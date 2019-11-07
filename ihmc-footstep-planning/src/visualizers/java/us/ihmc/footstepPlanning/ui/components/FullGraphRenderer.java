@@ -159,7 +159,6 @@ public class FullGraphRenderer extends AnimationTimer
             }
          }
       }
-      LogTools.info("Accepted nodes = " + acceptedNodes + ", rejected ndoes = " + rejectedNodes + " but showing = " + showRejectedNodes.get());
 
       footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
@@ -175,8 +174,6 @@ public class FullGraphRenderer extends AnimationTimer
    {
       int smallestIndex = Integer.MAX_VALUE;
       List<PlannerNodeData> childData = childMap.get(footstepNode);
-      if (childData == null)
-         throw new RuntimeException("uh oh.");
       for (PlannerNodeData child : childData)
          smallestIndex = Math.min(smallestIndex, child.getNodeId());
 
