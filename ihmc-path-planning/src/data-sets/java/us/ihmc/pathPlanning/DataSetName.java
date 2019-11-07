@@ -68,6 +68,7 @@ public enum DataSetName
 	_20001201_205040_TwoSquares,
 	_20001201_205030_SingleSquare,
 	_20191008_153543_TrickCorridor,
+	_20191107_110432_TrickCorridorWCutFloor,
 	_20191007_200400_Corridor1Wall,
 	_20191007_185913_SimpleCorridor,
 }
