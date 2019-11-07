@@ -77,7 +77,15 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      RigidBodyTransform nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      RigidBodyTransform nodePose;
+      if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP)
+         nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      else
+      {
+         nodePose = new RigidBodyTransform();
+         nodePose.setTranslation(rejectedNode.getX(), rejectedNode.getY(), 0.0);
+         nodePose.setRotationYaw(rejectedNode.getYaw());
+      }
       PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
 
       if (rejectedNodeData.get(parentNode) == null)
