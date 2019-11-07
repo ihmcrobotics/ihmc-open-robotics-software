@@ -70,4 +70,10 @@ public class REAModuleStateReporter
       if (reaMessager.isMessagerOpen())
          reaMessager.submitMessage(REAModuleAPI.StereoVisionPointCloudState, new StereoVisionPointCloudMessage(message));
    }
+   
+   public void registerDepthCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      if (reaMessager.isMessagerOpen())
+         reaMessager.submitMessage(REAModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
+   }
 }

@@ -25,9 +25,9 @@ public class LidarScanViewer extends AbstractSourceViewer<LidarScanMessage>
 
    private static final Material defaultMaterial = new PhongMaterial(Color.DARKRED);
 
-   public LidarScanViewer(Topic<LidarScanMessage> messageState, REAUIMessager uiMessager)
+   public LidarScanViewer(Topic<LidarScanMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic)
    {
-      super(messageState, uiMessager);
+      super(messageState, uiMessager, enableTopic, clearTopic);
       numberOfScans = uiMessager.createInput(REAModuleAPI.UILidarScanSize, 50);
    }
 
@@ -85,17 +85,5 @@ public class LidarScanViewer extends AbstractSourceViewer<LidarScanMessage>
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
       scanMeshToRender.set(scanMeshView);
       meshBuilder.clear();
-   }
-
-   @Override
-   protected Topic<Boolean> createEnableInput()
-   {
-      return REAModuleAPI.UILidarScanShow;
-   }
-
-   @Override
-   protected Topic<Boolean> createClearInput()
-   {
-      return REAModuleAPI.UILidarScanClear;
    }
 }

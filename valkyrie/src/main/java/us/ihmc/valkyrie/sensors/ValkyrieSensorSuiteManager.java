@@ -145,8 +145,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          private final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink();
 
          @Override
-         public void computeTransformToWorld(FullRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack,
-                                             Pose3DBasics sensorPoseToPack)
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
          {
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
             neckFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
