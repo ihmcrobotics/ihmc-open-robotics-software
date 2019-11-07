@@ -163,7 +163,7 @@ public class FootstepNodeVisualization implements BipedalFootstepPlannerListener
    }
 
    @Override
-   public void plannerFinished(List<FootstepNode> plan, Collection<FootstepNode> expandedNodes, FootstepGraph footstepGraph)
+   public void plannerFinished(List<FootstepNode> plan)
    {
    }
 

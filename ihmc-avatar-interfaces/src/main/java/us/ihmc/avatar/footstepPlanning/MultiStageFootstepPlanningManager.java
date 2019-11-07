@@ -324,8 +324,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       completedPathWaypoints.clear();
       completedStepPlans.clear();
 
-      completedPathPlanStatistics.clear();
-      completedStepPlanStatistics.clear();
 
       completedPathResults.clear();
       completedStepResults.clear();
@@ -541,6 +539,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDonePlanningSteps.set(false);
       requestedPlanarRegions.set(false);
       plannerTime.set(0.0);
+
+      completedPathPlanStatistics.clear();
+      completedStepPlanStatistics.clear();
 
       for (PathPlanningStage stage : allPathPlanningStages.iterable())
          stage.setTextToSpeechPublisher(textToSpeechPublisher);
