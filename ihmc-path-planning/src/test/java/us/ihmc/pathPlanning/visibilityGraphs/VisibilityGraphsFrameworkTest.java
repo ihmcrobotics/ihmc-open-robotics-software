@@ -61,7 +61,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    private static boolean ENABLE_TIMERS = true;
    private static boolean DYNAMIC_WAIT_FOR_CLICK = false;
 
@@ -88,7 +88,7 @@ public class VisibilityGraphsFrameworkTest
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
    private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
-   protected static final double walkerMarchingSpeed = 0.25;
+   protected static double walkerMarchingSpeed = 0.25;
    private static final double lidarObserverHeight = 1.25;
 
    // For the occlusion test
@@ -257,7 +257,6 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
    }
 
-   @Disabled("Occlusion planning needs to be implemented better.")
    @Test
    public void testSimulateOcclusionAndDynamicReplanningOnTrickyCorridor()
    {
@@ -269,9 +268,10 @@ public class VisibilityGraphsFrameworkTest
       }
 
       boolean testWithOcclusions = true;
-      ENABLE_TIMERS = false;
+      ENABLE_TIMERS = true;
       DYNAMIC_WAIT_FOR_CLICK = false;
       maxPointsInRegion = Integer.MAX_VALUE;
+      walkerMarchingSpeed = 0.7;
       List<DataSet> allDatasets = new ArrayList<>();
       allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
 
