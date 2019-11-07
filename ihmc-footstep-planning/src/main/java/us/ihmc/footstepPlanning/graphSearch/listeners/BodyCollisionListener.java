@@ -46,7 +46,7 @@ public class BodyCollisionListener implements NodeFailureEventListener
    }
 
    @Override
-   public void plannerFinished(List<FootstepNode> plan, Collection<FootstepNode> expandedNodes, FootstepGraph footstepGraph)
+   public void plannerFinished(List<FootstepNode> plan)
    {
    }
 

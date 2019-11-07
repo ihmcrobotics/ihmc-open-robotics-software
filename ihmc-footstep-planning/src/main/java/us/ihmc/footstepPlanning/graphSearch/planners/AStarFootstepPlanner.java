@@ -1,10 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 import org.apache.commons.math3.util.Precision;
 
@@ -25,8 +21,12 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepEdge;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
@@ -247,7 +247,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       FootstepPlanningResult result = checkResult();
 
       if (result.validForExecution() && listener != null)
-         listener.plannerFinished(null, expandedNodes, graph);
+         listener.plannerFinished(null);
 
       if (debug)
       {
@@ -550,8 +550,35 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    private void packGraphSearchStatistics(GraphSearchStatistics graphSearchStatistics)
    {
-      // TODO
-      throw new RuntimeException("TODO");
+      PlannerNodeDataList fullGraphList = new PlannerNodeDataList();
+      fullGraphList.setIsFootstepGraph(true);
+
+      HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = graph.getOutgoingEdges();
+      for (FootstepNode footstepNode : outgoingEdges.keySet())
+      {
+         for (FootstepEdge outgoingEdge : outgoingEdges.get(footstepNode))
+         {
+            FootstepNode childNode = outgoingEdge.getEndNode();
+            RigidBodyTransform nodePose = snapper.snapFootstepNode(childNode).getOrComputeSnappedNodeTransform(childNode);
+            fullGraphList.addNode(footstepNode.getNodeIndex(), childNode, nodePose, null);
+         }
+         if (listener != null)
+         {
+            List<PlannerNodeData> rejectedDataList = listener.getRejectedNodeData().get(footstepNode);
+            if (rejectedDataList != null)
+            {
+               for (PlannerNodeData rejectedData : rejectedDataList)
+                  fullGraphList.addNode(rejectedData);
+            }
+         }
+      }
+
+      PlannerLatticeMap expandedNodeMap = new PlannerLatticeMap();
+      for (FootstepNode expandedNode : expandedNodes)
+         expandedNodeMap.addFootstepNode(expandedNode);
+
+      graphSearchStatistics.setExpandedNodes(expandedNodeMap);
+      graphSearchStatistics.setFullGraph(fullGraphList);
    }
 
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,

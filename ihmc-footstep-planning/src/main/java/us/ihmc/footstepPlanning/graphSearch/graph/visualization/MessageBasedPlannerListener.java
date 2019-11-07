@@ -6,6 +6,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +17,10 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
 
    private final PlannerNodeDataList lowestNodeDataList = new PlannerNodeDataList();
    private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
-   private final PlannerLatticeMap expandedNodesSinceLastReport = new PlannerLatticeMap();
-   private final PlannerNodeDataList fullGraphSinceLastReport = new PlannerNodeDataList();
 
    private final long broadcastDt;
    private long lastBroadcastTime = -1;
-   private final HashMap<FootstepNode, PlannerNodeData> nodeDataMapSinceLastReport = new HashMap<>();
+   private final HashMap<FootstepNode, List<PlannerNodeData>> rejectedNodeData = new HashMap<>();
 
    private int totalNodeCount = 0;
 
@@ -35,34 +34,20 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
-      int previousNodeDataIndex;
-
       if (previousNode == null)
-      {
          reset();
-         previousNodeDataIndex = -1;
-      }
-      else
-      {
-         previousNodeDataIndex = previousNode.getNodeIndex();
-         expandedNodesSinceLastReport.addFootstepNode(previousNode);
-      }
-      RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
 
       node.setNodeIndex(totalNodeCount);
-      PlannerNodeData nodeData = new PlannerNodeData(previousNodeDataIndex, node, nodePose, null);
 
-      nodeDataMapSinceLastReport.put(node, nodeData);
-      fullGraphSinceLastReport.addNode(nodeData);
       occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
-
       totalNodeCount++;
    }
 
    private void reset()
    {
       lowestNodeDataList.clear();
-      nodeDataMapSinceLastReport.clear();
+      rejectedNodeData.clear();
+
       totalNodeCount = 0;
    }
 
@@ -82,7 +67,12 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      nodeDataMapSinceLastReport.get(rejectedNode).setRejectionReason(reason);
+      RigidBodyTransform nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
+
+      if (rejectedNodeData.get(parentNode) == null)
+         rejectedNodeData.put(parentNode, new ArrayList<>());
+      rejectedNodeData.get(parentNode).add(nodeData);
    }
 
    @Override
@@ -96,32 +86,27 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       if (currentTime - lastBroadcastTime > broadcastDt)
       {
          broadcastOccupancyMap(occupancyMapSinceLastReport);
-         broadcastExpandedNodes(expandedNodesSinceLastReport);
-
          occupancyMapSinceLastReport.clear();
-         expandedNodesSinceLastReport.clear();
 
          broadcastLowestCostNodeData(lowestNodeDataList);
-
-         broadcastFullGraph(fullGraphSinceLastReport);
-         fullGraphSinceLastReport.clear();
-         nodeDataMapSinceLastReport.clear();
 
          lastBroadcastTime = currentTime;
       }
    }
 
    @Override
-   public void plannerFinished(List<FootstepNode> plan, Collection<FootstepNode> expandedNodes, FootstepGraph footstepGraph)
+   public void plannerFinished(List<FootstepNode> plan)
    {
       broadcastOccupancyMap(occupancyMapSinceLastReport);
    }
 
+   @Override
+   public HashMap<FootstepNode, List<PlannerNodeData>> getRejectedNodeData()
+   {
+      return rejectedNodeData;
+   }
+
    abstract void broadcastOccupancyMap(PlannerOccupancyMap occupancyMap);
 
-   abstract void broadcastExpandedNodes(PlannerLatticeMap latticeMap);
-
    abstract void broadcastLowestCostNodeData(PlannerNodeDataList nodeDataList);
-
-   abstract void broadcastFullGraph(PlannerNodeDataList nodeDataList);
 }

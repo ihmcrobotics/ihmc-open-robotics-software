@@ -194,7 +194,7 @@ public class SnapAndWiggleBasedNodeCheckerTest
       }
 
       @Override
-      public void plannerFinished(List<FootstepNode> plan, Collection<FootstepNode> expandedNodes, FootstepGraph footstepGraph)
+      public void plannerFinished(List<FootstepNode> plan)
       {
 
       }

@@ -24,16 +24,4 @@ public class RosBasedPlannerListener extends MessageBasedPlannerListener
    {
       statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
-
-   @Override
-   void broadcastExpandedNodes(PlannerLatticeMap message)
-   {
-      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
-   }
-
-   @Override
-   void broadcastFullGraph(PlannerNodeDataList message)
-   {
-      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
-   }
 }
