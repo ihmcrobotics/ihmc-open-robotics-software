@@ -19,7 +19,11 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
    /**
             * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
             */
-   public double estimator_gain_;
+   public double estimator_gain_ = 0.5;
+   /**
+            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+            */
+   public double solver_alpha_ = 0.005;
    /**
             * The is the unique hash code of the end-effector that is assumed to be pushed
             * See RigidBody.hashCode() for the computation of a rigid-body hash code.
@@ -46,6 +50,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       sequence_id_ = other.sequence_id_;
 
       estimator_gain_ = other.estimator_gain_;
+
+      solver_alpha_ = other.solver_alpha_;
 
       end_effector_hash_code_ = other.end_effector_hash_code_;
 
@@ -80,6 +86,21 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
    public double getEstimatorGain()
    {
       return estimator_gain_;
+   }
+
+   /**
+            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+            */
+   public void setSolverAlpha(double solver_alpha)
+   {
+      solver_alpha_ = solver_alpha;
+   }
+   /**
+            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+            */
+   public double getSolverAlpha()
+   {
+      return solver_alpha_;
    }
 
    /**
@@ -130,6 +151,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimator_gain_, other.estimator_gain_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solver_alpha_, other.solver_alpha_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_hash_code_, other.end_effector_hash_code_, epsilon)) return false;
 
       if (!this.external_force_position_.epsilonEquals(other.external_force_position_, epsilon)) return false;
@@ -150,6 +173,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if(this.estimator_gain_ != otherMyClass.estimator_gain_) return false;
 
+      if(this.solver_alpha_ != otherMyClass.solver_alpha_) return false;
+
       if(this.end_effector_hash_code_ != otherMyClass.end_effector_hash_code_) return false;
 
       if (!this.external_force_position_.equals(otherMyClass.external_force_position_)) return false;
@@ -167,6 +192,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("estimator_gain=");
       builder.append(this.estimator_gain_);      builder.append(", ");
+      builder.append("solver_alpha=");
+      builder.append(this.solver_alpha_);      builder.append(", ");
       builder.append("end_effector_hash_code=");
       builder.append(this.end_effector_hash_code_);      builder.append(", ");
       builder.append("external_force_position=");

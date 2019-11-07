@@ -158,6 +158,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          RigidBodyBasics endEffector = endEffectorHashMap.get(configurationCommand.getEndEffectorHashCode());
          externalForceEstimator.setEndEffector(endEffector, configurationCommand.getExternalForcePosition());
          externalForceEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
+         externalForceEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
       }
       else if(externalForceEstimator == null)

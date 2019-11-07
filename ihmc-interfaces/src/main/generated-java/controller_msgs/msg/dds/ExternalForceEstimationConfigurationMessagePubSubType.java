@@ -44,6 +44,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -67,6 +69,9 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -82,6 +87,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
       cdr.write_type_6(data.getEstimatorGain());
 
+      cdr.write_type_6(data.getSolverAlpha());
+
       cdr.write_type_2(data.getEndEffectorHashCode());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getExternalForcePosition(), cdr);
@@ -92,6 +99,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       data.setSequenceId(cdr.read_type_4());
       	
       data.setEstimatorGain(cdr.read_type_6());
+      	
+      data.setSolverAlpha(cdr.read_type_6());
       	
       data.setEndEffectorHashCode(cdr.read_type_2());
       	
@@ -104,6 +113,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("estimator_gain", data.getEstimatorGain());
+      ser.write_type_6("solver_alpha", data.getSolverAlpha());
       ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
       ser.write_type_a("external_force_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getExternalForcePosition());
 
@@ -114,6 +124,7 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setEstimatorGain(ser.read_type_6("estimator_gain"));
+      data.setSolverAlpha(ser.read_type_6("solver_alpha"));
       data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
       ser.read_type_a("external_force_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getExternalForcePosition());
 

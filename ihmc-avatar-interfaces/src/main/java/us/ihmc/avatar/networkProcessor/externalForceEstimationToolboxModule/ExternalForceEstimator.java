@@ -47,7 +47,6 @@ public class ExternalForceEstimator implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoBoolean requestInitialize = new YoBoolean("requestInitialize", registry);
 
-   private static final double integrationTime = 2.5;
    private static final double defaultEstimatorGain = 0.7;
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
    private final double dt;
@@ -71,7 +70,7 @@ public class ExternalForceEstimator implements RobotController
 
    private final BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
    private final Consumer<DenseMatrix64F> tauSetter;
-   private final LinearSolver<DenseMatrix64F> forceEstimateSolver;
+   private final DampedLeastSquaresSolver forceEstimateSolver;
 
    private final FramePoint3D externalForcePoint = new FramePoint3D();
    private final Vector3D externalForcePointOffset = new Vector3D();
@@ -124,7 +123,7 @@ public class ExternalForceEstimator implements RobotController
       this.coriolisGravityTerm = new DenseMatrix64F(dofs, 1);
       this.tau = new DenseMatrix64F(dofs, 1);
       this.qd = new DenseMatrix64F(dofs, 1);
-      this.forceEstimateSolver = new DampedLeastSquaresSolver(dofs, 0.05); // new SolvePseudoInverseSvd(dofs, dofs); //
+      this.forceEstimateSolver = new DampedLeastSquaresSolver(dofs, 0.001);
 
       this.hqd0 = new DenseMatrix64F(dofs, 1);
 
@@ -325,5 +324,10 @@ public class ExternalForceEstimator implements RobotController
    public YoFramePose3D getYoLinkFramePose()
    {
       return yoLinkFramePose;
+   }
+
+   public void setSolverAlpha(double alpha)
+   {
+      forceEstimateSolver.setAlpha(alpha);
    }
 }

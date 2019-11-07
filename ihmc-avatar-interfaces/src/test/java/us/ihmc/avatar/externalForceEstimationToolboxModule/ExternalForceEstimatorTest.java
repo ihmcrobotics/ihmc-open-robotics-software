@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -41,7 +42,7 @@ public class ExternalForceEstimatorTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private YoVariableRegistry registry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -93,6 +94,7 @@ public class ExternalForceEstimatorTest
       externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, null);
       externalForceEstimator.setEndEffector(endEffector, externalForcePointOffset);
       externalForceEstimator.setEstimatorGain(5.0);
+      externalForceEstimator.setSolverAlpha(1e-6);
 
       robot.setController(externalForceEstimator);
 
@@ -161,7 +163,7 @@ public class ExternalForceEstimatorTest
       // only apply force in y-z
       minForce = new Vector3D(0.0, -10.0, -10.0);
       maxForce = new Vector3D(0.0, 10.0, 10.0);
-      epsilon = 0.15;
+      epsilon = 1e-7;
 
       return robot;
    }
@@ -181,7 +183,7 @@ public class ExternalForceEstimatorTest
 
       minForce = new Vector3D(-10.0, -10.0, -10.0);
       maxForce = new Vector3D(10.0, 10.0, 10.0);
-      epsilon = 0.15;
+      epsilon = 1e-7;
 
       joints = robot.getJoints();
       return robot;

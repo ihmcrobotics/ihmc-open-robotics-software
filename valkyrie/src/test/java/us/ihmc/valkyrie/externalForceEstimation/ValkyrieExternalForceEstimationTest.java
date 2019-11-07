@@ -91,9 +91,9 @@ public class ValkyrieExternalForceEstimationTest
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
       testConfigs = new ArrayList<>();
-      testConfigs.add(new TestConfig("torsoRoll", new Vector3D(0.0, 0.0, 0.2)));
-      testConfigs.add(new TestConfig("rightElbowPitch", new Vector3D(0.0, -0.32, 0.0)));
+      testConfigs.add(new TestConfig("rightElbowPitch", new Vector3D(0.0, -0.25, 0.0)));
       testConfigs.add(new TestConfig("leftShoulderPitch", new Vector3D(0.1, 0.1, 0.0)));
+      testConfigs.add(new TestConfig("torsoRoll", new Vector3D(0.0, 0.0, 0.2)));
 
       runTest();
    }
@@ -214,9 +214,10 @@ public class ValkyrieExternalForceEstimationTest
          TestConfig testConfig = testConfigs.get(i);
 
          ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
-         configurationMessage.setEstimatorGain(1.25);
+         configurationMessage.setEstimatorGain(0.8);
          configurationMessage.setEndEffectorHashCode(testConfig.endEffector.hashCode());
          configurationMessage.getExternalForcePosition().set(testConfig.efpOffset);
+         configurationMessage.setSolverAlpha(0.001);
          commandInputManager.submitMessage(configurationMessage);
 
          for (int j = 0; j < iterations; j++)

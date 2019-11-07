@@ -8,6 +8,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
 {
    private long sequenceId = 0;
    private double estimatorGain = 1.0;
+   private double solverAlpha = 0.005;
    private int endEffectorHashCode;
    private final Point3D externalForcePosition = new Point3D();
 
@@ -16,6 +17,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    {
       sequenceId = 0;
       estimatorGain = 1.0;
+      solverAlpha = 0.005;
       endEffectorHashCode = 0;
       externalForcePosition.setToNaN();
    }
@@ -25,6 +27,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    {
       this.sequenceId = message.getSequenceId();
       this.estimatorGain = message.getEstimatorGain();
+      this.solverAlpha = message.getSolverAlpha();
       this.endEffectorHashCode = message.getEndEffectorHashCode();
       this.externalForcePosition.set(message.getExternalForcePosition());
    }
@@ -52,6 +55,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    {
       this.sequenceId = other.sequenceId;
       this.estimatorGain = other.estimatorGain;
+      this.solverAlpha = other.solverAlpha;
       this.endEffectorHashCode = other.endEffectorHashCode;
       this.externalForcePosition.set(other.externalForcePosition);
    }
@@ -59,6 +63,11 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    public double getEstimatorGain()
    {
       return estimatorGain;
+   }
+
+   public double getSolverAlpha()
+   {
+      return solverAlpha;
    }
 
    public int getEndEffectorHashCode()
