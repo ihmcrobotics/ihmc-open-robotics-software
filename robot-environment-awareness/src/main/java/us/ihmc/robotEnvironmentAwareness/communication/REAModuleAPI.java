@@ -22,8 +22,8 @@ public class REAModuleAPI
 
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
    private static final CategoryTheme Lidar = apiFactory.createCategoryTheme("Lidar");
-   private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("DepthCloud");
-   private static final CategoryTheme DepthCloud = apiFactory.createCategoryTheme("StereoVision");
+   private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("StereoVision");
+   private static final CategoryTheme DepthCloud = apiFactory.createCategoryTheme("DepthCloud");
    private static final CategoryTheme BoundingBox = apiFactory.createCategoryTheme("BoundingBox");
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
