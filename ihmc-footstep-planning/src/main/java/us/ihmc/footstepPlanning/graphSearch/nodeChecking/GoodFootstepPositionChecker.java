@@ -71,13 +71,14 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       solePositionInParentZUpFrame.changeFrame(parentSoleZupFrame);
 
       RobotSide robotSide = nodeToCheck.getRobotSide();
-      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) <  parameters.getMinimumStepWidth())
+      double sidedWidth = robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY());
+      if (sidedWidth <  parameters.getMinimumStepWidth())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
          return false;
       }
 
-      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) > parameters.getMaximumStepWidth())
+      if (sidedWidth > parameters.getMaximumStepWidth())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
          return false;
@@ -96,24 +97,42 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
-      if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()) && (solePositionInParentZUpFrame.getZ() < -Math
-            .abs(parameters.getMaximumStepZWhenForwardAndDown())))
+      if (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
-         return false;
+         if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()))
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
+            return false;
+         }
+
+         if (sidedWidth > parameters.getMaximumStepYWhenForwardAndDown())
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
+            return false;
+         }
       }
 
-      double stepReach = EuclidCoreTools.norm(solePositionInParentZUpFrame.getX(), solePositionInParentZUpFrame.getY());
+      double widthRelativeToIdeal = solePositionInParentZUpFrame.getY() - robotSide.negateIfRightSide(parameters.getIdealFootstepWidth());
+      double stepReach = EuclidCoreTools.norm(solePositionInParentZUpFrame.getX(), widthRelativeToIdeal);
       if (stepReach > parameters.getMaximumStepReach())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
          return false;
       }
 
-      if (stepReach > parameters.getMaximumStepReachWhenSteppingUp() && solePositionInParentZUpFrame.getZ() > parameters.getMaximumStepZWhenSteppingUp())
+      if (solePositionInParentZUpFrame.getZ() > parameters.getMaximumStepZWhenSteppingUp())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-         return false;
+         if (stepReach > parameters.getMaximumStepReachWhenSteppingUp())
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
+            return false;
+         }
+
+         if (sidedWidth > parameters.getMaximumStepReachWhenSteppingUp())
+         {
+            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
+            return false;
+         }
       }
 
       if (graph != null)
@@ -127,7 +146,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
 
             Point3D grandparentPosition = new Point3D(grandparentNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             grandparentSnapData.getSnapTransform().transform(grandparentPosition);
-            double grandparentTranslationScaleFactor = 1.5;
+            double grandparentTranslationScaleFactor = parameters.getTranslationScaleFromGrandparentNode();
 
             Point3D nodePosition = new Point3D(nodeToCheck.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
             snapData.getSnapTransform().transform(nodePosition);
@@ -145,9 +164,9 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
                return false;
             }
 
-            if(largeStepDown && translationFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
+            if (largeStepDown && translationFromGrandparentNode > grandparentTranslationScaleFactor * parameters.getMaximumStepXWhenForwardAndDown())
             {
-               rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
+               rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
                return false;
             }
          }

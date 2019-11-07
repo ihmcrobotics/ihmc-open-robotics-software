@@ -84,6 +84,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("ToolboxBestEffortTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
@@ -329,6 +330,22 @@ public class FootstepPlanningToolboxController extends ToolboxController
       else
       {
          planner.setTimeout(Double.POSITIVE_INFINITY);
+      }
+
+      double bestEffortTimeout = request.getBestEffortTimeout();
+      if (bestEffortTimeout > 0.0 && Double.isFinite(bestEffortTimeout))
+      {
+         planner.setBestEffortTimeout(bestEffortTimeout);
+         this.bestEffortTimeout.set(bestEffortTimeout);
+
+         if (DEBUG)
+         {
+            LogTools.info("Setting best effort timeout to " + bestEffortTimeout);
+         }
+      }
+      else
+      {
+         planner.setBestEffortTimeout(0.0);
       }
 
       return true;

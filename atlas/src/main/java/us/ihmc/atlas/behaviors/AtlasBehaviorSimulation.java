@@ -111,7 +111,8 @@ public class AtlasBehaviorSimulation
    {
       int recordTicksPerControllerTick = 1;
       SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                          new FlatGroundEnvironment(), recordTicksPerControllerTick);
+                                                          new FlatGroundEnvironment(),
+                                                          recordTicksPerControllerTick);
       scs.simulate();
    }
 }

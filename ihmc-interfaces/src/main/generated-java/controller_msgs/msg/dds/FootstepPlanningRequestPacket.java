@@ -63,6 +63,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double timeout_;
    /**
+            * Best effort timeout in seconds
+            */
+   public double best_effort_timeout_;
+   /**
             * Max body path length if using body path
             */
    public double horizon_length_;
@@ -111,6 +115,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
 
       timeout_ = other.timeout_;
+
+      best_effort_timeout_ = other.best_effort_timeout_;
 
       horizon_length_ = other.horizon_length_;
 
@@ -248,6 +254,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
+            * Best effort timeout in seconds
+            */
+   public void setBestEffortTimeout(double best_effort_timeout)
+   {
+      best_effort_timeout_ = best_effort_timeout;
+   }
+   /**
+            * Best effort timeout in seconds
+            */
+   public double getBestEffortTimeout()
+   {
+      return best_effort_timeout_;
+   }
+
+   /**
             * Max body path length if using body path
             */
    public void setHorizonLength(double horizon_length)
@@ -335,6 +356,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.best_effort_timeout_, other.best_effort_timeout_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
       if (!this.planar_regions_list_message_.epsilonEquals(other.planar_regions_list_message_, epsilon)) return false;
@@ -370,6 +393,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.best_effort_timeout_ != otherMyClass.best_effort_timeout_) return false;
 
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
@@ -408,6 +433,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.goal_yaw_proximity_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
+      builder.append("best_effort_timeout=");
+      builder.append(this.best_effort_timeout_);      builder.append(", ");
       builder.append("horizon_length=");
       builder.append(this.horizon_length_);      builder.append(", ");
       builder.append("planar_regions_list_message=");

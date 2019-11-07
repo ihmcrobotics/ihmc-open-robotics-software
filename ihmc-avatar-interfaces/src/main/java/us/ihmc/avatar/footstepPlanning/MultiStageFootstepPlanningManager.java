@@ -58,6 +58,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
+   private static final boolean debug = false;
+
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
 
@@ -85,6 +87,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoDouble timeSpentBeforeFootstepPlanner = new YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new YoDouble("timeSpentInFootstepPlanner", registry);
    private final YoDouble timeout = new YoDouble("PlannerTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("PlannerBestEffortTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
    private final YoInteger globalPathSequenceIndex = new YoInteger("globalPathSequenceIndex", registry);
    private final YoInteger globalStepSequenceIndex = new YoInteger("globalStepSequenceIndex", registry);
@@ -454,6 +457,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processRequest(FootstepPlanningRequestPacket request)
    {
+      if (debug)
+      {
+         String message = "Received new planning request. ";
+         message += waitingForPlanningRequest.getBooleanValue() ? " Starting this request." : "Not starting because we should be planning.";
+
+         LogTools.info(message);
+      }
+
       if (!waitingForPlanningRequest.getBooleanValue())
          return;
 
@@ -596,6 +607,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       else
       {
          mainObjective.setTimeout(Double.POSITIVE_INFINITY);
+      }
+
+      double bestEffortTimeout = request.getBestEffortTimeout();
+      if (bestEffortTimeout > 0.0 && Double.isFinite(bestEffortTimeout))
+      {
+         mainObjective.setBestEffortTimeout(bestEffortTimeout);
+         this.bestEffortTimeout.set(bestEffortTimeout);
+      }
+      else
+      {
+         mainObjective.setBestEffortTimeout(Double.POSITIVE_INFINITY);
       }
 
       if (requestedPlannerType.plansPath())

@@ -17,6 +17,8 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPl
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.EnumProvider;
@@ -70,7 +72,7 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
       initialize = new YoBoolean(prefix + "Initialize" + registry.getName(), registry);
       sequenceId = new YoInteger(prefix + "PlanningSequenceId", registry);
 
-      ObstacleAndCliffAvoidanceProcessor postProcessor = new ObstacleAndCliffAvoidanceProcessor(visibilityGraphsParameters);
+      BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(visibilityGraphsParameters);
 
       plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathPlanner(parameters, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(prefix, parameters, visibilityGraphsParameters, postProcessor, registry));

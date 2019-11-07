@@ -89,6 +89,10 @@ module controller_msgs
          */
         double timeout;
         /**
+         * Best effort timeout in seconds
+         */
+        double best_effort_timeout;
+        /**
          * Max body path length if using body path
          */
         double horizon_length;

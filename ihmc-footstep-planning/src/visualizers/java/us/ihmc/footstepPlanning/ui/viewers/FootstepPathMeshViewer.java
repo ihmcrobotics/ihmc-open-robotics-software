@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,12 +17,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -32,7 +29,6 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Double;
@@ -49,6 +45,11 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
+   private static Color footWaypointColor = Color.WHITE;
+   private static Color midpointColor = Color.GREEN;
+   private static double footWaypointRadius = 0.02;
+   private static double midpointRadius = 0.02;
+
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
@@ -56,43 +57,52 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final double[] defaultWaypointProportions = new double[]{0.15, 0.85};
    private final AtomicReference<Boolean> showSolution;
    private final AtomicReference<Boolean> showIntermediatePlan;
+   private final AtomicReference<Boolean> showPostProcessingInfo;
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
    private final AtomicReference<Boolean> ignorePartialFootholds;
+   private final AtomicReference<Point3D> leftFootPosition;
+   private final AtomicReference<Point3D> rightFootPosition;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
    private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
 
    private final MeshView footstepPathMeshView = new MeshView();
+   private final MeshView footstepPostProcessedMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
+   private final AtomicReference<Pair<Mesh, Material>> postProcessedMeshReference = new AtomicReference<>(null);
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
+   private final JavaFXMultiColorMeshBuilder postProcessedMeshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
    public FootstepPathMeshViewer(Messager messager)
    {
-      ignorePartialFootholds = messager.createInput(IgnorePartialFootholdsTopic, false);
-      footstepDataListMessage = messager.createInput(FootstepPlanResponseTopic, null);
+      ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
+      footstepDataListMessage = messager.createInput(FootstepPlanResponse, null);
+      leftFootPosition = messager.createInput(LeftFootStartPosition, null);
+      rightFootPosition = messager.createInput(RightFootStartPosition, null);
 
-      messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
 
-      messager.registerTopicListener(NodeDataTopic, nodeData -> executorService.submit(() -> {
+      messager.registerTopicListener(NodeData, nodeData -> executorService.submit(() -> {
          solutionWasReceived.set(false);
          processLowestCostNodeList(nodeData);
       }));
 
-      messager.registerTopicListener(RenderShiftedWaypointsTopic, value ->
+      messager.registerTopicListener(RenderShiftedWaypoints, value ->
       {
          renderShiftedFootsteps.set(value);
          processFootstepPath(footstepDataListMessage.get());
       });
 
-      messager.registerTopicListener(IgnorePartialFootholdsTopic, b -> processFootstepPath(footstepDataListMessage.get()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
-      showSolution = messager.createInput(ShowFootstepPlanTopic, true);
-      showIntermediatePlan = messager.createInput(ShowNodeDataTopic, true);
+      showSolution = messager.createInput(ShowFootstepPlan, true);
+      showIntermediatePlan = messager.createInput(ShowNodeData, true);
+      showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
    }
 
    private void processLowestCostNodeList(FootstepNodeDataListMessage message)
@@ -135,7 +145,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       ConvexPolygon2D foothold = new ConvexPolygon2D();
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
 
-      if(ignorePartialFootholds.get())
+      if (ignorePartialFootholds.get())
       {
          for (int i = 0; i < plan.getNumberOfSteps(); i++)
          {
@@ -143,10 +153,27 @@ public class FootstepPathMeshViewer extends AnimationTimer
          }
       }
 
-     for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      boolean hasInfoToRenderFootsteps = leftFootPosition.get() != null && rightFootPosition.get() != null;
+
+      FramePoint3D stanceFootPosition = new FramePoint3D();
+      FramePoint3D previousStanceFootPosition = new FramePoint3D();
+      RobotSide firstStepSide = plan.getFootstep(0).getRobotSide();
+      if (hasInfoToRenderFootsteps && firstStepSide == RobotSide.LEFT)
+      {
+         previousStanceFootPosition.set(leftFootPosition.get());
+         stanceFootPosition.set(rightFootPosition.get());
+      }
+      else if (hasInfoToRenderFootsteps)
+      {
+         previousStanceFootPosition.set(rightFootPosition.get());
+         stanceFootPosition.set(leftFootPosition.get());
+      }
+
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          SimpleFootstep footstep = plan.getFootstep(i);
-         Color regionColor = getFootstepColor(footstepDataListMessage.getFootstepDataList().get(i));
+         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
+         Color regionColor = getFootstepColor(footstepDataMessage);
 
          footstep.getSoleFramePose(footPose);
          footPose.get(transformToWorld);
@@ -165,14 +192,30 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
+
+         for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
+         {
+            postProcessedMeshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
+         }
+
+         if (hasInfoToRenderFootsteps && footstepDataMessage.getTransferWeightDistribution() != -1.0)
+         {
+            FramePoint3D copMidpoint = new FramePoint3D();
+            copMidpoint.interpolate(previousStanceFootPosition, stanceFootPosition, footstepDataMessage.getTransferWeightDistribution());
+            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, midpointColor);
+         }
+
+         previousStanceFootPosition.set(stanceFootPosition);
+         stanceFootPosition.set(footPose.getPosition());
       }
 
       meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+      postProcessedMeshReference.set(new Pair<>(postProcessedMeshBuilder.generateMesh(), postProcessedMeshBuilder.generateMaterial()));
    }
 
    private Color getFootstepColor(FootstepDataMessage footstepDataMessage)
    {
-      if(renderShiftedFootsteps.get())
+      if (renderShiftedFootsteps.get())
       {
          if(hasDefaultWaypointProportions(footstepDataMessage))
          {
@@ -222,6 +265,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
       boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
       if (addIntermediatePlan || addFinalPlan)
          root.getChildren().add(footstepPathMeshView);
+      boolean addPostProcessingInfo = showPostProcessingInfo.get() && addFinalPlan;
+      if (addPostProcessingInfo)
+         root.getChildren().add(footstepPostProcessedMeshView);
 
       boolean removeIntermediatePlan = !showIntermediatePlan.get() && !solutionWasReceived.get() && !root.getChildren().isEmpty();
       boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
@@ -232,7 +278,10 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepPathMeshView.setMesh(null);
          footstepPathMeshView.setMaterial(null);
+         footstepPostProcessedMeshView.setMesh(null);
+         footstepPostProcessedMeshView.setMaterial(null);
          meshReference.set(null);
+         postProcessedMeshReference.set(null);
          return;
       }
 
@@ -241,6 +290,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
          footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
+      }
+
+      Pair<Mesh, Material> newPostProcessedMeshAndMaterial = postProcessedMeshReference.getAndSet(null);
+      if (newPostProcessedMeshAndMaterial != null)
+      {
+         footstepPostProcessedMeshView.setMesh(newPostProcessedMeshAndMaterial.getKey());
+         footstepPostProcessedMeshView.setMaterial(newPostProcessedMeshAndMaterial.getValue());
       }
    }
 

@@ -6,12 +6,13 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
 import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoPolynomial implements PolynomialReadOnly
+public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolder
 {
    private final int maximumNumberOfCoefficients;
    private double pos, vel, acc, dPos;
@@ -54,7 +55,7 @@ public class YoPolynomial implements PolynomialReadOnly
       a = coefficients;
       this.numberOfCoefficients = numberOfCoefficients;
 
-      this.maximumNumberOfCoefficients = coefficients.length;
+      maximumNumberOfCoefficients = coefficients.length;
 
       solver = LinearSolverFactory.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
@@ -105,6 +106,7 @@ public class YoPolynomial implements PolynomialReadOnly
       return coefficientVector;
    }
 
+   @Override
    public YoDouble[] getYoCoefficients()
    {
       return a;
@@ -164,7 +166,7 @@ public class YoPolynomial implements PolynomialReadOnly
       solveForCoefficients();
       setYoVariables();
    }
-   
+
    public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
                                        double zdf)
    {
@@ -238,7 +240,7 @@ public class YoPolynomial implements PolynomialReadOnly
    {
       setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
    }
-   
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
                                       double zdf, double zddf)
    {
@@ -566,16 +568,16 @@ public class YoPolynomial implements PolynomialReadOnly
       reshape(coefficients.getNumRows());
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         this.a[i].set(coefficients.get(i, 0));
+         a[i].set(coefficients.get(i, 0));
       }
    }
-   
+
    public void setDirectly(double[] coefficients)
    {
       reshape(coefficients.length);
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         this.a[i].set(coefficients[i]);
+         a[i].set(coefficients[i]);
       }
    }
 
@@ -589,17 +591,19 @@ public class YoPolynomial implements PolynomialReadOnly
       {
          for (int i = getNumberOfCoefficients(); i <= power; i++)
             a[i].set(0.0);
-         this.coefficientVector.reshape(power + 1, 1);
-         this.constraintMatrix.reshape(power + 1, power + 1);
-         this.constraintVector.reshape(power + 1, 1);
-         this.xPowersDerivativeVector.reshape(power + 1, 1);
+         coefficientVector.reshape(power + 1, 1);
+         constraintMatrix.reshape(power + 1, power + 1);
+         constraintVector.reshape(power + 1, 1);
+         xPowersDerivativeVector.reshape(power + 1, 1);
          numberOfCoefficients.set(power + 1);
       }
       a[power].set(coefficient);
    }
 
    /**
-    * Set a specific coefficient of the polynomial. A sequence of calls to this function should typically be followed by a call to {@code reshape(int)} later.
+    * Set a specific coefficient of the polynomial. A sequence of calls to this function should
+    * typically be followed by a call to {@code reshape(int)} later.
+    * 
     * @param power
     * @param coefficient
     */
@@ -649,7 +653,7 @@ public class YoPolynomial implements PolynomialReadOnly
       double integral = 0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         integral += (1.0 / (i + 1.0)) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
+         integral += 1.0 / (i + 1.0) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
       }
       return integral;
    }
@@ -679,7 +683,9 @@ public class YoPolynomial implements PolynomialReadOnly
    }
 
    /**
-    *  Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the YoPolynomials order-th derivative at x)
+    * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the
+    * YoPolynomials order-th derivative at x)
+    * 
     * @param order
     * @param x
     * @return
@@ -716,6 +722,7 @@ public class YoPolynomial implements PolynomialReadOnly
       return numberOfCoefficients.getIntegerValue();
    }
 
+   @Override
    public YoInteger getYoNumberOfCoefficients()
    {
       return numberOfCoefficients;
@@ -735,7 +742,7 @@ public class YoPolynomial implements PolynomialReadOnly
          double columnPower = 1.0;
          for (int i = 0; i < derivativeOrderWithPositionBeingZero; i++)
          {
-            columnPower *= (col - i);
+            columnPower *= col - i;
          }
          constraintMatrix.set(row, col, xPower * columnPower);
          xPower *= x;
@@ -773,10 +780,10 @@ public class YoPolynomial implements PolynomialReadOnly
          throw new RuntimeException("Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't build the polynomial as it requires: "
                + numberOfCoefficientsRequired + " coefficients.");
 
-      this.coefficientVector.reshape(numberOfCoefficientsRequired, 1);
-      this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
-      this.constraintVector.reshape(numberOfCoefficientsRequired, 1);
-      this.xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
+      coefficientVector.reshape(numberOfCoefficientsRequired, 1);
+      constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
+      constraintVector.reshape(numberOfCoefficientsRequired, 1);
+      xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
       numberOfCoefficients.set(numberOfCoefficientsRequired);
 
       for (int i = numberOfCoefficientsRequired; i < maximumNumberOfCoefficients; i++)

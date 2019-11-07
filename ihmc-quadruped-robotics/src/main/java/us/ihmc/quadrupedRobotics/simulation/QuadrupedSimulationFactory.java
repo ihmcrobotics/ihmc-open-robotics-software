@@ -37,6 +37,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -130,6 +131,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<HighLevelControllerName> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
+   private final OptionalFactoryField<DCMPlannerInterface> customCoMTrajectoryPlanner = new OptionalFactoryField<>("customCoMTrajectoryPlanner");
 
 
    // TO CONSTRUCT
@@ -318,6 +320,8 @@ public class QuadrupedSimulationFactory
                                                                                        highLevelControllerParameters.get(), dcmPlannerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
                                                                                        fallDetectionParameters.get(), robotMotionStatusFromController);
+      if (customCoMTrajectoryPlanner.hasValue())
+         runtimeEnvironment.setComTrajectoryPlanner(customCoMTrajectoryPlanner.get());
 
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get(), null);
    }
@@ -772,6 +776,11 @@ public class QuadrupedSimulationFactory
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
       this.createYoVariableServer.set(createYoVariableServer);
+   }
+
+   public void setCustomCoMTrajectoryPlanner(DCMPlannerInterface dcmPlannerInterface)
+   {
+      this.customCoMTrajectoryPlanner.set(dcmPlannerInterface);
    }
 
    public void close()

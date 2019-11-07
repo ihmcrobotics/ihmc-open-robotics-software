@@ -23,7 +23,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -65,9 +64,9 @@ public class BodyPathMeshViewer extends AnimationTimer
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathDataTopic, this::processBodyPathOnThread);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
 
       root.getChildren().addAll(bodyPathMeshView);

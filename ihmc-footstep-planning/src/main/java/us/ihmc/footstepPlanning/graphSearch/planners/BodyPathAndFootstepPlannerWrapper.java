@@ -37,6 +37,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
    protected final YoVariableRegistry registry;
 
    private final YoDouble timeout;
+   private final YoDouble bestEffortTimeout;
 
    private final YoBoolean hasPath;
    private final YoDouble timeSpentBeforeFootstepPlanner;
@@ -64,6 +65,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
       this.parameters = parameters;
 
       timeout = new YoDouble("timeout", registry);
+      bestEffortTimeout = new YoDouble("bestEffortTimeout", registry);
 
       hasPath = new YoBoolean("hasPath", registry);
       timeSpentBeforeFootstepPlanner = new YoDouble("timeSpentBeforeFootstepPlanner", registry);
@@ -213,6 +215,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
       }
 
       footstepPlanner.setTimeout(timeout.getDoubleValue() - timeSpentBeforeFootstepPlanner.getDoubleValue());
+      footstepPlanner.setBestEffortTimeout(bestEffortTimeout.getDoubleValue());
 
       long startTime = System.currentTimeMillis();
       yoResult.set(footstepPlanner.plan());

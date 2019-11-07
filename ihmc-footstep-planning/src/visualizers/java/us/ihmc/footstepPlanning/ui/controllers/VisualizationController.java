@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ToggleButton;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
@@ -41,6 +40,8 @@ public class VisualizationController
    @FXML
    private CheckBox showIntermediateSolution;
    @FXML
+   private CheckBox showPostProcessingInfo;
+   @FXML
    public void requestStatistics()
    {
       if (verbose)
@@ -60,7 +61,7 @@ public class VisualizationController
    {
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
 
-      messager.bindBidirectional(ShowPlanarRegionsTopic, showPlanarRegionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
@@ -72,7 +73,8 @@ public class VisualizationController
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
-      messager.bindBidirectional(ShowFootstepPlanTopic, showSolution.selectedProperty(), true);
-      messager.bindBidirectional(ShowNodeDataTopic, showIntermediateSolution.selectedProperty(), true);
+      messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
+      messager.bindBidirectional(ShowNodeData, showIntermediateSolution.selectedProperty(), true);
+      messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
    }
 }
