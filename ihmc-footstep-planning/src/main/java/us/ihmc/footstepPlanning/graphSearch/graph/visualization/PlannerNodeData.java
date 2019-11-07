@@ -32,7 +32,7 @@ public class PlannerNodeData
    {
       footstepNode = new FootstepNode(message.getFootstepNode().getXIndex(), message.getFootstepNode().getYIndex(), message.getFootstepNode().getYawIndex(),
                                       RobotSide.fromByte(message.getFootstepNode().getRobotSide()));
-      footstepNode.setNodeIndex(message.getNodeId());
+      footstepNode.setNodeIndex(message.getFootstepNode().getNodeIndex());
       parentNodeId = message.getParentNodeId();
       pose = new RigidBodyTransform(message.getOrientation(), message.getPosition());
       rejectionReason = BipedalFootstepPlannerNodeRejectionReason.fromByte(message.getBipedalFootstepPlannerNodeRejectionReason());
@@ -81,7 +81,7 @@ public class PlannerNodeData
    {
       byte rejectionReason = getRejectionReason() != null ? getRejectionReason().toByte() : (byte) 255;
 
-      message.setNodeId(getNodeId());
+      message.getFootstepNode().setNodeIndex(getNodeId());
       message.setParentNodeId(getParentNodeId());
       message.getFootstepNode().setXIndex(getFootstepNode().getXIndex());
       message.getFootstepNode().setYIndex(getFootstepNode().getYIndex());

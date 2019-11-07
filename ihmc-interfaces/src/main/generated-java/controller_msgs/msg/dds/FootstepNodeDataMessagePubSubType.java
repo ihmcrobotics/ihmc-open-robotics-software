@@ -46,8 +46,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -72,9 +70,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getCdrSerializedSize(data.getFootstepNode(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -88,8 +83,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      cdr.write_type_2(data.getNodeId());
-
       cdr.write_type_2(data.getParentNodeId());
 
       controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.write(data.getFootstepNode(), cdr);
@@ -101,8 +94,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      data.setNodeId(cdr.read_type_2());
-      	
       data.setParentNodeId(cdr.read_type_2());
       	
       controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.read(data.getFootstepNode(), cdr);	
@@ -118,7 +109,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_2("node_id", data.getNodeId());
       ser.write_type_2("parent_node_id", data.getParentNodeId());
       ser.write_type_a("footstep_node", new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType(), data.getFootstepNode());
 
@@ -132,7 +122,6 @@ public class FootstepNodeDataMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      data.setNodeId(ser.read_type_2("node_id"));
       data.setParentNodeId(ser.read_type_2("parent_node_id"));
       ser.read_type_a("footstep_node", new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType(), data.getFootstepNode());
 

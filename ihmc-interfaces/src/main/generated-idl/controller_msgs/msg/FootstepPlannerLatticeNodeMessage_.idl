@@ -37,6 +37,7 @@ module controller_msgs
          * Robot side of the cell
          */
         octet robot_side;
+        long node_index;
       };
     };
   };

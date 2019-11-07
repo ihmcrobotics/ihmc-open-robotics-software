@@ -54,7 +54,11 @@ public class PlannerLatticeMap
    {
       nodes.clear();
       for (FootstepPlannerLatticeNodeMessage nodeMessage : message.getLatticeNodes())
-         nodes.add(new FootstepNode(nodeMessage.getXIndex(), nodeMessage.getYIndex(), nodeMessage.getYawIndex(), RobotSide.fromByte(nodeMessage.getRobotSide())));
+      {
+         FootstepNode node = new FootstepNode(nodeMessage.getXIndex(), nodeMessage.getYIndex(), nodeMessage.getYawIndex(), RobotSide.fromByte(nodeMessage.getRobotSide()));
+         node.setNodeIndex(nodeMessage.getNodeIndex());
+         nodes.add(node);
+      }
    }
 
    public FootstepPlannerLatticeMapMessage getAsMessage()
@@ -73,6 +77,7 @@ public class PlannerLatticeMap
          nodeMessage.setYIndex(occupiedCell.getYIndex());
          nodeMessage.setYawIndex(occupiedCell.getYawIndex());
          nodeMessage.setRobotSide(occupiedCell.getRobotSide().toByte());
+         nodeMessage.setNodeIndex(occupiedCell.getNodeIndex());
       }
    }
 }

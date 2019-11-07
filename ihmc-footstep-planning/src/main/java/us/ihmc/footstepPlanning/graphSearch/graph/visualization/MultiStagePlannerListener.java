@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -91,6 +92,7 @@ public class MultiStagePlannerListener
       {
          numberOfStepsConsidered += listeners.get(i).getTotalNodeCount();
       }
+      LogTools.info("Total steps considered " + numberOfStepsConsidered);
       planningStatistics.setNumberOfStepsConsidered(numberOfStepsConsidered);
 
       int totalRejectionCount = 0;

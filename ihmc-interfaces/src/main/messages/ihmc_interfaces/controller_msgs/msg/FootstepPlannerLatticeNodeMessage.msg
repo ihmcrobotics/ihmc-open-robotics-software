@@ -12,3 +12,5 @@ int32 y_index
 int32 yaw_index
 # Robot side of the cell
 byte robot_side
+
+int32 node_index

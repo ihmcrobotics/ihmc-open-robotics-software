@@ -24,6 +24,7 @@ public class FootstepPlannerMessageConverter
          nodeMessage.setYIndex(stageCell.getYIndex());
          nodeMessage.setYawIndex(stageCell.getYawIndex());
          nodeMessage.setRobotSide(stageCell.getRobotSide().toByte());
+         nodeMessage.setNodeIndex(stageCell.getNodeIndex());
       }
 
       return latticeMapMessage;
@@ -33,12 +34,13 @@ public class FootstepPlannerMessageConverter
    {
       FootstepNodeDataListMessage message = new FootstepNodeDataListMessage();
       message.setPlanId(planId);
+      message.setIsFootstepGraph(true);
 
       for (PlannerNodeData nodeData : fullGraph.getNodeData())
       {
          FootstepNodeDataMessage nodeDataMessage = message.getNodeData().add();
          nodeData.getAsMessage(nodeDataMessage);
-         nodeDataMessage.setNodeId(nodeData.getNodeId());
+         nodeDataMessage.getFootstepNode().setNodeIndex(nodeData.getNodeId());
       }
 
       return message;

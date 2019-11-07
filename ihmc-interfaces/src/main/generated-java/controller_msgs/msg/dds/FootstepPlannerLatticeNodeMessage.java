@@ -30,6 +30,7 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
             * Robot side of the cell
             */
    public byte robot_side_;
+   public int node_index_;
 
    public FootstepPlannerLatticeNodeMessage()
    {
@@ -50,6 +51,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       yaw_index_ = other.yaw_index_;
 
       robot_side_ = other.robot_side_;
+
+      node_index_ = other.node_index_;
 
    }
 
@@ -113,6 +116,15 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       return robot_side_;
    }
 
+   public void setNodeIndex(int node_index)
+   {
+      node_index_ = node_index;
+   }
+   public int getNodeIndex()
+   {
+      return node_index_;
+   }
+
 
    public static Supplier<FootstepPlannerLatticeNodeMessagePubSubType> getPubSubType()
    {
@@ -139,6 +151,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.node_index_, other.node_index_, epsilon)) return false;
+
 
       return true;
    }
@@ -160,6 +174,8 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.node_index_ != otherMyClass.node_index_) return false;
+
 
       return true;
    }
@@ -177,7 +193,9 @@ public class FootstepPlannerLatticeNodeMessage extends Packet<FootstepPlannerLat
       builder.append("yaw_index=");
       builder.append(this.yaw_index_);      builder.append(", ");
       builder.append("robot_side=");
-      builder.append(this.robot_side_);
+      builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("node_index=");
+      builder.append(this.node_index_);
       builder.append("}");
       return builder.toString();
    }

@@ -442,15 +442,19 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       completedStepResults.add(stepPlanningResult);
 
-      if (stepPlanningResult != null && stepPlanningResult.validForExecution())
+      if (stepPlanningResult != null)
       {
-         int sequence = stageFinished.getPlanSequenceId();
-         FootstepPlan plan = stageFinished.getPlan();
-         if (plan != null)
-            completedStepPlans.add(sequence, plan);
-      }
+         if (stepPlanningResult.validForExecution())
+         {
+            int sequence = stageFinished.getPlanSequenceId();
+            FootstepPlan plan = stageFinished.getPlan();
+            if (plan != null)
+               completedStepPlans.add(sequence, plan);
+         }
 
-      completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
+         // FIXME get this IFF the planner is being spawned again to remove it from calculation
+         completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
+      }
 
       cleanupStepPlanningStage(stageFinished);
 
@@ -1104,6 +1108,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          break;
       case GRAPH_SEARCH:
          concatenateGraphSearchStatistics(mapToPopulate, segmentId, (GraphSearchStatistics) plannerStatistics);
+         break;
       }
    }
 
