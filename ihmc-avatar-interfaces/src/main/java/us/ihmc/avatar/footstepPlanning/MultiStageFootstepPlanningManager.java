@@ -107,6 +107,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final ConcurrentList<PathPlanningStage> pathPlanningStagePool = new ConcurrentList<>();
    private final ConcurrentList<PathPlanningStage> allPathPlanningStages = new ConcurrentList<>();
+   private final ConcurrentSet<PathPlanningStage> completedPathPlanningStages = new ConcurrentSet<>();
    private final ConcurrentMap<PathPlanningStage, FootstepPlannerObjective> pathPlanningStagesInProgress = new ConcurrentMap<>();
    private final ConcurrentMap<PathPlanningStage, ScheduledFuture<?>> pathPlanningTasks = new ConcurrentMap<>();
 
@@ -122,6 +123,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final ConcurrentList<FootstepPlanningStage> stepPlanningStagePool = new ConcurrentList<>();
    private final ConcurrentList<FootstepPlanningStage> allStepPlanningStages = new ConcurrentList<>();
+   private final ConcurrentSet<FootstepPlanningStage> completedStepPlanningStages = new ConcurrentSet<>();
    private final ConcurrentMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress = new ConcurrentMap<>();
    private final ConcurrentMap<FootstepPlanningStage, ScheduledFuture<?>> stepPlanningTasks = new ConcurrentMap<>();
 
@@ -256,6 +258,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          stageToReturn = pathPlanningStagePool.remove(0);
       }
 
+      // need to save the statistics from this plan before they get overwritten
+      if (completedPathPlanningStages.contains(stageToReturn))
+      {
+         completedPathPlanStatistics.add(stageToReturn.getPlanSequenceId(), stageToReturn.getPlannerStatistics());
+         completedPathPlanningStages.remove(stageToReturn);
+      }
+
+
       return stageToReturn;
    }
 
@@ -271,6 +281,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       else
       { // get one from the pool
          stageToReturn = stepPlanningStagePool.remove(0);
+      }
+
+      // need to save the statistics from this plan before they get overwritten
+      if (completedStepPlanningStages.contains(stageToReturn))
+      {
+         completedStepPlanStatistics.add(stageToReturn.getPlanSequenceId(), stageToReturn.getPlannerStatistics());
+         completedStepPlanningStages.remove(stageToReturn);
       }
 
       return stageToReturn;
@@ -323,7 +340,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       completedPathWaypoints.clear();
       completedStepPlans.clear();
-
 
       completedPathResults.clear();
       completedStepResults.clear();
@@ -424,13 +440,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public synchronized void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
       completedPathResults.add(pathPlanningResult);
+      completedPathPlanningStages.add(stageFinished);
 
-      if (pathPlanningResult != null && pathPlanningResult.validForExecution())
+      if (pathPlanningResult != null)
       {
-         completedPathWaypoints.add(stageFinished.getPlanSequenceId(), stageFinished.getWaypoints());
+         if (pathPlanningResult.validForExecution())
+         {
+            completedPathWaypoints.add(stageFinished.getPlanSequenceId(), stageFinished.getWaypoints());
+         }
+//         completedPathPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
       }
-
-      completedPathPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
       cleanupPathPlanningStage(stageFinished);
 
@@ -441,6 +460,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public synchronized void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
       completedStepResults.add(stepPlanningResult);
+      completedStepPlanningStages.add(stageFinished);
 
       if (stepPlanningResult != null)
       {
@@ -453,7 +473,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
 
          // FIXME get this IFF the planner is being spawned again to remove it from calculation
-         completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
+//         completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
       }
 
       cleanupStepPlanningStage(stageFinished);
@@ -473,6 +493,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       if (!waitingForPlanningRequest.getBooleanValue())
          return;
+
+      completedStepPlanningStages.clear();
+      completedPathPlanningStages.clear();
 
       isDone.set(false);
       isDonePlanningSteps.set(false);
@@ -494,7 +517,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processPlanningStatisticsRequest()
    {
+      completedPathPlanningStages.getCopyForReading().forEach(stage -> completedPathPlanStatistics.add(stage.getPlanSequenceId(), stage.getPlannerStatistics()));
+      completedStepPlanningStages.getCopyForReading().forEach(stage -> completedStepPlanStatistics.add(stage.getPlanSequenceId(), stage.getPlannerStatistics()));
+      completedPathPlanningStages.clear();
+      completedStepPlanningStages.clear();
+
       EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate = new EnumMap<>(StatisticsType.class);
+
 
       Iterable<ImmutablePair<Integer, PlannerStatistics<?>>> pathIterable = completedPathPlanStatistics.iterable();
       if (pathIterable != null)
