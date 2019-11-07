@@ -1,10 +1,16 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RejectionReasonToVisualize;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
@@ -46,6 +52,12 @@ public class VisualizationController
    @FXML
    private CheckBox showPostProcessingInfo;
    @FXML
+   private CheckBox showGraphSteps;
+   @FXML
+   private CheckBox showRejectedNodes;
+   @FXML
+   private ComboBox<RejectionReasonToVisualize> rejectionReasonToShow;
+   @FXML
    private Slider expansionSlider;
 
    @FXML
@@ -83,7 +95,16 @@ public class VisualizationController
       messager.bindBidirectional(ShowExpandedNodes, showExpandedNodes.selectedProperty(), true);
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
       messager.bindBidirectional(ShowNodeData, showIntermediateSolution.selectedProperty(), true);
+      messager.bindBidirectional(ShowRejectedNodes, showRejectedNodes.selectedProperty(), true);
+      messager.bindBidirectional(ShowFullGraph, showGraphSteps.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
+
+
+      ObservableList<RejectionReasonToVisualize> rejectionReasons = FXCollections.observableArrayList(RejectionReasonToVisualize.values);
+      rejectionReasonToShow.setItems(rejectionReasons);
+      rejectionReasonToShow.setValue(RejectionReasonToVisualize.ALL);
+      messager.bindBidirectional(RejectionReasonToShow, rejectionReasonToShow.valueProperty(), true);
+
 
       expansionSlider.valueProperty().addListener((observable, oldValue, newValue) -> messager.submitMessage(ExpansionFractionToShow, newValue.doubleValue()));
    }

@@ -8,10 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -137,7 +134,8 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowExpandedNodes = topic("ShowExpandedNodes");
    public static final Topic<Boolean> ShowFullGraph = topic("ShowFullGraph");
    public static final Topic<Double> ExpansionFractionToShow = topic("ExpansionFractionToShow");
-   public static final Topic<BipedalFootstepPlannerNodeRejectionReason> RejectionReasonToShow = topic("RejectionReasonToShow");
+   public static final Topic<RejectionReasonToVisualize> RejectionReasonToShow = topic("RejectionReasonToShow");
+   public static final Topic<Boolean> ShowRejectedNodes = topic("ShowRejectedNodes");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");

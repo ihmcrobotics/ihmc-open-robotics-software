@@ -16,10 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -49,8 +46,9 @@ public class FullGraphRenderer extends AnimationTimer
 
    private final AtomicReference<Pair<Mesh, Material>> footstepGraphToRender = new AtomicReference<>(null);
    private final AtomicReference<Boolean> show;
+   private final AtomicReference<Boolean> showRejectedNodes;
    private final AtomicReference<Double> fractionToShow;
-   private final AtomicReference<BipedalFootstepPlannerNodeRejectionReason> rejectionReasonToShow;
+   private final AtomicReference<RejectionReasonToVisualize> rejectionReasonToShow;
    private final AtomicBoolean reset = new AtomicBoolean(false);
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -73,10 +71,12 @@ public class FullGraphRenderer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ExpansionFractionToShow, data -> updateGraphicOnThread());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RejectionReasonToShow, data -> updateGraphicOnThread());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowRejectedNodes, data -> updateGraphicOnThread());
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowFullGraph, true);
-      fractionToShow = messager.createInput(FootstepPlannerMessagerAPI.ExpansionFractionToShow, -1.0);
-      rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShow, null);
+      showRejectedNodes = messager.createInput(FootstepPlannerMessagerAPI.ShowRejectedNodes, true);
+      fractionToShow = messager.createInput(FootstepPlannerMessagerAPI.ExpansionFractionToShow, 0.0);
+      rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShow, RejectionReasonToVisualize.ALL);
 
       root.getChildren().add(footstepGraphMeshView);
    }
@@ -123,7 +123,7 @@ public class FullGraphRenderer extends AnimationTimer
       executorService.submit(this::updateGraphic);
    }
 
-   private void updateGraphic()
+   private synchronized void updateGraphic()
    {
       double alpha = MathTools.clamp(fractionToShow.get(), 0.0, 1.0);
 
@@ -140,23 +140,26 @@ public class FullGraphRenderer extends AnimationTimer
       palette.clearPalette();
       meshBuilder.clear();
 
+      int rejectedNodes = 0;
+      int acceptedNodes = 0;
       addFoot(parentToShow, parentFootColor);
       for (PlannerNodeData childToShow : childrenToShow)
       {
          if (childToShow.getRejectionReason() == null)
          {
+            acceptedNodes++;
             addFoot(childToShow, validFootColor);
          }
-         else if (rejectionReasonToShow.get() == null)
+         else if (showRejectedNodes.get())
          {
-            addFoot(childToShow, rejectedFootColor);
+            rejectedNodes++;
+            if (rejectionReasonToShow.get() != null && rejectionReasonToShow.get().equals(childToShow.getRejectionReason()))
+            {
+               addFoot(childToShow, rejectedFootColor);
+            }
          }
-         else if (rejectionReasonToShow.get() == childToShow.getRejectionReason())
-         {
-            addFoot(childToShow, rejectedFootColor);
-         }
-
       }
+      LogTools.info("Accepted nodes = " + acceptedNodes + ", rejected ndoes = " + rejectedNodes + " but showing = " + showRejectedNodes.get());
 
       footstepGraphToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
