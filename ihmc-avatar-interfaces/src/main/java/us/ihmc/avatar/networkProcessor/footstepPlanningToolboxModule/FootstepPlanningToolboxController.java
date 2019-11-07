@@ -39,16 +39,15 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.SplinePathWithAStarPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.*;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -57,7 +56,6 @@ import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -462,8 +460,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter
-                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         reportVisibilityGraphStatistics((VisibilityGraphStatistics) plannerStatistics);
+         break;
+      case GRAPH_SEARCH:
+         reportGraphSearchStatistics((GraphSearchStatistics) plannerStatistics);
          break;
       }
    }
@@ -472,6 +472,17 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
+   }
+
+   private void reportVisibilityGraphStatistics(VisibilityGraphStatistics plannerStatistics)
+   {
+      reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), plannerStatistics));
+   }
+
+   private void reportGraphSearchStatistics(GraphSearchStatistics graphSearchStatistics)
+   {
+      reportMessage(FootstepPlannerMessageConverter.convertExpandedNodesToMessage(planId.getIntegerValue(), graphSearchStatistics.getExpandedNodes()));
+      reportMessage(FootstepPlannerMessageConverter.convertFullGraphToMessage(planId.getIntegerValue(), graphSearchStatistics.getFullGraph()));
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)

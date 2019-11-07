@@ -42,6 +42,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -103,6 +104,8 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    private final YoBoolean validGoalNode = new YoBoolean("validGoalNode", registry);
    private final YoBoolean abortPlanning = new YoBoolean("abortPlanning", registry);
+
+   private final GraphSearchStatistics graphSearchStatistics = new GraphSearchStatistics();
 
    public AStarFootstepPlanner(FootstepPlannerParametersReadOnly parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
@@ -492,6 +495,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       }
    }
 
+
    /**
     * Checks node is in proximity to goal. Assumes that one or both of distance and yaw proximity values are positive
     */
@@ -535,6 +539,19 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
 
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+   }
+
+   @Override
+   public GraphSearchStatistics getPlannerStatistics()
+   {
+      packGraphSearchStatistics(graphSearchStatistics);
+      return graphSearchStatistics;
+   }
+
+   private void packGraphSearchStatistics(GraphSearchStatistics graphSearchStatistics)
+   {
+      // TODO
+      throw new RuntimeException("TODO");
    }
 
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParametersReadOnly parameters, BipedalFootstepPlannerListener listener,

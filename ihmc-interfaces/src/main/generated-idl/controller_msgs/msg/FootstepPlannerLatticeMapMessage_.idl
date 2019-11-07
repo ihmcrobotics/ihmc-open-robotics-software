@@ -19,7 +19,7 @@ module controller_msgs
         /**
          * This is the ID of the planning request which this message corresponds to
          */
-        unsigned long sequence_id;
+        unsigned long plan_id;
         /**
          * List of cells that the planner has explored
          */
