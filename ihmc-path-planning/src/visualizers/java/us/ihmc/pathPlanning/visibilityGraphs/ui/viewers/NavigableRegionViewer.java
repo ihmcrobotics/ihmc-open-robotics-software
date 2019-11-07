@@ -150,7 +150,7 @@ public class NavigableRegionViewer extends AnimationTimer
                for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
                {
                   ConnectionPoint3D pointInWorld = homeRegionNode.getPointInWorld();
-                  meshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, pointInWorld);
+                  meshBuilder.addTetrahedron(VisualizationParameters.ESCAPE_EXTRUDEDPOINT_SIZE, pointInWorld);
                }
             }
          }

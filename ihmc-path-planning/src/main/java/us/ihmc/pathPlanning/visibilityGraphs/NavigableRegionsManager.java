@@ -101,61 +101,72 @@ public class NavigableRegionsManager
       return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph, accommodateOcclusions);
    }
 
-   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
+   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld,
                                                                         boolean fullyExpandVisibilityGraph, boolean accommodateOcclusions)
    {
-      if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
+      if (!initialize(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
          return null;
 
       // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
-      Point3DReadOnly goalInWorld;
       if (accommodateOcclusions)
       {
-         // find out if navigable regions make it to the goal
-         // try to find path?
+         /**
+          * try to plan to final goal once. If does not reach the goal:
+          * plan to the closest free/escape node to the goal
+          * here, a free/escape node is defined as one on the edge of the navigable area but not next to an obstacle
+          * Other options:
+          * - Keep track of where we've travelled
+          * - employ actual maze solving
+          */
 
-         // find closest region to final goal
+         List<Point3DReadOnly> plan = bestEffortPlanToGoal(startInWorld, finalGoalInWorld);
 
-         // gonna have to call planInternal many times??
-         // start from goal and back up until plan found
-         // take cue from explore area behavior
-         // maybe need to know where we've tried to get to before
-
-         // might need to compute edge costs early?
-
-         // TODO
-
-         ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
-         for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
+         if (plan.isEmpty() || !plan.get(plan.size() - 1).geometricallyEquals(finalGoalInWorld, 1e-6))
          {
-            for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
+            if (!initialize(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
+               return null;
+
+            // plan again, this time only to closest free edge
+            ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
+            for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
             {
-               homeRegionNodes.add(homeRegionNode);
+               for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
+               {
+                  homeRegionNodes.add(homeRegionNode);
+               }
             }
-         }
 
-         if (homeRegionNodes.isEmpty())
-         {
-            return false; // trapped!
-         }
-
-         VisibilityGraphNode closestHomeRegionNodeToGoal = homeRegionNodes.get(0);
-         for (VisibilityGraphNode visibilityGraphNode : homeRegionNodes)
-         {
-            if (visibilityGraphNode.getPointInWorld().distance(finalGoalInWorld) < closestHomeRegionNodeToGoal.getPointInWorld().distance(finalGoalInWorld))
+            if (homeRegionNodes.isEmpty())
             {
-               closestHomeRegionNodeToGoal = visibilityGraphNode;
+               return null; // trapped!
             }
-         }
 
-         goalInWorld = closestHomeRegionNodeToGoal.getPointInWorld();
+            VisibilityGraphNode closestHomeRegionNodeToGoal = homeRegionNodes.get(0);
+            for (VisibilityGraphNode visibilityGraphNode : homeRegionNodes)
+            {
+               if (visibilityGraphNode.getPointInWorld().distance(finalGoalInWorld) < closestHomeRegionNodeToGoal.getPointInWorld().distance(finalGoalInWorld))
+               {
+                  closestHomeRegionNodeToGoal = visibilityGraphNode;
+               }
+            }
+
+            plan = bestEffortPlanToGoal(startInWorld, closestHomeRegionNodeToGoal.getPointInWorld());
+            return plan;
+         }
+         else
+         {
+            return plan;
+         }
       }
       else
       {
-         goalInWorld = finalGoalInWorld;
+         return bestEffortPlanToGoal(startInWorld, finalGoalInWorld);
       }
+   }
 
-      if (!resetStackForStartAndGoal(startInWorld, goalInWorld))
+   private List<Point3DReadOnly> bestEffortPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
+   {
+      if (!resetStackForStartAndGoal(startInWorld, finalGoalInWorld))
          return null;
 
       return planInternal();
@@ -213,6 +224,9 @@ public class NavigableRegionsManager
       return true;
    }
 
+   /**
+    * @return plan as 3D waypoints, never null
+    */
    private List<Point3DReadOnly> planInternal()
    {
       long startBodyPathComputation = System.currentTimeMillis();
@@ -281,7 +295,7 @@ public class NavigableRegionsManager
       List<Point3DReadOnly> path;
       if (postProcessor != null)
       {
-         path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
+         path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution); // modifies and/or adds waypoints
       }
       else
       {
