@@ -5,7 +5,10 @@
 uint32 sequence_id
 
 # Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
-float64 estimator_gain
+float64 estimator_gain 0.5
+
+# Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+float64 solver_alpha 0.005
 
 # The is the unique hash code of the end-effector that is assumed to be pushed
 # See RigidBody.hashCode() for the computation of a rigid-body hash code.
