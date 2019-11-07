@@ -52,7 +52,7 @@
                               <VBox alignment="CENTER" prefHeight="0.0" prefWidth="110.0" spacing="10.0">
                                  <children>
                                     <ToggleButton fx:id="enableDepthButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Depth" />
-                                    <Button fx:id="clearDepthButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearStereo" text="Clear" />
+                                    <Button fx:id="clearDepthButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearDepth" text="Clear" />
                                  </children>
                               </VBox>
                               <GridPane prefHeight="70.0" prefWidth="283.0">
