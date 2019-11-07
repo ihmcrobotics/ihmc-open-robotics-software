@@ -56,13 +56,11 @@ public class MultiStagePlannerListener
 
       boolean stageHasMapUpdate = false;
       boolean stageHasLowestCostPlan = false;
-      boolean stageHasFullGraph = false;
 
       for (StagePlannerListener listener : listeners)
       {
          stageHasMapUpdate |= listener.hasOccupiedCells();
          stageHasLowestCostPlan |= listener.hasLowestCostPlan();
-         stageHasFullGraph |= listener.hasFullGraph();
       }
 
       if (stageHasMapUpdate)
