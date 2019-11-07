@@ -68,7 +68,7 @@ public class VisibilityGraphsFrameworkTest
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
 
-   private static final int maxPointsInRegion = 25000;
+   private static int maxPointsInRegion = 25000;
    private static final double walkerTotalTime = 300.0;
 
 
@@ -270,7 +270,8 @@ public class VisibilityGraphsFrameworkTest
 
       boolean testWithOcclusions = true;
       ENABLE_TIMERS = false;
-      DYNAMIC_WAIT_FOR_CLICK = true;
+      DYNAMIC_WAIT_FOR_CLICK = false;
+      maxPointsInRegion = Integer.MAX_VALUE;
       List<DataSet> allDatasets = new ArrayList<>();
       allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
 
