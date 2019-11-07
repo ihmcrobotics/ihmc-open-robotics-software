@@ -23,7 +23,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final List<PlannerNodeData> rejectedNodeData = new ArrayList<>();
+   private final HashMap<FootstepNode, List<PlannerNodeData>> rejectedNodeData = new HashMap<>();
 
    private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
@@ -86,7 +86,9 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       RigidBodyTransform nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
       PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
 
-      rejectedNodeData.add(nodeData);
+      if (rejectedNodeData.get(parentNode) == null)
+         rejectedNodeData.put(parentNode, new ArrayList<>());
+      rejectedNodeData.get(parentNode).add(nodeData);
       rejectionCount.get(reason).increment();
    }
 
@@ -154,8 +156,8 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
             PlannerNodeData nodeData = new PlannerNodeData(footstepNode.getNodeIndex(), childNode, nodePose, null);
             fullGraphToReport.add(nodeData);
          }
+         fullGraphToReport.addAll(rejectedNodeData.get(footstepNode));
       }
-      fullGraphToReport.addAll(rejectedNodeData);
 
       hasFullGraph.set(true);
    }
