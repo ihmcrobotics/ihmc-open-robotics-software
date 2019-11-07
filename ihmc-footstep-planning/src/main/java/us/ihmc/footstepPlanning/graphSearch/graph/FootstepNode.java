@@ -13,7 +13,7 @@ public class FootstepNode
 
    private Point2D midFootPoint;
    private final int hashCode;
-   private int nodeIndex;
+   private int nodeIndex = -1;
 
    public FootstepNode(double x, double y)
    {

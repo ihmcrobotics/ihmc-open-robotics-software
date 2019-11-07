@@ -46,6 +46,7 @@ import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -161,6 +162,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          side = defaultStartNodeSide;
       }
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
+      startNode.setNodeIndex(0);
       RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       nodeChecker.addStartNode(startNode, startNodeSnapTransform);
@@ -176,6 +178,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
+      int goalId = 77777777;
       if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.POSE_BETWEEN_FEET))
       {
          FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
@@ -186,6 +189,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
             goalNodePose.changeFrame(goalPose.getReferenceFrame());
             FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
+            goalNode.setNodeIndex(goalId++);
             goalNodes.put(side, goalNode);
 
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -202,6 +206,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             FramePose3D goalNodePose = new FramePose3D();
             goalSteps.get(side).getSoleFramePose(goalNodePose);
             FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
+            goalNode.setNodeIndex(goalId++);
             goalNodes.put(side, goalNode);
 
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -553,17 +558,28 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       PlannerNodeDataList fullGraphList = new PlannerNodeDataList();
       fullGraphList.setIsFootstepGraph(true);
 
+      PlannerLatticeMap expandedNodeMap = new PlannerLatticeMap();
+
+      RigidBodyTransform startNodePose = snapper.snapFootstepNode(startNode).getOrComputeSnappedNodeTransform(startNode);
+      fullGraphList.addNode(-1, startNode, startNodePose, null);
+      expandedNodeMap.addFootstepNode(startNode);
+
       HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = graph.getOutgoingEdges();
       for (FootstepNode footstepNode : outgoingEdges.keySet())
       {
+         expandedNodeMap.addFootstepNode(footstepNode);
          for (FootstepEdge outgoingEdge : outgoingEdges.get(footstepNode))
          {
             FootstepNode childNode = outgoingEdge.getEndNode();
             RigidBodyTransform nodePose = snapper.snapFootstepNode(childNode).getOrComputeSnappedNodeTransform(childNode);
             fullGraphList.addNode(footstepNode.getNodeIndex(), childNode, nodePose, null);
          }
-         if (listener != null)
+      }
+      if (listener != null)
+      {
+         for (FootstepNode footstepNode : listener.getRejectedNodeData().keySet())
          {
+            expandedNodeMap.addFootstepNode(footstepNode);
             List<PlannerNodeData> rejectedDataList = listener.getRejectedNodeData().get(footstepNode);
             if (rejectedDataList != null)
             {
@@ -572,10 +588,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             }
          }
       }
-
-      PlannerLatticeMap expandedNodeMap = new PlannerLatticeMap();
-      for (FootstepNode expandedNode : expandedNodes)
-         expandedNodeMap.addFootstepNode(expandedNode);
 
       graphSearchStatistics.setExpandedNodes(expandedNodeMap);
       graphSearchStatistics.setFullGraph(fullGraphList);

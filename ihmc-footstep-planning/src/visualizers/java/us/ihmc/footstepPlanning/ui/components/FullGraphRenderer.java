@@ -60,7 +60,6 @@ public class FullGraphRenderer extends AnimationTimer
    private final List<PlannerNodeData> allNodeData = new ArrayList<>();
    private final HashMap<FootstepNode, List<PlannerNodeData>> childMap = new HashMap<>();
    private final ArrayList<FootstepNode> expandedNodes = new ArrayList<>();
-   private final ArrayList<FootstepNode> parentNodes = new ArrayList<>();
 
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = PlannerTools.createDefaultFootPolygons();
 
@@ -93,7 +92,6 @@ public class FullGraphRenderer extends AnimationTimer
       fullGraph.clear();
       allNodeData.clear();
       childMap.clear();
-      parentNodes.clear();
 
       fullGraph.getNodeData().addAll(nodeDataList.getNodeData());
       fullGraph.getNodeData().sort(Comparator.comparingInt(PlannerNodeData::getNodeId));
@@ -104,19 +102,20 @@ public class FullGraphRenderer extends AnimationTimer
          if (nodeData.getParentNodeId() == -1)
             continue;
 
-         PlannerNodeData parentNode = fullGraph.getNodeData().get(nodeData.getParentNodeId());
-         if (childMap.get(parentNode.getFootstepNode()) == null)
-            childMap.put(parentNode.getFootstepNode(), new ArrayList<>());
-         childMap.get(parentNode.getFootstepNode()).add(nodeData);
+         FootstepNode parentNode = null;
+         for (FootstepNode otherNode : expandedNodes)
+         {
+            if (nodeData.getParentNodeId() == otherNode.getNodeIndex())
+            {
+               parentNode = otherNode;
+               break;
+            }
+         }
 
-         if (!parentNodes.contains(parentNode))
-            parentNodes.add(parentNode.getFootstepNode());
+         childMap.computeIfAbsent(parentNode, node -> new ArrayList<>()).add(nodeData);
       }
 
-      if (expandedNodes.size() != childMap.keySet().size())
-         throw new RuntimeException("Wrong size.");
-
-      parentNodes.sort(expansionOrderComparator);
+      expandedNodes.sort(expansionOrderComparator);
    }
 
    private void updateGraphicOnThread()
@@ -128,8 +127,8 @@ public class FullGraphRenderer extends AnimationTimer
    {
       double alpha = MathTools.clamp(fractionToShow.get(), 0.0, 1.0);
 
-      int frameIndex = (int) (alpha * (parentNodes.size() - 1));
-      FootstepNode nodeToShow = parentNodes.get(frameIndex);
+      int frameIndex = (int) (alpha * (expandedNodes.size() - 1));
+      FootstepNode nodeToShow = expandedNodes.get(frameIndex);
       Collection<PlannerNodeData> childrenToShow = childMap.get(nodeToShow);
       PlannerNodeData parentToShow = null;
       for (PlannerNodeData nodeData : allNodeData)
@@ -173,6 +172,8 @@ public class FullGraphRenderer extends AnimationTimer
    {
       int smallestIndex = Integer.MAX_VALUE;
       List<PlannerNodeData> childData = childMap.get(footstepNode);
+      if (childData == null)
+         throw new RuntimeException("uh oh.");
       for (PlannerNodeData child : childData)
          smallestIndex = Math.min(smallestIndex, child.getNodeId());
 
@@ -222,7 +223,6 @@ public class FullGraphRenderer extends AnimationTimer
          allNodeData.clear();
          childMap.clear();
          expandedNodes.clear();
-         parentNodes.clear();
          return;
       }
 
