@@ -915,7 +915,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
    private static String checkStepPositions(String datasetName, List<FootstepDataMessage> plannedSteps, FootstepPlannerParametersReadOnly parameters)
    {
-      double heightChangeFromWiggling = Math.sqrt(2) * parameters.getMaximumXYWiggleDistance() / Math.sin(parameters.getMinimumSurfaceInclineRadians());
+      double heightChangeFromWiggling = Math.sqrt(2.0) * parameters.getMaximumXYWiggleDistance() / Math.sin(parameters.getMinimumSurfaceInclineRadians());
       String errorMessage = "";
       SideDependentList<FootstepDataMessage> previousSteps = new SideDependentList<>();
       for (int i = 0; i < plannedSteps.size(); i++)
@@ -926,9 +926,15 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
          if (previousStep != null)
          {
-            double heightChange = Math.abs(step.getLocation().getZ() - previousStep.getLocation().getZ());
-            if (heightChange > parameters.getMaximumStepZ() + 2.0 * heightChangeFromWiggling)
-               errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much. Max is " + parameters.getMaximumStepZ();
+            double fudgeFactor = 1.25;
+            double heightChange = step.getLocation().getZ() - previousStep.getLocation().getZ();
+            double allowableChange = fudgeFactor * (parameters.getMaximumStepZ() + 2.0 * heightChangeFromWiggling);
+            if (Math.abs(heightChange) > allowableChange)
+            {
+               String error =  "Step " + i + " height changed " + heightChange + ", which was too much. Max is " + allowableChange;
+               LogTools.info(error);
+               errorMessage += datasetName + "\n " + error;
+            }
          }
 
          previousSteps.put(stepSide, step);
