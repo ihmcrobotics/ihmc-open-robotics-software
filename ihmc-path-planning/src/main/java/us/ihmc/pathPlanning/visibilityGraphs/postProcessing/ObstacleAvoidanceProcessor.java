@@ -116,9 +116,9 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       return intermediateWaypointsToAdd;
    }
 
-   private void adjustNodePositionToAvoidObstaclesAndCliffs(Point3DBasics nodeLocationToPack, NavigableRegion startRegion, NavigableRegion endRegion)
+   private void adjustNodePositionToAvoidObstaclesAndCliffs(Point3DBasics endNodeLocationToPack, NavigableRegion startRegion, NavigableRegion endRegion)
    {
-      Point2D nextPointInWorld2D = new Point2D(nodeLocationToPack);
+      Point2D endPointInWorld2D = new Point2D(endNodeLocationToPack);
 
       Set<NavigableRegion> bothRegions = new HashSet<>();
       bothRegions.add(startRegion);
@@ -135,43 +135,42 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
          }
       }
 
-      List<Point2DReadOnly> closestObstacleClusterPoints = PostProcessingTools.getClosestPointOnEachCluster(nextPointInWorld2D, obstacleClusters);
-      Vector2DReadOnly nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
+      List<Point2DReadOnly> closestObstacleClusterPoints = PostProcessingTools.getClosestPointOnEachCluster(endPointInWorld2D, obstacleClusters);
+      Vector2DReadOnly endNodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(endPointInWorld2D, closestObstacleClusterPoints,
                                                                                                     desiredDistanceFromObstacleCluster, 0.0);
 
-      if (nodeShiftToAvoidObstacles.containsNaN())
-         nodeShiftToAvoidObstacles = new Vector2D();
+      if (endNodeShiftToAvoidObstacles.containsNaN())
+         endNodeShiftToAvoidObstacles = new Vector2D();
 
-      if (nodeShiftToAvoidObstacles.length() < minDistanceToMove)
+      if (endNodeShiftToAvoidObstacles.length() < minDistanceToMove)
          return; // didn't shift significantly or it's NaN, don't need to do following checks
 
-      Point2D shiftedPoint = new Point2D(nodeLocationToPack);
-      shiftedPoint.add(nodeShiftToAvoidObstacles);
+      Point2D shiftedEndLocation = new Point2D(endNodeLocationToPack);
+      shiftedEndLocation.add(endNodeShiftToAvoidObstacles);
 
       List<Point2DReadOnly> closestCliffObstacleClusterPoints = new ArrayList<>(
-            PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, startRegion.getHomeRegionCluster()));
+            PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(endPointInWorld2D, endRegion.getHomeRegionCluster()));
 
-      if (endRegion != null && endRegion.getHomeRegionCluster() != null)
+      if (bothRegions.size() > 1 && startRegion != null && startRegion.getHomeRegionCluster() != null)
       {
-         boolean pointIsInEndRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(nextPointInWorld2D,
-                                                                                                endRegion.getHomeRegionCluster().getRawPointsInWorld2D(),
-                                                                                                endRegion.getHomeRegionCluster().getNumberOfRawPoints(),
-                                                                                                   true, 0.0);
-         if (pointIsInEndRegion)
-            closestCliffObstacleClusterPoints.addAll(PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(nextPointInWorld2D, endRegion.getHomeRegionCluster()));
+         Cluster startHomeCluster = startRegion.getHomeRegionCluster();
+         boolean pointIsInStartRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(endPointInWorld2D, startHomeCluster.getRawPointsInWorld2D(),
+                                                                                                  startHomeCluster.getNumberOfRawPoints(), true, 0.0);
+         if (pointIsInStartRegion)
+            closestCliffObstacleClusterPoints.addAll(PostProcessingTools.getPointsAlongEdgeOfClusterClosestToPoint(endPointInWorld2D, startHomeCluster));
       }
 
-      nodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(nextPointInWorld2D, closestObstacleClusterPoints,
+      endNodeShiftToAvoidObstacles = PointWiggler.computeBestShiftVectorToAvoidPoints(endPointInWorld2D, closestObstacleClusterPoints,
                                                                                    closestCliffObstacleClusterPoints, desiredDistanceFromObstacleCluster,
                                                                                    parameters.getNavigableExtrusionDistance(), 0.0,
                                                                                    parameters.getNavigableExtrusionDistance());
-      if (nodeShiftToAvoidObstacles.containsNaN())
-         nodeShiftToAvoidObstacles = new Vector2D();
+      if (endNodeShiftToAvoidObstacles.containsNaN())
+         endNodeShiftToAvoidObstacles = new Vector2D();
 
-      if (nodeShiftToAvoidObstacles.length() > minDistanceToMove) // if it moved a significant amount or if it's NaN
+      if (endNodeShiftToAvoidObstacles.length() > minDistanceToMove) // if it moved a significant amount or if it's NaN
       {
-         nextPointInWorld2D.add(nodeShiftToAvoidObstacles);
-         nodeLocationToPack.set(nextPointInWorld2D, PostProcessingTools.findHeightOfPoint(nextPointInWorld2D, bothRegions));
+         endPointInWorld2D.add(endNodeShiftToAvoidObstacles);
+         endNodeLocationToPack.set(endPointInWorld2D, PostProcessingTools.findHeightOfPoint(endPointInWorld2D, bothRegions));
       }
    }
 }
