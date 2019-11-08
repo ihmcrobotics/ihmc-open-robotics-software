@@ -20,6 +20,7 @@ public class ValkyriePhysicalProperties
 
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>();
+   public static final SideDependentList<RigidBodyTransform> handControlFrameToArmMassSimTransforms = new SideDependentList<RigidBodyTransform>();
 
    static
    {
@@ -40,6 +41,12 @@ public class ValkyriePhysicalProperties
          controlFrameToWristTransform.setTranslation(0.025, robotSide.negateIfRightSide(0.07), 0.0);
          controlFrameToWristTransform.appendYawRotation(robotSide.negateIfRightSide(Math.PI * 0.5));
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
+
+         RigidBodyTransform controlFrameToArmMassSimTransform = new RigidBodyTransform();
+         controlFrameToArmMassSimTransform.setTranslation(-0.0275, robotSide.negateIfRightSide(0.4), 0.0);
+         controlFrameToArmMassSimTransform.appendYawRotation(robotSide.negateIfRightSide(0.5 * Math.PI));
+         controlFrameToArmMassSimTransform.appendRollRotation(robotSide.negateIfRightSide(0.5 * Math.PI));
+         handControlFrameToArmMassSimTransforms.put(robotSide, controlFrameToArmMassSimTransform);
       }
    }
 
