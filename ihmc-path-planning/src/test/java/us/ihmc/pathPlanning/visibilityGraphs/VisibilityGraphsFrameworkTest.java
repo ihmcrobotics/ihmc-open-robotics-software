@@ -575,6 +575,7 @@ public class VisibilityGraphsFrameworkTest
 
    private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, List<Pose3DReadOnly> bodyPath)
    {
+      double totalDesiredDistance = distanceToTravel;
       Point3D initialPosition = new Point3D(bodyPath.get(0).getPosition());
 
       Point3D positionWithShift = new Point3D();
@@ -590,14 +591,15 @@ public class VisibilityGraphsFrameworkTest
             Vector3DBasics segmentDirection = segment.getDirection(true);
             positionWithShift.scaleAdd(distanceToTravel, segmentDirection, initialPosition);
 
-            if (xyDistance(segment, positionWithShift) < 1.0e-2)
+            double distanceFromStart = bodyPath.get(0).getPosition().distanceXY(positionWithShift);
+            if (xyDistance(segment, positionWithShift) < 1.0e-2 && distanceFromStart >= totalDesiredDistance)
             {
                initialPosition = new Point3D(positionWithShift);
                break;
             }
             else
             {
-               distanceToTravel -= initialPosition.distanceXY(segment.getSecondEndpoint());
+               distanceToTravel = Math.max(distanceToTravel - initialPosition.distanceXY(segment.getSecondEndpoint()), 0.1);
                initialPosition = new Point3D(segment.getSecondEndpoint());
             }
          }
@@ -906,12 +908,12 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
+//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
 //      String dataSetName = "20171216_111326_CrossoverPlatforms";
 //      String dataSetName = "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
 //      String dataSetName = "20171215_220523_SteppingStones";
-//      String dataSetName = "20171218_204917_FlatGround";
+      String dataSetName = "20171215_201810_RampSteppingStones_Sim";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
@@ -926,8 +928,8 @@ public class VisibilityGraphsFrameworkTest
 //         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }
