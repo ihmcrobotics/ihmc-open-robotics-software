@@ -134,7 +134,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 2.0;
 
-   private static final double dt = 0.01;
+   private static final double dt = 0.05;
    private static double timeScaleFactor;
 
    private final DecimalFormat numberFormat = new DecimalFormat("#.00");
@@ -603,11 +603,18 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       double expectedDuration = (dataSet.getPlannerInput().getStartPosition().distanceXY(dataSet.getPlannerInput().getGoalPosition())) / 0.2; // uses estimate speed of 0.2
       double maxDuration = 4.0 * expectedDuration;
+      double absoluteMaxDuration = 4.0 * expectedDuration;
       boolean timedOut = false;
+      double startTime = Conversions.nanosecondsToSeconds(System.nanoTime());
       String message = "";
       while (!continuousPlanningModule.getToolboxController().isDone() && !planningFailed.getBooleanValue() && !timedOut)
       {
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         if (currentTime - startTime > absoluteMaxDuration)
+         {
+            message += "hit an absolute max duration.";
+            break;
+         }
 
          if (!firstTick && ((currentTime - tickStartTime) < (dt / timeScaleFactor)))
          {
