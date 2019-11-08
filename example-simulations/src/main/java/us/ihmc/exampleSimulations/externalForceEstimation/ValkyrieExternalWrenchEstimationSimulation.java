@@ -57,7 +57,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
 
    public ValkyrieExternalWrenchEstimationSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, true, model);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, model);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new FlatGroundProfile());
       simulationStarter.setRunMultiThreaded(true);

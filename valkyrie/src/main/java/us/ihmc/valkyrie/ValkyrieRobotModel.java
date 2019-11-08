@@ -115,43 +115,37 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final JaxbSDFLoader loader;
    private final RobotDescription robotDescription;
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, headless, "DEFAULT", simulationContactPoints, false);
+      this(target, "DEFAULT", simulationContactPoints, false);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
-      this(target, headless, "DEFAULT", null, false);
+      this(target, "DEFAULT", null, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, String model)
    {
-      this(target, headless, "DEFAULT", null, useShapeCollision);
+      this(target, model, null, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model)
+   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, headless, model, null, false);
+      this(target, model, simulationContactPoints, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
    {
-      this(target, headless, model, simulationContactPoints, false);
+      this(target, model, simulationContactPoints, useShapeCollision, true);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints,
-                             boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
    {
-      this(target, headless, model, simulationContactPoints, useShapeCollision, true);
+      this(target, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
-   {
-      this(target, headless, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, boolean headless, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
+   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
    {
       this.target = target;
       this.useOBJGraphics = useOBJGraphics;

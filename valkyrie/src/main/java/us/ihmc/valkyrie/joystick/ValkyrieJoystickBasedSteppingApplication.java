@@ -30,7 +30,7 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
       LogTools.info("-------------------------------------------------------------------");
       LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       LogTools.info("-------------------------------------------------------------------");
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false, "DEFAULT", null, false, true);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, "DEFAULT", null, false, true);
       String robotName = robotModel.getSimpleRobotName();
       ValkyriePunchMessenger kickAndPunchMessenger = new ValkyriePunchMessenger(robotName, ros2Node);
 
