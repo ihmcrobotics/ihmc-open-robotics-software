@@ -83,9 +83,8 @@ import us.ihmc.wholeBodyController.UIParameters;
 public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    private static final boolean PRINT_MODEL = false;
-   // TODO pass in as parameter
-   public static final ValkyrieRobotVersion robotVersion = ValkyrieRobotVersion.DEFAULT;
 
+   private final ValkyrieRobotVersion robotVersion;
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
@@ -117,37 +116,43 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public ValkyrieRobotModel(RobotTarget target, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, "DEFAULT", simulationContactPoints, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, null, simulationContactPoints, false);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
-      this(target, "DEFAULT", null, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, null, null, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, String model)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
-      this(target, model, null, false);
+      this(target, robotVersion, null, null, false);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model)
+   {
+      this(target, robotVersion, model, null, false);
    }
 
    public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, model, simulationContactPoints, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, model, simulationContactPoints, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
    {
-      this(target, model, simulationContactPoints, useShapeCollision, true);
+      this(target, robotVersion, model, simulationContactPoints, useShapeCollision, true);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
    {
-      this(target, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
+      this(target, robotVersion, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
    {
       this.target = target;
+      this.robotVersion = robotVersion;
       this.useOBJGraphics = useOBJGraphics;
       jointMap = new ValkyrieJointMap(robotVersion);
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
@@ -156,7 +161,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
       InputStream sdf = null;
 
-      if (model.equalsIgnoreCase("DEFAULT"))
+      if (model == null)
       {
          System.out.println("Loading robot model from: '" + getSdfFile() + "'");
          sdf = getSdfFileAsStream();
@@ -436,16 +441,21 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
+      if (!robotVersion.hasHands())
+         return null;
+
       boolean hasFingers = true;
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          String handLinkName = jointMap.getHandName(robotSide);
          hasFingers = hasFingers && !simulatedRobot.getLink(handLinkName).getParentJoint().getChildrenJoints().isEmpty();
       }
 
-      if (robotVersion.hasHands())
+      if (hasFingers)
       {
-         return new SimulatedValkyrieFingerController(simulatedRobot, realtimeRos2Node, this,
+         return new SimulatedValkyrieFingerController(simulatedRobot,
+                                                      realtimeRos2Node,
+                                                      this,
                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
       }
