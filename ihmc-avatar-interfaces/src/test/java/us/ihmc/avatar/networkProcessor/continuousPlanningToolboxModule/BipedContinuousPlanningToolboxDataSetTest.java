@@ -9,10 +9,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.jme3.math.Transform;
@@ -349,6 +346,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    }
 
    @Test
+   @Tag("avatar-interfaces-slow")
    public void testAllDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
@@ -1335,7 +1333,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall, true);
+      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField, false);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 
