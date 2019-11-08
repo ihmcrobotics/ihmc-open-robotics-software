@@ -140,19 +140,15 @@ public class FullGraphRenderer extends AnimationTimer
       palette.clearPalette();
       meshBuilder.clear();
 
-      int rejectedNodes = 0;
-      int acceptedNodes = 0;
       addFoot(parentToShow, parentFootColor);
       for (PlannerNodeData childToShow : childrenToShow)
       {
          if (childToShow.getRejectionReason() == null)
          {
-            acceptedNodes++;
             addFoot(childToShow, validFootColor);
          }
          else if (showRejectedNodes.get())
          {
-            rejectedNodes++;
             if (rejectionReasonToShow.get() != null && rejectionReasonToShow.get().equals(childToShow.getRejectionReason()))
             {
                addFoot(childToShow, rejectedFootColor);
