@@ -26,7 +26,7 @@ public class ValkyrieJoystickBasedGraspingApplication extends Application
       LogTools.info("-------------------------------------------------------------------");
       LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       LogTools.info("-------------------------------------------------------------------");
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false, "DEFAULT", null, false, true);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, "DEFAULT", null, false, true);
       String robotName = robotModel.getSimpleRobotName();
 
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
