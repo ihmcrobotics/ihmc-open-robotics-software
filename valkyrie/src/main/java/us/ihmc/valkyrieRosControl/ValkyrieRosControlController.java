@@ -53,7 +53,7 @@ import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.fingers.ValkyrieHandStateCommunicator;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -69,8 +69,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
-   public static final boolean HAS_FOREARMS_ON = true && ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
-   public static final boolean ENABLE_FINGER_JOINTS = true && HAS_FOREARMS_ON;
+   // Note: keep committed as DEFAULT, only change locally if needed
+   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.DEFAULT;
+
+   public static final boolean ENABLE_FINGER_JOINTS = true;
    public static final boolean HAS_LIGHTER_BACKPACK = true;
 
    public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
@@ -83,23 +85,22 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       jointList.addAll(Arrays.asList("rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"));
       jointList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
 
-      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+      switch(VERSION)
       {
-         jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
-         jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
+         case DEFAULT:
+            jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
+            jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
+
+            if (ENABLE_FINGER_JOINTS)
+            {
+               jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
+               jointList.addAll(Arrays.asList("rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"));
+            }
+         case ARM_MASS_SIM:
+            jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
+            jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
       }
 
-      if (HAS_FOREARMS_ON)
-      {
-         jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
-         jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
-      }
-
-      if (ENABLE_FINGER_JOINTS)
-      {
-         jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
-         jointList.addAll(Arrays.asList("rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"));
-      }
       torqueControlledJoints = jointList.toArray(new String[0]);
    }
 

@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.sensorProcessing.parameters.*;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
 {
@@ -27,16 +27,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    static
    {
       feetForceSensorNames = new SideDependentList<String>("leftAnkleRoll", "rightAnkleRoll");
-
-      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
-      {
-         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" }; //, "leftWristPitch", "rightWristPitch" };
-      }
-      else
-      {
-         forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" };
-      }
+      forceSensorNames = new String[] { "leftAnkleRoll", "rightAnkleRoll" };
    }
+
    private static final SideDependentList<String> wristForceSensorNames = null; //new SideDependentList<String>("leftWristPitch", "rightWristPitch");
    private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("leftCOP_Offset", "rightCOP_Offset");
    private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("leftFootContactSensor","rightFootContactSensor");

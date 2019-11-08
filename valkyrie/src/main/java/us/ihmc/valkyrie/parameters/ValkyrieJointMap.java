@@ -21,7 +21,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -34,6 +34,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Palm", getRobotSidePrefix(RobotSide.RIGHT) + "Palm");
    private static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Foot", getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
+   private final ValkyrieRobotVersion robotVersion;
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
@@ -56,17 +57,22 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public ValkyrieJointMap()
+   public ValkyrieJointMap(ValkyrieRobotVersion robotVersion)
    {
-      boolean selectedValkyrieVersionHasArms = ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
-      if (selectedValkyrieVersionHasArms)
+      this.robotVersion = robotVersion;
+
+      switch(robotVersion)
       {
-         armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
-               ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH };
-      }
-      else
-      {
-         armJoints = new ArmJointName[] {};
+         case DEFAULT:
+            armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
+                                            ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH };
+            break;
+         case ARM_MASS_SIM:
+            armJoints = new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH};
+            break;
+         case ARMLESS:
+         default:
+            armJoints = new ArmJointName[] {};
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -79,21 +85,30 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
-         if (selectedValkyrieVersionHasArms)
+         switch(robotVersion)
          {
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_YAW));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftElbowPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
+            case ARMLESS:
+               break;
+            case DEFAULT:
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
+            case ARM_MASS_SIM:
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_YAW));
+               armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftElbowPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
          }
-         String prefix = getRobotSidePrefix(robotSide);
 
-         if (selectedValkyrieVersionHasArms)
+         String prefix = getRobotSidePrefix(robotSide);
+         switch(robotVersion)
          {
-            limbNames.put(prefix + "Palm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+            case DEFAULT:
+               limbNames.put(prefix + "Palm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+               break;
+            case ARMLESS:
+               limbNames.put(prefix + "ElbowPitchLink", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+               break;
          }
          limbNames.put(prefix + "Foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
@@ -310,10 +325,13 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
-      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
-         return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
-      else
-         return null;
+      switch (robotVersion)
+      {
+         case DEFAULT:
+            return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+         default:
+            return null;
+      }
    }
 
    @Override
@@ -338,6 +356,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public String getSpineJointName(SpineJointName spineJointName)
    {
       return spineJointStrings.get(spineJointName);
+   }
+
+   public ValkyrieRobotVersion getRobotVersion()
+   {
+      return robotVersion;
    }
 
    public String[] getNamesOfJointsUsingOutputEncoder()
