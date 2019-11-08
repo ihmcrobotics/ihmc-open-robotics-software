@@ -5,10 +5,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -144,6 +141,10 @@ public class BipedContinuousPlanningToolboxDataSetTest
    {
 //      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
    }
+   private static final List<DataSetName> fastDatasets = Arrays.asList(DataSetName._20171215_214730_CinderBlockField,
+                                                                       DataSetName._20171114_135559_PartialShallowMaze,
+                                                                       DataSetName._20171218_204953_FlatGroundWithWall,
+                                                                       DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = true;
@@ -332,17 +333,33 @@ public class BipedContinuousPlanningToolboxDataSetTest
    }
 
    @Test
-   public void testDataSets()
+   public void testFewDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
                                                               if (!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              for (DataSetName nameToIgnore : datasetsToIgnore)
-                                                              {
-                                                                 if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
-                                                                    return false;
-                                                              }
+                                                              if (fastDatasets.stream().noneMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+
+                                                              return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(dataSets, false);
+   }
+
+   @Test
+   public void testAllDataSets()
+   {
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              if (datasetsToIgnore.stream().anyMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+                                                              if (fastDatasets.stream().anyMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
                                                                                                                                     .containsFlag(getTimeoutFlag());
