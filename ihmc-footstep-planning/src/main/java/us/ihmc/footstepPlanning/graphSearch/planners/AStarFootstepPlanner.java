@@ -335,19 +335,17 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
          if (!validGoalNode)
          {
-            if (debug)
+            if (parameters.getReturnBestEffortPlan())
             {
-               LogTools.info("GoalNode is not valid: " + goalNodes.get(robotSide));
+               if (debug)
+                  LogTools.info("GoalNode is not valid: " + goalNodes.get(robotSide));
+               this.validGoalNode.set(false);
             }
-         }
-
-         if (!validGoalNode && !parameters.getReturnBestEffortPlan())
-         {
-            if (debug)
-               LogTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
-
-            if(goal.getDistanceProximity() <= 0.0 && goal.getYawProximity() <= 0.0)
+            else if (goal.getDistanceProximity() <= 0.0 && goal.getYawProximity() <= 0.0)
             {
+               if (debug)
+                  LogTools.info("Goal node isn't valid. To plan without a valid goal node, best effort planning must be enabled");
+
                this.validGoalNode.set(false);
                return false;
             }

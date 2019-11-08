@@ -341,11 +341,11 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       stepPlanResult = null;
 
+      getPlanner().setPlanarRegions(planarRegionsList.get());
       getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
       getPlanner().setGoal(goal.get());
       getPlanner().setTimeout(timeout.get());
       getPlanner().setBestEffortTimeout(bestEffortTimeout.get());
-      getPlanner().setPlanarRegions(planarRegionsList.get());
       getPlanner().setPlanningHorizonLength(horizonLength.get());
 
       return true;
