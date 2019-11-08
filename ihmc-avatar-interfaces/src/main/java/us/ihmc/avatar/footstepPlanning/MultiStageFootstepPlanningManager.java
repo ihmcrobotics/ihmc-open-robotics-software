@@ -173,7 +173,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       new YoVariablesForFootstepPlannerParameters(registry, footstepPlanningParameters);
       new YoVisibilityGraphParameters(registry, visibilityGraphsParameters);
 
-      activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+      activePlanner.set(FootstepPlannerType.A_STAR);
       isDone.set(false);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
 

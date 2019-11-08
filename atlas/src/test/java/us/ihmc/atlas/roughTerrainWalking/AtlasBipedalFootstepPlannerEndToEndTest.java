@@ -31,12 +31,6 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Override
-   @Test
-   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
-   {
-      super.testShortCinderBlockFieldWithPlanarRegionBipedalPlanner();
-   }
 
    @Override
    @Test
@@ -50,12 +44,5 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
    public void testSteppingStonesWithAStar()
    {
       super.testSteppingStonesWithAStar();
-   }
-
-   @Override
-   @Test
-   public void testSteppingStonesWithPlanarRegionBipedalPlanner()
-   {
-      super.testSteppingStonesWithPlanarRegionBipedalPlanner();
    }
 }
