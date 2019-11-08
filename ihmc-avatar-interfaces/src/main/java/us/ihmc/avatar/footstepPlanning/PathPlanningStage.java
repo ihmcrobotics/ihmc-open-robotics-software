@@ -74,7 +74,6 @@ public class PathPlanningStage implements WaypointsForFootstepsPlanner
 
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(visibilityGraphsParameters);
 
-      plannerMap.put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathPlanner(parameters, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphPathPlanner(prefix, parameters, visibilityGraphsParameters, postProcessor, registry));
 
       initialize.set(true);

@@ -196,19 +196,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
    }
 
-   @Disabled
-   @Test
-   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
-   {
-      double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
-
-      setupSimulation(cinderBlockField, startingLocation);
-      drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, goalPose);
-   }
-
    @Tag("video")
    @Test
    public void testSteppingStonesWithAStar()
@@ -220,19 +207,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       setupSimulation(steppingStoneField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
-   }
-
-   @Disabled
-   @Test
-   public void testSteppingStonesWithPlanarRegionBipedalPlanner()
-   {
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                             new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
-
-      setupSimulation(steppingStoneField, startingLocation);
-      drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, goalPose);
    }
 
    @Disabled
