@@ -325,6 +325,7 @@ public class ContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    @Tag("fast")
    public void testFewDataSets()
@@ -344,6 +345,7 @@ public class ContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets);
    }
 
+   @Disabled
    @Test
    @Tag("quad-comm-slow")
    public void testAllDataSets()
