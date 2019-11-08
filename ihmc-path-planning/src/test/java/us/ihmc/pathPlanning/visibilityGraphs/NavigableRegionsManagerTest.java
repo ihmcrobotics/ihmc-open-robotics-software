@@ -656,7 +656,7 @@ public class NavigableRegionsManagerTest
          visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
       }
 
-      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList(), 0.15);
    }
 
    @Test
@@ -824,10 +824,14 @@ public class NavigableRegionsManagerTest
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-
-
    private static void checkPath(List<? extends Pose3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
                                  PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList)
+   {
+      checkPath(path, start, goal, parameters, planarRegionsList, navigableRegionsList, proximityEpsilon);
+   }
+
+   private static void checkPath(List<? extends Pose3DReadOnly> path, Point3DReadOnly start, Point3DReadOnly goal, VisibilityGraphsParametersReadOnly parameters,
+                                 PlanarRegionsList planarRegionsList, List<VisibilityMapWithNavigableRegion> navigableRegionsList, double proximityEpsilon)
    {
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), null);
 
@@ -920,7 +924,7 @@ public class NavigableRegionsManagerTest
          walkerShape.getPosition().set(walkerBody3D);
          walkerShape.getOrientation().set(orientation);
 
-         String newErrorMessages = walkerCollisionChecks(walkerShape, planarRegionsList, collisions);
+         String newErrorMessages = walkerCollisionChecks(walkerShape, planarRegionsList, collisions, proximityEpsilon);
          errorMessages += newErrorMessages;
          if (!newErrorMessages.isEmpty() && visualize)
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerCollisionLocations, collisions);
@@ -946,7 +950,7 @@ public class NavigableRegionsManagerTest
          LogTools.info(errorMessages);
    }
 
-   private static String walkerCollisionChecks(Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack)
+   private static String walkerCollisionChecks(Ellipsoid3D walkerShapeWorld, PlanarRegionsList planarRegionsList, List<Point3D> collisionsToPack, double proximityEpsilon)
    {
       String errorMessages = "";
       walkerShapeWorld = new Ellipsoid3D(walkerShapeWorld); // Make a copy to ensure we are not modifying the argument
