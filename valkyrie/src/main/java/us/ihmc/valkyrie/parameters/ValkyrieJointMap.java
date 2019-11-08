@@ -31,7 +31,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private static final String pelvisName = "pelvis";
    private static final String fullPelvisNameInSdf = pelvisName;
    private static final String headName = "upperNeckPitchLink";
-   private static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Palm", getRobotSidePrefix(RobotSide.RIGHT) + "Palm");
    private static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Foot", getRobotSidePrefix(RobotSide.RIGHT) + "Foot");
 
    private final ValkyrieRobotVersion robotVersion;
@@ -39,6 +38,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
    private final NeckJointName[] neckJoints = { NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH };
+   private final SideDependentList<String> handNames = new SideDependentList<>();
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
@@ -104,10 +104,14 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          switch(robotVersion)
          {
             case DEFAULT:
-               limbNames.put(prefix + "Palm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+               String endEffectorName = prefix + "Palm";
+               limbNames.put(endEffectorName, new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+               handNames.put(robotSide, endEffectorName);
                break;
-            case ARMLESS:
-               limbNames.put(prefix + "ElbowPitchLink", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+            case ARM_MASS_SIM:
+               endEffectorName = prefix + "ElbowPitchLink";
+               limbNames.put(endEffectorName, new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+               handNames.put(robotSide, endEffectorName);
                break;
          }
          limbNames.put(prefix + "Foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
@@ -329,6 +333,8 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       {
          case DEFAULT:
             return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+         case ARM_MASS_SIM:
+            return ValkyriePhysicalProperties.handControlFrameToArmMassSimTransforms.get(robotSide);
          default:
             return null;
       }
