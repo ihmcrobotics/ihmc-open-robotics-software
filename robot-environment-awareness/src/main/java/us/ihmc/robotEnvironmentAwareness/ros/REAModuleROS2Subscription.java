@@ -1,6 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.ros;
 
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2Subscription;
@@ -13,11 +15,26 @@ public class REAModuleROS2Subscription<T>
 
    private Ros2Subscription<T> subscription = null;
 
-   public REAModuleROS2Subscription(String topicName, Class<T> messageType, NewMessageListener<T> listener)
+   public REAModuleROS2Subscription(Ros2Node ros2Node, Messager messager, REASourceType reaSourceType, Class<T> messageType, NewMessageListener<T> listener)
    {
-      this.topicName = topicName;
-      this.messageType = messageType;
+      this(ros2Node, messager, reaSourceType.getTopicName(), messageType, listener, reaSourceType.getEnableTopic());
+   }
+
+   public REAModuleROS2Subscription(Ros2Node node, Messager messager, String name, Class<T> Type, NewMessageListener<T> listener, Topic<Boolean> enableTopic)
+   {
+      this.topicName = name;
+      this.messageType = Type;
       this.listener = listener;
+
+      messager.registerTopicListener(enableTopic, (enable) -> handle(node, enable));
+   }
+
+   public void handle(Ros2Node ros2Node, boolean enable)
+   {
+      if (enable)
+         cerate(ros2Node);
+      else
+         remove();
    }
 
    public void cerate(Ros2Node ros2Node)
