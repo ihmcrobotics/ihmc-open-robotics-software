@@ -1340,7 +1340,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/left_elbow_mass_sim.dae</uri>
+            <uri>model://val_description/model/meshes/arms/left_elbow_mass_sim.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -1349,7 +1349,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/left_elbow_mass_sim.dae</uri>
+            <uri>model://val_description/model/meshes/arms/left_elbow_mass_sim.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2005,7 +2005,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/right_elbow_mass_sim.dae</uri>
+            <uri>model://val_description/model/meshes/arms/right_elbow_mass_sim.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -2014,7 +2014,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://val_description/model/meshes/arms/right_elbow_mass_sim.dae</uri>
+            <uri>model://val_description/model/meshes/arms/right_elbow_mass_sim.obj</uri>
           </mesh>
         </geometry>
       </visual>
