@@ -98,11 +98,12 @@ public class LIDARBasedREAModule
       mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
 
-      ros2BridgeManager = new REAModuleROS2BridgeManager(ros2Node);
-      ros2BridgeManager.addSubscription(REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage);
-      ros2BridgeManager.addSubscription(REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
-      ros2BridgeManager.addSubscription(REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class, this::dispatchDepthPointCloudMessage);
-      ros2BridgeManager.startSubscription(REASourceType.LIDAR_SCAN, true);
+      ros2BridgeManager = new REAModuleROS2BridgeManager(ros2Node, reaMessager);
+      ros2BridgeManager.addSubscription(REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage, REAModuleAPI.LidarBufferEnable);
+      ros2BridgeManager.addSubscription(REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage,
+                                        REAModuleAPI.StereoVisionBufferEnable);
+      ros2BridgeManager.addSubscription(REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class, this::dispatchDepthPointCloudMessage,
+                                        REAModuleAPI.DepthCloudBufferEnable);
 
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
                                            this::dispatchCustomPlanarRegion);
@@ -222,6 +223,8 @@ public class LIDARBasedREAModule
 
       try
       {
+         ros2BridgeManager.update();
+         
          NormalOcTree mainOctree = mainUpdater.getMainOctree();
          Pose3DReadOnly sensorPose = mainUpdater.getSensorPose();
          if (clearOcTree.getAndSet(false))
