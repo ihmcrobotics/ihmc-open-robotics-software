@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -132,6 +134,14 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    public static Function<StereoVisionPointCloudMessage, SensorFrame> createStereoVisionSensorFrameExtractor()
    {
       return message -> new SensorFrame(message.getSensorPosition(), message.getSensorOrientation(), message.getSensorPoseConfidence());
+   }
+   
+   public static Function<StampedPosePacket, SensorFrame> createStampedPosePacketSensorFrameExtractor()
+   {
+      return message -> {
+         Pose3D pose = message.getPose();
+         return new SensorFrame(pose.getPosition(), pose.getOrientation(), message.getConfidenceFactor());
+      };
    }
 
    public static class SensorFrame
