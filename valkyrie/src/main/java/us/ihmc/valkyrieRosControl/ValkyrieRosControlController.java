@@ -72,9 +72,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    // Note: keep committed as DEFAULT, only change locally if needed
    public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.DEFAULT;
 
-   public static final boolean ENABLE_FINGER_JOINTS = true;
+   public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
    public static final boolean HAS_LIGHTER_BACKPACK = true;
-
    public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
 
    private static final String[] torqueControlledJoints;
@@ -88,14 +87,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       switch(VERSION)
       {
          case DEFAULT:
+            jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
+            jointList.addAll(Arrays.asList("rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"));
+         case FINGERLESS:
             jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
             jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
-
-            if (ENABLE_FINGER_JOINTS)
-            {
-               jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
-               jointList.addAll(Arrays.asList("rightIndexFingerMotorPitch1", "rightMiddleFingerMotorPitch1", "rightPinkyMotorPitch1", "rightThumbMotorRoll", "rightThumbMotorPitch1", "rightThumbMotorPitch2"));
-            }
          case ARM_MASS_SIM:
             jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
             jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));

@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.configuration;
 public enum ValkyrieRobotVersion
 {
    DEFAULT,
+   FINGERLESS,
    ARM_MASS_SIM,
    ARMLESS;
 
@@ -12,6 +13,8 @@ public enum ValkyrieRobotVersion
       {
          case DEFAULT:
             return "models/val_description/sdf/valkyrie_sim.sdf";
+         case FINGERLESS:
+            return "models/val_description/sdf/valkyrie_sim_no_fingers.sdf";
          case ARM_MASS_SIM:
             return "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf";
          case ARMLESS:
@@ -27,6 +30,8 @@ public enum ValkyrieRobotVersion
       {
          case DEFAULT:
             return "models/val_description/sdf/valkyrie_sim.sdf";
+         case FINGERLESS:
+            return "models/val_description/sdf/valkyrie_sim_no_fingers.sdf";
          case ARM_MASS_SIM:
             return "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf";
          case ARMLESS:
@@ -41,6 +46,7 @@ public enum ValkyrieRobotVersion
       switch(this)
       {
          case DEFAULT:
+         case FINGERLESS:
          case ARM_MASS_SIM:
             return true;
          case ARMLESS:
@@ -50,12 +56,13 @@ public enum ValkyrieRobotVersion
       }
    }
 
-   public boolean hasHands()
+   public boolean hasFingers()
    {
       switch(this)
       {
          case DEFAULT:
             return true;
+         case FINGERLESS:
          case ARM_MASS_SIM:
          case ARMLESS:
             return false;
