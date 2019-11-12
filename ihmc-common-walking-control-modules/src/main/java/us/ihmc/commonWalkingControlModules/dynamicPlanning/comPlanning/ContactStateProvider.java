@@ -2,12 +2,13 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
 import java.util.List;
 
 /**
- * Provides the contact state that constitutes the contact sequence used by the {@link CoMTrajectoryPlanner}. This includes
+ * Provides the contact state that constitutes the contact sequence used by the {@link CoMTrajectoryPlannerInterface}. This includes
  * the starting and ending CoP position, the time interval, and the contact state {@link ContactState}.
  */
 public interface ContactStateProvider extends TimeIntervalProvider
@@ -27,13 +28,10 @@ public interface ContactStateProvider extends TimeIntervalProvider
     */
    ContactState getContactState();
 
-   default boolean hasCopConstraintRegion()
-   {
-      return false;
-   }
+   List<String> getBodiesInContact();
 
-   default List<Point3DReadOnly> getCopConstraintRegion()
+   default int getNumberOfBodiesInContact()
    {
-      return null;
+      return getBodiesInContact().size();
    }
 }
