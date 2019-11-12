@@ -441,7 +441,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
-      if (!robotVersion.hasHands())
+      if (!robotVersion.hasFingers())
          return null;
 
       boolean hasFingers = true;

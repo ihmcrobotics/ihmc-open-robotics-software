@@ -64,6 +64,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       switch(robotVersion)
       {
          case DEFAULT:
+         case FINGERLESS:
             armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
                                             ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH };
             break;
@@ -90,6 +91,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
             case ARMLESS:
                break;
             case DEFAULT:
+            case FINGERLESS:
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
                armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
@@ -104,6 +106,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          switch(robotVersion)
          {
             case DEFAULT:
+            case FINGERLESS:
                String endEffectorName = prefix + "Palm";
                limbNames.put(endEffectorName, new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
                handNames.put(robotSide, endEffectorName);
@@ -332,6 +335,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       switch (robotVersion)
       {
          case DEFAULT:
+         case FINGERLESS:
             return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
          case ARM_MASS_SIM:
             return ValkyriePhysicalProperties.handControlFrameToArmMassSimTransforms.get(robotSide);
