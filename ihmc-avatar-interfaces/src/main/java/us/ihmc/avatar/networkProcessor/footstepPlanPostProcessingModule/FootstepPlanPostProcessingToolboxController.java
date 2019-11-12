@@ -15,6 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -36,6 +38,7 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
 
    public FootstepPlanPostProcessingToolboxController(FootstepPostProcessingParametersBasics parameters,
                                                       WalkingControllerParameters walkingControllerParameters,
+                                                      RobotContactPointParameters<RobotSide> contactPointParameters,
                                                       ICPPlannerParameters cmpPlannerParameters, StatusMessageOutputManager statusOutputManager,
                                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -44,9 +47,9 @@ public class FootstepPlanPostProcessingToolboxController extends ToolboxControll
       this.parameters = parameters;
 
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
-
       PositionSplitFractionPostProcessingElement positionSplitFractionPostProcessingElement = new PositionSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
-      AreaSplitFractionPostProcessingElement areaSplitFractionPostProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, cmpPlannerParameters);
+      AreaSplitFractionPostProcessingElement areaSplitFractionPostProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, cmpPlannerParameters,
+                                                                                                                                 contactPointParameters.getFootContactPoints());
       SwingOverRegionsPostProcessingElement swingOverRegionsPostProcessingElement = new SwingOverRegionsPostProcessingElement(parameters,
                                                                                                                               walkingControllerParameters,
                                                                                                                               registry, graphicsListRegistry);
