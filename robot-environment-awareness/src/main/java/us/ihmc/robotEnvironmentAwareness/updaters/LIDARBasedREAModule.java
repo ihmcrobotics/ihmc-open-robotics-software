@@ -97,10 +97,10 @@ public class LIDARBasedREAModule
       mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
 
-      new REAModuleROS2Subscription(ros2Node, reaMessager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage);
-      new REAModuleROS2Subscription(ros2Node, reaMessager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class,
+      new REAModuleROS2Subscription<LidarScanMessage>(ros2Node, reaMessager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage);
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node, reaMessager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class,
                                     this::dispatchStereoVisionPointCloudMessage);
-      new REAModuleROS2Subscription(ros2Node, reaMessager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class,
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node, reaMessager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class,
                                     this::dispatchDepthPointCloudMessage);
 
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
