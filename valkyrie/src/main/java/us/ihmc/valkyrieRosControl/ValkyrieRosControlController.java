@@ -310,11 +310,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ValkyrieRobotModel robotModel;
       if (isGazebo)
       {
-         robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, true);
+         robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, VERSION);
       }
       else
       {
-         robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+         robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, VERSION);
       }
 
       String robotName = robotModel.getSimpleRobotName();
