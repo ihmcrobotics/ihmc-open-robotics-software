@@ -278,6 +278,28 @@ public class VisibilityGraphsFrameworkTest
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
    }
 
+   @Disabled("Not working yet. Need to cancel out the bordering home/free/escape/frontier nodes.")
+   @Test
+   public void testSimulateOcclusionAndDynamicReplanningOnTrickyCorridorWCutFloor()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+
+      boolean testWithOcclusions = true;
+      ENABLE_TIMERS = true;
+      DYNAMIC_WAIT_FOR_CLICK = false;
+      maxPointsInRegion = Integer.MAX_VALUE;
+      walkerMarchingSpeed = 0.7;
+      List<DataSet> allDatasets = new ArrayList<>();
+      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191107_110432_TrickCorridorWCutFloor));
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
    private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, Function<DataSet, String> dataSetTester)
    {
       if (DEBUG)
