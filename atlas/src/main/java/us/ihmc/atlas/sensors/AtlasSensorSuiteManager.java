@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -50,7 +49,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
-   private static final boolean ENABLE_TRACKING_PUBLISHER = false;
+   private static final boolean ENABLE_TRACKING_PUBLISHER = true;
 
    private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
    private static final String depthTopicNameSurfixToPublish = "_D435";
@@ -97,13 +96,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
    }
 
-   public static void main(String[] args)
-   {
-      MessageTopicNameGenerator gen = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
-      String generateTopicName = gen.generateTopicName(StampedPosePacket.class);
-      System.out.println("generateTopicName "+generateTopicName);
-   }
-   
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
