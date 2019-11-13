@@ -70,7 +70,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
    // Note: keep committed as DEFAULT, only change locally if needed
-   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.DEFAULT;
+   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.ARMLESS;
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
    public static final boolean HAS_LIGHTER_BACKPACK = true;
