@@ -106,16 +106,16 @@ public class TrackingCameraPublisher
       executorService.shutdownNow();
    }
 
-   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, URI rosCoreURI)
+   public void receiveTrackingCameraDataFromROS(String trackingCameraDataROSTopic, URI rosCoreURI)
    {
       String graphName = robotName + "/" + name;
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, graphName, true);
-      receiveStereoPointCloudFromROS(stereoPointCloudROSTopic, rosMainNode);
+      receiveTrackingCameraDataFromROS(trackingCameraDataROSTopic, rosMainNode);
    }
 
-   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, RosMainNode rosMainNode)
+   public void receiveTrackingCameraDataFromROS(String trackingCameraDataROSTopic, RosMainNode rosMainNode)
    {
-      rosMainNode.attachSubscriber(stereoPointCloudROSTopic, createNavigationMessageSubscriber());
+      rosMainNode.attachSubscriber(trackingCameraDataROSTopic, createNavigationMessageSubscriber());
    }
 
    public void setROSClockCalculator(RobotROSClockCalculator rosClockCalculator)
@@ -123,7 +123,7 @@ public class TrackingCameraPublisher
       this.rosClockCalculator = rosClockCalculator;
    }
 
-   public void setCustomStereoVisionTransformer(TrackingCameraWorldTransformCalculator transformer)
+   public void setCustomTrackingCameraTransformer(TrackingCameraWorldTransformCalculator transformer)
    {
       trackingCameraTransformer = transformer;
    }
