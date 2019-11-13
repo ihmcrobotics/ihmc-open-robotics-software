@@ -8,11 +8,16 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,11 +43,24 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
    private final FootstepPostProcessingParametersReadOnly parameters;
    private final ICPPlannerParameters icpPlannerParameters;
+   private final SideDependentList<ConvexPolygon2D> defaultPolygons = new SideDependentList<>();
 
-   public AreaSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters icpPlannerParameters)
+   public AreaSplitFractionPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, ICPPlannerParameters icpPlannerParameters,
+                                                 SegmentDependentList<RobotSide, ArrayList<Point2D>> defaultContactPointParameters)
    {
       this.parameters = parameters;
       this.icpPlannerParameters = icpPlannerParameters;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultPolygon = new ConvexPolygon2D();
+         if (defaultContactPointParameters != null)
+         {
+            for (Point2DReadOnly point : defaultContactPointParameters.get(robotSide))
+               defaultPolygon.addVertex(point);
+         }
+         defaultPolygon.update();
+         defaultPolygons.put(robotSide, defaultPolygon);
+      }
    }
 
    /** {@inheritDoc} **/
@@ -123,12 +141,19 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
          currentFrame.setOrientationAndUpdate(currentStep.getOrientation());
 
          currentPolygon.clear();
-         for (Point3DReadOnly vertex : currentStep.getPredictedContactPoints2d())
+         if (currentStep.getPredictedContactPoints2d().size() > 0)
          {
-            FramePoint3D vertexInSoleFrame = new FramePoint3D(worldFrame, vertex);
-            vertexInSoleFrame.changeFrame(currentFrame);
+            for (Point3DReadOnly vertex : currentStep.getPredictedContactPoints2d())
+            {
+               FramePoint3D vertexInSoleFrame = new FramePoint3D(worldFrame, vertex);
+               vertexInSoleFrame.changeFrame(currentFrame);
 
-            currentPolygon.addVertex(vertexInSoleFrame);
+               currentPolygon.addVertex(vertexInSoleFrame);
+            }
+         }
+         else
+         {
+            currentPolygon.addVertices(defaultPolygons.get(RobotSide.fromByte(currentStep.getRobotSide())));
          }
          currentPolygon.update();
 

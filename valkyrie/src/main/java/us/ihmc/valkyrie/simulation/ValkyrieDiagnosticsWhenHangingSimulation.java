@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 
 import us.ihmc.avatar.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
@@ -20,7 +19,6 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
@@ -34,7 +32,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
    public ValkyrieDiagnosticsWhenHangingSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
+      ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
@@ -45,7 +43,8 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 //      humanoidJointPoseList.createPoseSettersTuneWaist();
       
       boolean robotIsHanging = true;
-      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotIsHanging, robotModel, robotInitialSetup, computeTorqueOffsetsBasedOnAverages);
+      boolean hasArms = robotModel.getRobotVersion().hasArms();
+      HumanoidDiagnosticsWhenHangingSimulation humanoidDiagnosticsWhenHangingSimulation = new HumanoidDiagnosticsWhenHangingSimulation(humanoidJointPoseList, hasArms, robotIsHanging, robotModel, robotInitialSetup, computeTorqueOffsetsBasedOnAverages);
       humanoidDiagnosticsWhenHangingSimulation.rememberCorruptorVariableValues();
 
       

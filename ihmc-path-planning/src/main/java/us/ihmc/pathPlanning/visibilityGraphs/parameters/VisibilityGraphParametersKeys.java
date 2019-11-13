@@ -33,12 +33,12 @@ public class VisibilityGraphParametersKeys
    public static final BooleanStoredPropertyKey returnBestEffortSolution                   = keys.addBooleanKey("Return best effort solution", true);
    public static final BooleanStoredPropertyKey includePreferredExtrusions                 = keys.addBooleanKey("Include preferred extrusions", true);
 
-   public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 2.0);
-   public static final DoubleStoredPropertyKey distanceWeight                              = keys.addDoubleKey("Distance weight", 1.0);
+   public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 3.0);
+   public static final DoubleStoredPropertyKey distanceWeight                              = keys.addDoubleKey("Distance weight", 1.5);
    public static final DoubleStoredPropertyKey elevationWeight                             = keys.addDoubleKey("Elevation weight", 0.0);
    public static final DoubleStoredPropertyKey occludedGoalEdgeWeight                      = keys.addDoubleKey("Occluded goal edge weight", 50.0);
-   public static final DoubleStoredPropertyKey weightForInterRegionEdge                    = keys.addDoubleKey("Weight for inter region edge", 2.0);
-   public static final DoubleStoredPropertyKey weightForNonPreferredEdge                   = keys.addDoubleKey("Weight for non preferred edge", 5.0);
-   public static final DoubleStoredPropertyKey costForNonPreferredNode                     = keys.addDoubleKey("Cost for non preferred node", 1.0);
+   public static final DoubleStoredPropertyKey weightForInterRegionEdge                    = keys.addDoubleKey("Weight for inter region edge", 1.5);
+   public static final DoubleStoredPropertyKey weightForNonPreferredEdge                   = keys.addDoubleKey("Weight for non preferred edge", 1.5);
+   public static final DoubleStoredPropertyKey costForNonPreferredNode                     = keys.addDoubleKey("Cost for non preferred node", 0.25);
 
 }
