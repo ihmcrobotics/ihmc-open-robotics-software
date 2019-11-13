@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher;
+import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher.TrackingCameraWorldTransformCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
@@ -48,7 +49,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final TrackingCameraPublisher trackingCameraPublisher;
 
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
-   private static final boolean ENABLE_DEPTH_PUBLISHER = false;
+   private static final boolean ENABLE_DEPTH_PUBLISHER = true;
    private static final boolean ENABLE_TRACKING_PUBLISHER = true;
 
    private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
@@ -94,6 +95,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
       trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
+      trackingCameraPublisher.setCustomTrackingCameraTransformer(createCustomTrackingCameraWorldTransformCalculator());
    }
 
    @Override
@@ -136,7 +138,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (ENABLE_DEPTH_PUBLISHER)
          realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthTopicNameToSubscribe, rosMainNode);
       if (ENABLE_TRACKING_PUBLISHER)
-         trackingCameraPublisher.receiveStereoPointCloudFromROS(trackingTopicNameToSubscribe, rosMainNode);
+         trackingCameraPublisher.receiveTrackingCameraDataFromROS(trackingTopicNameToSubscribe, rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -185,6 +187,23 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       return new StereoVisionWorldTransformCalculator()
       {
          private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToDepthCamera;
+
+         @Override
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+         {
+            ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
+            pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
+            transformToWorldToPack.multiply(transformFromPelvisToRealSense);
+            sensorPoseToPack.set(transformToWorldToPack);
+         }
+      };
+   }
+
+   private TrackingCameraWorldTransformCalculator createCustomTrackingCameraWorldTransformCalculator()
+   {
+      return new TrackingCameraWorldTransformCalculator()
+      {
+         private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToTrackingCamera;
 
          @Override
          public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
