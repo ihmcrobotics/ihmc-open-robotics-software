@@ -11,7 +11,7 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher;
-import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher.TrackingCameraWorldTransformCalculator;
+import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
@@ -95,7 +95,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
       trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
-      trackingCameraPublisher.setCustomTrackingCameraTransformer(createCustomTrackingCameraWorldTransformCalculator());
+      trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
    }
 
    @Override
@@ -199,19 +199,18 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       };
    }
 
-   private TrackingCameraWorldTransformCalculator createCustomTrackingCameraWorldTransformCalculator()
+   private SensorFrameInitializationTransformer createCustomTrackingCameraWorldTransformCalculator()
    {
-      return new TrackingCameraWorldTransformCalculator()
+      return new SensorFrameInitializationTransformer()
       {
          private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToTrackingCamera;
 
          @Override
-         public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack)
          {
             ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
             pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
             transformToWorldToPack.multiply(transformFromPelvisToRealSense);
-            sensorPoseToPack.set(transformToWorldToPack);
          }
       };
    }
