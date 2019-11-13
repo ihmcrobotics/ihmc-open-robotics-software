@@ -61,7 +61,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = true;
+   private static boolean VISUALIZE = false;
    private static boolean ENABLE_TIMERS = true;
    private static boolean DYNAMIC_WAIT_FOR_CLICK = false;
 
@@ -273,7 +273,7 @@ public class VisibilityGraphsFrameworkTest
       maxPointsInRegion = Integer.MAX_VALUE;
       walkerMarchingSpeed = 0.7;
       List<DataSet> allDatasets = new ArrayList<>();
-      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191107_110432_TrickCorridorWCutFloor));
+      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
 
       runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
    }
