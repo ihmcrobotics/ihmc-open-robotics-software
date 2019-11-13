@@ -61,7 +61,7 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
    private static boolean ENABLE_TIMERS = true;
    private static boolean DYNAMIC_WAIT_FOR_CLICK = false;
 
