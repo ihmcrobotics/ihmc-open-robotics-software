@@ -19,7 +19,6 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -50,7 +49,8 @@ public class TrackingCameraPublisher
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
-   private TrackingCameraWorldTransformCalculator trackingCameraTransformer = null;
+   private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
+   private boolean isInitialized = false;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
@@ -123,9 +123,9 @@ public class TrackingCameraPublisher
       this.rosClockCalculator = rosClockCalculator;
    }
 
-   public void setCustomTrackingCameraTransformer(TrackingCameraWorldTransformCalculator transformer)
+   public void setCustomInitializationTransformer(SensorFrameInitializationTransformer transformer)
    {
-      trackingCameraTransformer = transformer;
+      sensorFrameInitializationTransformer = transformer;
    }
 
    private RosNavMsgsOdometrySubscriber createNavigationMessageSubscriber()
@@ -173,8 +173,7 @@ public class TrackingCameraPublisher
       readAndPublishInternal();
    }
 
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-   private final Pose3D sensorPose = new Pose3D();
+   private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
 
    private void readAndPublishInternal()
    {
@@ -217,16 +216,12 @@ public class TrackingCameraPublisher
             return;
       }
 
-      if (trackingCameraTransformer != null)
-      {
-         trackingCameraTransformer.computeTransformToWorld(fullRobotModel, transformToWorld, sensorPose);
-         dataToPublish.applyTransform(transformToWorld);
+      if(!isInitialized && sensorFrameInitializationTransformer != null)
+      {         
+         sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
+         isInitialized = true;
       }
-      else
-      {
-         fullRobotModel.getHeadBaseFrame().getTransformToDesiredFrame(transformToWorld, worldFrame);
-         sensorPose.set(transformToWorld);
-      }
+      dataToPublish.applyTransform(initialTransformToWorld);   //TODO: isInitialized should be true always.
 
       StampedPosePacket message = dataToPublish.toPacket();
 
@@ -239,9 +234,9 @@ public class TrackingCameraPublisher
          stampedPosePacketRealtimePublisher.publish(message);
    }
 
-   public static interface TrackingCameraWorldTransformCalculator
+   public static interface SensorFrameInitializationTransformer
    {
-      public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack);
+      public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack);
    }
 
    private class TrackingCameraData
