@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class ValkyrieJavaFxRobotVisualizer extends Application
    {
       primaryStage.setTitle("SDF Viewer");
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, ValkyrieConfigurationRoot.SIM_SDF_FILE);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       humanoidFloatingRootJointRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       ArrayList<Joint> joints = new ArrayList<>();

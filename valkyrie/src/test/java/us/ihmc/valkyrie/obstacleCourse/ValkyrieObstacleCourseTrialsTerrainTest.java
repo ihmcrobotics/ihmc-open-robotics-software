@@ -19,7 +19,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
 {
    private final AdditionalSimulationContactPoints<RobotSide> footContactPoints = new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 3, 4, true,
                                                                                                                                    false);
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, footContactPoints);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, footContactPoints);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -31,7 +31,7 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 5, 4, true, false);
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, simulationContactPoints);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, simulationContactPoints);
       return robotModel;
    }
 

@@ -37,6 +37,7 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       toolboxController = new FootstepPlanPostProcessingToolboxController(new DefaultFootstepPostProcessingParameters(),
                                                                           drcRobotModel.getWalkingControllerParameters(),
+                                                                          drcRobotModel.getContactPointParameters(),
                                                                           drcRobotModel.getCapturePointPlannerParameters(),
                                                                           statusOutputManager, registry,
                                                                           yoGraphicsListRegistry);

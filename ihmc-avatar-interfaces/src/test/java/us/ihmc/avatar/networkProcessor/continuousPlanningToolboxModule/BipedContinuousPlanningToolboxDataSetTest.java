@@ -5,17 +5,11 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.jme3.math.Transform;
@@ -134,7 +128,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 2.0;
 
-   private static final double dt = 0.01;
+   private static final double dt = 0.05;
    private static double timeScaleFactor;
 
    private final DecimalFormat numberFormat = new DecimalFormat("#.00");
@@ -144,6 +138,10 @@ public class BipedContinuousPlanningToolboxDataSetTest
    {
 //      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
    }
+   private static final List<DataSetName> fastDatasets = Arrays.asList(DataSetName._20171215_214730_CinderBlockField,
+                                                                       DataSetName._20171114_135559_PartialShallowMaze,
+                                                                       DataSetName._20171218_204953_FlatGroundWithWall,
+                                                                       DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = true;
@@ -332,17 +330,34 @@ public class BipedContinuousPlanningToolboxDataSetTest
    }
 
    @Test
-   public void testDataSets()
+   public void testFewDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
                                                               if (!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              for (DataSetName nameToIgnore : datasetsToIgnore)
-                                                              {
-                                                                 if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
-                                                                    return false;
-                                                              }
+                                                              if (fastDatasets.stream().noneMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+
+                                                              return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
+                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                           });
+      runAssertionsOnAllDatasets(dataSets, false);
+   }
+
+   @Test
+   @Tag("avatar-interfaces-slow")
+   public void testAllDataSets()
+   {
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
+                                                           {
+                                                              if (!dataSet.hasPlannerInput())
+                                                                 return false;
+                                                              if (datasetsToIgnore.stream().anyMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+                                                              if (fastDatasets.stream().anyMatch(name -> dataSet.getName().equals(name.name().substring(1))))
+                                                                 return false;
+
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
                                                                                                                                     .containsFlag(getTimeoutFlag());
@@ -603,11 +618,18 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       double expectedDuration = (dataSet.getPlannerInput().getStartPosition().distanceXY(dataSet.getPlannerInput().getGoalPosition())) / 0.2; // uses estimate speed of 0.2
       double maxDuration = 4.0 * expectedDuration;
+      double absoluteMaxDuration = 4.0 * expectedDuration;
       boolean timedOut = false;
+      double startTime = Conversions.nanosecondsToSeconds(System.nanoTime());
       String message = "";
       while (!continuousPlanningModule.getToolboxController().isDone() && !planningFailed.getBooleanValue() && !timedOut)
       {
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         if (currentTime - startTime > absoluteMaxDuration)
+         {
+            message += "hit an absolute max duration.";
+            break;
+         }
 
          if (!firstTick && ((currentTime - tickStartTime) < (dt / timeScaleFactor)))
          {
@@ -893,7 +915,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
    private static String checkStepPositions(String datasetName, List<FootstepDataMessage> plannedSteps, FootstepPlannerParametersReadOnly parameters)
    {
-      double heightChangeFromWiggling = Math.sqrt(2) * parameters.getMaximumXYWiggleDistance() / Math.sin(parameters.getMinimumSurfaceInclineRadians());
+      double heightChangeFromWiggling = Math.sqrt(2.0) * parameters.getMaximumXYWiggleDistance() / Math.sin(parameters.getMinimumSurfaceInclineRadians());
       String errorMessage = "";
       SideDependentList<FootstepDataMessage> previousSteps = new SideDependentList<>();
       for (int i = 0; i < plannedSteps.size(); i++)
@@ -904,9 +926,15 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
          if (previousStep != null)
          {
-            double heightChange = Math.abs(step.getLocation().getZ() - previousStep.getLocation().getZ());
-            if (heightChange > parameters.getMaximumStepZ() + 2.0 * heightChangeFromWiggling)
-               errorMessage += datasetName + "\n Step " + i + " height changed " + heightChange + ", which was too much. Max is " + parameters.getMaximumStepZ();
+            double fudgeFactor = 1.25;
+            double heightChange = step.getLocation().getZ() - previousStep.getLocation().getZ();
+            double allowableChange = fudgeFactor * (parameters.getMaximumStepZ() + 2.0 * heightChangeFromWiggling);
+            if (Math.abs(heightChange) > allowableChange)
+            {
+               String error =  "Step " + i + " height changed " + heightChange + ", which was too much. Max is " + allowableChange;
+               LogTools.info(error);
+               errorMessage += datasetName + "\n " + error;
+            }
          }
 
          previousSteps.put(stepSide, step);
@@ -1311,7 +1339,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall, true);
+      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField, false);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 

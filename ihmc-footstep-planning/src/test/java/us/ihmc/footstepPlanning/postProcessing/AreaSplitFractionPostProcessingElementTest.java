@@ -40,7 +40,7 @@ public class AreaSplitFractionPostProcessingElementTest
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
       parameters.setFractionTimeOnFootIfFootHasFullSupport(splitFractionIfFootHasFullSupport);
 
-      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters);
+      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters, null);
 
       FootstepPostProcessingPacket output = new FootstepPostProcessingPacket();
       output.getLeftFootPositionInWorld().set(0.0, width / 2.0, 0.0);
@@ -126,7 +126,7 @@ public class AreaSplitFractionPostProcessingElementTest
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
       parameters.setFractionTimeOnFootIfFootHasFullSupport(splitFractionIfFootHasFullSupport);
 
-      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters);
+      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters, null);
 
       FootstepPostProcessingPacket output = new FootstepPostProcessingPacket();
       output.getLeftFootPositionInWorld().set(0.0, width / 2.0, 0.0);
@@ -212,7 +212,7 @@ public class AreaSplitFractionPostProcessingElementTest
       parameters.setFractionLoadIfFootHasFullSupport(fractionLoadIfFootHasFullSupport);
       parameters.setFractionTimeOnFootIfFootHasFullSupport(splitFractionIfFootHasFullSupport);
 
-      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters);
+      AreaSplitFractionPostProcessingElement postProcessingElement = new AreaSplitFractionPostProcessingElement(parameters, icpPlannerParameters, null);
 
       FootstepPostProcessingPacket output = new FootstepPostProcessingPacket();
       output.getLeftFootPositionInWorld().set(0.0, width / 2.0, 0.0);
