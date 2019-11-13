@@ -38,6 +38,7 @@ public class REAModuleAPI
    private static final CategoryTheme Lidar = apiFactory.createCategoryTheme("Lidar");
    private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("StereoVision");
    private static final CategoryTheme DepthCloud = apiFactory.createCategoryTheme("DepthCloud");
+   private static final CategoryTheme Tracking = apiFactory.createCategoryTheme("Tracking");
    private static final CategoryTheme BoundingBox = apiFactory.createCategoryTheme("BoundingBox");
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
@@ -150,7 +151,7 @@ public class REAModuleAPI
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVision).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = ModuleCategory.child(DepthCloud).topic(Data);
-   public static final Topic<StampedPosePacket> TrackingCameraMessageState = ModuleCategory.child(DepthCloud).topic(Data);
+   public static final Topic<StampedPosePacket> TrackingCameraMessageState = ModuleCategory.child(Tracking).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
    public static final Topic<NormalOcTreeMessage> LidarBufferState = OcTreeCategory.child(Lidar).child(Buffer).topic(Data);
    public static final Topic<NormalOcTreeMessage> StereoVisionBufferState = OcTreeCategory.child(StereoVision).child(Buffer).topic(Data);
