@@ -7,10 +7,10 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.*;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
@@ -146,27 +146,31 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       double trackingOffsetZ = 0.051192;
       double trackingPitchingAngle = 35.0 / 180.0 * Math.PI;
 
-      double pelvisLenght = 0.33;
+      double pelvisLength = 0.33;
 
+      transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendPitchRotation(Math.PI / 2);
       transformDepthCameraToTrackingCamera.appendPitchRotation(-trackingPitchingAngle);
       transformDepthCameraToTrackingCamera.appendTranslation(-trackingOffsetX, 0.0, -trackingOffsetZ);
 
-      transformDepthCameraToTrackingCamera.appendTranslation(-pelvisLenght, 0.0, 0.0);
+      transformDepthCameraToTrackingCamera.appendTranslation(-pelvisLength, 0.0, 0.0);
 
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI);
       transformDepthCameraToTrackingCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(depthPitchingAngle);
       transformDepthCameraToTrackingCamera.appendYawRotation(-Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
+      transformDepthCameraToTrackingCamera.appendRollRotation(-Math.PI / 2);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToTrackingCamera.preMultiply(transformPelvisToDepthCamera);
+      LogTools.info("transformPelvisToTrackingCamera");
+      System.out.println(transformPelvisToTrackingCamera);
+      transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
+      System.out.println(transformPelvisToTrackingCamera);
       transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
+      System.out.println(transformPelvisToTrackingCamera);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)

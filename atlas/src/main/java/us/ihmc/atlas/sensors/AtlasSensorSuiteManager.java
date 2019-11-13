@@ -27,6 +27,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
@@ -210,7 +211,15 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          {
             ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
             pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
+            
+            
+            LogTools.info("transformToWorldToPack");
+            System.out.println(transformToWorldToPack);
+            
             transformToWorldToPack.multiply(transformFromPelvisToRealSense);
+            
+            LogTools.info("transformPelvisToTrackingCamera");
+            System.out.println(transformFromPelvisToRealSense);
          }
       };
    }

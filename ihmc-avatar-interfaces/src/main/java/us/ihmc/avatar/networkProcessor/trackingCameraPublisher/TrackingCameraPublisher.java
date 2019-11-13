@@ -18,12 +18,11 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -38,8 +37,6 @@ public class TrackingCameraPublisher
    private static final boolean Debug = false;
 
    private static final Class<StampedPosePacket> messageTypeToPublish = StampedPosePacket.class;
-
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
@@ -220,6 +217,8 @@ public class TrackingCameraPublisher
       {         
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
          isInitialized = true;
+         LogTools.info("initialTransformToWorld");
+         System.out.println(initialTransformToWorld);
       }
       dataToPublish.applyTransform(initialTransformToWorld);   //TODO: isInitialized should be true always.
 
