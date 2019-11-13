@@ -13,6 +13,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 
 /**
@@ -31,7 +32,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
-      DRCRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false, "DEFAULT", null, false, true, 0.0);
+      DRCRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT, null, null, false, true, 0.0);
 
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, model.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
