@@ -134,6 +134,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
+   /**
+    * Tracking camera reference frame is, X is forward and Z is toward sky. (Same with Robot coordinate system) 
+    */
    public static final RigidBodyTransform transformDepthCameraToTrackingCamera = new RigidBodyTransform();
    static
    {
