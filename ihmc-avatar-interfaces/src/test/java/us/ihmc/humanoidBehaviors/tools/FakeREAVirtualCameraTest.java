@@ -21,7 +21,7 @@ public class FakeREAVirtualCameraTest
    @BeforeAll
    static public void beforeAll()
    {
-      JavaFXApplicationCreator.createAJavaFXApplication();
+      if (VISUALIZE) JavaFXApplicationCreator.createAJavaFXApplication();
    }
 
    @AfterEach
@@ -33,47 +33,46 @@ public class FakeREAVirtualCameraTest
    @Test
    public void testFakeREA1()
    {
-      Platform.runLater(() ->
-      {
-         createAndShowPlanarRegionWindow(PlannerTestEnvironments.getTrickCorridorWCutFloor(), windowCount++);
-      });
+      createAndShowPlanarRegionWindow(PlannerTestEnvironments.getTrickCorridorWCutFloor(), windowCount++);
    }
 
    @Test
    public void testFakeREACutsComplexField()
    {
-      Platform.runLater(() ->
-      {
-         createAndShowPlanarRegionWindow(PlannerTestEnvironments.getTrickCorridor(), windowCount++);
-      });
+      createAndShowPlanarRegionWindow(PlannerTestEnvironments.getTrickCorridor(), windowCount++);
    }
 
    private void createAndShowPlanarRegionWindow(PlanarRegionsList planarRegionsList, int windowCount)
    {
-      int windowWidth = 800;
-      int windowHeight = 600;
-      View3DFactory view3dFactory = new View3DFactory(windowWidth, windowHeight);
-      FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
-      double isoZoomOut = 15.0;
-      camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      view3dFactory.addWorldCoordinateSystem(0.3);
-      view3dFactory.addDefaultLighting();
+      if (!VISUALIZE) return;
 
-      PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(planarRegionsList);
-      regionsGraphic.update();
+      Platform.runLater(() ->
+      {
+         int windowWidth = 800;
+         int windowHeight = 600;
+         View3DFactory view3dFactory = new View3DFactory(windowWidth, windowHeight);
+         FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
+         double isoZoomOut = 15.0;
+         camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
+         view3dFactory.addWorldCoordinateSystem(0.3);
+         view3dFactory.addDefaultLighting();
 
-      view3dFactory.addNodeToView(regionsGraphic);
+         PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
+         regionsGraphic.generateMeshes(planarRegionsList);
+         regionsGraphic.update();
 
-      Stage primaryStage = new Stage();
-      primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(false);
-      primaryStage.setScene(view3dFactory.getScene());
+         view3dFactory.addNodeToView(regionsGraphic);
 
-      int numberOfColumns = 3;
-      primaryStage.setX((windowCount % numberOfColumns) * windowWidth);
-      primaryStage.setY((windowCount / numberOfColumns) * windowHeight);
-      primaryStage.show();
-      primaryStage.toFront();
+         Stage primaryStage = new Stage();
+         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setMaximized(false);
+         primaryStage.setScene(view3dFactory.getScene());
+
+         int numberOfColumns = 3;
+         primaryStage.setX((windowCount % numberOfColumns) * windowWidth);
+         primaryStage.setY((windowCount / numberOfColumns) * windowHeight);
+         primaryStage.show();
+         primaryStage.toFront();
+      });
    }
 }
