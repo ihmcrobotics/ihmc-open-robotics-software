@@ -343,6 +343,9 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
    {
       StampedPosePacket newPose = stampedPosePacketToPublish.getAndSet(null);
 
+      if(newPose == null)
+         return;
+      
       transformToWorldToPack.setTranslation(newPose.getPose().getPosition());
       transformToWorldToPack.setRotation(newPose.getPose().getOrientation());
       transformToWorldToPack.multiply(transformToOther);
