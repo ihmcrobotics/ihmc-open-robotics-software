@@ -158,7 +158,6 @@ public class LIDARBasedREAModule
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
    }
    
-   // TODO : will be replaced after test.
    private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
    {
       StampedPosePacket message = subscriber.takeNextData();
