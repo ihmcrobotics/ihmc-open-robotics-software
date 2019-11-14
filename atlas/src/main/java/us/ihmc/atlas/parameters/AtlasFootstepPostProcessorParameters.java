@@ -15,6 +15,12 @@ public class AtlasFootstepPostProcessorParameters extends StoredPropertySet impl
    {
       super(FootstepPostProcessingKeys.keys, AtlasFootstepPostProcessorParameters.class, projectName, pathToResources);
 
+      setPositionSplitFractionProcessingEnabled(true);
+      setTransferSplitFractionAtFullDepth(0.3);
+      setTransferWeightDistributionAtFullDepth(0.75);
+      setStepHeightForLargeStepDown(0.1);
+      setLargestStepDownHeight(0.3);
+
       load();
    }
 
