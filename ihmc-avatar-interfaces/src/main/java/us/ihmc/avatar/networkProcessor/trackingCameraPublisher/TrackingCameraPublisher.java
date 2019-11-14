@@ -51,7 +51,7 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
 
    private static final long threadperiod = 1L;
 
-   private static int waitingTimeForInitialization = (int) (1 / threadperiod * 1000 * 10.0);
+   private static int waitingTimeForInitialization = (int) (1 / threadperiod * 1000 * 1.0);
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
 
