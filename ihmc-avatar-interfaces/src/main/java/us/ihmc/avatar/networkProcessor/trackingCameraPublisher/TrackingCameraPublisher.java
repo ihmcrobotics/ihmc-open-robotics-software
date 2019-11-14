@@ -46,8 +46,11 @@ public class TrackingCameraPublisher
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
+
+   private static final long threadperiod = 1L;
+
+   private static int waitingTimeForInitialization = (int) (1 / threadperiod * 1000 * 10.0);
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
-   private boolean isInitialized = false;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
@@ -94,7 +97,7 @@ public class TrackingCameraPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, threadperiod, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
@@ -147,7 +150,7 @@ public class TrackingCameraPublisher
             trackingCameraData.setOrientation(pose.getOrientation());
             trackingCameraData.setLinearVelocity(linearVelocity);
             trackingCameraData.setAngularVelocity(angularVelocity);
-            
+
             if (Debug)
                System.out.println("message.getPose().getPose() " + message.getPose().getPose().getPosition().getX());
 
@@ -213,20 +216,19 @@ public class TrackingCameraPublisher
             return;
       }
 
-      if(!isInitialized && sensorFrameInitializationTransformer != null)
-      {         
+      if (waitingTimeForInitialization != 0 && sensorFrameInitializationTransformer != null)
+      {
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
-         isInitialized = true;
-         LogTools.info("initialTransformToWorld");
-         System.out.println(initialTransformToWorld);
+         waitingTimeForInitialization--;
+         return;
       }
-      dataToPublish.applyTransform(initialTransformToWorld);   //TODO: isInitialized should be true always.
+      dataToPublish.applyTransform(initialTransformToWorld);
 
       StampedPosePacket message = dataToPublish.toPacket();
 
       if (Debug)
          System.out.println("Publishing tracking camera data.");
-      
+
       if (stampedPosePacketPublisher != null)
          stampedPosePacketPublisher.publish(message);
       else
@@ -251,7 +253,7 @@ public class TrackingCameraPublisher
       {
          this.timeStamp = timeStamp;
       }
-      
+
       public void setConfidence(double confidence)
       {
          this.confidence = confidence;
@@ -276,7 +278,7 @@ public class TrackingCameraPublisher
       {
          this.angularVelocity.set(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
       }
-      
+
       public void applyTransform(RigidBodyTransform transformToWorld)
       {
          position.applyTransform(transformToWorld);
@@ -289,16 +291,16 @@ public class TrackingCameraPublisher
       {
          return timeStamp;
       }
-      
+
       public StampedPosePacket toPacket()
       {
          StampedPosePacket message = new StampedPosePacket();
-         
+
          message.getPose().setPosition(position);
          message.getPose().setOrientation(orientation);
          message.setTimestamp(timeStamp);
          message.setConfidenceFactor(confidence);
-         
+
          return message;
       }
    }
