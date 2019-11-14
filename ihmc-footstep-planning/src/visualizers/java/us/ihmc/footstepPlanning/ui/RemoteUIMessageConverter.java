@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,7 +20,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -28,15 +32,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 /**
  * This class is required when using a local version of the Footstep Planner UI and the footstep planning algorithms
@@ -51,7 +53,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
    private final RealtimeRos2Node ros2Node;
 

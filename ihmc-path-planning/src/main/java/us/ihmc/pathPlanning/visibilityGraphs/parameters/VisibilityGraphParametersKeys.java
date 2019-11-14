@@ -31,7 +31,7 @@ public class VisibilityGraphParametersKeys
    public static final BooleanStoredPropertyKey introduceMidpointsInPostProcessing         = keys.addBooleanKey("Introduce mid points in post processing", true);
    public static final BooleanStoredPropertyKey computeOrientationsToAvoidObstacles        = keys.addBooleanKey("Compute orientations to avoid obstacles", false);
    public static final BooleanStoredPropertyKey returnBestEffortSolution                   = keys.addBooleanKey("Return best effort solution", true);
-   public static final BooleanStoredPropertyKey includePreferredExtrusions                 = keys.addBooleanKey("Include preferred extrusions", true);
+   public static final BooleanStoredPropertyKey includePreferredExtrusions                 = keys.addBooleanKey("Include preferred extrusions", false);
 
    public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 3.0);
    public static final DoubleStoredPropertyKey distanceWeight                              = keys.addDoubleKey("Distance weight", 1.5);
