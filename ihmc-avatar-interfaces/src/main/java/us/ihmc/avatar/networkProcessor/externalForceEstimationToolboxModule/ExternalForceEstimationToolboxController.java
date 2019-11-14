@@ -13,18 +13,15 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -38,7 +35,6 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
 
 public class ExternalForceEstimationToolboxController extends ToolboxController
@@ -130,7 +126,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       };
       Consumer<DenseMatrix64F> tauSetter = tau -> tau.set(controllerDesiredTau);
 
-      externalForceEstimator = new ExternalForceEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, registry);
+      externalForceEstimator = new ExternalForceEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, graphicsListRegistry, registry);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -142,9 +138,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          OneDoFJointBasics joint = jointNameMap.get(jointName);
          return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
-
-      if(graphicsListRegistry != null)
-         graphicsListRegistry.registerYoGraphic("EstimatedExternalForce", externalForceEstimator.getEstimatedForceVectorGraphic());
    }
 
    @Override
@@ -156,7 +149,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
                ExternalForceEstimationToolboxConfigurationCommand.class);
 
          RigidBodyBasics endEffector = endEffectorHashMap.get(configurationCommand.getEndEffectorHashCode());
-         externalForceEstimator.setEndEffector(endEffector, configurationCommand.getExternalForcePosition());
+         externalForceEstimator.addContactPoint(endEffector, configurationCommand.getExternalForcePosition(), true);
+         externalForceEstimator.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
+
          externalForceEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
          externalForceEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
@@ -196,14 +191,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       externalForceEstimator.doControl();
 
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
-      outputStatus.getEstimatedExternalForce().set(externalForceEstimator.getEstimatedExternalForce());
+      // TODO pack estimated forces
 
       statusOutputManager.reportStatusMessage(outputStatus);
-   }
-
-   public FrameVector3DReadOnly getEstimatedExternalForce()
-   {
-      return externalForceEstimator.getEstimatedExternalForce();
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)

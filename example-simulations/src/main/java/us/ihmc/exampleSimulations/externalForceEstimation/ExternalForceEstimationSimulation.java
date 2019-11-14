@@ -14,18 +14,14 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -51,19 +47,18 @@ import java.util.function.Consumer;
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalForceEstimator externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, null);
-      externalForceEstimator.setEndEffector(endEffector, externalForcePointOffset);
+      ExternalForceEstimator externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalForceEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
       robot.setController(externalForceEstimator);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), externalForceEstimator.getEstimatedForceVectorGraphic().getScale(), YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), 0.001, YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.01, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
-      yoGraphicsListRegistry.registerYoGraphic("estimatedForceGraphic", externalForceEstimator.getEstimatedForceVectorGraphic());
 
       scs.setFastSimulate(true, 15);
       scs.addYoVariableRegistry(registry);
