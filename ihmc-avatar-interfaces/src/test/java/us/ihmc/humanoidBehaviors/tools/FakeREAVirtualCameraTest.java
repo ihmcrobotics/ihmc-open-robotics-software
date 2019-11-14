@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,6 +14,7 @@ import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,25 +44,31 @@ public class FakeREAVirtualCameraTest
    @Test
    public void testFakeREACutsComplexField()
    {
-      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridor(), new Pose3D(), 0, 1);
+      Pose3D pose = new Pose3D();
+      pose.setZ(1.8);
+      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridor(), pose, 0, 1);
    }
 
    @Test
    public void testFakeREA1()
    {
-      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridorWCutFloor(), new Pose3D(), 2, 3);
+      Pose3D pose = new Pose3D();
+      pose.setZ(1.8);
+      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridorWCutFloor(), pose, 2, 3);
    }
 
    @Test
    public void testFakeREA2()
    {
       compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 4, 5);
-      Pose3D pose3D = new Pose3D();
-      pose3D.appendYawRotation(Math.toRadians(-135.0));
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose3D, 6, 7);
-      pose3D = new Pose3D();
-      pose3D.appendYawRotation(Math.toRadians(180.0));
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose3D, 6, 7);
+      Pose3D pose = new Pose3D();
+      pose.setZ(1.8);
+      pose.appendYawRotation(Math.toRadians(-135.0));
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 6, 7);
+      pose = new Pose3D();
+      pose.setZ(1.8);
+      pose.appendYawRotation(Math.toRadians(180.0));
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 8, 9);
    }
 
    private void compareMapToSimulatedView(PlanarRegionsList map, Pose3DReadOnly pose3D, int mapWindowNumber, int resultWindowNumber)
@@ -69,7 +77,9 @@ public class FakeREAVirtualCameraTest
       PoseReferenceFrame cameraFrame = new PoseReferenceFrame("camera", ReferenceFrame.getWorldFrame());
       cameraFrame.setPoseAndUpdate(pose3D);
       FakeREAVirtualCamera fakeREAVirtualCamera = new FakeREAVirtualCamera(90.0, 90.0, cameraFrame);
+      Stopwatch stopwatch = new Stopwatch().start();
       PlanarRegionsList virtualCamera = fakeREAVirtualCamera.filterMapToVisible(trickCorridor);
+      LogTools.info("Time taken: {}", stopwatch.lapElapsed());
       createAndShowPlanarRegionWindow(trickCorridor, mapWindowNumber);
       createAndShowPlanarRegionWindow(virtualCamera, resultWindowNumber);
    }
