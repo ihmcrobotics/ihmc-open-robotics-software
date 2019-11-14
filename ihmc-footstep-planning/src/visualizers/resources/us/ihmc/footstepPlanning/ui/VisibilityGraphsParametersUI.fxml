@@ -55,7 +55,7 @@
                 <Label text="Obstacle Height Definition" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
 
                 <!-- planar region -->
-                <Label text="Planar Region Min Size" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <Label text="Planar Region Min Area" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                 <Label text="Planar Region Min Size" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                 <Label text="Region Orthogonal Angle" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                 <Label text="Search Host Region Epsilon" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />

@@ -105,16 +105,16 @@ public class VisibilityGraphsParametersUIController
 //      canEasilyStepOver.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.25, 0.0, 0.03));
 //      canDuckUnderHeight.setValueFactory(new DoubleSpinnerValueFactory(1.0, 10.0, 0.0, 2.0));
 
+      planarRegionMinArea.setValueFactory(new DoubleSpinnerValueFactory(0, 10.0, 0.0, 0.1));
       planarRegionMinSize.setValueFactory(new IntegerSpinnerValueFactory(0, 100, 0, 1));
-      planarRegionMinArea.setValueFactory(new DoubleSpinnerValueFactory(0, 10.0, 0.0, 0.0));
       regionOrthogonalAngle.setValueFactory(new DoubleSpinnerValueFactory(0.0, Math.PI / 2.0, Math.toRadians(75.0), Math.toRadians(5.0)));
       searchHostRegionEpsilon.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.03, 0.05));
-      normalZThresholdForAccessibleRegions.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0,  Math.cos(Math.toRadians(30.0)), Math.cos(Math.toRadians(5.0))));
+      normalZThresholdForAccessibleRegions.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0,  Math.cos(Math.toRadians(30.0)), Math.sin(Math.toRadians(5.0))));
       explorationDistanceFromStartGoal.setValueFactory(new DoubleSpinnerValueFactory(0, Double.POSITIVE_INFINITY, 1.0, 0.5));
 
       heuristicWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 20.0, 3.0, 0.25));
       distanceWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 1.5, 1.1));
-      elevationWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.0));
+      elevationWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
       occludedGoalEdgeWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 100.0, 50.0, 1.0));
       weightForInterRegionEdge.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 1.5, 0.1));
       weightForNonPreferredEdge.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 1.5, 0.1));
