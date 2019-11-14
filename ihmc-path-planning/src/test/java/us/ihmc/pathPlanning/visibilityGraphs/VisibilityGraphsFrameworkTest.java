@@ -694,6 +694,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsParametersReadOnly parameters = createTestParameters();
       NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAvoidanceProcessor(parameters));
+      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(manager);
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -702,7 +703,14 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-         pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph, simulateOcclusions);
+         if (simulateOcclusions)
+         {
+            pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         }
+         else
+         {
+            pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         }
          path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 //         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }

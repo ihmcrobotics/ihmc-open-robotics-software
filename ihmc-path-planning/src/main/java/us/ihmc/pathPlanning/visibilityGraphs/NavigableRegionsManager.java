@@ -90,101 +90,38 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      return calculateBodyPath(start, goal, fullyExpandVisibilityGraph, false);
+      return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
    }
 
-   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start,
-                                                  final Point3DReadOnly goal,
-                                                  boolean fullyExpandVisibilityGraph,
-                                                  boolean accommodateOcclusions)
+   public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal, boolean fullyExpandVisibilityGraph)
    {
-      return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph, accommodateOcclusions);
+      return calculateVisibilityMapWhileFindingPath(start, goal, fullyExpandVisibilityGraph);
    }
 
-   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld,
-                                                                        boolean fullyExpandVisibilityGraph, boolean accommodateOcclusions)
+   private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
+                                                                        boolean fullyExpandVisibilityGraph)
    {
-      if (!initialize(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
+      if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
          return null;
 
-      // here, we modify the goal if there is clearly no path to the goal i.e. goal or path to goal is occluded
-      if (accommodateOcclusions)
-      {
-         /**
-          * try to plan to final goal once. If does not reach the goal:
-          * plan to the closest free/escape node to the goal
-          * here, a free/escape node is defined as one on the edge of the navigable area but not next to an obstacle
-          * Other options:
-          * - Keep track of where we've travelled
-          * - employ actual maze solving
-          */
-
-         List<Point3DReadOnly> plan = bestEffortPlanToGoal(startInWorld, finalGoalInWorld);
-
-         if (plan.isEmpty() || !plan.get(plan.size() - 1).geometricallyEquals(finalGoalInWorld, 1e-6))
-         {
-            if (!initialize(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph, accommodateOcclusions))
-               return null;
-
-            // plan again, this time only to closest free edge
-            ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
-            for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
-            {
-               for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
-               {
-                  homeRegionNodes.add(homeRegionNode);
-               }
-            }
-
-            if (homeRegionNodes.isEmpty())
-            {
-               return null; // trapped!
-            }
-
-            VisibilityGraphNode closestHomeRegionNodeToGoal = homeRegionNodes.get(0);
-            for (VisibilityGraphNode visibilityGraphNode : homeRegionNodes)
-            {
-               if (visibilityGraphNode.getPointInWorld().distance(finalGoalInWorld) < closestHomeRegionNodeToGoal.getPointInWorld().distance(finalGoalInWorld))
-               {
-                  closestHomeRegionNodeToGoal = visibilityGraphNode;
-               }
-            }
-
-            plan = bestEffortPlanToGoal(startInWorld, closestHomeRegionNodeToGoal.getPointInWorld());
-            return plan;
-         }
-         else
-         {
-            return plan;
-         }
-      }
-      else
-      {
-         return bestEffortPlanToGoal(startInWorld, finalGoalInWorld);
-      }
+      return planToGoal(startInWorld, goalInWorld);
    }
 
-   private List<Point3DReadOnly> bestEffortPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
+   List<Point3DReadOnly> planToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
    {
-      if (!resetStackForStartAndGoal(startInWorld, finalGoalInWorld))
+      if (!resetPlannerForNewStartAndGoal(startInWorld, finalGoalInWorld))
          return null;
 
       return planInternal();
    }
 
-   private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld, boolean fullyExpandVisibilityGraph, boolean accommodateOcclusions)
+   boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
    {
-      if (!checkIfStartAndGoalAreValid(startInWorld, finalGoalInWorld))
+      if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
          return false;
 
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
-
-      // filterPlanarRegionsWithBoundingCapsule is a chicken or the egg problem with occlusions
-      // maybe bound it instead by surrounding area or different shape?
-      if (!accommodateOcclusions)
-      {
-         navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
-      }
+      navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
 
       navigableRegions.createNavigableRegions(); // big deal; does a lot of computation and finds obstacles
 
@@ -199,7 +136,7 @@ public class NavigableRegionsManager
       return true;
    }
 
-   private boolean resetStackForStartAndGoal(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
+   private boolean resetPlannerForNewStartAndGoal(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
    {
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
@@ -221,6 +158,7 @@ public class NavigableRegionsManager
       startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
+
       return true;
    }
 
@@ -431,7 +369,7 @@ public class NavigableRegionsManager
    @Deprecated
    public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      List<Point3DReadOnly> path = calculateBodyPath(start, goal, fullyExpandVisibilityGraph, false);
+      List<Point3DReadOnly> path = calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
 
       if (path == null)
       {
@@ -462,7 +400,7 @@ public class NavigableRegionsManager
                                                                                     closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomePlanarRegion());
 
-         path = calculateBodyPath(start, closestExtrusion, fullyExpandVisibilityGraph, false);
+         path = calculateBodyPath(start, closestExtrusion, fullyExpandVisibilityGraph);
          path.add(goal);
 
          return path;
