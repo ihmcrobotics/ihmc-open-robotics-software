@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionsListCutTool;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class FakeREAVirtualCameraParameters
+public class FakeREAVirtualCamera
 {
    private final ReferenceFrame cameraFrame;
 
@@ -23,7 +23,7 @@ public class FakeREAVirtualCameraParameters
    private final Plane3D planeRight;
 
 
-   public FakeREAVirtualCameraParameters(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
+   public FakeREAVirtualCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;

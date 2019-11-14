@@ -28,7 +28,7 @@ public class FakeREAModule
    private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
-   private FakeREAVirtualCameraParameters virtualCameraFOV;
+   private FakeREAVirtualCamera virtualCameraFOV;
 
    public FakeREAModule(PlanarRegionsList map)
    {
@@ -49,7 +49,7 @@ public class FakeREAModule
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = Math.toRadians(180.0); // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = Math.toRadians(180.0);
-         virtualCameraFOV = new FakeREAVirtualCameraParameters(verticalFOV, horizontalFOV, neckFrame);
+         virtualCameraFOV = new FakeREAVirtualCamera(verticalFOV, horizontalFOV, neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
