@@ -1,12 +1,22 @@
 package us.ihmc.communication;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import org.apache.commons.net.util.SubnetUtils;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
@@ -17,33 +27,76 @@ import us.ihmc.pubsub.participant.Participant;
  */
 public class RTPSCommunicationFactory
 {
-   private static int START_OF_RANDOM_DOMAIN_RANGE = 200;
+   private static final int START_OF_RANDOM_DOMAIN_RANGE = 200;
+   private static final List<InterfaceAddress> MACHINE_INTERFACE_ADDRESSES = findInterfaceAddresses();
+
    private final Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
    private final TIntObjectHashMap<Participant> participants = new TIntObjectHashMap<>();
    private final int defaultDomainID;
+   private final InetAddress defaultAddressRestriction;
 
    /**
-    * Creates an RTPSCommunicationFactory. Loads the default RTPS Domain ID from the Network
-    * Parameter File on disk. This file is typically located in the user home directory
-    * /.ihmc/IHMCNetworkParameters.ini If the domain ID is not found, a random ID is generated
-    * between 200 and 229
+    * Creates an RTPSCommunicationFactory. Loads the default RTPS Domain ID from the Network Parameter
+    * File on disk. This file is typically located in the user home directory
+    * /.ihmc/IHMCNetworkParameters.ini If the domain ID is not found, a random ID is generated between
+    * 200 and 229
     */
    public RTPSCommunicationFactory()
    {
       int rtpsDomainID = new Random().nextInt(30) + START_OF_RANDOM_DOMAIN_RANGE;
+
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
-         PrintTools.info("Setting the RTPS Domain ID to " + rtpsDomainID);
+         LogTools.info("Setting the RTPS Domain ID to " + rtpsDomainID);
       }
       else
       {
-         PrintTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to "
+         LogTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to "
                + rtpsDomainID);
       }
 
+      InetAddress foundAddressRestriction = null;
+
+      if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet))
+      {
+         for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
+         {
+            InetAddress address = interfaceAddress.getAddress();
+
+            if (address instanceof Inet4Address)
+            {
+               short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
+               SubnetUtils subnetUtils = new SubnetUtils(NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet) + "/" + Short.toString(netmaskAsShort));
+               boolean inRange = subnetUtils.getInfo().isInRange(address.getHostAddress());
+               if (inRange)
+               {
+                  foundAddressRestriction = address;
+                  break;
+               }
+            }
+         }
+      }
+
       defaultDomainID = rtpsDomainID;
+      defaultAddressRestriction = foundAddressRestriction;
+      if (defaultAddressRestriction != null)
+         LogTools.info("Setting IP restriction: " + defaultAddressRestriction.getHostAddress());
       createParticipant(rtpsDomainID);
+   }
+
+   private static List<InterfaceAddress> findInterfaceAddresses()
+   {
+      try
+      {
+         return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
+                           .flatMap(networkInterface -> networkInterface.getInterfaceAddresses().stream()).collect(Collectors.toList());
+      }
+      catch (SocketException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
 
    /**
@@ -54,6 +107,16 @@ public class RTPSCommunicationFactory
    public Domain getDomain()
    {
       return domain;
+   }
+
+   /**
+    * Gets the address to restrict network traffic to when using RTPS.
+    * 
+    * @return
+    */
+   public InetAddress getAddressRestriction()
+   {
+      return defaultAddressRestriction;
    }
 
    /**

@@ -39,7 +39,7 @@ public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNoth
    @Test
    public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
    {
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, true);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, true);
       super.testDoNothing1();
    }
 }

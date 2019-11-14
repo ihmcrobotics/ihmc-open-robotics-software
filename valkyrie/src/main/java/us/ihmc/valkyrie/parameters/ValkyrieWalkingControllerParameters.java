@@ -602,16 +602,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch1]);
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch2]);
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch3]);
-
-         if (target == RobotTarget.REAL_ROBOT)
-         {
-            if (!ValkyrieRosControlController.HAS_FOREARMS_ON)
-            {
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
-            }
-         }
       }
 
       return jointToIgnoreList.toArray(new String[0]);
