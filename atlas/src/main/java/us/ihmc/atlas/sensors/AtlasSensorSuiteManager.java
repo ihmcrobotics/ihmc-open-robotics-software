@@ -96,6 +96,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
+      trackingCameraPublisher.setTransformToOtherSensorFrame(AtlasSensorInformation.transformTrackingCameraToDepthCamera);
       
       realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(trackingCameraPublisher);
    }

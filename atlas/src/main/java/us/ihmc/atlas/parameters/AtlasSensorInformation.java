@@ -152,14 +152,14 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 
       transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendPitchRotation(-trackingPitchingAngle);
-      transformDepthCameraToTrackingCamera.appendTranslation(-trackingOffsetX, 0.0, -trackingOffsetZ);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(-depthPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(-depthOffsetX, 0.0, -depthOffsetZ);
 
       transformDepthCameraToTrackingCamera.appendTranslation(-pelvisLength, 0.0, 0.0);
 
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI);
-      transformDepthCameraToTrackingCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformDepthCameraToTrackingCamera.appendPitchRotation(depthPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
@@ -168,6 +168,14 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
       transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
    }
+   
+   public static final RigidBodyTransform transformTrackingCameraToDepthCamera = new RigidBodyTransform();
+   static
+   {
+      transformTrackingCameraToDepthCamera.set(transformDepthCameraToTrackingCamera);
+      transformTrackingCameraToDepthCamera.invert();
+   }
+
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
    {
