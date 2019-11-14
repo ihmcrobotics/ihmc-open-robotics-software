@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -91,8 +90,8 @@ public class ExternalForceEstimatorTest
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, null);
-      externalForceEstimator.setEndEffector(endEffector, externalForcePointOffset);
+      externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalForceEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
       externalForceEstimator.setEstimatorGain(5.0);
       externalForceEstimator.setSolverAlpha(1e-6);
 
@@ -103,12 +102,11 @@ public class ExternalForceEstimatorTest
       YoGraphicVector forceVector = new YoGraphicVector("forceVector",
                                                         externalForcePoint.getYoPosition(),
                                                         externalForcePoint.getYoForce(),
-                                                        externalForceEstimator.getEstimatedForceVectorGraphic().getScale(),
+                                                        ExternalForceEstimator.forceGraphicScale,
                                                         YoAppearance.Red());
-      YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.01, YoAppearance.Red());
+      YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.02, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
-      yoGraphicsListRegistry.registerYoGraphic("estimatedForceGraphic", externalForceEstimator.getEstimatedForceVectorGraphic());
 
       scs.setFastSimulate(true, 15);
       scs.addYoVariableRegistry(registry);
@@ -201,7 +199,7 @@ public class ExternalForceEstimatorTest
             blockingSimulationRunner.simulateAndBlock(1.5);
             externalForceEstimator.initialize();
             blockingSimulationRunner.simulateAndBlock(estimationTime);
-            YoFrameVector3D estimatedExternalForce = externalForceEstimator.getEstimatedExternalForce();
+            YoFrameVector3D estimatedExternalForce = externalForceEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
             boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
 
