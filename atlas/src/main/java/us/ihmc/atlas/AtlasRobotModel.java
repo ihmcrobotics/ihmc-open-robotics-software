@@ -6,19 +6,7 @@ import java.util.List;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasPlanarRegionFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasQuadTreeFootstepPlanningParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasUIParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -46,6 +34,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
@@ -876,6 +865,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return new AtlasFootstepPlannerParameters();
+   }
+
+   @Override
+   public FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
+   {
+      return new AtlasFootstepPostProcessorParameters();
    }
 
    @Override
