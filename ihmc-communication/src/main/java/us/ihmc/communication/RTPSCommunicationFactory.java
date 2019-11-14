@@ -58,7 +58,7 @@ public class RTPSCommunicationFactory
 
       InetAddress foundAddressRestriction = null;
 
-      if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSNetworkAddress))
+      if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet))
       {
          for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
          {
@@ -67,7 +67,7 @@ public class RTPSCommunicationFactory
             if (address instanceof Inet4Address)
             {
                short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
-               SubnetUtils subnetUtils = new SubnetUtils(NetworkParameters.getHost(NetworkParameterKeys.RTPSNetworkAddress) + "/" + Short.toString(netmaskAsShort));
+               SubnetUtils subnetUtils = new SubnetUtils(NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet) + "/" + Short.toString(netmaskAsShort));
                boolean inRange = subnetUtils.getInfo().isInRange(address.getHostAddress());
                if (inRange)
                {
