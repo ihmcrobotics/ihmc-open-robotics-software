@@ -193,7 +193,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
 
       DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList());
-      navigableRegionsManager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph, false);
+      navigableRegionsManager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
       VisibilityMapSolution visibilityMapSolution = navigableRegionsManager.getVisibilityMapSolution();
       visualizerApplication.submitVisibilityGraphSolutionToVisualizer(visibilityMapSolution);
    }
