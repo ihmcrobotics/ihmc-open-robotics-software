@@ -12,17 +12,18 @@ import controller_msgs.msg.dds.StampedPosePacket;
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import geometry_msgs.Vector3;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -32,7 +33,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
 
-public class TrackingCameraPublisher
+public class TrackingCameraPublisher implements StereoVisionWorldTransformCalculator
 {
    private static final boolean Debug = false;
 
@@ -43,6 +44,7 @@ public class TrackingCameraPublisher
    private ScheduledFuture<?> publisherTask;
 
    private final AtomicReference<TrackingCameraData> trackingCameraDataToPublish = new AtomicReference<>(null);
+   private final AtomicReference<StampedPosePacket> stampedPosePacketToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
@@ -51,6 +53,7 @@ public class TrackingCameraPublisher
 
    private static int waitingTimeForInitialization = (int) (1 / threadperiod * 1000 * 10.0);
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
+   private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
@@ -173,8 +176,6 @@ public class TrackingCameraPublisher
       readAndPublishInternal();
    }
 
-   private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
-
    private void readAndPublishInternal()
    {
       try
@@ -218,13 +219,28 @@ public class TrackingCameraPublisher
 
       if (waitingTimeForInitialization != 0 && sensorFrameInitializationTransformer != null)
       {
-         sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
          waitingTimeForInitialization--;
+
+         sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
+         RigidBodyTransform currentOffsetTransform = dataToPublish.createTransform();
+
+         //TODO: remove
+         if (waitingTimeForInitialization == 0)
+         {
+            System.out.println("initialTransformToWorld");
+            System.out.println(initialTransformToWorld);
+            System.out.println("currentOffsetTransform");
+            System.out.println(currentOffsetTransform);
+         }
+
+         currentOffsetTransform.invert();
+         initialTransformToWorld.multiply(currentOffsetTransform);
          return;
       }
       dataToPublish.applyTransform(initialTransformToWorld);
 
       StampedPosePacket message = dataToPublish.toPacket();
+      stampedPosePacketToPublish.set(message);
 
       if (Debug)
          System.out.println("Publishing tracking camera data.");
@@ -292,6 +308,11 @@ public class TrackingCameraPublisher
          return timeStamp;
       }
 
+      public RigidBodyTransform createTransform()
+      {
+         return new RigidBodyTransform(orientation, position);
+      }
+
       public StampedPosePacket toPacket()
       {
          StampedPosePacket message = new StampedPosePacket();
@@ -303,5 +324,28 @@ public class TrackingCameraPublisher
 
          return message;
       }
+   }
+
+   /**
+    * From T265 frame to D465 frame of Atlas. 
+    */
+   private final RigidBodyTransform transformToOther = new RigidBodyTransform();
+   public void setTransformToOtherSensorFrame(RigidBodyTransform transformToOther)
+   {
+      this.transformToOther.set(transformToOther);
+   }
+
+   /**
+    * This interface `StereoVisionWorldTransformCalculator` is for tracking other sensor pose by this tracking camera data. 
+    */
+   @Override
+   public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+   {
+      StampedPosePacket newPose = stampedPosePacketToPublish.getAndSet(null);
+
+      transformToWorldToPack.setTranslation(newPose.getPose().getPosition());
+      transformToWorldToPack.setRotation(newPose.getPose().getOrientation());
+      transformToWorldToPack.multiply(transformToOther);
+      sensorPoseToPack.set(transformToWorldToPack);
    }
 }
