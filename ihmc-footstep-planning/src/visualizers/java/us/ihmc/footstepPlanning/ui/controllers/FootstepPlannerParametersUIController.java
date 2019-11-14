@@ -110,8 +110,8 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
-      idealStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.3));
-      idealStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.22));
+      idealStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.3, 0.02));
+      idealStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.22, 0.01));
 
       maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
@@ -121,15 +121,15 @@ public class FootstepPlannerParametersUIController
       maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       maxStepUpX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-      maxStepUpY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.5));
+      maxStepUpY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       stepUpHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
       maxStepDownX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-      maxStepDownY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.5));
+      maxStepDownY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       stepDownHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
 
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
-      stepYawReductionFactor.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.0));
+      stepYawReductionFactor.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
       minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
 
       minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));

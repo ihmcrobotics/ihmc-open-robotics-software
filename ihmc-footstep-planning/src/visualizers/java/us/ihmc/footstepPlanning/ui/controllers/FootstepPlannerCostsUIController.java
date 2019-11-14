@@ -84,8 +84,8 @@ public class FootstepPlannerCostsUIController
       stepUpWeight.setValueFactory(createLowWeightValueFactory());
       stepDownWeight.setValueFactory(createLowWeightValueFactory());
 
-      distanceFromPathTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.3));
-      deltaYawFromReferenceTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.2));
+      distanceFromPathTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.3, 0.05));
+      deltaYawFromReferenceTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.2, 0.05));
    }
 
    public void bindControls()
