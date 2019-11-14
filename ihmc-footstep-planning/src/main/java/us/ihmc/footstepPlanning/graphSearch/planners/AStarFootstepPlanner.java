@@ -178,7 +178,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
-      int goalId = 77777777;
       if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.POSE_BETWEEN_FEET))
       {
          FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
@@ -189,7 +188,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
             goalNodePose.changeFrame(goalPose.getReferenceFrame());
             FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
-            goalNode.setNodeIndex(goalId++);
             goalNodes.put(side, goalNode);
 
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -206,7 +204,6 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             FramePose3D goalNodePose = new FramePose3D();
             goalSteps.get(side).getSoleFramePose(goalNodePose);
             FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
-            goalNode.setNodeIndex(goalId++);
             goalNodes.put(side, goalNode);
 
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -478,6 +475,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          if (goalNodes.get(nodeSide).equals(nodeToExpand))
          {
             endNode = goalNodes.get(nodeSide.getOppositeSide());
+
+            if (listener != null)
+               listener.addNode(endNode, nodeToExpand);
+
             graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
             return true;
          }
