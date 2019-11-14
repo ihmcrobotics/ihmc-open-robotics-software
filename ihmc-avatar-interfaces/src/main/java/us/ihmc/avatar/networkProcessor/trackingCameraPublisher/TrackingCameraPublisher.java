@@ -78,6 +78,8 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
    public TrackingCameraPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
                                   String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
    {
+      //TODO: remove
+      System.out.println("waitingTimeForInitialization "+waitingTimeForInitialization);
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
@@ -222,19 +224,12 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
          waitingTimeForInitialization--;
 
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
-         RigidBodyTransform currentOffsetTransform = dataToPublish.createTransform();
-
          //TODO: remove
          if (waitingTimeForInitialization == 0)
          {
             System.out.println("initialTransformToWorld");
             System.out.println(initialTransformToWorld);
-            System.out.println("currentOffsetTransform");
-            System.out.println(currentOffsetTransform);
          }
-
-         currentOffsetTransform.invert();
-         initialTransformToWorld.multiply(currentOffsetTransform);
          return;
       }
       dataToPublish.applyTransform(initialTransformToWorld);
@@ -306,11 +301,6 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
       public long getTimeStamp()
       {
          return timeStamp;
-      }
-
-      public RigidBodyTransform createTransform()
-      {
-         return new RigidBodyTransform(orientation, position);
       }
 
       public StampedPosePacket toPacket()
