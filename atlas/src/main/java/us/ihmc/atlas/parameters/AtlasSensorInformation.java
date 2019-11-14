@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.*;
@@ -158,19 +157,13 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI);
       transformDepthCameraToTrackingCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(depthPitchingAngle);
-      transformDepthCameraToTrackingCamera.appendYawRotation(-Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendRollRotation(-Math.PI / 2);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      LogTools.info("transformPelvisToTrackingCamera");
-      System.out.println(transformPelvisToTrackingCamera);
       transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
-      System.out.println(transformPelvisToTrackingCamera);
       transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
-      System.out.println(transformPelvisToTrackingCamera);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
