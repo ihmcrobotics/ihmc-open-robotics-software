@@ -104,6 +104,8 @@ tasks.create("deployLocal") {
          into(File(System.getProperty("user.home"), "valkyrie"))
       }
 
+      File(System.getProperty("user.home"), "valkyrie/valkyrie-$version.jar").renameTo(File(System.getProperty("user.home"), "valkyrie/ValkyrieController.jar"))
+
       val configurationDir = File(System.getProperty("user.home"), ".ihmc/Configurations")
       configurationDir.delete()
       configurationDir.mkdirs()
