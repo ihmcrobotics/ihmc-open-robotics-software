@@ -2,12 +2,7 @@ package us.ihmc.atlas.joystickBasedStepping;
 
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -31,6 +26,8 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    private final IHMCROS2Publisher<FootTrajectoryMessage> footTrajectoryPublisher;
    private final IHMCROS2Publisher<FootLoadBearingMessage> footLoadBearingPublisher;
    private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> atlasLowLevelControlModePublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
    {
@@ -39,6 +36,8 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       footTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
       footLoadBearingPublisher = ROS2Tools.createPublisher(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
       atlasLowLevelControlModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
+      abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
    }
 
    @Override
@@ -145,5 +144,27 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
       message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
       atlasLowLevelControlModePublisher.publish(message);
+   }
+
+   @Override
+   public void sendAbortWalkingRequest()
+   {
+      abortWalkingPublisher.publish(new AbortWalkingMessage());
+   }
+
+   @Override
+   public void sendPauseWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(true);
+      pauseWalkingPublisher.publish(message);
+   }
+
+   @Override
+   public void sendContinueWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(false);
+      pauseWalkingPublisher.publish(message);
    }
 }
