@@ -32,12 +32,11 @@ public class OcclusionHandlingPathPlanner
        * - employ actual maze solving
        */
 
-      List<Point3DReadOnly> plan = navigableRegionsManager.planToGoal(startInWorld, finalGoalInWorld);
+      List<Point3DReadOnly> plan = navigableRegionsManager.calculateBodyPath(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph);
 
       if (plan.isEmpty() || !plan.get(plan.size() - 1).geometricallyEquals(finalGoalInWorld, 1e-6))
       {
-         if (!navigableRegionsManager.initialize(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph))
-            return null;
+         navigableRegionsManager.expandVisibilityGraph(startInWorld, finalGoalInWorld, fullyExpandVisibilityGraph);
 
          // plan again, this time only to closest free edge
          ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
@@ -63,7 +62,7 @@ public class OcclusionHandlingPathPlanner
             }
          }
 
-         plan = navigableRegionsManager.planToGoal(startInWorld, closestHomeRegionNodeToGoal.getPointInWorld());
+         plan = navigableRegionsManager.resetAndPlanToGoal(startInWorld, closestHomeRegionNodeToGoal.getPointInWorld());
          return plan;
       }
       else

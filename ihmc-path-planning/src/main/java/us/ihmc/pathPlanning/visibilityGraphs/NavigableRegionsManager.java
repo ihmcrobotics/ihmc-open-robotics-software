@@ -104,10 +104,10 @@ public class NavigableRegionsManager
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
          return null;
 
-      return planToGoal(startInWorld, goalInWorld);
+      return planInternal();
    }
 
-   List<Point3DReadOnly> planToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
+   List<Point3DReadOnly> resetAndPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
    {
       if (!resetPlannerForNewStartAndGoal(startInWorld, finalGoalInWorld))
          return null;
@@ -120,6 +120,12 @@ public class NavigableRegionsManager
       if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
          return false;
 
+      expandVisibilityGraph(startInWorld, goalInWorld, fullyExpandVisibilityGraph);
+      return resetPlannerForNewStartAndGoal(startInWorld, goalInWorld);
+   }
+
+   void expandVisibilityGraph(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   {
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
       navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
 
@@ -132,12 +138,13 @@ public class NavigableRegionsManager
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
-
-      return true;
    }
 
    private boolean resetPlannerForNewStartAndGoal(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
    {
+      if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
+         return false;
+
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
