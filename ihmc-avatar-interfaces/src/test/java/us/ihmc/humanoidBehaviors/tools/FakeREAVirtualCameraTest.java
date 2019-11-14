@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -47,17 +48,19 @@ public class FakeREAVirtualCameraTest
       });
    }
 
-   private void createAndShowPlanarRegionWindow(PlanarRegionsList trickCorridorWCutFloor, int windowCount)
+   private void createAndShowPlanarRegionWindow(PlanarRegionsList planarRegionsList, int windowCount)
    {
       int windowWidth = 800;
       int windowHeight = 600;
       View3DFactory view3dFactory = new View3DFactory(windowWidth, windowHeight);
-      view3dFactory.addCameraController(0.05, 2000.0, true);
+      FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
+      double isoZoomOut = 15.0;
+      camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(trickCorridorWCutFloor);
+      regionsGraphic.generateMeshes(planarRegionsList);
       regionsGraphic.update();
 
       view3dFactory.addNodeToView(regionsGraphic);
