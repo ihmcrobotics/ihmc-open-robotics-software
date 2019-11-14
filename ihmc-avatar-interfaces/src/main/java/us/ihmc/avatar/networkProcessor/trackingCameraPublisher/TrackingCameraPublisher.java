@@ -279,10 +279,14 @@ public class TrackingCameraPublisher
       
       public void applyTransform(RigidBodyTransform transformToWorld)
       {
-         transformToWorld.transform(position);
-         transformToWorld.transform(orientation);
-         transformToWorld.transform(linearVelocity);
-         transformToWorld.transform(angularVelocity);
+//         transformToWorld.transform(position);
+//         transformToWorld.transform(orientation);
+//         transformToWorld.transform(linearVelocity);
+//         transformToWorld.transform(angularVelocity);
+         position.applyTransform(transformToWorld);
+         orientation.applyTransform(transformToWorld);
+         linearVelocity.applyTransform(transformToWorld);
+         angularVelocity.applyTransform(transformToWorld);
       }
 
       public long getTimeStamp()
