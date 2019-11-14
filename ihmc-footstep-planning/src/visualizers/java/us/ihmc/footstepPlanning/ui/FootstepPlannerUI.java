@@ -257,6 +257,7 @@ public class FootstepPlannerUI
       {
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
+         startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
       }
 
       planarRegionViewer.start();
