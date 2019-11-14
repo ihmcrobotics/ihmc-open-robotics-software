@@ -141,7 +141,6 @@ public class FootstepPlanningStage implements FootstepPlanner
                                            bodyPathPlanner,
                                            footstepPlannerParameters,
                                            contactPointsInSoleFrame,
-                                           new SimplePlanarRegionFootstepNodeSnapper(contactPointsInSoleFrame),
                                            footstepPlannerParameters.getAStarHeuristicsWeight(),
                                            registry,
                                            plannerListener);

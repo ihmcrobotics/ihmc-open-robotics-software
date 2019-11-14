@@ -445,10 +445,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (pathPlanningResult != null)
       {
          if (pathPlanningResult.validForExecution())
-         {
             completedPathWaypoints.add(stageFinished.getPlanSequenceId(), stageFinished.getWaypoints());
-         }
-//         completedPathPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
       }
 
       cleanupPathPlanningStage(stageFinished);
@@ -471,9 +468,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             if (plan != null)
                completedStepPlans.add(sequence, plan);
          }
-
-         // FIXME get this IFF the planner is being spawned again to remove it from calculation
-//         completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
       }
 
       cleanupStepPlanningStage(stageFinished);
