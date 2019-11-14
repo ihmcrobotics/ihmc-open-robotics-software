@@ -3,6 +3,7 @@ package us.ihmc.avatar.factory;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.StampedPosePacket;
@@ -177,18 +178,13 @@ public class AvatarSimulationFactory
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
       try
       {
-         if (!isWindows())
-            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+         if (!SystemUtils.IS_OS_WINDOWS)
+            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2 / 3));
       }
       catch (NullPointerException npe)
       {
          // do nothing
       }
-   }
-
-   private static boolean isWindows()
-   {
-      return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
    }
 
    private void setupSensorReaderFactory()

@@ -4,7 +4,14 @@ import java.awt.*;
 
 public class AWTTools
 {
-   public static Dimension getDimensionForSmallestScreen()
+   public static Dimension getDimensionOfSmallestScreenScaled(double scalar)
+   {
+      Dimension smallestDimension = getDimensionOfSmallestScreen();
+      smallestDimension.setSize(smallestDimension.getWidth() * scalar, smallestDimension.getHeight() * scalar);
+      return smallestDimension;
+   }
+
+   public static Dimension getDimensionOfSmallestScreen()
    {
       Dimension smallestDimension = new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
       for (GraphicsDevice graphicsDevice : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices())
@@ -24,7 +31,6 @@ public class AWTTools
          }
       }
 
-      smallestDimension.setSize(smallestDimension.getWidth() * 2 / 3, smallestDimension.getHeight() * 2 / 3);
       return smallestDimension;
    }
 }
