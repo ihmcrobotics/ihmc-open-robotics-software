@@ -71,6 +71,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
+   private final AtomicReference<Double> plannerBestEffortTimeoutReference;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
@@ -134,6 +135,7 @@ public class RemoteUIMessageConverter
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
+      plannerBestEffortTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, 2.0);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
@@ -273,6 +275,7 @@ public class RemoteUIMessageConverter
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
+      double bestEffortTimeout = packet.getBestEffortTimeout();
       double horizonLength = packet.getHorizonLength();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
@@ -284,6 +287,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
@@ -515,6 +519,8 @@ public class RemoteUIMessageConverter
          packet.setInitialStanceRobotSide(plannerInitialSupportSideReference.get().toByte());
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
+      if (plannerBestEffortTimeoutReference.get() != null)
+         packet.setBestEffortTimeout(plannerBestEffortTimeoutReference.get());
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
       if (plannerRequestIdReference.get() != null)
