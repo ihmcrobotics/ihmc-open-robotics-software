@@ -36,7 +36,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:euclid-geometry:0.12.1")
    api("us.ihmc:ihmc-pub-sub:0.10.2")
-   api("us.ihmc:ros2-common-interfaces:0.14.3")
+   api("us.ihmc:ros2-common-interfaces:0.13.4")
    api("us.ihmc:ihmc-commons:0.26.6")
 }
 

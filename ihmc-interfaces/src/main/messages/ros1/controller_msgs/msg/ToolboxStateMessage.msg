@@ -1,3 +1,5 @@
+# This message is part of the IHMC toolbox framework.
+
 int8 WAKE_UP=0
 
 int8 REINITIALIZE=1

@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 int8 EXTRUSION_INSIDE=0
 
 int8 EXTRUSION_OUTSIDE=1

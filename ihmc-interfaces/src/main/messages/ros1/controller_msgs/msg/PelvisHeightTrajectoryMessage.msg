@@ -1,3 +1,8 @@
+# This message is part of the IHMC whole-body controller API.
+# This message commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points.
+# Sending this command will not affect the pelvis horizontal position.
+# To control the pelvis 3D position use the PelvisTrajectoryMessage instead.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

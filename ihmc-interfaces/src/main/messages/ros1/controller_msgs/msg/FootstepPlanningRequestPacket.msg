@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
