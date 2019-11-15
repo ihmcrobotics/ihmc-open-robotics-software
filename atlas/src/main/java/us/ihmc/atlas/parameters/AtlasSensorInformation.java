@@ -170,7 +170,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformPelvisToTrackingCamera.appendYawRotation(Math.PI);
       transformPelvisToTrackingCamera.appendTranslation(pelvisLength - pelvisToDepthOrigin, 0.0, 0.0);
       transformPelvisToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
-//      transformPelvisToTrackingCamera.appendPitchRotation(trackingPitchingAngle); //TODO: ask To Daniel. Excuse me?
+      transformPelvisToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
       transformPelvisToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
    }
    
