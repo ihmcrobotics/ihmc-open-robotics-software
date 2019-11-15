@@ -233,8 +233,50 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             
             RigidBodyTransform zaxisToZupTransform = new RigidBodyTransform();
             zaxisToZupTransform.setRotation(axisAngleFromZUpToVector3D);
-            transformToWorldToPack.multiply(zaxisToZupTransform);
+            transformToWorldToPack.preMultiply(zaxisToZupTransform);
          }
       };
    }
+   
+//   public static void main(String[] args)
+//   {
+//      double simulatedYaw = 50.0 / 180.0 * Math.PI;
+//      double simulatedPitch = 0.0 / 180.0 * Math.PI;
+//      double simulatedRoll = 0.0 / 180.0 * Math.PI;
+//      
+//      RigidBodyTransform transformToWorldToPack = new RigidBodyTransform();
+//      transformToWorldToPack.appendTranslation(0.5, 0.6, 1.0);
+//      transformToWorldToPack.appendYawRotation(simulatedYaw);
+//      transformToWorldToPack.appendPitchRotation(simulatedPitch);
+//      transformToWorldToPack.appendRollRotation(simulatedRoll);
+//      
+//      RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToTrackingCamera;
+//      
+//      System.out.println("transformToWorldToPack");
+//      System.out.println(transformToWorldToPack);
+//      transformToWorldToPack.multiply(transformFromPelvisToRealSense);
+//      System.out.println(transformToWorldToPack);
+//      
+//      RigidBodyTransform syncronizedZup = new RigidBodyTransform(transformToWorldToPack);
+//      
+//      Vector3D axisZ = new Vector3D(syncronizedZup.getM02(), syncronizedZup.getM12(), syncronizedZup.getM22());
+//      System.out.println("axisZ");
+//      System.out.println(axisZ);
+//      
+//      AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
+//      
+//      System.out.println("axisAngleFromZUpToVector3D");
+//      System.out.println(axisAngleFromZUpToVector3D);
+//      axisAngleFromZUpToVector3D.invert();
+//      System.out.println(axisAngleFromZUpToVector3D);
+//
+//      RigidBodyTransform zaxisToZupTransform = new RigidBodyTransform();
+//      zaxisToZupTransform.setRotation(axisAngleFromZUpToVector3D);
+//      System.out.println("zaxisToZupTransform");
+//      System.out.println(zaxisToZupTransform);
+//      transformToWorldToPack.preMultiply(zaxisToZupTransform);
+//
+//      System.out.println("transformToWorldToPack");
+//      System.out.println(transformToWorldToPack);
+//   }
 }
