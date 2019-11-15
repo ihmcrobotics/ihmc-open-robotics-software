@@ -107,7 +107,6 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
                                            pubTopicNameGenerator,
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
-      AtomicBoolean tare = new AtomicBoolean();
       AtomicBoolean reset = new AtomicBoolean();
       Vector3D tareOffset = new Vector3D();
 
@@ -118,17 +117,6 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
                        if(reset.getAndSet(false))
                        {
                           tareOffset.setToZero();
-                       }
-
-                       if(toolboxOutputStatus.get() != null)
-                       {
-                          if(tare.getAndSet(false))
-                          {
-                             tareOffset.set(toolboxOutputStatus.get().getEstimatedExternalForce());
-                          }
-
-                          estimatedForce.set(toolboxOutputStatus.get().getEstimatedExternalForce());
-                          estimatedForce.sub(tareOffset);
                        }
 
                        ThreadTools.sleep(100);
@@ -147,8 +135,8 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
                                      {
                                         ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
                                         configurationMessage.setEstimatorGain(0.5);
-                                        configurationMessage.setEndEffectorHashCode(endEffectorHashCode);
-                                        configurationMessage.getExternalForcePosition().set(externalForcePointOffset);
+                                        configurationMessage.getRigidBodyHashCodes().add(endEffectorHashCode);
+                                        configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
                                         configurationMessagePublisher.publish(configurationMessage);
 
                                         ThreadTools.sleep(1);
@@ -168,10 +156,6 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
                                        toolboxStatePublisher.publish(toolboxStateMessage);
                                     });
       scs.addButton(sleepButton);
-
-      JButton tareButton = new JButton("Tare");
-      tareButton.addActionListener(e -> tare.set(true));
-      scs.addButton(tareButton);
 
       JButton resetButton = new JButton("Reset");
       resetButton.addActionListener(e -> reset.set(true));

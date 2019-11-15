@@ -42,10 +42,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -62,10 +61,10 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getEstimatedExternalForce(), current_alignment);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getEstimatedExternalForces().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getEstimatedExternalForces().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -75,8 +74,9 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    {
       cdr.write_type_4(data.getSequenceId());
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getEstimatedExternalForce(), cdr);
-      cdr.write_type_6(data.getSolutionQuality());
+      if(data.getEstimatedExternalForces().size() <= 10)
+      cdr.write_type_e(data.getEstimatedExternalForces());else
+          throw new RuntimeException("estimated_external_forces field exceeds the maximum length");
 
    }
 
@@ -84,9 +84,7 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getEstimatedExternalForce(), cdr);	
-      data.setSolutionQuality(cdr.read_type_6());
-      	
+      cdr.read_type_e(data.getEstimatedExternalForces());	
 
    }
 
@@ -94,18 +92,14 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    public final void serialize(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_a("estimated_external_force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getEstimatedExternalForce());
-
-      ser.write_type_6("solution_quality", data.getSolutionQuality());
+      ser.write_type_e("estimated_external_forces", data.getEstimatedExternalForces());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_a("estimated_external_force", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getEstimatedExternalForce());
-
-      data.setSolutionQuality(ser.read_type_6("solution_quality"));
+      ser.read_type_e("estimated_external_forces", data.getEstimatedExternalForces());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus src, controller_msgs.msg.dds.ExternalForceEstimationOutputStatus dest)

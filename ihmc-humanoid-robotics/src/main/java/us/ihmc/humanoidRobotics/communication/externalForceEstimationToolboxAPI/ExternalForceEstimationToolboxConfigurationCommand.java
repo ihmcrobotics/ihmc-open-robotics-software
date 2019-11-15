@@ -1,16 +1,20 @@
 package us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI;
 
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
+
+import java.util.List;
 
 public class ExternalForceEstimationToolboxConfigurationCommand implements Command<ExternalForceEstimationToolboxConfigurationCommand, ExternalForceEstimationConfigurationMessage>
 {
    private long sequenceId = 0;
    private double estimatorGain = 1.0;
    private double solverAlpha = 0.005;
-   private int endEffectorHashCode;
-   private final Point3D externalForcePosition = new Point3D();
+   private final TIntArrayList rigidBodyHashCodes = new TIntArrayList(10);
+   private final RecyclingArrayList<Point3D> contactPointPositions = new RecyclingArrayList<>(10, Point3D::new);
 
    @Override
    public void clear()
@@ -18,8 +22,8 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       sequenceId = 0;
       estimatorGain = 1.0;
       solverAlpha = 0.005;
-      endEffectorHashCode = 0;
-      externalForcePosition.setToNaN();
+      rigidBodyHashCodes.reset();
+      contactPointPositions.clear();
    }
 
    @Override
@@ -28,8 +32,14 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       this.sequenceId = message.getSequenceId();
       this.estimatorGain = message.getEstimatorGain();
       this.solverAlpha = message.getSolverAlpha();
-      this.endEffectorHashCode = message.getEndEffectorHashCode();
-      this.externalForcePosition.set(message.getExternalForcePosition());
+
+      this.rigidBodyHashCodes.reset();
+      this.contactPointPositions.clear();
+      for (int i = 0; i < message.getRigidBodyHashCodes().size(); i++)
+      {
+         this.rigidBodyHashCodes.add(message.getRigidBodyHashCodes().get(i));
+         this.contactPointPositions.add().set(message.getContactPointPositions().get(i));
+      }
    }
 
    @Override
@@ -41,7 +51,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    @Override
    public boolean isCommandValid()
    {
-      return estimatorGain >= 0.0 && !externalForcePosition.containsNaN();
+      return estimatorGain >= 0.0 && !rigidBodyHashCodes.isEmpty() && (rigidBodyHashCodes.size() == contactPointPositions.size());
    }
 
    @Override
@@ -56,8 +66,14 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       this.sequenceId = other.sequenceId;
       this.estimatorGain = other.estimatorGain;
       this.solverAlpha = other.solverAlpha;
-      this.endEffectorHashCode = other.endEffectorHashCode;
-      this.externalForcePosition.set(other.externalForcePosition);
+
+      this.rigidBodyHashCodes.reset();
+      this.contactPointPositions.clear();
+      for (int i = 0; i < other.getNumberOfContactPoints(); i++)
+      {
+         this.rigidBodyHashCodes.add(other.rigidBodyHashCodes.get(i));
+         this.contactPointPositions.add().set(other.contactPointPositions.get(i));
+      }
    }
 
    public double getEstimatorGain()
@@ -70,13 +86,18 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       return solverAlpha;
    }
 
-   public int getEndEffectorHashCode()
+   public TIntArrayList getRigidBodyHashCodes()
    {
-      return endEffectorHashCode;
+      return rigidBodyHashCodes;
    }
 
-   public Point3D getExternalForcePosition()
+   public List<Point3D> getContactPointPositions()
    {
-      return externalForcePosition;
+      return contactPointPositions;
+   }
+
+   public int getNumberOfContactPoints()
+   {
+      return rigidBodyHashCodes.size();
    }
 }
