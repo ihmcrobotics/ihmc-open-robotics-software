@@ -7,4 +7,7 @@ uint32 sequence_id
 # Estimated external force in world frame
 geometry_msgs/Vector3[] estimated_external_forces
 
+# Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
+geometry_msgs/Wrench estimated_root_joint_wrench
+
 

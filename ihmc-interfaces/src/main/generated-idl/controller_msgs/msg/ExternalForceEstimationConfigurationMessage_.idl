@@ -31,6 +31,11 @@ module controller_msgs
         @defaultValue(value=0.005)
         double solver_alpha;
         /**
+         * Indicates whether the wrench at the root joint should be included in the solver
+         */
+        @defaultValue(value=True)
+        boolean calculate_root_joint_wrench;
+        /**
          * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
          * See RigidBody.hashCode() for calculation of the hash code
          */

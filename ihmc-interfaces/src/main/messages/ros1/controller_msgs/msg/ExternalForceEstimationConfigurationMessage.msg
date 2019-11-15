@@ -12,6 +12,10 @@ float64 estimator_gain
 # Field default value 0.005
 float64 solver_alpha
 
+# Indicates whether the wrench at the root joint should be included in the solver
+# Field default value True
+bool calculate_root_joint_wrench
+
 # List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
 # See RigidBody.hashCode() for calculation of the hash code
 int32[] rigid_body_hash_codes

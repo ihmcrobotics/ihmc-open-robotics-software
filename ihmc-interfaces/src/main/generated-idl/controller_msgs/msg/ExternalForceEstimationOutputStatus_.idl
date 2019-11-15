@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__ExternalForceEstimationOutputStatus__idl__
 
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "geometry_msgs/msg/./Wrench_.idl"
 module controller_msgs
 {
   module msg
@@ -24,6 +25,10 @@ module controller_msgs
          * Estimated external force in world frame
          */
         sequence<geometry_msgs::msg::dds::Vector3, 10> estimated_external_forces;
+        /**
+         * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
+         */
+        geometry_msgs::msg::dds::Wrench estimated_root_joint_wrench;
       };
     };
   };

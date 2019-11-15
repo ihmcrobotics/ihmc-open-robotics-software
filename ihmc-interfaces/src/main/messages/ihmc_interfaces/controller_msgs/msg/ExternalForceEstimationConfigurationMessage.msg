@@ -10,6 +10,9 @@ float64 estimator_gain 0.5
 # Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
 float64 solver_alpha 0.005
 
+# Indicates whether the wrench at the root joint should be included in the solver
+bool calculate_root_joint_wrench true
+
 # List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
 # See RigidBody.hashCode() for calculation of the hash code
 int32[<=10] rigid_body_hash_codes

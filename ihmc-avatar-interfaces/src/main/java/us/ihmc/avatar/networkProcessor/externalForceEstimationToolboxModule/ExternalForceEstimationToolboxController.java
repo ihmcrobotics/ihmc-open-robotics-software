@@ -19,6 +19,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -29,6 +30,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,21 +43,18 @@ import java.util.function.ToIntFunction;
 public class ExternalForceEstimationToolboxController extends ToolboxController
 {
    private final HumanoidReferenceFrames referenceFrames;
-   private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
-   private final double updateDT;
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   private JointBasics[] jointsToIgnore;
-   private JointBasics[] joints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
    private final HashMap<String, OneDoFJointBasics> jointNameMap = new HashMap<>();
    private final ToIntFunction<String> jointNameToMatrixIndexFunction;
+   private final YoBoolean calculateRootJointWrench = new YoBoolean("calculateRootJointWrench", registry);
 
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
 
@@ -82,18 +81,16 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      this.updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
-
-      jointsToIgnore = new JointBasics[0]; // new JointBasics[]{controllerFullRobotModel.getOneDoFJointByName("hokuyo_joint")}; //
-      joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
       this.rootJoint = fullRobotModel.getRootJoint();
+
       MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
                           .subtreeIterable()
                           .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
-      this.controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
+      double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
+      JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
                                                                 9.81,
                                                                 fullRobotModel.getRootJoint(),
                                                                 joints,
@@ -111,8 +108,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       }
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
-      this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(Arrays.asList(jointsToIgnore), controlCoreToolbox, controlCoreToolbox.getWrenchMatrixCalculator());
-      final int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox, controlCoreToolbox.getWrenchMatrixCalculator());
+      int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       this.controllerDesiredQdd = new DenseMatrix64F(degreesOfFreedom, 1);
       this.controllerDesiredTau = new DenseMatrix64F(degreesOfFreedom, 1);
@@ -149,6 +146,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          ExternalForceEstimationToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(
                ExternalForceEstimationToolboxConfigurationCommand.class);
 
+
          externalForceEstimator.clearContactPoints();
          int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
          for (int i = 0; i < numberOfContactPoints; i++)
@@ -158,11 +156,17 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
             externalForceEstimator.addContactPoint(rigidBody, contactPoint, true);
          }
 
+         calculateRootJointWrench.set(configurationCommand.getCalculateRootJointWrench());
+         if(calculateRootJointWrench.getValue())
+         {
+            externalForceEstimator.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
+         }
+
          externalForceEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
          externalForceEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
          commandInputManager.clearCommands(ExternalForceEstimationToolboxConfigurationCommand.class);
       }
-      else if(externalForceEstimator == null)
+      else if (externalForceEstimator == null)
       {
          return false;
       }
@@ -198,10 +202,25 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       outputStatus.getEstimatedExternalForces().clear();
       YoFixedFrameSpatialVector[] estimatedExternalWrenches = externalForceEstimator.getEstimatedExternalWrenches();
-      for (int i = 0; i < externalForceEstimator.getNumberOfContactPoints(); i++)
+
+      int numberOfContactPoints = externalForceEstimator.getNumberOfContactPoints() - (calculateRootJointWrench.getValue() ? 1 : 0);
+      for (int i = 0; i < numberOfContactPoints; i++)
       {
          outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
       }
+
+      if(calculateRootJointWrench.getValue())
+      {
+         int lastIndex = externalForceEstimator.getNumberOfContactPoints() - 1;
+         outputStatus.getEstimatedRootJointWrench().getTorque().set(externalForceEstimator.getEstimatedExternalWrenches()[lastIndex].getAngularPart());
+         outputStatus.getEstimatedRootJointWrench().getForce().set(externalForceEstimator.getEstimatedExternalWrenches()[lastIndex].getLinearPart());
+      }
+      else
+      {
+         outputStatus.getEstimatedRootJointWrench().getTorque().setToNaN();
+         outputStatus.getEstimatedRootJointWrench().getForce().setToNaN();
+      }
+
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
 
       statusOutputManager.reportStatusMessage(outputStatus);
