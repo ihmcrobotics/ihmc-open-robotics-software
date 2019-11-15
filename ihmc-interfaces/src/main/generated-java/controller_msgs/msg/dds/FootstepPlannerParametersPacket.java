@@ -196,6 +196,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_z_ = -11.1;
    /**
+            * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+            * 
+            * The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+            * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+            */
+   public double minimum_step_z_when_fully_pitched_ = -11.1;
+   /**
             * This is the reduction factor for the max yaw when the step is at max reach.
             * This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
             * If this returns 0.0, the max yaw is not modified, even at full reach.
@@ -500,6 +507,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       translation_scale_from_grandparent_node_ = other.translation_scale_from_grandparent_node_;
 
       maximum_step_z_ = other.maximum_step_z_;
+
+      minimum_step_z_when_fully_pitched_ = other.minimum_step_z_when_fully_pitched_;
 
       step_yaw_reduction_factor_at_max_reach_ = other.step_yaw_reduction_factor_at_max_reach_;
 
@@ -1051,6 +1060,27 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZ()
    {
       return maximum_step_z_;
+   }
+
+   /**
+            * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+            * 
+            * The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+            * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+            */
+   public void setMinimumStepZWhenFullyPitched(double minimum_step_z_when_fully_pitched)
+   {
+      minimum_step_z_when_fully_pitched_ = minimum_step_z_when_fully_pitched;
+   }
+   /**
+            * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+            * 
+            * The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+            * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+            */
+   public double getMinimumStepZWhenFullyPitched()
+   {
+      return minimum_step_z_when_fully_pitched_;
    }
 
    /**
@@ -1939,6 +1969,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_z_when_fully_pitched_, other.minimum_step_z_when_fully_pitched_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_yaw_reduction_factor_at_max_reach_, other.step_yaw_reduction_factor_at_max_reach_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_foothold_percent_, other.minimum_foothold_percent_, epsilon)) return false;
@@ -2084,6 +2116,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
 
+      if(this.minimum_step_z_when_fully_pitched_ != otherMyClass.minimum_step_z_when_fully_pitched_) return false;
+
       if(this.step_yaw_reduction_factor_at_max_reach_ != otherMyClass.step_yaw_reduction_factor_at_max_reach_) return false;
 
       if(this.minimum_foothold_percent_ != otherMyClass.minimum_foothold_percent_) return false;
@@ -2226,6 +2260,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.translation_scale_from_grandparent_node_);      builder.append(", ");
       builder.append("maximum_step_z=");
       builder.append(this.maximum_step_z_);      builder.append(", ");
+      builder.append("minimum_step_z_when_fully_pitched=");
+      builder.append(this.minimum_step_z_when_fully_pitched_);      builder.append(", ");
       builder.append("step_yaw_reduction_factor_at_max_reach=");
       builder.append(this.step_yaw_reduction_factor_at_max_reach_);      builder.append(", ");
       builder.append("minimum_foothold_percent=");

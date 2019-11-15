@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
@@ -62,6 +63,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setMaximumStepZ(double stepZ)
    {
       set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+   }
+
+   default void setMinimumStepZWhenFullyPitched(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.minStepZWhenFullyPitched, stepZ);
    }
 
    default void setStepYawReductionFactorAtMaxReach(double factor)
@@ -379,6 +385,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
       if (parametersPacket.getMaximumStepZ() != noValue)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
+         setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getStepYawReductionFactorAtMaxReach() != noValue)
          setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
       if (parametersPacket.getMinimumFootholdPercent() != noValue)

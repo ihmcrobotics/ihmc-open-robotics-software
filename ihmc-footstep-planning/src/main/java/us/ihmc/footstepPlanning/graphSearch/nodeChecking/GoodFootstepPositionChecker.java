@@ -1,7 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -94,6 +97,17 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       if (Math.abs(solePositionInParentZUpFrame.getZ()) > parameters.getMaximumStepZ())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
+         return false;
+      }
+
+      FrameOrientation3DBasics parentPose = new FrameQuaternion(parentSoleFrame);
+      parentPose.changeFrame(parentSoleZupFrame);
+
+      double alpha = Math.max(0.0, -parentPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
+      double minZ = InterpolationTools.linearInterpolate(parameters.getMaximumStepZ(), parameters.getMinimumStepZWhenFullyPitched(), alpha);
+      if (solePositionInParentZUpFrame.getZ() < minZ)
+      {
+         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_WHEN_PITCHED;
          return false;
       }
 
