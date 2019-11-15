@@ -49,11 +49,9 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
    private final String robotName;
    private final FullRobotModel fullRobotModel;
 
-   private static final long threadperiod = 1L;
-
-   private static int waitingTimeForInitialization = (int) (1 / threadperiod * 1000 * 1.0);
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
+   private boolean initialized = false;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
@@ -78,8 +76,6 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
    public TrackingCameraPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
                                   String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
    {
-      //TODO: remove
-      System.out.println("waitingTimeForInitialization "+waitingTimeForInitialization);
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
@@ -102,7 +98,7 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, threadperiod, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
@@ -219,17 +215,10 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
             return;
       }
 
-      if (waitingTimeForInitialization != 0 && sensorFrameInitializationTransformer != null)
+      if (!initialized && sensorFrameInitializationTransformer != null)
       {
-         waitingTimeForInitialization--;
-
+         initialized = true;
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
-         //TODO: remove
-         if (waitingTimeForInitialization == 0)
-         {
-            System.out.println("initialTransformToWorld");
-            System.out.println(initialTransformToWorld);
-         }
          return;
       }
       dataToPublish.applyTransform(initialTransformToWorld);
@@ -292,10 +281,10 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
 
       public void applyTransform(RigidBodyTransform transformToWorld)
       {
-         position.applyTransform(transformToWorld);
-         orientation.applyTransform(transformToWorld);
-         linearVelocity.applyTransform(transformToWorld);
-         angularVelocity.applyTransform(transformToWorld);
+         transformToWorld.transform(position);
+         transformToWorld.transform(orientation);
+         transformToWorld.transform(linearVelocity);
+         transformToWorld.transform(angularVelocity);
       }
 
       public long getTimeStamp()
@@ -336,8 +325,7 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
       if(newPose == null)
          return;
       
-      transformToWorldToPack.setTranslation(newPose.getPose().getPosition());
-      transformToWorldToPack.setRotation(newPose.getPose().getOrientation());
+      transformToWorldToPack.set(newPose.getPose().getOrientation(), newPose.getPose().getPosition());
       transformToWorldToPack.multiply(transformToOther);
       sensorPoseToPack.set(transformToWorldToPack);
    }
