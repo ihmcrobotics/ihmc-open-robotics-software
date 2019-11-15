@@ -104,7 +104,7 @@ public class ValkyrieExternalForceEstimationTest
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, newRobotModel(), testEnvironment);
 
-      AtomicBoolean initializeToolbox = new AtomicBoolean();
+      AtomicBoolean initializeToolbox = new AtomicBoolean(true);
       AtomicBoolean updateToolbox = new AtomicBoolean();
 
       Robot dummyRobot = new Robot("dummyRobot");

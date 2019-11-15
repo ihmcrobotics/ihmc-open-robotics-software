@@ -94,6 +94,7 @@ public class ExternalForceEstimatorTest
       externalForceEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
       externalForceEstimator.setEstimatorGain(5.0);
       externalForceEstimator.setSolverAlpha(1e-6);
+      externalForceEstimator.initialize();
 
       robot.setController(externalForceEstimator);
 
@@ -197,7 +198,6 @@ public class ExternalForceEstimatorTest
             externalForcePoint.setForce(i == 0 ? new Vector3D(0.0, 0.0, 0.0) : EuclidCoreRandomTools.nextVector3D(random, minForce, maxForce));
 
             blockingSimulationRunner.simulateAndBlock(1.5);
-            externalForceEstimator.initialize();
             blockingSimulationRunner.simulateAndBlock(estimationTime);
             YoFrameVector3D estimatedExternalForce = externalForceEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
