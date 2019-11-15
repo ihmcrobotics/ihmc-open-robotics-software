@@ -67,4 +67,5 @@ public enum DataSetName
 	_20001201_205050_TwoSquaresOneObstacle,
 	_20001201_205040_TwoSquares,
 	_20001201_205030_SingleSquare,
+	_20191114_155310_SimplePlatform,
 }

@@ -580,13 +580,37 @@ public class PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList  getSimplePlatform()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      // floor
+      generator.addRectangle(10.0, 6.0);
+
+      // top platform
+      generator.translate(0.0, 0.0, 0.46);
+      generator.addRectangle(1.14, 1.14);
+
+      generator.identity();
+      generator.translate((1.14 + 0.38) / 2.0, 0.0, 0.36);
+      generator.addRectangle(0.38, 1.14);
+
+      generator.translate(0.38, 0.0, -0.15);
+      generator.addRectangle(0.38, 1.14);
+
+
+
+      return generator.getPlanarRegionsList();
+   }
+
+
    public static void main(String[] args)
    {
-      String dataSetNameSuffix = "QuadrupedEnvironment3";
+      String dataSetNameSuffix = "SimplePlatform";
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
       String date = LocalDateTime.now().format(dateTimeFormatter);
 
-      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getQuadrupedEnvironment3());
+      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getSimplePlatform());
       DataSetIOTools.exportDataSet(dataSet);
    }
 }

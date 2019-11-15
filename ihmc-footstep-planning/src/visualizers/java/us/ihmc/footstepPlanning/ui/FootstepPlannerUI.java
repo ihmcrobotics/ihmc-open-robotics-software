@@ -196,6 +196,7 @@ public class FootstepPlannerUI
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
                                                                  StartPosition, LowLevelGoalPosition, GoalPosition);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      this.startGoalOrientationViewer.setPlannerParameters(plannerParameters);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
                                                          StartPosition, GoalPosition, PlanarRegionData, SelectedRegion,
                                                          StartOrientationEditModeEnabled, GoalOrientationEditModeEnabled);
@@ -257,6 +258,7 @@ public class FootstepPlannerUI
       {
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
+         startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
       }
 
       planarRegionViewer.start();
