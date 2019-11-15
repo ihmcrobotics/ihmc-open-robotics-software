@@ -51,6 +51,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = true;
    private static final boolean ENABLE_TRACKING_PUBLISHER = true;
+   private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = true;
 
    private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
    private static final String depthTopicNameSurfixToPublish = "_D435";
@@ -90,15 +91,17 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
       realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
-      //realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
 
       trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
       trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
       trackingCameraPublisher.setTransformToOtherSensorFrame(AtlasSensorInformation.transformTrackingCameraToDepthCamera);
-      
-      realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(trackingCameraPublisher);
+
+      if (USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING)
+         realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(trackingCameraPublisher);
+      else
+         realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
    }
 
    @Override
