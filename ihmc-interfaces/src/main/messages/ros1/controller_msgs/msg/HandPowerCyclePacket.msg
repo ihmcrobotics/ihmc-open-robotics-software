@@ -1,3 +1,5 @@
+# Atlas specific message used to power cycle the hands.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

@@ -1,3 +1,6 @@
+# This message is part of the IHMC footstep planning module.
+# This message is sent from the planner in order to visualize and debug planner progress
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

@@ -1,3 +1,5 @@
+# This message is part of the IHMC whole-body controller API.
+
 int8 NORMAL=0
 
 int8 FROZEN=1

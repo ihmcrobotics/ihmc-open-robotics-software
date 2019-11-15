@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 # unique id of the map
 int32 map_id
 

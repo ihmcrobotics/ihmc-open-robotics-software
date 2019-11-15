@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message contains joint-level desired values that are output from the whole-body controller
+
 int8 CONTROL_MODE_POSITION=0
 
 int8 CONTROL_VELOCITY=1
