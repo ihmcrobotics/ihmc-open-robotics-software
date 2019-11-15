@@ -26,20 +26,18 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyrieMomentumOptimizationSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import javax.swing.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ValkyrieExternalWrenchEstimationSimulation
+public class ValkyrieExternalForceEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
    private static final Vector3D initialForce = new Vector3D(0.0, 0.0, 0.0);
 
-   public ValkyrieExternalWrenchEstimationSimulation()
+   public ValkyrieExternalForceEstimationSimulation()
    {
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
 
@@ -168,6 +166,6 @@ public class ValkyrieExternalWrenchEstimationSimulation
 
    public static void main(String[] args)
    {
-      new ValkyrieExternalWrenchEstimationSimulation();
+      new ValkyrieExternalForceEstimationSimulation();
    }
 }

@@ -41,7 +41,7 @@ import java.util.stream.IntStream;
  * Implementation based on Haddadin, et. al:
  * <a href="www.repo.uni-hannover.de/bitstream/handle/123456789/3543/VorndammeSchHad2017_accepted.pdf">Collision Detection, Isolation and Identification for Humanoids</a>
  */
-public class ExternalForceEstimator implements RobotController
+public class ExternalWrenchEstimator implements RobotController
 {
    public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
@@ -94,12 +94,12 @@ public class ExternalForceEstimator implements RobotController
     *
     * @param dynamicMatrixSetter sets the mass matrix and coriolis-gravity matrices respectively
     */
-   public ExternalForceEstimator(JointBasics[] joints,
-                                 double dt,
-                                 BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter,
-                                 Consumer<DenseMatrix64F> tauSetter,
-                                 YoGraphicsListRegistry graphicsListRegistry,
-                                 YoVariableRegistry parentRegistry)
+   public ExternalWrenchEstimator(JointBasics[] joints,
+                                  double dt,
+                                  BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter,
+                                  Consumer<DenseMatrix64F> tauSetter,
+                                  YoGraphicsListRegistry graphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
    {
       this.joints = joints;
       this.tauSetter = tauSetter;

@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimator;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ExternalForceEstimatorTest
+public class ExternalWrenchEstimatorTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -49,7 +49,7 @@ public class ExternalForceEstimatorTest
    private OneDoFJointBasics[] joints;
    private ExternalForcePoint externalForcePoint;
    private Vector3D externalForcePointOffset;
-   private ExternalForceEstimator externalForceEstimator;
+   private ExternalWrenchEstimator externalWrenchEstimator;
    private BlockingSimulationRunner blockingSimulationRunner;
    private Vector3D minForce, maxForce;
 
@@ -90,20 +90,20 @@ public class ExternalForceEstimatorTest
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      externalForceEstimator = new ExternalForceEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      externalForceEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      externalForceEstimator.setEstimatorGain(5.0);
-      externalForceEstimator.setSolverAlpha(1e-6);
-      externalForceEstimator.initialize();
+      externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
+      externalWrenchEstimator.setEstimatorGain(5.0);
+      externalWrenchEstimator.setSolverAlpha(1e-6);
+      externalWrenchEstimator.initialize();
 
-      robot.setController(externalForceEstimator);
+      robot.setController(externalWrenchEstimator);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       YoGraphicVector forceVector = new YoGraphicVector("forceVector",
                                                         externalForcePoint.getYoPosition(),
                                                         externalForcePoint.getYoForce(),
-                                                        ExternalForceEstimator.forceGraphicScale,
+                                                        ExternalWrenchEstimator.forceGraphicScale,
                                                         YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.02, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
@@ -199,7 +199,7 @@ public class ExternalForceEstimatorTest
 
             blockingSimulationRunner.simulateAndBlock(1.5);
             blockingSimulationRunner.simulateAndBlock(estimationTime);
-            YoFrameVector3D estimatedExternalForce = externalForceEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
+            YoFrameVector3D estimatedExternalForce = externalWrenchEstimator.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
             boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
 
@@ -234,7 +234,7 @@ public class ExternalForceEstimatorTest
       joints = null;
       externalForcePoint = null;
       externalForcePointOffset = null;
-      externalForceEstimator = null;
+      externalWrenchEstimator = null;
       minForce = null;
       maxForce = null;
    }
