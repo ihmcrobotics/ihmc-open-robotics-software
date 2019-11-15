@@ -72,6 +72,8 @@ public class MainTabController
    @FXML
    private Spinner<Double> timeout;
    @FXML
+   private Spinner<Double> bestEffortTimeout;
+   @FXML
    private Spinner<Double> horizonLength;
 
    // status
@@ -294,6 +296,7 @@ public class MainTabController
       plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
 
       timeout.setValueFactory(createTimeoutValueFactory());
+      bestEffortTimeout.setValueFactory(new DoubleSpinnerValueFactory(0.0, 100.0, 3.0, 1.0));
       horizonLength.setValueFactory(createHorizonValueFactory());
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
@@ -317,6 +320,7 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
