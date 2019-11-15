@@ -72,6 +72,7 @@ public class ExternalForceEstimationMessageReplay
       configurationMessage.getRigidBodyHashCodes().add(601127246);
       configurationMessage.getContactPointPositions().add().set(0.0, -0.35, -0.03);
 
+      configurationMessage.setCalculateRootJointWrench(true);
       configMessagePublisher.publish(configurationMessage);
 
       sendToolboxStateMessage(ToolboxState.WAKE_UP);

@@ -13,6 +13,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    private long sequenceId = 0;
    private double estimatorGain = 1.0;
    private double solverAlpha = 0.005;
+   private boolean calculateRootJointWrench = false;
    private final TIntArrayList rigidBodyHashCodes = new TIntArrayList(10);
    private final RecyclingArrayList<Point3D> contactPointPositions = new RecyclingArrayList<>(10, Point3D::new);
 
@@ -22,6 +23,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       sequenceId = 0;
       estimatorGain = 1.0;
       solverAlpha = 0.005;
+      calculateRootJointWrench = false;
       rigidBodyHashCodes.reset();
       contactPointPositions.clear();
    }
@@ -32,6 +34,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       this.sequenceId = message.getSequenceId();
       this.estimatorGain = message.getEstimatorGain();
       this.solverAlpha = message.getSolverAlpha();
+      this.calculateRootJointWrench = message.getCalculateRootJointWrench();
 
       this.rigidBodyHashCodes.reset();
       this.contactPointPositions.clear();
@@ -66,6 +69,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       this.sequenceId = other.sequenceId;
       this.estimatorGain = other.estimatorGain;
       this.solverAlpha = other.solverAlpha;
+      this.calculateRootJointWrench = other.calculateRootJointWrench;
 
       this.rigidBodyHashCodes.reset();
       this.contactPointPositions.clear();
@@ -84,6 +88,11 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    public double getSolverAlpha()
    {
       return solverAlpha;
+   }
+
+   public boolean getCalculateRootJointWrench()
+   {
+      return calculateRootJointWrench;
    }
 
    public TIntArrayList getRigidBodyHashCodes()

@@ -6,6 +6,7 @@ import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.Exte
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimationToolboxModule
 {
@@ -16,7 +17,7 @@ public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimati
    
    public static void main(String[] args)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
 
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;

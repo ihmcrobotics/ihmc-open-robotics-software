@@ -25,6 +25,10 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
             */
    public double solver_alpha_ = 0.005;
    /**
+            * Indicates whether the wrench at the root joint should be included in the solver
+            */
+   public boolean calculate_root_joint_wrench_ = true;
+   /**
             * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
             * See RigidBody.hashCode() for calculation of the hash code
             */
@@ -55,6 +59,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       estimator_gain_ = other.estimator_gain_;
 
       solver_alpha_ = other.solver_alpha_;
+
+      calculate_root_joint_wrench_ = other.calculate_root_joint_wrench_;
 
       rigid_body_hash_codes_.set(other.rigid_body_hash_codes_);
       contact_point_positions_.set(other.contact_point_positions_);
@@ -105,6 +111,21 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       return solver_alpha_;
    }
 
+   /**
+            * Indicates whether the wrench at the root joint should be included in the solver
+            */
+   public void setCalculateRootJointWrench(boolean calculate_root_joint_wrench)
+   {
+      calculate_root_joint_wrench_ = calculate_root_joint_wrench;
+   }
+   /**
+            * Indicates whether the wrench at the root joint should be included in the solver
+            */
+   public boolean getCalculateRootJointWrench()
+   {
+      return calculate_root_joint_wrench_;
+   }
+
 
    /**
             * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
@@ -148,6 +169,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solver_alpha_, other.solver_alpha_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calculate_root_joint_wrench_, other.calculate_root_joint_wrench_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.rigid_body_hash_codes_, other.rigid_body_hash_codes_, epsilon)) return false;
 
       if (this.contact_point_positions_.size() != other.contact_point_positions_.size()) { return false; }
@@ -176,6 +199,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if(this.solver_alpha_ != otherMyClass.solver_alpha_) return false;
 
+      if(this.calculate_root_joint_wrench_ != otherMyClass.calculate_root_joint_wrench_) return false;
+
       if (!this.rigid_body_hash_codes_.equals(otherMyClass.rigid_body_hash_codes_)) return false;
       if (!this.contact_point_positions_.equals(otherMyClass.contact_point_positions_)) return false;
 
@@ -194,6 +219,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       builder.append(this.estimator_gain_);      builder.append(", ");
       builder.append("solver_alpha=");
       builder.append(this.solver_alpha_);      builder.append(", ");
+      builder.append("calculate_root_joint_wrench=");
+      builder.append(this.calculate_root_joint_wrench_);      builder.append(", ");
       builder.append("rigid_body_hash_codes=");
       builder.append(this.rigid_body_hash_codes_);      builder.append(", ");
       builder.append("contact_point_positions=");

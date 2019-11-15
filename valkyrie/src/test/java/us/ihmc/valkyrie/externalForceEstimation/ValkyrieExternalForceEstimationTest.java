@@ -82,7 +82,7 @@ public class ValkyrieExternalForceEstimationTest
 
    public DRCRobotModel newRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DEFAULT);
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
    }
 
    @Test
@@ -218,6 +218,7 @@ public class ValkyrieExternalForceEstimationTest
          configurationMessage.getRigidBodyHashCodes().add(testConfig.endEffector.hashCode());
          configurationMessage.getContactPointPositions().add().set(testConfig.efpOffset);
          configurationMessage.setSolverAlpha(0.001);
+         configurationMessage.setCalculateRootJointWrench(false);
          commandInputManager.submitMessage(configurationMessage);
 
          for (int j = 0; j < iterations; j++)

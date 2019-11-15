@@ -43,7 +43,7 @@ import java.util.stream.IntStream;
  */
 public class ExternalForceEstimator implements RobotController
 {
-   public static final double forceGraphicScale = 0.01;
+   public static final double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
    private static final double defaultEstimatorGain = 0.7;
 

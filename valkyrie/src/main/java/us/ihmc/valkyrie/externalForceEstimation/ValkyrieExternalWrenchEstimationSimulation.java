@@ -125,6 +125,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
                                         configurationMessage.setEstimatorGain(0.5);
                                         configurationMessage.getRigidBodyHashCodes().add(endEffector.hashCode());
                                         configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
+                                        configurationMessage.setCalculateRootJointWrench(false);
                                         configurationMessagePublisher.publish(configurationMessage);
 
                                         ThreadTools.sleep(1);
