@@ -1,13 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
@@ -37,6 +30,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
@@ -62,9 +56,10 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private SideDependentList<Material> transparentFootMaterial = new SideDependentList<>();
    private SideDependentList<Material> opaqueFootMaterial = new SideDependentList<>();
 
-   private final AtomicReference<FootstepPlannerParametersReadOnly> parametersReference;
+   private FootstepPlannerParametersReadOnly parameters;
    private final AtomicReference<Boolean> startRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
+   private final AtomicReference<Boolean> goalPositionEditModeEnabled;
 
    private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> lowLevelGoalPositionReference;
@@ -86,9 +81,9 @@ public class StartGoalOrientationViewer extends AnimationTimer
       root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
-      parametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParameters, null);
       startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabled, false);
       goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabled, false);
+      goalPositionEditModeEnabled = messager.createInput(GoalPositionEditModeEnabled, false);
 
       startPositionReference = messager.createInput(StartPosition, new Point3D());
       lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
@@ -97,6 +92,11 @@ public class StartGoalOrientationViewer extends AnimationTimer
       startQuaternionReference = messager.createInput(StartOrientation, new Quaternion());
       lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
       goalQuaternionReference = messager.createInput(GoalOrientation, new Quaternion());
+   }
+
+   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
+   {
+      this.parameters = parameters;
    }
 
    private void updateGoalFrame(Point3D goalPosition)
@@ -109,8 +109,9 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         double width = parametersReference.get().getIdealFootstepWidth() / 2.0;
+         double width = parameters.getIdealFootstepWidth() / 2.0;
          FramePoint3D footPose = new FramePoint3D(goalFrame, 0.0, robotSide.negateIfRightSide(width), 0.0);
+         footPose.changeFrame(worldFrame);
          setFootPose(footGraphics.get(robotSide), footPose, goalQuaternionReference.get().getYaw());
       }
    }
@@ -130,18 +131,18 @@ public class StartGoalOrientationViewer extends AnimationTimer
       }
 
       if (goalRotationEditModeEnabled.get())
-      {
          goalArrow.setMaterial(goalTransparentMaterial);
-         if (!footGraphics.isEmpty())
+      else
+         goalArrow.setMaterial(goalOpaqueMaterial);
+
+      if (!footGraphics.isEmpty())
+      {
+         if (goalPositionEditModeEnabled.get() || goalRotationEditModeEnabled.get())
          {
             for (RobotSide robotSide : RobotSide.values)
                footGraphics.get(robotSide).setMaterial(transparentFootMaterial.get(robotSide));
          }
-      }
-      else
-      {
-         goalArrow.setMaterial(goalOpaqueMaterial);
-         if (!footGraphics.isEmpty())
+         else
          {
             for (RobotSide robotSide : RobotSide.values)
                footGraphics.get(robotSide).setMaterial(opaqueFootMaterial.get(robotSide));
@@ -198,7 +199,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
          this.defaultContactPoints.put(robotSide, defaultFoothold);
 
 
-         FootGraphic opaqueFootGraphic = new FootGraphic(defaultFoothold, toTransparentColor(getFootstepColor(robotSide), 0.7));
+         FootGraphic opaqueFootGraphic = new FootGraphic(defaultFoothold, toTransparentColor(getFootstepColor(robotSide), 0.8));
          FootGraphic transparentFootGraphic = new FootGraphic(defaultFoothold, toTransparentColor(getFootstepColor(robotSide), 0.4));
 
          transparentFootMaterial.put(robotSide, transparentFootGraphic.getMaterial());
@@ -251,13 +252,15 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
       public FootGraphic(ConvexPolygon2D foot, Color color)
       {
-         List<Point3D> pointsToRender = foot.getVertexBufferView().stream().map(Point3D::new).collect(Collectors.toList());
-         meshBuilder.addMultiLine(pointsToRender, 0.01, color, true);
-         meshBuilder.addPolygon(pointsToRender, color);
+         Point3D[] vertices = new Point3D[foot.getNumberOfVertices()];
+         for (int j = 0; j < vertices.length; j++)
+            vertices[j] = new Point3D(foot.getVertex(j));
+         meshBuilder.addMultiLine(vertices, 0.01, color, true);
 
          material = meshBuilder.generateMaterial();
          this.foot.setMesh(meshBuilder.generateMesh());
          this.foot.setMaterial(material);
+         getChildren().add(this.foot);
       }
 
       public Material getMaterial()
