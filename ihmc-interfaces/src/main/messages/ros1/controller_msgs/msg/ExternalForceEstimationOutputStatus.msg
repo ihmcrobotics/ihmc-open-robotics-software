@@ -5,10 +5,6 @@
 uint32 sequence_id
 
 # Estimated external force in world frame
-geometry_msgs/Vector3 estimated_external_force
-
-# An indicator of the quality of the estimation
-# Field default value -1.0
-float64 solution_quality
+geometry_msgs/Vector3[] estimated_external_forces
 
 

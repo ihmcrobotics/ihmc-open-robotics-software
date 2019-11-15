@@ -46,10 +46,11 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -73,9 +74,13 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getRigidBodyHashCodes().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getExternalForcePosition(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getContactPointPositions().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPointPositions().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -89,9 +94,14 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
 
       cdr.write_type_6(data.getSolverAlpha());
 
-      cdr.write_type_2(data.getEndEffectorHashCode());
+      if(data.getRigidBodyHashCodes().size() <= 10)
+      cdr.write_type_e(data.getRigidBodyHashCodes());else
+          throw new RuntimeException("rigid_body_hash_codes field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getExternalForcePosition(), cdr);
+      if(data.getContactPointPositions().size() <= 10)
+      cdr.write_type_e(data.getContactPointPositions());else
+          throw new RuntimeException("contact_point_positions field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -102,9 +112,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       	
       data.setSolverAlpha(cdr.read_type_6());
       	
-      data.setEndEffectorHashCode(cdr.read_type_2());
-      	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getExternalForcePosition(), cdr);	
+      cdr.read_type_e(data.getRigidBodyHashCodes());	
+      cdr.read_type_e(data.getContactPointPositions());	
 
    }
 
@@ -114,9 +123,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("estimator_gain", data.getEstimatorGain());
       ser.write_type_6("solver_alpha", data.getSolverAlpha());
-      ser.write_type_2("end_effector_hash_code", data.getEndEffectorHashCode());
-      ser.write_type_a("external_force_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getExternalForcePosition());
-
+      ser.write_type_e("rigid_body_hash_codes", data.getRigidBodyHashCodes());
+      ser.write_type_e("contact_point_positions", data.getContactPointPositions());
    }
 
    @Override
@@ -125,9 +133,8 @@ public class ExternalForceEstimationConfigurationMessagePubSubType implements us
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setEstimatorGain(ser.read_type_6("estimator_gain"));
       data.setSolverAlpha(ser.read_type_6("solver_alpha"));
-      data.setEndEffectorHashCode(ser.read_type_2("end_effector_hash_code"));
-      ser.read_type_a("external_force_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getExternalForcePosition());
-
+      ser.read_type_e("rigid_body_hash_codes", data.getRigidBodyHashCodes());
+      ser.read_type_e("contact_point_positions", data.getContactPointPositions());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage src, controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage dest)

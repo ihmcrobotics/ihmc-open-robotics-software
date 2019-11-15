@@ -19,15 +19,12 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
    /**
             * Estimated external force in world frame
             */
-   public us.ihmc.euclid.tuple3D.Vector3D estimated_external_force_;
-   /**
-            * An indicator of the quality of the estimation
-            */
-   public double solution_quality_ = -1.0;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  estimated_external_forces_;
 
    public ExternalForceEstimationOutputStatus()
    {
-      estimated_external_force_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      estimated_external_forces_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (10, new geometry_msgs.msg.dds.Vector3PubSubType());
+
    }
 
    public ExternalForceEstimationOutputStatus(ExternalForceEstimationOutputStatus other)
@@ -40,9 +37,7 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
    {
       sequence_id_ = other.sequence_id_;
 
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.estimated_external_force_, estimated_external_force_);
-      solution_quality_ = other.solution_quality_;
-
+      estimated_external_forces_.set(other.estimated_external_forces_);
    }
 
    /**
@@ -64,24 +59,9 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
    /**
             * Estimated external force in world frame
             */
-   public us.ihmc.euclid.tuple3D.Vector3D getEstimatedExternalForce()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getEstimatedExternalForces()
    {
-      return estimated_external_force_;
-   }
-
-   /**
-            * An indicator of the quality of the estimation
-            */
-   public void setSolutionQuality(double solution_quality)
-   {
-      solution_quality_ = solution_quality;
-   }
-   /**
-            * An indicator of the quality of the estimation
-            */
-   public double getSolutionQuality()
-   {
-      return solution_quality_;
+      return estimated_external_forces_;
    }
 
 
@@ -104,8 +84,12 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.estimated_external_force_.epsilonEquals(other.estimated_external_force_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
+      if (this.estimated_external_forces_.size() != other.estimated_external_forces_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.estimated_external_forces_.size(); i++)
+         {  if (!this.estimated_external_forces_.get(i).epsilonEquals(other.estimated_external_forces_.get(i), epsilon)) return false; }
+      }
 
 
       return true;
@@ -122,9 +106,7 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.estimated_external_force_.equals(otherMyClass.estimated_external_force_)) return false;
-      if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
-
+      if (!this.estimated_external_forces_.equals(otherMyClass.estimated_external_forces_)) return false;
 
       return true;
    }
@@ -137,10 +119,8 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
       builder.append("ExternalForceEstimationOutputStatus {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("estimated_external_force=");
-      builder.append(this.estimated_external_force_);      builder.append(", ");
-      builder.append("solution_quality=");
-      builder.append(this.solution_quality_);
+      builder.append("estimated_external_forces=");
+      builder.append(this.estimated_external_forces_);
       builder.append("}");
       return builder.toString();
    }

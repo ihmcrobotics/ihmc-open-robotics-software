@@ -399,6 +399,11 @@ public class ExternalForceEstimator implements RobotController
       return estimatedExternalWrenches;
    }
 
+   public int getNumberOfContactPoints()
+   {
+      return contactPoints.size();
+   }
+
    public void setSolverAlpha(double alpha)
    {
       solverAlpha.set(alpha);

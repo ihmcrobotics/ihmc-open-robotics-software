@@ -18,12 +18,13 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,7 +53,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    private JointBasics[] jointsToIgnore;
    private JointBasics[] joints;
-   private final TIntObjectHashMap<RigidBodyBasics> endEffectorHashMap = new TIntObjectHashMap<>();
+   private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
    private final HashMap<String, OneDoFJointBasics> jointNameMap = new HashMap<>();
    private final ToIntFunction<String> jointNameToMatrixIndexFunction;
 
@@ -90,7 +91,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.rootJoint = fullRobotModel.getRootJoint();
       MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
                           .subtreeIterable()
-                          .forEach(rigidBody -> endEffectorHashMap.put(rigidBody.hashCode(), rigidBody));
+                          .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
       this.controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
                                                                 9.81,
@@ -148,9 +149,14 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          ExternalForceEstimationToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(
                ExternalForceEstimationToolboxConfigurationCommand.class);
 
-         RigidBodyBasics endEffector = endEffectorHashMap.get(configurationCommand.getEndEffectorHashCode());
-         externalForceEstimator.addContactPoint(endEffector, configurationCommand.getExternalForcePosition(), true);
-         externalForceEstimator.addContactPoint(fullRobotModel.getRootBody(), new Vector3D(), false);
+         externalForceEstimator.clearContactPoints();
+         int numberOfContactPoints = configurationCommand.getNumberOfContactPoints();
+         for (int i = 0; i < numberOfContactPoints; i++)
+         {
+            RigidBodyBasics rigidBody = rigidBodyHashMap.get(configurationCommand.getRigidBodyHashCodes().get(i));
+            Point3D contactPoint = configurationCommand.getContactPointPositions().get(i);
+            externalForceEstimator.addContactPoint(rigidBody, contactPoint, true);
+         }
 
          externalForceEstimator.setEstimatorGain(configurationCommand.getEstimatorGain());
          externalForceEstimator.setSolverAlpha(configurationCommand.getSolverAlpha());
@@ -190,8 +196,13 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       externalForceEstimator.doControl();
 
+      outputStatus.getEstimatedExternalForces().clear();
+      YoFixedFrameSpatialVector[] estimatedExternalWrenches = externalForceEstimator.getEstimatedExternalWrenches();
+      for (int i = 0; i < externalForceEstimator.getNumberOfContactPoints(); i++)
+      {
+         outputStatus.getEstimatedExternalForces().add().set(estimatedExternalWrenches[i].getLinearPart());
+      }
       outputStatus.setSequenceId(outputStatus.getSequenceId() + 1);
-      // TODO pack estimated forces
 
       statusOutputManager.reportStatusMessage(outputStatus);
    }

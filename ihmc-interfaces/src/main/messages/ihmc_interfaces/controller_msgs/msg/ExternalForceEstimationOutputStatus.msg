@@ -5,7 +5,4 @@
 uint32 sequence_id
 
 # Estimated external force in world frame
-geometry_msgs/Vector3 estimated_external_force
-
-# An indicator of the quality of the estimation
-float64 solution_quality -1
+geometry_msgs/Vector3[<=10] estimated_external_forces

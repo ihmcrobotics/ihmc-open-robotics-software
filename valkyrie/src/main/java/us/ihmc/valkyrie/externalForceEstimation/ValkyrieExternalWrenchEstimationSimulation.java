@@ -123,8 +123,8 @@ public class ValkyrieExternalWrenchEstimationSimulation
                                      {
                                         ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
                                         configurationMessage.setEstimatorGain(0.5);
-                                        configurationMessage.setEndEffectorHashCode(endEffector.hashCode());
-                                        configurationMessage.getExternalForcePosition().set(externalForcePointOffset);
+                                        configurationMessage.getRigidBodyHashCodes().add(endEffector.hashCode());
+                                        configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
                                         configurationMessagePublisher.publish(configurationMessage);
 
                                         ThreadTools.sleep(1);
@@ -145,7 +145,7 @@ public class ValkyrieExternalWrenchEstimationSimulation
                                     });
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addButton(sleepButton);
 
-      new ExternalForceEstimationToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
+      new ExternalForceEstimationToolboxModule(robotModel, true, PubSubImplementation.FAST_RTPS);
 
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
       ROS2Tools.createCallbackSubscription(ros2Node,
@@ -157,7 +157,8 @@ public class ValkyrieExternalWrenchEstimationSimulation
                                                                                        {
                                                                                           if (toolboxOutputStatus.get() != null)
                                                                                              estimatedForce.set(toolboxOutputStatus.get()
-                                                                                                                                   .getEstimatedExternalForce());
+                                                                                                                                   .getEstimatedExternalForces()
+                                                                                                                                   .get(0));
                                                                                        });
       simulationStarter.getAvatarSimulation().start();
       simulationStarter.getAvatarSimulation().simulate();

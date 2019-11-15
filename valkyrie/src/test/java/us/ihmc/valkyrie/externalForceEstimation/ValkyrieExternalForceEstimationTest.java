@@ -197,7 +197,7 @@ public class ValkyrieExternalForceEstimationTest
          for (int i = 0; i < testConfigs.size(); i++)
          {
             if(i == testIndex.get())
-               testConfigs.get(testIndex.get()).estimatedForce.set(status.getEstimatedExternalForce());
+               testConfigs.get(testIndex.get()).estimatedForce.set(status.getEstimatedExternalForces().get(0));
             else
                testConfigs.get(i).estimatedForce.set(0.0, 0.0, 0.0);
          }
@@ -215,8 +215,8 @@ public class ValkyrieExternalForceEstimationTest
 
          ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
          configurationMessage.setEstimatorGain(0.8);
-         configurationMessage.setEndEffectorHashCode(testConfig.endEffector.hashCode());
-         configurationMessage.getExternalForcePosition().set(testConfig.efpOffset);
+         configurationMessage.getRigidBodyHashCodes().add(testConfig.endEffector.hashCode());
+         configurationMessage.getContactPointPositions().add().set(testConfig.efpOffset);
          configurationMessage.setSolverAlpha(0.001);
          commandInputManager.submitMessage(configurationMessage);
 

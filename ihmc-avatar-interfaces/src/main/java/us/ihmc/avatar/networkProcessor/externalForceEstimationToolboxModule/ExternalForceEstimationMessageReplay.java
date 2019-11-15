@@ -66,11 +66,11 @@ public class ExternalForceEstimationMessageReplay
 
       // Valkyrie pelvis
       //      configurationMessage.setEndEffectorHashCode(-878626891);
-      //      configurationMessage.getExternalForcePosition().setToZero();
+      //      configurationMessage.getContactPointPositions().setToZero();
 
       // Valkyrie right elbow pitch
-      configurationMessage.setEndEffectorHashCode(601127246);
-      configurationMessage.getExternalForcePosition().set(0.0, -0.35, -0.03);
+      configurationMessage.getRigidBodyHashCodes().add(601127246);
+      configurationMessage.getContactPointPositions().add().set(0.0, -0.35, -0.03);
 
       configMessagePublisher.publish(configurationMessage);
 

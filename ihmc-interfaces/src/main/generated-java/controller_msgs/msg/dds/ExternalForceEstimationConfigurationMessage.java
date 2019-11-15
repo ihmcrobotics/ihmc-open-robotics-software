@@ -25,18 +25,21 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
             */
    public double solver_alpha_ = 0.005;
    /**
-            * The is the unique hash code of the end-effector that is assumed to be pushed
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+            * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
+            * See RigidBody.hashCode() for calculation of the hash code
             */
-   public int end_effector_hash_code_;
+   public us.ihmc.idl.IDLSequence.Integer  rigid_body_hash_codes_;
    /**
-            * This is the position externally applied force to be estimated, in endEffector.getBodyFixedFrame().
+            * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
             */
-   public us.ihmc.euclid.tuple3D.Point3D external_force_position_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  contact_point_positions_;
 
    public ExternalForceEstimationConfigurationMessage()
    {
-      external_force_position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      rigid_body_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (10, "type_2");
+
+      contact_point_positions_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public ExternalForceEstimationConfigurationMessage(ExternalForceEstimationConfigurationMessage other)
@@ -53,9 +56,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       solver_alpha_ = other.solver_alpha_;
 
-      end_effector_hash_code_ = other.end_effector_hash_code_;
-
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.external_force_position_, external_force_position_);
+      rigid_body_hash_codes_.set(other.rigid_body_hash_codes_);
+      contact_point_positions_.set(other.contact_point_positions_);
    }
 
    /**
@@ -103,30 +105,23 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       return solver_alpha_;
    }
 
+
    /**
-            * The is the unique hash code of the end-effector that is assumed to be pushed
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+            * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
+            * See RigidBody.hashCode() for calculation of the hash code
             */
-   public void setEndEffectorHashCode(int end_effector_hash_code)
+   public us.ihmc.idl.IDLSequence.Integer  getRigidBodyHashCodes()
    {
-      end_effector_hash_code_ = end_effector_hash_code;
-   }
-   /**
-            * The is the unique hash code of the end-effector that is assumed to be pushed
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
-            */
-   public int getEndEffectorHashCode()
-   {
-      return end_effector_hash_code_;
+      return rigid_body_hash_codes_;
    }
 
 
    /**
-            * This is the position externally applied force to be estimated, in endEffector.getBodyFixedFrame().
+            * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
             */
-   public us.ihmc.euclid.tuple3D.Point3D getExternalForcePosition()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getContactPointPositions()
    {
-      return external_force_position_;
+      return contact_point_positions_;
    }
 
 
@@ -153,9 +148,15 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solver_alpha_, other.solver_alpha_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_hash_code_, other.end_effector_hash_code_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.rigid_body_hash_codes_, other.rigid_body_hash_codes_, epsilon)) return false;
 
-      if (!this.external_force_position_.epsilonEquals(other.external_force_position_, epsilon)) return false;
+      if (this.contact_point_positions_.size() != other.contact_point_positions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.contact_point_positions_.size(); i++)
+         {  if (!this.contact_point_positions_.get(i).epsilonEquals(other.contact_point_positions_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -175,9 +176,8 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       if(this.solver_alpha_ != otherMyClass.solver_alpha_) return false;
 
-      if(this.end_effector_hash_code_ != otherMyClass.end_effector_hash_code_) return false;
-
-      if (!this.external_force_position_.equals(otherMyClass.external_force_position_)) return false;
+      if (!this.rigid_body_hash_codes_.equals(otherMyClass.rigid_body_hash_codes_)) return false;
+      if (!this.contact_point_positions_.equals(otherMyClass.contact_point_positions_)) return false;
 
       return true;
    }
@@ -194,10 +194,10 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       builder.append(this.estimator_gain_);      builder.append(", ");
       builder.append("solver_alpha=");
       builder.append(this.solver_alpha_);      builder.append(", ");
-      builder.append("end_effector_hash_code=");
-      builder.append(this.end_effector_hash_code_);      builder.append(", ");
-      builder.append("external_force_position=");
-      builder.append(this.external_force_position_);
+      builder.append("rigid_body_hash_codes=");
+      builder.append(this.rigid_body_hash_codes_);      builder.append(", ");
+      builder.append("contact_point_positions=");
+      builder.append(this.contact_point_positions_);
       builder.append("}");
       return builder.toString();
    }
