@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,6 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -100,14 +102,19 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
-      FrameOrientation3DBasics parentPose = new FrameQuaternion(parentSoleFrame);
-      parentPose.changeFrame(parentSoleZupFrame);
+      double upwardPitch = -previousSnappedSoleTransform.getRotation().getPitch();
+      double alpha = Math.max(0.0, upwardPitch / parameters.getMinimumSurfaceInclineRadians());
 
-      double alpha = Math.max(0.0, -parentPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
-      double minZ = InterpolationTools.linearInterpolate(parameters.getMaximumStepZ(), parameters.getMinimumStepZWhenFullyPitched(), alpha);
-      if (solePositionInParentZUpFrame.getZ() < minZ)
+      double maxStepForwardWhenPitched = 0.2;
+      double minZ = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alpha);
+      double minX = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), maxStepForwardWhenPitched, alpha);
+      double stepDownFraction = -solePositionInParentZUpFrame.getZ() / minZ;
+      double stepForwardFraction = solePositionInParentZUpFrame.getX() / minX;
+      double combinedFraction = stepDownFraction + stepForwardFraction;
+
+      if (combinedFraction > 1.0)
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_WHEN_PITCHED;
+         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
          return false;
       }
 
