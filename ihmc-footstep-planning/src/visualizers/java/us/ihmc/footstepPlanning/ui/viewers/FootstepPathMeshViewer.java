@@ -202,7 +202,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          {
             FramePoint3D copMidpoint = new FramePoint3D();
             copMidpoint.interpolate(previousStanceFootPosition, stanceFootPosition, footstepDataMessage.getTransferWeightDistribution());
-            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, midpointColor);
+            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, getWaypointColor(footstepDataMessage));
          }
 
          previousStanceFootPosition.set(stanceFootPosition);
@@ -245,6 +245,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          return Color.GRAY;
       }
+   }
+
+   private Color getWaypointColor(FootstepDataMessage footstepDataMessage)
+   {
+      return toTransparentColor(footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN, 0.5);
    }
 
    private boolean hasDefaultWaypointProportions(FootstepDataMessage footstepDataMessage)
@@ -333,5 +338,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
    public Node getRoot()
    {
       return root;
+   }
+
+   private static Color toTransparentColor(Color opaqueColor, double opacity)
+   {
+      double red = opaqueColor.getRed();
+      double green = opaqueColor.getGreen();
+      double blue = opaqueColor.getBlue();
+      return new Color(red, green, blue, opacity);
    }
 }
