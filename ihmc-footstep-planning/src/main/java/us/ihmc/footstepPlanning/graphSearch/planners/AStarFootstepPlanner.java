@@ -78,6 +78,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    /** The final node of the planned path. Used to call {@link FootstepGraph#getPathFromStart} and as a helper object for best-effort mode*/
    private FootstepNode endNode;
+   private FootstepNode bestEffortNode;
 
    /** Nominal mid-foot goal pose, used to call {@link FootstepPlan#setLowLevelPlanGoal} */
    private final FramePose3D goalPoseInWorld = new FramePose3D();
@@ -360,6 +361,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       endNode = null;
+      bestEffortNode = null;
 
       if (listener != null)
       {
@@ -433,7 +435,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
-            if (!parameters.getReturnBestEffortPlan() || endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
+            if (!parameters.getReturnBestEffortPlan() || bestEffortNode == null || stack.comparator().compare(neighbor, bestEffortNode) < 0)
                stack.add(neighbor);
          }
 
@@ -443,7 +445,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          long timeInNano = System.nanoTime();
          double planningTime = Conversions.nanosecondsToSeconds(timeInNano - planningStartTime);
          boolean hardTimeout = planningTime > timeout.getDoubleValue();
-         boolean bestEffortTimedOut = parameters.getReturnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue() && endNode != null;
+         boolean bestEffortTimedOut = parameters.getReturnBestEffortPlan() && planningTime > bestEffortTimeout.getDoubleValue() && bestEffortNode != null;
          if (hardTimeout || bestEffortTimedOut || abortPlanning.getBooleanValue())
          {
             if (abortPlanning.getBooleanValue())
@@ -452,6 +454,9 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             break;
          }
       }
+
+      if (endNode == null && bestEffortNode != null)
+         endNode = bestEffortNode;
 
       long timeInNano = System.nanoTime();
       planningTime.set(Conversions.nanosecondsToSeconds(timeInNano - planningStartTime));
@@ -479,6 +484,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             if (listener != null)
                listener.addNode(endNode, nodeToExpand);
 
+            bestEffortNode = endNode;
             graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
             return true;
          }
@@ -494,6 +500,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          if (isNodeWithinProximityOfGoal(parentNode))
          {
             endNode = nodeToExpand;
+            bestEffortNode = endNode;
             return true;
          }
 
@@ -523,11 +530,11 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       if (graph.getPathFromStart(nodeToExpand).size() - 1 < parameters.getMinimumStepsForBestEffortPlan())
          return;
 
-      if (endNode == null || heuristics.compute(nodeToExpand) < heuristics.compute(endNode))
+      if (bestEffortNode == null || heuristics.compute(nodeToExpand) < heuristics.compute(bestEffortNode))
       {
          if (listener != null)
             listener.reportLowestCostNodeList(graph.getPathFromStart(nodeToExpand));
-         endNode = nodeToExpand;
+         bestEffortNode = nodeToExpand;
       }
    }
 
