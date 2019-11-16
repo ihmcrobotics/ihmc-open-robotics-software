@@ -435,7 +435,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
-            if (!parameters.getReturnBestEffortPlan() || bestEffortNode == null || stack.comparator().compare(neighbor, bestEffortNode) < 0)
+//            if (!parameters.getReturnBestEffortPlan() || bestEffortNode == null || stack.comparator().compare(neighbor, bestEffortNode) < 0)
                stack.add(neighbor);
          }
 
