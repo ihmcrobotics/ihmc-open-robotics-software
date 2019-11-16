@@ -13,7 +13,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistics> implements Settable<FootstepPlanningStatistics>, EpsilonComparable<FootstepPlanningStatistics>
 {
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_HIGH_OR_LOW = (byte) 0;
-   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_LOW_WHEN_PITCHED = (byte) 1;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED = (byte) 1;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FORWARD_AND_DOWN = (byte) 2;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE_AND_DOWN = (byte) 3;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR = (byte) 4;

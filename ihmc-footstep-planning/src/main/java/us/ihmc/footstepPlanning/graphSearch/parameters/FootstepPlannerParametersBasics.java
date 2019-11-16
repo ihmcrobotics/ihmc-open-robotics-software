@@ -70,6 +70,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepZWhenFullyPitched, stepZ);
    }
 
+   default void setMaximumStepXWhenFullyPitched(double stepX)
+   {
+      set(FootstepPlannerParameterKeys.maxStepXWhenFullyPitched, stepX);
+   }
+
    default void setStepYawReductionFactorAtMaxReach(double factor)
    {
       set(FootstepPlannerParameterKeys.stepYawReductionFactorAtMaxReach, factor);
@@ -387,6 +392,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
+      if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
+         setMaximumStepXWhenFullyPitched(parametersPacket.getMaximumStepXWhenFullyPitched());
       if (parametersPacket.getStepYawReductionFactorAtMaxReach() != noValue)
          setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
       if (parametersPacket.getMinimumFootholdPercent() != noValue)
