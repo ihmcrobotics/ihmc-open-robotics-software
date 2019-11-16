@@ -158,7 +158,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-//      tryToStartModule(() -> setupFootstepPostProcessingToolboxModule());
+      tryToStartModule(() -> setupFootstepPostProcessingToolboxModule());
 
       messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
