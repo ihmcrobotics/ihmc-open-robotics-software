@@ -435,6 +435,8 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
 
+            // RJG: 18112019For some reason, only adding the cheapest nodes when in best effort causes it to take a LOT longer, so we don't get as good of
+            // results. Removing this check causes much quicker convergence.
 //            if (!parameters.getReturnBestEffortPlan() || bestEffortNode == null || stack.comparator().compare(neighbor, bestEffortNode) < 0)
                stack.add(neighbor);
          }
