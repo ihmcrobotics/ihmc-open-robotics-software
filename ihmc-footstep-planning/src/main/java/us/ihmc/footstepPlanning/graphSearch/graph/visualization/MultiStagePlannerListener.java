@@ -92,7 +92,6 @@ public class MultiStagePlannerListener
       {
          numberOfStepsConsidered += listeners.get(i).getTotalNodeCount();
       }
-      LogTools.info("Total steps considered " + numberOfStepsConsidered);
       planningStatistics.setNumberOfStepsConsidered(numberOfStepsConsidered);
 
       int totalRejectionCount = 0;
