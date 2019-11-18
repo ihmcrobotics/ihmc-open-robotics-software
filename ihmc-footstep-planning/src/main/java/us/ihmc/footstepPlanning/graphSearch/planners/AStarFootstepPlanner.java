@@ -499,7 +499,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             return false;
          FootstepNode parentNode = graph.getParentNode(nodeToExpand);
 
-         if (isNodeWithinProximityOfGoal(parentNode))
+         if (isNodeWithinProximityOfGoal(parentNode) && isNodeCloserThanEndNode(nodeToExpand))
          {
             endNode = nodeToExpand;
             bestEffortNode = endNode;
@@ -521,6 +521,23 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
          return false;
       if (goal.getYawProximity() > 0.0 && Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(nominalGoalNode.getYaw(), node.getYaw())) > goal.getYawProximity())
          return false;
+      return true;
+   }
+
+   private boolean isNodeCloserThanEndNode(FootstepNode node)
+   {
+      if (endNode == null)
+         return true;
+
+      FootstepNode existingNominalGoalNode = goalNodes.get(endNode.getRobotSide());
+      FootstepNode candidateNominalGoalNode = goalNodes.get(node.getRobotSide());
+
+      if (candidateNominalGoalNode.euclideanDistanceSquared(node) > existingNominalGoalNode.euclideanDistanceSquared(endNode))
+         return false;
+      if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(candidateNominalGoalNode.getYaw(), node.getYaw())) >
+            Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(existingNominalGoalNode.getYaw(), endNode.getYaw())))
+         return false;
+
       return true;
    }
 
