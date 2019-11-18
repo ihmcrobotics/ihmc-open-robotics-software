@@ -12,5 +12,7 @@ byte type 255
 
 geometry_msgs/Pose pose_in_world
 geometry_msgs/Point[<=25] raw_points_in_local
+geometry_msgs/Point[<=25] preferred_navigable_extrusions_in_local
+geometry_msgs/Point[<=25] preferred_non_navigable_extrusions_in_local
 geometry_msgs/Point[<=25] navigable_extrusions_in_local
 geometry_msgs/Point[<=25] non_navigable_extrusions_in_local
