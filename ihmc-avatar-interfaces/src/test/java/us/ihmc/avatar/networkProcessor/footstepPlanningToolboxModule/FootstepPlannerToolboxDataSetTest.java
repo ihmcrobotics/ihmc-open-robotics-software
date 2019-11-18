@@ -1206,7 +1206,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       @Override
-      public double getMaxICPErrorBeforeSingleSupportY()
+      public double getMaxICPErrorBeforeSingleSupportInnerY()
       {
          return 0;
       }

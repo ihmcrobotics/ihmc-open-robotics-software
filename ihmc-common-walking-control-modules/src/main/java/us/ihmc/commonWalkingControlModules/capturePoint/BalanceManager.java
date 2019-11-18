@@ -121,7 +121,8 @@ public class BalanceManager
 
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final DoubleProvider maxICPErrorBeforeSingleSupportX;
-   private final DoubleProvider maxICPErrorBeforeSingleSupportY;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -213,7 +214,8 @@ public class BalanceManager
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
       maxICPErrorBeforeSingleSupportX = new DoubleParameter("maxICPErrorBeforeSingleSupportX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
-      maxICPErrorBeforeSingleSupportY = new DoubleParameter("maxICPErrorBeforeSingleSupportY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
+      maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
+      maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
       double pelvisTranslationICPSupportPolygonSafeMargin = walkingControllerParameters.getPelvisTranslationICPSupportPolygonSafeMargin();
       pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, pelvisTranslationICPSupportPolygonSafeMargin, bipedSupportPolygons, registry);
@@ -658,8 +660,10 @@ public class BalanceManager
       getICPError(icpError2d);
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
+      boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT && icpError2d.getY() > 0.0;
+      double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue() : maxICPErrorBeforeSingleSupportOuterY.getValue();
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
+            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()

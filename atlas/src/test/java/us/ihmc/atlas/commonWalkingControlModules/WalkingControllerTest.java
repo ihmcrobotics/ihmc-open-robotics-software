@@ -119,7 +119,7 @@ public class WalkingControllerTest
             };
 
             @Override
-            public double getMaxICPErrorBeforeSingleSupportY()
+            public double getMaxICPErrorBeforeSingleSupportInnerY()
             {
                return 1.0;
             };
