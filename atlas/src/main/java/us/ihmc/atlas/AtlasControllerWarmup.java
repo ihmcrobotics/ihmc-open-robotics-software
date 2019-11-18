@@ -32,7 +32,8 @@ public class AtlasControllerWarmup extends HumanoidControllerWarmup
          getYoVariable(side.getLowerCaseName() + "FootAssumeFootBarelyLoaded").setValueFromDouble(1.0);
          getYoVariable(side.getLowerCaseName() + "FootAssumeCopOnEdge").setValueFromDouble(1.0);
       }
-      getYoVariable("maxICPErrorBeforeSingleSupportX").setValueFromDouble(Double.POSITIVE_INFINITY);
+      getYoVariable("maxICPErrorBeforeSingleSupportForwardX").setValueFromDouble(Double.POSITIVE_INFINITY);
+      getYoVariable("maxICPErrorBeforeSingleSupportBackwardX").setValueFromDouble(Double.POSITIVE_INFINITY);
       getYoVariable("maxICPErrorBeforeSingleSupportInnerY").setValueFromDouble(Double.POSITIVE_INFINITY);
       getYoVariable("maxICPErrorBeforeSingleSupportOuterY").setValueFromDouble(Double.POSITIVE_INFINITY);
 
