@@ -3,12 +3,15 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepEdge;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.log.LogTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,6 +81,12 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
+      if (parentNode == null)
+      {
+         LogTools.warn("Rejecting the initial node, because the parent is null.");
+         return;
+      }
+
       RigidBodyTransform nodePose;
       if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP && snapper != null)
       {
@@ -135,7 +144,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       for (int i = 0; i < lowestCostPlan.size(); i++)
       {
          FootstepNode node = lowestCostPlan.get(i);
-         RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
+         RigidBodyTransform nodePose;
+         if (snapper == null)
+            nodePose = new RigidBodyTransform(new Quaternion(node.getYaw(), 0.0, 0.0), new Vector3D(node.getX(), node.getY(), 0.0));
+         else
+            nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
          int parentNodeIndex = i > 0 ? lowestCostPlan.get(i - 1).getNodeIndex() : -1;
          concurrentNodeDataList.addNode(parentNodeIndex, node, nodePose, null);
       }
