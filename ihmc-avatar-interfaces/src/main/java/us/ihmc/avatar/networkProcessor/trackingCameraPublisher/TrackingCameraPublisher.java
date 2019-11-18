@@ -219,6 +219,21 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
       {
          initialized = true;
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
+         
+         System.out.println("Initial Tracking data ");
+         RigidBodyTransform initTransform = new RigidBodyTransform(dataToPublish.orientation, dataToPublish.position);
+         System.out.println(initTransform);
+         System.out.println("initialTransformToWorld (FK) ");
+         System.out.println(initialTransformToWorld);
+         
+         Point3D tempposition = new Point3D(dataToPublish.position);
+         Quaternion temporientation = new Quaternion(dataToPublish.orientation);
+         initialTransformToWorld.transform(tempposition);
+         initialTransformToWorld.transform(temporientation);
+         
+         System.out.println("Initial offset inverted ");
+         RigidBodyTransform transform = new RigidBodyTransform(temporientation, tempposition);
+         System.out.println(transform);
          return;
       }
       dataToPublish.applyTransform(initialTransformToWorld);
