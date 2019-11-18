@@ -121,7 +121,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    
    private static final double depthOffsetX = 0.058611;
    private static final double depthOffsetZ = 0.038959;
-   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double depthPitchingAngle = 75.0 / 180.0 * Math.PI;
    private static final double depthThickness = 0.0245;
 
    private static final double trackingOffsetX = 0.055625;
