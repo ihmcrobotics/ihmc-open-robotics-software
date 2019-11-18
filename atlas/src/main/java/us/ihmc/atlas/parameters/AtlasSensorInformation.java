@@ -9,7 +9,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.parameters.*;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
@@ -109,16 +113,16 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private final boolean setupROSLocationService;
    private final boolean setupROSParameterSetters;
    private final RobotTarget target;
-   
+
    public static final double linearVelocityThreshold = 0.2;
-   public static final double angularVelocityThreshold = Math.PI/15;
+   public static final double angularVelocityThreshold = Math.PI / 15;
 
    /**
     * Realsense Parameters
     */
    public static final String depthCameraTopic = depth_camera_namespace + "/depth/color/points";
    public static final String trackingCameraTopic = tracking_camera_namespace + "/odom/sample";
-   
+
    private static final double depthOffsetX = 0.058611;
    private static final double depthOffsetZ = 0.038959;
    private static final double depthPitchingAngle = 75.0 / 180.0 * Math.PI;
@@ -127,7 +131,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final double trackingOffsetX = 0.055625;
    private static final double trackingOffsetZ = 0.051192;
    private static final double trackingPitchingAngle = 35.0 / 180.0 * Math.PI;
-   private static final double trackingThickness = 0.0125;
+   private static final double trackingThickness = 0.0135; // Original : 12.5 mm. But for calibration with Lidar, 1 cm more. Ideally, Lidar should be re-cal. 
 
    private static final double pelvisToDepthOrigin = 0.19;
    private static final double pelvisLength = 0.33;
@@ -167,30 +171,16 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToTrackingCamera.appendYawRotation(Math.PI);
-      transformPelvisToTrackingCamera.appendTranslation(pelvisLength - pelvisToDepthOrigin, 0.0, 0.0);
-      transformPelvisToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
-      transformPelvisToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
-      transformPelvisToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
+      transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
+      transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
    }
-   
+
    public static final RigidBodyTransform transformTrackingCameraToDepthCamera = new RigidBodyTransform();
    static
    {
-      transformTrackingCameraToDepthCamera.appendTranslation(-trackingThickness, 0.0, 0.0);
-      transformTrackingCameraToDepthCamera.appendPitchRotation(-trackingPitchingAngle);
-      transformTrackingCameraToDepthCamera.appendTranslation(-trackingOffsetX, 0.0, -trackingOffsetZ);
-      transformTrackingCameraToDepthCamera.appendYawRotation(-Math.PI);
-      
-      transformTrackingCameraToDepthCamera.appendTranslation(pelvisLength, 0.0, 0.0);
-      
-      transformTrackingCameraToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformTrackingCameraToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformTrackingCameraToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
-      transformTrackingCameraToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformTrackingCameraToDepthCamera.appendRollRotation(-Math.PI / 2);
+      transformTrackingCameraToDepthCamera.multiply(transformDepthCameraToTrackingCamera);
+      transformTrackingCameraToDepthCamera.invert();
    }
-
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
    {
