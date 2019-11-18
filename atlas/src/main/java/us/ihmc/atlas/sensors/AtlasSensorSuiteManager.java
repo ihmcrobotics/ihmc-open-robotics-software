@@ -21,13 +21,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -212,7 +208,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    /**
     * Tracking Camera (T265) is able to compensate flat ground itself.
     * See the documentation of BMI055, Session 5.6.7.
-    * So the initial transformation matrix will be snap into Zup.
+    * So the initial transformation matrix will be snap into Zup at `TrackingCameraPublisher`.
     */
    private SensorFrameInitializationTransformer createCustomTrackingCameraWorldTransformCalculator()
    {
@@ -226,14 +222,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
             pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
             transformToWorldToPack.multiply(transformFromPelvisToRealSense);
-
-//            RigidBodyTransform syncronizedZup = new RigidBodyTransform(transformToWorldToPack);
-//            Vector3D axisZ = new Vector3D(syncronizedZup.getM02(), syncronizedZup.getM12(), syncronizedZup.getM22());
-//            AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
-//            axisAngleFromZUpToVector3D.invert();
-//
-//            RotationMatrix zaxisToZupTransform = new RotationMatrix(axisAngleFromZUpToVector3D);
-//            transformToWorldToPack.getRotation().preMultiply(zaxisToZupTransform);
          }
       };
    }
