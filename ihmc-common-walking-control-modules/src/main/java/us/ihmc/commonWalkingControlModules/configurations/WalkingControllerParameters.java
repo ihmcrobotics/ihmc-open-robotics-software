@@ -74,12 +74,12 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Method returns robot specific parameters for the {@link #ToeSlippingDetector}.
+    * Method returns robot specific parameters for the {@link ToeSlippingDetector}.
     * <p>
     * Must be overwritten if {@link #enableToeOffSlippingDetection()} returns {@code true}.
     * </p>
     * @return the parameters for slip detection during toe off.
-    * @see ToeSlippingDetector#configure(double, double, double, double)
+    * @see ToeSlippingDetector#configure(ToeSlippingDetectorParameters)
     */
    public ToeSlippingDetectorParameters getToeSlippingDetectorParameters()
    {
@@ -422,10 +422,29 @@ public abstract class WalkingControllerParameters
     * Note that if the ICP leaves the support area the single support state will be started regardless of the
     * ICP error in the hope to recover by stepping.
     * </p>
+    * @see #getMaxICPErrorBeforeSingleSupportBackwardX()
     * @see #getMaxICPErrorBeforeSingleSupportInnerY()
     * @see #getMaxICPErrorBeforeSingleSupportOuterY()
     */
-   public abstract double getMaxICPErrorBeforeSingleSupportX();
+   public abstract double getMaxICPErrorBeforeSingleSupportForwardX();
+
+   /**
+    * This parameter is used when the controller checks if it is safe to transition from transfer to single
+    * support state when walking. The transition is considered safe if the ICP tracking error lies within
+    * an ellipse with the axes aligned with the z-up ankle frame of the stance foot. This parameter defines
+    * the radius of the ellipse along the x-axis of that frame.
+    * </p>
+    * Note that if the ICP leaves the support area the single support state will be started regardless of the
+    * ICP error in the hope to recover by stepping.
+    * </p>
+    * @see #getMaxICPErrorBeforeSingleSupportForwardX()
+    * @see #getMaxICPErrorBeforeSingleSupportInnerY()
+    * @see #getMaxICPErrorBeforeSingleSupportOuterY()
+    */
+   public double getMaxICPErrorBeforeSingleSupportBackwardX()
+   {
+      return getMaxICPErrorBeforeSingleSupportForwardX();
+   }
 
    /**
     * This parameter is used when the controller checks if it is safe to transition from transfer to single
@@ -436,7 +455,8 @@ public abstract class WalkingControllerParameters
     * Note that if the ICP leaves the support area the single support state will be started regardless of the
     * ICP error in the hope to recover by stepping.
     * </p>
-    * @see #getMaxICPErrorBeforeSingleSupportX()
+    * @see #getMaxICPErrorBeforeSingleSupportForwardX()
+    * @see #getMaxICPErrorBeforeSingleSupportBackwardX()
     * @see #getMaxICPErrorBeforeSingleSupportOuterY()
     */
    public abstract double getMaxICPErrorBeforeSingleSupportInnerY();
@@ -450,7 +470,8 @@ public abstract class WalkingControllerParameters
     * Note that if the ICP leaves the support area the single support state will be started regardless of the
     * ICP error in the hope to recover by stepping.
     * </p>
-    * @see #getMaxICPErrorBeforeSingleSupportX()
+    * @see #getMaxICPErrorBeforeSingleSupportForwardX()
+    * @see #getMaxICPErrorBeforeSingleSupportBackwardX()
     * @see #getMaxICPErrorBeforeSingleSupportInnerY()
     */
    public double getMaxICPErrorBeforeSingleSupportOuterY()
