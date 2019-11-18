@@ -1,8 +1,15 @@
 package us.ihmc.valkyrie.torquespeedcurve;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static us.ihmc.avatar.testTools.EndToEndTestTools.computeWalkingDuration;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +28,8 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -38,11 +47,14 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporterGraphCreator;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.StaircaseEnvironment;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -59,14 +71,12 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private ValkyrieJointMap jointMap = new ValkyrieJointMap();
 
-   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -87,24 +97,31 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testStepUpWithSquareUpReal() throws SimulationExceededMaximumTimeException
+   public void testStepUpInchWithSquareUpReal() throws Exception
    {
-      testStepUpWithSquareUp(getRealRobotWalkingParameters());
+      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
+      {
+         testStepUpWithSquareUp(stepHeight, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+      }
    }
 
    @Test
-   public void testStepUpWithSquareUpSim() throws SimulationExceededMaximumTimeException
+   public void testStepUpInchWithSquareUpSim() throws Exception
    {
-      testStepUpWithSquareUp(getSCSWalkingParameters());
+      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
+      {
+         testStepUpWithSquareUp(stepHeight, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
+      }
    }
 
-   public void testStepUpWithSquareUp(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   public void testStepUpWithSquareUp(double stepHeightInches, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+         throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      showMemoryUsageBeforeTest();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double stepStart = 1.0;
-      double stepHeight = 2.54 / 100.0 * 9.5;
+      double stepHeight = 2.54 / 100.0 * stepHeightInches;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
       DRCRobotModel robotModel = getRobotModel(false);
@@ -143,28 +160,40 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
+      String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
+      exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      destroySimulationAndRecycleMemory();
    }
 
    @Test
-   public void testStepUpWithoutSquareUpReal() throws SimulationExceededMaximumTimeException
+   public void testStepUpInchWithoutSquareUpReal() throws Exception
    {
-      testStepUpWithoutSquareUp(getRealRobotWalkingParameters());
+      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
+      {
+         testStepUpWithoutSquareUp(stepHeight, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+      }
    }
 
    @Test
-   public void testStepUpWithoutSquareUpSim() throws SimulationExceededMaximumTimeException
+   public void testStepUpInchWithoutSquareUpSim() throws Exception
    {
-      testStepUpWithoutSquareUp(getSCSWalkingParameters());
+      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
+      {
+         testStepUpWithoutSquareUp(stepHeight, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
+      }
    }
 
-   public void testStepUpWithoutSquareUp(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   public void testStepUpWithoutSquareUp(double stepHeightInches, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+         throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      showMemoryUsageBeforeTest();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double stepStart = 1.0;
-      double stepHeight = 2.54 / 100.0 * 9.5;
+      double stepHeight = 2.54 / 100.0 * stepHeightInches;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
       DRCRobotModel robotModel = getRobotModel(false);
@@ -204,63 +233,89 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      String dataNameSuffix = "StepUpWithoutSquareUp" + stepHeightInches;
+      String info = "Step up a " + stepHeightInches + " inches high step while walking";
+      exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      destroySimulationAndRecycleMemory();
    }
 
    @Test
-   public void testWalkDownSlope45DegReal() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope45DegReal() throws Exception
    {
-      testWalkSlope(Math.toRadians(45.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+      testWalkSlope(Math.toRadians(45.0),
+                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
+                    getRealRobotWalkingParameters(),
+                    getDataOuputFolderForRealRobotParams());
    }
 
    @Test
-   public void testWalkDownSlope45DegSim() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope45DegSim() throws Exception
    {
-      testWalkSlope(Math.toRadians(45.0), 0.33 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+      testWalkSlope(Math.toRadians(45.0),
+                    0.33 * getSCSSteppingParameters().getDefaultStepLength(),
+                    getSCSWalkingParameters(),
+                    getDataOuputFolderForSimParams());
    }
 
    @Test
-   public void testWalkDownSlope30DegReal() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope30DegReal() throws Exception
    {
-      testWalkSlope(Math.toRadians(30.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+      testWalkSlope(Math.toRadians(30.0),
+                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
+                    getRealRobotWalkingParameters(),
+                    getDataOuputFolderForRealRobotParams());
    }
 
    @Test
-   public void testWalkDownSlope30DegSim() throws SimulationExceededMaximumTimeException
+   public void testWalkDownSlope30DegSim() throws Exception
    {
-      testWalkSlope(Math.toRadians(30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+      testWalkSlope(Math.toRadians(30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters(), getDataOuputFolderForSimParams());
    }
 
    @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
    @Test
-   public void testWalkUpSlope45DegReal() throws SimulationExceededMaximumTimeException
+   public void testWalkUpSlope45DegReal() throws Exception
    {
-      testWalkSlope(Math.toRadians(-45.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+      testWalkSlope(Math.toRadians(-45.0),
+                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
+                    getRealRobotWalkingParameters(),
+                    getDataOuputFolderForRealRobotParams());
    }
 
    @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
    @Test
-   public void testWalkUpSlope45DegSim() throws SimulationExceededMaximumTimeException
+   public void testWalkUpSlope45DegSim() throws Exception
    {
-      testWalkSlope(Math.toRadians(-45.0), 0.33 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+      testWalkSlope(Math.toRadians(-45.0),
+                    0.33 * getSCSSteppingParameters().getDefaultStepLength(),
+                    getSCSWalkingParameters(),
+                    getDataOuputFolderForSimParams());
    }
 
    @Test
-   public void testWalkUpSlope30DegReal() throws SimulationExceededMaximumTimeException
+   public void testWalkUpSlope30DegReal() throws Exception
    {
-      testWalkSlope(Math.toRadians(-30.0), 0.5 * getRealRobotSteppingParameters().getDefaultStepLength(), getRealRobotWalkingParameters());
+      testWalkSlope(Math.toRadians(-30.0),
+                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
+                    getRealRobotWalkingParameters(),
+                    getDataOuputFolderForRealRobotParams());
    }
 
    @Test
-   public void testWalkUpSlope30DegSim() throws SimulationExceededMaximumTimeException
+   public void testWalkUpSlope30DegSim() throws Exception
    {
-      testWalkSlope(Math.toRadians(-30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters());
+      testWalkSlope(Math.toRadians(-30.0),
+                    0.5 * getSCSSteppingParameters().getDefaultStepLength(),
+                    getSCSWalkingParameters(),
+                    getDataOuputFolderForSimParams());
    }
 
-   public void testWalkSlope(double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters)
+   public void testWalkSlope(double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      showMemoryUsageBeforeTest();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
@@ -304,33 +359,42 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       //      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Integer.toString((int) Math.toDegrees(slopeAngle)) + "Deg";
+      String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Integer.toString((int) Math.toDegrees(slopeAngle)) + " degrees";
+      exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      destroySimulationAndRecycleMemory();
    }
 
    @Test
-   public void testUpstairsReal() throws SimulationExceededMaximumTimeException
+   public void testUpstairsReal() throws Exception
    {
-      testUpstairs(getRealRobotWalkingParameters());
+      testUpstairs(7.0, 3, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+      testUpstairs(9.5, 10, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
    }
 
    @Test
-   public void testUpstairsSim() throws SimulationExceededMaximumTimeException
+   public void testUpstairsSim() throws Exception
    {
+      testUpstairs(7.0, 3, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
       /*
        * TODO Needs: SwingTrajectoryParameters.useSingularityAvoidanceInSupport() to be false and disable
        * smoothing in the CenterOfMassHeightControlState.computeDesiredCoMHeightAcceleration(...)
        */
-      testUpstairs(getSCSWalkingParameters());
+      assertFalse(getSCSWalkingParameters().getSwingTrajectoryParameters().useSingularityAvoidanceInSupport());
+      testUpstairs(9.5, 10, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
    }
 
-   public void testUpstairs(WalkingControllerParameters walkingControllerParameters) throws SimulationExceededMaximumTimeException
+   public void testUpstairs(double stairStepHeightInches, int numberOfStairSteps, WalkingControllerParameters walkingControllerParameters,
+                            File dataOutputFolder)
+         throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      showMemoryUsageBeforeTest();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      double stairStepHeight = 2.54 / 100.0 * 9.5;
+      double stairStepHeight = 2.54 / 100.0 * stairStepHeightInches;
       double stairStepLength = 1.5 * walkingControllerParameters.getSteppingParameters().getActualFootLength();
-      int numberOfStairSteps = 10;
       StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight, stairStepLength);
 
       DRCRobotModel robotModel = getRobotModel(false);
@@ -348,7 +412,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
       FramePoint3D pelvisPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double desiredHeight = pelvisPosition.getZ() + 0.08;
+      double desiredHeight = pelvisPosition.getZ() + 0.01;
       PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
       drcSimulationTestHelper.publishToController(pelvisHeightMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -380,7 +444,12 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
+      String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
+      exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      destroySimulationAndRecycleMemory();
    }
 
    private static ValkyrieInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap)
@@ -526,6 +595,85 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       };
    }
 
+   // Pattern-matched from TorqueSpeedDataExporter
+   private static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
+   {
+      Robot robot = scs.getRobots()[0];
+      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
+      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+
+      // Stop the sim and disable the GUI:
+      scs.stop();
+      scs.disableGUIComponents();
+
+      // Wait till done running:
+      while (scs.isSimulating())
+      {
+         ThreadTools.sleep(1000);
+      }
+
+      // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+
+      String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
+      String tagName = timeStamp + "_" + robot.getName() + "_" + dataNameSuffix;
+
+      File dataFolder = new File(dataParentFolder, tagName);
+      dataFolder.mkdir();
+
+      System.out.println("Saving ReadMe");
+      writeReadme(new File(dataFolder, tagName + ".txt"), info);
+      System.out.println("Done Saving ReadMe");
+
+      System.out.println("Saving data");
+      scs.writeData(new File(dataFolder, tagName + ".data.gz"));
+      System.out.println("Done Saving Data");
+
+      System.out.println("Saving data in Matlab format");
+      try
+      {
+         scs.writeMatlabData("all", new File(dataFolder, tagName + ".m"));
+         System.out.println("Done Saving Data in Matlab format");
+      }
+      catch (OutOfMemoryError exception)
+      {
+         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         exception.printStackTrace();
+      }
+
+      System.out.println("creating torque and speed spreadsheet");
+      excelWorkbookCreator.createAndSaveTorqueAndSpeedSpreadSheet(dataFolder, tagName);
+      System.out.println("done creating torque and speed spreadsheet");
+
+      System.out.println("creating torque and speed graphs");
+      // make graph directory inside destination directory
+      File graphDirectory = new File(dataFolder, "graphs");
+      graphDirectory.mkdir();
+      graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, false);
+      System.out.println("done creating torque and speed graphs");
+
+      System.out.println("creating video");
+      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(new File(dataFolder, tagName + "_Video.mov"));
+      System.out.println("done creating video");
+
+      scs.enableGUIComponents();
+   }
+
+   private static void writeReadme(File readmeFile, String info)
+   {
+      try
+      {
+         FileWriter out = new FileWriter(readmeFile);
+         out.write(info);
+         out.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
    private ValkyrieWalkingControllerParameters getRealRobotWalkingParameters()
    {
       return new ValkyrieWalkingControllerParameters(jointMap, RobotTarget.REAL_ROBOT);
@@ -544,5 +692,19 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    private SteppingParameters getSCSSteppingParameters()
    {
       return getSCSWalkingParameters().getSteppingParameters();
+   }
+
+   private static File getDataOuputFolderForSimParams() throws IOException
+   {
+      Path path = Paths.get("D:/DataAndVideos/Valkyrie/SimParams");
+      FileTools.ensureDirectoryExists(path);
+      return path.toFile();
+   }
+
+   private static File getDataOuputFolderForRealRobotParams() throws IOException
+   {
+      Path path = Paths.get("D:/DataAndVideos/Valkyrie/RealRobotParams");
+      FileTools.ensureDirectoryExists(path);
+      return path.toFile();
    }
 }
