@@ -286,9 +286,12 @@ public class HumanoidHighLevelControllerManager implements RobotController
       jointDesiredOutputBroadcastCounter = 0;
 
       lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
+
       HighLevelControllerState currentState = stateMachine.getCurrentState();
-      if (currentState != null && currentState.getOutputForRootJoint() != null)
-         currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+      if (currentState == null || currentState.getOutputForRootJoint() == null)
+         return;
+
+      currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
 
       robotDesiredConfigurationData.setWallTime(System.nanoTime());
       // TODO use or remove joint name hash
