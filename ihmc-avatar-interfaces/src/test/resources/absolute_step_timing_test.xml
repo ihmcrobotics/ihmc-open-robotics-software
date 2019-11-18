@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <parameters>
     <registry name="DRCControllerThread">
@@ -7,7 +8,8 @@
                     <registry name="HighLevelControlManagerFactory">
                         <registry name="BalanceManager">
                             <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                            <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         </registry>
                     </registry>
                 </registry>
