@@ -17,8 +17,7 @@ public class FootLeapOfFaithModule
    private static final String yoNamePrefix = "leapOfFaith";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-
+   
    private final YoDouble swingDuration;
 
    private final DoubleProvider fractionOfSwing;
@@ -52,7 +51,7 @@ public class FootLeapOfFaithModule
 
       double exceededTime = Math.max(currentTime - fractionOfSwing.getValue() * swingDuration.getDoubleValue(), 0.0);
 
-      if (exceededTime == 0.0)
+      if (exceededTime < 0.0)
          return;
 
       if (scaleFootWeight.getValue())
@@ -65,19 +64,18 @@ public class FootLeapOfFaithModule
       }
    }
 
-   public void scaleFootWeight(Vector3DReadOnly unscaledLinearWeight, Vector3DBasics scaledLinearWeight)
+   public void scaleFootWeight(Vector3DReadOnly unscaledLinearWeight, Vector3DBasics scaledLinearWeightToPack)
    {
-      scaledLinearWeight.set(unscaledLinearWeight);
+      scaledLinearWeightToPack.set(unscaledLinearWeight);
 
       if (!scaleFootWeight.getValue())
          return;
 
-      scaledLinearWeight.scale(horizontalFootWeightScaleFraction.getDoubleValue());
+      scaledLinearWeightToPack.scale(horizontalFootWeightScaleFraction.getDoubleValue());
 
-      scaledLinearWeight.setX(Math.max(minimumHorizontalWeight.getValue(), scaledLinearWeight.getX()));
-      scaledLinearWeight.setY(Math.max(minimumHorizontalWeight.getValue(), scaledLinearWeight.getY()));
+      scaledLinearWeightToPack.setX(Math.max(minimumHorizontalWeight.getValue(), scaledLinearWeightToPack.getX()));
+      scaledLinearWeightToPack.setY(Math.max(minimumHorizontalWeight.getValue(), scaledLinearWeightToPack.getY()));
 
-      double verticalWeight = unscaledLinearWeight.getZ() * verticalFootWeightScaleFraction.getDoubleValue();
-      scaledLinearWeight.setZ(verticalWeight);
+      scaledLinearWeightToPack.setZ(unscaledLinearWeight.getZ() * verticalFootWeightScaleFraction.getDoubleValue());
    }
 }

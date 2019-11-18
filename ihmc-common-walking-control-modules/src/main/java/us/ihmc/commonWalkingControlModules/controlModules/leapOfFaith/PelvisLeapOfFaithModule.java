@@ -4,7 +4,10 @@ import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,7 +33,7 @@ public class PelvisLeapOfFaithModule
    private final YoBoolean isInSwing = new YoBoolean(yoNamePrefix + "IsInSwing", registry);
 
    private final BooleanProvider usePelvisRotation;
-   private final BooleanProvider relaxPelvis;
+   private final BooleanProvider relaxPelvisWeight;
 
    private final DoubleProvider reachingYawGain;
    private final DoubleProvider reachingRollGain;
@@ -39,7 +42,7 @@ public class PelvisLeapOfFaithModule
    private final DoubleProvider reachingFractionOfSwing;
 
    private final YoDouble relaxationFraction = new YoDouble(yoNamePrefix + "PelvisRelaxationFraction", registry);
-   private final DoubleProvider relaxationRate;
+   private final DoubleProvider weightRelaxationRate;
    private final DoubleProvider minimumWeight;
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
@@ -49,16 +52,18 @@ public class PelvisLeapOfFaithModule
 
    private double stateDuration;
 
-   private double timeInLeapOfFaith;
+   private final YoDouble timeInLeapOfFaith = new YoDouble("timeInPelvisLeapOfFaith", registry);
    private double phaseOutTime;
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
                                   YoVariableRegistry parentRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
 
-      usePelvisRotation = new BooleanParameter(yoNamePrefix + "UsePelvisRotation", registry, parameters.usePelvisRotation());
-      relaxPelvis = new BooleanParameter(yoNamePrefix + "RelaxPelvis", registry, parameters.relaxPelvisControl());
+      usePelvisRotation = new BooleanParameter(yoNamePrefix + "UsePelvisRotationForReaching", registry, parameters.usePelvisRotation());
+      relaxPelvisWeight = new BooleanParameter(yoNamePrefix + "RelaxPelvisWeight", registry, parameters.relaxPelvisControl());
 
       reachingYawGain = new DoubleParameter(yoNamePrefix + "PelvisReachingYawGain", registry, parameters.getPelvisReachingYawGain());
       reachingRollGain = new DoubleParameter(yoNamePrefix + "PelvisReachingRollGain", registry, parameters.getPelvisReachingRollGain());
@@ -66,7 +71,7 @@ public class PelvisLeapOfFaithModule
       reachingMaxRoll = new DoubleParameter(yoNamePrefix + "PelvisReachingMaxRoll", registry, parameters.getPelvisReachingMaxRoll());
       reachingFractionOfSwing = new DoubleParameter(yoNamePrefix + "PelvisReachingFractionOfSwing", registry, parameters.getPelvisReachingFractionOfSwing());
 
-      relaxationRate = new DoubleParameter(yoNamePrefix + "PelvisRelaxationRate", registry, parameters.getRelaxationRate());
+      weightRelaxationRate = new DoubleParameter(yoNamePrefix + "PelvisWeightRelaxationRate", registry, parameters.getRelaxationRate());
       minimumWeight = new DoubleParameter(yoNamePrefix + "PelvisMinimumWeight", registry, parameters.getMinimumPelvisWeight());
 
       parentRegistry.addChild(registry);
@@ -99,97 +104,90 @@ public class PelvisLeapOfFaithModule
    public void update(double currentTimeInState)
    {
       if (isInSwing.getBooleanValue())
-         timeInLeapOfFaith = Math.max(currentTimeInState - reachingFractionOfSwing.getValue() * stateDuration, 0.0);
+         timeInLeapOfFaith.set(Math.max(currentTimeInState - reachingFractionOfSwing.getValue() * stateDuration, 0.0));
       else
-         phaseOutTime = Math.max(timeInLeapOfFaith - currentTimeInState, 0.0);
+         phaseOutTime = Math.max(timeInLeapOfFaith.getDoubleValue() - currentTimeInState, 0.0);
    }
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
    public void updateAngularOffsets()
    {
       orientationOffset.setToZero();
 
-      if (isInSwing.getBooleanValue() && usePelvisRotation.getValue())
+      if (!usePelvisRotation.getValue())
+         return;
+
+      double timeForReaching;
+      if (isInSwing.getBooleanValue())
       {
-         if (timeInLeapOfFaith == 0.0)
+         if (timeInLeapOfFaith.getDoubleValue() < 0.0)
             return;
 
-         tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
-         tempPoint.changeFrame(soleZUpFrames.get(supportSide));
-         double stepLength = tempPoint.getX();
-
-         double yawAngleOffset = reachingYawGain.getValue() * timeInLeapOfFaith * stepLength;
-         double rollAngleOffset = reachingRollGain.getValue() * timeInLeapOfFaith;
-
-         yawAngleOffset = MathTools.clamp(yawAngleOffset, reachingMaxYaw.getValue());
-         rollAngleOffset = MathTools.clamp(rollAngleOffset, reachingMaxRoll.getValue());
-
-         yawAngleOffset = supportSide.negateIfRightSide(yawAngleOffset);
-         rollAngleOffset = supportSide.negateIfRightSide(rollAngleOffset);
-
-         orientationOffset.setRoll(rollAngleOffset);
-         orientationOffset.setYaw(yawAngleOffset);
+         // doing the leap of faith, so modify the pelvis setpoints to have it reach
+         timeForReaching = timeInLeapOfFaith.getDoubleValue();
       }
-      else if (usePelvisRotation.getValue())
+      else
       {
-         if (phaseOutTime == 0.0)
+         if (phaseOutTime < 0.0)
             return;
 
-         tempPoint.setToZero(soleZUpFrames.get(supportSide.getOppositeSide()));
-         tempPoint.changeFrame(soleZUpFrames.get(supportSide));
-         double stepLength = tempPoint.getX();
-
-         double yawAngleOffset = reachingYawGain.getValue() * phaseOutTime * stepLength;
-         double rollAngleOffset = reachingRollGain.getValue() * phaseOutTime;
-
-         yawAngleOffset = MathTools.clamp(yawAngleOffset, reachingMaxYaw.getValue());
-         rollAngleOffset = MathTools.clamp(rollAngleOffset, reachingMaxRoll.getValue());
-
-         yawAngleOffset = supportSide.negateIfRightSide(yawAngleOffset);
-         rollAngleOffset = supportSide.negateIfLeftSide(rollAngleOffset);
-
-         orientationOffset.setRoll(rollAngleOffset);
-         orientationOffset.setYaw(yawAngleOffset);
+         // need to return the offset back to zero, so use the monotonically decreasing phase out time
+         timeForReaching = phaseOutTime;
       }
+
+      tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
+      tempPoint.changeFrame(soleZUpFrames.get(supportSide));
+      double stepLength = tempPoint.getX();
+
+      double yawAngleOffset = reachingYawGain.getValue() * timeForReaching * stepLength;
+      double rollAngleOffset = reachingRollGain.getValue() * timeForReaching;
+
+      yawAngleOffset = MathTools.clamp(yawAngleOffset, reachingMaxYaw.getValue());
+      rollAngleOffset = MathTools.clamp(rollAngleOffset, reachingMaxRoll.getValue());
+
+      yawAngleOffset = supportSide.negateIfRightSide(yawAngleOffset);
+      rollAngleOffset = supportSide.negateIfRightSide(rollAngleOffset);
+
+      orientationOffset.setRoll(rollAngleOffset);
+      orientationOffset.setYaw(yawAngleOffset);
    }
 
-   public void relaxAngularWeight(Vector3D angularWeightToPack)
+   public void relaxAngularWeight(Vector3DBasics angularWeightToPack)
    {
       relaxationFraction.set(0.0);
 
-      if (isInSwing.getBooleanValue() && relaxPelvis.getValue())
+      if (!relaxPelvisWeight.getValue())
+         return;
+
+      double relaxationTime;
+      if (isInSwing.getBooleanValue())
       {
-         if (timeInLeapOfFaith == 0.0)
+         if (timeInLeapOfFaith.getDoubleValue() < 0.0)
             return;
 
-         double relaxationFraction = relaxationRate.getValue() * timeInLeapOfFaith;
-         relaxationFraction = MathTools.clamp(relaxationFraction, 0.0, 1.0);
-
-         this.relaxationFraction.set(relaxationFraction);
-
-         angularWeightToPack.scale(1.0 - relaxationFraction);
-         angularWeightToPack.setX(Math.max(minimumWeight.getValue(), angularWeightToPack.getX()));
-         angularWeightToPack.setY(Math.max(minimumWeight.getValue(), angularWeightToPack.getY()));
-         angularWeightToPack.setZ(Math.max(minimumWeight.getValue(), angularWeightToPack.getZ()));
+         // doing the leap of faith, so start relaxing the weight
+         relaxationTime = timeInLeapOfFaith.getDoubleValue();
       }
-      else if (relaxPelvis.getValue())
+      else
       {
-         if (phaseOutTime == 0.0)
+         if (phaseOutTime < 0.0)
             return;
 
-         double relaxationFraction = relaxationRate.getValue() * phaseOutTime;
-         relaxationFraction = MathTools.clamp(relaxationFraction, 0.0, 1.0);
-
-         this.relaxationFraction.set(relaxationFraction);
-
-         angularWeightToPack.scale(1.0 - relaxationFraction);
-         angularWeightToPack.setX(Math.max(minimumWeight.getValue(), angularWeightToPack.getX()));
-         angularWeightToPack.setY(Math.max(minimumWeight.getValue(), angularWeightToPack.getY()));
-         angularWeightToPack.setZ(Math.max(minimumWeight.getValue(), angularWeightToPack.getZ()));
+         // need to return the weight back to nominal
+         relaxationTime = phaseOutTime;
       }
+
+      double relaxationFraction = weightRelaxationRate.getValue() * relaxationTime;
+      relaxationFraction = MathTools.clamp(relaxationFraction, 0.0, 1.0);
+
+      this.relaxationFraction.set(relaxationFraction);
+
+      angularWeightToPack.scale(1.0 - relaxationFraction);
+      angularWeightToPack.setX(Math.max(minimumWeight.getValue(), angularWeightToPack.getX()));
+      angularWeightToPack.setY(Math.max(minimumWeight.getValue(), angularWeightToPack.getY()));
+      angularWeightToPack.setZ(Math.max(minimumWeight.getValue(), angularWeightToPack.getZ()));
    }
 
-   public void addAngularOffset(FrameQuaternion orientationToPack)
+   public void addAngularOffset(FixedFrameQuaternionBasics orientationToPack)
    {
       orientationToPack.prepend(orientationOffset);
    }
