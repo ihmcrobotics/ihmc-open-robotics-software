@@ -19,7 +19,10 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -51,6 +54,7 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
 
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform initialErrorCompensator = new RigidBodyTransform();
    private boolean initialized = false;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -220,20 +224,48 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
          initialized = true;
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
          
-         System.out.println("Initial Tracking data ");
-         RigidBodyTransform initTransform = new RigidBodyTransform(dataToPublish.orientation, dataToPublish.position);
-         System.out.println(initTransform);
-         System.out.println("initialTransformToWorld (FK) ");
+
+         System.out.println("Ground Truth (FK)");
          System.out.println(initialTransformToWorld);
          
-         Point3D tempposition = new Point3D(dataToPublish.position);
-         Quaternion temporientation = new Quaternion(dataToPublish.orientation);
-         initialTransformToWorld.transform(tempposition);
-         initialTransformToWorld.transform(temporientation);
          
-         System.out.println("Initial offset inverted ");
-         RigidBodyTransform transform = new RigidBodyTransform(temporientation, tempposition);
-         System.out.println(transform);
+         
+         
+         RigidBodyTransform zUpInitialTransformToWorld = new RigidBodyTransform(initialTransformToWorld);
+         Vector3D axisZ = new Vector3D(zUpInitialTransformToWorld.getM02(), zUpInitialTransformToWorld.getM12(), zUpInitialTransformToWorld.getM22());
+         AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
+         axisAngleFromZUpToVector3D.invert();
+
+         RotationMatrix zaxisToZupTransform = new RotationMatrix(axisAngleFromZUpToVector3D);
+         zUpInitialTransformToWorld.getRotation().preMultiply(zaxisToZupTransform);
+         
+         Quaternion orientation = new Quaternion(dataToPublish.orientation);
+         Point3D position = new Point3D(dataToPublish.position);
+         System.out.println("Initial estimated data");
+         System.out.println(new RigidBodyTransform(orientation, position));
+         
+         zUpInitialTransformToWorld.transform(position);
+         zUpInitialTransformToWorld.transform(orientation);
+         System.out.println("Initial data that is transfored to World (OLD)");
+         System.out.println(new RigidBodyTransform(orientation, position));
+         
+         /**
+          * New Computation.
+          */
+         initialErrorCompensator.set(dataToPublish.orientation, dataToPublish.position);
+         initialErrorCompensator.invert();
+         zUpInitialTransformToWorld.invert();
+         initialErrorCompensator.multiply(zUpInitialTransformToWorld);
+         initialErrorCompensator.multiply(initialTransformToWorld);
+
+         
+         Quaternion neworientation = new Quaternion(dataToPublish.orientation);
+         Point3D newposition = new Point3D(dataToPublish.position);
+         initialErrorCompensator.transform(position);
+         initialErrorCompensator.transform(orientation);
+         System.out.println("new computation (NEW)");
+         System.out.println(new RigidBodyTransform(neworientation, newposition));
+         
          return;
       }
       dataToPublish.applyTransform(initialTransformToWorld);

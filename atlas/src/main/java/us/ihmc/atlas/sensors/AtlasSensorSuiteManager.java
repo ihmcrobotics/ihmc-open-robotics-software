@@ -227,13 +227,13 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
             transformToWorldToPack.multiply(transformFromPelvisToRealSense);
 
-            RigidBodyTransform syncronizedZup = new RigidBodyTransform(transformToWorldToPack);
-            Vector3D axisZ = new Vector3D(syncronizedZup.getM02(), syncronizedZup.getM12(), syncronizedZup.getM22());
-            AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
-            axisAngleFromZUpToVector3D.invert();
-
-            RotationMatrix zaxisToZupTransform = new RotationMatrix(axisAngleFromZUpToVector3D);
-            transformToWorldToPack.getRotation().preMultiply(zaxisToZupTransform);
+//            RigidBodyTransform syncronizedZup = new RigidBodyTransform(transformToWorldToPack);
+//            Vector3D axisZ = new Vector3D(syncronizedZup.getM02(), syncronizedZup.getM12(), syncronizedZup.getM22());
+//            AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
+//            axisAngleFromZUpToVector3D.invert();
+//
+//            RotationMatrix zaxisToZupTransform = new RotationMatrix(axisAngleFromZUpToVector3D);
+//            transformToWorldToPack.getRotation().preMultiply(zaxisToZupTransform);
          }
       };
    }
