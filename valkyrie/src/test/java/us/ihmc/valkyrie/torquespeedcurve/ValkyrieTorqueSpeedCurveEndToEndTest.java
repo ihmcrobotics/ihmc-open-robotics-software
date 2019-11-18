@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -61,6 +59,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -69,7 +68,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private ValkyrieJointMap jointMap = new ValkyrieJointMap();
+   private ValkyrieJointMap jointMap = new ValkyrieJointMap(ValkyrieRobotVersion.FINGERLESS);
 
    public void showMemoryUsageBeforeTest()
    {
@@ -582,7 +581,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
    private ValkyrieRobotModel getRobotModel(boolean disableAnkleLimits)
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS)
       {
          @Override
          public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
