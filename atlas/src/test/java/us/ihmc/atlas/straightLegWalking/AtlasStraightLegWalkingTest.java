@@ -151,7 +151,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public double getMaxICPErrorBeforeSingleSupportY()
+      public double getMaxICPErrorBeforeSingleSupportInnerY()
       {
          return 0.02;
       }
