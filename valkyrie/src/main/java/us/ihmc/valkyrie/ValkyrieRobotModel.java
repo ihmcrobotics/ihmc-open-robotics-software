@@ -106,10 +106,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final boolean useOBJGraphics;
    private final double transparency;
 
-   private final String[] resourceDirectories;
-   {
-      resourceDirectories = new String[] {"models/", "models/gazebo/", "models/val_description/", "models/val_description/sdf/",};
-   }
+   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/sdf/"};
 
    private final JaxbSDFLoader loader;
    private final RobotDescription robotDescription;
@@ -139,17 +136,20 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(target, ValkyrieRobotVersion.DEFAULT, model, simulationContactPoints, false);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
+                             boolean useShapeCollision)
    {
       this(target, robotVersion, model, simulationContactPoints, useShapeCollision, true);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
+                             boolean useShapeCollision, boolean useOBJGraphics)
    {
       this(target, robotVersion, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints, boolean useShapeCollision, boolean useOBJGraphics, double transparency)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
+                             boolean useShapeCollision, boolean useOBJGraphics, double transparency)
    {
       this.target = target;
       this.robotVersion = robotVersion;
@@ -208,7 +208,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          {
             for (String sensorName : ValkyrieSensorInformation.contactSensors.get(side).get(parentJointName).keySet())
             {
-               loader.addContactSensor(jointMap, sensorName, parentJointName,
+               loader.addContactSensor(jointMap,
+                                       sensorName,
+                                       parentJointName,
                                        ValkyrieSensorInformation.contactSensors.get(side).get(parentJointName).get(sensorName));
             }
          }
@@ -241,7 +243,11 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, getContactPointParameters(), useCollisionMeshes, transparency);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
+                                                                          jointMap,
+                                                                          getContactPointParameters(),
+                                                                          useCollisionMeshes,
+                                                                          transparency);
       }
 
       return robotDescription;
@@ -434,7 +440,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getROSClockCalculator(), sensorInformation, jointMap,
+      return new ValkyrieSensorSuiteManager(getSimpleRobotName(),
+                                            this,
+                                            getCollisionBoxProvider(),
+                                            getROSClockCalculator(),
+                                            sensorInformation,
+                                            jointMap,
                                             target);
    }
 
@@ -560,14 +571,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          switch (linkHolder.getName())
          {
-         case "hokuyo_link":
-            modifyHokuyoInertia(linkHolder);
-            break;
-         case "torso":
-            modifyChestMass(linkHolder);
-            break;
-         default:
-            break;
+            case "hokuyo_link":
+               modifyHokuyoInertia(linkHolder);
+               break;
+            case "torso":
+               modifyChestMass(linkHolder);
+               break;
+            default:
+               break;
          }
       }
    }
@@ -662,13 +673,13 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       switch (target)
       {
-      case SCS:
-         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
-      case GAZEBO:
-      case REAL_ROBOT:
-         return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
-      default:
-         throw new UnsupportedOperationException("Unsupported target: " + target);
+         case SCS:
+            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+         case GAZEBO:
+         case REAL_ROBOT:
+            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+         default:
+            throw new UnsupportedOperationException("Unsupported target: " + target);
       }
    }
 
