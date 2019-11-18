@@ -54,7 +54,6 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
 
    private SensorFrameInitializationTransformer sensorFrameInitializationTransformer = null;
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform initialErrorCompensator = new RigidBodyTransform();
    private boolean initialized = false;
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -224,13 +223,6 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
          initialized = true;
          sensorFrameInitializationTransformer.computeTransformToWorld(fullRobotModel, initialTransformToWorld);
          
-
-         System.out.println("Ground Truth (FK)");
-         System.out.println(initialTransformToWorld);
-         
-         
-         
-         
          RigidBodyTransform zUpInitialTransformToWorld = new RigidBodyTransform(initialTransformToWorld);
          Vector3D axisZ = new Vector3D(zUpInitialTransformToWorld.getM02(), zUpInitialTransformToWorld.getM12(), zUpInitialTransformToWorld.getM22());
          AxisAngle axisAngleFromZUpToVector3D = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisZ);
@@ -241,30 +233,19 @@ public class TrackingCameraPublisher implements StereoVisionWorldTransformCalcul
          
          Quaternion orientation = new Quaternion(dataToPublish.orientation);
          Point3D position = new Point3D(dataToPublish.position);
-         System.out.println("Initial estimated data");
-         System.out.println(new RigidBodyTransform(orientation, position));
          
          zUpInitialTransformToWorld.transform(position);
          zUpInitialTransformToWorld.transform(orientation);
-         System.out.println("Initial data that is transfored to World (OLD)");
-         System.out.println(new RigidBodyTransform(orientation, position));
          
          /**
           * New Computation.
           */
-         initialErrorCompensator.set(dataToPublish.orientation, dataToPublish.position);
-         initialErrorCompensator.invert();
-         zUpInitialTransformToWorld.invert();
-         initialErrorCompensator.multiply(zUpInitialTransformToWorld);
-         initialErrorCompensator.multiply(initialTransformToWorld);
-
+         RigidBodyTransform initialErrorCompensator = new RigidBodyTransform(zUpInitialTransformToWorld);
+         initialErrorCompensator.multiplyInvertThis(initialTransformToWorld);
+         initialErrorCompensator.multiplyInvertOther(new RigidBodyTransform(dataToPublish.orientation, dataToPublish.position));
          
-         Quaternion neworientation = new Quaternion(dataToPublish.orientation);
-         Point3D newposition = new Point3D(dataToPublish.position);
-         initialErrorCompensator.transform(position);
-         initialErrorCompensator.transform(orientation);
-         System.out.println("new computation (NEW)");
-         System.out.println(new RigidBodyTransform(neworientation, newposition));
+         initialTransformToWorld.set(zUpInitialTransformToWorld);
+         initialTransformToWorld.multiply(initialErrorCompensator);
          
          return;
       }
