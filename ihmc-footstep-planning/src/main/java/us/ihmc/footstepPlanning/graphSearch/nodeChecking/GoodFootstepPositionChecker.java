@@ -102,17 +102,13 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
-      double upwardPitch = -previousSnappedSoleTransform.getRotation().getPitch();
-      double alpha = Math.max(0.0, upwardPitch / parameters.getMinimumSurfaceInclineRadians());
-
-      double maxStepForwardWhenPitched = 0.2;
+      double alpha = Math.max(0.0, -previousSnappedSoleTransform.getRotation().getPitch() / parameters.getMinimumSurfaceInclineRadians());
       double minZ = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alpha);
-      double minX = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), maxStepForwardWhenPitched, alpha);
+      double minX = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alpha);
       double stepDownFraction = -solePositionInParentZUpFrame.getZ() / minZ;
       double stepForwardFraction = solePositionInParentZUpFrame.getX() / minX;
-      double combinedFraction = stepDownFraction + stepForwardFraction;
 
-      if (combinedFraction > 1.0)
+      if (stepDownFraction + stepForwardFraction > 1.0)
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
          return false;
