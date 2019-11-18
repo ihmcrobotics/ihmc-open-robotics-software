@@ -120,7 +120,8 @@ public class BalanceManager
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
 
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
-   private final DoubleProvider maxICPErrorBeforeSingleSupportX;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
    private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
    private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
 
@@ -213,7 +214,8 @@ public class BalanceManager
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
-      maxICPErrorBeforeSingleSupportX = new DoubleParameter("maxICPErrorBeforeSingleSupportX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
+      maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
+      maxICPErrorBeforeSingleSupportBackwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportBackwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportBackwardX());
       maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
       maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
@@ -660,10 +662,10 @@ public class BalanceManager
       getICPError(icpError2d);
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
-      boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT && icpError2d.getY() > 0.0;
+      boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
+      double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue() : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue() : maxICPErrorBeforeSingleSupportOuterY.getValue();
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX) + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()
