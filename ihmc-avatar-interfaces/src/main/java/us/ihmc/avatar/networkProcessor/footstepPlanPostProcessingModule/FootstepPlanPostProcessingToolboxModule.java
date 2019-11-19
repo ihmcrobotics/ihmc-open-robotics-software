@@ -10,6 +10,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -30,12 +31,30 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
       this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
+   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
+                                                  FootstepPostProcessingParametersBasics postProcessingParameters, boolean startYoVariableServer)
+   {
+      this(drcRobotModel, modelProvider, postProcessingParameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
+
+
    public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
                                                   DomainFactory.PubSubImplementation pubSubImplementation)
    {
+      this(drcRobotModel, modelProvider, new DefaultFootstepPostProcessingParameters(), startYoVariableServer, pubSubImplementation);
+   }
+
+   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
+                                                  FootstepPostProcessingParametersBasics postProcessingParameters, boolean startYoVariableServer,
+                                                  DomainFactory.PubSubImplementation pubSubImplementation)
+
+   {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      toolboxController = new FootstepPlanPostProcessingToolboxController(new DefaultFootstepPostProcessingParameters(),
+      if (postProcessingParameters == null)
+         postProcessingParameters = new DefaultFootstepPostProcessingParameters();
+
+      toolboxController = new FootstepPlanPostProcessingToolboxController(postProcessingParameters,
                                                                           drcRobotModel.getWalkingControllerParameters(),
                                                                           drcRobotModel.getContactPointParameters(),
                                                                           drcRobotModel.getCapturePointPlannerParameters(),

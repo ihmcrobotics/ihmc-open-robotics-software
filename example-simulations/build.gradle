@@ -37,7 +37,6 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
-   api("us.ihmc:valkyrie:source")
 }
 
 testDependencies {

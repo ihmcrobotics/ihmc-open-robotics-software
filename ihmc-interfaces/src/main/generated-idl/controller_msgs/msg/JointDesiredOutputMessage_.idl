@@ -31,6 +31,7 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        string joint_name;
         @defaultValue(value=255)
         octet control_mode;
         boolean has_desired_torque;

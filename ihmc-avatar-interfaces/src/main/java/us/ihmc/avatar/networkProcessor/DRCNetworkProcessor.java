@@ -125,7 +125,7 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPostProcessingToolboxEnabled())
          return;
 
-      new FootstepPlanPostProcessingToolboxModule(robotModel, null, params.isFootstepPostProcessingToolboxVisualizerEnabled());
+      new FootstepPlanPostProcessingToolboxModule(robotModel, null, robotModel.getFootstepPostProcessingParameters(), params.isFootstepPostProcessingToolboxVisualizerEnabled());
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

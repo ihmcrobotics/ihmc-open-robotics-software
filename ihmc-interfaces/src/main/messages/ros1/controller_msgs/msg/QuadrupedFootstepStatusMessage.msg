@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message gives the status of the current footstep from the quadruped controller as well as the position of the footstep in world coordinates.
+
 int8 FOOTSTEP_STATUS_STARTED=0
 
 int8 FOOTSTEP_STATUS_COMPLETED=1

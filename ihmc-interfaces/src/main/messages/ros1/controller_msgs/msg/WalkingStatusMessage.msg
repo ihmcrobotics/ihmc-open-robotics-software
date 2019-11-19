@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# The controller sends this message to notify the user of the status of walking.
+
 # The robot has begun its initial transfer/sway at the start of a walking plan.
 int8 STARTED=0
 

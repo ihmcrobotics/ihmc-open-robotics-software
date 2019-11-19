@@ -1,3 +1,5 @@
+# Specifies a specific electric motor in the Atlas forearm to power on or off.
+
 int8 L_ARM_WRY=0
 
 int8 L_ARM_WRX=1

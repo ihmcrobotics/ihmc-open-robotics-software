@@ -42,6 +42,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -115,6 +116,8 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointName().length() + 1;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -211,6 +214,10 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       cdr.write_type_4(data.getSequenceId());
 
+      if(data.getJointName().length() <= 255)
+      cdr.write_type_d(data.getJointName());else
+          throw new RuntimeException("joint_name field exceeds the maximum length");
+
       cdr.write_type_9(data.getControlMode());
 
       cdr.write_type_7(data.getHasDesiredTorque());
@@ -275,6 +282,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      cdr.read_type_d(data.getJointName());	
       data.setControlMode(cdr.read_type_9());
       	
       data.setHasDesiredTorque(cdr.read_type_7());
@@ -340,6 +348,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void serialize(controller_msgs.msg.dds.JointDesiredOutputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_d("joint_name", data.getJointName());
       ser.write_type_9("control_mode", data.getControlMode());
       ser.write_type_7("has_desired_torque", data.getHasDesiredTorque());
       ser.write_type_7("has_desired_position", data.getHasDesiredPosition());
@@ -375,6 +384,7 @@ public class JointDesiredOutputMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.JointDesiredOutputMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      ser.read_type_d("joint_name", data.getJointName());
       data.setControlMode(ser.read_type_9("control_mode"));
       data.setHasDesiredTorque(ser.read_type_7("has_desired_torque"));
       data.setHasDesiredPosition(ser.read_type_7("has_desired_position"));
