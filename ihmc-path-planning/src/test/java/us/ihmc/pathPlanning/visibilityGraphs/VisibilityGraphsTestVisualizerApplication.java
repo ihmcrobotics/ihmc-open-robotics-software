@@ -55,7 +55,7 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterRawPoints, showClusterRawPoints);
       messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions, showClusterNavigableExtrusions);
       messager.submitMessage(UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusions);
-      messager.submitMessage(UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps, showRegionInnerConnections);
+      messager.submitMessage(UIVisibilityGraphsTopics.ShowInnerRegionVisibilityMapEdges, showRegionInnerConnections);
       messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, showRegionInterConnections);
    }
 
@@ -94,6 +94,11 @@ public class VisibilityGraphsTestVisualizerApplication extends Application
       VisibilityGraphsTestVisualizerApplication application = new VisibilityGraphsTestVisualizerApplication();
       application.startOnAThread();
       ThreadTools.sleepForever();
+   }
+
+   public void submitVisibilityGraphToVisualizer(VisibilityGraph visibilityGraph)
+   {
+      messager.submitMessage(UIVisibilityGraphsTopics.VisibilityGraph, visibilityGraph);
    }
 
    public void submitVisibilityGraphSolutionToVisualizer(VisibilityMapSolution visibilityMapSolution)
