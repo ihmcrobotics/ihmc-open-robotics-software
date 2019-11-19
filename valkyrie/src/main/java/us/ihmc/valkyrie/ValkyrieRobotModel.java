@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -29,15 +28,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFContactSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -68,12 +59,11 @@ import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
 
-public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
+public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
 
@@ -316,7 +306,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       if (generalizedRobotModel == null)
       {
-         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), this);
+         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics));
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
@@ -413,111 +403,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new ValkyrieCollisionBoxProvider(createFullRobotModel());
-   }
-
-   @Override
-   public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-         if (useOBJGraphics)
-         {
-            List<SDFVisual> visuals = linkHolder.getVisuals();
-            if (visuals != null)
-            {
-               for (SDFVisual sdfVisual : visuals)
-               {
-                  SDFGeometry geometry = sdfVisual.getGeometry();
-                  if (geometry == null)
-                     continue;
-
-                  SDFGeometry.Mesh mesh = geometry.getMesh();
-                  if (mesh == null)
-                     continue;
-
-                  String meshUri = mesh.getUri();
-                  if (meshUri.contains("meshes"))
-                  {
-                     String replacedURI = meshUri.replace(".dae", ".obj");
-                     mesh.setUri(replacedURI);
-                  }
-               }
-            }
-         }
-
-         switch (linkHolder.getName())
-         {
-            case "hokuyo_link":
-               modifyHokuyoInertia(linkHolder);
-               break;
-            case "torso":
-               modifyChestMass(linkHolder);
-               break;
-            default:
-               break;
-         }
-      }
-   }
-
-   private void modifyChestMass(SDFLinkHolder chestSDFLink)
-   {
-      if (ValkyrieRosControlController.HAS_LIGHTER_BACKPACK)
-         chestSDFLink.setMass(chestSDFLink.getMass() - 8.6);
-   }
-
-   @Override
-   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
-   {
-      if (getJointMap().getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
-   {
-      linkHolder.getInertia().setM00(0.000401606); // i_xx
-      linkHolder.getInertia().setM01(4.9927e-08); // i_xy
-      linkHolder.getInertia().setM02(1.0997e-05); // i_xz
-      linkHolder.getInertia().setM11(0.00208115); // i_yy
-      linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
-      linkHolder.getInertia().setM22(0.00178402); // i_zz
    }
 
    @Override
