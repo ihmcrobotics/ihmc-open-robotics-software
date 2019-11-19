@@ -18,8 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import com.jme3.math.Transform;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -730,12 +728,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       @Override
       public HandModel getHandModel()
-      {
-         return null;
-      }
-
-      @Override
-      public Transform getJmeTransformWristToHand(RobotSide side)
       {
          return null;
       }
