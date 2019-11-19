@@ -10,6 +10,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.tools.property.StoredProperty;
+import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import java.util.List;
@@ -478,5 +480,16 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
             return true;
          }
       };
+   }
+
+   default String getAsString()
+   {
+      String message = "";
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         message += "\n" + key.getTitleCasedName() + " = " + get(key);
+      }
+
+      return message;
    }
 }

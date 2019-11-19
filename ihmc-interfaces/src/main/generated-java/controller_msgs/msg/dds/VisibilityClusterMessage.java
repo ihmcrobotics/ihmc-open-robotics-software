@@ -20,6 +20,8 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    public byte type_ = (byte) 255;
    public us.ihmc.euclid.geometry.Pose3D pose_in_world_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  raw_points_in_local_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  preferred_navigable_extrusions_in_local_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  preferred_non_navigable_extrusions_in_local_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  navigable_extrusions_in_local_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  non_navigable_extrusions_in_local_;
 
@@ -27,6 +29,8 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    {
       pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
       raw_points_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
+      preferred_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
+      preferred_non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
       navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
       non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
 
@@ -46,6 +50,8 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_in_world_, pose_in_world_);
       raw_points_in_local_.set(other.raw_points_in_local_);
+      preferred_navigable_extrusions_in_local_.set(other.preferred_navigable_extrusions_in_local_);
+      preferred_non_navigable_extrusions_in_local_.set(other.preferred_non_navigable_extrusions_in_local_);
       navigable_extrusions_in_local_.set(other.navigable_extrusions_in_local_);
       non_navigable_extrusions_in_local_.set(other.non_navigable_extrusions_in_local_);
    }
@@ -78,6 +84,18 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getRawPointsInLocal()
    {
       return raw_points_in_local_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getPreferredNavigableExtrusionsInLocal()
+   {
+      return preferred_navigable_extrusions_in_local_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getPreferredNonNavigableExtrusionsInLocal()
+   {
+      return preferred_non_navigable_extrusions_in_local_;
    }
 
 
@@ -122,6 +140,20 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
          {  if (!this.raw_points_in_local_.get(i).epsilonEquals(other.raw_points_in_local_.get(i), epsilon)) return false; }
       }
 
+      if (this.preferred_navigable_extrusions_in_local_.size() != other.preferred_navigable_extrusions_in_local_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.preferred_navigable_extrusions_in_local_.size(); i++)
+         {  if (!this.preferred_navigable_extrusions_in_local_.get(i).epsilonEquals(other.preferred_navigable_extrusions_in_local_.get(i), epsilon)) return false; }
+      }
+
+      if (this.preferred_non_navigable_extrusions_in_local_.size() != other.preferred_non_navigable_extrusions_in_local_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.preferred_non_navigable_extrusions_in_local_.size(); i++)
+         {  if (!this.preferred_non_navigable_extrusions_in_local_.get(i).epsilonEquals(other.preferred_non_navigable_extrusions_in_local_.get(i), epsilon)) return false; }
+      }
+
       if (this.navigable_extrusions_in_local_.size() != other.navigable_extrusions_in_local_.size()) { return false; }
       else
       {
@@ -155,6 +187,8 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
 
       if (!this.pose_in_world_.equals(otherMyClass.pose_in_world_)) return false;
       if (!this.raw_points_in_local_.equals(otherMyClass.raw_points_in_local_)) return false;
+      if (!this.preferred_navigable_extrusions_in_local_.equals(otherMyClass.preferred_navigable_extrusions_in_local_)) return false;
+      if (!this.preferred_non_navigable_extrusions_in_local_.equals(otherMyClass.preferred_non_navigable_extrusions_in_local_)) return false;
       if (!this.navigable_extrusions_in_local_.equals(otherMyClass.navigable_extrusions_in_local_)) return false;
       if (!this.non_navigable_extrusions_in_local_.equals(otherMyClass.non_navigable_extrusions_in_local_)) return false;
 
@@ -175,6 +209,10 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       builder.append(this.pose_in_world_);      builder.append(", ");
       builder.append("raw_points_in_local=");
       builder.append(this.raw_points_in_local_);      builder.append(", ");
+      builder.append("preferred_navigable_extrusions_in_local=");
+      builder.append(this.preferred_navigable_extrusions_in_local_);      builder.append(", ");
+      builder.append("preferred_non_navigable_extrusions_in_local=");
+      builder.append(this.preferred_non_navigable_extrusions_in_local_);      builder.append(", ");
       builder.append("navigable_extrusions_in_local=");
       builder.append(this.navigable_extrusions_in_local_);      builder.append(", ");
       builder.append("non_navigable_extrusions_in_local=");

@@ -1,3 +1,8 @@
+# This message is part of the IHMC whole-body controller API.
+# Published by the IHMC controller, this message carries minimal information relative
+# to the current balance status of the robot.
+# All the information here is expressed in the world frame.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

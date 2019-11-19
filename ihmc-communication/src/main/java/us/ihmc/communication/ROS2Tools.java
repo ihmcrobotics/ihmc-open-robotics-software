@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +14,7 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.RealtimeRos2Subscription;
+import us.ihmc.ros2.Ros2Distro;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2QosProfile;
@@ -45,6 +47,7 @@ public class ROS2Tools
    public static final String KINEMATICS_STREAMING_TOOLBOX = "/toolbox/ik_streaming";
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
    public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
+   public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX = "/toolbox/external_force_estimation";
 
    public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER = "/quadruped_support_region_publisher";
@@ -87,7 +90,10 @@ public class ROS2Tools
    };
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
-   private static final int DOMAIN_ID = new RTPSCommunicationFactory().getDomainId();
+   private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
+   private static final int DOMAIN_ID = FACTORY.getDomainId();
+   private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
+   private static final Ros2Distro ROS2_DISTRO = Ros2Distro.fromEnvironment();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
@@ -147,7 +153,7 @@ public class ROS2Tools
    {
       try
       {
-         return new RealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID);
+         return new RealtimeRos2Node(pubSubImplementation, ROS2_DISTRO, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -165,7 +171,7 @@ public class ROS2Tools
    {
       try
       {
-         return new Ros2Node(pubSubImplementation, nodeName, NAMESPACE, DOMAIN_ID);
+         return new Ros2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {

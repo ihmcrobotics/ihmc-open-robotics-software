@@ -41,6 +41,11 @@ public class FootstepGraph
       incomingBestEdge.put(startNode, edgeToStart);
    }
 
+   public HashMap<FootstepNode, HashSet<FootstepEdge>> getOutgoingEdges()
+   {
+      return outgoingEdges;
+   }
+
    /**
     * Adds an edge to the graph and updates all path and node costs affected. The edge must
     * originate at a known node and the cost associated to moving along the edge must be given.

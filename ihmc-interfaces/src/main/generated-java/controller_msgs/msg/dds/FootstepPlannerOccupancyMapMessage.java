@@ -23,7 +23,7 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
    public FootstepPlannerOccupancyMapMessage()
    {
-      occupied_cells_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerCellMessage> (100, new controller_msgs.msg.dds.FootstepPlannerCellMessagePubSubType());
+      occupied_cells_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerCellMessage> (10000, new controller_msgs.msg.dds.FootstepPlannerCellMessagePubSubType());
 
    }
 

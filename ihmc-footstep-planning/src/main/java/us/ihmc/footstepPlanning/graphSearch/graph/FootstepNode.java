@@ -1,12 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import java.util.Objects;
-import java.util.Random;
-
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 public class FootstepNode
 {
@@ -15,6 +13,7 @@ public class FootstepNode
 
    private Point2D midFootPoint;
    private final int hashCode;
+   private int nodeIndex = -1;
 
    public FootstepNode(double x, double y)
    {
@@ -26,11 +25,26 @@ public class FootstepNode
       this(new LatticeNode(x, y, yaw), robotSide);
    }
 
+   public FootstepNode(int xIndex, int yIndex, int yawIndex, RobotSide robotSide)
+   {
+      this(new LatticeNode(xIndex, yIndex, yawIndex), robotSide);
+   }
+
    public FootstepNode(LatticeNode latticeNode, RobotSide robotSide)
    {
       this.latticeNode = latticeNode;
       this.robotSide = robotSide;
       hashCode = computeHashCode(this);
+   }
+
+   public void setNodeIndex(int nodeIndex)
+   {
+      this.nodeIndex = nodeIndex;
+   }
+
+   public int getNodeIndex()
+   {
+      return nodeIndex;
    }
 
    public double getX()

@@ -24,6 +24,12 @@ public class UIRobotController
    private Button standPrep;
    @FXML
    private Button shutdown;
+   @FXML
+   private Button abortWalking;
+   @FXML
+   private Button pauseWalking;
+   @FXML
+   private Button continueWalking;
 
    @FXML
    private CheckBox enableSupportRegions;
@@ -42,6 +48,8 @@ public class UIRobotController
       freeze.setDisable(robotLowLevelMessenger == null);
       standPrep.setDisable(robotLowLevelMessenger == null);
       shutdown.setDisable(robotLowLevelMessenger == null);
+      abortWalking.setDisable(robotLowLevelMessenger == null);
+      pauseWalking.setDisable(robotLowLevelMessenger == null);
    }
 
    @FXML
@@ -74,6 +82,24 @@ public class UIRobotController
    public void shutdown()
    {
       robotLowLevelMessenger.sendShutdownRequest();
+   }
+
+   @FXML
+   public void abortWalking()
+   {
+      robotLowLevelMessenger.sendAbortWalkingRequest();
+   }
+
+   @FXML
+   public void pauseWalking()
+   {
+      robotLowLevelMessenger.sendPauseWalkingRequest();
+   }
+
+   @FXML
+   public void continueWalking()
+   {
+      robotLowLevelMessenger.sendContinueWalkingRequest();
    }
 
    @FXML

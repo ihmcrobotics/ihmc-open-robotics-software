@@ -1,3 +1,5 @@
+# Message specific to Atlas, it is reported by the IHMC state estimator.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

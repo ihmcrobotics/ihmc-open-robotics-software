@@ -11,14 +11,13 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class NetworkParameters
 {
    public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
-   private static final String helpText =
-         "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in " + defaultParameterFile
-               + ", or pass in -Dus.ihmc.networkParameterFile=[path].";
+   private static final String helpText = "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in "
+         + defaultParameterFile + ", or pass in -Dus.ihmc.networkParameterFile=[path].";
 
    private static NetworkParameters instance = null;
 
@@ -36,11 +35,11 @@ public class NetworkParameters
    private NetworkParameters()
    {
       File file = new File(System.getProperty("us.ihmc.networkParameterFile", defaultParameterFile)).getAbsoluteFile();
-      PrintTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
+      LogTools.info("Looking for network parameters in network parameters file at " + file.getAbsolutePath());
 
       if (file.exists() && file.isFile())
       {
-         PrintTools.info("Found Network parameters file at " + file.getAbsolutePath());
+         LogTools.info("Found Network parameters file at " + file.getAbsolutePath());
          try
          {
             Properties properties = new Properties();
@@ -64,11 +63,11 @@ public class NetworkParameters
       }
       else
       {
-         PrintTools.warn("Network parameter file " + file.getAbsolutePath() + " does not exist.");
+         LogTools.warn("Network parameter file " + file.getAbsolutePath() + " does not exist.");
       }
 
-      PrintTools.info("Looking for network parameters in environment variables");
-      PrintTools.info("Environment variables will override entries in the network parameters file.");
+      LogTools.info("Looking for network parameters in environment variables");
+      LogTools.info("Environment variables will override entries in the network parameters file.");
       for (NetworkParameterKeys key : NetworkParameterKeys.values())
       {
          String keyString = key.toString();
@@ -117,13 +116,11 @@ public class NetworkParameters
          }
          else
          {
-            throw new RuntimeException(
-                  "Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI or set the IHMC Network key " + key.toString()
-                        + " in your ini file. Exiting.\n" + helpText);
+            throw new RuntimeException("Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI or set the IHMC Network key "
+                  + key.toString() + " in your ini file. Exiting.\n" + helpText);
          }
 
-
-//         System.exit(-1);
+         //         System.exit(-1);
       }
       return value;
    }
@@ -146,24 +143,23 @@ public class NetworkParameters
          }
       }
    }
-   
+
    public static int getRTPSDomainID()
    {
-      if(hasKey(NetworkParameterKeys.RTPSDomainID))
+      if (hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          String value = getInstance().parameters.get(NetworkParameterKeys.RTPSDomainID);
-         if(value != null)
+         if (value != null)
          {
             int rtpsDomainID = Integer.parseInt(value);
-            if(rtpsDomainID >= 0)
+            if (rtpsDomainID >= 0)
             {
                return rtpsDomainID;
             }
          }
       }
-      PrintTools.error("Tried to load the RTPS Domain ID from the Network Parameter file, but either the key didn't exist or after parsing the string it returned a negative number. Please check the rtps domain ID and try again. It should look like RTPSDomainID:15 Returning a domain ID of 1");
+      LogTools.error("Tried to load the RTPS Domain ID from the Network Parameter file, but either the key didn't exist or after parsing the string it returned a negative number. Please check the rtps domain ID and try again. It should look like RTPSDomainID:15 Returning a domain ID of 1");
       return 1;
-   
    }
 
    public static boolean hasKey(NetworkParameterKeys key)

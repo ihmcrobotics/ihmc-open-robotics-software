@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.externalForceEstimation;
+package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
