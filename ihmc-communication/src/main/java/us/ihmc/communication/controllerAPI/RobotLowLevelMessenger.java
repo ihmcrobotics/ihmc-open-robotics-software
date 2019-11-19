@@ -6,6 +6,12 @@ public interface RobotLowLevelMessenger
 
    void sendStandRequest();
 
+   void sendAbortWalkingRequest();
+
+   void sendPauseWalkingRequest();
+
+   void sendContinueWalkingRequest();
+
    default void sendShutdownRequest()
    {
       throw new RuntimeException("Robot shutdown request is not implemented.");

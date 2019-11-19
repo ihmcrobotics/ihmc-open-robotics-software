@@ -16,15 +16,19 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageConverter;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
@@ -103,6 +107,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final ConcurrentList<PathPlanningStage> pathPlanningStagePool = new ConcurrentList<>();
    private final ConcurrentList<PathPlanningStage> allPathPlanningStages = new ConcurrentList<>();
+   private final ConcurrentSet<PathPlanningStage> completedPathPlanningStages = new ConcurrentSet<>();
    private final ConcurrentMap<PathPlanningStage, FootstepPlannerObjective> pathPlanningStagesInProgress = new ConcurrentMap<>();
    private final ConcurrentMap<PathPlanningStage, ScheduledFuture<?>> pathPlanningTasks = new ConcurrentMap<>();
 
@@ -118,6 +123,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private final ConcurrentList<FootstepPlanningStage> stepPlanningStagePool = new ConcurrentList<>();
    private final ConcurrentList<FootstepPlanningStage> allStepPlanningStages = new ConcurrentList<>();
+   private final ConcurrentSet<FootstepPlanningStage> completedStepPlanningStages = new ConcurrentSet<>();
    private final ConcurrentMap<FootstepPlanningStage, FootstepPlannerObjective> stepPlanningStagesInProgress = new ConcurrentMap<>();
    private final ConcurrentMap<FootstepPlanningStage, ScheduledFuture<?>> stepPlanningTasks = new ConcurrentMap<>();
 
@@ -181,7 +187,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       maxNumberOfPathPlanners = Math.max(initialNumberOfPathStages, absoluteMaxNumberOfPathStages);
 
       long updateFrequency = 1000;
-      plannerListener = new MultiStagePlannerListener(updateFrequency);
+      plannerListener = new MultiStagePlannerListener(statusOutputManager, updateFrequency, registry);
 
       for (int i = 0; i < Math.min(initialNumberOfStepStages, absoluteMaxNumberOfStepStages); i++)
       {
@@ -252,6 +258,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          stageToReturn = pathPlanningStagePool.remove(0);
       }
 
+      // need to save the statistics from this plan before they get overwritten
+      if (completedPathPlanningStages.contains(stageToReturn))
+      {
+         completedPathPlanStatistics.add(stageToReturn.getPlanSequenceId(), stageToReturn.getPlannerStatistics());
+         completedPathPlanningStages.remove(stageToReturn);
+      }
+
+
       return stageToReturn;
    }
 
@@ -267,6 +281,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       else
       { // get one from the pool
          stageToReturn = stepPlanningStagePool.remove(0);
+      }
+
+      // need to save the statistics from this plan before they get overwritten
+      if (completedStepPlanningStages.contains(stageToReturn))
+      {
+         completedStepPlanStatistics.add(stageToReturn.getPlanSequenceId(), stageToReturn.getPlannerStatistics());
+         completedStepPlanningStages.remove(stageToReturn);
       }
 
       return stageToReturn;
@@ -319,9 +340,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       completedPathWaypoints.clear();
       completedStepPlans.clear();
-
-      completedPathPlanStatistics.clear();
-      completedStepPlanStatistics.clear();
 
       completedPathResults.clear();
       completedStepResults.clear();
@@ -422,13 +440,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public synchronized void pathPlanningIsComplete(FootstepPlanningResult pathPlanningResult, PathPlanningStage stageFinished)
    {
       completedPathResults.add(pathPlanningResult);
+      completedPathPlanningStages.add(stageFinished);
 
-      if (pathPlanningResult != null && pathPlanningResult.validForExecution())
+      if (pathPlanningResult != null)
       {
-         completedPathWaypoints.add(stageFinished.getPlanSequenceId(), stageFinished.getWaypoints());
+         if (pathPlanningResult.validForExecution())
+            completedPathWaypoints.add(stageFinished.getPlanSequenceId(), stageFinished.getWaypoints());
       }
-
-      completedPathPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
       cleanupPathPlanningStage(stageFinished);
 
@@ -439,16 +457,18 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public synchronized void stepPlanningIsComplete(FootstepPlanningResult stepPlanningResult, FootstepPlanningStage stageFinished)
    {
       completedStepResults.add(stepPlanningResult);
+      completedStepPlanningStages.add(stageFinished);
 
-      if (stepPlanningResult != null && stepPlanningResult.validForExecution())
+      if (stepPlanningResult != null)
       {
-         int sequence = stageFinished.getPlanSequenceId();
-         FootstepPlan plan = stageFinished.getPlan();
-         if (plan != null)
-            completedStepPlans.add(sequence, plan);
+         if (stepPlanningResult.validForExecution())
+         {
+            int sequence = stageFinished.getPlanSequenceId();
+            FootstepPlan plan = stageFinished.getPlan();
+            if (plan != null)
+               completedStepPlans.add(sequence, plan);
+         }
       }
-
-      completedStepPlanStatistics.add(stageFinished.getPlanSequenceId(), stageFinished.getPlannerStatistics());
 
       cleanupStepPlanningStage(stageFinished);
 
@@ -467,6 +487,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       if (!waitingForPlanningRequest.getBooleanValue())
          return;
+
+      completedStepPlanningStages.clear();
+      completedPathPlanningStages.clear();
 
       isDone.set(false);
       isDonePlanningSteps.set(false);
@@ -488,7 +511,13 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void processPlanningStatisticsRequest()
    {
+      completedPathPlanningStages.getCopyForReading().forEach(stage -> completedPathPlanStatistics.add(stage.getPlanSequenceId(), stage.getPlannerStatistics()));
+      completedStepPlanningStages.getCopyForReading().forEach(stage -> completedStepPlanStatistics.add(stage.getPlanSequenceId(), stage.getPlannerStatistics()));
+      completedPathPlanningStages.clear();
+      completedStepPlanningStages.clear();
+
       EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate = new EnumMap<>(StatisticsType.class);
+
 
       Iterable<ImmutablePair<Integer, PlannerStatistics<?>>> pathIterable = completedPathPlanStatistics.iterable();
       if (pathIterable != null)
@@ -537,6 +566,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDonePlanningSteps.set(false);
       requestedPlanarRegions.set(false);
       plannerTime.set(0.0);
+
+      completedPathPlanStatistics.clear();
+      completedStepPlanStatistics.clear();
 
       for (PathPlanningStage stage : allPathPlanningStages.iterable())
          stage.setTextToSpeechPublisher(textToSpeechPublisher);
@@ -1095,27 +1127,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          concatenateListOfStatistics(mapToPopulate, segmentId, (ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         VisibilityGraphStatistics incomingStatistics = (VisibilityGraphStatistics) plannerStatistics;
-         VisibilityGraphStatistics statistics;
-         if (mapToPopulate.containsKey(StatisticsType.VISIBILITY_GRAPH))
-            statistics = (VisibilityGraphStatistics) mapToPopulate.get(StatisticsType.VISIBILITY_GRAPH);
-         else
-         {
-            statistics = new VisibilityGraphStatistics();
-            mapToPopulate.put(StatisticsType.VISIBILITY_GRAPH, statistics);
-         }
-
-         if (segmentId == 1)
-            statistics.setStartMapId(incomingStatistics.getStartMapId());
-         if (segmentId == globalStepSequenceIndex.getIntegerValue())
-            statistics.setGoalMapId(incomingStatistics.getGoalMapId());
-
-         statistics.getStartVisibilityMap().addConnections(incomingStatistics.getStartVisibilityMap().getConnections());
-         statistics.getGoalVisibilityMap().addConnections(incomingStatistics.getGoalVisibilityMap().getConnections());
-         statistics.getInterRegionsVisibilityMap().addConnections(incomingStatistics.getInterRegionsVisibilityMap().getConnections());
-         for (int i = 0; i < incomingStatistics.getNumberOfNavigableRegions(); i++)
-            statistics.addNavigableRegion(incomingStatistics.getNavigableRegion(i));
-
+         concatenateVisibilityGraphStatistics(mapToPopulate, segmentId, (VisibilityGraphStatistics) plannerStatistics);
+         break;
+      case GRAPH_SEARCH:
+         concatenateGraphSearchStatistics(mapToPopulate, segmentId, (GraphSearchStatistics) plannerStatistics);
          break;
       }
    }
@@ -1124,6 +1139,54 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       while (listOfStatistics.getNumberOfStatistics() > 0)
          concatenateStatistics(mapToPopulate, segmentId, listOfStatistics.pollStatistics());
+   }
+
+   private void concatenateVisibilityGraphStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId,
+                                                     VisibilityGraphStatistics incomingStatistics)
+   {
+      VisibilityGraphStatistics existingStaticsToAugment;
+      if (mapToPopulate.containsKey(StatisticsType.VISIBILITY_GRAPH))
+         existingStaticsToAugment = (VisibilityGraphStatistics) mapToPopulate.get(StatisticsType.VISIBILITY_GRAPH);
+      else
+      {
+         existingStaticsToAugment = new VisibilityGraphStatistics();
+         mapToPopulate.put(StatisticsType.VISIBILITY_GRAPH, existingStaticsToAugment);
+      }
+
+      if (segmentId == 1)
+         existingStaticsToAugment.setStartMapId(incomingStatistics.getStartMapId());
+      if (segmentId == globalStepSequenceIndex.getIntegerValue())
+         existingStaticsToAugment.setGoalMapId(incomingStatistics.getGoalMapId());
+
+      existingStaticsToAugment.getStartVisibilityMap().addConnections(incomingStatistics.getStartVisibilityMap().getConnections());
+      existingStaticsToAugment.getGoalVisibilityMap().addConnections(incomingStatistics.getGoalVisibilityMap().getConnections());
+      existingStaticsToAugment.getInterRegionsVisibilityMap().addConnections(incomingStatistics.getInterRegionsVisibilityMap().getConnections());
+      for (int i = 0; i < incomingStatistics.getNumberOfNavigableRegions(); i++)
+         existingStaticsToAugment.addNavigableRegion(incomingStatistics.getNavigableRegion(i));
+   }
+
+   private final static int assumedMaxGraphSize = 1000000000;
+
+   private void concatenateGraphSearchStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> mapToPopulate, int segmentId,
+                                                 GraphSearchStatistics incomingStatistics)
+   {
+      GraphSearchStatistics existingStaticsToAugment;
+      if (mapToPopulate.containsKey(StatisticsType.GRAPH_SEARCH))
+      {
+         existingStaticsToAugment = (GraphSearchStatistics) mapToPopulate.get(StatisticsType.GRAPH_SEARCH);
+         existingStaticsToAugment.getExpandedNodes().append(incomingStatistics.getExpandedNodes());
+         List<PlannerNodeData> existingData = existingStaticsToAugment.getFullGraph().getNodeData();
+         for (PlannerNodeData dataToAdd : incomingStatistics.getFullGraph().getNodeData())
+         {
+            dataToAdd.getFootstepNode().setNodeIndex(dataToAdd.getNodeId() + segmentId * assumedMaxGraphSize);
+            existingData.add(dataToAdd);
+         }
+      }
+      else
+      {
+         existingStaticsToAugment = new GraphSearchStatistics(incomingStatistics);
+         mapToPopulate.put(StatisticsType.GRAPH_SEARCH, existingStaticsToAugment);
+      }
    }
 
    private ListOfStatistics convertToListOfStatistics(EnumMap<StatisticsType, PlannerStatistics<?>> statisticsMap)
@@ -1146,9 +1209,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         statusOutputManager.reportStatusMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(),
-                                                                                                                         (VisibilityGraphStatistics) plannerStatistics));
+         sendVisibilityGraphStatistics((VisibilityGraphStatistics) plannerStatistics);
          break;
+      case GRAPH_SEARCH:
+         sendGraphSearchStatistics((GraphSearchStatistics) plannerStatistics);
       }
    }
 
@@ -1156,6 +1220,19 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
+   }
+
+   private void sendVisibilityGraphStatistics(VisibilityGraphStatistics plannerStatistics)
+   {
+      statusOutputManager.reportStatusMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), plannerStatistics));
+   }
+
+   private void sendGraphSearchStatistics(GraphSearchStatistics graphSearchStatistics)
+   {
+      statusOutputManager.reportStatusMessage(FootstepPlannerMessageConverter.convertExpandedNodesToMessage(planId.getIntegerValue(),
+                                                                                                            graphSearchStatistics.getExpandedNodes()));
+      statusOutputManager.reportStatusMessage(FootstepPlannerMessageConverter.convertFullGraphToMessage(planId.getIntegerValue(),
+                                                                                                        graphSearchStatistics.getFullGraph()));
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher)

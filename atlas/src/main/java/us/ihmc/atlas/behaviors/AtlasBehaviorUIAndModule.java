@@ -1,8 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,34 +10,21 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
-public class AtlasBehaviorUIAndModule extends Application
+public class AtlasBehaviorUIAndModule
 {
-   private BehaviorUI ui;
-
-   @Override
-   public void start(Stage primaryStage) throws Exception
+   public AtlasBehaviorUIAndModule()
    {
+      ThreadTools.startAThread(() -> new AtlasBehaviorModule(), AtlasBehaviorUIAndModule.class.getSimpleName());
+
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
 
       Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
 
-      ui = new BehaviorUI(primaryStage,
-                          behaviorMessager,
-                          drcRobotModel,
-                          PubSubImplementation.FAST_RTPS);
-      ui.show();
-   }
-
-   @Override
-   public void stop() throws Exception
-   {
-      super.stop();
-      Platform.exit();
+      new BehaviorUI(behaviorMessager, drcRobotModel, PubSubImplementation.FAST_RTPS);
    }
 
    public static void main(String[] args)
    {
-      ThreadTools.startAThread(() -> new AtlasBehaviorModule(), AtlasBehaviorUIAndModule.class.getSimpleName());
-      launch(args);
+      new AtlasBehaviorUIAndModule();
    }
 }

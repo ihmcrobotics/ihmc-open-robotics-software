@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

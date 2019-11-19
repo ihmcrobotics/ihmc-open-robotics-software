@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message is old will be refreshed in a future release.
+# Message for commanding the hands to perform various predefined grasps.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

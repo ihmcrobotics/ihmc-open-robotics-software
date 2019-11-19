@@ -1,3 +1,29 @@
+# This message is part of the IHMC footstep planning module.
+# Maximum step reach when stepping up.
+# 
+# Long steps forward are rejected by the planner if one of two criteria are met:
+# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - OR -
+# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - AND -
+# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# Maximum step width when stepping up.
+# 
+# Long steps forward are rejected by the planner if one of two criteria are met:
+# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - OR -
+# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - AND -
+# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# Step height for considering stepping up.
+# 
+# Long steps forward are rejected by the planner if one of two criteria are met:
+# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - OR -
+# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+# - AND -
+# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message commands the controller to execute a list of footsteps.
+# See FootstepDataMessage for more information about defining a footstep.
+
 int8 EXECUTION_TIMING_CONTROL_DURATIONS=0
 
 int8 EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS=1

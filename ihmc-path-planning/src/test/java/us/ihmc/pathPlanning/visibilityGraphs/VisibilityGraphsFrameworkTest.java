@@ -98,12 +98,12 @@ public class VisibilityGraphsFrameworkTest
    private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
-      parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
-      parameters.setPerformPostProcessingNodeShifting(true);
-      parameters.setIntroduceMidpointsInPostProcessing(true);
-      parameters.setObstacleExtrusionDistance(0.3);
-      parameters.setPreferredObstacleExtrusionDistance(0.6);
-      parameters.setNavigableExtrusionDistance(0.02);
+//      parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
+//      parameters.setPerformPostProcessingNodeShifting(true);
+//      parameters.setIntroduceMidpointsInPostProcessing(true);
+//      parameters.setObstacleExtrusionDistance(0.3);
+//      parameters.setPreferredObstacleExtrusionDistance(0.6);
+//      parameters.setNavigableExtrusionDistance(0.02);
 
       return parameters;
    }
@@ -913,7 +913,7 @@ public class VisibilityGraphsFrameworkTest
 //      String dataSetName = "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest";
 //      String dataSetName = "20171215_211034_DoorwayNoCeiling";
 //      String dataSetName = "20171215_220523_SteppingStones";
-      String dataSetName = "20171215_201810_RampSteppingStones_Sim";
+      String dataSetName = "20191114_155310_SimplePlatform";
 //      String dataSetName = "20171215_214730_CinderBlockField";
 //      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
 //      String dataSetName = "20171215_210811_DoorwayWithCeiling";
@@ -928,8 +928,8 @@ public class VisibilityGraphsFrameworkTest
 //         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
+      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();
 
    }

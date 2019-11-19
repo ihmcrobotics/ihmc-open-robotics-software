@@ -135,7 +135,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private static final String robotName = "testBot";
    private MultiStageFootstepPlanningModule toolboxModule;
-   private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
 
    private RealtimeRos2Node ros2Node;
 
@@ -158,7 +157,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
-      tryToStartModule(() -> setupFootstepPostProcessingToolboxModule());
 
       messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
       messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
@@ -227,7 +225,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.closeMessager();
       messageConverter.destroy();
       toolboxModule.destroy();
-      postProcessingToolboxModule.destroy();
 
       if (ui != null)
          ui.stop();
@@ -240,7 +237,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       ros2Node = null;
       toolboxModule = null;
-      postProcessingToolboxModule = null;
 
       messageConverter = null;
       messager = null;
@@ -287,11 +283,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
       toolboxModule = new MultiStageFootstepPlanningModule(getRobotModel(), null, true, pubSubImplementation);
-   }
-
-   private void setupFootstepPostProcessingToolboxModule() throws IOException
-   {
-      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, true, pubSubImplementation);
    }
 
    private DRCRobotModel getRobotModel()
@@ -1209,13 +1200,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       @Override
-      public double getMaxICPErrorBeforeSingleSupportX()
+      public double getMaxICPErrorBeforeSingleSupportForwardX()
       {
          return 0;
       }
 
       @Override
-      public double getMaxICPErrorBeforeSingleSupportY()
+      public double getMaxICPErrorBeforeSingleSupportInnerY()
       {
          return 0;
       }

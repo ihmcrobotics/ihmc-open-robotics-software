@@ -240,6 +240,9 @@ public interface JointDesiredOutputListReadOnly
       for (int i = 0; i < getNumberOfJointsWithDesiredOutput(); i++)
       {
          JointDesiredOutputMessage jointDesiredOutputMessage = jointDesiredOutputList.add();
+
+         String jointName = getOneDoFJoint(i).getName();
+         jointDesiredOutputMessage.setJointName(jointName);
          getJointDesiredOutput(i).copyToMessage(jointDesiredOutputMessage);
       }
    }

@@ -1,5 +1,6 @@
 package us.ihmc.javafx.applicationCreator;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import javafx.application.Application;
@@ -22,6 +23,8 @@ public class JavaFXApplicationCreator extends Application
 
    private static final CountDownLatch latch = new CountDownLatch(1);
    private static JavaFXApplicationCreator startUpTest = null;
+
+   private static ArrayList<Runnable> stopListeners = new ArrayList<>();
 
    public JavaFXApplicationCreator()
    {
@@ -48,9 +51,23 @@ public class JavaFXApplicationCreator extends Application
       return startUpTest;
    }
 
+   public static void attachStopListener(Runnable stopListener)
+   {
+      stopListeners.add(stopListener);
+   }
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+   }
+
+   @Override
+   public void stop() throws Exception
+   {
+      for (Runnable stopListener : stopListeners)
+      {
+         stopListener.run();
+      }
    }
 
    /**

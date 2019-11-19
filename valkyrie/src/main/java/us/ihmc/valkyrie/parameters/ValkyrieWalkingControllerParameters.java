@@ -626,13 +626,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportX()
+   public double getMaxICPErrorBeforeSingleSupportForwardX()
    {
       return 0.02;
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportY()
+   public double getMaxICPErrorBeforeSingleSupportInnerY()
    {
       return 0.02;
    }

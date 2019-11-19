@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 int8 FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION=0
 
 int8 FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION=1
