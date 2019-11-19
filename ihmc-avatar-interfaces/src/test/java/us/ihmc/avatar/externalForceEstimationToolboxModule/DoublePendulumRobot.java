@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.externalForceEstimation;
+package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;

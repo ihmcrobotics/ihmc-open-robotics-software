@@ -127,6 +127,7 @@ public class RemotePlannerMessageConverter
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
+      double bestEffortTimeout = packet.getBestEffortTimeout();
       double horizonLength = packet.getHorizonLength();
 
       this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, regions));
@@ -139,6 +140,7 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);

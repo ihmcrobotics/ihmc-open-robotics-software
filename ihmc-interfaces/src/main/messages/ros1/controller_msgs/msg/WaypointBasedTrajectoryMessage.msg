@@ -1,3 +1,6 @@
+# Configure a constrained trajectory for a given end-effector.
+# Main usage is the IHMC WholeBodyTrajectoryToolbox.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

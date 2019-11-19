@@ -43,6 +43,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
@@ -55,16 +56,14 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.SplinePathWithAStarPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.*;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -270,6 +269,9 @@ public class FootstepPathCalculatorModule
       case VISIBILITY_GRAPH:
          sendVisibilityGraphStatisticsMessages((VisibilityGraphStatistics) plannerStatistics);
          break;
+      case GRAPH_SEARCH:
+         sendGraphSearchPlannerStatisticsMessage((GraphSearchStatistics) plannerStatistics);
+         break;
       }
    }
 
@@ -332,6 +334,12 @@ public class FootstepPathCalculatorModule
       messager.submitMessage(GoalVisibilityMap, goalMap);
       messager.submitMessage(VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
+   }
+
+   private void sendGraphSearchPlannerStatisticsMessage(GraphSearchStatistics graphSearchStatistics)
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.ExpandedNodesMap, graphSearchStatistics.getExpandedNodes());
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraphPart, graphSearchStatistics.getFullGraph());
    }
 
    private BodyPathAndFootstepPlanner createPlanner()

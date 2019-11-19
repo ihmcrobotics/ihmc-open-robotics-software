@@ -1,3 +1,5 @@
+# This message is part of the IHMC humanoid behavior module.
+
 int8 NO_BEHAVIOR_RUNNING=0
 
 int8 BEHAVIOS_RUNNING=1

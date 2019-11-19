@@ -198,8 +198,10 @@
                         <parameter name="userDesiredICPOffsetY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="manualModeICPOffset" type="BooleanParameter" value="false" />
                      </registry>
-                     <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                   </registry>
                </registry>
                <registry name="RigidBodyGains">

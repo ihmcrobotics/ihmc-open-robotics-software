@@ -1,3 +1,6 @@
+# This message is part of the IHMC quadruped controller API.
+# This message is used to switch the control scheme between different stepping modes.
+
 int8 FRONT_LEFT=0
 
 int8 FRONT_RIGHT=1

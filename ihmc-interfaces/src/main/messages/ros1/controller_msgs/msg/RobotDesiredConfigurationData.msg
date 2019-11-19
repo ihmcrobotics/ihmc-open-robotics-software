@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message contains a list of joint-level desired values that are output from the whole-body controller
+
 # Wall-time in nanoseconds
 int64 wall_time
 

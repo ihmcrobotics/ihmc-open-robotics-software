@@ -15,9 +15,14 @@ public class LatticeNode
 
    public LatticeNode(double x, double y, double yaw)
    {
-      this.xIndex = (int) Math.round(x / gridSizeXY);
-      this.yIndex = (int) Math.round(y / gridSizeXY);
-      this.yawIndex = Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions);
+      this((int) Math.round(x / gridSizeXY), (int) Math.round(y / gridSizeXY), Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions));
+   }
+
+   public LatticeNode(int xIndex, int yIndex, int yawIndex)
+   {
+      this.xIndex = xIndex;
+      this.yIndex = yIndex;
+      this.yawIndex = yawIndex;
       hashCode = computeHashCode(this);
    }
 

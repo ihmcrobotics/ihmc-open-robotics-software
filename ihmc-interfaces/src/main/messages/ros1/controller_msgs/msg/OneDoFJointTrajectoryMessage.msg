@@ -1,3 +1,8 @@
+# This message is part of the IHMC whole-body controller API.
+# This class is used to build trajectory messages in jointspace
+# It holds all the trajectory points to go through with a one-dimensional trajectory.
+# A third order polynomial function is used to interpolate between trajectory points.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

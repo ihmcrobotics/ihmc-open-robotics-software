@@ -1,3 +1,5 @@
+# Message for the IHMC humanoid behavior module.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

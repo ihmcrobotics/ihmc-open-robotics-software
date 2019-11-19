@@ -1,3 +1,5 @@
+# Message notifying if the IHMC whole-body controller has crashed unexpectedly.
+
 int8 CONTROLLER_READ=0
 
 int8 CONTROLLER_WRITE=1

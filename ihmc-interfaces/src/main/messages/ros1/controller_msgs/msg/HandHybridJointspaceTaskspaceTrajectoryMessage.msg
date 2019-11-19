@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message commands the controller to move the hand in both taskspace and jointspace
+# to the desired orientation and joint angles while going through the specified trajectory points.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

@@ -1,3 +1,5 @@
+# This message is part of the IHMC quadruped footstep planning module.
+
 int8 FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET=0
 
 int8 FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS=1
