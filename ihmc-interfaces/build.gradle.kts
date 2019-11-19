@@ -10,7 +10,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.13.4")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.14.3")
    }
 }
 
@@ -41,12 +41,12 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.14.2")
+   api("us.ihmc:ihmc-ros2-library:0.14.3")
 }
 
 generatorDependencies {
    api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.13.4")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.14.3")
 }
 
 val generator = RosInterfaceGenerator()

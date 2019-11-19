@@ -20,7 +20,6 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
             * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
             */
    public int y_index_;
-   public boolean node_is_valid_ = true;
 
    public FootstepPlannerCellMessage()
    {
@@ -37,8 +36,6 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       x_index_ = other.x_index_;
 
       y_index_ = other.y_index_;
-
-      node_is_valid_ = other.node_is_valid_;
 
    }
 
@@ -72,15 +69,6 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       return y_index_;
    }
 
-   public void setNodeIsValid(boolean node_is_valid)
-   {
-      node_is_valid_ = node_is_valid;
-   }
-   public boolean getNodeIsValid()
-   {
-      return node_is_valid_;
-   }
-
 
    public static Supplier<FootstepPlannerCellMessagePubSubType> getPubSubType()
    {
@@ -103,8 +91,6 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_index_, other.y_index_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.node_is_valid_, other.node_is_valid_, epsilon)) return false;
-
 
       return true;
    }
@@ -122,8 +108,6 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
       if(this.y_index_ != otherMyClass.y_index_) return false;
 
-      if(this.node_is_valid_ != otherMyClass.node_is_valid_) return false;
-
 
       return true;
    }
@@ -137,9 +121,7 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       builder.append("x_index=");
       builder.append(this.x_index_);      builder.append(", ");
       builder.append("y_index=");
-      builder.append(this.y_index_);      builder.append(", ");
-      builder.append("node_is_valid=");
-      builder.append(this.node_is_valid_);
+      builder.append(this.y_index_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

@@ -1,3 +1,5 @@
+# This message is part of the IHMC quadruped footstep planning module.
+
 int8 ROBOT_QUADRANT_FRONT_LEFT=0
 
 int8 ROBOT_QUADRANT_FRONT_RIGHT=1

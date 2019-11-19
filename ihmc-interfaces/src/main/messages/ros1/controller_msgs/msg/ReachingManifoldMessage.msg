@@ -1,3 +1,6 @@
+# Message used to encode the manifold of an object to be used as input by a reaching motion planner.
+# Main usage is the IHMC WholeBodyTrajectoryToolbox.
+
 int8 CONFIGURATION_SPACE_NAME_X=0
 
 int8 CONFIGURATION_SPACE_NAME_Y=1

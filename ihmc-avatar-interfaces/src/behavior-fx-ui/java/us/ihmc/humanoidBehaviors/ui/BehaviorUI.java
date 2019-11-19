@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -9,6 +10,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
@@ -18,6 +21,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
@@ -35,8 +39,7 @@ public class BehaviorUI
 {
    private static boolean showLivePlanarRegionsGraphic = true;
 
-   private final Stage primaryStage;
-   private final BorderPane mainPane;
+   private BorderPane mainPane;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
@@ -49,13 +52,8 @@ public class BehaviorUI
    @FXML private PlannerParametersUIController plannerParametersUIController;
    @FXML private DirectRobotUIController directRobotUIController;
 
-   public BehaviorUI(Stage primaryStage,
-                     Messager behaviorMessager,
-                     DRCRobotModel robotModel,
-                     PubSubImplementation pubSubImplementation) throws Exception
+   public BehaviorUI(Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
-      this.primaryStage = primaryStage;
-
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
@@ -65,55 +63,57 @@ public class BehaviorUI
          parameterServer.start();
       }
 
-      FXMLLoader loader = new FXMLLoader();
-      loader.setController(this);
-      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-
-      mainPane = loader.load();
-
-      View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(0.05, 2000.0,true);
-      view3dFactory.addWorldCoordinateSystem(0.3);
-      view3dFactory.addDefaultLighting();
-      SubScene subScene = view3dFactory.getSubScene();
-      Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
-
-      behaviorSelector.getItems().add("NONE");
-      for (BehaviorRegistry behavior : BehaviorRegistry.values)
+      JavaFXApplicationCreator.createAJavaFXApplication();
+      Platform.runLater(() ->
       {
-         behaviorSelector.getItems().add(behavior.name());
-      }
-      behaviorSelector.valueProperty().addListener(
-            (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
+         FXMLLoader loader = new FXMLLoader();
+         loader.setController(this);
+         loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
-      stepInPlaceBehaviorUIController.init(behaviorMessager);
-      fancyPosesBehaviorUIController.init(behaviorMessager);
-      exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-      patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-      plannerParametersUIController.init(behaviorMessager, robotModel);
-      directRobotUIController.init(ros2Node, robotModel);
+         ExceptionTools.handle(() -> mainPane = loader.load(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      view3dFactory.addNodeToView(patrolBehaviorUIController);
-      view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
-      
-      if (showLivePlanarRegionsGraphic)
-      {
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, false));
-      }
+         View3DFactory view3dFactory = View3DFactory.createSubscene();
+         view3dFactory.addCameraController(0.05, 2000.0,true);
+         view3dFactory.addWorldCoordinateSystem(0.3);
+         view3dFactory.addDefaultLighting();
+         SubScene subScene = view3dFactory.getSubScene();
+         Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-      view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+         behaviorSelector.getItems().add("NONE");
+         for (BehaviorRegistry behavior : BehaviorRegistry.values)
+         {
+            behaviorSelector.getItems().add(behavior.name());
+         }
+         behaviorSelector.valueProperty().addListener(
+               (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
 
-      mainPane.setCenter(subSceneWrappedInsidePane);
-      primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(false);
-      Scene mainScene = new Scene(mainPane, 1554, 1000);
+         stepInPlaceBehaviorUIController.init(behaviorMessager);
+         fancyPosesBehaviorUIController.init(behaviorMessager);
+         exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+         patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+         plannerParametersUIController.init(behaviorMessager, robotModel);
+         directRobotUIController.init(ros2Node, robotModel);
 
-      primaryStage.setScene(mainScene);
-   }
+         view3dFactory.addNodeToView(patrolBehaviorUIController);
+         view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
 
-   public void show()
-   {
-      primaryStage.show();
+         if (showLivePlanarRegionsGraphic)
+         {
+            view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, false));
+         }
+
+         view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+
+         mainPane.setCenter(subSceneWrappedInsidePane);
+         Stage primaryStage = new Stage();
+         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setMaximized(false);
+         Scene mainScene = new Scene(mainPane, 1554, 1000);
+
+         primaryStage.setScene(mainScene);
+         primaryStage.show();
+         primaryStage.toFront();
+      });
    }
 
    public static void claimEditing(Object claimingEditor)

@@ -1,3 +1,7 @@
+# This message is part of the IHMC quadruped controller API.
+# This message commands the controller to move in taskspace the body to the desired height while going through the specified trajectory points.
+# Sending this command will not affect the pelvis horizontal position.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

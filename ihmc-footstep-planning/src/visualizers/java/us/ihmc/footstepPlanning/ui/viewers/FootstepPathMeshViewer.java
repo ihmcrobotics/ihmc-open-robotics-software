@@ -29,6 +29,8 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Double;
@@ -105,35 +107,25 @@ public class FootstepPathMeshViewer extends AnimationTimer
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
    }
 
-   private void processLowestCostNodeList(FootstepNodeDataListMessage message)
+   private void processLowestCostNodeList(PlannerNodeDataList nodeDataList)
    {
-      if (message.getIsFootstepGraph())
+      if (nodeDataList.isFootstepGraph())
          return;
 
-      IDLSequence.Object<FootstepNodeDataMessage> nodeDataList = message.getNodeData();
+
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      for (int i = 0; i < nodeDataList.size(); i++)
-      {
-         addNodeDataToFootstepPlan(footstepDataListMessage, nodeDataList.get(i));
-      }
+      for (PlannerNodeData nodeData : nodeDataList.getNodeData())
+         addNodeDataToFootstepPlan(footstepDataListMessage, nodeData);
 
       processFootstepPath(footstepDataListMessage);
    }
 
-   private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, FootstepNodeDataMessage nodeData)
+   private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, PlannerNodeData nodeData)
    {
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotationYawAndZeroTranslation(nodeData.getYawIndex() * LatticeNode.gridSizeYaw);
-      footstepPose.setTranslationX(nodeData.getXIndex() * LatticeNode.gridSizeXY);
-      footstepPose.setTranslationY(nodeData.getYIndex() * LatticeNode.gridSizeXY);
-
       FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-      RigidBodyTransform snapTransform = new RigidBodyTransform();
-      snapTransform.set(nodeData.getSnapRotation(), nodeData.getSnapTranslation());
-      snapTransform.transform(footstepPose);
-      footstepDataMessage.getLocation().set(footstepPose.getTranslationVector());
-      footstepDataMessage.getOrientation().set(footstepPose.getRotationMatrix());
-      footstepDataMessage.setRobotSide(nodeData.getRobotSide());
+      footstepDataMessage.getLocation().set(nodeData.getNodePose().getTranslation());
+      footstepDataMessage.getOrientation().set(nodeData.getNodePose().getRotation());
+      footstepDataMessage.setRobotSide(nodeData.getFootstepNode().getRobotSide().toByte());
    }
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
@@ -202,7 +194,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          {
             FramePoint3D copMidpoint = new FramePoint3D();
             copMidpoint.interpolate(previousStanceFootPosition, stanceFootPosition, footstepDataMessage.getTransferWeightDistribution());
-            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, midpointColor);
+            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, getWaypointColor(footstepDataMessage));
          }
 
          previousStanceFootPosition.set(stanceFootPosition);
@@ -245,6 +237,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          return Color.GRAY;
       }
+   }
+
+   private Color getWaypointColor(FootstepDataMessage footstepDataMessage)
+   {
+      return toTransparentColor(footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN, 0.5);
    }
 
    private boolean hasDefaultWaypointProportions(FootstepDataMessage footstepDataMessage)
@@ -333,5 +330,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
    public Node getRoot()
    {
       return root;
+   }
+
+   private static Color toTransparentColor(Color opaqueColor, double opacity)
+   {
+      double red = opaqueColor.getRed();
+      double green = opaqueColor.getGreen();
+      double blue = opaqueColor.getBlue();
+      return new Color(red, green, blue, opacity);
    }
 }

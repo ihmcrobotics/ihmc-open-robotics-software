@@ -1,3 +1,6 @@
+# This message is part of the IHMC footstep planning module.
+# This messages gives statistical information about a footstep planning
+
 int8 BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_HIGH_OR_LOW=0
 
 int8 BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FORWARD_AND_DOWN=1

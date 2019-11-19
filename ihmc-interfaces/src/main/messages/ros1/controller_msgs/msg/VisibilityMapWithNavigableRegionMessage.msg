@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 controller_msgs/PlanarRegionMessage home_region
 
 controller_msgs/VisibilityClusterMessage home_region_cluster
