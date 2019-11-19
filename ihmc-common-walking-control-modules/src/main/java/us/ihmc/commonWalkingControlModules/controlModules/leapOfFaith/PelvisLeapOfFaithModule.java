@@ -119,7 +119,7 @@ public class PelvisLeapOfFaithModule
       double timeForReaching;
       if (isInSwing.getBooleanValue())
       {
-         if (timeInLeapOfFaith.getDoubleValue() < 0.0)
+         if (timeInLeapOfFaith.getDoubleValue() <= 0.0)
             return;
 
          // doing the leap of faith, so modify the pelvis setpoints to have it reach
@@ -127,15 +127,12 @@ public class PelvisLeapOfFaithModule
       }
       else
       {
-         if (phaseOutTime < 0.0)
+         if (phaseOutTime <= 0.0)
             return;
 
          // need to return the offset back to zero, so use the monotonically decreasing phase out time
          timeForReaching = phaseOutTime;
       }
-
-      if (upcomingFootstep == null)
-         return;
 
       tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
       tempPoint.changeFrame(soleZUpFrames.get(supportSide));
