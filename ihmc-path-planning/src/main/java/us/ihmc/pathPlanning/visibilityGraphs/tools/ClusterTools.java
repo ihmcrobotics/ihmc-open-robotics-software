@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -35,6 +36,8 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class ClusterTools
 {
+   private final static boolean pruneExtrusionLoops = true;
+
    //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by 
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
@@ -109,6 +112,9 @@ public class ClusterTools
          }
       }
 
+      if (pruneExtrusionLoops)
+         pruneExtrusionLoops(extrusions);
+
       return extrusions;
    }
 
@@ -166,6 +172,36 @@ public class ClusterTools
       }
 
       return maxExtrusionDistance;
+   }
+
+   private static void pruneExtrusionLoops(List<Point2D> extrusions)
+   {
+      // first, remove all points that are midpoints on another line segment
+      int extrusionIdx = 0;
+      while (extrusionIdx < extrusions.size())
+      {
+         int nextExtrusionIdx = ListWrappingIndexTools.next(extrusionIdx, extrusions);
+         int nextNextExtrusionIdx = ListWrappingIndexTools.next(nextExtrusionIdx, extrusions);
+         int prevExtrusionIdx = ListWrappingIndexTools.previous(extrusionIdx, extrusions);
+
+         LineSegment2D nextEdge = new LineSegment2D(extrusions.get(nextExtrusionIdx), extrusions.get(nextNextExtrusionIdx));
+         LineSegment2D previousEdge = new LineSegment2D(extrusions.get(prevExtrusionIdx), extrusions.get(extrusionIdx));
+
+         if (nextEdge.distance(extrusions.get(extrusionIdx)) < 1e-5)
+         {
+            extrusions.remove(nextExtrusionIdx);
+         }
+         else if (previousEdge.distance(extrusions.get(nextExtrusionIdx)) < 1e-5)
+         {
+            extrusions.remove(extrusionIdx);
+         }
+         else
+         {
+            extrusionIdx++;
+         }
+
+      }
+
    }
 
    private static Point2DReadOnly getMidpointExtrusion(boolean extrudeToTheLeft, LineSegment2DReadOnly edge, double extrusionDistance)
@@ -454,7 +490,7 @@ public class ClusterTools
       if (includePreferredExtrusions)
       {
          homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, true));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, false));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
