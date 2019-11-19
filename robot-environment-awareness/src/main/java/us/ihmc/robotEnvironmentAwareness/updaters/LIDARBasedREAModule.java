@@ -104,7 +104,7 @@ public class LIDARBasedREAModule
       new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node, reaMessager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class,
                                                                    this::dispatchDepthPointCloudMessage);
       new REAModuleROS2Subscription<StampedPosePacket>(ros2Node, reaMessager, "/ihmc/stamped_pose_T265", StampedPosePacket.class,
-                                                       this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable); // TODO : will be replaced after test.
+                                                       this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable);
 
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
                                            this::dispatchCustomPlanarRegion);
