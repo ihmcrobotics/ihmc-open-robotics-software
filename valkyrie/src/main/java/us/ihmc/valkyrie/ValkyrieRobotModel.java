@@ -91,34 +91,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private boolean useShapeCollision = false;
    private boolean useOBJGraphics = true;
-   private final String customModel;
+   private String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
-
-   public ValkyrieRobotModel(RobotTarget target)
-   {
-      this(target, ValkyrieRobotVersion.DEFAULT, null);
-   }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, null);
+      this(target, ValkyrieRobotVersion.DEFAULT);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target)
+   {
+      this(target, ValkyrieRobotVersion.DEFAULT);
    }
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
-      this(target, robotVersion, null);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, String model)
-   {
-      this(target, ValkyrieRobotVersion.DEFAULT, model);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model)
-   {
       this.target = target;
       this.robotVersion = robotVersion;
-      this.customModel = model;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -167,6 +156,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (contactPointParameters != null)
          throw new IllegalArgumentException("Cannot set simulation contact points once contactPointParameters has been created.");
       this.simulationContactPoints = simulationContactPoints;
+   }
+
+   public void setCustomModel(String customModel)
+   {
+      if (generalizedRobotModel != null)
+         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+      this.customModel = customModel;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
