@@ -19,6 +19,9 @@ public class FootstepPlannerMessageConverter
 
       for (FootstepNode stageCell : expandedNodes.getLatticeNodes())
       {
+         if (latticeMapMessage.getLatticeNodes().size() == 10000)
+            break;
+
          FootstepPlannerLatticeNodeMessage nodeMessage = latticeMapMessage.getLatticeNodes().add();
          nodeMessage.setXIndex(stageCell.getXIndex());
          nodeMessage.setYIndex(stageCell.getYIndex());
@@ -38,6 +41,9 @@ public class FootstepPlannerMessageConverter
 
       for (PlannerNodeData nodeData : fullGraph.getNodeData())
       {
+         if (message.getNodeData().size() == 200000)
+            break;
+
          FootstepNodeDataMessage nodeDataMessage = message.getNodeData().add();
          nodeData.getAsMessage(nodeDataMessage);
          nodeDataMessage.getFootstepNode().setNodeIndex(nodeData.getNodeId());
