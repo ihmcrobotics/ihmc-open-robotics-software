@@ -478,13 +478,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public double getStandPrepAngle(String jointName)
-   {
-      System.err.println("Need to add access to stand prep joint angles.");
-      return 0;
-   }
-
-   @Override
    public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
       if (this.jointMap.getModelName().equals(model.getName()))

@@ -48,9 +48,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract double getEstimatorDT();
 
-   // TODO This should be moved to the SliderBoardParameters.
-   public abstract double getStandPrepAngle(String jointName);
-
    public default RobotROSClockCalculator getROSClockCalculator()
    {
       return new WallTimeBasedROSClockCalculator();
