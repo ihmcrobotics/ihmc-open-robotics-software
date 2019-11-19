@@ -110,9 +110,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.setScanFrameToWorldFrame();
 
       if (ENABLE_STEREO_PUBLISHER)
-         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
       if (ENABLE_DEPTH_PUBLISHER)
-         pointCloudSensorManager.receiveDataFromROS(rosMainNode);
+         pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,

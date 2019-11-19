@@ -30,7 +30,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
 
-public class TrackingCameraPublisher
+public class TrackingCameraBridge
 {
    private static final boolean Debug = false;
 
@@ -57,20 +57,20 @@ public class TrackingCameraPublisher
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePacketPublisher;
    private final IHMCRealtimeROS2Publisher<StampedPosePacket> stampedPosePacketRealtimePublisher;
 
-   public TrackingCameraPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            ROS2Tools.getDefaultTopicNameGenerator());
    }
 
-   public TrackingCameraPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
                                   MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            defaultTopicNameGenerator);
    }
 
-   public TrackingCameraPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
                                   String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this.robotName = robotName;
@@ -104,7 +104,7 @@ public class TrackingCameraPublisher
       executorService.shutdownNow();
    }
 
-   public void receiveTrackingCameraDataFromROS(String trackingCameraDataROSTopic, RosMainNode rosMainNode)
+   public void receiveTrackingCameraDataFromROS1(String trackingCameraDataROSTopic, RosMainNode rosMainNode)
    {
       rosMainNode.attachSubscriber(trackingCameraDataROSTopic, createNavigationMessageSubscriber());
    }
