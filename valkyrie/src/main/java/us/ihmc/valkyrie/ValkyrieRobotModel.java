@@ -73,6 +73,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final RobotTarget target;
 
    private double transparency = Double.NaN;
+   private boolean useShapeCollision = false;
+   private boolean useOBJGraphics = true;
+   private String customModel = null;
+   private FootContactPoints<RobotSide> simulationContactPoints = null;
    private GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
 
@@ -88,11 +92,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
-
-   private boolean useShapeCollision = false;
-   private boolean useOBJGraphics = true;
-   private String customModel;
-   private FootContactPoints<RobotSide> simulationContactPoints;
 
    public ValkyrieRobotModel(RobotTarget target)
    {
