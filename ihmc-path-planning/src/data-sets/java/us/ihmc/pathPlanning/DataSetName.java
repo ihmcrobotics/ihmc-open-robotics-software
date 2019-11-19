@@ -72,4 +72,5 @@ public enum DataSetName
 	_20191007_200400_Corridor1Wall,
 	_20191007_185913_SimpleCorridor,
 	_20191114_155310_SimplePlatform,
+	_20191119_135944_RobotPlatform,
 }
