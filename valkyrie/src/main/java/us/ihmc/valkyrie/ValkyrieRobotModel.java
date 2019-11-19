@@ -122,6 +122,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return jointMap;
    }
 
+   /**
+    * Overrides the transparency of the robot visuals.
+    * 
+    * @param transparency the new transparency, default value {@link Double#NaN}.
+    */
    public void setTransparency(double transparency)
    {
       if (robotDescription != null)
@@ -129,6 +134,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.transparency = transparency;
    }
 
+   /**
+    * Indicates whether to use the OBJ or DAE meshes for the robot visuals.
+    * 
+    * @param useOBJGraphics switch to use OBJ when {@code true}, use DAE otherwise. Default value is
+    *                       {@code true}.
+    */
    public void setUseOBJGraphics(boolean useOBJGraphics)
    {
       if (generalizedRobotModel != null)
@@ -136,6 +147,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.useOBJGraphics = useOBJGraphics;
    }
 
+   /**
+    * Sets whether the simulation contact engine should use point-to-shape or shape-to-shape model.
+    * 
+    * @param useShapeCollision switch to use shape-to-shape when {@code true}, use point-to-shape
+    *                          otherwise. Default value is {@code false}.
+    */
    public void setUseShapeCollision(boolean useShapeCollision)
    {
       if (robotModelShapeCollisionSettings != null)
@@ -145,6 +162,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.useShapeCollision = useShapeCollision;
    }
 
+   /**
+    * Overrides the default set of contact points to use for the simulation for the feet.
+    * 
+    * @param simulationContactPoints the new set of foot contact points. Default value is {@code null}.
+    */
    public void setSimulationContactPoints(FootContactPoints<RobotSide> simulationContactPoints)
    {
       if (contactPointParameters != null)
@@ -152,6 +174,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.simulationContactPoints = simulationContactPoints;
    }
 
+   /**
+    * Overrides the model to load.
+    * 
+    * @param customModel the file's fullname of the model to load. Default value is {@code null}.
+    */
    public void setCustomModel(String customModel)
    {
       if (generalizedRobotModel != null)
