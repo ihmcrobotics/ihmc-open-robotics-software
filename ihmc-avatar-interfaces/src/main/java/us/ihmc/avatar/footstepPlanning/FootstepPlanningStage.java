@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootstepPlanningStage implements FootstepPlanner
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final YoVariableRegistry registry;
 

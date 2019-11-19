@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
