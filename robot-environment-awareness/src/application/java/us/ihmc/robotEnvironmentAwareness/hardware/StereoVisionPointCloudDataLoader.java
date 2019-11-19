@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 
 public class StereoVisionPointCloudDataLoader
 {
@@ -116,5 +121,87 @@ public class StereoVisionPointCloudDataLoader
          message.getSensorOrientation().set(ox, oy, oz, os);
          return message;
       }
+   }
+
+   public static List<StereoVisionPointCloudMessage> getMessagesFromFile(File selectedDataFolder)
+   {
+      File[] listOfFiles = selectedDataFolder.listFiles();
+
+      List<File> sensorPoseFiles = new ArrayList<>();
+      List<File> pointCloudFiles = new ArrayList<>();
+      List<Long> timestamps = new ArrayList<Long>();
+
+      Map<Long, StereoVisionPointCloudMessage> mapTimestampToStereoMessage = new HashMap<Long, StereoVisionPointCloudMessage>();
+      List<Long> timestampsInTimeOrder = new ArrayList<>();
+      List<StereoVisionPointCloudMessage> messagesInTimeOrder = new ArrayList<>();
+
+      for (File file : listOfFiles)
+      {
+         if (file.isFile())
+         {
+            String fileName = file.getName();
+
+            if (fileName.contains(StereoVisionPointCloudDataExporter.SENSOR_POSE_FILE_NAME_HEADER))
+               sensorPoseFiles.add(file);
+
+            if (fileName.contains(StereoVisionPointCloudDataExporter.POINT_CLOUD_FILE_NAME_HEADER))
+               pointCloudFiles.add(file);
+         }
+      }
+
+      for (int i = 0; i < sensorPoseFiles.size(); i++)
+      {
+         File sensorPoseFile = sensorPoseFiles.get(i);
+         long sensorPoseTimestamp = extractTimestamp(sensorPoseFile.getName());
+
+         for (int j = 0; j < pointCloudFiles.size(); j++)
+         {
+            File pointCloudFile = pointCloudFiles.get(j);
+            long pointCloudTimestamp = extractTimestamp(pointCloudFile.getName());
+            if (sensorPoseTimestamp == pointCloudTimestamp)
+            {
+               timestamps.add(sensorPoseTimestamp);
+               mapTimestampToStereoMessage.put(sensorPoseTimestamp, StereoVisionPointCloudDataLoader.getMessageFromFile(sensorPoseFile, pointCloudFile));
+            }
+         }
+      }
+
+      int numberOfMessages = timestamps.size();
+      for (int i = 0; i < numberOfMessages; i++)
+      {
+         long minTimestamp = Long.MAX_VALUE;
+         for (int j = 0; j < timestamps.size(); j++)
+         {
+            if (timestamps.get(j) < minTimestamp)
+            {
+               minTimestamp = timestamps.get(j);
+            }
+         }
+
+         if (timestamps.remove(minTimestamp))
+         {
+            timestampsInTimeOrder.add(minTimestamp);
+         }
+      }
+
+      for (int i = 0; i < numberOfMessages; i++)
+         messagesInTimeOrder.add(mapTimestampToStereoMessage.get(timestampsInTimeOrder.get(i)));
+
+      return messagesInTimeOrder;
+   }
+
+   private static long extractTimestamp(String fileName)
+   {
+      String[] stringsWithoutSpliter = fileName.split(StereoVisionPointCloudDataExporter.STEREO_DATA_SPLITER);
+      for (String string : stringsWithoutSpliter)
+      {
+         if (string.contains(StereoVisionPointCloudDataExporter.STEREO_DATA_EXTENSION))
+         {
+            String[] timestampWithDot = string.split(StereoVisionPointCloudDataExporter.STEREO_DATA_EXTENSION);
+            long timestamp = Long.parseLong(timestampWithDot[0]);
+            return timestamp;
+         }
+      }
+      return -1;
    }
 }
