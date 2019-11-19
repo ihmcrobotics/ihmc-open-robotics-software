@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -9,6 +10,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
+import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 
 public class ValkyrieSliderBoardParameters extends SliderBoardParameters
 {
@@ -19,13 +21,13 @@ public class ValkyrieSliderBoardParameters extends SliderBoardParameters
    {
       for (RobotSide side : RobotSide.values())
       {
-         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
+         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double, Double>>());
          // FIXME 
-//         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
-//         {
-//            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
-//                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
-//         }
+         //         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
+         //         {
+         //            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
+         //                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
+         //         }
       }
 
       NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
@@ -34,10 +36,9 @@ public class ValkyrieSliderBoardParameters extends SliderBoardParameters
       {
          NeckJointName joint = sliderBoardControlledNeckJointNames[i];
 
-         sliderBoardControlledNeckJointNamesWithLimits.put(
-               joint,
-               new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
-                     .getFullyFlexedPositionLimit(joint)));
+         sliderBoardControlledNeckJointNamesWithLimits.put(joint,
+                                                           new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint),
+                                                                                             ValkyrieSliderBoardControlledNeckJoints.getFullyFlexedPositionLimit(joint)));
       }
    }
 
@@ -57,5 +58,16 @@ public class ValkyrieSliderBoardParameters extends SliderBoardParameters
    public boolean controlHeadAndHandsWithSliders()
    {
       return false;
+   }
+
+   private Map<String, Double> standPrepAngles;
+
+   @SuppressWarnings("unchecked")
+   @Override
+   public double getStandPrepAngle(String jointName)
+   {
+      if (standPrepAngles == null)
+         standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
+      return standPrepAngles.get(jointName);
    }
 }

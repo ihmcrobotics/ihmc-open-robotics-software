@@ -312,12 +312,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public double getStandPrepAngle(String jointName)
-   {
-      return 0;
-   }
-
-   @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return null;

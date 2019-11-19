@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -58,7 +57,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -561,17 +559,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SliderBoardParameters getSliderBoardParameters()
    {
       return new ValkyrieSliderBoardParameters();
-   }
-
-   private Map<String, Double> standPrepAngles;
-
-   @SuppressWarnings("unchecked")
-   @Override
-   public double getStandPrepAngle(String jointName)
-   {
-      if (standPrepAngles == null)
-         standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
-      return standPrepAngles.get(jointName);
    }
 
    @Override
