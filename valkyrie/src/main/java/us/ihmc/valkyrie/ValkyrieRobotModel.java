@@ -82,6 +82,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
 
+   private double transparency = Double.NaN;
    private GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
 
@@ -99,7 +100,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean useShapeCollision = false;
    private final boolean useOBJGraphics;
-   private final double transparency;
    private final String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
 
@@ -137,19 +137,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
                              boolean useShapeCollision, boolean useOBJGraphics)
    {
-      this(target, robotVersion, model, simulationContactPoints, useShapeCollision, useOBJGraphics, Double.NaN);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String customModel, FootContactPoints<RobotSide> simulationContactPoints,
-                             boolean useShapeCollision, boolean useOBJGraphics, double transparency)
-   {
       this.target = target;
       this.robotVersion = robotVersion;
-      this.customModel = customModel;
+      this.customModel = model;
       this.simulationContactPoints = simulationContactPoints;
       this.useShapeCollision = useShapeCollision;
       this.useOBJGraphics = useOBJGraphics;
-      this.transparency = transparency;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -174,6 +167,13 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
    {
       return new ValkyrieRobotModelShapeCollisionSettings(useShapeCollision);
+   }
+
+   public void setTransparency(double transparency)
+   {
+      if (robotDescription != null)
+         throw new IllegalArgumentException("Cannot set transparency once robot description has been created.");
+      this.transparency = transparency;
    }
 
    @Override
