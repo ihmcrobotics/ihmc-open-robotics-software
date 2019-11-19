@@ -31,7 +31,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT);
       previewModel.setTransparency(0.0);
       previewModel.setUseOBJGraphics(true);

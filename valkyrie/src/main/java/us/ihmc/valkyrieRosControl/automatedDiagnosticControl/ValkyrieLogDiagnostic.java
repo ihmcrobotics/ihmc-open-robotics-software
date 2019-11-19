@@ -36,6 +36,6 @@ public class ValkyrieLogDiagnostic extends DRCLogProcessor
    @Override
    public DRCRobotModel createDRCRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 }

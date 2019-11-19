@@ -22,6 +22,6 @@ public class ValkyrieRigidBodyHashTest extends RigidBodyHashTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, true);
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 }

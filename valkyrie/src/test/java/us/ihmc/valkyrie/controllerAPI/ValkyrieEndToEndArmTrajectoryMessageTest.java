@@ -12,7 +12,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       @Override
       public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
