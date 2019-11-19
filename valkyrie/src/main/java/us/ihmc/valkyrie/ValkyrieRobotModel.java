@@ -82,6 +82,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
 
+   private GeneralizedSDFRobotModel generalizedRobotModel;
+   private RobotDescription robotDescription;
+
    private ValkyrieJointMap jointMap;
    private ValkyrieContactPointParameters contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
@@ -91,17 +94,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
-   private StateEstimatorParameters stateEstimatorParamaters;
-
-   private final WallTimeBasedROSClockCalculator rosClockCalculator = new WallTimeBasedROSClockCalculator();
+   private StateEstimatorParameters stateEstimatorParameters;
+   private WallTimeBasedROSClockCalculator rosClockCalculator;
 
    private boolean useShapeCollision = false;
    private final boolean useOBJGraphics;
    private final double transparency;
    private final String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
-   private JaxbSDFLoader loader;
-   private RobotDescription robotDescription;
 
    public ValkyrieRobotModel(RobotTarget target, FootContactPoints<RobotSide> simulationContactPoints)
    {
@@ -177,21 +177,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public InputStream getWholeBodyControllerParametersFile()
-   {
-      switch (target)
-      {
-         case SCS:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
-         case GAZEBO:
-         case REAL_ROBOT:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
-         default:
-            throw new UnsupportedOperationException("Unsupported target: " + target);
-      }
-   }
-
-   @Override
    public RobotDescription getRobotDescription()
    {
       if (robotDescription == null)
@@ -203,8 +188,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          if (useShapeCollision)
          {
-            robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, null, false, transparency);
-            ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(jointMap);
+            robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, getJointMap(), null, false, transparency);
+            ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(getJointMap());
             collisionMeshDefinitionDataHolder.setVisible(false);
 
             robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
@@ -212,7 +197,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
          else
          {
             robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
-                                                                             jointMap,
+                                                                             getJointMap(),
                                                                              getContactPointParameters(),
                                                                              useCollisionMeshes,
                                                                              transparency);
@@ -226,52 +211,41 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return resourceDirectories;
    }
 
-   private InputStream sdfModelInputStream = null;
-
    private InputStream getSDFModelInputStream()
    {
-      if (sdfModelInputStream == null)
+      InputStream inputStream = null;
+
+      if (customModel != null)
       {
-         InputStream inputStream = null;
 
-         if (customModel != null)
+         System.out.println("Loading robot model from: '" + customModel + "'");
+         inputStream = getClass().getClassLoader().getResourceAsStream(customModel);
+
+         if (inputStream == null)
          {
-
-            System.out.println("Loading robot model from: '" + customModel + "'");
-            inputStream = getClass().getClassLoader().getResourceAsStream(customModel);
-
-            if (inputStream == null)
+            try
             {
-               try
-               {
-                  inputStream = new FileInputStream(customModel);
-               }
-               catch (FileNotFoundException e)
-               {
-                  throw new RuntimeException(e);
-               }
+               inputStream = new FileInputStream(customModel);
+            }
+            catch (FileNotFoundException e)
+            {
+               throw new RuntimeException(e);
             }
          }
-         else
-         {
-            String sdfFile = null;
-
-            if (target == RobotTarget.REAL_ROBOT)
-               sdfFile = robotVersion.getRealRobotSdfFile();
-            else
-               sdfFile = robotVersion.getSimSdfFile();
-
-            sdfModelInputStream = getClass().getClassLoader().getResourceAsStream(sdfFile);
-         }
-
       }
-      return sdfModelInputStream;
-   }
+      else
+      {
+         String sdfFile = null;
 
-   @Override
-   public String toString()
-   {
-      return getSimpleRobotName();
+         if (target == RobotTarget.REAL_ROBOT)
+            sdfFile = robotVersion.getRealRobotSdfFile();
+         else
+            sdfFile = robotVersion.getSimSdfFile();
+
+         inputStream = getClass().getClassLoader().getResourceAsStream(sdfFile);
+      }
+
+      return inputStream;
    }
 
    @Override
@@ -289,7 +263,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      return new FullHumanoidRobotModelFromDescription(robotDescription, jointMap, sensorInformation.getSensorFramesToTrack());
+      return new FullHumanoidRobotModelFromDescription(getRobotDescription(), getJointMap(), getSensorInformation().getSensorFramesToTrack());
    }
 
    @Override
@@ -297,7 +271,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       boolean enableTorqueVelocityLimits = false;
 
-      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
+      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(getRobotDescription(),
+                                                                                   getJointMap(),
+                                                                                   enableJointDamping,
+                                                                                   enableTorqueVelocityLimits);
 
       if (PRINT_MODEL)
       {
@@ -337,14 +314,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
-      if (loader == null)
+      if (generalizedRobotModel == null)
       {
-         loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), this);
+         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), this);
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
             RigidBodyTransform transform = new RigidBodyTransform(ValkyrieSensorInformation.getForceSensorTransform(forceSensorName));
-            loader.addForceSensor(jointMap, forceSensorName, forceSensorName, transform);
+            loader.addForceSensor(getJointMap(), forceSensorName, forceSensorName, transform);
          }
 
          for (RobotSide side : RobotSide.values)
@@ -355,18 +332,22 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
             {
                for (String sensorName : contactsensors.get(parentJointName).keySet())
                {
-                  loader.addContactSensor(jointMap, sensorName, parentJointName, contactsensors.get(parentJointName).get(sensorName));
+                  loader.addContactSensor(getJointMap(), sensorName, parentJointName, contactsensors.get(parentJointName).get(sensorName));
                }
             }
          }
+
+         generalizedRobotModel = loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
       }
 
-      return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
+      return generalizedRobotModel;
    }
 
    @Override
    public RobotROSClockCalculator getROSClockCalculator()
    {
+      if (rosClockCalculator == null)
+         rosClockCalculator = new WallTimeBasedROSClockCalculator();
       return rosClockCalculator;
    }
 
@@ -377,8 +358,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                             this,
                                             getCollisionBoxProvider(),
                                             getROSClockCalculator(),
-                                            sensorInformation,
-                                            jointMap,
+                                            getSensorInformation(),
+                                            getJointMap(),
                                             target);
    }
 
@@ -391,7 +372,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       boolean hasFingers = true;
       for (RobotSide robotSide : RobotSide.values)
       {
-         String handLinkName = jointMap.getHandName(robotSide);
+         String handLinkName = getJointMap().getHandName(robotSide);
          hasFingers = hasFingers && !simulatedRobot.getLink(handLinkName).getParentJoint().getChildrenJoints().isEmpty();
       }
 
@@ -410,15 +391,9 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new ValkyrieFootstepPlanningParameters();
-   }
-
-   @Override
    public LogModelProvider getLogModelProvider()
    {
-      return new DefaultLogModelProvider<>(SDFModelLoader.class, jointMap.getModelName(), getSDFModelInputStream(), getResourceDirectories());
+      return new DefaultLogModelProvider<>(SDFModelLoader.class, getJointMap().getModelName(), getSDFModelInputStream(), getResourceDirectories());
    }
 
    @Override
@@ -435,12 +410,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public String getSimpleRobotName()
-   {
-      return "Valkyrie";
-   }
-
-   @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new ValkyrieCollisionBoxProvider(createFullRobotModel());
@@ -449,7 +418,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
 
       }
@@ -458,7 +427,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
          if (useOBJGraphics)
          {
@@ -508,7 +477,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
 
       }
@@ -517,7 +486,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
 
       }
@@ -526,7 +495,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
 
       }
@@ -535,7 +504,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
    {
-      if (jointMap.getModelName().equals(model.getName()))
+      if (getJointMap().getModelName().equals(model.getName()))
       {
 
       }
@@ -549,6 +518,21 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().setM11(0.00208115); // i_yy
       linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
       linkHolder.getInertia().setM22(0.00178402); // i_zz
+   }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      switch (target)
+      {
+         case SCS:
+            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+         case GAZEBO:
+         case REAL_ROBOT:
+            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+         default:
+            throw new UnsupportedOperationException("Unsupported target: " + target);
+      }
    }
 
    @Override
@@ -573,7 +557,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public RobotContactPointParameters<RobotSide> getContactPointParameters()
    {
       if (contactPointParameters == null)
-         contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
+         contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), simulationContactPoints);
       return contactPointParameters;
    }
 
@@ -589,14 +573,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HighLevelControllerParameters getHighLevelControllerParameters()
    {
       if (highLevelControllerParameters == null)
-         highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target, jointMap);
+         highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target, getJointMap());
       return highLevelControllerParameters;
    }
 
    public ValkyrieCalibrationParameters getCalibrationParameters()
    {
       if (calibrationParameters == null)
-         calibrationParameters = new ValkyrieCalibrationParameters(jointMap);
+         calibrationParameters = new ValkyrieCalibrationParameters(getJointMap());
       return calibrationParameters;
    }
 
@@ -606,9 +590,15 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
    {
-      if (planarRegionFootstepPlanningParameters == null)
+      if (getPlanarRegionFootstepPlanningParameters() == null)
          planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      return planarRegionFootstepPlanningParameters;
+      return getPlanarRegionFootstepPlanningParameters();
+   }
+
+   @Override
+   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
+   {
+      return new ValkyrieFootstepPlanningParameters();
    }
 
    @Override
@@ -623,16 +613,16 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       if (walkingControllerParameters == null)
-         walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
+         walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), target);
       return walkingControllerParameters;
    }
 
    @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
-      if (stateEstimatorParamaters == null)
-         stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), sensorInformation, jointMap);
-      return stateEstimatorParamaters;
+      if (stateEstimatorParameters == null)
+         stateEstimatorParameters = new ValkyrieStateEstimatorParameters(target, getEstimatorDT(), getSensorInformation(), getJointMap());
+      return stateEstimatorParameters;
    }
 
    @Override
@@ -645,5 +635,22 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public UIParameters getUIParameters()
    {
       return new ValkyrieUIParameters();
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return "Valkyrie";
+   }
+
+   @Override
+   public String toString()
+   {
+      return getSimpleRobotName();
+   }
+
+   private PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlanningParameters()
+   {
+      return planarRegionFootstepPlanningParameters;
    }
 }
