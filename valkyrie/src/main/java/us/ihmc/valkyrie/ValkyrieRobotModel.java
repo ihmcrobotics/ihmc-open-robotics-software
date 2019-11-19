@@ -6,10 +6,6 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
@@ -649,20 +645,5 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public UIParameters getUIParameters()
    {
       return new ValkyrieUIParameters();
-   }
-
-   @Override
-   public Transform getJmeTransformWristToHand(RobotSide robotSide)
-   {
-      Vector3f centerOfHandToWristTranslation = new Vector3f();
-      float[] angles = new float[3];
-
-      centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
-      angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-      angles[1] = 0.0f;
-      angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-
-      Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-      return new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation);
    }
 }

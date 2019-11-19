@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.jme3.math.Transform;
 
 import controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -972,12 +971,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       @Override
       public HandModel getHandModel()
-      {
-         return null;
-      }
-
-      @Override
-      public Transform getJmeTransformWristToHand(RobotSide side)
       {
          return null;
       }
