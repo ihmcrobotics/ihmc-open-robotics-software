@@ -1,32 +1,27 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 
 public class RosBasedPlannerListener extends MessageBasedPlannerListener
 {
    private final StatusMessageOutputManager statusMessageOutputManager;
 
-   public RosBasedPlannerListener(StatusMessageOutputManager statusMessageOutputManager, FootstepNodeSnapperReadOnly snapper, long broadcastDtMillis)
+   public RosBasedPlannerListener(StatusMessageOutputManager statusMessageOutputManager, FootstepNodeSnapper snapper, long broadcastDtMillis)
    {
       super(snapper, broadcastDtMillis);
       this.statusMessageOutputManager = statusMessageOutputManager;
    }
 
    @Override
-   void broadcastNodeData(FootstepNodeDataListMessage message)
+   void broadcastLowestCostNodeData(PlannerNodeDataList message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
 
    @Override
-   void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage message)
+   void broadcastOccupancyMap(PlannerOccupancyMap message)
    {
-//      statusMessageOutputManager.reportStatusMessage(message);
+      statusMessageOutputManager.reportStatusMessage(message.getAsMessage());
    }
 }

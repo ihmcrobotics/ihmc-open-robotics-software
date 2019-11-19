@@ -1,3 +1,5 @@
+# Atlas specific message.
+
 int8 NONE=0
 
 int8 FREEZE=1

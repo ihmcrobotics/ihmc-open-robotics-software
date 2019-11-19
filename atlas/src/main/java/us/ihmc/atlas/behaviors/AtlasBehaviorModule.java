@@ -34,9 +34,12 @@ public class AtlasBehaviorModule
       LogTools.info("Creating behavior module");
       BehaviorModule.createForBackpack(createRobotModel());
 
-      Runtime.getRuntime().addShutdownHook(ThreadTools.startAThread(() ->
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
       { // add cleanup actions here
-         multiStageFootstepPlanningModule.destroy();
+         if (START_FOOTSTEP_PLANNING_TOOLBOX)
+         {
+            multiStageFootstepPlanningModule.destroy();
+         }
       }, "Cleanup"));
    }
 
