@@ -66,8 +66,8 @@ public class MultiStagePlannerListener
 
       if (stageHasMapUpdate)
       {
-         if (broadcastOccupancyMap.getBooleanValue())
-            statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+//         if (broadcastOccupancyMap.getBooleanValue())
+//            statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
 
          lastBroadcastTime = currentTime;
       }
@@ -82,7 +82,7 @@ public class MultiStagePlannerListener
 
    public void plannerFinished(List<FootstepNode> plan)
    {
-      statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+//      statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
