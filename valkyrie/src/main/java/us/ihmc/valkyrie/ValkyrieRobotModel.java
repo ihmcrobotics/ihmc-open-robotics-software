@@ -82,7 +82,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
 
-   private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
+   private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
@@ -479,9 +479,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
    {
-      if (getPlanarRegionFootstepPlanningParameters() == null)
-         planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      return getPlanarRegionFootstepPlanningParameters();
+      if (planarRegionFootstepPlannerParameters == null)
+         planarRegionFootstepPlannerParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
+      return planarRegionFootstepPlannerParameters;
    }
 
    @Override
@@ -536,10 +536,5 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public String toString()
    {
       return getSimpleRobotName();
-   }
-
-   private PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlanningParameters()
-   {
-      return planarRegionFootstepPlanningParameters;
    }
 }
