@@ -41,12 +41,14 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract HandModel getHandModel();
 
+   // TODO This should be moved to UIParameters
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
 
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
 
+   // TODO This should be moved to the SliderBoardParameters.
    public abstract double getStandPrepAngle(String jointName);
 
    public default RobotROSClockCalculator getROSClockCalculator()
