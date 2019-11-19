@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootstepPlanningStage implements FootstepPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private final YoVariableRegistry registry;
 
@@ -135,8 +135,12 @@ public class FootstepPlanningStage implements FootstepPlanner
                                                                      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
    {
       // TODO add the snapper in
-      StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
-      multiStageListener.addStagePlannerListener(plannerListener);
+      StagePlannerListener plannerListener = null;
+      if (multiStageListener != null)
+      {
+         plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
+         multiStageListener.addStagePlannerListener(plannerListener);
+      }
       return new BodyPathBasedAStarPlanner("visGraph_",
                                            bodyPathPlanner,
                                            footstepPlannerParameters,
@@ -171,10 +175,14 @@ public class FootstepPlanningStage implements FootstepPlanner
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlanningParameters.getAStarHeuristicsWeight(),
                                                                                    footstepPlanningParameters);
 
-      StagePlannerListener plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
+      StagePlannerListener plannerListener = null;
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-      nodeChecker.addPlannerListener(plannerListener);
-      multiStageListener.addStagePlannerListener(plannerListener);
+      if (multiStageListener != null)
+      {
+         plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
+         nodeChecker.addPlannerListener(plannerListener);
+         multiStageListener.addStagePlannerListener(plannerListener);
+      }
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
@@ -379,7 +387,7 @@ public class FootstepPlanningStage implements FootstepPlanner
                   + " on stage " + stageId);
 
       if (debug)
-         LogTools.error("Stage " + stageId + " planning steps.");
+         LogTools.info("Stage " + stageId + " planning steps.");
 
       stepPlanResult = plan();
 
