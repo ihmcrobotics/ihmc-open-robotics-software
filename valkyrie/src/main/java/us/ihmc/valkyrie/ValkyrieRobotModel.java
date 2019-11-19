@@ -89,7 +89,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
 
    private boolean useShapeCollision = false;
-   private final boolean useOBJGraphics;
+   private boolean useOBJGraphics = true;
    private final String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
 
@@ -121,18 +121,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
                              boolean useShapeCollision)
    {
-      this(target, robotVersion, model, simulationContactPoints, useShapeCollision, true);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
-                             boolean useShapeCollision, boolean useOBJGraphics)
-   {
       this.target = target;
       this.robotVersion = robotVersion;
       this.customModel = model;
       this.simulationContactPoints = simulationContactPoints;
       this.useShapeCollision = useShapeCollision;
-      this.useOBJGraphics = useOBJGraphics;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -164,6 +157,46 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (robotDescription != null)
          throw new IllegalArgumentException("Cannot set transparency once robot description has been created.");
       this.transparency = transparency;
+   }
+
+   public void setUseOBJGraphics(boolean useOBJGraphics)
+   {
+      if (generalizedRobotModel != null)
+         throw new IllegalArgumentException("Cannot change to use OBJ graphics once generalized robot model has been created.");
+      this.useOBJGraphics = useOBJGraphics;
+   }
+
+   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   {
+      if (generalizedRobotModel == null)
+      {
+         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(),
+                                                               getSDFModelInputStream(),
+                                                               new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics));
+
+         for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform(ValkyrieSensorInformation.getForceSensorTransform(forceSensorName));
+            loader.addForceSensor(getJointMap(), forceSensorName, forceSensorName, transform);
+         }
+
+         for (RobotSide side : RobotSide.values)
+         {
+            LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>> contactsensors = ValkyrieSensorInformation.contactSensors.get(side);
+
+            for (String parentJointName : contactsensors.keySet())
+            {
+               for (String sensorName : contactsensors.get(parentJointName).keySet())
+               {
+                  loader.addContactSensor(getJointMap(), sensorName, parentJointName, contactsensors.get(parentJointName).get(sensorName));
+               }
+            }
+         }
+
+         generalizedRobotModel = loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
+      }
+
+      return generalizedRobotModel;
    }
 
    @Override
@@ -300,37 +333,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
          return 0.004;
       else
          return 0.006;
-   }
-
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
-   {
-      if (generalizedRobotModel == null)
-      {
-         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics));
-
-         for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
-         {
-            RigidBodyTransform transform = new RigidBodyTransform(ValkyrieSensorInformation.getForceSensorTransform(forceSensorName));
-            loader.addForceSensor(getJointMap(), forceSensorName, forceSensorName, transform);
-         }
-
-         for (RobotSide side : RobotSide.values)
-         {
-            LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>> contactsensors = ValkyrieSensorInformation.contactSensors.get(side);
-
-            for (String parentJointName : contactsensors.keySet())
-            {
-               for (String sensorName : contactsensors.get(parentJointName).keySet())
-               {
-                  loader.addContactSensor(getJointMap(), sensorName, parentJointName, contactsensors.get(parentJointName).get(sensorName));
-               }
-            }
-         }
-
-         generalizedRobotModel = loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
-      }
-
-      return generalizedRobotModel;
    }
 
    @Override
