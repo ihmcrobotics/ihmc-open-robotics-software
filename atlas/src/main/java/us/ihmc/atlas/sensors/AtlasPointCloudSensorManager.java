@@ -86,7 +86,7 @@ public class AtlasPointCloudSensorManager
          }
       };
    }
-   
+
    private StereoVisionWorldTransformCalculator createDepthPointCloudWorldTransformCalculatorFromTrackingData()
    {
       return new StereoVisionWorldTransformCalculator()
@@ -102,7 +102,7 @@ public class AtlasPointCloudSensorManager
                Pose3D sensorPose = newTrackingSensorPose.getPose();
                latestTrackingSensorPose.set(sensorPose.getOrientation(), sensorPose.getPosition());
             }
-            
+
             transformToWorldToPack.set(latestTrackingSensorPose);
             transformToWorldToPack.multiply(transformFromPelvisToRealSense);
             sensorPoseToPack.set(transformToWorldToPack);
