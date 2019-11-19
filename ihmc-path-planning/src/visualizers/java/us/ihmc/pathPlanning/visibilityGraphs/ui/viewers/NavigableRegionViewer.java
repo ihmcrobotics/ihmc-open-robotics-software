@@ -20,11 +20,10 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraph;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class NavigableRegionViewer extends AnimationTimer
 {
@@ -34,11 +33,17 @@ public class NavigableRegionViewer extends AnimationTimer
    private final Group root = new Group();
    private AtomicReference<Map<Integer, MeshView>> regionVisMapToRenderReference = new AtomicReference<>(null);
    private AtomicReference<Boolean> resetRequested;
-   private AtomicReference<Boolean> show;
+   private AtomicReference<Boolean> showInnerEdges;
+   private AtomicReference<Boolean> showHomeRegionNodes;
 
    private AtomicReference<List<VisibilityMapWithNavigableRegion>> newRequestReference;
+   private AtomicReference<VisibilityGraph> latestVisibilityGraphReference;
 
    private final Messager messager;
+   private List<VisibilityMapWithNavigableRegion> lastestPulledSolution;
+   private VisibilityGraph latestPulledFullGraphs;
+   private boolean lastShowInnerEdges;
+   private boolean lastShowHomeRegionNodes;
 
    public NavigableRegionViewer(Messager messager)
    {
@@ -62,8 +67,10 @@ public class NavigableRegionViewer extends AnimationTimer
    public void setTopics(Topic<Boolean> globalResetTopic, Topic<Boolean> showNavigableRegionVisibilityMapsTopic, Topic<List<VisibilityMapWithNavigableRegion>> navigableRegionVisibilityMapTopic)
    {
       resetRequested = messager.createInput(globalResetTopic, false);
-      show = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
+      showInnerEdges = messager.createInput(showNavigableRegionVisibilityMapsTopic, false);
+      showHomeRegionNodes = messager.createInput(UIVisibilityGraphsTopics.ShowInnerRegionVisibilityMapHomeNodes, false);
       newRequestReference = messager.createInput(navigableRegionVisibilityMapTopic, null);
+      latestVisibilityGraphReference = messager.createInput(UIVisibilityGraphsTopics.VisibilityGraph, null);
    }
 
    @Override
@@ -82,30 +89,49 @@ public class NavigableRegionViewer extends AnimationTimer
       {
          root.getChildren().clear();
 
-         if (show.get())
+         if (showInnerEdges.get() || showHomeRegionNodes.get())
             root.getChildren().addAll(regionVisMapToRender.values());
       }
 
-      if (show.get())
+      boolean tempShowInnerEdges = showInnerEdges.get();
+      boolean tempShowHomeRegionNodes = showHomeRegionNodes.get();
+      if (tempShowInnerEdges || tempShowHomeRegionNodes)
       {
-         List<VisibilityMapWithNavigableRegion> newRequest = newRequestReference.getAndSet(null);
+         List<VisibilityMapWithNavigableRegion> latestSolutionTemp = newRequestReference.getAndSet(null);
+         if (latestSolutionTemp != null)
+         {
+            lastestPulledSolution = latestSolutionTemp;
+         }
 
-         if (newRequest != null)
-            processNavigableRegionsOnThread(newRequest);
+         VisibilityGraph latestFullGraphsTemp = latestVisibilityGraphReference.getAndSet(null);
+         if (latestSolutionTemp != null)
+         {
+            latestPulledFullGraphs = latestFullGraphsTemp;
+         }
+
+         boolean recompute = false;
+         recompute |= tempShowInnerEdges != lastShowInnerEdges;
+         recompute |= tempShowHomeRegionNodes != lastShowHomeRegionNodes;
+         if (latestSolutionTemp != null || latestSolutionTemp != null || recompute)
+         {
+            processNavigableRegionsOnThread(lastestPulledSolution, latestPulledFullGraphs);
+         }
       }
+      lastShowInnerEdges = tempShowInnerEdges;
+      lastShowHomeRegionNodes = tempShowHomeRegionNodes;
    }
 
-   private void processNavigableRegionsOnThread(List<VisibilityMapWithNavigableRegion> newRequest)
+   private void processNavigableRegionsOnThread(List<VisibilityMapWithNavigableRegion> newRequest, VisibilityGraph visibilityGraph)
    {
-      executorService.execute(() -> processNavigableRegions(newRequest));
+      executorService.execute(() -> processNavigableRegions(newRequest, visibilityGraph));
    }
 
-   private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> newRequest)
+   private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> newRequest, VisibilityGraph visibilityGraph)
    {
       Map<Integer, JavaFXMeshBuilder> meshBuilders = new HashMap<>();
       Map<Integer, Material> materials = new HashMap<>();
 
-      for (VisibilityMapHolder navigableRegionLocalPlanner : newRequest)
+      for (VisibilityMapWithNavigableRegion navigableRegionLocalPlanner : newRequest)
       {
          int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder meshBuilder = meshBuilders.get(regionId);
@@ -117,11 +143,26 @@ public class NavigableRegionViewer extends AnimationTimer
 
          VisibilityMap visibilityGraphInWorld = navigableRegionLocalPlanner.getVisibilityMapInWorld();
 
-         for (Connection connection : visibilityGraphInWorld.getConnections())
+         if (showHomeRegionNodes.get())
          {
-            Point3DReadOnly edgeSource = connection.getSourcePoint();
-            Point3DReadOnly edgeTarget = connection.getTargetPoint();
-            meshBuilder.addLine(edgeSource, edgeTarget, VisualizationParameters.VISBILITYMAP_LINE_THICKNESS);
+            for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraph.getVisibilityGraphNavigableRegions())
+            {
+               for (VisibilityGraphNode homeRegionNode : visibilityGraphNavigableRegion.getHomeRegionNodes())
+               {
+                  ConnectionPoint3D pointInWorld = homeRegionNode.getPointInWorld();
+                  meshBuilder.addTetrahedron(VisualizationParameters.ESCAPE_EXTRUDEDPOINT_SIZE, pointInWorld);
+               }
+            }
+         }
+
+         if (showInnerEdges.get())
+         {
+            for (Connection connection : visibilityGraphInWorld.getConnections())
+            {
+               Point3DReadOnly edgeSource = connection.getSourcePoint();
+               Point3DReadOnly edgeTarget = connection.getTargetPoint();
+               meshBuilder.addLine(edgeSource, edgeTarget, VisualizationParameters.VISBILITYMAP_LINE_THICKNESS);
+            }
          }
 
          materials.put(regionId, new PhongMaterial(getLineColor(regionId)));

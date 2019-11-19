@@ -82,13 +82,14 @@ public class NavigableRegionsFactory
       navigableRegion.addObstacleClusters(ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
                                                                               obstacleCalculator, includePreferredExtrusions));
 
-      for (Cluster cluster : navigableRegion.getAllClusters())
+      for (Cluster cluster : navigableRegion.getAllClusters()) // fills long edges with interpolated points for visibility graph building later
       {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
          List<Point2DReadOnly> expandListOfPreferred2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getPreferredNavigableExtrusionsInLocal(), clusterResolution);
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
          cluster.setPreferredNavigableExtrusionsInLocal(expandListOfPreferred2DPoints);
       }
+
       return navigableRegion;
    }
 
