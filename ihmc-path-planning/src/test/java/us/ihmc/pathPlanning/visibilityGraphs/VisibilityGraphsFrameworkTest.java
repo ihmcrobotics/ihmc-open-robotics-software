@@ -352,7 +352,7 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
-         
+
          if (DEBUG)
          {
             LogTools.info("Finished processing file: " + dataset.getName());
