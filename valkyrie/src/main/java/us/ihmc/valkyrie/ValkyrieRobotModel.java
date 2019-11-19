@@ -94,11 +94,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
 
-   public ValkyrieRobotModel(RobotTarget target, boolean headless)
-   {
-      this(target, ValkyrieRobotVersion.DEFAULT);
-   }
-
    public ValkyrieRobotModel(RobotTarget target)
    {
       this(target, ValkyrieRobotVersion.DEFAULT);

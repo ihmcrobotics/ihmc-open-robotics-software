@@ -293,7 +293,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
 
       public ValkyrieRobotModelWithHoist(RobotTarget target, boolean headless)
       {
-         super(target, headless);
+         super(target);
       }
       
       @Override

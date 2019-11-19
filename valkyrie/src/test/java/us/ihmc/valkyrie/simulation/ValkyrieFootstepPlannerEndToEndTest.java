@@ -29,7 +29,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
    private static final boolean showCollisionGraphics = true;
-   private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

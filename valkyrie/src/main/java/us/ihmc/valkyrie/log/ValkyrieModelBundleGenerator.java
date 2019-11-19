@@ -17,7 +17,7 @@ public class ValkyrieModelBundleGenerator
 {
    public static void main(String[] args) throws IOException
    {
-      ValkyrieRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      ValkyrieRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       LogModelProvider logModelProvider = model.getLogModelProvider();
       Properties properties = new Properties();
       properties.setProperty("modelName", logModelProvider.getModelName());
