@@ -94,37 +94,31 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final String customModel;
    private FootContactPoints<RobotSide> simulationContactPoints;
 
-   public ValkyrieRobotModel(RobotTarget target, FootContactPoints<RobotSide> simulationContactPoints)
+   public ValkyrieRobotModel(RobotTarget target)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, null, simulationContactPoints);
+      this(target, ValkyrieRobotVersion.DEFAULT, null);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, null, null);
+      this(target, ValkyrieRobotVersion.DEFAULT, null);
    }
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
-      this(target, robotVersion, null, null);
+      this(target, robotVersion, null);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, String model)
+   {
+      this(target, ValkyrieRobotVersion.DEFAULT, model);
    }
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model)
    {
-      this(target, robotVersion, model, null);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints)
-   {
-      this(target, ValkyrieRobotVersion.DEFAULT, model, simulationContactPoints);
-   }
-
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints)
-   {
       this.target = target;
       this.robotVersion = robotVersion;
       this.customModel = model;
-      this.simulationContactPoints = simulationContactPoints;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -166,6 +160,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (robotDescription != null)
          throw new IllegalArgumentException("Cannot change to use shape collision once robotDescription has been created.");
       this.useShapeCollision = useShapeCollision;
+   }
+
+   public void setSimulationContactPoints(FootContactPoints<RobotSide> simulationContactPoints)
+   {
+      if (contactPointParameters != null)
+         throw new IllegalArgumentException("Cannot set simulation contact points once contactPointParameters has been created.");
+      this.simulationContactPoints = simulationContactPoints;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()

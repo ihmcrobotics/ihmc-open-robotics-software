@@ -32,7 +32,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -79,7 +78,8 @@ public class OpenHumanoidsSimulator
             simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, false, true);
             System.out.println("Added extra foot contact points.");
          }
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, model, simulationContactPoints);
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, model);
+	      robotModel.setSimulationContactPoints(simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
