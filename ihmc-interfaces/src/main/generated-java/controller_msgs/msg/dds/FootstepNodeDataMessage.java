@@ -15,22 +15,24 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    /**
           * Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
           */
-   public static final byte STEP_TOO_HIGH_OR_LOW = (byte) 0;
-   public static final byte STEP_TOO_FORWARD_AND_DOWN = (byte) 1;
-   public static final byte STEP_TOO_FAR = (byte) 2;
-   public static final byte STEP_TOO_FAR_AND_HIGH = (byte) 3;
-   public static final byte STEP_NOT_WIDE_ENOUGH = (byte) 4;
-   public static final byte STEP_IN_PLACE = (byte) 5;
-   public static final byte NOT_ENOUGH_AREA = (byte) 6;
-   public static final byte COULD_NOT_SNAP = (byte) 7;
-   public static final byte COULD_NOT_WIGGLE_INSIDE = (byte) 8;
-   public static final byte SURFACE_NORMAL_TOO_STEEP_TO_SNAP = (byte) 9;
-   public static final byte TOO_MUCH_PENETRATION_AFTER_WIGGLE = (byte) 10;
-   public static final byte STEP_NOT_LONG_ENOUGH = (byte) 11;
-   public static final byte STEP_TOO_WIDE = (byte) 12;
-   public static final byte OBSTACLE_BLOCKING_BODY = (byte) 13;
-   public static final byte OBSTACLE_HITTING_BODY = (byte) 14;
-   public static final byte AT_CLIFF_BOTTOM = (byte) 15;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_HIGH_OR_LOW = (byte) 0;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FORWARD_AND_DOWN = (byte) 1;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE_AND_DOWN = (byte) 2;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR = (byte) 3;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR_AND_HIGH = (byte) 4;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE_AND_HIGH = (byte) 5;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_WIDE_ENOUGH = (byte) 6;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_IN_PLACE = (byte) 7;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_NOT_ENOUGH_AREA = (byte) 8;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_COULD_NOT_SNAP = (byte) 9;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_COULD_NOT_WIGGLE_INSIDE = (byte) 10;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_SURFACE_NORMAL_TOO_STEEP_TO_SNAP = (byte) 11;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_TOO_MUCH_PENETRATION_AFTER_WIGGLE = (byte) 12;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_LONG_ENOUGH = (byte) 13;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE = (byte) 14;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_BLOCKING_BODY = (byte) 15;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY = (byte) 16;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM = (byte) 17;
    /**
             * Specifies snap transform translation. NaN if snap was unsuccessful
             */

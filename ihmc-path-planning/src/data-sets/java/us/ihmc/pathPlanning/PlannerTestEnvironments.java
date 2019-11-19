@@ -512,7 +512,7 @@ public class PlannerTestEnvironments
       return planarRegionsList;
    }
 
-   public static PlanarRegionsList  getTrickCorridor()
+   public static PlanarRegionsList getTrickCorridor()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(-3.0, 0.0, 0.0);
@@ -522,6 +522,31 @@ public class PlannerTestEnvironments
       generator.addRectangle(10.0, 6.0);
       generator.translate(-5.0, 1.5, 0.0);
 
+      drawTrickyCorridorWalls(generator);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getTrickCorridorWCutFloor()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(-3.0, 0.0, 0.0);
+
+      // floor
+      generator.translate(2.5, -1.5, 0.0);
+      generator.addRectangle(5.0, 6.0);
+      generator.translate(-2.5, 1.5, 0.0);
+      generator.translate(7.5, -1.5, 0.0);
+      generator.addRectangle(5.0, 6.0);
+      generator.translate(-7.5, 1.5, 0.0);
+
+      drawTrickyCorridorWalls(generator);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static void drawTrickyCorridorWalls(PlanarRegionsListGenerator generator)
+   {
       // left wall
       generator.translate(0.0, 1.5, 0.0);
       generator.rotate(Math.toRadians(90.0), Axis.X);

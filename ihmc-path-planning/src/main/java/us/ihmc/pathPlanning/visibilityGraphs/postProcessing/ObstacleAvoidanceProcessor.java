@@ -145,6 +145,9 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
       if (endNodeShiftToAvoidObstacles.length() < minDistanceToMove)
          return; // didn't shift significantly or it's NaN, don't need to do following checks
 
+      if (endRegion.getHomeRegionCluster() == null)
+         return; // sometimes the goal node can be in free space
+
       Point2D shiftedEndLocation = new Point2D(endNodeLocationToPack);
       shiftedEndLocation.add(endNodeShiftToAvoidObstacles);
 

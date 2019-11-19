@@ -23,7 +23,7 @@ module controller_msgs
         /**
          * List of cells that the planner has explored
          */
-        sequence<controller_msgs::msg::dds::FootstepPlannerLatticeNodeMessage> lattice_nodes;
+        sequence<controller_msgs::msg::dds::FootstepPlannerLatticeNodeMessage, 10000> lattice_nodes;
       };
     };
   };

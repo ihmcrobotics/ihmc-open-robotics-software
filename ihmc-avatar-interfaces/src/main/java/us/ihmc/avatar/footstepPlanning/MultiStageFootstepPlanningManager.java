@@ -472,7 +472,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupStepPlanningStage(stageFinished);
 
-      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its steps in " + stageFinished.getPlanningDuration() + " s and a result " + stepPlanningResult + ".");
+      if (debug)
+         LogTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps in " + stageFinished.getPlanningDuration() + " s and a result " + stepPlanningResult + ".");
    }
 
    public void processRequest(FootstepPlanningRequestPacket request)
@@ -580,7 +581,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (request == null)
          return false;
 
-      plannerListener.reset();
+      if (plannerListener != null)
+         plannerListener.reset();
 
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
@@ -781,7 +783,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          }
       }
 
-      plannerListener.tickAndUpdate();
+      if (plannerListener != null)
+         plannerListener.tickAndUpdate();
 
       boolean isDone = stepPlanningStagesInProgress.isEmpty();
       isDone &= latestRequestReference.get() == null;
@@ -791,7 +794,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       isDone &= isDonePlanningPath.getBooleanValue();
       isDone &= isDonePlanningSteps.getBooleanValue();
 
-      if (isDone)
+      if (isDone && plannerListener != null)
          plannerListener.plannerFinished(null);
 
       this.isDone.set(isDone);
@@ -1112,7 +1115,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       FootstepPlanningToolboxOutputStatus outputStatus = FootstepPlanningMessageReporter
             .packStepResult(footstepPlan, bodyPathPlan, status, timeTaken, planarRegionsList.get(), planId.getIntegerValue());
-      plannerListener.packPlannerStatistics(outputStatus.getFootstepPlanningStatistics());
+      if (plannerListener != null)
+         plannerListener.packPlannerStatistics(outputStatus.getFootstepPlanningStatistics());
       return outputStatus;
    }
 

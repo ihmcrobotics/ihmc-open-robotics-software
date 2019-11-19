@@ -5,7 +5,7 @@
 uint32 plan_id
 
 # List of all footstep node data. Index 0 should hold the start node
-FootstepNodeDataMessage[] node_data
+FootstepNodeDataMessage[<=200000] node_data
 
 # This message has two modes:
 # Mode 1: The planner will periodically emit a list of nodes representing the current lowest cost path while planning.

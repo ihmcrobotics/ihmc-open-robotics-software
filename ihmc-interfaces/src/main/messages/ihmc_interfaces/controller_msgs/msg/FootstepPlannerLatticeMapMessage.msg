@@ -5,4 +5,4 @@
 uint32 plan_id
 
 # List of cells that the planner has explored
-FootstepPlannerLatticeNodeMessage[] lattice_nodes
+FootstepPlannerLatticeNodeMessage[<=10000] lattice_nodes
