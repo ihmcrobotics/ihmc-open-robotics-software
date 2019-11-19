@@ -822,6 +822,95 @@ public class ClusterToolsTest
       }
    }
 
+   @Test
+   public void testExtrudePolygonWithLoops()
+   {
+
+      List<Point3D> pointsInWorld3D = new ArrayList<>();
+      pointsInWorld3D.add(new Point3D(0.2, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, 0.1, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, 0.0, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, -0.1, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.1, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.0, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.1, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, -0.1, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, 0.0, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, 0.1, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.1, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.0, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.1, 0.2, 0.0));
+
+      List<Point3D> expectedPointsInWorld3D = new ArrayList<>();
+      expectedPointsInWorld3D.add(new Point3D(0.05, 0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(0.05, 0.0, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(0.05, -0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(0.0, -0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(-0.05, -0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(-0.05, -0.0, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(-0.05, 0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(0.0, 0.05, 0.0));
+
+
+      double extrusionDistance = 0.15;
+      List<Point2DReadOnly> pointsInWorld2D = pointsInWorld3D.stream().map(Point2D::new).collect(Collectors.toList());
+
+      ObstacleExtrusionDistanceCalculator calculator = (p, h) -> extrusionDistance;
+      double[] extrusionDistances = pointsInWorld3D.stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), rawPoint.getZ())).toArray();
+
+      List<Point2D> extrudedPoints = ClusterTools.extrudePolygon(false, pointsInWorld2D, extrusionDistances);
+
+      assertEquals(expectedPointsInWorld3D.size() , extrudedPoints.size());
+      for (int i = 0; i < extrudedPoints.size(); i++)
+      {
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(expectedPointsInWorld3D.get(i)), extrudedPoints.get(i), 1e-5);
+      }
+
+
+
+
+      pointsInWorld3D = new ArrayList<>();
+      pointsInWorld3D.add(new Point3D(0.2, 0.15, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, 0.05, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, -0.05, 0.0));
+      pointsInWorld3D.add(new Point3D(0.2, -0.15, 0.0));
+      pointsInWorld3D.add(new Point3D(0.15, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.05, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.05, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.15, -0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, -0.15, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, -0.05, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, 0.05, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.2, 0.15, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.15, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(-0.05, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.05, 0.2, 0.0));
+      pointsInWorld3D.add(new Point3D(0.15, 0.2, 0.0));
+
+      expectedPointsInWorld3D = new ArrayList<>();
+      expectedPointsInWorld3D.add(new Point3D(0.05, 0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(0.05, -0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(-0.05, -0.05, 0.0));
+      expectedPointsInWorld3D.add(new Point3D(-0.05, 0.05, 0.0));
+
+
+      pointsInWorld2D = pointsInWorld3D.stream().map(Point2D::new).collect(Collectors.toList());
+
+      extrusionDistances = pointsInWorld3D.stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), rawPoint.getZ())).toArray();
+
+      extrudedPoints = ClusterTools.extrudePolygon(false, pointsInWorld2D, extrusionDistances);
+
+      assertEquals(expectedPointsInWorld3D.size() , extrudedPoints.size());
+      for (int i = 0; i < extrudedPoints.size(); i++)
+      {
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(expectedPointsInWorld3D.get(i)), extrudedPoints.get(i), 1e-5);
+      }
+   }
+
+
    private List<Cluster> createObstacleClustersForTests(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
    {
       double orthogonalAngle = 0.8;
