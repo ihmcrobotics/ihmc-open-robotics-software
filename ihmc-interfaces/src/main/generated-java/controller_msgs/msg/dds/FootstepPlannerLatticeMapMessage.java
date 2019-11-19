@@ -23,7 +23,7 @@ public class FootstepPlannerLatticeMapMessage extends Packet<FootstepPlannerLatt
 
    public FootstepPlannerLatticeMapMessage()
    {
-      lattice_nodes_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage> (100, new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType());
+      lattice_nodes_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessage> (10000, new controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType());
 
    }
 
