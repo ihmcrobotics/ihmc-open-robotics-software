@@ -51,7 +51,7 @@ public class FootLeapOfFaithModule
 
       double exceededTime = Math.max(currentTime - fractionOfSwing.getValue() * swingDuration.getDoubleValue(), 0.0);
 
-      if (exceededTime < 0.0)
+      if (exceededTime <= 0.0)
          return;
 
       if (scaleFootWeight.getValue())
