@@ -87,6 +87,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
+   private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
 
    private boolean useShapeCollision = false;
    private boolean useOBJGraphics = true;
@@ -95,37 +96,35 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    public ValkyrieRobotModel(RobotTarget target, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, null, simulationContactPoints, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, null, simulationContactPoints);
    }
 
    public ValkyrieRobotModel(RobotTarget target, boolean headless)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, null, null, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, null, null);
    }
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
-      this(target, robotVersion, null, null, false);
+      this(target, robotVersion, null, null);
    }
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model)
    {
-      this(target, robotVersion, model, null, false);
+      this(target, robotVersion, model, null);
    }
 
    public ValkyrieRobotModel(RobotTarget target, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
-      this(target, ValkyrieRobotVersion.DEFAULT, model, simulationContactPoints, false);
+      this(target, ValkyrieRobotVersion.DEFAULT, model, simulationContactPoints);
    }
 
-   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints,
-                             boolean useShapeCollision)
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, String model, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this.target = target;
       this.robotVersion = robotVersion;
       this.customModel = model;
       this.simulationContactPoints = simulationContactPoints;
-      this.useShapeCollision = useShapeCollision;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -146,24 +145,27 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return jointMap;
    }
 
-   @Override
-   public DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
-   {
-      return new ValkyrieRobotModelShapeCollisionSettings(useShapeCollision);
-   }
-
    public void setTransparency(double transparency)
    {
       if (robotDescription != null)
-         throw new IllegalArgumentException("Cannot set transparency once robot description has been created.");
+         throw new IllegalArgumentException("Cannot set transparency once robotDescription has been created.");
       this.transparency = transparency;
    }
 
    public void setUseOBJGraphics(boolean useOBJGraphics)
    {
       if (generalizedRobotModel != null)
-         throw new IllegalArgumentException("Cannot change to use OBJ graphics once generalized robot model has been created.");
+         throw new IllegalArgumentException("Cannot change to use OBJ graphics once generalizedRobotModel has been created.");
       this.useOBJGraphics = useOBJGraphics;
+   }
+
+   public void setUseShapeCollision(boolean useShapeCollision)
+   {
+      if (robotModelShapeCollisionSettings != null)
+         throw new IllegalArgumentException("Cannot change to use shape collision once robotModelShapeCollisionSettings has been created.");
+      if (robotDescription != null)
+         throw new IllegalArgumentException("Cannot change to use shape collision once robotDescription has been created.");
+      this.useShapeCollision = useShapeCollision;
    }
 
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -405,6 +407,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new ValkyrieCollisionBoxProvider(createFullRobotModel());
+   }
+
+   @Override
+   public DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
+   {
+      if (robotModelShapeCollisionSettings == null)
+         robotModelShapeCollisionSettings = new ValkyrieRobotModelShapeCollisionSettings(useShapeCollision);
+      return robotModelShapeCollisionSettings;
    }
 
    @Override
