@@ -287,13 +287,13 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double getMaxICPErrorBeforeSingleSupportX()
+         public double getMaxICPErrorBeforeSingleSupportForwardX()
          {
             return 0;
          }
 
          @Override
-         public double getMaxICPErrorBeforeSingleSupportY()
+         public double getMaxICPErrorBeforeSingleSupportInnerY()
          {
             return 0;
          }
