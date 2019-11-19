@@ -67,7 +67,10 @@ public class MultiStagePlannerListener
       if (stageHasMapUpdate)
       {
          if (broadcastOccupancyMap.getBooleanValue())
-            statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+         {
+            FootstepPlannerOccupancyMapMessage message = getConcatenatedOccupancyMap();
+            statusOutputManager.reportStatusMessage(message);
+         }
 
          lastBroadcastTime = currentTime;
       }
@@ -82,7 +85,11 @@ public class MultiStagePlannerListener
 
    public void plannerFinished(List<FootstepNode> plan)
    {
-      statusOutputManager.reportStatusMessage(getConcatenatedOccupancyMap());
+      if (broadcastOccupancyMap.getBooleanValue())
+      {
+         FootstepPlannerOccupancyMapMessage message = getConcatenatedOccupancyMap();
+         statusOutputManager.reportStatusMessage(message);
+      }
    }
 
    public void packPlannerStatistics(FootstepPlanningStatistics planningStatistics)
@@ -124,15 +131,19 @@ public class MultiStagePlannerListener
       FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
       for (StagePlannerListener listener : listeners)
       {
-//         if (!listener.hasOccupiedCells())
-//            continue;
+         //         if (!listener.hasOccupiedCells())
+         //            continue;
 
          PlannerOccupancyMap occupancyMap = listener.getOccupancyMap();
          if (occupancyMap == null)
             continue;
 
          for (PlannerCell stageCell : occupancyMap.getOccupiedCells())
+         {
+            if (occupancyMap.getOccupiedCells().size() == 10000)
+               break;
             stageCell.getAsMessage(occupancyMapMessage.getOccupiedCells().add());
+         }
       }
 
       return occupancyMapMessage;

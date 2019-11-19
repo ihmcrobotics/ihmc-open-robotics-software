@@ -33,7 +33,7 @@ public class FootstepNodeDataListMessage extends Packet<FootstepNodeDataListMess
 
    public FootstepNodeDataListMessage()
    {
-      node_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepNodeDataMessage> (100, new controller_msgs.msg.dds.FootstepNodeDataMessagePubSubType());
+      node_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepNodeDataMessage> (200000, new controller_msgs.msg.dds.FootstepNodeDataMessagePubSubType());
 
    }
 
