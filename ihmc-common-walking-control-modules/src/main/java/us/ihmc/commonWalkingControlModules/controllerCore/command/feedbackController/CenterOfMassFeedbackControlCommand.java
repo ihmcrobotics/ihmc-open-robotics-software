@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
@@ -52,7 +52,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    /** The (ID) feed-forward center of mass linear acceleration to use in the feedback controller. */
    private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final DefaultPID3DGains gains = new DefaultPID3DGains();
+   private final ZeroablePID3DGains gains = new ZeroablePID3DGains();
 
    /**
     * Momentum rate command used to save different control properties such as the weight to be used in
