@@ -4,8 +4,8 @@ import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
-import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher;
-import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraPublisher.SensorFrameInitializationTransformer;
+import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge;
+import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -21,7 +21,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 public class AtlasPointCloudSensorManager
 {
    private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
-   private final TrackingCameraPublisher trackingCameraPublisher;
+   private final TrackingCameraBridge trackingCameraPublisher;
 
    private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
 
@@ -42,7 +42,7 @@ public class AtlasPointCloudSensorManager
 
       MessageTopicNameGenerator trackingCameraTopicNameGenerator;
       trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(topicNamePrefixToPublish, T) + trackingTopicNameSurfixToPublish;
-      trackingCameraPublisher = new TrackingCameraPublisher(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
+      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
 
@@ -52,10 +52,10 @@ public class AtlasPointCloudSensorManager
          realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createDepthPointCloudWorldTransformCalculator());
    }
 
-   public void receiveDataFromROS(RosMainNode rosMainNode)
+   public void receiveDataFromROS1(RosMainNode rosMainNode)
    {
-      realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthTopicNameToSubscribe, rosMainNode);
-      trackingCameraPublisher.receiveTrackingCameraDataFromROS(trackingTopicNameToSubscribe, rosMainNode);
+      realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS1(depthTopicNameToSubscribe, rosMainNode);
+      trackingCameraPublisher.receiveTrackingCameraDataFromROS1(trackingTopicNameToSubscribe, rosMainNode);
    }
 
    public void start()

@@ -117,14 +117,14 @@ public class StereoVisionPointCloudPublisher
       executorService.shutdownNow();
    }
 
-   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, URI rosCoreURI)
+   public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
    {
       String graphName = robotName + "/" + name;
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, graphName, true);
-      receiveStereoPointCloudFromROS(stereoPointCloudROSTopic, rosMainNode);
+      receiveStereoPointCloudFromROS1(stereoPointCloudROSTopic, rosMainNode);
    }
 
-   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, RosMainNode rosMainNode)
+   public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, RosMainNode rosMainNode)
    {
       rosMainNode.attachSubscriber(stereoPointCloudROSTopic, createROSPointCloud2Subscriber());
    }
