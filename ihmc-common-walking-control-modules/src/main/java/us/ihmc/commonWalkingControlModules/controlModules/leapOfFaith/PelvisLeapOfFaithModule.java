@@ -134,6 +134,9 @@ public class PelvisLeapOfFaithModule
          timeForReaching = phaseOutTime;
       }
 
+      if (upcomingFootstep == null)
+         return;
+
       tempPoint.setToZero(upcomingFootstep.getSoleReferenceFrame());
       tempPoint.changeFrame(soleZUpFrames.get(supportSide));
       double stepLength = tempPoint.getX();
