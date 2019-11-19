@@ -42,7 +42,7 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10000; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepPlannerLatticeNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -74,7 +74,7 @@ public class FootstepPlannerLatticeMapMessagePubSubType implements us.ihmc.pubsu
    {
       cdr.write_type_4(data.getPlanId());
 
-      if(data.getLatticeNodes().size() <= 100)
+      if(data.getLatticeNodes().size() <= 10000)
       cdr.write_type_e(data.getLatticeNodes());else
           throw new RuntimeException("lattice_nodes field exceeds the maximum length");
 

@@ -42,7 +42,7 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10000; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepPlannerCellMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -74,7 +74,7 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getOccupiedCells().size() <= 100)
+      if(data.getOccupiedCells().size() <= 10000)
       cdr.write_type_e(data.getOccupiedCells());else
           throw new RuntimeException("occupied_cells field exceeds the maximum length");
 
