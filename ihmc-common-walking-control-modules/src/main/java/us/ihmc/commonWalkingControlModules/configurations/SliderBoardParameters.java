@@ -23,11 +23,4 @@ public class SliderBoardParameters
    {
       return new LinkedHashMap<NeckJointName, ImmutablePair<Double,Double>>();
    }
-
-
-   public double getStandPrepAngle(String jointName)
-   {
-      System.err.println("Need to add access to stand prep joint angles.");
-      return 0;
-   }
 }
