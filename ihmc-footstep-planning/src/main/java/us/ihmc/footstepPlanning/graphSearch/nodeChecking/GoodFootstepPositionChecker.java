@@ -108,7 +108,8 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       double stepDownFraction = -solePositionInParentZUpFrame.getZ() / minZ;
       double stepForwardFraction = solePositionInParentZUpFrame.getX() / minX;
 
-      if (stepDownFraction + stepForwardFraction > 1.0)
+      // TODO eliminate the 1.5, and look at the actual max step z and max step reach to ensure those are valid if there's not any pitching
+      if (stepDownFraction > 1.0 || stepForwardFraction > 1.0 || (stepDownFraction + stepForwardFraction > 1.5))
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
          return false;
