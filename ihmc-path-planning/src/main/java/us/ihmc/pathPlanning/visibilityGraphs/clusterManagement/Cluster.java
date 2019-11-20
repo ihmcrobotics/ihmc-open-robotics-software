@@ -30,7 +30,7 @@ public class Cluster
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
-   private final List<Point2DReadOnly> preferredNavigableExtrusionsInLocal = new ArrayList<>();
+   private final List<List<Point2DReadOnly>> preferredNavigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
@@ -277,51 +277,47 @@ public class Cluster
    }
 
 
-   public List<Point3DReadOnly> getPreferredNavigableExtrusionsInWorld()
+   public List<List<Point3DReadOnly>> getPreferredNavigableExtrusionsInWorld()
    {
-      return preferredNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
+      List<List<Point3DReadOnly>> extrusionsInWorld = new ArrayList<>();
+      for (List<Point2DReadOnly> preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
+         extrusionsInWorld.add(preferredExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList()));
+      return extrusionsInWorld;
    }
 
-   public List<Point2DReadOnly> getPreferredNavigableExtrusionsInWorld2D()
+   public List<List<Point2DReadOnly>> getPreferredNavigableExtrusionsInWorld2D()
    {
-      return preferredNavigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+      List<List<Point2DReadOnly>> extrusionsInWorld = new ArrayList<>();
+      for (List<Point2DReadOnly> preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
+         extrusionsInWorld.add(preferredExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList()));
+      return extrusionsInWorld;
    }
 
 
-   public void addPreferredNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
+   public void addPreferredNavigableExtrusionInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
    {
-      preferredNavigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
+      List<Point2DReadOnly> listCopy = navigableExtrusionInLocal.stream().map(Point2D::new).collect(Collectors.toList());
+      preferredNavigableExtrusionsInLocal.add(listCopy);
    }
 
-   public void addPreferredNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
+   public void addPreferredNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> navigableExtrusionInLocal)
    {
       navigableExtrusionInLocal.forEach(this::addPreferredNavigableExtrusionInLocal);
    }
 
-   public int getNumberOfPreferredNavigableExtrusions()
-   {
-      return preferredNavigableExtrusionsInLocal.size();
-   }
-
-   public Point2DReadOnly getPreferredNavigableExtrusionInLocal(int i)
-   {
-      return preferredNavigableExtrusionsInLocal.get(i);
-   }
-
-   public Point3DReadOnly getPreferredNavigableExtrusionInWorld(int i)
-   {
-      return toWorld3D(getPreferredNavigableExtrusionInLocal(i));
-   }
-
-   public List<Point2DReadOnly> getPreferredNavigableExtrusionsInLocal()
+   public List<List<Point2DReadOnly>> getPreferredNavigableExtrusionsInLocal()
    {
       return preferredNavigableExtrusionsInLocal;
    }
 
-   public void setPreferredNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   public void setPreferredNavigableExtrusionsInLocal(List<List<Point2DReadOnly>> listsOfPoints)
    {
       preferredNavigableExtrusionsInLocal.clear();
-      preferredNavigableExtrusionsInLocal.addAll(points);
+      for (List<Point2DReadOnly> points : listsOfPoints)
+      {
+         List<Point2DReadOnly> listCopy = new ArrayList<>(points);
+         preferredNavigableExtrusionsInLocal.add(listCopy);
+      }
    }
 
 
