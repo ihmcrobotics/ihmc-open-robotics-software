@@ -16,6 +16,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
             */
    public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
+   public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_;
+   public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
    public long timestamp_;
    public double confidence_factor_;
    public java.lang.StringBuilder frame_id_;
@@ -23,6 +25,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    public StampedPosePacket()
    {
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       frame_id_ = new java.lang.StringBuilder(255);
    }
 
@@ -37,6 +41,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       sequence_id_ = other.sequence_id_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_velocity_, linear_velocity_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
       timestamp_ = other.timestamp_;
 
       confidence_factor_ = other.confidence_factor_;
@@ -65,6 +71,18 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    public us.ihmc.euclid.geometry.Pose3D getPose()
    {
       return pose_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Vector3D getLinearVelocity()
+   {
+      return linear_velocity_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocity()
+   {
+      return angular_velocity_;
    }
 
    public void setTimestamp(long timestamp)
@@ -121,6 +139,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
+      if (!this.linear_velocity_.epsilonEquals(other.linear_velocity_, epsilon)) return false;
+      if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_factor_, other.confidence_factor_, epsilon)) return false;
@@ -143,6 +163,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
+      if (!this.linear_velocity_.equals(otherMyClass.linear_velocity_)) return false;
+      if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_)) return false;
       if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
       if(this.confidence_factor_ != otherMyClass.confidence_factor_) return false;
@@ -163,6 +185,10 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
+      builder.append("linear_velocity=");
+      builder.append(this.linear_velocity_);      builder.append(", ");
+      builder.append("angular_velocity=");
+      builder.append(this.angular_velocity_);      builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);      builder.append(", ");
       builder.append("confidence_factor=");

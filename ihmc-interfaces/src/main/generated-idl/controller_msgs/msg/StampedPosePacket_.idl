@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__StampedPosePacket__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -20,6 +21,8 @@ module controller_msgs
          */
         unsigned long sequence_id;
         geometry_msgs::msg::dds::Pose pose;
+        geometry_msgs::msg::dds::Vector3 linear_velocity;
+        geometry_msgs::msg::dds::Vector3 angular_velocity;
         long long timestamp;
         double confidence_factor;
         string frame_id;
