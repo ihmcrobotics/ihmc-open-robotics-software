@@ -12,7 +12,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Tag("controller-api-2")
    @Override

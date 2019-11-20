@@ -601,11 +601,9 @@ public class PlannerTestEnvironments
       generator.translate(-10.0, 0.0, -1.0);
 
       generator.translate(3.0, 1.5, 0.0);
-
-      return generator.getPlanarRegionsList();
    }
 
-   public static PlanarRegionsList  getSimplePlatform()
+   public static PlanarRegionsList getSimplePlatform()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -622,8 +620,6 @@ public class PlannerTestEnvironments
 
       generator.translate(0.38, 0.0, -0.15);
       generator.addRectangle(0.38, 1.14);
-
-
 
       return generator.getPlanarRegionsList();
    }

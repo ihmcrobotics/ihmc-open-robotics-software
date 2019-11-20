@@ -9,9 +9,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 
@@ -19,7 +19,7 @@ public class ValkyrieAutomatedDiagnosticSimulation
 {
    public ValkyrieAutomatedDiagnosticSimulation()
    {
-      ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
+      ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS);
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, false);
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
@@ -42,9 +42,9 @@ public class ValkyrieAutomatedDiagnosticSimulation
    private class ValkyrieRobotModelWithHoist extends ValkyrieRobotModel
    {
 
-      public ValkyrieRobotModelWithHoist(RobotTarget target, boolean headless)
+      public ValkyrieRobotModelWithHoist(RobotTarget target)
       {
-         super(target, headless);
+         super(target);
       }
 
       @Override

@@ -5,6 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -15,6 +16,7 @@ public class YoEffortJointHandleHolder
    private final OneDoFJointBasics joint;
    private final JointDesiredOutputBasics desiredJointData;
    private final YoJointDesiredOutput yoDesiredJointData;
+   private final DoubleParameter tauMax;
 
    private final YoDouble tauDesired;
    private final YoDouble tauMeasured;
@@ -29,6 +31,7 @@ public class YoEffortJointHandleHolder
       this.handle = handle;
       this.joint = joint;
       this.desiredJointData = desiredJointData != null ? desiredJointData : new JointDesiredOutput();
+      this.tauMax = new DoubleParameter(handle.getName() + "TauMax", registry, Double.POSITIVE_INFINITY);
 
       yoDesiredJointData = new YoJointDesiredOutput(name, registry, "JointHandle");
 
@@ -82,5 +85,10 @@ public class YoEffortJointHandleHolder
    public String getName()
    {
       return name;
+   }
+
+   public double getTauMax()
+   {
+      return tauMax.getValue();
    }
 }

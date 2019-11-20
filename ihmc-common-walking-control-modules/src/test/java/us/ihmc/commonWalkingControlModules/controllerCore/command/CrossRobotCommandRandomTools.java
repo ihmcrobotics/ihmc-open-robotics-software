@@ -108,6 +108,8 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
@@ -354,7 +356,9 @@ public class CrossRobotCommandRandomTools
 
    public static SpatialAcceleration nextSpatialAcceleration(Random random, ReferenceFrame... possibleFrames)
    {
-      return MecanoRandomTools.nextSpatialAcceleration(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames),
+      return MecanoRandomTools.nextSpatialAcceleration(random,
+                                                       nextElementIn(random, possibleFrames),
+                                                       nextElementIn(random, possibleFrames),
                                                        nextElementIn(random, possibleFrames));
    }
 
@@ -507,6 +511,11 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static ZeroablePID3DGains nextZeroablePID3DGains(Random random)
+   {
+      return new ZeroablePID3DGains(nextDefaultPID3DGains(random));
+   }
+
    public static PIDSE3Gains nextPIDSE3Gains(Random random)
    {
       return nextDefaultPIDSE3Gains(random);
@@ -515,6 +524,14 @@ public class CrossRobotCommandRandomTools
    public static DefaultPIDSE3Gains nextDefaultPIDSE3Gains(Random random)
    {
       DefaultPIDSE3Gains next = new DefaultPIDSE3Gains();
+      next.setPositionGains(nextDefaultPID3DGains(random));
+      next.setOrientationGains(nextDefaultPID3DGains(random));
+      return next;
+   }
+
+   public static ZeroablePIDSE3Gains nextZeroablePIDSE3Gains(Random random)
+   {
+      ZeroablePIDSE3Gains next = new ZeroablePIDSE3Gains();
       next.setPositionGains(nextDefaultPID3DGains(random));
       next.setOrientationGains(nextDefaultPID3DGains(random));
       return next;
@@ -644,7 +661,8 @@ public class CrossRobotCommandRandomTools
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         next.addLimitEnforcementMethod(allJoints.remove(random.nextInt(allJoints.size())), nextElementIn(random, JointLimitEnforcement.values()),
+         next.addLimitEnforcementMethod(allJoints.remove(random.nextInt(allJoints.size())),
+                                        nextElementIn(random, JointLimitEnforcement.values()),
                                         nextJointLimitParameters(random));
       }
 
@@ -801,7 +819,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static LinearMomentumConvexConstraint2DCommand nextLinearMomentumConvexConstraint2DCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static LinearMomentumConvexConstraint2DCommand nextLinearMomentumConvexConstraint2DCommand(Random random, RigidBodyBasics rootBody,
+                                                                                                     ReferenceFrame... possibleFrames)
    {
       LinearMomentumConvexConstraint2DCommand next = new LinearMomentumConvexConstraint2DCommand();
       int size = random.nextInt(10);
@@ -890,16 +909,16 @@ public class CrossRobotCommandRandomTools
       {
          switch (random.nextInt(3))
          {
-         case 0:
-            next.setAsGreaterOrEqualInequalityConstraint();
-            break;
-         case 1:
-            next.setAsLessOrEqualInequalityConstraint();
-            break;
-         case 2:
-         default:
-            next.setAsHardEqualityConstraint();
-            break;
+            case 0:
+               next.setAsGreaterOrEqualInequalityConstraint();
+               break;
+            case 1:
+               next.setAsLessOrEqualInequalityConstraint();
+               break;
+            case 2:
+            default:
+               next.setAsHardEqualityConstraint();
+               break;
          }
       }
 
@@ -1128,8 +1147,10 @@ public class CrossRobotCommandRandomTools
    public static InverseDynamicsCommandList nextInverseDynamicsCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      return nextInverseDynamicsCommandList(random, getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
-                                            rootBody, possibleFrames);
+      return nextInverseDynamicsCommandList(random,
+                                            getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
+                                            rootBody,
+                                            possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -1155,8 +1176,10 @@ public class CrossRobotCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(),
+                                                                                       Random.class,
+                                                                                       RigidBodyBasics.class,
+                                                                                       ReferenceFrame[].class);
          InverseDynamicsCommand<?> command = (InverseDynamicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
@@ -1168,7 +1191,8 @@ public class CrossRobotCommandRandomTools
    {
       return nextInverseKinematicsCommandList(random,
                                               getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class, InverseKinematicsCommandBuffer.class),
-                                              rootBody, possibleFrames);
+                                              rootBody,
+                                              possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -1194,8 +1218,10 @@ public class CrossRobotCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(),
+                                                                                       Random.class,
+                                                                                       RigidBodyBasics.class,
+                                                                                       ReferenceFrame[].class);
          InverseKinematicsCommand<?> command = (InverseKinematicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
@@ -1205,9 +1231,11 @@ public class CrossRobotCommandRandomTools
    public static VirtualModelControlCommandList nextVirtualModelControlCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      return nextVirtualModelControlCommandList(random, getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
-                                                                                           VirtualModelControlCommandBuffer.class),
-                                                rootBody, possibleFrames);
+      return nextVirtualModelControlCommandList(random,
+                                                getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
+                                                                                   VirtualModelControlCommandBuffer.class),
+                                                rootBody,
+                                                possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -1233,8 +1261,10 @@ public class CrossRobotCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(),
+                                                                                       Random.class,
+                                                                                       RigidBodyBasics.class,
+                                                                                       ReferenceFrame[].class);
          VirtualModelControlCommand<?> command = (VirtualModelControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
@@ -1244,8 +1274,10 @@ public class CrossRobotCommandRandomTools
    public static FeedbackControlCommandList nextFeedbackControlCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      return nextFeedbackControlCommandList(random, getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class),
-                                            rootBody, possibleFrames);
+      return nextFeedbackControlCommandList(random,
+                                            getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class),
+                                            rootBody,
+                                            possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -1271,8 +1303,10 @@ public class CrossRobotCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(),
+                                                                                       Random.class,
+                                                                                       RigidBodyBasics.class,
+                                                                                       ReferenceFrame[].class);
          FeedbackControlCommand<?> command = (FeedbackControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
@@ -1433,11 +1467,17 @@ public class CrossRobotCommandRandomTools
       ForceSensorDataHolder forceSensorDataHolder = nextForceSensorDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       CenterOfPressureDataHolder centerOfPressureDataHolder = nextCenterOfPressureDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody,
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random,
+                                                                                                             ensureNonEmptyCommand,
+                                                                                                             rootBody,
                                                                                                              possibleFrames);
       SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
-      HumanoidRobotContextData next = new HumanoidRobotContextData(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder,
-                                                                   robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext);
+      HumanoidRobotContextData next = new HumanoidRobotContextData(processedJointData,
+                                                                   forceSensorDataHolder,
+                                                                   centerOfPressureDataHolder,
+                                                                   robotMotionStatusHolder,
+                                                                   jointDesiredOutputList,
+                                                                   sensorDataContext);
       next.setTimestamp(random.nextLong());
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
@@ -1457,12 +1497,18 @@ public class CrossRobotCommandRandomTools
       ForceSensorDataHolder forceSensorDataHolder = nextForceSensorDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       CenterOfPressureDataHolder centerOfPressureDataHolder = nextCenterOfPressureDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody,
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random,
+                                                                                                             ensureNonEmptyCommand,
+                                                                                                             rootBody,
                                                                                                              possibleFrames);
       SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = nextRawJointSensorDataHolderMap(random, ensureNonEmptyCommand, rootBody);
-      AtlasHumanoidRobotContextData next = new AtlasHumanoidRobotContextData(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder,
-                                                                             robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext,
+      AtlasHumanoidRobotContextData next = new AtlasHumanoidRobotContextData(processedJointData,
+                                                                             forceSensorDataHolder,
+                                                                             centerOfPressureDataHolder,
+                                                                             robotMotionStatusHolder,
+                                                                             jointDesiredOutputList,
+                                                                             sensorDataContext,
                                                                              rawJointSensorDataHolderMap);
       next.setTimestamp(random.nextLong());
       next.setSchedulerTick(random.nextLong());
@@ -1590,11 +1636,14 @@ public class CrossRobotCommandRandomTools
    public static ControllerCoreCommand nextControllerCoreCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      return nextControllerCoreCommand(random, getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
+      return nextControllerCoreCommand(random,
+                                       getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
                                        getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class, InverseKinematicsCommandBuffer.class),
-                                       getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class, VirtualModelControlCommandBuffer.class,
+                                       getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
+                                                                          VirtualModelControlCommandBuffer.class,
                                                                           VirtualEffortCommand.class),
-                                       getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class), rootBody,
+                                       getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class),
+                                       rootBody,
                                        possibleFrames);
    }
 

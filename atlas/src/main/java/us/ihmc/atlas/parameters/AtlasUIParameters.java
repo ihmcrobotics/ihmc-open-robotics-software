@@ -1,5 +1,10 @@
 package us.ihmc.atlas.parameters;
 
+import com.jme3.math.Transform;
+
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.UIParameters;
 
@@ -11,9 +16,11 @@ public class AtlasUIParameters implements UIParameters
    private final double spineRollLimit = Math.PI / 4.0;
 
    private final AtlasPhysicalProperties physicalProperties;
+   private final AtlasRobotVersion selectedVersion;
 
-   public AtlasUIParameters(AtlasPhysicalProperties physicalProperties)
+   public AtlasUIParameters(AtlasRobotVersion selectedVersion, AtlasPhysicalProperties physicalProperties)
    {
+      this.selectedVersion = selectedVersion;
       this.physicalProperties = physicalProperties;
    }
 
@@ -64,5 +71,13 @@ public class AtlasUIParameters implements UIParameters
    public double getAnkleHeight()
    {
       return Math.abs(physicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.LEFT).getTranslationZ());
+   }
+
+   @Override
+   public Transform getJmeTransformWristToHand(RobotSide side)
+   {
+      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
+      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
+      return jmeAttachmentPlateToPalm;
    }
 }
