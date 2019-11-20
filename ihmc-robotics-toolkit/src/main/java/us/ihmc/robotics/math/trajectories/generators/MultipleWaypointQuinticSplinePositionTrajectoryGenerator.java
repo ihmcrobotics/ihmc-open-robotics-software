@@ -1,4 +1,4 @@
-package us.ihmc.robotics.math.interpolators;
+package us.ihmc.robotics.math.trajectories.generators;
 
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -6,13 +6,14 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Helper class to create a one degree of freedom quintic spline interpolator
  */
-public class MultipleWaypointPositionQuinticSplineTrajectory implements PositionTrajectoryGenerator
+public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final ReferenceFrame trajectoryFrame;
    private final QuinticSplineInterpolator interpolator;
@@ -29,7 +30,7 @@ public class MultipleWaypointPositionQuinticSplineTrajectory implements Position
    private final Vector3D af = new Vector3D();
    
 
-   public MultipleWaypointPositionQuinticSplineTrajectory(String name, ReferenceFrame trajectoryFrame, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
+   public MultipleWaypointQuinticSplinePositionTrajectoryGenerator(String name, ReferenceFrame trajectoryFrame, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
    {
       this.trajectoryFrame = trajectoryFrame;
       this.interpolator = new QuinticSplineInterpolator(name, maximumNumberOfPoints, 3, parentRegistry);
