@@ -8,8 +8,8 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieHumanoidKinematicsToolboxControllerTest extends HumanoidKinematicsToolboxControllerTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-   private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+   private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    @Test // (timeout = 30000)

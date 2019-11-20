@@ -5,14 +5,21 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.jme3.math.Transform;
 
 import controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -969,12 +976,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
       }
 
       @Override
-      public Transform getJmeTransformWristToHand(RobotSide side)
-      {
-         return null;
-      }
-
-      @Override
       public double getSimulateDT()
       {
          return 0;
@@ -982,12 +983,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       @Override
       public double getEstimatorDT()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getStandPrepAngle(String jointName)
       {
          return 0;
       }

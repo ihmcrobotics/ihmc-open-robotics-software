@@ -80,7 +80,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
          "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw",
          "rightElbowPitch"};
 
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
 
    private YoVariableServer yoVariableServer;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
