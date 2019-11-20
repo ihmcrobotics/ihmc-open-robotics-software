@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -59,6 +58,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -241,74 +241,27 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testWalkDownSlope45DegReal() throws Exception
+   public void testWalkSlopeReal() throws Exception
    {
-      testWalkSlope(Math.toRadians(45.0),
-                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
-                    getRealRobotWalkingParameters(),
-                    getDataOuputFolderForRealRobotParams());
+      for (double slopeAngle : new double[] {-30.0, 30.0, 45.0})
+      {
+         testWalkSlope(Math.toRadians(slopeAngle),
+                       0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
+                       getRealRobotWalkingParameters(),
+                       getDataOuputFolderForRealRobotParams());
+      }
    }
 
    @Test
-   public void testWalkDownSlope45DegSim() throws Exception
+   public void testWalkSlopeSim() throws Exception
    {
-      testWalkSlope(Math.toRadians(45.0),
-                    0.33 * getSCSSteppingParameters().getDefaultStepLength(),
-                    getSCSWalkingParameters(),
-                    getDataOuputFolderForSimParams());
-   }
-
-   @Test
-   public void testWalkDownSlope30DegReal() throws Exception
-   {
-      testWalkSlope(Math.toRadians(30.0),
-                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
-                    getRealRobotWalkingParameters(),
-                    getDataOuputFolderForRealRobotParams());
-   }
-
-   @Test
-   public void testWalkDownSlope30DegSim() throws Exception
-   {
-      testWalkSlope(Math.toRadians(30.0), 0.5 * getSCSSteppingParameters().getDefaultStepLength(), getSCSWalkingParameters(), getDataOuputFolderForSimParams());
-   }
-
-   @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
-   @Test
-   public void testWalkUpSlope45DegReal() throws Exception
-   {
-      testWalkSlope(Math.toRadians(-45.0),
-                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
-                    getRealRobotWalkingParameters(),
-                    getDataOuputFolderForRealRobotParams());
-   }
-
-   @Disabled // TODO This exhibits a few control issues and doesn't look realistic at all
-   @Test
-   public void testWalkUpSlope45DegSim() throws Exception
-   {
-      testWalkSlope(Math.toRadians(-45.0),
-                    0.33 * getSCSSteppingParameters().getDefaultStepLength(),
-                    getSCSWalkingParameters(),
-                    getDataOuputFolderForSimParams());
-   }
-
-   @Test
-   public void testWalkUpSlope30DegReal() throws Exception
-   {
-      testWalkSlope(Math.toRadians(-30.0),
-                    0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
-                    getRealRobotWalkingParameters(),
-                    getDataOuputFolderForRealRobotParams());
-   }
-
-   @Test
-   public void testWalkUpSlope30DegSim() throws Exception
-   {
-      testWalkSlope(Math.toRadians(-30.0),
-                    0.5 * getSCSSteppingParameters().getDefaultStepLength(),
-                    getSCSWalkingParameters(),
-                    getDataOuputFolderForSimParams());
+      for (double slopeAngle : new double[] {45.0})
+      {
+         testWalkSlope(Math.toRadians(slopeAngle),
+                       0.5 * getSCSSteppingParameters().getDefaultStepLength(),
+                       getSCSWalkingParameters(),
+                       getDataOuputFolderForSimParams());
+      }
    }
 
    public void testWalkSlope(double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
@@ -358,8 +311,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       //      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Integer.toString((int) Math.toDegrees(slopeAngle)) + "Deg";
-      String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Integer.toString((int) Math.toDegrees(slopeAngle)) + " degrees";
+      String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + "Deg";
+      String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
       exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -400,7 +353,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      double xGoal = 0.6 + numberOfStairSteps * stairStepLength;
+      double xGoal = 0.6 + numberOfStairSteps * stairStepLength + 1.0e-3;
       double cameraX = xGoal / 2.0;
       double cameraZ = 0.8 + staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 10.0);
       scs.setCameraFix(cameraX, 0.0, cameraZ);
@@ -576,22 +529,22 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
    private static void setFootstepLocation(double x, double y, HeightMap heightMap, FootstepDataMessage stepToPack)
    {
-      stepToPack.getLocation().set(x, y, heightMap.heightAt(x, y, 10.0));
+      stepToPack.getLocation().set(x, y, heightMap.heightAt(x, y, 50.0));
    }
 
    private ValkyrieRobotModel getRobotModel(boolean disableAnkleLimits)
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS)
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true)
       {
          @Override
          public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
          {
             if (disableAnkleLimits && jointHolder.getName().contains("AnklePitch"))
-            {
                jointHolder.setLimits(-Math.PI, Math.PI);
-            }
          }
-      };
+      });
+      return robotModel;
    }
 
    // Pattern-matched from TorqueSpeedDataExporter
