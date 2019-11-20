@@ -7,10 +7,14 @@ import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
@@ -30,6 +34,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterTy
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
+import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -38,33 +44,152 @@ public class ClusterTools
 {
    private final static boolean pruneExtrusionLoops = true;
 
-   //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by 
+   //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
+   public static List<List<Point2D>> extrudePolygonInward(List<ConvexPolygon2DReadOnly> polygons, ObstacleExtrusionDistanceCalculator calculator)
    {
-      return extrudePolygon(extrudeToTheLeft, cluster, calculator, false);
+      ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
+      List<List<Point2D>> listOfExtrusions = new ArrayList<>();
+      for (ConvexPolygon2DReadOnly polygon : polygons)
+      {
+         double[] extrusionDistances = polygon.getVertexBufferView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
+         ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+         polygonScaler.scaleConvexPolygon(polygon, extrusionDistances, scaledPolygon);
+
+         listOfExtrusions.add(scaledPolygon.getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()));
+      }
+
+      return listOfExtrusions;
    }
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator, boolean checkExtrusionDistance)
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
+    */
+   public boolean scaleConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
+   {
+      if (distances.length != polygonQ.getNumberOfVertices())
+         throw new IllegalArgumentException("Not a valid number of distances.");
+
+      boolean allAreZero = true;
+      for (double distance : distances)
+      {
+         if (distance < 0.0)
+            throw new IllegalArgumentException("Not a valid distance " + distance + ", must be positive.");
+
+         if (distance > 1.0e-10)
+         {
+            allAreZero = false;
+            break;
+         }
+      }
+      if (allAreZero)
+      {
+         polygonToPack.set(polygonQ);
+         return true;
+      }
+
+      if (polygonQ.getNumberOfVertices() == 2)
+      {
+         Point2DReadOnly vertex0 = polygonQ.getVertex(0);
+         Point2DReadOnly vertex1 = polygonQ.getVertex(1);
+
+         if (vertex0.distance(vertex1) < distances[0] + distances[1])
+         {
+            Point2D midPoint = new Point2D(vertex0);
+            midPoint.add(vertex1);
+            midPoint.scale(0.5);
+
+            polygonToPack.clear();
+            polygonToPack.addVertex(midPoint);
+            polygonToPack.update();
+            return false;
+         }
+
+         double edgeLength = vertex0.distance(vertex1);
+         double percentageAlongSegment0 = distances[0] / edgeLength;
+         double percentageAlongSegment1 = distances[1] / edgeLength;
+
+         Point2D newVertex0 = new Point2D();
+         Point2D newVertex1 = new Point2D();
+         newVertex0.interpolate(vertex0, vertex1, percentageAlongSegment0);
+         newVertex1.interpolate(vertex1, vertex0, percentageAlongSegment1);
+
+         polygonToPack.clear();
+         polygonToPack.addVertex(newVertex0);
+         polygonToPack.addVertex(newVertex1);
+         polygonToPack.update();
+
+         return true;
+      }
+
+      if (polygonQ.getNumberOfVertices() == 1)
+      {
+         polygonToPack.set(polygonQ);
+         return false;
+      }
+
+      ArrayList<Line2D> rays = new ArrayList<>();
+
+      int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools
+            .findVertexIndex(polygonQ, true, EuclidGeometryPolygonTools.Bound.MIN, EuclidGeometryPolygonTools.Bound.MIN);
+      Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
+      int vertexQIndex = leftMostIndexOnPolygonQ;
+      int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
+      Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+
+      for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
+      {
+         Line2D edgeOnQ = new Line2D(vertexQ, nextVertexQ);
+         normalizedVector.set(edgeOnQ.getDirection());
+
+            edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
+            vectorPerpendicularToEdgeOnQ.negate();
+            linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
+            linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
+
+
+         Line2D newEdge = getARay(rays.size());
+         newEdge.set(referencePoint, normalizedVector);
+         rays.add(newEdge);
+
+         vertexQIndex = nextVertexQIndex;
+         nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
+
+         vertexQ = nextVertexQ;
+         nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+      }
+
+
+      ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
+
+      boolean foundSolution = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToPack);
+      if (!foundSolution)
+      {
+         polygonToPack.clear();
+         polygonToPack.addVertex(polygonQ.getCentroid());
+         polygonToPack.update();
+      }
+
+      return foundSolution;
+   }
+
+   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
    {
       List<Point2DReadOnly> rawPoints = cluster.getRawPointsInLocal2D();
       double[] extrusionDistances = cluster.getRawPointsInLocal3D().stream()
                                            .mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), rawPoint.getZ())).toArray();
 
-      return extrudePolygon(extrudeToTheLeft, rawPoints, extrusionDistances, checkExtrusionDistance);
+      return extrudePolygon(extrudeToTheLeft, rawPoints, extrusionDistances);
    }
 
    public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances)
-   {
-      return extrudePolygon(extrudeToTheLeft, pointsToExtrude, extrusionDistances, false);
-   }
-
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, boolean checkExtrusionDistance)
    {
       if (pointsToExtrude.size() == 2)
       {
@@ -85,9 +210,6 @@ public class ClusterTools
             continue;
 
          double extrusionDistance = extrusionDistances[i];
-
-         if (checkExtrusionDistance)
-            extrusionDistance = getMaximumExtrusionDistance(extrudeToTheLeft, i, edges, extrusionDistances);
 
          LineSegment2DReadOnly edgePrev = edges.get(i);
          LineSegment2DReadOnly edgeNext = ListWrappingIndexTools.getNext(i, edges);
@@ -303,8 +425,8 @@ public class ClusterTools
    }
 
    /**
-    * Extrudes a single point at the extrusionDistance. If this is to the inside of a corner (angle is less than 180), 
-    * then the two new lines will be moved by the extrusionDistance. 
+    * Extrudes a single point at the extrusionDistance. If this is to the inside of a corner (angle is less than 180),
+    * then the two new lines will be moved by the extrusionDistance.
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
    public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, LineSegment2DReadOnly edgePrev, LineSegment2DReadOnly edgeNext,
@@ -484,13 +606,13 @@ public class ClusterTools
 
       //TODO: JEP+++: Why do we add a NonNavigableExtrusion to a home region cluster?
       // I guess it's for inner region connections that cross over empty space.
-      // Need to make sure they don't. But then also need to make sure these 
-      // NonNavigable regions are not treated as boundaries when making 
+      // Need to make sure they don't. But then also need to make sure these
+      // NonNavigable regions are not treated as boundaries when making
       // inter region connections...
       if (includePreferredExtrusions)
       {
          homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, false));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
@@ -686,8 +808,8 @@ public class ClusterTools
    }
 
    /**
-    * 
-    * 
+    *
+    *
     * @param verticalPolygonVertices
     * @param poppingPointsDistanceSquaredThreshold
     * @return
@@ -775,7 +897,7 @@ public class ClusterTools
     * It assumes the list is ordered in such a way that the only possible duplicates are next to each other.
     * In removing a duplicate, it keeps the one with the larger z value.
     * At the end, all points are guaranteed to be greater than the threshold distance apart.
-    * 
+    *
     * @param pointsToFilter List of points to be filtered.
     * @param poppingPointsDistanceSquaredThreshold Threshold for the squared distance for considering points to be duplicates.
     */
@@ -790,7 +912,7 @@ public class ClusterTools
          filteredPointsToReturn.add(pointsToFilter.get(0));
          return filteredPointsToReturn;
       }
-      
+
       boolean pointWasFiltered = false;
 
       for (int i = 0; i < pointsToFilter.size(); i++)
@@ -800,7 +922,7 @@ public class ClusterTools
             filteredPointsToReturn.add(pointsToFilter.get(i));
             continue;
          }
-         
+
          Point3D currentPoint = pointsToFilter.get(i);
          Point3D nextPoint = pointsToFilter.get(i + 1);
 
