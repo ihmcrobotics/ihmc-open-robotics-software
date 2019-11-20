@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -26,6 +27,7 @@ public class FakeREAVirtualCamera
    private final double horizontalFOV;
 
    private final FramePose3D tempFramePose3D = new FramePose3D();
+   private final FramePoint3D tempFramePoint3D = new FramePoint3D();
    private final Vector3D tempNormal = new Vector3D();
 
    private final Plane3D planeTop;
@@ -104,12 +106,15 @@ public class FakeREAVirtualCamera
 
    private void updatePlaneToFrameWithParameters(Plane3D plane, double pitch, double yaw, double yFace, double zFace)
    {
+      tempFramePoint3D.setToZero(cameraFrame);
+      tempFramePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
+      plane.setPoint(tempFramePoint3D);
+
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
       tempFramePose3D.appendPitchRotation(Math.toRadians(pitch));
       tempFramePose3D.appendYawRotation(Math.toRadians(yaw)); // <-- this is wrong
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      plane.setPoint(tempFramePose3D.getPosition());
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
       plane.setNormal(tempNormal);
