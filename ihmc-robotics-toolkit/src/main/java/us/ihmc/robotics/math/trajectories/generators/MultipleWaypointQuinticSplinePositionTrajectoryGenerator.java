@@ -11,7 +11,9 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
- * Helper class to create a one degree of freedom quintic spline interpolator
+ * Helper class to create positon trajectory using the quintic spline interpolator
+ * 
+ * Not realtime safe. 
  */
 public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
