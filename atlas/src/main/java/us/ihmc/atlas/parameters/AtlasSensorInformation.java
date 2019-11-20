@@ -128,18 +128,17 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final double depthPitchingAngle = 75.0 / 180.0 * Math.PI;
    private static final double depthThickness = 0.0245;
 
-   private static final double trackingOffsetX = 0.055625;
-   private static final double trackingOffsetZ = 0.051192;
-   private static final double trackingPitchingAngle = 35.0 / 180.0 * Math.PI;
-   private static final double trackingThickness = 0.0135; // Original : 12.5 mm. But for calibration with Lidar, 1 cm more. Ideally, Lidar should be re-cal. 
+   private static final double trackingOffsetX = 0.0358;
+   private static final double trackingOffsetZ = 0.0994;
+   private static final double trackingPitchingAngle = 0.0 / 180.0 * Math.PI;
+   private static final double trackingThickness = 0.0125; 
 
-   private static final double pelvisToDepthOrigin = 0.19;
-   private static final double pelvisLength = 0.33;
+   private static final double pelvisToMountOrigin = 0.19;
 
    public static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToDepthCamera.appendTranslation(pelvisToDepthOrigin, 0.0, 0.0);
+      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
       transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
       transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
       transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
@@ -160,9 +159,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformDepthCameraToTrackingCamera.appendPitchRotation(-depthPitchingAngle);
       transformDepthCameraToTrackingCamera.appendTranslation(-depthOffsetX, 0.0, -depthOffsetZ);
 
-      transformDepthCameraToTrackingCamera.appendTranslation(-pelvisLength, 0.0, 0.0);
-
-      transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI);
       transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
       transformDepthCameraToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
