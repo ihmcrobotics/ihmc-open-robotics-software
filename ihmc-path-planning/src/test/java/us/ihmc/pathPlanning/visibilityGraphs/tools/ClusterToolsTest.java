@@ -773,6 +773,7 @@ public class ClusterToolsTest
       assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.1, -0.4)));
    }
 
+   /*
    @Test
    public void testExtrudePolygonWithLimits()
    {
@@ -821,6 +822,7 @@ public class ClusterToolsTest
          EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(), extrudedPoints.get(i), 1e-5);
       }
    }
+   */
 
    @Test
    public void testExtrudePolygonWithLoops()
