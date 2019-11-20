@@ -14,6 +14,9 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class EnvironmentMappingViewer extends Application
 {
+   private static final boolean SHOW_PLANAR_REGIONS = false;
+   private static final boolean SHOW_STEREO_POINT_CLOUD = true;
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
@@ -24,16 +27,26 @@ public class EnvironmentMappingViewer extends Application
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
       StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
-      
+
       File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
-      
-      regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(dataFolder));
-      regionsGraphic.update();
-      view3dFactory.addNodeToView(regionsGraphic);
-      
-      List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(dataFolder);
-      //TODO: add graphics for every messages.
-      view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
+
+      if (SHOW_PLANAR_REGIONS)
+      {
+         regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(dataFolder));
+         regionsGraphic.update();
+         view3dFactory.addNodeToView(regionsGraphic);
+         System.out.println("Planar regions are rendered.");
+      }
+
+      if (SHOW_STEREO_POINT_CLOUD)
+      {
+         List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(dataFolder);
+         System.out.println("Point cloud messages (" + messagesFromFile.size()+")");
+         stereoVisionPointCloudGraphic.generateMeshes(messagesFromFile);
+         stereoVisionPointCloudGraphic.update();
+         view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
+         System.out.println("are rendered.");
+      }
 
       primaryStage.setTitle(dataFolder.getPath());
       primaryStage.setMaximized(false);
