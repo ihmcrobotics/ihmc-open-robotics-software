@@ -11,20 +11,22 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
 
 /**
  * Quintic spline interpolator This class calculates a spline through multiple waypoints, minimizing
- * the jerk and a finite 5th derivative of position. 
- *  
+ * the jerk and a finite 5th derivative of position.
+ * 
  * @author Jesper Smith
  */
-public class QuinticSplineInterpolator
+public class QuinticSplineInterpolator implements TrajectoryGenerator
 {
    private final int maximumNumberOfPoints;
    private final int numberOfSplines;
 
    private final YoVariableRegistry registry;
    private final YoBoolean initialized;
+   private final YoDouble currentTime;
 
    // Matrices used internally to calculate constants
    private DenseMatrix64F h;
@@ -63,7 +65,8 @@ public class QuinticSplineInterpolator
     * @param name                  Name of the YoVariableRegistry
     * @param maximumNumberOfPoints Maximum number of points the spline can interpolate (>= 2)
     * @param numberOfSplines       Number of splines it creates that have the same x coordinates for
-    *                              the points to interpolate. This allows re-use of memory and saves some computational time.
+    *                              the points to interpolate. This allows re-use of memory and saves
+    *                              some computational time.
     */
    public QuinticSplineInterpolator(String name, int maximumNumberOfPoints, int numberOfSplines, YoVariableRegistry parentRegistry)
    {
@@ -74,6 +77,7 @@ public class QuinticSplineInterpolator
       initialized = new YoBoolean(name + "_initialized", registry);
       initialized.set(false);
       numberOfPoints = new YoInteger(name + "_numberOfPoints", registry);
+      currentTime = new YoDouble(name + "_currentTime", registry);
 
       h = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
       D = new DenseMatrix64F(maximumNumberOfPoints - 1, maximumNumberOfPoints + 2);
@@ -123,22 +127,29 @@ public class QuinticSplineInterpolator
 
    }
 
+   public int getMaximumNumberOfWaypoints()
+   {
+      return this.maximumNumberOfPoints;
+   }
+
    /**
     * Initializes the spline.
     * 
-    * @param xIn Array (length = pointsToInterpolate) with the x coordinates of the points to
-    *            interpolate
+    * @param numberOfPointsIn Number of waypoints for this trajectory.
+    * @param timeIn           Array (length >= numberOfPointsIn) with the time for the points to
+    *                         interpolate. If the array is longer than numberOfPointsIn, points past
+    *                         numberOfPointsIn are ignored
     */
-   public void initialize(double[] xIn)
+   public void initialize(int numberOfPointsIn, double[] timeIn)
    {
-      if (xIn.length > maximumNumberOfPoints)
+      if (timeIn.length > maximumNumberOfPoints)
          throw new RuntimeException("xIn exceeds the maximum number of points");
 
-      numberOfPoints.set(xIn.length);
+      numberOfPoints.set(numberOfPointsIn);
 
       for (int i = 0; i < numberOfPoints.getValue(); i++)
       {
-         x[i].set(xIn[i]);
+         x[i].set(timeIn[i]);
       }
 
       h.reshape(numberOfPoints.getValue() - 1, 1);
@@ -158,7 +169,7 @@ public class QuinticSplineInterpolator
       e.reshape(numberOfPoints.getValue() - 1, 1);
       f.reshape(numberOfPoints.getValue() - 1, 1);
 
-      MatrixTools.diff(xIn, h);
+      MatrixTools.diff(timeIn, h);
 
       // Build D DenseMatrix64F
       MatrixTools.setToZero(D);
@@ -244,14 +255,14 @@ public class QuinticSplineInterpolator
     * Determines the coefficients for one spline
     * 
     * @param splineIndex Index for the spline ( 0 <= splineIndex < pointsToInterpolate)
-    * @param yIn         Array (length = pointsToInterpolate) with the y coordinates of the points to
+    * @param positionIn  Array (length = pointsToInterpolate) with the positions of the points to
     *                    interpolate
     * @param v0          Initial velocity
     * @param vf          Final velocity
     * @param a0          Initial acceleration
     * @param af          Final acceleration
     */
-   public void determineCoefficients(int splineIndex, double[] yIn, double v0, double vf, double a0, double af)
+   public void determineCoefficients(int splineIndex, double[] positionIn, double v0, double vf, double a0, double af)
    {
       if (!initialized.getBooleanValue())
          throw new RuntimeException("QuinticSplineInterpolator is not initialized");
@@ -259,16 +270,16 @@ public class QuinticSplineInterpolator
       if (splineIndex > numberOfSplines - 1 || splineIndex < 0)
          throw new RuntimeException("SplineIndex is out of bounds");
 
-      if (yIn.length != numberOfPoints.getValue())
-         throw new RuntimeException("y should have as many elements as points to interpolate");
+      if (positionIn.length < numberOfPoints.getValue())
+         throw new RuntimeException("Length of positionIn is less than the number of points");
 
-      MatrixTools.setMatrixColumnFromArray(a, 0, yIn);
+      MatrixTools.setMatrixColumnFromArray(a, 0, positionIn);
 
-      MatrixTools.diff(yIn, yd);
+      MatrixTools.diff(positionIn, yd);
 
       if (numberOfPoints.getValue() > 2)
       {
-         s.unsafe_set(0, 0, yIn[1] / h.unsafe_get(0, 0) - yIn[0] / h.unsafe_get(1, 0) - v0);
+         s.unsafe_set(0, 0, positionIn[1] / h.unsafe_get(0, 0) - positionIn[0] / h.unsafe_get(1, 0) - v0);
          for (int i = 0; i < numberOfPoints.getValue() - 2; i++)
          {
             s.unsafe_set(i + 4, 0, yd.unsafe_get(i + 1, 0) / h.unsafe_get(i + 1, 0) - yd.unsafe_get(i, 0) / h.unsafe_get(i, 0));
@@ -276,14 +287,14 @@ public class QuinticSplineInterpolator
       }
       else
       {
-         s.unsafe_set(0, 0, yIn[1] / h.unsafe_get(0, 0) - yIn[0] / h.unsafe_get(0, 0) - v0);
+         s.unsafe_set(0, 0, positionIn[1] / h.unsafe_get(0, 0) - positionIn[0] / h.unsafe_get(0, 0) - v0);
       }
 
       s.unsafe_set(1, 0, a0);
       s.unsafe_set(2,
                    0,
-                   vf - yIn[numberOfPoints.getValue() - 1] / h.unsafe_get(numberOfPoints.getValue() - 2, 0)
-                         + yIn[numberOfPoints.getValue() - 2] / h.unsafe_get(numberOfPoints.getValue() - 2, 0));
+                   vf - positionIn[numberOfPoints.getValue() - 1] / h.unsafe_get(numberOfPoints.getValue() - 2, 0)
+                         + positionIn[numberOfPoints.getValue() - 2] / h.unsafe_get(numberOfPoints.getValue() - 2, 0));
       s.unsafe_set(3, 0, af);
 
       /*
@@ -330,18 +341,21 @@ public class QuinticSplineInterpolator
     * getPosition(spline), getVelocity(spline), getAcceleration(spline) and getJerk(spline)
     * respectively
     * 
-    * @param xx x coordinate to calculate
+    * @param time x coordinate to calculate
     */
-   public void compute(double xx)
+   public void compute(double timeIn)
    {
-      if (xx > x[numberOfPoints.getValue() - 1].getDoubleValue())
-         xx = x[numberOfPoints.getValue() - 1].getDoubleValue();
-      if (xx < x[0].getDoubleValue())
-         xx = x[0].getDoubleValue();
+      this.currentTime.set(timeIn);
 
-      int index = determineSplineIndex(xx);
+      double time = timeIn;
+      if (time > x[numberOfPoints.getValue() - 1].getDoubleValue())
+         time = x[numberOfPoints.getValue() - 1].getDoubleValue();
+      if (time < x[0].getDoubleValue())
+         time = x[0].getDoubleValue();
 
-      double h = xx - x[index].getDoubleValue();
+      int index = determineSplineIndex(time);
+
+      double h = time - x[index].getDoubleValue();
 
       double h2 = MathTools.square(h);
       double h3 = h2 * h;
@@ -495,6 +509,18 @@ public class QuinticSplineInterpolator
                + 5.0 * f[index].getDoubleValue() * h4);
       }
 
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return currentTime.getValue() > x[numberOfPoints.getValue() - 1].getDoubleValue();
+   }
+
+   @Override
+   public void initialize()
+   {
+      throw new RuntimeException("Use initialize(double[] xIn) and determineCoefficients() to initialize the quintic spline interpolator");
    }
 
 }

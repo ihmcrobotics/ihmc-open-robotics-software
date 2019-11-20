@@ -35,12 +35,12 @@ public class QuinticSplineInterpolatorTest
       
       for(int t = 0; t < 5; t++)
       {
-         double[] x2d = new double[] {0.0, 1.0};
-         double[] y2d = new double[] {-0.5, 0.5};
+         double[] x2d = new double[] {0.0, 1.0, 0.0, 0.0};
+         double[] y2d = new double[] {-0.5, 0.5, 0.0, 0.0};
          double v0_2d = 3.0, vf_2d = -2.0;
          double a0_2d = 10.0, af_2d = -4.0;
    
-         spline.initialize(x2d);
+         spline.initialize(2, x2d);
          spline.determineCoefficients(0, y2d, v0_2d, vf_2d, a0_2d, af_2d);
          spline.determineCoefficients(1, y2d, v0_2d, vf_2d, a0_2d, af_2d);
          spline.determineCoefficients(2, y2d, v0_2d, vf_2d, a0_2d, af_2d);
@@ -59,7 +59,7 @@ public class QuinticSplineInterpolatorTest
          assertEquals(af_2d, spline.getAcceleration(0), delta);
    
          
-         spline.initialize(x);
+         spline.initialize(x.length, x);
          spline.determineCoefficients(0, y, v0, vf, a0, af);
          spline.determineCoefficients(1, y, v0, vf, a0, af);
          spline.determineCoefficients(2, y, v0, vf, a0, af);
@@ -147,7 +147,7 @@ public class QuinticSplineInterpolatorTest
       long startTime = System.nanoTime();
       for (int i = 0; i < numberOfSplines; i++)
       {
-         spline.initialize(x[i]);
+         spline.initialize(x[i].length, x[i]);
          for (int j = 0; j < 6; j++)
          {
             spline.determineCoefficients(j, y[i][j], v0[i][j], vf[i][j], a0[i][j], af[i][j]);

@@ -124,6 +124,21 @@ public class MatrixToolsTest
          assertEquals(expected[i], res.get(i, 0), 1e-8);
       }
    }
+   
+   @Test
+   public void testDiffDoubleArrayDenseMatrixRange()
+   {
+      double[] vals = new double[] {Double.NaN, Double.NaN, 1.0, 3.0, 4.0, 9.0, 16.0, 32.0, Double.NaN};
+      double[] expected = new double[] {2.0, 1.0, 5.0, 7.0, 16.0};
+      DenseMatrix64F res = new DenseMatrix64F(5, 1);
+      
+      MatrixTools.diff(vals, 2, 6, res);
+      
+      for (int i = 0; i < 5; i++)
+      {
+         assertEquals(expected[i], res.get(i, 0), 1e-8);
+      }
+   }
 
    @Test
    public void tranformSe3IntoTransform3D()
