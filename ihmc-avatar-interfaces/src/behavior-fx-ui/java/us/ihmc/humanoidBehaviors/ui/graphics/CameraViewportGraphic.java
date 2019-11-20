@@ -5,14 +5,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -27,6 +23,13 @@ public class CameraViewportGraphic extends Group
    private final double horizontalFOV;
 
    FramePose3D tempFramePose3D = new FramePose3D();
+   private FramePoint3D tempFramePoint = new FramePoint3D();
+   private final List<Point3D> points = new ArrayList<>();
+   private final Point3D commonPoint = new Point3D();
+   private final Point3D upperLeftPoint = new Point3D();
+   private final Point3D upperRightPoint = new Point3D();
+   private final Point3D lowerLeftPoint = new Point3D();
+   private final Point3D lowerRightPoint = new Point3D();
 
    public CameraViewportGraphic(PoseReferenceFrame cameraFrame, double verticalFOV, double horizontalFOV)
    {
@@ -34,100 +37,20 @@ public class CameraViewportGraphic extends Group
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
    }
-   // import a model of a camera
-   // what model types can be loaded?
-
-   // just make some triangles
-
 
    public void update()
    {
       JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
-
-
-      List<Point3D> points = new ArrayList<>();
-
-
-      Point3D commonPoint = new Point3D();
-      Point3D upperLeftPoint = new Point3D();
-      Point3D upperRightPoint = new Point3D();
-      Point3D lowerLeftPoint = new Point3D();
-      Point3D lowerRightPoint = new Point3D();
-
-
-      // draw wireframe version instead
 
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       commonPoint.set(tempFramePose3D.getPosition());
 
-      PoseReferenceFrame tempFrame;
-      PoseReferenceFrame tempFrame2;
-      FramePoint3D tempFramePoint;
-      Pose3D pose3D;
-      Pose3D pose3D2;
-
-//      tempFrame = new PoseReferenceFrame("tempFrame", cameraFrame);
-//      tempFrame2 = new PoseReferenceFrame("tempFrame2", tempFrame);
-//      pose3D = new Pose3D();
-//      pose3D.setOrientationYawPitchRoll(horizontalFOV / 2.0, verticalFOV / 2.0, 0.0);
-//      pose3D.appendPitchRotation(verticalFOV / 2.0);
-//      pose3D2 = new Pose3D();
-//      pose3D2.appendYawRotation(horizontalFOV / 2.0);
-//      tempFrame.setPoseAndUpdate(pose3D);
-      tempFramePoint = new FramePoint3D(cameraFrame);
-      tempFramePoint.setX(SIZE * Math.cos(verticalFOV / 2.0));
-      tempFramePoint.setY(SIZE * Math.sin(horizontalFOV / 2.0));
-      tempFramePoint.setZ(SIZE * Math.sin(verticalFOV / 2.0));
-      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      upperLeftPoint.set(tempFramePoint);
-
-//      tempFrame = new PoseReferenceFrame("tempFrame", cameraFrame);
-//      pose3D = new Pose3D();
-//      pose3D.setOrientationYawPitchRoll(-horizontalFOV / 2.0, verticalFOV / 2.0, 0.0);
-////      pose3D.appendPitchRotation(verticalFOV / 2.0);
-////      pose3D.appendYawRotation(-horizontalFOV / 2.0);
-//      tempFrame.setPoseAndUpdate(pose3D);
-//      tempFramePoint = new FramePoint3D(tempFrame);
-//      tempFramePoint.setX(SIZE);
-      tempFramePoint = new FramePoint3D(cameraFrame);
-      tempFramePoint.setX(SIZE * Math.cos(verticalFOV / 2.0));
-      tempFramePoint.setY(SIZE * Math.sin(-horizontalFOV / 2.0));
-      tempFramePoint.setZ(SIZE * Math.sin(verticalFOV / 2.0));
-      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      upperRightPoint.set(tempFramePoint);
-
-//      tempFrame = new PoseReferenceFrame("tempFrame", cameraFrame);
-//      pose3D = new Pose3D();
-//      pose3D.setOrientationYawPitchRoll(horizontalFOV / 2.0, -verticalFOV / 2.0, 0.0);
-////      pose3D.appendPitchRotation(-verticalFOV / 2.0);
-////      pose3D.appendYawRotation(horizontalFOV / 2.0);
-//      tempFrame.setPoseAndUpdate(pose3D);
-//      tempFramePoint = new FramePoint3D(tempFrame);
-//      tempFramePoint.setX(SIZE);
-      tempFramePoint = new FramePoint3D(cameraFrame);
-      tempFramePoint.setX(SIZE * Math.cos(-verticalFOV / 2.0));
-      tempFramePoint.setY(SIZE * Math.sin(horizontalFOV / 2.0));
-      tempFramePoint.setZ(SIZE * Math.sin(-verticalFOV / 2.0));
-      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      lowerLeftPoint.set(tempFramePoint);
-
-//      tempFrame = new PoseReferenceFrame("tempFrame", cameraFrame);
-//      pose3D = new Pose3D();
-//      pose3D.setOrientationYawPitchRoll(-horizontalFOV / 2.0, -verticalFOV / 2.0, 0.0);
-////      pose3D.appendPitchRotation(-verticalFOV / 2.0);
-////      pose3D.appendYawRotation(-horizontalFOV / 2.0);
-//      tempFrame.setPoseAndUpdate(pose3D);
-//      tempFramePoint = new FramePoint3D(tempFrame);
-//      tempFramePoint.setX(SIZE);
-      tempFramePoint = new FramePoint3D(cameraFrame);
-      tempFramePoint.setX(SIZE * Math.cos(-verticalFOV / 2.0));
-      tempFramePoint.setY(SIZE * Math.sin(-horizontalFOV / 2.0));
-      tempFramePoint.setZ(SIZE * Math.sin(-verticalFOV / 2.0));
-      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      lowerRightPoint.set(tempFramePoint);
-
+      updatePoint(upperLeftPoint, horizontalFOV, verticalFOV);
+      updatePoint(upperRightPoint, -horizontalFOV, verticalFOV);
+      updatePoint(lowerLeftPoint, horizontalFOV, -verticalFOV);
+      updatePoint(lowerRightPoint, -horizontalFOV, -verticalFOV);
 
       points.add(commonPoint);
       points.add(upperLeftPoint);
@@ -141,19 +64,6 @@ public class CameraViewportGraphic extends Group
       points.add(commonPoint);
       points.add(lowerLeftPoint);
       points.add(upperLeftPoint);
-
-
-//      // create 4 triangles
-//      // add origin point to each
-//      // add two more points to each
-//
-//      // create vector in x forward
-//      Vector3D straightForward = new Vector3D();
-//
-//      updatePlaneToFrameWithParameters(points, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
-//      updatePlaneToFrameWithParameters(points, verticalFOV / 2.0, 0.0, 0.0, 1.0);
-//      updatePlaneToFrameWithParameters(points, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
-//      updatePlaneToFrameWithParameters(points, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
 
       meshBuilder.addMultiLine(points, 0.01, false);
 
@@ -165,17 +75,13 @@ public class CameraViewportGraphic extends Group
       getChildren().add(meshView);
    }
 
-   private void updatePlaneToFrameWithParameters(List<Point3D> points, double pitch, double yaw, double yFace, double zFace)
+   private void updatePoint(Point3D upperLeftPoint, double horizontal, double vertical)
    {
-      tempFramePose3D.setToZero();
-      tempFramePose3D.setReferenceFrame(cameraFrame);
-      tempFramePose3D.appendPitchRotation(pitch);
-      tempFramePose3D.appendYawRotation(yaw);
-      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-
-//      meshBuilder.addPolygon();
-
-      // do it again
-
+      tempFramePoint.setToZero(cameraFrame);
+      tempFramePoint.setX(SIZE);
+      tempFramePoint.setY(SIZE * Math.asin(Math.toRadians(horizontal / 2.0)));
+      tempFramePoint.setZ(SIZE * Math.asin(Math.toRadians(vertical / 2.0)));
+      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      upperLeftPoint.set(tempFramePoint);
    }
 }
