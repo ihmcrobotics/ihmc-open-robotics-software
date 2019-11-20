@@ -17,7 +17,7 @@ public class ValkyrieBehaviorUI
 
    public ValkyrieBehaviorUI()
    {
-      DRCRobotModel drcRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel drcRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
 
       final Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
       JavaFXApplicationCreator.attachStopListener(() -> ExceptionTools.handle(() -> behaviorMessager.closeMessager(),

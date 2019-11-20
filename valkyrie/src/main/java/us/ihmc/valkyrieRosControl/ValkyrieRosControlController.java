@@ -207,7 +207,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
-      valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
       calibrationStateFactory = new ValkyrieCalibrationControllerStateFactory(valkyrieTorqueOffsetPrinter, robotModel.getCalibrationParameters());
       controllerFactory.addCustomControlState(calibrationStateFactory);
 
