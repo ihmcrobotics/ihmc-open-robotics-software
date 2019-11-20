@@ -9,8 +9,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.parameters.*;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
@@ -110,63 +113,69 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private final boolean setupROSLocationService;
    private final boolean setupROSParameterSetters;
    private final RobotTarget target;
-   
+
    public static final double linearVelocityThreshold = 0.2;
-   public static final double angularVelocityThreshold = Math.PI/15;
+   public static final double angularVelocityThreshold = Math.PI / 15;
 
    /**
     * Realsense Parameters
     */
-   private static final String frontFacingD435 = realsense_namespace + "/frontCam/depth/color/points";
-   private static final String frontFacingT265 = realsense_namespace + "/frontT265/odom/sample";
    public static final String depthCameraTopic = depth_camera_namespace + "/depth/color/points";
    public static final String trackingCameraTopic = tracking_camera_namespace + "/odom/sample";
-   public static final boolean DEPTH_CLOUD_USE_ESTIMATED_POSE = true;
+
+   private static final double depthOffsetX = 0.058611;
+   private static final double depthOffsetZ = 0.038959;
+   private static final double depthPitchingAngle = 75.0 / 180.0 * Math.PI;
+   private static final double depthThickness = 0.0245;
+
+   private static final double trackingOffsetX = 0.0358;
+   private static final double trackingOffsetZ = 0.0994;
+   private static final double trackingPitchingAngle = 0.0 / 180.0 * Math.PI;
+   private static final double trackingThickness = 0.0125; 
+
+   private static final double pelvisToMountOrigin = 0.19;
 
    public static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
    static
    {
-      double offsetX = 0.245;
-      double pitchingAngle = 70.0 / 180.0 * Math.PI;
-      transformPelvisToDepthCamera.appendTranslation(offsetX, 0.0, 0.0);
-      transformPelvisToDepthCamera.appendPitchRotation(pitchingAngle);
+      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
+      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
+      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
+      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
 
       transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
       transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
-   public static final RigidBodyTransform transformTrackingCameraToDepthCamera = new RigidBodyTransform();
+   /**
+    * Tracking camera reference frame is, X is forward and Z is toward sky. (Same with Robot coordinate system) 
+    */
+   public static final RigidBodyTransform transformDepthCameraToTrackingCamera = new RigidBodyTransform();
    static
    {
-      double depthOffsetX = 0.058611;
-      double depthOffsetZ = 0.038959;
-      double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
+      transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
+      transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI / 2);
+      transformDepthCameraToTrackingCamera.appendTranslation(-depthThickness, 0.0, 0.0);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(-depthPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(-depthOffsetX, 0.0, -depthOffsetZ);
 
-      double trackingOffsetX = 0.055625;
-      double trackingOffsetZ = 0.051192;
-      double trackingPitchingAngle = 35.0 / 180.0 * Math.PI;
-
-      double pelvisLenght = 0.33;
-
-      transformTrackingCameraToDepthCamera.appendYawRotation(Math.PI / 2);
-      transformTrackingCameraToDepthCamera.appendPitchRotation(Math.PI / 2);
-      transformTrackingCameraToDepthCamera.appendPitchRotation(-trackingPitchingAngle);
-      transformTrackingCameraToDepthCamera.appendTranslation(-trackingOffsetX, 0.0, -trackingOffsetZ);
-
-      transformTrackingCameraToDepthCamera.appendTranslation(-pelvisLenght, 0.0, 0.0);
-
-      transformTrackingCameraToDepthCamera.appendYawRotation(Math.PI);
-      transformTrackingCameraToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformTrackingCameraToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformTrackingCameraToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformTrackingCameraToDepthCamera.appendRollRotation(Math.PI / 2);
+      transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToTrackingCamera.preMultiply(transformPelvisToDepthCamera);
-      transformPelvisToTrackingCamera.multiplyInvertOther(transformTrackingCameraToDepthCamera);
+      transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
+      transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
+   }
+
+   public static final RigidBodyTransform transformTrackingCameraToDepthCamera = new RigidBodyTransform();
+   static
+   {
+      transformTrackingCameraToDepthCamera.multiply(transformDepthCameraToTrackingCamera);
+      transformTrackingCameraToDepthCamera.invert();
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
