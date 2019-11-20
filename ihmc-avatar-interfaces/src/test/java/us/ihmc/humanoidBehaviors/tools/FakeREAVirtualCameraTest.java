@@ -10,6 +10,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidBehaviors.ui.graphics.CameraViewportGraphic;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -26,8 +27,9 @@ import java.awt.*;
 // TODO: Measure speed
 public class FakeREAVirtualCameraTest
 {
+   public static final double VERTICAL_FOV = 90.0;
+   public static final double HORIZONTAL_FOV = 90.0;
    private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
-   private static int windowCount = 0; // for tiling
 
    @BeforeAll
    static public void beforeAll()
@@ -46,7 +48,7 @@ public class FakeREAVirtualCameraTest
    {
       Pose3D pose = new Pose3D();
       pose.setZ(1.8);
-      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridor(), pose, 0, 1);
+      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridor(), pose, 1, 2);
    }
 
    @Test
@@ -54,21 +56,21 @@ public class FakeREAVirtualCameraTest
    {
       Pose3D pose = new Pose3D();
       pose.setZ(1.8);
-      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridorWCutFloor(), pose, 2, 3);
+      compareMapToSimulatedView(PlannerTestEnvironments.getTrickCorridorWCutFloor(), pose, 3, 4);
    }
 
    @Test
    public void testFakeREA2()
    {
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 4, 5);
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 5, 6);
       Pose3D pose = new Pose3D();
       pose.setZ(1.8);
       pose.appendYawRotation(Math.toRadians(-135.0));
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 6, 7);
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 7, 8);
       pose = new Pose3D();
       pose.setZ(1.8);
       pose.appendYawRotation(Math.toRadians(180.0));
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 8, 9);
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 9, 10);
    }
 
    private void compareMapToSimulatedView(PlanarRegionsList map, Pose3DReadOnly pose3D, int mapWindowNumber, int resultWindowNumber)
@@ -76,15 +78,15 @@ public class FakeREAVirtualCameraTest
       PlanarRegionsList trickCorridor = map;
       PoseReferenceFrame cameraFrame = new PoseReferenceFrame("camera", ReferenceFrame.getWorldFrame());
       cameraFrame.setPoseAndUpdate(pose3D);
-      FakeREAVirtualCamera fakeREAVirtualCamera = new FakeREAVirtualCamera(90.0, 90.0, cameraFrame);
+      FakeREAVirtualCamera fakeREAVirtualCamera = new FakeREAVirtualCamera(VERTICAL_FOV, HORIZONTAL_FOV, cameraFrame);
       Stopwatch stopwatch = new Stopwatch().start();
       PlanarRegionsList virtualCamera = fakeREAVirtualCamera.filterMapToVisible(trickCorridor);
       LogTools.info("Time taken: {}", stopwatch.lapElapsed());
-      createAndShowPlanarRegionWindow(trickCorridor, mapWindowNumber);
-      createAndShowPlanarRegionWindow(virtualCamera, resultWindowNumber);
+      createAndShowPlanarRegionWindow(trickCorridor, cameraFrame, mapWindowNumber - 1);
+      createAndShowPlanarRegionWindow(virtualCamera, cameraFrame, resultWindowNumber - 1);
    }
 
-   private void createAndShowPlanarRegionWindow(PlanarRegionsList planarRegionsList, int windowCount)
+   private void createAndShowPlanarRegionWindow(PlanarRegionsList planarRegionsList, PoseReferenceFrame cameraFrame, int windowCount)
    {
       if (!VISUALIZE) return;
 
@@ -103,7 +105,11 @@ public class FakeREAVirtualCameraTest
          regionsGraphic.generateMeshes(planarRegionsList);
          regionsGraphic.update();
 
+         CameraViewportGraphic cameraViewportGraphic = new CameraViewportGraphic(cameraFrame, VERTICAL_FOV, HORIZONTAL_FOV);
+         cameraViewportGraphic.update();
+
          view3dFactory.addNodeToView(regionsGraphic);
+         view3dFactory.addNodeToView(cameraViewportGraphic);
 
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());

@@ -33,7 +33,6 @@ public class FakeREAVirtualCamera
    private final Plane3D planeLeft;
    private final Plane3D planeRight;
 
-
    public FakeREAVirtualCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this.verticalFOV = verticalFOV;
@@ -52,10 +51,10 @@ public class FakeREAVirtualCamera
       // List<PlanarRegion> filteredRegions = PlanarRegionTools
       //            .filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
 
-      calculatePlane(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
-      calculatePlane(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
-      calculatePlane(planeLeft, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
-      calculatePlane(planeRight, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
+      updatePlaneToFrameWithParameters(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
+      updatePlaneToFrameWithParameters(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
+      updatePlaneToFrameWithParameters(planeLeft, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
+      updatePlaneToFrameWithParameters(planeRight, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
 
       map = PlanarRegionsListCutTool.cutByPlane(planeTop, map);
       map = PlanarRegionsListCutTool.cutByPlane(planeBottom, map);
@@ -103,7 +102,7 @@ public class FakeREAVirtualCamera
       return map;
    }
 
-   private void calculatePlane(Plane3D plane, double pitch, double yaw, double yFace, double zFace)
+   private void updatePlaneToFrameWithParameters(Plane3D plane, double pitch, double yaw, double yFace, double zFace)
    {
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
