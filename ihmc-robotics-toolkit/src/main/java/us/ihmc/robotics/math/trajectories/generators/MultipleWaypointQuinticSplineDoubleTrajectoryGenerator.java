@@ -1,5 +1,6 @@
-package us.ihmc.robotics.math.interpolators;
+package us.ihmc.robotics.math.trajectories.generators;
 
+import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -7,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * Helper class to create a one degree of freedom quintic spline interpolator
  * 
  */
-public class OneDoFQuinticSplineTrajectory implements DoubleTrajectoryGenerator
+public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
    private final QuinticSplineInterpolator interpolator;
 
@@ -16,7 +17,7 @@ public class OneDoFQuinticSplineTrajectory implements DoubleTrajectoryGenerator
    private final double[] time;
    private final double[] positions;
 
-   public OneDoFQuinticSplineTrajectory(String name, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
+   public MultipleWaypointQuinticSplineDoubleTrajectoryGenerator(String name, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
    {
       this.interpolator = new QuinticSplineInterpolator(name, maximumNumberOfPoints, 1, parentRegistry);
       this.time = new double[maximumNumberOfPoints];
@@ -67,7 +68,7 @@ public class OneDoFQuinticSplineTrajectory implements DoubleTrajectoryGenerator
    {
       if (time.length != positions.length)
       {
-         throw new RuntimeException();
+         throw new RuntimeException("Time and positions lengths do not match");
       }
       this.interpolator.initialize(this.numberOfPoints, time);
 
