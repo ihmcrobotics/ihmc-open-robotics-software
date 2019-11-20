@@ -1,5 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -70,6 +71,8 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       double ff_tau = desiredOutput.hasDesiredTorque() ? desiredOutput.getDesiredTorque() : 0.0;
 
       double desiredEffort = fb_tau + ff_tau + tauOffset.getDoubleValue();
+      desiredEffort = EuclidCoreTools.clamp(desiredEffort, yoEffortJointHandleHolder.getTauMax());
+
       yoEffortJointHandleHolder.setDesiredEffort(desiredEffort);
    }
 

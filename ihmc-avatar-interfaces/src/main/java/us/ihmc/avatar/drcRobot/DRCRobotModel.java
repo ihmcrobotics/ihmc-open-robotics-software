@@ -1,7 +1,5 @@
 package us.ihmc.avatar.drcRobot;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
@@ -41,13 +39,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract HandModel getHandModel();
 
-   public abstract Transform getJmeTransformWristToHand(RobotSide side);
-
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-
-   public abstract double getStandPrepAngle(String jointName);
 
    public default RobotROSClockCalculator getROSClockCalculator()
    {

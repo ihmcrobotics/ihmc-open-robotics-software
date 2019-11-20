@@ -38,7 +38,7 @@ public class FootstepPlannerStepUpTest
 
       FootstepPlannerParametersReadOnly parameters = new ValkyrieFootstepPlannerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygonsFromContactPoints(
-            new ValkyrieRobotModel(RobotTarget.SCS, true).getContactPointParameters());
+            new ValkyrieRobotModel(RobotTarget.SCS).getContactPointParameters());
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
 
       RigidBodyTransform t1 = new RigidBodyTransform();

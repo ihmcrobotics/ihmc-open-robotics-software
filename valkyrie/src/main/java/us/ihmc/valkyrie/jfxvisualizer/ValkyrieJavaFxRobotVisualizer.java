@@ -40,7 +40,7 @@ public class ValkyrieJavaFxRobotVisualizer extends Application
    {
       primaryStage.setTitle("SDF Viewer");
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       humanoidFloatingRootJointRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       ArrayList<Joint> joints = new ArrayList<>();

@@ -12,7 +12,7 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
    @Override
    public DRCRobotModel newRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override
