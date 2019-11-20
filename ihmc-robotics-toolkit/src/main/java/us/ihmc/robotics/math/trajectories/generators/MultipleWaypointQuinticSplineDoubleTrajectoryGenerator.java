@@ -5,7 +5,9 @@ import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
- * Helper class to create a one degree of freedom quintic spline interpolator
+ * Helper class to create a one degree of freedom trajectory using the quintic spline interpolator
+ * 
+ * Not realtime safe. 
  * 
  */
 public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements DoubleTrajectoryGenerator

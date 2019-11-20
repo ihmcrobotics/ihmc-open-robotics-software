@@ -17,6 +17,8 @@ import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
  * Quintic spline interpolator This class calculates a spline through multiple waypoints, minimizing
  * the jerk and a finite 5th derivative of position.
  * 
+ * Not realtime safe. 
+ * 
  * @author Jesper Smith
  */
 public class QuinticSplineInterpolator implements TrajectoryGenerator
