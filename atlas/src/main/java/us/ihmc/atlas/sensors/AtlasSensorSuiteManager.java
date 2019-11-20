@@ -9,25 +9,19 @@ import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -43,15 +37,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    private final LidarScanPublisher lidarScanPublisher;
    private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
-   private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
+   private final AtlasPointCloudSensorManager pointCloudSensorManager;
 
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
-   private static final boolean ENABLE_DEPTH_PUBLISHER = false;
-
-   private static final String depthTopicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
-   private static final String depthTopicNameSurfixToPublish = "_D435";
-   private static final String depthTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;
-   private final MessageTopicNameGenerator depthCloudTopicNameGenerator;
+   private static final boolean ENABLE_DEPTH_PUBLISHER = true;
+   private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = true;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -80,10 +70,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(depthTopicNamePrefixToPublish, T) + depthTopicNameSurfixToPublish;
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
-      realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
-      realsenseDepthPointCloudPublisher.setCustomStereoVisionTransformer(createCustomDepthPointCloudWorldTransformCalculator());
+      pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory, ros2Node, rcdTopicName, rosClockCalculator,
+                                                                 USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
    }
 
    @Override
@@ -122,9 +110,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.setScanFrameToWorldFrame();
 
       if (ENABLE_STEREO_PUBLISHER)
-         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
       if (ENABLE_DEPTH_PUBLISHER)
-         realsenseDepthPointCloudPublisher.receiveStereoPointCloudFromROS(depthTopicNameToSubscribe, rosMainNode);
+         pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -146,7 +134,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (ENABLE_STEREO_PUBLISHER)
          multisenseStereoVisionPointCloudPublisher.start();
       if (ENABLE_DEPTH_PUBLISHER)
-         realsenseDepthPointCloudPublisher.start();
+         pointCloudSensorManager.start();
 
       rosClockCalculator.setROSMainNode(rosMainNode);
 
@@ -166,20 +154,4 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    }
 
-   private StereoVisionWorldTransformCalculator createCustomDepthPointCloudWorldTransformCalculator()
-   {
-      return new StereoVisionWorldTransformCalculator()
-      {
-         private final RigidBodyTransform transformFromPelvisToRealSense = AtlasSensorInformation.transformPelvisToDepthCamera;
-
-         @Override
-         public void computeTransformToWorld(FullRobotModel fullRobotModel, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
-         {
-            ReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
-            pelvisFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());
-            transformToWorldToPack.multiply(transformFromPelvisToRealSense);
-            sensorPoseToPack.set(transformToWorldToPack);
-         }
-      };
-   }
 }
