@@ -106,8 +106,8 @@ public class FakeREAVirtualCamera
    {
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
-      tempFramePose3D.appendPitchRotation(pitch);
-      tempFramePose3D.appendYawRotation(yaw);
+      tempFramePose3D.appendPitchRotation(Math.toRadians(pitch));
+      tempFramePose3D.appendYawRotation(Math.toRadians(yaw)); // <-- this is wrong
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       plane.setPoint(tempFramePose3D.getPosition());
       tempNormal.set(0.0, yFace, zFace);
