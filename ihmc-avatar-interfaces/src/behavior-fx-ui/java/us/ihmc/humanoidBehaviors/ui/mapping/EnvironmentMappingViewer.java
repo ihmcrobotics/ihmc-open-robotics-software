@@ -17,7 +17,7 @@ public class EnvironmentMappingViewer extends Application
    private static final boolean SHOW_PLANAR_REGIONS = true;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
 
-   private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegions";
+   private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegion";
    private static final String POINT_CLOUD_FILE_NAME = "PointCloud";
 
    @Override
@@ -32,27 +32,65 @@ public class EnvironmentMappingViewer extends Application
       StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
 
       File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
-      File planarRegionsFile = new File(dataFolder.getAbsolutePath() + "/" + PLANAR_REGIONS_FILE_NAME);
-      File pointCloudFile = new File(dataFolder.getAbsolutePath() + "/" + POINT_CLOUD_FILE_NAME);
-      System.out.println(dataFolder.getAbsolutePath());
-      System.out.println(pointCloudFile.getAbsolutePath());
+      File[] listOfFiles = dataFolder.listFiles();
 
       if (SHOW_PLANAR_REGIONS)
       {
-         regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile));
-         regionsGraphic.update();
-         view3dFactory.addNodeToView(regionsGraphic);
-         System.out.println("Planar regions are rendered.");
+         File planarRegionsFile = null;
+         for (File file : listOfFiles)
+         {
+            String fileName = file.getName();
+            System.out.println(fileName);
+
+            if (fileName.contains(PLANAR_REGIONS_FILE_NAME))
+            {
+               planarRegionsFile = file;
+               break;
+            }
+         }
+
+         if (planarRegionsFile == null)
+         {
+            System.out.println("No planar regions file.");
+         }
+         else
+         {
+            regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile));
+            regionsGraphic.update();
+            view3dFactory.addNodeToView(regionsGraphic);
+            System.out.println("Planar regions are rendered.");
+         }
       }
 
       if (SHOW_STEREO_POINT_CLOUD)
       {
-         List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-         System.out.println("Point cloud messages (" + messagesFromFile.size() + ")");
-         stereoVisionPointCloudGraphic.generateMeshes(messagesFromFile);
-         stereoVisionPointCloudGraphic.update();
-         view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
-         System.out.println("are rendered.");
+         File pointCloudFile = null;
+
+         for (File file : listOfFiles)
+         {
+            String fileName = file.getName();
+            System.out.println(fileName);
+
+            if (fileName.contains(POINT_CLOUD_FILE_NAME))
+            {
+               pointCloudFile = file;
+               break;
+            }
+         }
+
+         if (pointCloudFile == null)
+         {
+            System.out.println("No point cloud file.");
+         }
+         else
+         {
+            List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+            System.out.println("Point cloud messages (" + messagesFromFile.size() + ")");
+            stereoVisionPointCloudGraphic.generateMeshes(messagesFromFile);
+            stereoVisionPointCloudGraphic.update();
+            view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
+            System.out.println("are rendered.");
+         }
       }
 
       primaryStage.setTitle(dataFolder.getPath());
