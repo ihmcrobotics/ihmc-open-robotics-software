@@ -232,32 +232,35 @@ public class VisibilityGraphNavigableRegion
    // FIXME check the combinatorics
    public static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
                                                  PlanarRegion homeRegion, List<Cluster> allClusters, int mapId, List<VisibilityGraphNode> preferredNodesToPack,
-                                                 List<VisibilityGraphNode> nodesToPack,
-                                                 ArrayList<VisibilityGraphEdge> edgesToPack, boolean createEdgesAroundClusterRing)
+                                                 List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack,
+                                                 boolean createEdgesAroundClusterRing)
    {
-      List<? extends Point2DReadOnly> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
+      List<List<Point2DReadOnly>> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
       List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
-      boolean[] arePreferredPointsActuallyNavigable = VisibilityTools.checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters,
-                                                                                                                                 preferredNavigableExtrusionPoints);
-      boolean[] arePointsActuallyNavigable = VisibilityTools.checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters,
-                                                                                                                        navigableExtrusionPoints);
+      boolean[][] arePreferredPointsActuallyNavigable = VisibilityTools
+            .checkIfListOfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, preferredNavigableExtrusionPoints);
+      boolean[] arePointsActuallyNavigable = VisibilityTools
+            .checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
 
       ArrayList<VisibilityGraphNode> newPreferredNodes = new ArrayList<>();
       ArrayList<VisibilityGraphNode> newNodes = new ArrayList<>();
 
       // create preferred nodes
-      for (int nodeIndex = 0; nodeIndex < preferredNavigableExtrusionPoints.size(); nodeIndex++)
+      for (int clusterIndex = 0; clusterIndex < preferredNavigableExtrusionPoints.size(); clusterIndex++)
       {
-         if (arePreferredPointsActuallyNavigable[nodeIndex])
+         for (int nodeIndex = 0; nodeIndex < preferredNavigableExtrusionPoints.get(clusterIndex).size(); nodeIndex++)
          {
-            Point2DReadOnly nodePointInLocal = preferredNavigableExtrusionPoints.get(nodeIndex);
+            if (arePreferredPointsActuallyNavigable[clusterIndex][nodeIndex])
+            {
+               Point2DReadOnly nodePointInLocal = preferredNavigableExtrusionPoints.get(clusterIndex).get(nodeIndex);
 
-            Point3D sourcePointInWorld = new Point3D(nodePointInLocal);
-            homeRegion.transformFromLocalToWorld(sourcePointInWorld);
-            VisibilityGraphNode node = new VisibilityGraphNode(sourcePointInWorld, nodePointInLocal, visibilityGraphNavigableRegion, true);
+               Point3D sourcePointInWorld = new Point3D(nodePointInLocal);
+               homeRegion.transformFromLocalToWorld(sourcePointInWorld);
+               VisibilityGraphNode node = new VisibilityGraphNode(sourcePointInWorld, nodePointInLocal, visibilityGraphNavigableRegion, true);
 
-            newPreferredNodes.add(node);
-            preferredNodesToPack.add(node);
+               newPreferredNodes.add(node);
+               preferredNodesToPack.add(node);
+            }
          }
       }
 
