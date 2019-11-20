@@ -85,9 +85,11 @@ public class NavigableRegionsFactory
       for (Cluster cluster : navigableRegion.getAllClusters()) // fills long edges with interpolated points for visibility graph building later
       {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
-         List<Point2DReadOnly> expandListOfPreferred2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getPreferredNavigableExtrusionsInLocal(), clusterResolution);
+         List<List<Point2DReadOnly>> currentListOfPreferred2DPoints = cluster.getPreferredNavigableExtrusionsInLocal();
+         List<List<Point2DReadOnly>> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(listOfPoints -> PointCloudTools
+               .addPointsAlongPolygon(listOfPoints, clusterResolution)).collect(Collectors.toList());
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
-         cluster.setPreferredNavigableExtrusionsInLocal(expandListOfPreferred2DPoints);
+         cluster.setPreferredNavigableExtrusionsInLocal(expandedListOfPreferred2DPoints);
       }
 
       return navigableRegion;

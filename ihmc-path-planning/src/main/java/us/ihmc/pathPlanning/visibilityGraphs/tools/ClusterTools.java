@@ -51,15 +51,14 @@ public class ClusterTools
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
-   public static List<List<Point2D>> extrudePolygonInward(List<ConvexPolygon2DReadOnly> polygons, ObstacleExtrusionDistanceCalculator calculator)
+   public static List<List<? extends Point2DReadOnly>> extrudePolygonInward(List<ConvexPolygon2D> polygons, ObstacleExtrusionDistanceCalculator calculator)
    {
-      ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-      List<List<Point2D>> listOfExtrusions = new ArrayList<>();
+      List<List<? extends Point2DReadOnly>> listOfExtrusions = new ArrayList<>();
       for (ConvexPolygon2DReadOnly polygon : polygons)
       {
          double[] extrusionDistances = polygon.getVertexBufferView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
          ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
-         polygonScaler.scaleConvexPolygon(polygon, extrusionDistances, scaledPolygon);
+         scaleConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
 
          listOfExtrusions.add(scaledPolygon.getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()));
       }
@@ -72,7 +71,7 @@ public class ClusterTools
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
     */
-   public boolean scaleConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
+   public static boolean scaleConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
    {
       if (distances.length != polygonQ.getNumberOfVertices())
          throw new IllegalArgumentException("Not a valid number of distances.");
@@ -140,26 +139,26 @@ public class ClusterTools
       int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools
             .findVertexIndex(polygonQ, true, EuclidGeometryPolygonTools.Bound.MIN, EuclidGeometryPolygonTools.Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
-      int vertexQIndex = leftMostIndexOnPolygonQ;
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
 
+      // TODO review this and see if there are speed improvements
       for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {
          Line2D edgeOnQ = new Line2D(vertexQ, nextVertexQ);
+         Vector2D normalizedVector = new Vector2D(edgeOnQ.getDirection());
          normalizedVector.set(edgeOnQ.getDirection());
 
-            edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
-            vectorPerpendicularToEdgeOnQ.negate();
-            linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
-            linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
+         Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D(edgeOnQ.perpendicularVector());
+         vectorPerpendicularToEdgeOnQ.negate();
+         vectorPerpendicularToEdgeOnQ.normalize();
+         Point2D referencePoint = new Point2D();
+         referencePoint.scaleAdd(distances[i], vectorPerpendicularToEdgeOnQ, vertexQ);
 
 
-         Line2D newEdge = getARay(rays.size());
-         newEdge.set(referencePoint, normalizedVector);
+         Line2D newEdge = new Line2D(referencePoint, normalizedVector);
          rays.add(newEdge);
 
-         vertexQIndex = nextVertexQIndex;
          nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
 
          vertexQ = nextVertexQ;
@@ -612,7 +611,7 @@ public class ClusterTools
       if (includePreferredExtrusions)
       {
          homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(homeRegion.getConvexPolygons(), preferredNavigableCalculator));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
@@ -694,18 +693,21 @@ public class ClusterTools
                                                                                                                  nonNavigableExtrusionsInFlatWorld,
                                                                                                                  transformFromWorldToHome);
 
-      List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = null;
+      List<List<Point2DReadOnly>> preferredNavigableExtrusionsInHomeRegionLocal = null;
       List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
+         // FIXME check that this is doing things correctly with regards to the preferred extrusions
          Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
                                                                                                       verticalObstacle);
 
          List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
          List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
-         preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
+         List<Point2DReadOnly> tempPreferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
                                                                                                     transformFromWorldToHome);
+         preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+         preferredNavigableExtrusionsInHomeRegionLocal.add(tempPreferredNavigableExtrusionsInHomeRegionLocal);
          preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
                                                                                                        transformFromWorldToHome);
       }
