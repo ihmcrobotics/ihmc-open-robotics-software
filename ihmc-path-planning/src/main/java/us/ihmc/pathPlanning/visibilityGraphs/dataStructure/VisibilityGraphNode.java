@@ -65,7 +65,7 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return point2DInLocal;
    }
 
-   public void addEdge(VisibilityGraphEdge edge)
+   public synchronized void addEdge(VisibilityGraphEdge edge)
    {
       edges.add(edge);
    }
