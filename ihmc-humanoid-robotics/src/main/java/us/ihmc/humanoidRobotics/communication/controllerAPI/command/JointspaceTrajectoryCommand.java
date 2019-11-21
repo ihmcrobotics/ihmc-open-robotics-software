@@ -56,6 +56,8 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
 
    private void set(RecyclingArrayList<? extends OneDoFJointTrajectoryCommand> trajectoryPointListArray)
    {
+      jointTrajectoryInputs.clear();
+
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
          set(i, trajectoryPointListArray.get(i));
@@ -64,6 +66,8 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
 
    private void set(List<OneDoFJointTrajectoryMessage> trajectoryPointListArray)
    {
+      jointTrajectoryInputs.clear();
+
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
