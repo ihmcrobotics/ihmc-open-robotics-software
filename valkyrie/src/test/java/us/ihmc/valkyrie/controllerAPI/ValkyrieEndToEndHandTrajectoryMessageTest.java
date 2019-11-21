@@ -39,7 +39,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       @Override
       public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
@@ -196,7 +196,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
 
    public DRCRobotModel getRobotModelWithHandContacts()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      return new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public RobotContactPointParameters<RobotSide> getContactPointParameters()

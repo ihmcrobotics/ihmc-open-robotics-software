@@ -32,12 +32,12 @@ public class REAModuleROS2Subscription<T>
    public void handle(Ros2Node ros2Node, boolean enable)
    {
       if (enable)
-         cerate(ros2Node);
+         create(ros2Node);
       else
          remove();
    }
 
-   public void cerate(Ros2Node ros2Node)
+   public void create(Ros2Node ros2Node)
    {
       if (subscription == null)
          subscription = ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, listener);
