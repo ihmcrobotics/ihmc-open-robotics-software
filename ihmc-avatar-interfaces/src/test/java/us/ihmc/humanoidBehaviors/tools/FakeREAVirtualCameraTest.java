@@ -77,7 +77,6 @@ public class FakeREAVirtualCameraTest
    }
 
    @Test
-   @Disabled
    public void testFakeREA2()
    {
       compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 7, 8, VERTICAL_FOV, HORIZONTAL_FOV);
