@@ -129,7 +129,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyrieJointMap getJointMap()
    {
       if (jointMap == null)
-         jointMap = new ValkyrieJointMap(robotPhysicalProperties, robotVersion);
+         jointMap = new ValkyrieJointMap(getRobotPhysicalProperties(), robotVersion, modelMassScale);
       return jointMap;
    }
 
@@ -544,7 +544,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
       if (capturePointPlannerParameters == null)
-         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(robotPhysicalProperties, target);
+         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(getRobotPhysicalProperties(), target);
       return capturePointPlannerParameters;
    }
 
