@@ -333,11 +333,6 @@ public class VisibilityGraphsFrameworkTest
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
       DataSet dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
@@ -357,8 +352,7 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
-
-
+         
          if (DEBUG)
          {
             LogTools.info("Finished processing file: " + dataset.getName());
