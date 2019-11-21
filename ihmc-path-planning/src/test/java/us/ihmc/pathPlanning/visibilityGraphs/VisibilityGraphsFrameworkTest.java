@@ -603,6 +603,7 @@ public class VisibilityGraphsFrameworkTest
 
          if (VISUALIZE)
          {
+            messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, !simulateOcclusions);
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, walkerPosition);
          }
 
