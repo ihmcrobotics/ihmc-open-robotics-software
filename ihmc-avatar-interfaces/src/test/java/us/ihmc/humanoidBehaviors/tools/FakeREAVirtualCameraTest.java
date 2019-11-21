@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -76,6 +77,7 @@ public class FakeREAVirtualCameraTest
    }
 
    @Test
+   @Disabled
    public void testFakeREA2()
    {
       compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 7, 8, VERTICAL_FOV, HORIZONTAL_FOV);
