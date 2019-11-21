@@ -44,9 +44,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.TwistPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,9 +69,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearVelocity(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocity(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.TwistPubSubType.getCdrSerializedSize(data.getTwist(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -92,8 +88,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_4(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocity(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocity(), cdr);
+      geometry_msgs.msg.dds.TwistPubSubType.write(data.getTwist(), cdr);
       cdr.write_type_11(data.getTimestamp());
 
       cdr.write_type_6(data.getConfidenceFactor());
@@ -109,8 +104,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
       data.setSequenceId(cdr.read_type_4());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocity(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);	
+      geometry_msgs.msg.dds.TwistPubSubType.read(data.getTwist(), cdr);	
       data.setTimestamp(cdr.read_type_11());
       	
       data.setConfidenceFactor(cdr.read_type_6());
@@ -125,9 +119,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
-      ser.write_type_a("linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocity());
-
-      ser.write_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
+      ser.write_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());
 
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_6("confidence_factor", data.getConfidenceFactor());
@@ -140,9 +132,7 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
-      ser.read_type_a("linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocity());
-
-      ser.read_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
+      ser.read_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());
 
       data.setTimestamp(ser.read_type_11("timestamp"));
       data.setConfidenceFactor(ser.read_type_6("confidence_factor"));
