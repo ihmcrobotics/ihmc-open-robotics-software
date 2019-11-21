@@ -6,10 +6,12 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 public class ValkyrieToeOffParameters extends ToeOffParameters
 {
    private final RobotTarget target;
+   private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieToeOffParameters(RobotTarget target)
+   public ValkyrieToeOffParameters(ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
       this.target = target;
+      this.physicalProperties = physicalProperties;
    }
 
    @Override
@@ -39,11 +41,10 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
       return (target == RobotTarget.REAL_ROBOT) ? 0.02 : 0.04;
    }
 
-
    @Override
    public double getMinStepLengthForToeOff()
    {
-      return ValkyriePhysicalProperties.footLength;
+      return physicalProperties.getFootLength();
    }
 
    /**
@@ -60,12 +61,12 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    {
       switch (target)
       {
-      case SCS:
-         return true;
-      case GAZEBO:
-      case REAL_ROBOT:
-      default:
-         return false;
+         case SCS:
+            return true;
+         case GAZEBO:
+         case REAL_ROBOT:
+         default:
+            return false;
       }
    }
 

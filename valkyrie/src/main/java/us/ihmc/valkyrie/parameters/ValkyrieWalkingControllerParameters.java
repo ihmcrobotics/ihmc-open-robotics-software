@@ -55,20 +55,23 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ValkyrieSteppingParameters steppingParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
+   private final ValkyriePhysicalProperties physicalProperties;
+
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
    {
-      this(jointMap, RobotTarget.SCS);
+      this(jointMap, physicalProperties, RobotTarget.SCS);
    }
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, RobotTarget target)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
       this.jointMap = jointMap;
+      this.physicalProperties = physicalProperties;
       this.target = target;
 
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
-      toeOffParameters = new ValkyrieToeOffParameters(target);
+      toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
-      steppingParameters = new ValkyrieSteppingParameters(target);
+      steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
       icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
 
       // Generated using ValkyrieFullRobotModelVisualizer
@@ -147,7 +150,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
+      return physicalProperties.getThighLength() + physicalProperties.getShinLength();
    }
 
    @Override
