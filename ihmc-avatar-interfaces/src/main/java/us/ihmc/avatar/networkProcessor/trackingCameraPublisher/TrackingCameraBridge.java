@@ -290,6 +290,8 @@ public class TrackingCameraBridge
 
          message.getPose().setPosition(position);
          message.getPose().setOrientation(orientation);
+         message.getTwist().getLinear().set(linearVelocity);
+         message.getTwist().getAngular().set(angularVelocity);
          message.setTimestamp(timeStamp);
          message.setConfidenceFactor(confidence);
 
