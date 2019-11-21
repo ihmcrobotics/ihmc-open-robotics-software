@@ -85,36 +85,8 @@ public class StereoVisionPointCloudGraphic extends Group
 
       meshBuilder.clear();
       for (int i = 0; i < stereoVisionPointCloudMessages.size(); i++)
-      {
          addMesh(stereoVisionPointCloudMessages.get(i), meshBuilder);
-      }
-      //      Point3D32 sensorPosition = new Point3D32();
-      //      Point3D32 scanPoint = new Point3D32();
-      //      for (int i = 0; i < stereoVisionPointCloudMessages.size(); i++)
-      //      {
-      //         StereoVisionPointCloudMessage message = stereoVisionPointCloudMessages.get(i);
-      //         sensorPosition.set(message.getSensorPosition());
-      //         int redScaler = (int) (0xFF * (1 - (message.getSensorPoseConfidence())));
-      //         int greenScaler = (int) (0xFF * (message.getSensorPoseConfidence()));
-      //         Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
-      //         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), sensorPosition, confidenceColor);
-      //
-      //         int numberOfScanPoints = message.getPointCloud().size() / 3;
-      //         int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      //         Random random = new Random();
-      //         for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
-      //         {
-      //            int indexToVisualize;
-      //            if (numberOfScanPoints < NUMBER_OF_POINTS_PER_MESSAGE)
-      //               indexToVisualize = j;
-      //            else
-      //               indexToVisualize = random.nextInt(numberOfScanPoints);
-      //
-      //            Color color = Color.BLACK;
-      //            MessageTools.unpackScanPoint(message, indexToVisualize, scanPoint);
-      //            meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
-      //         }
-      //      }
+
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
 
