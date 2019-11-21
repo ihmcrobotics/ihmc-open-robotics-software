@@ -5,9 +5,7 @@ uint32 sequence_id
 
 geometry_msgs/Pose pose
 
-geometry_msgs/Vector3 linear_velocity
-
-geometry_msgs/Vector3 angular_velocity
+geometry_msgs/Twist twist
 
 int64 timestamp
 
