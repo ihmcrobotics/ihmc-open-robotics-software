@@ -4,6 +4,8 @@ package us.ihmc.robotics.math.trajectories.generators;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
@@ -26,10 +28,12 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
    private final double[] y;
    private final double[] z;
    
-   private final Vector3D v0 = new Vector3D();
-   private final Vector3D a0 = new Vector3D();
-   private final Vector3D vf = new Vector3D();
-   private final Vector3D af = new Vector3D();
+   private final FixedFrameVector3DBasics v0;
+   private final FixedFrameVector3DBasics a0;
+   private final FixedFrameVector3DBasics vf;
+   private final FixedFrameVector3DBasics af;
+   
+   private final FixedFramePoint3DBasics tempPosition;
    
 
    public MultipleWaypointQuinticSplinePositionTrajectoryGenerator(String name, ReferenceFrame trajectoryFrame, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
@@ -41,6 +45,12 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
       this.y = new double[maximumNumberOfPoints];
       this.z = new double[maximumNumberOfPoints];
       
+      this.tempPosition = new FramePoint3D(trajectoryFrame);
+      
+      this.v0 = new FrameVector3D(trajectoryFrame);
+      this.a0 = new FrameVector3D(trajectoryFrame);
+      this.vf = new FrameVector3D(trajectoryFrame);
+      this.af = new FrameVector3D(trajectoryFrame);
    }
    
    /**
@@ -63,12 +73,12 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
          throw new RuntimeException("Number of waypoints exceeds maximum number of waypoints");
       }
       
-      trajectoryFrame.checkReferenceFrameMatch(position);
+      this.tempPosition.setMatchingFrame(position);
       
       this.time[this.numberOfPoints] = time;
-      this.x[this.numberOfPoints] = position.getX();
-      this.y[this.numberOfPoints] = position.getY();
-      this.z[this.numberOfPoints] = position.getZ();
+      this.x[this.numberOfPoints] = tempPosition.getX();
+      this.y[this.numberOfPoints] = tempPosition.getY();
+      this.z[this.numberOfPoints] = tempPosition.getZ();
       
       this.numberOfPoints++;
       
@@ -76,24 +86,18 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
    
    public void setInitialConditions(FrameTuple3DReadOnly initialVelocity, FrameTuple3DReadOnly initialAcceleration)
    {
-      trajectoryFrame.checkReferenceFrameMatch(initialVelocity);
-      trajectoryFrame.checkReferenceFrameMatch(initialAcceleration);
-
-      
-      this.v0.set(initialVelocity);
-      this.a0.set(initialAcceleration);
+      this.v0.setMatchingFrame(initialVelocity);
+      this.a0.setMatchingFrame(initialAcceleration);
    }
    
    public void setFinalConditions(FrameTuple3DReadOnly finalVelocity, FrameTuple3DReadOnly finalAcceleration)
    {
-      this.vf.set(finalVelocity);
-      this.af.set(finalAcceleration);
+      this.vf.setMatchingFrame(finalVelocity);
+      this.af.setMatchingFrame(finalAcceleration);
    }
 
    public void initialize()
    {
-      
-      
       this.interpolator.initialize(this.numberOfPoints, time);
 
       this.interpolator.determineCoefficients(0, x, v0.getX(), vf.getX(), a0.getX(), af.getX());
