@@ -2,26 +2,29 @@ package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieSteppingParameters implements SteppingParameters
 {
    private final RobotTarget target;
+   private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieSteppingParameters(RobotTarget target)
+   public ValkyrieSteppingParameters(ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
       this.target = target;
+      this.physicalProperties = physicalProperties;
    }
 
    @Override
    public double getFootForwardOffset()
    {
-      return ValkyriePhysicalProperties.footForward;
+      return physicalProperties.getFootForward();
    }
 
    @Override
    public double getFootBackwardOffset()
    {
-      return ValkyriePhysicalProperties.footBack;
+      return physicalProperties.getFootBack();
    }
 
    @Override
@@ -137,30 +140,30 @@ public class ValkyrieSteppingParameters implements SteppingParameters
    @Override
    public double getFootWidth()
    {
-      return ValkyriePhysicalProperties.footWidth;
+      return physicalProperties.getFootWidth();
    }
 
    @Override
    public double getToeWidth()
    {
-      return ValkyriePhysicalProperties.footWidth;
+      return physicalProperties.getFootWidth();
    }
 
    @Override
    public double getFootLength()
    {
-      return ValkyriePhysicalProperties.footLength;
+      return physicalProperties.getFootLength();
    }
 
    @Override
    public double getActualFootWidth()
    {
-      return ValkyriePhysicalProperties.footWidth;
+      return physicalProperties.getFootWidth();
    }
 
    @Override
    public double getActualFootLength()
    {
-      return ValkyriePhysicalProperties.footLength;
+      return physicalProperties.getFootLength();
    }
 }

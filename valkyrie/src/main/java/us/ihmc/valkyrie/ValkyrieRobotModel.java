@@ -51,6 +51,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyriePlanarRegionFootstepPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
@@ -72,6 +73,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
 
+   private double modelSizeScale = 1.0;
+   private double modelMassScale = 1.0;
    private double transparency = Double.NaN;
    private boolean useShapeCollision = false;
    private boolean useOBJGraphics = true;
@@ -80,6 +83,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
 
+   private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
    private ValkyrieContactPointParameters contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
@@ -114,11 +118,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return target;
    }
 
+   public ValkyriePhysicalProperties getRobotPhysicalProperties()
+   {
+      if (robotPhysicalProperties == null)
+         robotPhysicalProperties = new ValkyriePhysicalProperties(modelSizeScale);
+      return robotPhysicalProperties;
+   }
+
    @Override
    public ValkyrieJointMap getJointMap()
    {
       if (jointMap == null)
-         jointMap = new ValkyrieJointMap(robotVersion);
+         jointMap = new ValkyrieJointMap(robotPhysicalProperties, robotVersion);
       return jointMap;
    }
 
@@ -186,6 +197,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.customModel = customModel;
    }
 
+   public void setModelMassScale(double modelMassScale)
+   {
+      this.modelMassScale = modelMassScale;
+   }
+
+   public void setModelSizeScale(double modelSizeScale)
+   {
+      if (robotPhysicalProperties != null)
+         throw new IllegalArgumentException("Cannot set modelSizeScale once robotPhysicalProperties has been created.");
+      this.modelSizeScale = modelSizeScale;
+   }
+
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       if (generalizedRobotModel == null)
@@ -232,7 +255,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
          if (useShapeCollision)
          {
             robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, getJointMap(), null, false, transparency);
-            ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(getJointMap());
+            ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(getJointMap(),
+                                                                                                                                        getRobotPhysicalProperties());
             collisionMeshDefinitionDataHolder.setVisible(false);
 
             robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
@@ -472,7 +496,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotContactPointParameters<RobotSide> getContactPointParameters()
    {
       if (contactPointParameters == null)
-         contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), simulationContactPoints);
+         contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), getRobotPhysicalProperties(), simulationContactPoints);
       return contactPointParameters;
    }
 
@@ -480,7 +504,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyrieSensorInformation getSensorInformation()
    {
       if (sensorInformation == null)
-         sensorInformation = new ValkyrieSensorInformation(target);
+         sensorInformation = new ValkyrieSensorInformation(getRobotPhysicalProperties(), target);
       return sensorInformation;
    }
 
@@ -520,7 +544,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
       if (capturePointPlannerParameters == null)
-         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(target);
+         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(robotPhysicalProperties, target);
       return capturePointPlannerParameters;
    }
 
@@ -528,7 +552,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       if (walkingControllerParameters == null)
-         walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), target);
+         walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target);
       return walkingControllerParameters;
    }
 
@@ -549,7 +573,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters();
+      return new ValkyrieUIParameters(getRobotPhysicalProperties());
    }
 
    @Override

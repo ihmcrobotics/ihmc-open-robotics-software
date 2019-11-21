@@ -57,9 +57,12 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public ValkyrieJointMap(ValkyrieRobotVersion robotVersion)
+   private final ValkyriePhysicalProperties physicalProperties;
+
+   public ValkyrieJointMap(ValkyriePhysicalProperties physicalProperties, ValkyrieRobotVersion robotVersion)
    {
       this.robotVersion = robotVersion;
+      this.physicalProperties = physicalProperties;
 
       switch(robotVersion)
       {
@@ -326,7 +329,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
-      return ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
+      return physicalProperties.getSoleToAnkleFrameTransform(robotSide);
    }
 
    @Override
@@ -336,9 +339,9 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       {
          case DEFAULT:
          case FINGERLESS:
-            return ValkyriePhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+            return physicalProperties.getHandControlFrameToWristTransform(robotSide);
          case ARM_MASS_SIM:
-            return ValkyriePhysicalProperties.handControlFrameToArmMassSimTransforms.get(robotSide);
+            return physicalProperties.getHandControlFrameToArmMassSimTransform(robotSide);
          default:
             return null;
       }
