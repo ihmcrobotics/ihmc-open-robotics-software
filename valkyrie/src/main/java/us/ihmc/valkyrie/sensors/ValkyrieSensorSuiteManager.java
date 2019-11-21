@@ -124,7 +124,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          stereoVisionPointCloudPublisher.setFilterThreshold(ValkyrieSensorInformation.linearVelocityThreshold,
                                                             ValkyrieSensorInformation.angularVelocityThreshold);
          stereoVisionPointCloudPublisher.enableFilter(true);
-         stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+         stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
          stereoVisionPointCloudPublisher.start();
       }
 

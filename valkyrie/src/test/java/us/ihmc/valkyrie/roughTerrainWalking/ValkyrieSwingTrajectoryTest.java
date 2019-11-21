@@ -13,7 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @Tag("humanoid-rough-terrain-slow")
 public class ValkyrieSwingTrajectoryTest extends DRCSwingTrajectoryTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

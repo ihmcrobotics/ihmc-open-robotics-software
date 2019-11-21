@@ -29,7 +29,7 @@ public class ValkyrieROSNetworkProcessor
 
    public ValkyrieROSNetworkProcessor(String nameSpace, String tfPrefix) throws IOException
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       PacketCommunicator rosAPICommunicator = null;
       URI rosUri = NetworkParameters.getROSURI();
 

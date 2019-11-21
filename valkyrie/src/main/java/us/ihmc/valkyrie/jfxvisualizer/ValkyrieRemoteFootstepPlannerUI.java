@@ -31,8 +31,10 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
-      DRCRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT, null, null, false, true, 0.0);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
+      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT);
+      previewModel.setTransparency(0.0);
+      previewModel.setUseOBJGraphics(true);
 
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, model.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
