@@ -24,7 +24,8 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
    private final DRCRobotJointMap jointMap;
    private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, ValkyriePhysicalProperties physicalProperties, FootContactPoints<RobotSide> footContactPoints)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, ValkyriePhysicalProperties physicalProperties,
+                                         FootContactPoints<RobotSide> footContactPoints)
    {
       super(jointMap, physicalProperties.getFootWidth(), physicalProperties.getFootLength(), physicalProperties.getSoleToAnkleFrameTransforms());
 
@@ -50,6 +51,9 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
       Vector3D knuckleIndex1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.115), 0.03);
       Vector3D knuckleMiddle1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.11), -0.015);
       Vector3D knucklePinky1 = new Vector3D(-0.02, robotSide.negateIfRightSide(0.105), -0.06);
+      knuckleIndex1.scale(jointMap.getModelScale());
+      knuckleMiddle1.scale(jointMap.getModelScale());
+      knuckleIndex1.scale(jointMap.getModelScale());
 
       addSimulationContactPoint(wrist, knuckleIndex1);
       addSimulationContactPoint(wrist, knuckleMiddle1);
@@ -63,7 +67,8 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
       {
          String name = collision.getName();
          Sphere sphere = collision.getGeometry().getSphere();
-         if (name.contains("_heel") || name.contains("_toe") || name.contains("sim_contact") || (sphere != null && Double.parseDouble(sphere.getRadius()) == 0.0))
+         if (name.contains("_heel") || name.contains("_toe") || name.contains("sim_contact")
+               || (sphere != null && Double.parseDouble(sphere.getRadius()) == 0.0))
          {
             System.out.println("Simulation contact '" + name + "'");
             Vector3D gcOffset = new Vector3D();
