@@ -374,8 +374,12 @@ public class VisibilityGraphNavigableRegion
       List<VisibilityGraphNode> allNavigableNodes = getAllNavigableNodes();
       List<VisibilityGraphNode> allPreferredNavigableNodes = getAllPreferredNavigableNodes();
 
-      for (VisibilityGraphNode targetNode : allNavigableNodes)
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false);
+      allNavigableNodes.parallelStream()
+                       .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
+                                                                                          targetNode,
+                                                                                          nonPreferredWeight,
+                                                                                          nonPreferredStaticCost,
+                                                                                          false));
 
       double weight;
       double cost;
@@ -390,8 +394,12 @@ public class VisibilityGraphNavigableRegion
          cost = nonPreferredStaticCost;
       }
 
-      for (VisibilityGraphNode targetNode : allPreferredNavigableNodes)
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode());
+      allPreferredNavigableNodes.parallelStream()
+                                .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
+                                                                                                   targetNode,
+                                                                                                   weight,
+                                                                                                   cost,
+                                                                                                   sourceNode.isPreferredNode()));
    }
 
    public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost,
