@@ -23,13 +23,13 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer) throws IOException
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
       this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                        DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
+                                        DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
