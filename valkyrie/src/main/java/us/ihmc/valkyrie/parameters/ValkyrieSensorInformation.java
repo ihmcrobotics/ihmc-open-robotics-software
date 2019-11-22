@@ -192,11 +192,14 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
 
    public static final double linearVelocityThreshold = 0.15;
    public static final double angularVelocityThreshold = Math.PI / 15;
+   private ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieSensorInformation(RobotTarget target)
+   public ValkyrieSensorInformation(ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
       //      cameraParamaters[LEFT_HAZARD_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       //      cameraParamaters[RIGHT_HAZARD_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
+
+      this.physicalProperties = physicalProperties;
 
       if (target == RobotTarget.REAL_ROBOT)
       {
@@ -435,7 +438,7 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
       {
          String footName = robotSide.getCamelCaseName() + "Foot";
          String soleName = robotSide.getCamelCaseName() + "Sole";
-         RigidBodyTransform transform = new RigidBodyTransform(ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide));
+         RigidBodyTransform transform = new RigidBodyTransform(physicalProperties.getSoleToAnkleFrameTransform(robotSide));
          staticTranformsForRos.add(new ImmutableTriple<>(footName, soleName, transform));
       }
    }
