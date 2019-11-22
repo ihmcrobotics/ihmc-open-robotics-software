@@ -547,13 +547,12 @@ public class ClusterTools
       RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
       homeRegion.getTransformToWorld(transformFromHomeToWorld);
 
-      Vector3D homeRegionSurfaceNormal = homeRegion.getNormal();
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle);
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
          Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
-                                                         transformFromHomeToWorld, homeRegionSurfaceNormal, zThresholdBeforeOrthogonal, obstacleRegion,
+                                                         transformFromHomeToWorld, zThresholdBeforeOrthogonal, obstacleRegion,
                                                          includePreferredExtrusions);
          obstacleClusters.add(obstacleCluster);
       }
@@ -563,7 +562,7 @@ public class ClusterTools
 
    private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
                                                 ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal, double zThresholdBeforeOrthogonal,
+                                                RigidBodyTransform transformFromHomeRegionToWorld, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion, boolean includePreferredExtrusions)
    {
       Point2D[] concaveHull = obstacleRegion.getConcaveHull();
