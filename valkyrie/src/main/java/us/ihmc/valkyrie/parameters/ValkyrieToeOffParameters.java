@@ -38,9 +38,27 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    @Override
    public double getECMPProximityForToeOff()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 0.02 : 0.04;
+      return ((target == RobotTarget.REAL_ROBOT) ? 0.02 : 0.04) * physicalProperties.getModelSizeScale();
    }
 
+   @Override
+   public double getCoPProximityForToeOff()
+   {
+      return super.getCoPProximityForToeOff() * physicalProperties.getModelSizeScale();
+   }
+
+   @Override
+   public double getICPProximityForToeOff()
+   {
+      return super.getICPProximityForToeOff() * physicalProperties.getModelSizeScale();
+   }
+
+   @Override
+   public double getMinStepHeightForToeOff()
+   {
+      return super.getMinStepHeightForToeOff() * physicalProperties.getModelSizeScale();
+   }
+   
    @Override
    public double getMinStepLengthForToeOff()
    {

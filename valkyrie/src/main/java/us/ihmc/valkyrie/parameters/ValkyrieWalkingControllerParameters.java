@@ -52,6 +52,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final ValkyriePhysicalProperties physicalProperties;
 
+   // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
+   private final double minimumHeightAboveGround;
+   private final double nominalHeightAboveGround;
+   private final double maximumHeightAboveGround;
+
    public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
    {
       this(jointMap, physicalProperties, RobotTarget.SCS);
@@ -65,16 +70,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
       toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
-      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
+      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(physicalProperties, target);
       steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
       icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
+
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
    }
 
    @Override
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3; // 3.3 seems more appropriate.
+      return (target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3) / Math.sqrt(jointMap.getModelScale()); // 3.3 seems more appropriate.
    }
 
    @Override
@@ -92,7 +101,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05;
+      return 0.05 * jointMap.getModelScale();
    }
 
    @Override
@@ -100,11 +109,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return target != RobotTarget.SCS ? 0.70 : 0.30;
    }
-
-   // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.23 + 0.08;
-   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01 + 0.08;
-   private final double maximumHeightAboveGround = 0.735 + 0.23 + 0.08;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -458,9 +462,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = runningOnRealRobot? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
-      double kpY = runningOnRealRobot? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
+      double kpX = runningOnRealRobot ? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = runningOnRealRobot ? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 250.0 : 200.0; // Was 200.0 before tuneup of sep 2018
       // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
       double zetaZ = runningOnRealRobot ? 0.8 : 0.7;
@@ -683,7 +687,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
-      return 0.18;
+      return 0.18 * jointMap.getModelScale();
    }
 
    /** {@inheritDoc} */

@@ -118,7 +118,7 @@ public class MicroStrain3DMRobot extends Robot
    
    public static void main(String[] args) throws IOException
    {
-      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(new ValkyriePhysicalProperties(1.0), RobotTarget.REAL_ROBOT);
+      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation(new ValkyriePhysicalProperties(), RobotTarget.REAL_ROBOT);
       final MicrostrainUDPPacketListener listener = MicrostrainUDPPacketListener.createNonRealtimeListener(sensorInformation.getImuUSBSerialIds().get("v1Pelvis_leftIMU"));
       
       final MicroStrain3DMRobot robot = new MicroStrain3DMRobot();
