@@ -18,8 +18,10 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class FakeREAModule
+public class SimulatedREAModule
 {
+   private static final boolean USE_POLYGONIZER = true;
+
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
@@ -28,14 +30,14 @@ public class FakeREAModule
    private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
-   private FakeREAVirtualCamera virtualCameraFOV;
+   private SimulatedDepthCamera virtualCameraFOV;
 
-   public FakeREAModule(PlanarRegionsList map)
+   public SimulatedREAModule(PlanarRegionsList map)
    {
       this(map, null);
    }
 
-   public FakeREAModule(PlanarRegionsList map, DRCRobotModel robotModel)
+   public SimulatedREAModule(PlanarRegionsList map, DRCRobotModel robotModel)
    {
       this.map = map;
 
@@ -47,9 +49,9 @@ public class FakeREAModule
       {
          remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-         double verticalFOV = Math.toRadians(180.0); // TODO: Reduce FOV when behaviors support it better
-         double horizontalFOV = Math.toRadians(180.0);
-         virtualCameraFOV = new FakeREAVirtualCamera(verticalFOV, horizontalFOV, neckFrame);
+         double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
+         double horizontalFOV = 180.0;
+         virtualCameraFOV = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
