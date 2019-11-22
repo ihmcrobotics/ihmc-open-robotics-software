@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -34,15 +33,11 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
    private final RobotTarget target;
-
-   private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final ValkyrieJointMap jointMap;
 
@@ -73,18 +68,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
       steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
       icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
-
-      // Generated using ValkyrieFullRobotModelVisualizer
-      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
-            0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112,
-            0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
-
-      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[] { 0.8772107606751612, -0.47056267784177724, -0.09524729695945025,
-            0.11738015535642271, -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021, -0.3166524835989298, -0.48010546476828164,
-            -0.8597107556492186, -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0 });
-
-      handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
-      handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
    }
 
    @Override
