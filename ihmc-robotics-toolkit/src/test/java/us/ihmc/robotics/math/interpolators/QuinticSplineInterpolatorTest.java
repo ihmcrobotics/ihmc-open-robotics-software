@@ -11,13 +11,39 @@ import org.junit.jupiter.api.Test;
 public class QuinticSplineInterpolatorTest
 {
 
+   
+   @Test
+   public void testUnevenlySpacedTime()
+   {
+      double[] x = { 0, 0.1, 2.0, 4.1 };
+      double[] y = { 0.5, 0.1, 0.3, 0.5 };
+      
+      double v0 = 0.1;
+      double vf = 0.0;
+      double a0 = 0.0;
+      double af = 0.0;
+      
+      QuinticSplineInterpolator spline = new QuinticSplineInterpolator("quinticSplineTest", 255, 1, null);
+      
+      spline.initialize(x.length, x);
+      spline.determineCoefficients(0, y, v0, vf, a0, af);
+      
+      spline.compute(0.0);
+      
+      assertEquals(y[0], spline.getPosition(0), 1e-6);
+      assertEquals(v0, spline.getVelocity(0), 1e-6);
+      assertEquals(a0, spline.getAcceleration(0), 1e-6);
+
+      System.out.println(spline.getVelocity(0));
+   }
+   
+   
    /**
     * Tests QuinticSplineInterpolator, makes four identical splines and checks if the values correspond
     * to the values I got from the spline interpolation I made in Matlab.
     * 
     * Tests 2D and 5D splines, to test if the resizing works
     */
-
    @Test
    public void testQuinticSplineInterpolator()
    {
