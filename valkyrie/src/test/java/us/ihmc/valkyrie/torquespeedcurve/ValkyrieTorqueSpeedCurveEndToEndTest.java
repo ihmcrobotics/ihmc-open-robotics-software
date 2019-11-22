@@ -29,7 +29,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,6 +41,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
@@ -60,15 +60,44 @@ import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieTorqueSpeedCurveEndToEndTest
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private ValkyrieJointMap jointMap = new ValkyrieJointMap(ValkyrieRobotVersion.FINGERLESS);
+   private ValkyrieRobotModel simRobotModel, realRobotModel, smallSimRobotModel, smallRealRobotModel;
+   private double smallModelSizeScale = 0.934; // => for size of 1m70 (5'7")
+   private double smallModelMassScale = 0.717; // => for total mass of 90kg (200lbs)
+   private String simDataFolder = "SimParams";
+   private String realDataFolder = "RealRobotParams";
+   private String smallSimDataFolder = "SmallSimParams";
+   private String smallRealDataFolder = "SmallRealRobotParams";
+
+   public void configureRobotModels(boolean disableAnkleJointLimits)
+   {
+      simRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      realRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.FINGERLESS);
+      smallSimRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      smallRealRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.FINGERLESS);
+
+      smallSimRobotModel.setModelSizeScale(smallModelSizeScale);
+      smallSimRobotModel.setModelMassScale(smallModelMassScale);
+
+      smallRealRobotModel.setModelSizeScale(smallModelSizeScale);
+      smallRealRobotModel.setModelMassScale(smallModelMassScale);
+
+      if (disableAnkleJointLimits)
+      {
+         disableAnkleLimits(simRobotModel);
+         disableAnkleLimits(realRobotModel);
+         disableAnkleLimits(smallSimRobotModel);
+         disableAnkleLimits(smallRealRobotModel);
+      }
+
+      double totalMass = TotalMassCalculator.computeSubTreeMass(smallSimRobotModel.createFullRobotModel().getRootBody());
+      System.out.println("smallSimRobot weighs: " + totalMass + "kg.");
+   }
 
    public void showMemoryUsageBeforeTest()
    {
@@ -96,24 +125,60 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testStepUpInchWithSquareUpReal() throws Exception
+   public void testStepUpWithSquareUp() throws Throwable
    {
+      Throwable caughtException = null;
+
+      configureRobotModels(false);
+
       for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
       {
-         testStepUpWithSquareUp(stepHeight, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+         try
+         {
+            testStepUpWithSquareUp(simRobotModel, stepHeight, realRobotModel.getWalkingControllerParameters(), getDataOutputFolder(realDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+         try
+         {
+            testStepUpWithSquareUp(simRobotModel, stepHeight, simRobotModel.getWalkingControllerParameters(), getDataOutputFolder(simDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+         try
+         {
+            testStepUpWithSquareUp(smallSimRobotModel,
+                                   stepHeight,
+                                   smallRealRobotModel.getWalkingControllerParameters(),
+                                   getDataOutputFolder(smallRealDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+         try
+         {
+            testStepUpWithSquareUp(smallSimRobotModel,
+                                   stepHeight,
+                                   smallSimRobotModel.getWalkingControllerParameters(),
+                                   getDataOutputFolder(smallSimDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
       }
+
+      if (caughtException != null)
+         throw caughtException;
    }
 
-   @Test
-   public void testStepUpInchWithSquareUpSim() throws Exception
-   {
-      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
-      {
-         testStepUpWithSquareUp(stepHeight, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
-      }
-   }
-
-   public void testStepUpWithSquareUp(double stepHeightInches, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+   public void testStepUpWithSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
+                                      File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
       showMemoryUsageBeforeTest();
@@ -123,7 +188,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double stepHeight = 2.54 / 100.0 * stepHeightInches;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
-      DRCRobotModel robotModel = getRobotModel(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
       drcSimulationTestHelper.createSimulation("StepUpWithSquareUpFast");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -154,11 +218,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25));
 
-      Point3D center = new Point3D(1.9552, 0.0, 1.3);
-      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
       String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
       String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
       exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
@@ -168,24 +227,61 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testStepUpInchWithoutSquareUpReal() throws Exception
+   public void testStepUpWithoutSquareUp() throws Throwable
    {
+      Throwable caughtException = null;
+
+      configureRobotModels(false);
+
       for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
       {
-         testStepUpWithoutSquareUp(stepHeight, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+         try
+         {
+            testStepUpWithoutSquareUp(simRobotModel, stepHeight, realRobotModel.getWalkingControllerParameters(), getDataOutputFolder(realDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+         try
+         {
+            testStepUpWithoutSquareUp(simRobotModel, stepHeight, simRobotModel.getWalkingControllerParameters(), getDataOutputFolder(simDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+
+         try
+         {
+            testStepUpWithoutSquareUp(smallSimRobotModel,
+                                      stepHeight,
+                                      smallRealRobotModel.getWalkingControllerParameters(),
+                                      getDataOutputFolder(smallRealDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+         try
+         {
+            testStepUpWithoutSquareUp(smallSimRobotModel,
+                                      stepHeight,
+                                      smallSimRobotModel.getWalkingControllerParameters(),
+                                      getDataOutputFolder(smallSimDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
       }
+
+      if (caughtException != null)
+         throw caughtException;
    }
 
-   @Test
-   public void testStepUpInchWithoutSquareUpSim() throws Exception
-   {
-      for (double stepHeight : Arrays.asList(9.5, 6.0, 7.25, 8.25))
-      {
-         testStepUpWithoutSquareUp(stepHeight, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
-      }
-   }
-
-   public void testStepUpWithoutSquareUp(double stepHeightInches, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+   public void testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
+                                         File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
       showMemoryUsageBeforeTest();
@@ -195,7 +291,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double stepHeight = 2.54 / 100.0 * stepHeightInches;
       StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
-      DRCRobotModel robotModel = getRobotModel(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -227,11 +322,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
       assertTrue(success);
 
-      Point3D center = new Point3D(1.9552, 0.0, 1.3);
-      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
       String dataNameSuffix = "StepUpWithoutSquareUp" + stepHeightInches;
       String info = "Step up a " + stepHeightInches + " inches high step while walking";
       exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
@@ -241,30 +331,86 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testWalkSlopeReal() throws Exception
+   public void testWalkSlope() throws Throwable
    {
+      Throwable caughtException = null;
+
+      configureRobotModels(true);
+
       for (double slopeAngle : new double[] {-30.0, 30.0, 45.0})
       {
-         testWalkSlope(Math.toRadians(slopeAngle),
-                       0.5 * getRealRobotSteppingParameters().getDefaultStepLength(),
-                       getRealRobotWalkingParameters(),
-                       getDataOuputFolderForRealRobotParams());
+         WalkingControllerParameters walkingControllerParameters = realRobotModel.getWalkingControllerParameters();
+         try
+         {
+            testWalkSlope(simRobotModel,
+                          Math.toRadians(slopeAngle),
+                          0.5 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength(),
+                          walkingControllerParameters,
+                          getDataOutputFolder(realDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
       }
-   }
 
-   @Test
-   public void testWalkSlopeSim() throws Exception
-   {
-      for (double slopeAngle : new double[] {45.0})
+      for (double slopeAngle : new double[] {-30.0, 30.0, 45.0})
       {
-         testWalkSlope(Math.toRadians(slopeAngle),
-                       0.5 * getSCSSteppingParameters().getDefaultStepLength(),
-                       getSCSWalkingParameters(),
-                       getDataOuputFolderForSimParams());
+         WalkingControllerParameters walkingControllerParameters = simRobotModel.getWalkingControllerParameters();
+         try
+         {
+            testWalkSlope(simRobotModel,
+                          Math.toRadians(slopeAngle),
+                          0.5 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength(),
+                          walkingControllerParameters,
+                          getDataOutputFolder(simDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
       }
+
+      for (double slopeAngle : new double[] {-30.0, 30.0, 45.0})
+      {
+         WalkingControllerParameters walkingControllerParameters = smallRealRobotModel.getWalkingControllerParameters();
+         try
+         {
+            testWalkSlope(smallSimRobotModel,
+                          Math.toRadians(slopeAngle),
+                          0.5 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength(),
+                          walkingControllerParameters,
+                          getDataOutputFolder(smallRealDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+      }
+
+      for (double slopeAngle : new double[] {-30.0, 30.0, 45.0})
+      {
+         WalkingControllerParameters walkingControllerParameters = smallSimRobotModel.getWalkingControllerParameters();
+         try
+         {
+            testWalkSlope(smallSimRobotModel,
+                          Math.toRadians(slopeAngle),
+                          0.5 * walkingControllerParameters.getSteppingParameters().getDefaultStepLength(),
+                          walkingControllerParameters,
+                          getDataOutputFolder(smallSimDataFolder));
+         }
+         catch (Throwable e)
+         {
+            caughtException = e;
+         }
+      }
+
+      if (caughtException != null)
+         throw caughtException;
    }
 
-   public void testWalkSlope(double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+   public void testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters,
+                             File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
       showMemoryUsageBeforeTest();
@@ -272,7 +418,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
       SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
 
-      DRCRobotModel robotModel = getRobotModel(slopeAngle < 0.0);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
       drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable()));
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
@@ -306,11 +451,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
       assertTrue(success);
 
-      //      Point3D center = new Point3D(1.9552, 0.0, 1.3);
-      //      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
-      //      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      //      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
       String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + "Deg";
       String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
       exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
@@ -320,26 +460,75 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
    }
 
    @Test
-   public void testUpstairsReal() throws Exception
+   public void testUpstairs() throws Throwable
    {
-      testUpstairs(7.0, 3, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
-      testUpstairs(9.5, 10, getRealRobotWalkingParameters(), getDataOuputFolderForRealRobotParams());
+      Throwable caughtException = null;
+
+      configureRobotModels(false);
+
+      try
+      {
+         testUpstairs(simRobotModel, 7.0, 3, realRobotModel.getWalkingControllerParameters(), getDataOutputFolder(realDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+      try
+      {
+         testUpstairs(simRobotModel, 9.5, 10, realRobotModel.getWalkingControllerParameters(), getDataOutputFolder(realDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+
+      try
+      {
+         testUpstairs(simRobotModel, 7.0, 3, simRobotModel.getWalkingControllerParameters(), getDataOutputFolder(simDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+      try
+      {
+         /*
+          * TODO Needs: SwingTrajectoryParameters.useSingularityAvoidanceInSupport() to be false and disable
+          * smoothing in the CenterOfMassHeightControlState.computeDesiredCoMHeightAcceleration(...)
+          */
+         assertFalse(simRobotModel.getWalkingControllerParameters().getSwingTrajectoryParameters().useSingularityAvoidanceInSupport());
+         testUpstairs(simRobotModel, 9.5, 10, simRobotModel.getWalkingControllerParameters(), getDataOutputFolder(simDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+
+      try
+      {
+         testUpstairs(smallSimRobotModel, 7.0, 3, smallRealRobotModel.getWalkingControllerParameters(), getDataOutputFolder(smallRealDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+
+      try
+      {
+         testUpstairs(smallSimRobotModel, 7.0, 3, smallSimRobotModel.getWalkingControllerParameters(), getDataOutputFolder(smallSimDataFolder));
+      }
+      catch (Throwable e)
+      {
+         caughtException = e;
+      }
+
+      if (caughtException != null)
+         throw caughtException;
    }
 
-   @Test
-   public void testUpstairsSim() throws Exception
-   {
-      testUpstairs(7.0, 3, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
-      /*
-       * TODO Needs: SwingTrajectoryParameters.useSingularityAvoidanceInSupport() to be false and disable
-       * smoothing in the CenterOfMassHeightControlState.computeDesiredCoMHeightAcceleration(...)
-       */
-      assertFalse(getSCSWalkingParameters().getSwingTrajectoryParameters().useSingularityAvoidanceInSupport());
-      testUpstairs(9.5, 10, getSCSWalkingParameters(), getDataOuputFolderForSimParams());
-   }
-
-   public void testUpstairs(double stairStepHeightInches, int numberOfStairSteps, WalkingControllerParameters walkingControllerParameters,
-                            File dataOutputFolder)
+   public void testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches, int numberOfStairSteps,
+                            WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
       showMemoryUsageBeforeTest();
@@ -349,7 +538,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double stairStepLength = 1.5 * walkingControllerParameters.getSteppingParameters().getActualFootLength();
       StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight, stairStepLength);
 
-      DRCRobotModel robotModel = getRobotModel(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
       drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -390,11 +578,6 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
       assertTrue(success);
-
-      Point3D center = new Point3D(xGoal, 0.0, 1.1 + staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(xGoal, 0.0, 10.0));
-      Vector3D plusMinusVector = new Vector3D(0.1, 0.1, 0.1);
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
       String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
@@ -532,19 +715,17 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       stepToPack.getLocation().set(x, y, heightMap.heightAt(x, y, 50.0));
    }
 
-   private ValkyrieRobotModel getRobotModel(boolean disableAnkleLimits)
+   private void disableAnkleLimits(ValkyrieRobotModel robotModel)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
       robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true)
       {
          @Override
          public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
          {
-            if (disableAnkleLimits && jointHolder.getName().contains("AnklePitch"))
+            if (jointHolder.getName().contains("AnklePitch"))
                jointHolder.setLimits(-Math.PI, Math.PI);
          }
       });
-      return robotModel;
    }
 
    // Pattern-matched from TorqueSpeedDataExporter
@@ -626,36 +807,9 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       }
    }
 
-   private ValkyrieWalkingControllerParameters getRealRobotWalkingParameters()
+   private static File getDataOutputFolder(String folderName) throws IOException
    {
-      return new ValkyrieWalkingControllerParameters(jointMap, RobotTarget.REAL_ROBOT);
-   }
-
-   private ValkyrieWalkingControllerParameters getSCSWalkingParameters()
-   {
-      return new ValkyrieWalkingControllerParameters(jointMap, RobotTarget.SCS);
-   }
-
-   private SteppingParameters getRealRobotSteppingParameters()
-   {
-      return getRealRobotWalkingParameters().getSteppingParameters();
-   }
-
-   private SteppingParameters getSCSSteppingParameters()
-   {
-      return getSCSWalkingParameters().getSteppingParameters();
-   }
-
-   private static File getDataOuputFolderForSimParams() throws IOException
-   {
-      Path path = Paths.get("D:/DataAndVideos/Valkyrie/SimParams");
-      FileTools.ensureDirectoryExists(path);
-      return path.toFile();
-   }
-
-   private static File getDataOuputFolderForRealRobotParams() throws IOException
-   {
-      Path path = Paths.get("D:/DataAndVideos/Valkyrie/RealRobotParams");
+      Path path = Paths.get("D:/DataAndVideos/Valkyrie/" + folderName);
       FileTools.ensureDirectoryExists(path);
       return path.toFile();
    }
