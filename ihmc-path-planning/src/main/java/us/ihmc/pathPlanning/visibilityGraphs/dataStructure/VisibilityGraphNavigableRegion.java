@@ -14,6 +14,12 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class VisibilityGraphNavigableRegion
 {
+   /**
+    * This enables a potential 2X speed boost by replacing for loops
+    * with a parallel streamed forEach. It breaks a few tests and there
+    * is a null edge in the resulting visibility map.
+    * See more: https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-open-robotics-software/pull-requests/1393
+    */
    private static final boolean ENABLE_EXPERIMENTAL_SPEEDUP = false;
 
    private final NavigableRegion navigableRegion;
