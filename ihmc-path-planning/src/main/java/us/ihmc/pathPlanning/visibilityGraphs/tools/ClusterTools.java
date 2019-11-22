@@ -42,8 +42,6 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class ClusterTools
 {
-   private final static boolean pruneExtrusionLoops = true;
-
    //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
@@ -242,9 +240,6 @@ public class ClusterTools
          }
       }
 
-      if (pruneExtrusionLoops)
-         pruneExtrusionLoops(extrusions);
-
       return extrusions;
    }
 
@@ -261,90 +256,6 @@ public class ClusterTools
       }
 
       return edges;
-   }
-
-   private static double getMaximumExtrusionDistance(boolean extrudeToTheLeft, int currentEdgeIndex, List<LineSegment2DReadOnly> allEdges, double[] extrusionDistances)
-   {
-      LineSegment2DReadOnly currentEdge = allEdges.get(currentEdgeIndex);
-
-      Point2DReadOnly currentMidpoint = currentEdge.midpoint();
-      Point2DReadOnly currentMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, currentEdge, extrusionDistances[currentEdgeIndex]);
-      Vector2DBasics currentExtrusionDirection = new Vector2D();
-      currentExtrusionDirection.sub(currentMidpointExtrusion, currentMidpoint);
-
-      double maxExtrusionDistance = extrusionDistances[currentEdgeIndex];
-
-      for (int i = 0; i < allEdges.size(); i++)
-      {
-         if (i == currentEdgeIndex)
-            continue;
-
-         LineSegment2DReadOnly otherEdge = allEdges.get(i);
-         Point2DReadOnly otherMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, otherEdge, extrusionDistances[i]);
-
-         LineSegment2DReadOnly midpointConnection = new LineSegment2D(currentMidpoint, otherEdge.midpoint());
-
-         // FIXME this percentage thing isn't working quite right.
-         double currentPercentAlongSegment = midpointConnection.percentageAlongLineSegment(currentMidpointExtrusion);
-         double otherPercentAlongSegment = midpointConnection.percentageAlongLineSegment(otherMidpointExtrusion);
-
-         if (currentPercentAlongSegment > otherPercentAlongSegment)
-         {
-            double maxPercent = 0.5 * ( currentPercentAlongSegment + otherPercentAlongSegment);
-            if (maxPercent > 1.0 || maxPercent < 0.0)
-               continue;
-
-            double distanceAlongMidpointConnection = maxPercent * midpointConnection.length();
-            double angle = currentExtrusionDirection.angle(midpointConnection.direction(false));
-            double equivalentExtrusionDistance = distanceAlongMidpointConnection / Math.cos(angle);
-            maxExtrusionDistance = Math.min(maxExtrusionDistance, equivalentExtrusionDistance);
-         }
-      }
-
-      return maxExtrusionDistance;
-   }
-
-   private static void pruneExtrusionLoops(List<Point2D> extrusions)
-   {
-      // first, remove all points that are midpoints on another line segment
-      int extrusionIdx = 0;
-      while (extrusionIdx < extrusions.size())
-      {
-         int nextExtrusionIdx = ListWrappingIndexTools.next(extrusionIdx, extrusions);
-         int nextNextExtrusionIdx = ListWrappingIndexTools.next(nextExtrusionIdx, extrusions);
-         int prevExtrusionIdx = ListWrappingIndexTools.previous(extrusionIdx, extrusions);
-
-         LineSegment2D nextEdge = new LineSegment2D(extrusions.get(nextExtrusionIdx), extrusions.get(nextNextExtrusionIdx));
-         LineSegment2D previousEdge = new LineSegment2D(extrusions.get(prevExtrusionIdx), extrusions.get(extrusionIdx));
-
-         if (nextEdge.distance(extrusions.get(extrusionIdx)) < 1e-5)
-         {
-            extrusions.remove(nextExtrusionIdx);
-         }
-         else if (previousEdge.distance(extrusions.get(nextExtrusionIdx)) < 1e-5)
-         {
-            extrusions.remove(extrusionIdx);
-         }
-         else
-         {
-            extrusionIdx++;
-         }
-
-      }
-
-   }
-
-   private static Point2DReadOnly getMidpointExtrusion(boolean extrudeToTheLeft, LineSegment2DReadOnly edge, double extrusionDistance)
-   {
-      Vector2DBasics currentDirection = edge.direction(true);
-      EuclidGeometryTools.perpendicularVector2D(currentDirection, currentDirection);
-      if (!extrudeToTheLeft)
-         currentDirection.negate();
-      Point2DReadOnly currentMidpoint = edge.midpoint();
-      Point2D extrudedMidpoint = new Point2D();
-      extrudedMidpoint.scaleAdd(extrusionDistance, currentDirection, currentMidpoint);
-
-      return extrudedMidpoint;
    }
 
    public static List<Point2D> extrudeMultiLine(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator, int numberOfExtrusionsAtEndpoints)
