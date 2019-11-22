@@ -619,15 +619,12 @@ public class ClusterTools
          Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
                                                                                                       verticalObstacle);
 
-         List<List<Point2DReadOnly>> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getPreferredNavigableExtrusionsInLocal();
-         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getPreferredNonNavigableExtrusionsInLocal();
+         List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
+         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
          preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         for (List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorldSet : preferredNavigableExtrusionsInFlatWorld)
-         {
             preferredNavigableExtrusionsInHomeRegionLocal
-                  .add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorldSet, transformFromWorldToHome));
-         }
+                  .add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld, transformFromWorldToHome));
          preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
                                                                                                        transformFromWorldToHome);
       }
