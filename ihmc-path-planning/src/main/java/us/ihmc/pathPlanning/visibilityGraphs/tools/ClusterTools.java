@@ -136,7 +136,6 @@ public class ClusterTools
 
       ArrayList<Line2D> rays = new ArrayList<>();
 
-      // FIXME don't use that one,
       int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools
             .findVertexIndex(polygonQ, true, EuclidGeometryPolygonTools.Bound.MIN, EuclidGeometryPolygonTools.Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
@@ -603,7 +602,6 @@ public class ClusterTools
       List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
 
-
       // Project the points back up to the home region...
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
@@ -617,17 +615,19 @@ public class ClusterTools
       List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
-         // FIXME check that this is doing things correctly with regards to the preferred extrusions
+         // FIXME check that this is doing things correctly with regards to the preferred extrusions. Pretty sure it's wrong.
          Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
                                                                                                       verticalObstacle);
 
-         List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
-         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+         List<List<Point2DReadOnly>> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getPreferredNavigableExtrusionsInLocal();
+         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getPreferredNonNavigableExtrusionsInLocal();
 
-         List<Point2DReadOnly> tempPreferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
-                                                                                                    transformFromWorldToHome);
          preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         preferredNavigableExtrusionsInHomeRegionLocal.add(tempPreferredNavigableExtrusionsInHomeRegionLocal);
+         for (List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorldSet : preferredNavigableExtrusionsInFlatWorld)
+         {
+            preferredNavigableExtrusionsInHomeRegionLocal
+                  .add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorldSet, transformFromWorldToHome));
+         }
          preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
                                                                                                        transformFromWorldToHome);
       }
