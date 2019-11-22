@@ -36,8 +36,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel.getContactPointParameters(),
                                                                                 drcRobotModel.getFootstepPlannerParameters(),
                                                                                 drcRobotModel.getVisibilityGraphsParameters(), statusOutputManager, registry,
-                                                                                yoGraphicsListRegistry,
-                                                                                Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+                                                                                yoGraphicsListRegistry);
       footstepPlanningToolboxController.setTextToSpeechPublisher(textToSpeechPublisher);
       startYoVariableServer();
    }
