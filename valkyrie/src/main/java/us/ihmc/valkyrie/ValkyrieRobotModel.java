@@ -197,11 +197,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.customModel = customModel;
    }
 
+   /**
+    * Scale to apply to the robot mass.
+    * 
+    * @param modelMassScale the new scale value. Default value is {@code 1.0}.
+    */
    public void setModelMassScale(double modelMassScale)
    {
+      if (robotPhysicalProperties != null)
+         throw new IllegalArgumentException("Cannot set modelMassScale once robotPhysicalProperties has been created.");
       this.modelMassScale = modelMassScale;
    }
 
+   /**
+    * Scale to apply to the robot size.
+    * 
+    * @param modelSizeScale the new scale value. Default value is {@code 1.0}.
+    */
    public void setModelSizeScale(double modelSizeScale)
    {
       if (robotPhysicalProperties != null)
