@@ -190,7 +190,7 @@ public class StereoVisionPointCloudDataLoader
       return messagesInTimeOrder;
    }
 
-   private static long extractTimestamp(String fileName)
+   public static long extractTimestamp(String fileName)
    {
       String[] stringsWithoutSpliter = fileName.split(StereoVisionPointCloudDataExporter.STEREO_DATA_SPLITER);
       for (String string : stringsWithoutSpliter)
