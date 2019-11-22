@@ -545,7 +545,7 @@ public class PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
-   private static PlanarRegionsList drawTrickyCorridorWalls(PlanarRegionsListGenerator generator)
+   private static void drawTrickyCorridorWalls(PlanarRegionsListGenerator generator)
    {
       // left wall
       generator.translate(0.0, 1.5, 0.0);
@@ -601,8 +601,6 @@ public class PlannerTestEnvironments
       generator.translate(-10.0, 0.0, -1.0);
 
       generator.translate(3.0, 1.5, 0.0);
-
-      return generator.getPlanarRegionsList();
    }
 
    public static PlanarRegionsList getSimplePlatform()
