@@ -281,7 +281,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       if (numberOfPoints.getValue() > 2)
       {
-         s.unsafe_set(0, 0, positionIn[1] / h.unsafe_get(0, 0) - positionIn[0] / h.unsafe_get(1, 0) - v0);
+         s.unsafe_set(0, 0, positionIn[1] / h.unsafe_get(0, 0) - positionIn[0] / h.unsafe_get(0, 0) - v0);
          for (int i = 0; i < numberOfPoints.getValue() - 2; i++)
          {
             s.unsafe_set(i + 4, 0, yd.unsafe_get(i + 1, 0) / h.unsafe_get(i + 1, 0) - yd.unsafe_get(i, 0) / h.unsafe_get(i, 0));
