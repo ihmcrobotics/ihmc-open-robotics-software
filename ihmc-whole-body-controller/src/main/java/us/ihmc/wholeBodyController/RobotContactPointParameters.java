@@ -186,7 +186,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    {
       // The gains were computed for simDT = 0.0001sec. This assumes that the gains should be inversely proportional to the simulation DT.
       double simDTRef = 0.0001;
-      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower() + 2.0);
+      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       if (useSoftGroundContactParameters)
       {
@@ -208,7 +208,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
    {
-      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower() + 2.0);
+      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       if (useSoftGroundContactParameters)
       {
