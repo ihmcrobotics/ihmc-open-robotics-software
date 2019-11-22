@@ -56,11 +56,11 @@ public class ClusterTools
       List<List<? extends Point2DReadOnly>> listOfExtrusions = new ArrayList<>();
       for (ConvexPolygon2DReadOnly polygon : polygons)
       {
-         double[] extrusionDistances = polygon.getVertexBufferView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
+         double[] extrusionDistances = polygon.getPolygonVerticesView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
          ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
          scaleConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
 
-         listOfExtrusions.add(scaledPolygon.getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()));
+         listOfExtrusions.add(scaledPolygon.getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
       }
 
       return listOfExtrusions;
@@ -94,10 +94,12 @@ public class ClusterTools
          return true;
       }
 
+      List<? extends Point2DReadOnly> vertices = polygonQ.getPolygonVerticesView();
+
       if (polygonQ.getNumberOfVertices() == 2)
       {
-         Point2DReadOnly vertex0 = polygonQ.getVertex(0);
-         Point2DReadOnly vertex1 = polygonQ.getVertex(1);
+         Point2DReadOnly vertex0 = vertices.get(0);
+         Point2DReadOnly vertex1 = vertices.get(1);
 
          if (vertex0.distance(vertex1) < distances[0] + distances[1])
          {
@@ -136,33 +138,40 @@ public class ClusterTools
 
       ArrayList<Line2D> rays = new ArrayList<>();
 
+      // FIXME don't use that one,
       int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools
             .findVertexIndex(polygonQ, true, EuclidGeometryPolygonTools.Bound.MIN, EuclidGeometryPolygonTools.Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+      Point2DReadOnly nextNextVertexQ = polygonQ.getNextVertex(nextVertexQIndex);
 
-      // TODO review this and see if there are speed improvements
       for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {
-         Line2D edgeOnQ = new Line2D(vertexQ, nextVertexQ);
-         Vector2D normalizedVector = new Vector2D(edgeOnQ.getDirection());
-         normalizedVector.set(edgeOnQ.getDirection());
+         Vector2D normalizedVector = new Vector2D();
+         Vector2D nextNormalizedVector = new Vector2D();
+         normalizedVector.sub(nextVertexQ, vertexQ);
+         normalizedVector.normalize();
+         nextNormalizedVector.sub(nextNextVertexQ, nextVertexQ);
+         nextNormalizedVector.normalize();
 
-         Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D(edgeOnQ.perpendicularVector());
-         vectorPerpendicularToEdgeOnQ.negate();
-         vectorPerpendicularToEdgeOnQ.normalize();
-         Point2D referencePoint = new Point2D();
-         referencePoint.scaleAdd(distances[i], vectorPerpendicularToEdgeOnQ, vertexQ);
+         // don't include collinear points
+         if (normalizedVector.dot(nextNormalizedVector) < 1.0 - 1e-6)
+         {
+            Vector2DBasics vectorPerpendicularToEdgeOnQ = EuclidGeometryTools.perpendicularVector2D(normalizedVector);
+            vectorPerpendicularToEdgeOnQ.negate();
 
+            Point2D referencePoint = new Point2D();
+            referencePoint.scaleAdd(distances[i], vectorPerpendicularToEdgeOnQ, vertexQ);
 
-         Line2D newEdge = new Line2D(referencePoint, normalizedVector);
-         rays.add(newEdge);
+            rays.add(new Line2D(referencePoint, normalizedVector));
+         }
 
          nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
 
          vertexQ = nextVertexQ;
          nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+         nextNextVertexQ = polygonQ.getNextVertex(nextVertexQIndex);
       }
 
 
