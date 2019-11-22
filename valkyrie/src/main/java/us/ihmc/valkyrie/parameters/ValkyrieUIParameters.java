@@ -9,11 +9,17 @@ import us.ihmc.wholeBodyController.UIParameters;
 
 public class ValkyrieUIParameters implements UIParameters
 {
+   private final ValkyriePhysicalProperties physicalProperties;
+
+   public ValkyrieUIParameters(ValkyriePhysicalProperties physicalProperties)
+   {
+      this.physicalProperties = physicalProperties;
+   }
 
    @Override
    public double getAnkleHeight()
    {
-      return ValkyriePhysicalProperties.ankleHeight;
+      return physicalProperties.getAnkleHeight();
    }
 
    /** @inheritDoc */
@@ -54,8 +60,8 @@ public class ValkyrieUIParameters implements UIParameters
    @Override
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
-      return (1 + 0.3) * 2 * Math.sqrt(ValkyriePhysicalProperties.footForward * ValkyriePhysicalProperties.footForward
-            + 0.25 * ValkyriePhysicalProperties.footWidth * ValkyriePhysicalProperties.footWidth);
+      return (1 + 0.3) * 2 * Math.sqrt(physicalProperties.getFootForward() * physicalProperties.getFootForward()
+            + 0.25 * physicalProperties.getFootWidth() * physicalProperties.getFootWidth());
    }
 
    @Override

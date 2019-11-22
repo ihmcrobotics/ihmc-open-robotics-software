@@ -22,7 +22,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), RobotTarget.SCS)
             {
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
