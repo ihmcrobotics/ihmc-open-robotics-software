@@ -25,10 +25,18 @@ public class ValkyriePhysicalProperties
    private final SideDependentList<RigidBodyTransform> handControlFrameToArmMassSimTransforms = new SideDependentList<>();
 
    private final double modelSizeScale;
+   private final double modelMassScalePower;
 
-   public ValkyriePhysicalProperties(double modelSizeScale)
+   public ValkyriePhysicalProperties()
+   {
+      this(1.0, 1.0);
+   }
+
+   public ValkyriePhysicalProperties(double modelSizeScale, double modelMassScale)
    {
       this.modelSizeScale = modelSizeScale;
+      modelMassScalePower = modelSizeScale != 1.0 ? Math.log(modelMassScale) / Math.log(modelSizeScale) : 1.0;
+
       ankleHeight = modelSizeScale * defaultAnkleHeight;
       footLength = modelSizeScale * defaultFootLength;
       footBack = modelSizeScale * defaultFootBack;
@@ -65,6 +73,11 @@ public class ValkyriePhysicalProperties
    public double getModelSizeScale()
    {
       return modelSizeScale;
+   }
+
+   public double getModelMassScalePower()
+   {
+      return modelMassScalePower;
    }
 
    public double getAnkleHeight()

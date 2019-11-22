@@ -61,12 +61,12 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final double massScalePower;
    private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieJointMap(ValkyriePhysicalProperties physicalProperties, ValkyrieRobotVersion robotVersion, double modelMassScale)
+   public ValkyrieJointMap(ValkyriePhysicalProperties physicalProperties, ValkyrieRobotVersion robotVersion)
    {
       this.robotVersion = robotVersion;
       this.physicalProperties = physicalProperties;
       modelScale = physicalProperties.getModelSizeScale();
-      massScalePower = modelScale != 1.0 ? Math.log(modelMassScale) / Math.log(modelScale) : 1.0;
+      massScalePower = physicalProperties.getModelMassScalePower();
 
       switch(robotVersion)
       {

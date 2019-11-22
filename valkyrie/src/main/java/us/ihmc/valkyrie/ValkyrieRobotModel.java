@@ -121,7 +121,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyriePhysicalProperties getRobotPhysicalProperties()
    {
       if (robotPhysicalProperties == null)
-         robotPhysicalProperties = new ValkyriePhysicalProperties(modelSizeScale);
+         robotPhysicalProperties = new ValkyriePhysicalProperties(modelSizeScale, modelMassScale);
       return robotPhysicalProperties;
    }
 
@@ -129,7 +129,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyrieJointMap getJointMap()
    {
       if (jointMap == null)
-         jointMap = new ValkyrieJointMap(getRobotPhysicalProperties(), robotVersion, modelMassScale);
+         jointMap = new ValkyrieJointMap(getRobotPhysicalProperties(), robotVersion);
       return jointMap;
    }
 
