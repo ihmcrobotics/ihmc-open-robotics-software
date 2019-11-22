@@ -67,7 +67,10 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
 
    public synchronized void addEdge(VisibilityGraphEdge edge)
    {
-      edges.add(edge);
+      if (edge != null)
+      {
+         edges.add(edge);
+      }
    }
 
    public List<VisibilityGraphEdge> getEdges()
