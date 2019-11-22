@@ -333,11 +333,6 @@ public class VisibilityGraphsFrameworkTest
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
       DataSet dataset = allDatasets.get(currentDatasetIndex);
 
       while (dataset != null)
@@ -357,8 +352,7 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
-
-
+         
          if (DEBUG)
          {
             LogTools.info("Finished processing file: " + dataset.getName());
@@ -430,44 +424,30 @@ public class VisibilityGraphsFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname)
+   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, DataSetName datasetname)
    {
-      List<DataSet> allDatasets = DataSetIOTools.loadDataSets();
+      List<DataSet> allDataSets = DataSetIOTools.loadDataSets();
+      DataSet dataSetToTest = DataSetIOTools.loadDataSet(datasetname);
 
-      if (DEBUG)
-      {
-         LogTools.info("Unit test files found: " + allDatasets.size());
-      }
-
+      // load all datasets in UI, only test one though
       if (VISUALIZE)
       {
-         List<String> allDatasetNames = allDatasets.stream().map(DataSet::getName).collect(Collectors.toList());
+         List<String> allDatasetNames = allDataSets.stream().map(DataSet::getName).collect(Collectors.toList());
          messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
-
       }
-
-      if (allDatasets.isEmpty())
-         Assert.fail("Did not find any datasets to test.");
-
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
-      DataSet dataset = allDatasets.stream().filter(d -> d.getName().equals(datasetname)).findFirst().orElse(null);
 
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getName());
+         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataSetToTest.getName());
       }
 
       if (DEBUG)
       {
-         LogTools.info("Processing file: " + dataset.getName());
+         LogTools.info("Processing file: " + dataSetToTest.getName());
       }
 
-      String errorMessages = dataSetTester.apply(dataset);
+      String errorMessages = dataSetTester.apply(dataSetToTest);
 
       Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       LogTools.info("Finished testing.");
@@ -603,6 +583,7 @@ public class VisibilityGraphsFrameworkTest
 
          if (VISUALIZE)
          {
+            messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, !simulateOcclusions);
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, walkerPosition);
          }
 
@@ -977,21 +958,22 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-//      String dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment.name(); // enum is easier to swap than all these commented lines
-//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-//      String dataSetName = "20191008_153543_TrickCorridor";
-//      String dataSetName = "20171216_111326_CrossoverPlatforms";
-//      String dataSetName = "20171026_131304_PlanarRegion_Ramp_2Story_UnitTest";
-//      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-//      String dataSetName = "20171215_220523_SteppingStones";
-//      String dataSetName = "20171218_204917_FlatGround";
-//      String dataSetName = "20171215_201810_RampSteppingStones_Sim"
-      String dataSetName = "20191114_155310_SimplePlatform";
-//      String dataSetName = "20171215_214730_CinderBlockField";
-//      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
-//      String dataSetName = "20171215_210811_DoorwayWithCeiling";
-      //      String dataSetName = "20191007_185913_SimpleCorridor";
-      //      String dataSetName = "20191007_200400_Corridor1Wall";
+
+//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
+//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
+//      DataSetName dataSetName = DataSetName._20191008_153543_TrickCorridor;
+//      DataSetName dataSetName = DataSetName._20171216_111326_CrossoverPlatforms;
+//      DataSetName dataSetName = DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest;
+//      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
+//      DataSetName dataSetName = DataSetName._20171215_220523_SteppingStones;
+//      DataSetName dataSetName = DataSetName._20171218_204917_FlatGround;
+//      DataSetName dataSetName = DataSetName._20171215_201810_RampSteppingStones_Si"
+      DataSetName dataSetName = DataSetName._20191114_155310_SimplePlatform;
+//      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
+//      DataSetName dataSetName = DataSetName._20001201_205050_TwoSquaresOneObstacle;
+//      DataSetName dataSetName = DataSetName._20171215_210811_DoorwayWithCeiling;
+//      DataSetName dataSetName = DataSetName._20191007_185913_SimpleCorridor;
+//      DataSetName dataSetName = DataSetName._20191007_200400_Corridor1Wall;
 
       VISUALIZE = true;
       test.setup();
@@ -1004,7 +986,7 @@ public class VisibilityGraphsFrameworkTest
 
       }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
       test.tearDown();
 
    }
