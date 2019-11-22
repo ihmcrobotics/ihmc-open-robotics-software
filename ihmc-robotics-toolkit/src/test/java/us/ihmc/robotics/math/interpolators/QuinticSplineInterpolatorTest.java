@@ -33,8 +33,6 @@ public class QuinticSplineInterpolatorTest
       assertEquals(y[0], spline.getPosition(0), 1e-6);
       assertEquals(v0, spline.getVelocity(0), 1e-6);
       assertEquals(a0, spline.getAcceleration(0), 1e-6);
-
-      System.out.println(spline.getVelocity(0));
    }
    
    

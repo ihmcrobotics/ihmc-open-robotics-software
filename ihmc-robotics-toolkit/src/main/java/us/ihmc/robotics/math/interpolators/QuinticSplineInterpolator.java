@@ -19,6 +19,8 @@ import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
  * 
  * Not realtime safe. 
  * 
+ * Not rewindable. It will result in too many intermediate variables.
+ * 
  * @author Jesper Smith
  */
 public class QuinticSplineInterpolator implements TrajectoryGenerator
@@ -50,7 +52,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    private DenseMatrix64F f;
 
    // Constants
-   private final YoDouble[] x;
+   private final double[] x;
    private final YoInteger numberOfPoints;
    private final QuinticSpline[] splines;
 
@@ -99,11 +101,8 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       e = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
       f = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
 
-      x = new YoDouble[maximumNumberOfPoints];
-      for (int i = 0; i < maximumNumberOfPoints; i++)
-      {
-         x[i] = new YoDouble("x[" + i + "]", registry);
-      }
+      x = new double[maximumNumberOfPoints];
+      
 
       position = new YoDouble[numberOfSplines];
       velocity = new YoDouble[numberOfSplines];
@@ -151,7 +150,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       for (int i = 0; i < numberOfPoints.getValue(); i++)
       {
-         x[i].set(timeIn[i]);
+         x[i] = timeIn[i];
       }
 
       h.reshape(numberOfPoints.getValue() - 1, 1);
@@ -350,14 +349,14 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       this.currentTime.set(timeIn);
 
       double time = timeIn;
-      if (time > x[numberOfPoints.getValue() - 1].getDoubleValue())
-         time = x[numberOfPoints.getValue() - 1].getDoubleValue();
-      if (time < x[0].getDoubleValue())
-         time = x[0].getDoubleValue();
+      if (time > x[numberOfPoints.getValue() - 1])
+         time = x[numberOfPoints.getValue() - 1];
+      if (time < x[0])
+         time = x[0];
 
       int index = determineSplineIndex(time);
 
-      double h = time - x[index].getDoubleValue();
+      double h = time - x[index];
 
       double h2 = MathTools.square(h);
       double h3 = h2 * h;
@@ -395,7 +394,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    {
       for (int i = 0; i < numberOfPoints.getValue() - 2; i++)
       {
-         if (xx >= x[i].getDoubleValue() && xx <= x[i + 1].getDoubleValue())
+         if (xx >= x[i] && xx <= x[i + 1])
             return i;
       }
       return numberOfPoints.getValue() - 2;
@@ -409,12 +408,12 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       private final int segments;
       private final YoVariableRegistry registry;
 
-      private final YoDouble[] a;
-      private final YoDouble[] b;
-      private final YoDouble[] c;
-      private final YoDouble[] d;
-      private final YoDouble[] e;
-      private final YoDouble[] f;
+      private final double[] a;
+      private final double[] b;
+      private final double[] c;
+      private final double[] d;
+      private final double[] e;
+      private final double[] f;
 
       private final YoBoolean coefficientsSet;
 
@@ -423,32 +422,22 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          this.segments = pointsToInterpolate - 1;
          this.registry = new YoVariableRegistry(name);
          parentRegistry.addChild(this.registry);
-         a = new YoDouble[segments];
-         b = new YoDouble[segments];
-         c = new YoDouble[segments];
-         d = new YoDouble[segments];
-         e = new YoDouble[segments];
-         f = new YoDouble[segments];
+         a = new double[segments];
+         b = new double[segments];
+         c = new double[segments];
+         d = new double[segments];
+         e = new double[segments];
+         f = new double[segments];
 
          coefficientsSet = new YoBoolean(name + "_initialized", registry);
          coefficientsSet.set(false);
-
-         for (int i = 0; i < segments; i++)
-         {
-            a[i] = new YoDouble(name + "_a[" + i + "]", registry);
-            b[i] = new YoDouble(name + "_b[" + i + "]", registry);
-            c[i] = new YoDouble(name + "_c[" + i + "]", registry);
-            d[i] = new YoDouble(name + "_d[" + i + "]", registry);
-            e[i] = new YoDouble(name + "_e[" + i + "]", registry);
-            f[i] = new YoDouble(name + "_f[" + i + "]", registry);
-         }
       }
 
-      private void set(YoDouble[] var, DenseMatrix64F value)
+      private void set(double[] var, DenseMatrix64F value)
       {
          for (int i = 0; i < segments; i++)
          {
-            var[i].set(value.unsafe_get(i, 0));
+            var[i] = value.unsafe_get(i, 0);
          }
       }
 
@@ -493,22 +482,22 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          if (!coefficientsSet.getBooleanValue())
             throw new RuntimeException("Spline coefficients not set");
 
-         pos.set(a[index].getDoubleValue() + b[index].getDoubleValue() * h + c[index].getDoubleValue() * h2 + d[index].getDoubleValue() * h3
-               + e[index].getDoubleValue() * h4 + f[index].getDoubleValue() * h5);
+         pos.set(a[index] + b[index] * h + c[index] * h2 + d[index] * h3
+               + e[index] * h4 + f[index] * h5);
 
          if (crackle != null)
          {
-            crackle.set(120.0 * f[index].getDoubleValue());
+            crackle.set(120.0 * f[index]);
          }
          if (snap != null)
          {
-            snap.set(24.0 * e[index].getDoubleValue() + 120.0 * f[index].getDoubleValue() * h);
+            snap.set(24.0 * e[index] + 120.0 * f[index] * h);
          }
-         jerk.set(6.0 * d[index].getDoubleValue() + 24.0 * e[index].getDoubleValue() * h + 60 * f[index].getDoubleValue() * h2);
-         acc.set(2.0 * c[index].getDoubleValue() + 6.0 * d[index].getDoubleValue() * h + 12.0 * e[index].getDoubleValue() * h2
-               + 20.0 * f[index].getDoubleValue() * h3);
-         vel.set(b[index].getDoubleValue() + 2.0 * c[index].getDoubleValue() * h + 3.0 * d[index].getDoubleValue() * h2 + 4.0 * e[index].getDoubleValue() * h3
-               + 5.0 * f[index].getDoubleValue() * h4);
+         jerk.set(6.0 * d[index] + 24.0 * e[index] * h + 60 * f[index] * h2);
+         acc.set(2.0 * c[index] + 6.0 * d[index] * h + 12.0 * e[index] * h2
+               + 20.0 * f[index] * h3);
+         vel.set(b[index] + 2.0 * c[index] * h + 3.0 * d[index] * h2 + 4.0 * e[index] * h3
+               + 5.0 * f[index] * h4);
       }
 
    }
@@ -516,7 +505,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    @Override
    public boolean isDone()
    {
-      return currentTime.getValue() > x[numberOfPoints.getValue() - 1].getDoubleValue();
+      return currentTime.getValue() > x[numberOfPoints.getValue() - 1];
    }
 
    @Override
