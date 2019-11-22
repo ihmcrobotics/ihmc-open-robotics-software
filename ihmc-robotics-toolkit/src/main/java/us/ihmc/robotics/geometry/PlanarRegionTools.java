@@ -18,10 +18,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1147,12 +1144,12 @@ public class PlanarRegionTools
       return null;
    }
 
-   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(PlanarRegionsList regions, Point3D rayStart, Vector3D rayDirection)
+   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(PlanarRegionsList regions, Point3DReadOnly rayStart, Vector3D rayDirection)
    {
       return intersectRegionsWithRay(regions.getPlanarRegionsAsList(), rayStart, rayDirection);
    }
 
-   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(List<PlanarRegion> regions, Point3D rayStart, Vector3D rayDirection)
+   public static ImmutablePair<Point3D, PlanarRegion> intersectRegionsWithRay(List<PlanarRegion> regions, Point3DReadOnly rayStart, Vector3D rayDirection)
    {
       double smallestDistance = Double.POSITIVE_INFINITY;
       ImmutablePair<Point3D, PlanarRegion> closestIntersection = null;
@@ -1175,7 +1172,7 @@ public class PlanarRegionTools
       return closestIntersection;
    }
 
-   public static Point3D intersectRegionWithRay(PlanarRegion region, Point3D rayStart, Vector3D rayDirection)
+   public static Point3D intersectRegionWithRay(PlanarRegion region, Point3DReadOnly rayStart, Vector3D rayDirection)
    {
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       region.getTransformToWorld(regionToWorld);
