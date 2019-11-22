@@ -1,26 +1,31 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionsListCutTool;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
-public class FakeREAVirtualCamera
+public class SimulatedDepthCamera
 {
+   private static final boolean USE_METHOD_2 = true;
+
    private final ReferenceFrame cameraFrame;
 
    private final double verticalFOV;
@@ -35,7 +40,12 @@ public class FakeREAVirtualCamera
    private final Plane3D planeLeft;
    private final Plane3D planeRight;
 
-   public FakeREAVirtualCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
+   HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private FramePose3D tempCameraPose = new FramePose3D();
+
+   public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
@@ -48,6 +58,73 @@ public class FakeREAVirtualCamera
    }
 
    public PlanarRegionsList filterMapToVisible(PlanarRegionsList map)
+   {
+      return USE_METHOD_2 ? filterUsingMethod2(map) : filterUsingMethod1(map);
+   }
+
+   public PlanarRegionsList filterUsingMethod2(PlanarRegionsList map)
+   {
+      pointsInRegions.clear();
+
+      for (PlanarRegion planarRegion : map.getPlanarRegionsAsList())
+         pointsInRegions.put(planarRegion, new ArrayList<>());
+
+      tempCameraPose.setToZero(cameraFrame);
+      tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      int numberOfPointsToGenerate = 7500;
+      Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), 1.0, numberOfPointsToGenerate);
+
+      double rayLength = 5.0;
+      double rayLengthSquared = MathTools.square(rayLength);
+      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(tempCameraPose.getPosition()),
+                                                                                                   rayLength,
+                                                                                                   map.getPlanarRegionsAsList());
+
+      for (int rayIndex = 0; rayIndex < numberOfPointsToGenerate; rayIndex++)
+      {
+         Point3D pointOnSphere = pointsOnSphere[rayIndex];
+         Vector3D rayDirection = new Vector3D();
+         rayDirection.sub(pointOnSphere, tempCameraPose.getPosition());
+         ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(filteredRegions,
+                                                                                                           tempCameraPose.getPosition(),
+                                                                                                           rayDirection);
+         if (intersectionPair == null || intersectionPair.getLeft().distanceSquared(tempCameraPose.getPosition()) > rayLengthSquared)
+         {
+            continue;
+         }
+
+         Point3D intersection = intersectionPair.getLeft();
+         PlanarRegion region = intersectionPair.getRight();
+
+         //         rayImpactLocations.add(intersection);
+
+         Point3D pointOnPlane = new Point3D(intersection);
+         region.transformFromWorldToLocal(pointOnPlane);
+
+         pointsInRegions.get(region).add(intersection);
+      }
+
+      List<PlanarRegionSegmentationRawData> segmentationRawData = new ArrayList<>();
+      for (PlanarRegion originalRegion : pointsInRegions.keySet())
+      {
+         List<Point3D> points = pointsInRegions.get(originalRegion);
+         Point3D center = new Point3D();
+         originalRegion.getBoundingBox3dInWorld().getCenterPoint(center);
+         PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(originalRegion.getRegionId(),
+                                                                                       originalRegion.getNormal(),
+                                                                                       center,
+                                                                                       points);
+         segmentationRawData.add(rawData);
+      }
+
+      PlanarRegionsList visibleRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData,
+                                                                                             concaveHullFactoryParameters,
+                                                                                             polygonizerParameters);
+      return visibleRegionsList;
+   }
+
+   public PlanarRegionsList filterUsingMethod1(PlanarRegionsList map)
    {
       // TODO consider prefilter with view distance
       // List<PlanarRegion> filteredRegions = PlanarRegionTools

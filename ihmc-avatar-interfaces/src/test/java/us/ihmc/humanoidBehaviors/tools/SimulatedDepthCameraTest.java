@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -26,7 +25,7 @@ import us.ihmc.tools.gui.AWTTools;
 import java.awt.*;
 
 // TODO: Measure speed
-public class FakeREAVirtualCameraTest
+public class SimulatedDepthCameraTest
 {
    public static final double VERTICAL_FOV = 90.0;
    public static final double HORIZONTAL_FOV = 90.0;
@@ -111,9 +110,9 @@ public class FakeREAVirtualCameraTest
       PlanarRegionsList trickCorridor = map;
       PoseReferenceFrame cameraFrame = new PoseReferenceFrame("camera", ReferenceFrame.getWorldFrame());
       cameraFrame.setPoseAndUpdate(pose3D);
-      FakeREAVirtualCamera fakeREAVirtualCamera = new FakeREAVirtualCamera(verticalFov, horizontalFov, cameraFrame);
+      SimulatedDepthCamera simulatedDepthCamera = new SimulatedDepthCamera(verticalFov, horizontalFov, cameraFrame);
       Stopwatch stopwatch = new Stopwatch().start();
-      PlanarRegionsList virtualCamera = fakeREAVirtualCamera.filterMapToVisible(trickCorridor);
+      PlanarRegionsList virtualCamera = simulatedDepthCamera.filterMapToVisible(trickCorridor);
       LogTools.info("Time taken: {}", stopwatch.lapElapsed());
       if (mapWindowNumber > 0)
          createAndShowPlanarRegionWindow(trickCorridor, cameraFrame, mapWindowNumber - 1, verticalFov, horizontalFov);
