@@ -968,7 +968,7 @@ public class VisibilityGraphsFrameworkTest
 //      DataSetName dataSetName = DataSetName._20171215_220523_SteppingStones;
 //      DataSetName dataSetName = DataSetName._20171218_204917_FlatGround;
 //      DataSetName dataSetName = DataSetName._20171215_201810_RampSteppingStones_Si"
-      DataSetName dataSetName = DataSetName._20191114_155310_SimplePlatform;
+      DataSetName dataSetName = DataSetName._20191122_122216_MultiRegionFlatGround;
 //      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
 //      DataSetName dataSetName = DataSetName._20001201_205050_TwoSquaresOneObstacle;
 //      DataSetName dataSetName = DataSetName._20171215_210811_DoorwayWithCeiling;
