@@ -189,6 +189,8 @@ public class ClusterMeshViewer extends AnimationTimer
 
          buildPreferredNavigableExtrusion(preferredNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
          buildNavigableExtrusion(navigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
+         buildNonNavigableExtrusion(nonNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
+         buildPreferredNonNavigableExtrusion(preferredNonNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
 
          List<Cluster> allClusters = navigableRegionLocalPlanner.getAllClusters();
          for (Cluster cluster : allClusters)
