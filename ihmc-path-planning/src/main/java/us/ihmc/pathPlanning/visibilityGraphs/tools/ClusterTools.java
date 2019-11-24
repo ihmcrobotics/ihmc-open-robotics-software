@@ -593,7 +593,8 @@ public class ClusterTools
 
       Vector3D obstacleNormal = obstacleRegion.getNormal();
       boolean verticalObstacle = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
-      Cluster tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(extrusionDistanceCalculator, temporaryClusterPoints, verticalObstacle);
+      Cluster tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(extrusionDistanceCalculator, preferredExtrusionDistanceCalculator,
+                                                                                          temporaryClusterPoints, verticalObstacle, includePreferredExtrusions);
 
       List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
@@ -611,14 +612,12 @@ public class ClusterTools
       List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
-         tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator,
-                                                                                     temporaryClusterPoints, verticalObstacle);
 
-         List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
-         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+         List<List<Point2DReadOnly>> preferredNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getPreferredNavigableExtrusionsInLocal();
+         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getPreferredNonNavigableExtrusionsInLocal();
 
-         preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         preferredNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld, transformFromWorldToHome));
+         preferredNavigableExtrusionsInHomeRegionLocal = preferredNavigableExtrusionsInFlatWorld.stream().
+               map(pointList -> projectPointsVerticallyToPlanarRegionLocal(homeRegion, pointList, transformFromWorldToHome)).collect(Collectors.toList());
 
          preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
                                                                                                        transformFromWorldToHome);
@@ -639,7 +638,9 @@ public class ClusterTools
    }
 
    private static Cluster createTemporaryClusterWithZEqualZeroAndExtrudeIt(ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                                           List<Point3DReadOnly> temporaryClusterPoints, boolean verticalObstacle)
+                                                                           ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
+                                                                           List<Point3DReadOnly> temporaryClusterPoints, boolean verticalObstacle,
+                                                                           boolean includePreferredExtrusions)
    {
       Cluster tempFlatClusterToExtrude;
 
@@ -657,7 +658,7 @@ public class ClusterTools
          tempFlatClusterToExtrude.addRawPointsInLocal3D(temporaryClusterPoints);
       }
 
-      extrudeObstacleCluster(tempFlatClusterToExtrude, extrusionDistanceCalculator);
+      extrudeObstacleCluster(tempFlatClusterToExtrude, extrusionDistanceCalculator, preferredExtrusionDistanceCalculator, includePreferredExtrusions);
       return tempFlatClusterToExtrude;
    }
 
@@ -681,8 +682,11 @@ public class ClusterTools
       return navigableExtrusionsInHomeRegionLocal;
    }
 
-   public static void extrudeObstacleCluster(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
+   public static void extrudeObstacleCluster(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator,
+                                             ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator, boolean includePreferredExtrusions)
    {
+      ObstacleExtrusionDistanceCalculator preferredNonNavigableCalculator = (p, h) -> preferredExtrusionDistanceCalculator.computeExtrusionDistance(p, h) - NAV_TO_NON_NAV_DISTANCE;
+      ObstacleExtrusionDistanceCalculator preferredNavigableCalculator = preferredExtrusionDistanceCalculator;
       ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> calculator.computeExtrusionDistance(p, h) - NAV_TO_NON_NAV_DISTANCE;
       ObstacleExtrusionDistanceCalculator navigableCalculator = calculator;
       int numberOfExtrusionsAtEndpoints = 5;
@@ -692,12 +696,27 @@ public class ClusterTools
       case MULTI_LINE:
          cluster.addNonNavigableExtrusionsInLocal(extrudeMultiLine(cluster, nonNavigableCalculator, numberOfExtrusionsAtEndpoints));
          cluster.addNavigableExtrusionsInLocal(extrudeMultiLine(cluster, navigableCalculator, numberOfExtrusionsAtEndpoints));
+         if (includePreferredExtrusions)
+         {
+            cluster.addPreferredNonNavigableExtrusionsInLocal(extrudeMultiLine(cluster, preferredNonNavigableCalculator, numberOfExtrusionsAtEndpoints));
+            cluster.addPreferredNavigableExtrusionInLocal(extrudeMultiLine(cluster, preferredNavigableCalculator, numberOfExtrusionsAtEndpoints));
+         }
          cluster.setType(ClusterType.POLYGON);
          break;
       case POLYGON:
          boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
          cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
          cluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
+         if (includePreferredExtrusions)
+         {
+            if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
+            {
+               cluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, preferredNonNavigableCalculator));
+               cluster.addPreferredNavigableExtrusionInLocal(extrudePolygon(extrudeToTheLeft, cluster, preferredNavigableCalculator));
+            }
+            else
+               throw new RuntimeException("Not yet implemented.");
+         }
          break;
 
       default:
