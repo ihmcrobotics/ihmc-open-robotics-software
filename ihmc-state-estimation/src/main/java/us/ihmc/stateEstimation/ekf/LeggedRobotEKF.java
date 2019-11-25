@@ -41,7 +41,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -107,7 +106,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, String primaryImuName, Map<String, IMUDefinition> imuSensorMap,
-                         Map<String, ImmutablePair<ReferenceFrame, ForceSensorDefinition>> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput,
+                         Map<String, ImmutablePair<ReferenceFrame, ForceSensorDefinition>> forceSensorMap, SensorOutputMapReadOnly rawSensorOutput,
                          SensorOutputMapReadOnly processedSensorOutput, double dt, double gravity, Map<String, String> jointGroups,
                          YoGraphicsListRegistry graphicsListRegistry, List<OneDoFJointBasics> referenceJoints)
    {

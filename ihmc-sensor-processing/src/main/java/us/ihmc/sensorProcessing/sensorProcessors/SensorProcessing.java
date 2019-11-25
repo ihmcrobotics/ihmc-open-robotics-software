@@ -245,7 +245,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
 
-   private final SensorRawOutputMapReadOnly rawSensorOutputMap = new SensorRawOutputMapReadOnly()
+   private final SensorOutputMapReadOnly rawSensorOutputMap = new SensorOutputMapReadOnly()
    {
       @Override
       public long getWallTime()
@@ -266,37 +266,43 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
 
       @Override
-      public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
+      public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
       {
          return inputJointPositions.get(oneDoFJoint).getDoubleValue();
       }
 
       @Override
-      public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
+      public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
       {
          return inputJointVelocities.get(oneDoFJoint).getDoubleValue();
       }
 
       @Override
-      public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
+      public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
       {
          return inputJointAccelerations.get(oneDoFJoint).getDoubleValue();
       }
 
       @Override
-      public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
+      public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
       {
          return inputJointTaus.get(oneDoFJoint).getDoubleValue();
       }
 
       @Override
-      public List<? extends IMUSensorReadOnly> getIMURawOutputs()
+      public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
+      {
+         return SensorProcessing.this.isJointEnabled(oneDoFJoint);
+      }
+
+      @Override
+      public List<? extends IMUSensorReadOnly> getIMUOutputs()
       {
          return inputIMUs;
       }
 
       @Override
-      public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
+      public ForceSensorDataHolderReadOnly getForceSensorOutputs()
       {
          return inputForceSensors;
       }
@@ -2227,7 +2233,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
    }
 
-   public SensorRawOutputMapReadOnly getRawSensorOutputMap()
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
       return rawSensorOutputMap;
    }

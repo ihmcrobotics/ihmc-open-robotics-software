@@ -156,7 +156,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       sensorReader = sensorReaderFactory.getSensorReader();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
-      SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
+      SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getProcessedSensorOutputMap();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
       double gravitationalAcceleration = 9.81;
@@ -209,7 +209,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                             null,
                                                             simulationRegistry);
 
-      return sensorReader.getSensorOutputMapReadOnly();
+      return sensorReader.getProcessedSensorOutputMap();
    }
 
    public void setDiagnosticParameters(DiagnosticParameters diagnosticParameters)

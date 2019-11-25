@@ -176,7 +176,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
-      SensorOutputMapReadOnly sensorOutputMap = sensorReader.getSensorOutputMapReadOnly();
+      SensorOutputMapReadOnly sensorOutputMap = sensorReader.getProcessedSensorOutputMap();
 
       /*
        * Create state estimator
