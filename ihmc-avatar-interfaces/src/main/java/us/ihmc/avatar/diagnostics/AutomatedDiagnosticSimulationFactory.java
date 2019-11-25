@@ -156,7 +156,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       sensorReader = sensorReaderFactory.getSensorReader();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
-      SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getProcessedSensorOutputMap();
+      SensorOutputMapReadOnly processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
       double gravitationalAcceleration = 9.81;
@@ -195,13 +195,13 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.UNKNOWN);
-      stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,
+      stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, processedSensorOutputMap,
                                                             centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration,
                                                             footSwitchMap, null, robotMotionStatusHolder, bipedFeetMap, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
 
       forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
-                                                            sensorOutputMapReadOnly,
+                                                            processedSensorOutputMap,
                                                             forceSensorDataHolderToUpdate,
                                                             stateEstimatorParameters,
                                                             gravitationalAcceleration,
