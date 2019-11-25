@@ -71,6 +71,11 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
+   public void initialize()
+   {
+   }
+
+   @Override
    public long read(SensorDataContext sensorDataContextToSet)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

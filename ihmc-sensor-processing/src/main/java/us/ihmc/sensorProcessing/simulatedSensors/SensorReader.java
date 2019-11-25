@@ -9,6 +9,10 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
  */
 public interface SensorReader
 {
+   public default void initialize()
+   {
+   }
+
    /**
     * Reads the sensor data from the robot. This method should not do any heavy computation and is meant to populate the
     * sensor data context as quickly as possible to be used by the state estimator thread.

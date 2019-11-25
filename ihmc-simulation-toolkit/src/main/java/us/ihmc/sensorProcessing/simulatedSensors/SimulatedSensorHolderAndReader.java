@@ -84,6 +84,12 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    }
 
    @Override
+   public void initialize()
+   {
+      sensorProcessing.initialize();
+   }
+
+   @Override
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
       return sensorProcessing;

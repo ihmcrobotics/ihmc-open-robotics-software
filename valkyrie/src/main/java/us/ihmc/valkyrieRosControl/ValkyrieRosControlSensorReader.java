@@ -88,6 +88,12 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
+   public void initialize()
+   {
+      sensorProcessing.initialize();
+   }
+
+   @Override
    public long read(SensorDataContext sensorDataContext)
    {
       readSensors();
