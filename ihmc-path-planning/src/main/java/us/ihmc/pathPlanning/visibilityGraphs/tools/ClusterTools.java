@@ -529,7 +529,7 @@ public class ClusterTools
       // inter region connections...
       if (includePreferredExtrusions)
       {
-//         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
+         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
          homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(homeRegion.getConvexPolygons(), preferredNavigableCalculator));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));

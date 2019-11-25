@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -457,6 +458,10 @@ public class VisibilityTools
    {
       for (Cluster cluster : clusters)
       {
+         boolean closed = cluster.isClosed();
+
+         List<? extends Point2DReadOnly> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
+
          if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
          {
             BoundingBox2D outerMostBoundingBoxToCheck = checkPreferredExtrusions ? cluster.getPreferredNonNavigableExtrusionsBoundingBox() : cluster.getNonNavigableExtrusionsBoundingBox();
@@ -471,12 +476,33 @@ public class VisibilityTools
                   continue;
                }
             }
+
+            // if it starts in a preferred region, that means you're already inside a preferred extrusion. This means that if we start inside, we should not
+            // check for visibility, as we are trying to get out.
+
+            if (checkPreferredExtrusions)
+            {
+               boolean startsInPreferredRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, preferredNonNavigableExtrusions,
+                                                                                                           preferredNonNavigableExtrusions.size(), true, 0.0);
+
+               if (!startsInPreferredRegion && !VisibilityTools.isPointVisible(observer, targetPoint, preferredNonNavigableExtrusions, closed))
+                  return false;
+            }
          }
+         else
+         { // we're checking an inner extrusion, likely a home region one. we want to be able to transition from outside a preferred region into one
+            if (checkPreferredExtrusions)
+            {
+               // if you don't start in a preferred region, you have to cross into one. This means that if we start outside, we should not check check for
+               // visibility, as we are trying to get in.
+               boolean startsInPreferredRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, preferredNonNavigableExtrusions,
+                                                                                                           preferredNonNavigableExtrusions.size(), true, 0.0);
+               boolean pointIsVisible = VisibilityTools.isPointVisible(observer, targetPoint, preferredNonNavigableExtrusions, closed);
 
-         boolean closed = cluster.isClosed();
-
-         if (checkPreferredExtrusions && !VisibilityTools.isPointVisible(observer, targetPoint, cluster.getPreferredNonNavigableExtrusionsInLocal(), closed))
-               return false;
+               if (startsInPreferredRegion && !pointIsVisible)
+                  return false;
+            }
+         }
 
          if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
             return false;
