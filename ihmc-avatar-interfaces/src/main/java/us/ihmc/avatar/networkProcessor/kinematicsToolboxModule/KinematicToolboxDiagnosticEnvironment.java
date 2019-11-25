@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +24,6 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -53,7 +51,7 @@ public class KinematicToolboxDiagnosticEnvironment
       JointConfigurationGatherer jointConfigurationGatherer = new JointConfigurationGatherer(humanoidFullRobotModel, forceSensorDataHolder);
 
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
-      SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
+      SensorOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       HumanoidRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
@@ -78,66 +76,6 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableLocalControllerCommunicator(true);
       parameters.setEnableJoystickBasedStepping(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
-   }
-
-   private SensorRawOutputMapReadOnly initializeSensorRawOutputMapReadOnly()
-   {
-      return new SensorRawOutputMapReadOnly()
-      {
-         @Override
-         public long getWallTime()
-         {
-            return 0;
-         }
-
-         @Override
-         public long getMonotonicTime()
-         {
-            return 0;
-         }
-
-         @Override
-         public long getSyncTimestamp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public List<? extends IMUSensorReadOnly> getIMURawOutputs()
-         {
-            return Collections.<IMUSensorReadOnly> emptyList();
-         }
-
-         @Override
-         public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
-         {
-            return null;
-         }
-      };
    }
 
    private long timestamp = 0L;

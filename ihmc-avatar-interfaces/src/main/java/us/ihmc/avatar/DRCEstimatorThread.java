@@ -53,7 +53,6 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -109,8 +108,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private long lastReadSystemTime = 0L;
    private final YoDouble actualEstimatorDT = new YoDouble("actualEstimatorDTInMillis", estimatorRegistry);
 
-   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
-   private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
+   private final SensorOutputMapReadOnly processedSensorOutputMap;
+   private final SensorOutputMapReadOnly rawSensorOutputMap;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
 
@@ -151,8 +150,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       robotMotionStatusFromController = threadDataSynchronizer.getEstimatorRobotMotionStatusHolder();
 
-      sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
-      sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
+      processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
+      rawSensorOutputMap = sensorReader.getRawSensorOutputMap();
 
       if (realtimeRos2Node != null)
          controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node,
@@ -166,7 +165,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (forceSensorDataHolderForEstimator != null)
          {
             forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(),
-                                                                  sensorOutputMapReadOnly,
+                                                                  processedSensorOutputMap,
                                                                   forceSensorDataHolderForEstimator,
                                                                   stateEstimatorParameters,
                                                                   gravity,
@@ -213,7 +212,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController = threadDataSynchronizer.getEstimatorCenterOfPressureDataHolder();
          CenterOfMassDataHolder centerOfMassDataHolderForEstimator = threadDataSynchronizer.getEstimatorCenterOfMassDataHolder();
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
-                         .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
+                         .setSensorOutputMapReadOnly(processedSensorOutputMap).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
                          .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolderForEstimator)
                          .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
@@ -226,7 +225,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          drcStateEstimator = null;
       }
 
-      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
+      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), rawSensorOutputMap);
       estimatorController.addRobotController(robotJointLimitWatcher);
 
       if (USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR)
@@ -256,8 +255,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                     jointConfigurationGathererAndProducer,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                                     realtimeRos2Node,
-                                                    sensorOutputMapReadOnly,
-                                                    sensorRawOutputMapReadOnly,
+                                                    processedSensorOutputMap,
+                                                    rawSensorOutputMap,
                                                     robotMotionStatusFromController,
                                                     sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
@@ -298,10 +297,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                                   primaryImuName,
                                                                   imuSensorNames,
                                                                   footForceSensorNames,
-                                                                  sensorRawOutputMapReadOnly,
+                                                                  rawSensorOutputMap,
                                                                   estimatorDT,
                                                                   gravity,
-                                                                  sensorOutputMapReadOnly,
+                                                                  processedSensorOutputMap,
                                                                   yoGraphicsListRegistry,
                                                                   estimatorFullRobotModel);
 
@@ -327,10 +326,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                                   primaryImuName,
                                                                   imuSensorNames,
                                                                   footForceSensorNames,
-                                                                  sensorRawOutputMapReadOnly,
+                                                                  rawSensorOutputMap,
                                                                   estimatorDT,
                                                                   gravity,
-                                                                  sensorOutputMapReadOnly,
+                                                                  processedSensorOutputMap,
                                                                   yoGraphicsListRegistry,
                                                                   estimatorFullRobotModel);
 
@@ -414,7 +413,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          long timestamp = sensorReader.read(sensorDataContext);
          sensorReader.compute(timestamp, sensorDataContext);
 
-         estimatorTime.set(sensorOutputMapReadOnly.getWallTime());
+         estimatorTime.set(processedSensorOutputMap.getWallTime());
       }
       catch (Throwable e)
       {
@@ -526,7 +525,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
    {
-      return sensorOutputMapReadOnly.getIMUOutputs();
+      return processedSensorOutputMap.getIMUOutputs();
    }
 
    public void dispose()

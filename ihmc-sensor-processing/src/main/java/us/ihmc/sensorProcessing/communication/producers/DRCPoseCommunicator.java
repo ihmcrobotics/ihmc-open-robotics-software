@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,7 +29,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorTimestampHolder sensorTimestampHolder;
-   private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
+   private final SensorOutputMapReadOnly rawSensorOutputMap;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
 
    private final RobotConfigurationData robotConfigurationData;
@@ -38,12 +38,12 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
                               MessageTopicNameGenerator publisherTopicNameGenerator, RealtimeRos2Node realtimeRos2Node,
-                              SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
+                              SensorTimestampHolder sensorTimestampHolder, SensorOutputMapReadOnly rawSensorOutputMap,
                               RobotMotionStatusHolder robotMotionStatusFromController, HumanoidRobotSensorInformation sensorInformation)
    {
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorTimestampHolder = sensorTimestampHolder;
-      this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
+      this.rawSensorOutputMap = rawSensorOutputMap;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
 
       IMUDefinition[] imuDefinitions = estimatorModel.getIMUDefinitions();
@@ -86,11 +86,11 @@ public class DRCPoseCommunicator implements RawOutputWriter
       long syncTimestamp = sensorTimestampHolder.getSyncTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(wallTime, monotonicTime, syncTimestamp, robotConfigurationData);
 
-      if (sensorRawOutputMapReadOnly != null)
+      if (rawSensorOutputMap != null)
       {
          robotConfigurationData.getImuSensorData().clear();
 
-         List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
+         List<? extends IMUSensorReadOnly> imuRawOutputs = rawSensorOutputMap.getIMUOutputs();
          for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
          {
             IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);

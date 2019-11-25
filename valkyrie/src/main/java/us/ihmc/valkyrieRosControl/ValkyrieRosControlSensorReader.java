@@ -13,7 +13,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -175,13 +174,13 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   public SensorOutputMapReadOnly getProcessedSensorOutputMap()
    {
       return sensorProcessing;
    }
 
    @Override
-   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
       return sensorProcessing.getRawSensorOutputMap();
    }

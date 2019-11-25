@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 
 /**
  * TODO: Split this class in two: The part that reads and the part that does the computation on the sensor data as they
@@ -36,7 +35,7 @@ public interface SensorReader
    {
    };
 
-   public abstract SensorOutputMapReadOnly getSensorOutputMapReadOnly();
+   public abstract SensorOutputMapReadOnly getProcessedSensorOutputMap();
 
-   public abstract SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly();
+   public abstract SensorOutputMapReadOnly getRawSensorOutputMap();
 }

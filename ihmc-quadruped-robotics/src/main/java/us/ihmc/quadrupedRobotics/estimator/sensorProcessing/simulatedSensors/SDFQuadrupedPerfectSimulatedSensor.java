@@ -12,7 +12,6 @@ import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -165,13 +164,13 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   public SensorOutputMapReadOnly getProcessedSensorOutputMap()
    {
       return sdfPerfectSimulatedSensorReader;
    }
 
    @Override
-   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
       return sdfPerfectSimulatedSensorReader.getRawSensorOutputMap();
    }
