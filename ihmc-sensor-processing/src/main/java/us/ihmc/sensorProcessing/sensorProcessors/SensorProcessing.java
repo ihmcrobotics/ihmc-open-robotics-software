@@ -939,7 +939,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param stiffnesses    estimated stiffness for each joint.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
     *                       processing stage, nor as the output of the sensor processing.
-    * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
                                                    Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
@@ -1111,7 +1110,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param stiffnesses    estimated stiffness for each joint.
     * @param forVizOnly     if set to true, the result will not be used as the input of the next
     *                       processing stage, nor as the output of the sensor processing.
-    * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
                                                    Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
@@ -1904,7 +1902,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * @param breakFrequency break frequency in Hertz
     * @return a {@code YoDouble} to be used when adding a low-pass filter stage using the methods in
     *         this class such as
-    *         {@link SensorProcessing#addJointVelocityAlphaFilter(YoDouble, boolean)}.
+    *         {@link SensorProcessing#addSensorAlphaFilter(DoubleProvider, boolean, SensorType)}.
     */
    public DoubleProvider createAlphaFilter(String name, double breakFrequency)
    {
@@ -1924,7 +1922,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     *                               be empty or null in which the defaultStiffness is used for every
     *                               joint.
     * @return {@code Map<OneDoFJoint, YoDouble>} to be used when calling
-    *         {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
+    *         {@link SensorProcessing#addJointPositionElasticyCompensator(Map, DoubleProvider, boolean)}.
     */
    public Map<OneDoFJointBasics, DoubleProvider> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
    {
