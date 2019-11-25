@@ -173,6 +173,6 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    @Override
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
-      return sdfPerfectSimulatedSensorReader;
+      return sdfPerfectSimulatedSensorReader.getRawSensorOutputMap();
    }
 }

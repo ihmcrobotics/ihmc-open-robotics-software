@@ -58,7 +58,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderToUpdate, null);
       perfectSensorReader.setSensorReader(sdfPerfectSimulatedSensorReader);
       perfectSensorReader.setSensorOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
-      perfectSensorReader.setSensorRawOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
+      perfectSensorReader.setSensorRawOutputMapReadOnly(sdfPerfectSimulatedSensorReader.getRawSensorOutputMap());
 
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
 
