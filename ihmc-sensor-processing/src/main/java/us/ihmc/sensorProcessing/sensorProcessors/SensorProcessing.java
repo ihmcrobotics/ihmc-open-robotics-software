@@ -570,7 +570,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorsIDs.put(imuName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(imuName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         AlphaFilteredYoFrameVector filter = new AlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
          
          if (!forVizOnly)
@@ -601,7 +601,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorsIDs.put(sensorName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(sensorName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         AlphaFilteredYoFrameVector filter = new AlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
 
          if (!forVizOnly)
