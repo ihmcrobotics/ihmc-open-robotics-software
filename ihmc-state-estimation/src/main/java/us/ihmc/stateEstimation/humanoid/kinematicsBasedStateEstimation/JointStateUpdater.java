@@ -1,6 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -91,15 +91,15 @@ public class JointStateUpdater
       }
       else
       {
-         PrintTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
+         LogTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
          if(pelvisIMU == null)
          {
-            PrintTools.warn("Pelvis IMU is null.");
+            LogTools.warn("Pelvis IMU is null.");
          }
 
          if(chestIMU == null)
          {
-            PrintTools.warn("Chest IMU is null.");
+            LogTools.warn("Chest IMU is null.");
          }
 
          return null;
