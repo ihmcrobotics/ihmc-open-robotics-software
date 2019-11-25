@@ -526,7 +526,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
    {
-      return sensorOutputMapReadOnly.getIMUProcessedOutputs();
+      return sensorOutputMapReadOnly.getIMUOutputs();
    }
 
    public void dispose()

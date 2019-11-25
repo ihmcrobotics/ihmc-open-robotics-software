@@ -105,7 +105,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointPosition.get(oneDoFJoint);
    }
@@ -116,7 +116,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointVelocity.get(oneDoFJoint);
    }
@@ -127,7 +127,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointAcceleration.get(oneDoFJoint);
    }
@@ -138,7 +138,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointTau.get(oneDoFJoint);
    }
@@ -160,13 +160,13 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public List<? extends IMUSensor> getIMUProcessedOutputs()
+   public List<? extends IMUSensor> getIMUOutputs()
    {
       return imuSensors;
    }
 
    @Override
-   public ForceSensorDataHolder getForceSensorProcessedOutputs()
+   public ForceSensorDataHolder getForceSensorOutputs()
    {
       return forceSensorDataHolder;
    }

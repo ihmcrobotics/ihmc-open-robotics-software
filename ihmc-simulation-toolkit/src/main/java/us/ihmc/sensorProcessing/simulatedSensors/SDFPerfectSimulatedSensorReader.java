@@ -221,37 +221,37 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQ();
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQd();
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQdd();
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getTau();
    }
 
    @Override
-   public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+   public List<? extends IMUSensorReadOnly> getIMUOutputs()
    {
       return new ArrayList<>();
    }
 
    @Override
-   public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+   public ForceSensorDataHolderReadOnly getForceSensorOutputs()
    {
       return forceSensorDataHolderToUpdate;
    }

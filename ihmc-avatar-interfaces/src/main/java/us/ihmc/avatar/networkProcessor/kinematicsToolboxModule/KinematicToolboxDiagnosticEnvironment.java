@@ -172,37 +172,37 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
+         public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
+         public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+         public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
+         public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
          {
             return 0;
          }
 
          @Override
-         public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+         public List<? extends IMUSensorReadOnly> getIMUOutputs()
          {
             return null;
          }
 
          @Override
-         public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+         public ForceSensorDataHolderReadOnly getForceSensorOutputs()
          {
             return null;
          }
