@@ -236,7 +236,7 @@ public class PelvisRotationalStateUpdaterTest
       SensorProcessing sensorDataSource = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       
       imuSensors.clear();
-      imuSensors.addAll(sensorDataSource.getIMUProcessedOutputs());
+      imuSensors.addAll(sensorDataSource.getIMUOutputs());
       
       return sensorDataSource;
    }

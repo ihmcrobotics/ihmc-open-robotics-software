@@ -71,9 +71,9 @@ public class JointStateUpdater
       String pelvisIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft();
       String chestIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight();
 
-      for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
+      for (int i = 0; i < sensorOutputMapReadOnly.getIMUOutputs().size(); i++)
       {
-         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
+         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUOutputs().get(i);
          if (sensorReadOnly.getSensorName().equals(pelvisIMUName))
             pelvisIMU = sensorReadOnly;
 
@@ -119,9 +119,9 @@ public class JointStateUpdater
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
 
-         double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
-         double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
-         double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
+         double positionSensorData = sensorMap.getJointPositionOutput(oneDoFJoint);
+         double velocitySensorData = sensorMap.getJointVelocityOutput(oneDoFJoint);
+         double torqueSensorData = sensorMap.getJointTauOutput(oneDoFJoint);
 
          if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {

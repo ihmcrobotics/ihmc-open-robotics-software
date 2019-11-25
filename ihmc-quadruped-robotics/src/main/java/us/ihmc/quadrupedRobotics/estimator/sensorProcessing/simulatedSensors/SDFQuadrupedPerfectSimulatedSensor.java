@@ -98,7 +98,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -111,7 +111,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -124,7 +124,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {
@@ -137,7 +137,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
    {
       for(int i = 0; i < sensorOneDoFJoints.length; i++)
       {

@@ -146,7 +146,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
       for (String forceSensorName : forceSensorMap.keySet())
       {
-         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorProcessedOutputs().getByName(forceSensorName);
+         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorOutputs().getByName(forceSensorName);
          ReferenceFrame soleFrame = forceSensorMap.get(forceSensorName).getLeft();
          ReferenceFrame measurementFrame = forceSensorMap.get(forceSensorName).getRight().getSensorFrame();
          RigidBodyBasics foot = forceSensorMap.get(forceSensorName).getRight().getRigidBody();
@@ -170,7 +170,7 @@ public class LeggedRobotEKF implements StateEstimatorController
          RigidBodyBasics imuBody = imuSensorMap.get(imuName).getRigidBody();
          ReferenceFrame imuFrame = imuSensorMap.get(imuName).getIMUFrame();
 
-         IMUSensorReadOnly imuOutput = sensorOutput.getIMUProcessedOutputs().stream().filter(imu -> imu.getSensorName().equals(imuName)).findFirst().get();
+         IMUSensorReadOnly imuOutput = sensorOutput.getIMUOutputs().stream().filter(imu -> imu.getSensorName().equals(imuName)).findFirst().get();
          LogTools.info("Adding angular velocity sensor " + imuName);
          AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, false, registry);
          angularVelocitySensors.add(angularVelocitySensor);
@@ -258,9 +258,9 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
-         double jointPositionMeasurement = processedSensorOutput.getJointPositionProcessedOutput(referenceJoints.get(jointIdx));
+         double jointPositionMeasurement = processedSensorOutput.getJointPositionOutput(referenceJoints.get(jointIdx));
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
-         double jointVelocityMeasurement = processedSensorOutput.getJointVelocityProcessedOutput(referenceJoints.get(jointIdx));
+         double jointVelocityMeasurement = processedSensorOutput.getJointVelocityOutput(referenceJoints.get(jointIdx));
          jointVelocitySensors.get(jointIdx).setJointVelocityMeasurement(jointVelocityMeasurement);
       }
 
