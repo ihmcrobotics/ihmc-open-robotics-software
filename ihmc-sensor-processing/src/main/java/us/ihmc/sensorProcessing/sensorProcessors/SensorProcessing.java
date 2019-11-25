@@ -66,7 +66,7 @@ import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
+public class SensorProcessing implements SensorOutputMapReadOnly
 {
    private static final String RAW = "raw";
    private static final String BACKLASH = "bl";
@@ -244,6 +244,63 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final FrameVector3D tempForce = new FrameVector3D();
    private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
+
+   private final SensorRawOutputMapReadOnly rawSensorOutputMap = new SensorRawOutputMapReadOnly()
+   {
+      @Override
+      public long getWallTime()
+      {
+         return wallTime.getValue();
+      }
+
+      @Override
+      public long getMonotonicTime()
+      {
+         return monotonicTime.getValue();
+      }
+
+      @Override
+      public long getSyncTimestamp()
+      {
+         return syncTimestamp.getValue();
+      }
+
+      @Override
+      public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
+      {
+         return inputJointPositions.get(oneDoFJoint).getDoubleValue();
+      }
+
+      @Override
+      public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
+      {
+         return inputJointVelocities.get(oneDoFJoint).getDoubleValue();
+      }
+
+      @Override
+      public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
+      {
+         return inputJointAccelerations.get(oneDoFJoint).getDoubleValue();
+      }
+
+      @Override
+      public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
+      {
+         return inputJointTaus.get(oneDoFJoint).getDoubleValue();
+      }
+
+      @Override
+      public List<? extends IMUSensorReadOnly> getIMURawOutputs()
+      {
+         return inputIMUs;
+      }
+
+      @Override
+      public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
+      {
+         return inputForceSensors;
+      }
+   };
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
                            YoVariableRegistry parentRegistry)
@@ -936,9 +993,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
     * 
-    * @param stiffnesses    estimated stiffness for each joint.
-    * @param forVizOnly     if set to true, the result will not be used as the input of the next
-    *                       processing stage, nor as the output of the sensor processing.
+    * @param stiffnesses estimated stiffness for each joint.
+    * @param forVizOnly  if set to true, the result will not be used as the input of the next
+    *                    processing stage, nor as the output of the sensor processing.
     */
    public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
                                                    Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
@@ -1107,9 +1164,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
     * 
-    * @param stiffnesses    estimated stiffness for each joint.
-    * @param forVizOnly     if set to true, the result will not be used as the input of the next
-    *                       processing stage, nor as the output of the sensor processing.
+    * @param stiffnesses estimated stiffness for each joint.
+    * @param forVizOnly  if set to true, the result will not be used as the input of the next
+    *                    processing stage, nor as the output of the sensor processing.
     */
    public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
                                                    Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
@@ -2170,6 +2227,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
    }
 
+   public SensorRawOutputMapReadOnly getRawSensorOutputMap()
+   {
+      return rawSensorOutputMap;
+   }
+
    @Override
    public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
@@ -2212,45 +2274,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    @Override
-   public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return inputJointPositions.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
-   public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return inputJointVelocities.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
-   public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return inputJointAccelerations.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
-   public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return inputJointTaus.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
    public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
    {
       return jointEnabledIndicators.get(oneDoFJoint).getBooleanValue();
-   }
-
-   @Override
-   public List<? extends IMUSensorReadOnly> getIMURawOutputs()
-   {
-      return inputIMUs;
-   }
-
-   @Override
-   public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
-   {
-      return inputForceSensors;
    }
 
    public List<OneDoFJointBasics> getJointSensorDefinitions()
