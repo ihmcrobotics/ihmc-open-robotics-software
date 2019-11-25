@@ -4,23 +4,23 @@ import java.util.List;
 import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class RobotConfigurationDataFactory
 {
-   public static RobotConfigurationData create(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   public static RobotConfigurationData create(OneDoFJointReadOnly[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       RobotConfigurationData message = new RobotConfigurationData();
       message.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions));
       return message;
    }
 
-   public static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   public static int calculateJointNameHash(OneDoFJointReadOnly[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
-      for (OneDoFJointBasics joint : joints)
+      for (OneDoFJointReadOnly joint : joints)
       {
          crc.update(joint.getName().getBytes());
       }
@@ -38,7 +38,7 @@ public class RobotConfigurationDataFactory
       return (int) crc.getValue();
    }
 
-   public static void packJointState(RobotConfigurationData robotConfigurationData, OneDoFJointBasics[] newJointData)
+   public static void packJointState(RobotConfigurationData robotConfigurationData, OneDoFJointReadOnly[] newJointData)
    {
       robotConfigurationData.getJointAngles().reset();
       robotConfigurationData.getJointVelocities().reset();
@@ -52,7 +52,7 @@ public class RobotConfigurationDataFactory
       }
    }
 
-   public static void packJointState(RobotConfigurationData robotConfigurationData, List<? extends OneDoFJointBasics> newJointData)
+   public static void packJointState(RobotConfigurationData robotConfigurationData, List<? extends OneDoFJointReadOnly> newJointData)
    {
       robotConfigurationData.getJointAngles().reset();
       robotConfigurationData.getJointVelocities().reset();
