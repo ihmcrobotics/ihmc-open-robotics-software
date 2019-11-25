@@ -183,7 +183,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    @Override
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
-      return sensorProcessing;
+      return sensorProcessing.getRawSensorOutputMap();
    }
 
    @Override

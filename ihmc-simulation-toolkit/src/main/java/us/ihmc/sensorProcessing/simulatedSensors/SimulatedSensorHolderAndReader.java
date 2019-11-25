@@ -98,7 +98,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    @Override
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
-      return sensorProcessing;
+      return sensorProcessing.getRawSensorOutputMap();
    }
 
    @Override
