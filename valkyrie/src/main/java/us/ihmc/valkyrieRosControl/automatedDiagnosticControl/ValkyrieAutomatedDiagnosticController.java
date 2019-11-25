@@ -176,19 +176,19 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
-      SensorOutputMapReadOnly sensorOutputMap = sensorReader.getProcessedSensorOutputMap();
+      SensorOutputMapReadOnly processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
 
       /*
        * Create state estimator
        */
       double gravity = ValkyrieRosControlController.gravity;
-      stateEstimator = createStateEstimator(robotModel, gravity, sensorOutputMap, fullRobotModel);
+      stateEstimator = createStateEstimator(robotModel, gravity, processedSensorOutputMap, fullRobotModel);
 
       /*
        * Create diagnostic controller
        */
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, sensorOutputMap,
+      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, processedSensorOutputMap,
                                                                             diagnosticParameters, walkingControllerParameters, diagnosticControllerTime,
                                                                             diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
 
