@@ -36,14 +36,14 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
-   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
+   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
@@ -55,13 +55,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         ReferenceFrames referenceFrames)
+                                          ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingJointBasics rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         ReferenceFrames referenceFrames)
+                                          ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
@@ -78,7 +78,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDegreeOfFreedomJoint, oneDoFJoint);
+            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
             revoluteJoints.add(jointPair);
          }
       }
@@ -127,8 +127,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
-      this.controllerTimestamp.set(timestamp);
-      this.sensorHeadPPSTimetamp.set(timestamp);
+      controllerTimestamp.set(timestamp);
+      sensorHeadPPSTimetamp.set(timestamp);
 
       if (forceSensorDataHolderToUpdate != null)
       {
@@ -142,14 +142,14 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
-   {      
+   {
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
       // Update base frames without updating all frames to transform velocity into pelvis
       elevatorFrame.update();
       pelvisFrame.update();
-      
+
       FrameVector3D linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
@@ -187,7 +187,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
-         if (pinJoint == null) continue;
+         if (pinJoint == null)
+            continue;
 
          revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
@@ -254,7 +255,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    {
       return forceSensorDataHolderToUpdate;
    }
-   
+
    @Override
    public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
    {
@@ -270,19 +271,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    {
       return new SensorOutputMapReadOnly()
       {
-         
+
          @Override
          public long getWallTime()
          {
             return SDFPerfectSimulatedSensorReader.this.getWallTime();
          }
-         
+
          @Override
          public long getMonotonicTime()
          {
             return SDFPerfectSimulatedSensorReader.this.getMonotonicTime();
          }
-         
+
          @Override
          public long getSyncTimestamp()
          {
