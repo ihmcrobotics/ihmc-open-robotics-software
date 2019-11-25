@@ -352,7 +352,7 @@ public class AvatarEstimatorThread
 
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      sensorReader.getSensorOutputMapReadOnly().reset();
+      sensorReader.initialize();
 
       if (ekfStateEstimator != null)
          ekfStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
