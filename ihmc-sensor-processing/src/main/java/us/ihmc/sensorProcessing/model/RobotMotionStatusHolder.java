@@ -4,7 +4,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RobotMotionStatusHolder
 {
-   private final AtomicReference<RobotMotionStatus> currentRobotMotionStatus = new AtomicReference<RobotMotionStatus>(RobotMotionStatus.UNKNOWN);
+   private final AtomicReference<RobotMotionStatus> currentRobotMotionStatus;
+
+   public RobotMotionStatusHolder()
+   {
+      this(RobotMotionStatus.UNKNOWN);
+   }
+
+   public RobotMotionStatusHolder(RobotMotionStatus initialValue)
+   {
+      currentRobotMotionStatus = new AtomicReference<>(initialValue);
+   }
 
    public RobotMotionStatus getCurrentRobotMotionStatus()
    {
