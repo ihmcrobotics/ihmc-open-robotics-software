@@ -104,7 +104,7 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
+         public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
          {
             return null;
          }

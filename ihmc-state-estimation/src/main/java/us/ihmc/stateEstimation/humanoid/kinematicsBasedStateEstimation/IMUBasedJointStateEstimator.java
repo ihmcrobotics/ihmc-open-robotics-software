@@ -75,7 +75,7 @@ public class IMUBasedJointStateEstimator
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJointBasics joint = joints[i];
-         OneDoFJointSensorOutputReadOnly jointSensorOutput = sensorMap.getJointOutput(joint);
+         OneDoFJointSensorOutputReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(joint);
 
          double qd_sensorMap = jointSensorOutput.getVelocity();
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);

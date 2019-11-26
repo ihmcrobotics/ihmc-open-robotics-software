@@ -268,7 +268,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
 
       @Override
-      public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
+      public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
       {
          return inputJointSensors.get(oneDoFJoint);
       }
@@ -2240,7 +2240,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    }
 
    @Override
-   public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return outputJointSensors.get(oneDoFJoint);
    }

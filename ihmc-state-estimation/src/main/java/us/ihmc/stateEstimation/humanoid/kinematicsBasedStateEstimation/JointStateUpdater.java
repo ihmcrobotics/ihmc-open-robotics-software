@@ -119,7 +119,7 @@ public class JointStateUpdater
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
-         OneDoFJointSensorOutputReadOnly jointSensorOutput = sensorMap.getJointOutput(oneDoFJoint);
+         OneDoFJointSensorOutputReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(oneDoFJoint);
 
          double positionSensorData = jointSensorOutput.getPosition();
          double velocitySensorData = jointSensorOutput.getVelocity();

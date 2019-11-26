@@ -8,7 +8,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface SensorOutputMapReadOnly extends SensorTimestampHolder
 {
-   OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint);
+   OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint);
 
    List<? extends IMUSensorReadOnly> getIMUOutputs();
 

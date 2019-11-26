@@ -100,34 +100,34 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public OneDoFJointSensorOutput getJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointSensorOutput getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointSensorOutputMap.get(oneDoFJoint);
    }
 
    public void setJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint, double position)
    {
-      getJointOutput(oneDoFJoint).setPosition(position);
+      getOneDoFJointOutput(oneDoFJoint).setPosition(position);
    }
 
    public void setJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint, double velocity)
    {
-      getJointOutput(oneDoFJoint).setVelocity(velocity);
+      getOneDoFJointOutput(oneDoFJoint).setVelocity(velocity);
    }
 
    public void setJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint, double acceleration)
    {
-      getJointOutput(oneDoFJoint).setAcceleration(acceleration);
+      getOneDoFJointOutput(oneDoFJoint).setAcceleration(acceleration);
    }
 
    public void setJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint, double tau)
    {
-      getJointOutput(oneDoFJoint).setEffort(tau);
+      getOneDoFJointOutput(oneDoFJoint).setEffort(tau);
    }
 
    public void setJointEnabled(OneDoFJointBasics oneDoFJoint, boolean enabled)
    {
-      getJointOutput(oneDoFJoint).setJointEnabled(enabled);
+      getOneDoFJointOutput(oneDoFJoint).setJointEnabled(enabled);
    }
 
    @Override

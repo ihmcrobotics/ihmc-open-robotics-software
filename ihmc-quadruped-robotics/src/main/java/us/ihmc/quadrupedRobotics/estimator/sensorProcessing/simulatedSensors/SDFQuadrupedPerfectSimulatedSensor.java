@@ -98,7 +98,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointNameToJointSensorOutputMap.get(oneDoFJoint.getName());
    }

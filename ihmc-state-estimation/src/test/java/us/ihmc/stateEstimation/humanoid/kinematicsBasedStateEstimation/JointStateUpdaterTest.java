@@ -101,7 +101,7 @@ public class JointStateUpdaterTest
    {
       for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
-         double sensorValue = sensorMap.getJointOutput(joint).getVelocity();
+         double sensorValue = sensorMap.getOneDoFJointOutput(joint).getVelocity();
          double robotJointValue = joint.getQd();
          
          assertEquals(sensorValue, robotJointValue, EPS);
@@ -112,7 +112,7 @@ public class JointStateUpdaterTest
    {
       for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
-         double sensorValue = sensorMap.getJointOutput(joint).getPosition();
+         double sensorValue = sensorMap.getOneDoFJointOutput(joint).getPosition();
          double robotJointValue = joint.getQ();
          
          assertEquals(sensorValue, robotJointValue, EPS);
