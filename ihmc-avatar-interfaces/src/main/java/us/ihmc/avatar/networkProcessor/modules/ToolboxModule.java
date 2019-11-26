@@ -184,14 +184,7 @@ public abstract class ToolboxModule
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
    {
-      new Thread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            yoVariableServer.start();
-         }
-      }).start();
+      new Thread(yoVariableServer::start).start();
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
@@ -310,11 +303,11 @@ public abstract class ToolboxModule
       if (DEBUG)
          LogTools.debug("Waking up");
 
-      createToolboxRunnable();
-      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
-      getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
       reinitialize();
       receivedInput.set(true);
+      getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
+      createToolboxRunnable();
+      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
 
    private void reinitialize()
@@ -380,32 +373,28 @@ public abstract class ToolboxModule
          return;
       }
 
-      toolboxRunnable = new Runnable()
+      toolboxRunnable = () ->
       {
-         @Override
-         public void run()
+         if (Thread.interrupted())
+            return;
+
+         try
          {
-            if (Thread.interrupted())
-               return;
+            getToolboxController().update();
+            yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
 
-            try
-            {
-               getToolboxController().update();
-               yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
-
-               if (receivedInput.getAndSet(false))
-                  timeOfLastInput.set(yoTime.getDoubleValue());
-               if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
-                  sleep();
-               else if (getToolboxController().isDone())
-                  sleep();
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
+            if (receivedInput.getAndSet(false))
+               timeOfLastInput.set(yoTime.getDoubleValue());
+            if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
                sleep();
-               throw e;
-            }
+            else if (getToolboxController().isDone())
+               sleep();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+            sleep();
+            throw e;
          }
       };
    }
