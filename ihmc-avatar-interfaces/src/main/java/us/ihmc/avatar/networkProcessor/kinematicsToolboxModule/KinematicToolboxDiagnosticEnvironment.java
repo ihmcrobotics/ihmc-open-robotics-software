@@ -23,7 +23,7 @@ import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -104,13 +104,13 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
+         public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
          {
             return null;
          }
 
          @Override
-         public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+         public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
          {
             return null;
          }

@@ -26,8 +26,8 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    private long wallTime;
    private long monotonicTime;
    private long syncTimestamp;
-   private final List<OneDoFJointSensorOutput> jointSensorOutputList = new ArrayList<>();
-   private final Map<OneDoFJointBasics, OneDoFJointSensorOutput> jointSensorOutputMap = new HashMap<>();
+   private final List<OneDoFJointState> jointSensorOutputList = new ArrayList<>();
+   private final Map<OneDoFJointBasics, OneDoFJointState> jointSensorOutputMap = new HashMap<>();
    private final ArrayList<IMUSensor> imuSensors = new ArrayList<>();
    private final ForceSensorDataHolder forceSensorDataHolder;
 
@@ -43,7 +43,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJointSensorOutput jointSensorOutput = new OneDoFJointSensorOutput(joint.getName());
+         OneDoFJointState jointSensorOutput = new OneDoFJointState(joint.getName());
          jointSensorOutput.setPosition(Double.NaN);
          jointSensorOutput.setVelocity(Double.NaN);
          jointSensorOutput.setAcceleration(Double.NaN);
@@ -101,13 +101,13 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public OneDoFJointSensorOutput getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointState getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointSensorOutputMap.get(oneDoFJoint);
    }
 
    @Override
-   public List<OneDoFJointSensorOutput> getOneDoFJointOutputs()
+   public List<OneDoFJointState> getOneDoFJointOutputs()
    {
       return jointSensorOutputList;
    }

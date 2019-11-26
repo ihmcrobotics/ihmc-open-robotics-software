@@ -23,7 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -39,8 +39,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
-   private final List<OneDoFJointSensorOutputReadOnly> jointSensorOutputList = new ArrayList<>();
-   private final Map<OneDoFJointBasics, OneDoFJointSensorOutputReadOnly> jointToSensorOutputMap = new HashMap<>();
+   private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
+   private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
    private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -83,7 +83,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
             ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
             oneDoFJointPairs.add(jointPair);
-            OneDoFJointSensorOutputReadOnly jointSensorOutput = OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
+            OneDoFJointStateReadOnly jointSensorOutput = OneDoFJointStateReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
             jointSensorOutputList.add(jointSensorOutput);
             jointToSensorOutputMap.put(oneDoFJoint, jointSensorOutput);
          }
@@ -227,13 +227,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointToSensorOutputMap.get(oneDoFJoint);
    }
 
    @Override
-   public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+   public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
    {
       return jointSensorOutputList;
    }

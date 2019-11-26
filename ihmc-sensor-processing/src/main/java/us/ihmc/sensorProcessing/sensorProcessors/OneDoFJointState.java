@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-public class OneDoFJointSensorOutput implements OneDoFJointSensorOutputReadOnly
+public class OneDoFJointState implements OneDoFJointStateReadOnly
 {
    private final String jointName;
    private double position;
@@ -9,7 +9,7 @@ public class OneDoFJointSensorOutput implements OneDoFJointSensorOutputReadOnly
    private double effort;
    private boolean isJointEnabled;
 
-   public OneDoFJointSensorOutput(String jointName)
+   public OneDoFJointState(String jointName)
    {
       this.jointName = jointName;
    }
