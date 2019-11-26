@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -147,7 +148,7 @@ public class Cluster
       return type;
    }
 
-   public void setTransformToWorld(RigidBodyTransform transform)
+   public void setTransformToWorld(RigidBodyTransformReadOnly transform)
    {
       //TODO: +++JerryPratt: Should never have to set the transform if we get it from the planar region. Right?
       transformToWorld.set(transform);
