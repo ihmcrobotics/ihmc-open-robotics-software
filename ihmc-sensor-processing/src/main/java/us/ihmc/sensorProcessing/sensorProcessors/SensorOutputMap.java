@@ -18,20 +18,20 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
 
 /**
  * Simplified sensor output map that just holds all values and does not do any processing
- * 
- * @author jesper
  *
+ * @author jesper
  */
 public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfectSensorOutputMapReadOnly
 {
    private long wallTime;
    private long monotonicTime;
    private long syncTimestamp;
+   private final List<OneDoFJointSensorOutput> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointSensorOutput> jointSensorOutputMap = new HashMap<>();
    private final ArrayList<IMUSensor> imuSensors = new ArrayList<>();
    private final ForceSensorDataHolder forceSensorDataHolder;
-   
-   /** 
+
+   /**
     * Perfect sensors
     */
    private final RigidBodyTransform rootJointTransform = new RigidBodyTransform();
@@ -48,6 +48,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
          jointSensorOutput.setVelocity(Double.NaN);
          jointSensorOutput.setAcceleration(Double.NaN);
          jointSensorOutput.setEffort(Double.NaN);
+         jointSensorOutputList.add(jointSensorOutput);
          jointSensorOutputMap.put(joint, jointSensorOutput);
       }
 
@@ -58,11 +59,11 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
 
       if (forceSensorDefinitions != null)
       {
-         this.forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions);
+         forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions);
       }
       else
       {
-         this.forceSensorDataHolder = new ForceSensorDataHolder(Collections.emptyList());
+         forceSensorDataHolder = new ForceSensorDataHolder(Collections.emptyList());
       }
    }
 
@@ -103,6 +104,12 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    public OneDoFJointSensorOutput getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointSensorOutputMap.get(oneDoFJoint);
+   }
+
+   @Override
+   public List<OneDoFJointSensorOutput> getOneDoFJointOutputs()
+   {
+      return jointSensorOutputList;
    }
 
    public void setJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint, double position)
@@ -147,10 +154,10 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    {
       transformToPack.set(rootJointTransform);
    }
-   
+
    public void setRootJointTransform(RigidBodyTransform transform)
    {
-      this.rootJointTransform.set(transform);
+      rootJointTransform.set(transform);
    }
 
    @Override

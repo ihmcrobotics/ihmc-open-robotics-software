@@ -39,6 +39,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
+   private final List<OneDoFJointSensorOutputReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointSensorOutputReadOnly> jointToSensorOutputMap = new HashMap<>();
    private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
 
@@ -82,7 +83,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
             ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
             oneDoFJointPairs.add(jointPair);
-            jointToSensorOutputMap.put(oneDoFJoint, OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(oneDoFJoint, true));
+            OneDoFJointSensorOutputReadOnly jointSensorOutput = OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
+            jointSensorOutputList.add(jointSensorOutput);
+            jointToSensorOutputMap.put(oneDoFJoint, jointSensorOutput);
          }
       }
    }
@@ -227,6 +230,12 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointToSensorOutputMap.get(oneDoFJoint);
+   }
+
+   @Override
+   public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+   {
+      return jointSensorOutputList;
    }
 
    @Override

@@ -10,6 +10,8 @@ public interface SensorOutputMapReadOnly extends SensorTimestampHolder
 {
    OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint);
 
+   List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs();
+
    List<? extends IMUSensorReadOnly> getIMUOutputs();
 
    ForceSensorDataHolderReadOnly getForceSensorOutputs();
