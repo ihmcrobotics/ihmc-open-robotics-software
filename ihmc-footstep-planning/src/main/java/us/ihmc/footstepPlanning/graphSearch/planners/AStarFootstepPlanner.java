@@ -331,7 +331,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       abortPlanning.set(false);
 
       graph.initialize(startNode);
-      NodeComparator nodeComparator = new NodeComparator(graph, heuristics);
+      NodeComparator<FootstepNode> nodeComparator = new NodeComparator<>(graph, heuristics::compute);
       stack = new PriorityQueue<>(nodeComparator);
 
       validGoalNode.set(true);
