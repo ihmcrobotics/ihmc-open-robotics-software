@@ -1,8 +1,10 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -21,6 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -36,7 +39,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<>();
+   private final Map<OneDoFJointBasics, OneDoFJointSensorOutputReadOnly> jointToSensorOutputMap = new HashMap<>();
+   private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
@@ -46,8 +50,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
-
-   private final SensorOutputMapReadOnly rawSensorOutputMap = createRawSensorOutputMap();
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
@@ -79,7 +81,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
             ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
-            revoluteJoints.add(jointPair);
+            oneDoFJointPairs.add(jointPair);
+            jointToSensorOutputMap.put(oneDoFJoint, OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(oneDoFJoint, true));
          }
       }
    }
@@ -181,9 +184,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()
    {
-      for (int i = 0; i < revoluteJoints.size(); i++)
+      for (int i = 0; i < oneDoFJointPairs.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = revoluteJoints.get(i);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = oneDoFJointPairs.get(i);
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
@@ -221,27 +224,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
    {
-      return oneDoFJoint.getQ();
-   }
-
-   @Override
-   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getQd();
-   }
-
-   @Override
-   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getQdd();
-   }
-
-   @Override
-   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getTau();
+      return jointToSensorOutputMap.get(oneDoFJoint);
    }
 
    @Override
@@ -254,83 +239,5 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public ForceSensorDataHolderReadOnly getForceSensorOutputs()
    {
       return forceSensorDataHolderToUpdate;
-   }
-
-   @Override
-   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-   {
-      return true; //oneDoFJoint.isEnabled();
-   }
-
-   public SensorOutputMapReadOnly getRawSensorOutputMap()
-   {
-      return rawSensorOutputMap;
-   }
-
-   private SensorOutputMapReadOnly createRawSensorOutputMap()
-   {
-      return new SensorOutputMapReadOnly()
-      {
-
-         @Override
-         public long getWallTime()
-         {
-            return SDFPerfectSimulatedSensorReader.this.getWallTime();
-         }
-
-         @Override
-         public long getMonotonicTime()
-         {
-            return SDFPerfectSimulatedSensorReader.this.getMonotonicTime();
-         }
-
-         @Override
-         public long getSyncTimestamp()
-         {
-            return SDFPerfectSimulatedSensorReader.this.getSyncTimestamp();
-         }
-
-         @Override
-         public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return oneDoFJoint.getQ();
-         }
-
-         @Override
-         public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return oneDoFJoint.getQd();
-         }
-
-         @Override
-         public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return oneDoFJoint.getQdd();
-         }
-
-         @Override
-         public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return oneDoFJoint.getTau();
-         }
-
-         @Override
-         public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-         {
-            return SDFPerfectSimulatedSensorReader.this.isJointEnabled(oneDoFJoint);
-         }
-
-         @Override
-         public List<? extends IMUSensorReadOnly> getIMUOutputs()
-         {
-            return new ArrayList<>();
-         }
-
-         @Override
-         public ForceSensorDataHolderReadOnly getForceSensorOutputs()
-         {
-            return forceSensorDataHolderToUpdate;
-         }
-      };
    }
 }
