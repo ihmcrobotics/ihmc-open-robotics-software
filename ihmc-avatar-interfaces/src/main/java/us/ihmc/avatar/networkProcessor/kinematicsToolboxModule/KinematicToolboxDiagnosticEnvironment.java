@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -103,33 +104,9 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
+         public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
          {
-            return false;
-         }
-
-         @Override
-         public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
+            return null;
          }
 
          @Override
