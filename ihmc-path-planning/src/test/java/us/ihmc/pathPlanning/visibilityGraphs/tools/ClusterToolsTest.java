@@ -56,7 +56,7 @@ public class ClusterToolsTest
       points.add(endpoint2);
 
       double[] extrusionDistances = new double[] {extrusionDistance, extrusionDistance};
-      List<Point2D> extrusions = ClusterTools.extrudeMultiLine(points, extrusionDistances, 3);
+      List<? extends Point2DReadOnly> extrusions = ClusterTools.extrudeMultiLine(points, extrusionDistances, 3);
 
       assertEquals(6, extrusions.size());
       int index = 0;
@@ -77,9 +77,9 @@ public class ClusterToolsTest
       rawPoints.add(new Point3D(expectedObstacleHeight, 0.0, expectedObstacleHeight));
       rawPoints.add(new Point3D(0.5, 0.0, 0.0));
 
-      List<Point3D> filteredRawPoints = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(rawPoints, 0.0);
+      List<? extends Point3DReadOnly> filteredRawPoints = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(rawPoints, 0.0);
 
-      for (Point3D filteredRawPoint : filteredRawPoints)
+      for (Point3DReadOnly filteredRawPoint : filteredRawPoints)
       {
          assertEquals(expectedObstacleHeight, filteredRawPoint.getZ(), EPSILON);
       }
@@ -132,7 +132,7 @@ public class ClusterToolsTest
 
       double[] extrusionDistances = new double[] {0.1, 0.2, 0.0, 0.3};
 
-      List<Point2D> extrudedPolygon = ClusterTools.extrudePolygon(extrudeToTheLeft, pointsToExtrude, extrusionDistances);
+      List<? extends Point2DReadOnly> extrudedPolygon = ClusterTools.extrudePolygon(extrudeToTheLeft, pointsToExtrude, extrusionDistances);
 
       assertEquals(4, extrudedPolygon.size());
       int index = 0;
@@ -217,7 +217,7 @@ public class ClusterToolsTest
       double[] extrusionDistances = new double[] {0.1, 0.1};
       int numberOfExtrusionsAtEndpoints = 5;
 
-      List<Point2D> extrudedLine = ClusterTools.extrudeMultiLine(pointsToExtrude, extrusionDistances, numberOfExtrusionsAtEndpoints);
+      List<? extends Point2DReadOnly> extrudedLine = ClusterTools.extrudeMultiLine(pointsToExtrude, extrusionDistances, numberOfExtrusionsAtEndpoints);
 
       //      printPoints(extrudedLine);
 
@@ -252,7 +252,7 @@ public class ClusterToolsTest
       double[] extrusionDistances = new double[] {0.1, 0.1, 0.1};
       int numberOfExtrusionsAtEndpoints = 5;
 
-      List<Point2D> extrudedLine = ClusterTools.extrudeMultiLine(pointsToExtrude, extrusionDistances, numberOfExtrusionsAtEndpoints);
+      List<? extends Point2DReadOnly> extrudedLine = ClusterTools.extrudeMultiLine(pointsToExtrude, extrusionDistances, numberOfExtrusionsAtEndpoints);
 
       double sqrt2By2 = Math.sqrt(2.0) / 2.0;
 
