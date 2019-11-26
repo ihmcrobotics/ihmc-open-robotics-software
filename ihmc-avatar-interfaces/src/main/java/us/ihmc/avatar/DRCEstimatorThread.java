@@ -45,12 +45,11 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -247,18 +246,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
 
-         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
-                                                                                                           forceSensorDataHolderToSend);
+         RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
+         factory.setDefinitionsToSend(estimatorFullRobotModel);
+         factory.setEstimatorOutput(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
+         factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
+         factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
 
-         DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel,
-                                                                        jointConfigurationGathererAndProducer,
-                                                                        ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                                                        realtimeRos2Node,
-                                                                        processedSensorOutputMap,
-                                                                        rawSensorOutputMap,
-                                                                        robotMotionStatusFromController,
-                                                                        sensorInformation);
-         estimatorController.setRawOutputWriter(poseCommunicator);
+         estimatorController.setRawOutputWriter(factory.createRobotConfigurationDataPublisher());
       }
 
       firstTick.set(true);

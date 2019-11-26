@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -53,10 +52,10 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
@@ -64,8 +63,6 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
-import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -148,7 +145,7 @@ public class QuadrupedSimulationFactory
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeRos2Node realtimeRos2Node;
    private QuadrupedControllerManager controllerManager;
-   private DRCPoseCommunicator poseCommunicator;
+   private RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
@@ -328,16 +325,13 @@ public class QuadrupedSimulationFactory
 
    private void createPoseCommunicator()
    {
-      JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
-      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName());
-      poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(),
-                                                 jointConfigurationGathererAndProducer,
-                                                 publisherTopicNameGenerator,
-                                                 realtimeRos2Node,
-                                                 timestampProvider.get(),
-                                                 sensorReader.getRawSensorOutputMap(),
-                                                 controllerManager.getMotionStatusHolder(),
-                                                 null);
+      RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
+      factory.setDefinitionsToSend(fullRobotModel.get());
+      factory.setEstimatorOutput(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
+      factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
+      factory.setROS2Info(realtimeRos2Node, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName()));
+
+      robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
    }
 
    private void createControllerNetworkSubscriber()
@@ -397,7 +391,7 @@ public class QuadrupedSimulationFactory
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
-                                                               poseCommunicator, yoVariableServer);
+                                                               robotConfigurationDataPublisher, yoVariableServer);
       simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
