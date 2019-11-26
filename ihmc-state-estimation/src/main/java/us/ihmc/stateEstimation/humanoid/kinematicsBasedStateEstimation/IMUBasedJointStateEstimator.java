@@ -11,7 +11,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -75,7 +75,7 @@ public class IMUBasedJointStateEstimator
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJointBasics joint = joints[i];
-         OneDoFJointSensorOutputReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(joint);
+         OneDoFJointStateReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(joint);
 
          double qd_sensorMap = jointSensorOutput.getVelocity();
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);

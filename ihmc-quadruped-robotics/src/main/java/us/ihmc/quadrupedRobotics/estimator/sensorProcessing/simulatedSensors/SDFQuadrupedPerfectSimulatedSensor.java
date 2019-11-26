@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -28,8 +28,8 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
 
-   private final List<OneDoFJointSensorOutputReadOnly> jointSensorOutputList = new ArrayList<>();
-   private final Map<String, OneDoFJointSensorOutputReadOnly> jointNameToJointSensorOutputMap = new HashMap<>();
+   private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
+   private final Map<String, OneDoFJointStateReadOnly> jointNameToJointSensorOutputMap = new HashMap<>();
 
    private final YoBoolean enableDrives;
 
@@ -51,7 +51,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJointSensorOutputReadOnly jointSensorOutput = OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(joint, true);
+         OneDoFJointStateReadOnly jointSensorOutput = OneDoFJointStateReadOnly.createFromOneDoFJoint(joint, true);
          jointSensorOutputList.add(jointSensorOutput);
          jointNameToJointSensorOutputMap.put(joint.getName(), jointSensorOutput);
       }
@@ -102,13 +102,13 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointNameToJointSensorOutputMap.get(oneDoFJoint.getName());
    }
 
    @Override
-   public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+   public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
    {
       return jointSensorOutputList;
    }

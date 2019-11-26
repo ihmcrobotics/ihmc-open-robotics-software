@@ -40,7 +40,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointSensorOutputReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -258,7 +258,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
-         OneDoFJointSensorOutputReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoints.get(jointIdx));
+         OneDoFJointStateReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoints.get(jointIdx));
          double jointPositionMeasurement = processedJointOutput.getPosition();
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
          double jointVelocityMeasurement = processedJointOutput.getVelocity();
