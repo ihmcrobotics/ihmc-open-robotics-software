@@ -7,18 +7,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -799,7 +796,7 @@ public class ClusterToolsTest
       double[] distances = new double[polygon.getNumberOfVertices()];
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 0.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.1), shrunkenPolygon.getVertexCCW(0), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.9, 0.1), shrunkenPolygon.getVertexCCW(1), 1e-7);
@@ -812,7 +809,7 @@ public class ClusterToolsTest
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 1.1;
 
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 0.5), shrunkenPolygon.getVertexCCW(0), 1e-7);
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
@@ -833,7 +830,7 @@ public class ClusterToolsTest
       double[] distances = new double[polygon.getNumberOfVertices()];
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 0.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.986224428207409, 0.11869118477128504), shrunkenPolygon.getVertexCCW(0), 1e-7);
@@ -844,7 +841,7 @@ public class ClusterToolsTest
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 1.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(1.0666666666, 0.5), shrunkenPolygon.getVertexCCW(0), 1e-7);
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
@@ -865,7 +862,7 @@ public class ClusterToolsTest
       double[] distances = new double[polygon.getNumberOfVertices()];
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 0.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.9, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(-0.9, 3.0), shrunkenPolygon.getVertexCCW(1), 1e-7);
@@ -874,7 +871,7 @@ public class ClusterToolsTest
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 1.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.0, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
       assertEquals(1, shrunkenPolygon.getNumberOfVertices());
@@ -893,7 +890,7 @@ public class ClusterToolsTest
       double[] distances = new double[polygon.getNumberOfVertices()];
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          distances[i] = 0.1;
-      ClusterTools.scaleConvexPolygonInward(polygon, distances, shrunkenPolygon);
+      ClusterTools.extrudeConvexPolygonInward(polygon, distances, shrunkenPolygon);
 
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(-1.0, 3.0), shrunkenPolygon.getVertexCCW(0), 1e-7);
    }
@@ -924,7 +921,7 @@ public class ClusterToolsTest
          double[] distances = new double[randomPolygon.getNumberOfVertices()];
          for (int i = 0; i < randomPolygon.getNumberOfVertices(); i++)
             distances[i] = distance;
-         ClusterTools.scaleConvexPolygonInward(randomPolygon, distances, shrunkenPolygon);
+         ClusterTools.extrudeConvexPolygonInward(randomPolygon, distances, shrunkenPolygon);
 
          ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
          ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
