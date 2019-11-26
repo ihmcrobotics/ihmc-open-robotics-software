@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -27,6 +28,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
 
+   private final List<OneDoFJointSensorOutputReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<String, OneDoFJointSensorOutputReadOnly> jointNameToJointSensorOutputMap = new HashMap<>();
 
    private final YoBoolean enableDrives;
@@ -49,7 +51,9 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         jointNameToJointSensorOutputMap.put(joint.getName(), OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(joint, true));
+         OneDoFJointSensorOutputReadOnly jointSensorOutput = OneDoFJointSensorOutputReadOnly.createFromOneDoFJoint(joint, true);
+         jointSensorOutputList.add(jointSensorOutput);
+         jointNameToJointSensorOutputMap.put(joint.getName(), jointSensorOutput);
       }
 
       //FootSwitches
@@ -101,6 +105,12 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointNameToJointSensorOutputMap.get(oneDoFJoint.getName());
+   }
+
+   @Override
+   public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+   {
+      return jointSensorOutputList;
    }
 
    @Override

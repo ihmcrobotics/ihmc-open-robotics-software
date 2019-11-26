@@ -110,6 +110,12 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
+         public List<? extends OneDoFJointSensorOutputReadOnly> getOneDoFJointOutputs()
+         {
+            return null;
+         }
+
+         @Override
          public List<? extends IMUSensorReadOnly> getIMUOutputs()
          {
             return null;
