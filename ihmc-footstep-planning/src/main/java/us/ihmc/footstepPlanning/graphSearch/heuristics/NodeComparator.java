@@ -2,17 +2,15 @@ package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import java.util.Comparator;
 
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class NodeComparator implements Comparator<FootstepNode>
 {
-   private final FootstepGraph graph;
+   private final DirectedGraph graph;
    private final CostToGoHeuristics heuristics;
 
-   public NodeComparator(FootstepGraph graph, CostToGoHeuristics heuristics)
+   public NodeComparator(DirectedGraph graph, CostToGoHeuristics heuristics)
    {
       this.graph = graph;
       this.heuristics = heuristics;

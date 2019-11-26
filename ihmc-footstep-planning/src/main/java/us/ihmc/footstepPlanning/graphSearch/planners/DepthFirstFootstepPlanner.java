@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
@@ -49,7 +49,7 @@ public class DepthFirstFootstepPlanner implements BodyPathAndFootstepPlanner
    private final YoDouble planningDuration = new YoDouble("planningDuration", registry);
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
 
-   private final FootstepGraph footstepGraph;
+   private final DirectedGraph footstepGraph;
    protected final Deque<FootstepNode> stack = new ArrayDeque<FootstepNode>();
    private final ParameterBasedNodeExpansion nodeExpansion;
    private final FootstepNodeSnapper snapper;
@@ -71,7 +71,7 @@ public class DepthFirstFootstepPlanner implements BodyPathAndFootstepPlanner
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
-      this.footstepGraph = new FootstepGraph();
+      this.footstepGraph = new DirectedGraph();
       this.snapper = snapper;
       this.checker = checker;
       this.stepCostCalculator = stepCostCalculator;

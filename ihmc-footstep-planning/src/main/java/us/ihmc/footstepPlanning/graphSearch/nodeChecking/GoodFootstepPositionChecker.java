@@ -7,14 +7,12 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
@@ -35,7 +33,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
-   private FootstepGraph graph;
+   private DirectedGraph<FootstepNode> graph;
 
    public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
@@ -44,7 +42,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(FootstepGraph graph)
+   public void setFootstepGraph(DirectedGraph<FootstepNode> graph)
    {
       this.graph = graph;
    }
