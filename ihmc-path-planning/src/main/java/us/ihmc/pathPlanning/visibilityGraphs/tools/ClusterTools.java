@@ -12,7 +12,6 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -21,21 +20,17 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -56,7 +51,7 @@ public class ClusterTools
       {
          double[] extrusionDistances = polygon.getPolygonVerticesView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
          ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
-         scaleConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
+         extrudeConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
 
          listOfExtrusions.add(scaledPolygon.getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
       }
@@ -69,7 +64,7 @@ public class ClusterTools
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
     */
-   public static boolean scaleConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
+   public static boolean extrudeConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
    {
       if (distances.length != polygonQ.getNumberOfVertices())
          throw new IllegalArgumentException("Not a valid number of distances.");
@@ -143,10 +138,12 @@ public class ClusterTools
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
       Point2DReadOnly nextNextVertexQ = polygonQ.getNextVertex(nextVertexQIndex);
 
+      Vector2D normalizedVector = new Vector2D();
+      Vector2D nextNormalizedVector = new Vector2D();
+      Point2D referencePoint = new Point2D();
+
       for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {
-         Vector2D normalizedVector = new Vector2D();
-         Vector2D nextNormalizedVector = new Vector2D();
          normalizedVector.sub(nextVertexQ, vertexQ);
          normalizedVector.normalize();
          nextNormalizedVector.sub(nextNextVertexQ, nextVertexQ);
@@ -158,7 +155,6 @@ public class ClusterTools
             Vector2DBasics vectorPerpendicularToEdgeOnQ = EuclidGeometryTools.perpendicularVector2D(normalizedVector);
             vectorPerpendicularToEdgeOnQ.negate();
 
-            Point2D referencePoint = new Point2D();
             referencePoint.scaleAdd(distances[i], vectorPerpendicularToEdgeOnQ, vertexQ);
 
             rays.add(new Line2D(referencePoint, normalizedVector));
