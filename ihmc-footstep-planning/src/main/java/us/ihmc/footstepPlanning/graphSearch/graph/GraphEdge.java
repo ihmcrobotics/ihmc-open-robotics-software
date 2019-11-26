@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-public class FootstepEdge
+public class GraphEdge<N>
 {
-   private final FootstepNode startNode;
-   private final FootstepNode endNode;
+   private final N startNode;
+   private final N endNode;
 
    private final int hashCode;
 
-   public FootstepEdge(FootstepNode startNode, FootstepNode endNode)
+   public GraphEdge(N startNode, N endNode)
    {
       this.startNode = startNode;
       this.endNode = endNode;
@@ -15,12 +15,12 @@ public class FootstepEdge
       hashCode = computeHashCode(this);
    }
 
-   public FootstepNode getStartNode()
+   public N getStartNode()
    {
       return startNode;
    }
 
-   public FootstepNode getEndNode()
+   public N getEndNode()
    {
       return endNode;
    }
@@ -31,7 +31,7 @@ public class FootstepEdge
       return hashCode;
    }
 
-   private static int computeHashCode(FootstepEdge edge)
+   private static int computeHashCode(GraphEdge edge)
    {
       final int prime = 31;
       int result = 1;
@@ -49,7 +49,7 @@ public class FootstepEdge
          return false;
       if (getClass() != obj.getClass())
          return false;
-      FootstepEdge other = (FootstepEdge) obj;
+      GraphEdge other = (GraphEdge) obj;
       if (endNode == null)
       {
          if (other.endNode != null)

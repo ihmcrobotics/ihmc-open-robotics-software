@@ -21,8 +21,8 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepEdge;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.footstepPlanning.graphSearch.graph.GraphEdge;
+import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
@@ -43,10 +43,10 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,14 +76,14 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    /** Goal nodes, calculated from {@link #goal}. Used to indicate planner completion and compute heuristics */
    private SideDependentList<FootstepNode> goalNodes;
 
-   /** The final node of the planned path. Used to call {@link FootstepGraph#getPathFromStart} and as a helper object for best-effort mode*/
+   /** The final node of the planned path. Used to call {@link DirectedGraph#getPathFromStart} and as a helper object for best-effort mode*/
    private FootstepNode endNode;
    private FootstepNode bestEffortNode;
 
    /** Nominal mid-foot goal pose, used to call {@link FootstepPlan#setLowLevelPlanGoal} */
    private final FramePose3D goalPoseInWorld = new FramePose3D();
 
-   private final FootstepGraph graph;
+   private final DirectedGraph<FootstepNode> graph;
    private final FootstepNodeChecker nodeChecker;
    private final BipedalFootstepPlannerListener listener;
    private final CostToGoHeuristics heuristics;
@@ -126,7 +126,7 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       this.listener = listener;
       this.snapper = snapper;
-      this.graph = new FootstepGraph();
+      this.graph = new DirectedGraph<FootstepNode>();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
       this.footPolygons = footPolygons;
@@ -591,11 +591,11 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       fullGraphList.addNode(-1, startNode, startNodePose, null);
       expandedNodeMap.addFootstepNode(startNode);
 
-      HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = graph.getOutgoingEdges();
+      HashMap<FootstepNode, HashSet<GraphEdge<FootstepNode>>> outgoingEdges = graph.getOutgoingEdges();
       for (FootstepNode footstepNode : outgoingEdges.keySet())
       {
          expandedNodeMap.addFootstepNode(footstepNode);
-         for (FootstepEdge outgoingEdge : outgoingEdges.get(footstepNode))
+         for (GraphEdge<FootstepNode> outgoingEdge : outgoingEdges.get(footstepNode))
          {
             FootstepNode childNode = outgoingEdge.getEndNode();
             RigidBodyTransform nodePose = snapper.snapFootstepNode(childNode).getOrComputeSnappedNodeTransform(childNode);
