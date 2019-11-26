@@ -40,10 +40,11 @@ public class SimulatedDepthCamera
    private final Plane3D planeLeft;
    private final Plane3D planeRight;
 
-   HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
    private FramePose3D tempCameraPose = new FramePose3D();
+   private Point2D tempCircleOrigin = new Point2D();
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
@@ -67,37 +68,41 @@ public class SimulatedDepthCamera
       pointsInRegions.clear();
 
       for (PlanarRegion planarRegion : map.getPlanarRegionsAsList())
+      {
          pointsInRegions.put(planarRegion, new ArrayList<>());
+      }
 
       tempCameraPose.setToZero(cameraFrame);
       tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      int numberOfPointsToGenerate = 7500;
-      Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), 1.0, numberOfPointsToGenerate);
+      int numberOfPointsToGenerate = 50000;
+      double sphereRadius = 5.0;
+      Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 
       double rayLength = 5.0;
       double rayLengthSquared = MathTools.square(rayLength);
-      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(tempCameraPose.getPosition()),
-                                                                                                   rayLength,
-                                                                                                   map.getPlanarRegionsAsList());
+      tempCircleOrigin.set(tempCameraPose.getPosition());
+      List<PlanarRegion> filteredRegions = map.getPlanarRegionsAsList();
+//      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(tempCircleOrigin, rayLength, map.getPlanarRegionsAsList());
 
-      for (int rayIndex = 0; rayIndex < numberOfPointsToGenerate; rayIndex++)
+      for (Point3D pointOnSphere : pointsOnSphere)
       {
-         Point3D pointOnSphere = pointsOnSphere[rayIndex];
          Vector3D rayDirection = new Vector3D();
          rayDirection.sub(pointOnSphere, tempCameraPose.getPosition());
          ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(filteredRegions,
                                                                                                            tempCameraPose.getPosition(),
                                                                                                            rayDirection);
-         if (intersectionPair == null || intersectionPair.getLeft().distanceSquared(tempCameraPose.getPosition()) > rayLengthSquared)
+         if (intersectionPair == null)
          {
             continue;
          }
+//         if (intersectionPair.getLeft().distanceSquared(tempCameraPose.getPosition()) > rayLengthSquared)
+//         {
+//            continue;
+//         }
 
          Point3D intersection = intersectionPair.getLeft();
          PlanarRegion region = intersectionPair.getRight();
-
-         //         rayImpactLocations.add(intersection);
 
          Point3D pointOnPlane = new Point3D(intersection);
          region.transformFromWorldToLocal(pointOnPlane);
@@ -118,10 +123,7 @@ public class SimulatedDepthCamera
          segmentationRawData.add(rawData);
       }
 
-      PlanarRegionsList visibleRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData,
-                                                                                             concaveHullFactoryParameters,
-                                                                                             polygonizerParameters);
-      return visibleRegionsList;
+      return PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    public PlanarRegionsList filterUsingMethod1(PlanarRegionsList map)

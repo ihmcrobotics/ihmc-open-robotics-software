@@ -78,11 +78,11 @@ public class SimulatedDepthCameraTest
    @Test
    public void testFakeREA2()
    {
-      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), new Pose3D(), 7, 8, VERTICAL_FOV, HORIZONTAL_FOV);
       Pose3D pose;
       pose = new Pose3D();
       pose.setZ(1.8);
       pose.appendYawRotation(Math.toRadians(-135.0));
+      compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, 7, 8, VERTICAL_FOV, HORIZONTAL_FOV);
       compareMapToSimulatedView(BehaviorPlanarRegionEnvironments.realDataFromAtlasSLAMDataset20190710(), pose, -1, 9, VERTICAL_FOV, HORIZONTAL_FOV);
       pose = new Pose3D();
       pose.setZ(1.8);
