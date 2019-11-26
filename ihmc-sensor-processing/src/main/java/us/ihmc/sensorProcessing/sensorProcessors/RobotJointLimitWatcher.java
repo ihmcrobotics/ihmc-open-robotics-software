@@ -57,7 +57,7 @@ public class RobotJointLimitWatcher implements RobotController
          // and you get a wrong output.
          if (rawSensorOutputMap != null)
          {
-            double jointPositionRawOutput = rawSensorOutputMap.getJointPositionOutput(oneDoFJoints[i]);
+            double jointPositionRawOutput = rawSensorOutputMap.getJointOutput(oneDoFJoints[i]).getPosition();
             variablesToTrack[i].set(jointPositionRawOutput);
             limitCheckers[i].update();
          }

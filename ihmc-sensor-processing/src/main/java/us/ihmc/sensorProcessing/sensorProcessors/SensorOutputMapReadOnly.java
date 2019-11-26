@@ -10,31 +10,6 @@ public interface SensorOutputMapReadOnly extends SensorTimestampHolder
 {
    OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint);
 
-   default double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return getJointOutput(oneDoFJoint).getPosition();
-   }
-
-   default double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return getJointOutput(oneDoFJoint).getVelocity();
-   }
-
-   default double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return getJointOutput(oneDoFJoint).getAcceleration();
-   }
-
-   default double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return getJointOutput(oneDoFJoint).getEffort();
-   }
-
-   default boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-   {
-      return getJointOutput(oneDoFJoint).isJointEnabled();
-   }
-
    public List<? extends IMUSensorReadOnly> getIMUOutputs();
 
    public ForceSensorDataHolderReadOnly getForceSensorOutputs();
