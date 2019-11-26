@@ -85,7 +85,6 @@ public class AvatarEstimatorThread
 
    private final SensorOutputMapReadOnly processedSensorOutputMap;
    private final SensorOutputMapReadOnly rawSensorOutputMap;
-   private final DRCPoseCommunicator poseCommunicator;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
 
@@ -129,12 +128,12 @@ public class AvatarEstimatorThread
 
       estimatorController = new ModularRobotController("EstimatorController");
 
-
       processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       rawSensorOutputMap = sensorReader.getRawSensorOutputMap();
 
       if (realtimeRos2Node != null)
-         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node,
+                                                              ControllerCrashNotificationPacket.class,
                                                               ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
       else
          controllerCrashPublisher = null;
@@ -142,15 +141,22 @@ public class AvatarEstimatorThread
       if (sensorReaderFactory.useStateEstimator())
       {
          // Updates the force sensor data when running with the estimator.
-         forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(), processedSensorOutputMap,
-                                                               forceSensorDataHolder, stateEstimatorParameters, gravity,
-                                                               robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
+         forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(),
+                                                               processedSensorOutputMap,
+                                                               forceSensorDataHolder,
+                                                               stateEstimatorParameters,
+                                                               gravity,
+                                                               robotMotionStatusFromController,
+                                                               yoGraphicsListRegistry,
+                                                               estimatorRegistry);
 
          if (realtimeRos2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
             MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, RequestWristForceSensorCalibrationPacket.class, subscriberTopicNameGenerator,
+            ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                                 RequestWristForceSensorCalibrationPacket.class,
+                                                 subscriberTopicNameGenerator,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
@@ -172,7 +178,8 @@ public class AvatarEstimatorThread
          contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
                                                           contactPointParameters.getControllerToeContactLines());
          for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-            contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+            contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                               additionalContactNames.get(i),
                                                                additionalContactTransforms.get(i));
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(processedSensorOutputMap).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
@@ -202,14 +209,15 @@ public class AvatarEstimatorThread
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
                                                                                                            forceSensorDataHolderToSend);
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
-                                                    processedSensorOutputMap, rawSensorOutputMap, robotMotionStatusFromController, sensorInformation);
+         DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel,
+                                                                        jointConfigurationGathererAndProducer,
+                                                                        ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                                                        realtimeRos2Node,
+                                                                        processedSensorOutputMap,
+                                                                        rawSensorOutputMap,
+                                                                        robotMotionStatusFromController,
+                                                                        sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
-      }
-      else
-      {
-         poseCommunicator = null;
       }
 
       firstTick.set(true);
@@ -236,9 +244,16 @@ public class AvatarEstimatorThread
          SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
          String primaryImuName = sensorInformation.getPrimaryBodyImu();
          Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
-                                                                  rawSensorOutputMap, estimatorDT, gravity, processedSensorOutputMap,
-                                                                  yoGraphicsListRegistry, estimatorFullRobotModel);
+         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel,
+                                                                  primaryImuName,
+                                                                  imuSensorNames,
+                                                                  footForceSensorNames,
+                                                                  rawSensorOutputMap,
+                                                                  estimatorDT,
+                                                                  gravity,
+                                                                  processedSensorOutputMap,
+                                                                  yoGraphicsListRegistry,
+                                                                  estimatorFullRobotModel);
 
          InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
          if (ekfParameterStream == null)
@@ -258,9 +273,16 @@ public class AvatarEstimatorThread
          SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
          String primaryImuName = sensorInformation.getPrimaryBodyImu();
          Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
-                                                                  rawSensorOutputMap, estimatorDT, gravity, processedSensorOutputMap,
-                                                                  yoGraphicsListRegistry, estimatorFullRobotModel);
+         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel,
+                                                                  primaryImuName,
+                                                                  imuSensorNames,
+                                                                  footForceSensorNames,
+                                                                  rawSensorOutputMap,
+                                                                  estimatorDT,
+                                                                  gravity,
+                                                                  processedSensorOutputMap,
+                                                                  yoGraphicsListRegistry,
+                                                                  estimatorFullRobotModel);
 
          InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
          if (ekfParameterStream == null)
@@ -282,7 +304,8 @@ public class AvatarEstimatorThread
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
+      {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
 
