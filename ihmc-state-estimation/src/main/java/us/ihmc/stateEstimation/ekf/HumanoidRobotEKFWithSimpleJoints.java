@@ -123,7 +123,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       {
          OneDoFJoint simpleJoint = simpleJoints.get(jointIdx);
          OneDoFJoint referenceJoint = referenceJoints.get(jointIdx);
-         OneDoFJointSensorOutputReadOnly processedJointOutput = processedSensorOutput.getJointOutput(referenceJoint);
+         OneDoFJointSensorOutputReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoint);
          simpleJoint.setQ(processedJointOutput.getPosition());
          simpleJoint.setQd(processedJointOutput.getVelocity());
       }

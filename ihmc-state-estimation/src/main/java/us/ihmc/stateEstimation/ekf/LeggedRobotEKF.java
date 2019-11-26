@@ -258,7 +258,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
-         OneDoFJointSensorOutputReadOnly processedJointOutput = processedSensorOutput.getJointOutput(referenceJoints.get(jointIdx));
+         OneDoFJointSensorOutputReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoints.get(jointIdx));
          double jointPositionMeasurement = processedJointOutput.getPosition();
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
          double jointVelocityMeasurement = processedJointOutput.getVelocity();

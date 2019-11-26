@@ -224,7 +224,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public OneDoFJointSensorOutputReadOnly getJointOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointSensorOutputReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
       return jointToSensorOutputMap.get(oneDoFJoint);
    }
