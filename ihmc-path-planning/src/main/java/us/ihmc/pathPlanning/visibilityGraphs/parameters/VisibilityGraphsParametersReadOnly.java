@@ -302,7 +302,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLength = getMaxInterRegionConnectionLength();
+         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * getNavigableExtrusionDistance();
          private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
@@ -311,7 +311,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          {
             if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
                return false;
-            if (source.distanceSquared(target) > maxLengthSquared)
+            if (source.distanceXYSquared(target) > maxLengthSquared)
                return false;
 
             return true;
@@ -329,7 +329,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * (getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance());
+         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * getPreferredNavigableExtrusionDistance();
          private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
@@ -338,7 +338,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          {
             if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
                return false;
-            if (source.distanceSquared(target) > maxLengthSquared)
+            if (source.distanceXYSquared(target) > maxLengthSquared)
                return false;
 
             return true;
@@ -356,7 +356,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLength = getMaxInterRegionConnectionLength() + getPreferredNavigableExtrusionDistance() - getNavigableExtrusionDistance();
+         private final double maxLength = getMaxInterRegionConnectionLength() + getPreferredNavigableExtrusionDistance() + getNavigableExtrusionDistance();
          private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
@@ -365,7 +365,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          {
             if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
                return false;
-            if (source.distanceSquared(target) > maxLengthSquared)
+            if (source.distanceXYSquared(target) > maxLengthSquared)
                return false;
 
             return true;
