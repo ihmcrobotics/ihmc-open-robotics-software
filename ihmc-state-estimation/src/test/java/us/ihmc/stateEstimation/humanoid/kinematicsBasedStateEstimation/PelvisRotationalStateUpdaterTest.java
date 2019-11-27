@@ -186,7 +186,6 @@ public class PelvisRotationalStateUpdaterTest
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       inverseDynamicsStructure.getElevator().updateFramesRecursively();
-      inverseDynamicsStructure.updateInternalState();
       
       for (int i = 0; i < stateEstimatorSensorDefinitions.getIMUSensorDefinitions().size(); i++)
       {

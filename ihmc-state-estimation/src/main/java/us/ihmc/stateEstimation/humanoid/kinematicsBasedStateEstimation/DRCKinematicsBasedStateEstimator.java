@@ -67,7 +67,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final CenterOfPressureVisualizer copVisualizer;
 
    private final YoBoolean usePelvisCorrector;
-   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   private final SensorOutputMapReadOnly sensorOutput;
 
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
@@ -79,7 +79,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final YoFixedFrameTwist yoRootTwist;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-                                           SensorOutputMapReadOnly sensorOutputMapReadOnly, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+                                           SensorOutputMapReadOnly sensorOutputMap, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
                                            String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
                                            Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
@@ -87,7 +87,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
-      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
 
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
@@ -119,7 +119,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
-      for (IMUSensorReadOnly imu : sensorOutputMapReadOnly.getIMUProcessedOutputs())
+      for (IMUSensorReadOnly imu : sensorOutputMap.getIMUProcessedOutputs())
       {
          if (imuSensorsToUse.contains(imu.getSensorName()))
             imuProcessedOutputs.add(imu);
@@ -140,19 +140,33 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          imusToUse.addAll(imuProcessedOutputs);
       }
 
-      BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement", registry,
+      BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement",
+                                                                                      registry,
                                                                                       stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
 
-      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), gravitationalAcceleration, cancelGravityFromAccelerationMeasurement,
-                                                        estimatorDT, stateEstimatorParameters, registry);
-      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, robotMotionStatusFromController, stateEstimatorParameters,
+      imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs,
+                                                        feet.keySet(),
+                                                        gravitationalAcceleration,
+                                                        cancelGravityFromAccelerationMeasurement,
+                                                        estimatorDT,
+                                                        stateEstimatorParameters,
+                                                        registry);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure,
+                                                      footSwitches,
+                                                      feet,
+                                                      robotMotionStatusFromController,
+                                                      stateEstimatorParameters,
                                                       registry);
 
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
       {
-         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator,
-                                                                                 imuYawDriftEstimator, estimatorDT, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure,
+                                                                                 imusToUse,
+                                                                                 imuBiasStateEstimator,
+                                                                                 imuYawDriftEstimator,
+                                                                                 estimatorDT,
+                                                                                 registry);
       }
       else
       {
@@ -160,10 +174,18 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          pelvisRotationalStateUpdater = new ConstantPelvisRotationalStateUpdater(inverseDynamicsStructure, registry);
       }
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator,
-                                                              cancelGravityFromAccelerationMeasurement, footSwitches, estimatorCenterOfMassDataHolderToUpdate,
-                                                              centerOfPressureDataHolderFromController, feet, gravitationalAcceleration,
-                                                              stateEstimatorParameters, yoGraphicsListRegistry, registry);
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure,
+                                                              imusToUse,
+                                                              imuBiasStateEstimator,
+                                                              cancelGravityFromAccelerationMeasurement,
+                                                              footSwitches,
+                                                              estimatorCenterOfMassDataHolderToUpdate,
+                                                              centerOfPressureDataHolderFromController,
+                                                              feet,
+                                                              gravitationalAcceleration,
+                                                              stateEstimatorParameters,
+                                                              yoGraphicsListRegistry,
+                                                              registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -202,9 +224,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             ContactablePlaneBody contactableBody = feet.get(rigidBody);
             contactablePlaneBodies.add(contactableBody);
          }
-         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer
-               .createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches", inverseDynamicsStructure.getRootJoint().getSuccessor(),
-                                                            contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
+                                                                                                                      inverseDynamicsStructure.getRootJoint()
+                                                                                                                                              .getSuccessor(),
+                                                                                                                      contactablePlaneBodies,
+                                                                                                                      1.0,
+                                                                                                                      yoGraphicsListRegistry,
+                                                                                                                      registry);
       }
       else
       {
@@ -212,7 +238,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       rootJoint = inverseDynamicsStructure.getRootJoint();
-      yoRootTwist = new YoFixedFrameTwist("RootTwist", rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
+      yoRootTwist = new YoFixedFrameTwist("RootTwist",
+                                          rootJoint.getFrameAfterJoint(),
+                                          rootJoint.getFrameBeforeJoint(),
+                                          rootJoint.getFrameAfterJoint(),
                                           registry);
    }
 
@@ -220,7 +249,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, false, 1.0);
+         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(),
+                                                                                         registry,
+                                                                                         false,
+                                                                                         1.0);
          yoGraphicMeasurementFrames.add(yoGraphicMeasurementFrame);
       }
       yoGraphicsListRegistry.registerYoGraphics("imuFrame", yoGraphicMeasurementFrames);
@@ -251,8 +283,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getWallTime()));
-
+      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutput.getWallTime()));
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
@@ -275,13 +306,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       switch (operatingMode.getEnumValue())
       {
-      case FROZEN:
-         pelvisLinearStateUpdater.updateForFrozenState();
-         break;
-      case NORMAL:
-      default:
-         pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
-         break;
+         case FROZEN:
+            pelvisLinearStateUpdater.updateForFrozenState();
+            break;
+         case NORMAL:
+         default:
+            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+            break;
       }
 
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
@@ -291,7 +322,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
-         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getWallTime());
+         pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
       }
 
       updateVisualizers();
@@ -318,7 +349,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    @Override
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslationVector());
+      pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslation());
       reinitializeStateEstimator.set(true);
       // Do nothing for the orientation since the IMU is trusted
    }
