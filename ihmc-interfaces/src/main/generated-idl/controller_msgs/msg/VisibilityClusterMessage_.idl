@@ -38,7 +38,7 @@ module controller_msgs
         geometry_msgs::msg::dds::Pose pose_in_world;
         controller_msgs::msg::dds::VisibilityClusterPointsMessage raw_points_in_local;
         sequence<controller_msgs::msg::dds::VisibilityClusterPointsMessage, 25> preferred_navigable_extrusions_in_local;
-        controller_msgs::msg::dds::VisibilityClusterPointsMessage preferred_non_navigable_extrusions_in_local;
+        sequence<controller_msgs::msg::dds::VisibilityClusterPointsMessage, 25> preferred_non_navigable_extrusions_in_local;
         controller_msgs::msg::dds::VisibilityClusterPointsMessage navigable_extrusions_in_local;
         controller_msgs::msg::dds::VisibilityClusterPointsMessage non_navigable_extrusions_in_local;
       };

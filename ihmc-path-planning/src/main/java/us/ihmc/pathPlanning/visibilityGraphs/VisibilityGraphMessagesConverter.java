@@ -97,7 +97,7 @@ public class VisibilityGraphMessagesConverter
       List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
       List<List<Point2DReadOnly>> preferredNavigableExtrusionsInLocal = cluster.getPreferredNavigableExtrusionsInLocal();
       List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
-      List<Point2DReadOnly> preferredNonNavigableExtrusionsInLocal = cluster.getPreferredNonNavigableExtrusionsInLocal();
+      List<List<Point2DReadOnly>> preferredNonNavigableExtrusionsInLocal = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
       message.setExtrusionSide(cluster.getExtrusionSide().toByte());
       message.setType(cluster.getType().toByte());
@@ -109,7 +109,12 @@ public class VisibilityGraphMessagesConverter
       for (int i = 0; i < nonNavigableExtrusionsInLocal.size(); i++)
          message.getNonNavigableExtrusionsInLocal().getPoints().add().set(nonNavigableExtrusionsInLocal.get(i));
       for (int i = 0; i < preferredNonNavigableExtrusionsInLocal.size(); i++)
-         message.getPreferredNonNavigableExtrusionsInLocal().getPoints().add().set(preferredNonNavigableExtrusionsInLocal.get(i));
+      {
+         List<Point2DReadOnly> extrusions = preferredNonNavigableExtrusionsInLocal.get(i);
+         VisibilityClusterPointsMessage points = message.getPreferredNonNavigableExtrusionsInLocal().add();
+         for (int j = 0; j < preferredNonNavigableExtrusionsInLocal.get(i).size(); j++)
+            points.getPoints().add().set(extrusions.get(j));
+      }
       for (int i = 0; i < preferredNavigableExtrusionsInLocal.size(); i++)
       {
          List<Point2DReadOnly> extrusions = preferredNavigableExtrusionsInLocal.get(i);
@@ -224,7 +229,7 @@ public class VisibilityGraphMessagesConverter
 
       List<Point3D> rawPointsInLocal = message.getRawPointsInLocal().getPoints();
       List<VisibilityClusterPointsMessage> preferredNavigableExtrusionsInLocal = message.getPreferredNavigableExtrusionsInLocal();
-      List<Point3D> preferredNonNavigableExtrusionsInLocal = message.getPreferredNonNavigableExtrusionsInLocal().getPoints();
+      List<VisibilityClusterPointsMessage> preferredNonNavigableExtrusionsInLocal = message.getPreferredNonNavigableExtrusionsInLocal();
       List<Point3D> navigableExtrusionsInLocal = message.getNavigableExtrusionsInLocal().getPoints();
       List<Point3D> nonNavigableExtrusionsInLocal = message.getNonNavigableExtrusionsInLocal().getPoints();
 
@@ -245,7 +250,13 @@ public class VisibilityGraphMessagesConverter
          cluster.addPreferredNavigableExtrusionInLocal(extrusionPoints);
       }
       for (int i = 0; i < preferredNonNavigableExtrusionsInLocal.size(); i++)
-         cluster.addPreferredNonNavigableExtrusionInLocal(preferredNonNavigableExtrusionsInLocal.get(i));
+      {
+         List<Point2D> extrusionPoints = new ArrayList<>();
+         List<Point3D> points = preferredNonNavigableExtrusionsInLocal.get(i).getPoints();
+         for (int j = 0; j < points.size(); j++)
+            extrusionPoints.add(new Point2D(points.get(j)));
+         cluster.addPreferredNonNavigableExtrusionInLocal(extrusionPoints);
+      }
 
 
       return cluster;

@@ -271,6 +271,22 @@ public class ClusterMeshViewer extends AnimationTimer
       }
    }
 
+   private void buildPreferredNonNavigableExtrusion(JavaFXMeshBuilder preferredNonNavigableExtrusionsMeshBuilder, Cluster cluster)
+   {
+      boolean close = cluster.isClosed();
+
+      for (List<Point3DReadOnly> extrusions : cluster.getPreferredNonNavigableExtrusionsInWorld())
+      {
+         preferredNonNavigableExtrusionsMeshBuilder
+               .addMultiLine(extrusions, VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
+
+         for (Point3DReadOnly rawPoint : extrusions)
+         {
+            preferredNonNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
+         }
+      }
+   }
+
    private void buildNavigableExtrusion(JavaFXMeshBuilder navigableExtrusionsMeshBuilder, Cluster cluster)
    {
       boolean close = cluster.isClosed();
@@ -281,19 +297,6 @@ public class ClusterMeshViewer extends AnimationTimer
       for (Point3DReadOnly rawPoint : cluster.getNavigableExtrusionsInWorld())
       {
          navigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
-      }
-   }
-
-   private void buildPreferredNonNavigableExtrusion(JavaFXMeshBuilder preferredNonNavigableExtrusionsMeshBuilder, Cluster cluster)
-   {
-      boolean close = cluster.isClosed();
-
-      preferredNonNavigableExtrusionsMeshBuilder
-            .addMultiLine(cluster.getPreferredNonNavigableExtrusionsInWorld(), VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
-
-      for (Point3DReadOnly rawPoint : cluster.getPreferredNonNavigableExtrusionsInWorld())
-      {
-         preferredNonNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
       }
    }
 

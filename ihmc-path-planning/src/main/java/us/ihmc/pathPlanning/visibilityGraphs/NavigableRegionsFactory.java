@@ -86,7 +86,7 @@ public class NavigableRegionsFactory
       {
          List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
          List<List<Point2DReadOnly>> currentListOfPreferred2DPoints = cluster.getPreferredNavigableExtrusionsInLocal();
-         List<List<Point2DReadOnly>> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(listOfPoints -> PointCloudTools
+         List<List<? extends Point2DReadOnly>> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(listOfPoints -> PointCloudTools
                .addPointsAlongPolygon(listOfPoints, clusterResolution)).collect(Collectors.toList());
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
          cluster.setPreferredNavigableExtrusionsInLocal(expandedListOfPreferred2DPoints);
