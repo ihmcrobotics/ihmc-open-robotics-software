@@ -5,19 +5,21 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Application;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class EnvironmentMappingViewer extends Application
+public class InverseExtrapolationEndToEndTest extends Application
 {
    private static final boolean SHOW_PLANAR_REGIONS = false;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
 
-   private static final boolean BUILD_PLANAR_REGIONS = false;
+   private static final boolean BUILD_PLANAR_REGIONS = true;
 
    private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegion";
    private static final String POINT_CLOUD_FILE_NAME = "PointCloud";
@@ -32,6 +34,7 @@ public class EnvironmentMappingViewer extends Application
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
       StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
+      NormalOctreeGraphic octreeGraphic = new NormalOctreeGraphic();
 
       File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
       File[] listOfFiles = dataFolder.listFiles();
@@ -86,7 +89,26 @@ public class EnvironmentMappingViewer extends Application
          {
             List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
             System.out.println("Point cloud messages (" + messagesFromFile.size() + ")");
-            stereoVisionPointCloudGraphic.generateMeshes(messagesFromFile);
+
+            InverseExtrapolationStereoFrameFilter frameFilter = new InverseExtrapolationStereoFrameFilter();
+            EnvironmentMap environmentMap = new EnvironmentMap(0, messagesFromFile.get(0)); // TODO: set proper timestamp.
+
+            stereoVisionPointCloudGraphic.initializeMeshes();
+            for (int i = 1; i < messagesFromFile.size(); i++)
+            {
+               boolean result = frameFilter.intersectionFilter(messagesFromFile.get(i), environmentMap);
+               if (true)
+               {
+                  environmentMap.addFrame(0, messagesFromFile.get(i));
+                  stereoVisionPointCloudGraphic.addSingleMesh(messagesFromFile.get(i), Color.BLUE);
+               }
+               else
+               {
+//                  stereoVisionPointCloudGraphic.addSingleMesh(messagesFromFile.get(i), Color.YELLOW);
+               }
+            }
+            stereoVisionPointCloudGraphic.generateMeshes();
+
             stereoVisionPointCloudGraphic.update();
             view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
             System.out.println("are rendered.");
@@ -94,15 +116,14 @@ public class EnvironmentMappingViewer extends Application
             if (BUILD_PLANAR_REGIONS)
             {
                System.out.println("Building planar regions map.");
-               List<Long> timestamps = StereoVisionPointCloudDataLoader.extractTimestamps(pointCloudFile);
-               EnvironmentMap environmentMap = new EnvironmentMap(timestamps.get(0), messagesFromFile.get(0));
-               for (int i = 1; i < messagesFromFile.size(); i++)
-               {
-                  environmentMap.addFrame(timestamps.get(i), messagesFromFile.get(i));
-               }
-               regionsGraphic.generateMeshes(environmentMap.getPlanarRegionsMap());
+               PlanarRegionsList map = environmentMap.getPlanarRegionsMap();
+               regionsGraphic.generateMeshes(map);
                regionsGraphic.update();
                view3dFactory.addNodeToView(regionsGraphic);
+               
+//               octreeGraphic.generateMeshes(environmentMap.getOctreeMap(), environmentMap.getOctreeResolution());
+//               octreeGraphic.update();
+//               view3dFactory.addNodeToView(octreeGraphic);
             }
          }
       }

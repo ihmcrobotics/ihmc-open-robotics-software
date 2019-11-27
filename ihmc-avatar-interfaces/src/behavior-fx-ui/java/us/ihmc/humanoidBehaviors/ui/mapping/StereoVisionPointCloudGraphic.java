@@ -10,6 +10,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -19,7 +21,9 @@ public class StereoVisionPointCloudGraphic extends Group
 {
    private static final float ORIGIN_POINT_SIZE = 0.05f;
    private static final float SCAN_POINT_SIZE = 0.0075f;
-   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 1000;
+   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 2000;
+
+   private static final Color DEFAULT_COLOR = Color.BLACK;
 
    private static final int palleteSizeForMeshBuilder = 2048;
 
@@ -34,7 +38,7 @@ public class StereoVisionPointCloudGraphic extends Group
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
    }
 
-   private void addMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, JavaFXMultiColorMeshBuilder meshBuilder)
+   private void addMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, Color colorToViz)
    {
       Point3D32 sensorPosition = new Point3D32();
       Point3D32 scanPoint = new Point3D32();
@@ -55,12 +59,55 @@ public class StereoVisionPointCloudGraphic extends Group
          else
             indexToVisualize = random.nextInt(numberOfScanPoints);
 
-         Color color = Color.BLACK;
          MessageTools.unpackScanPoint(stereoVisionPointCloudMessage, indexToVisualize, scanPoint);
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
       }
-
    }
+
+   /**
+    * for test
+    * ===============================================================================
+    */
+   // TODO : remove.
+   public void addPointsMeshes(Point3D[] points, Color colorToViz)
+   {
+      Point3D32 scanPoint = new Point3D32();
+
+      int numberOfScanPoints = points.length;
+      int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
+      for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
+      {
+         scanPoint.set(points[j]);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
+      }
+   }
+   
+   public void addSingleMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, Color colorToViz)
+   {
+      addMesh(stereoVisionPointCloudMessage, colorToViz);
+   }
+
+   public void initializeMeshes()
+   {
+      updatePointCloudMeshViews = new ArrayList<>();
+      meshBuilder.clear();
+   }
+
+   public void generateMeshes()
+   {
+      MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
+      scanMeshView.setMaterial(meshBuilder.generateMaterial());
+
+      updatePointCloudMeshViews.add(scanMeshView);
+      meshBuilder.clear();
+      messageNodes = updatePointCloudMeshViews;
+   }
+
+
+   /**
+    * for test
+    * ===============================================================================
+    */
 
    public void generateMeshes(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
@@ -68,7 +115,7 @@ public class StereoVisionPointCloudGraphic extends Group
 
       meshBuilder.clear();
 
-      addMesh(stereoVisionPointCloudMessage, meshBuilder);
+      addMesh(stereoVisionPointCloudMessage, DEFAULT_COLOR);
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
@@ -85,7 +132,7 @@ public class StereoVisionPointCloudGraphic extends Group
 
       meshBuilder.clear();
       for (int i = 0; i < stereoVisionPointCloudMessages.size(); i++)
-         addMesh(stereoVisionPointCloudMessages.get(i), meshBuilder);
+         addMesh(stereoVisionPointCloudMessages.get(i), DEFAULT_COLOR);
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
