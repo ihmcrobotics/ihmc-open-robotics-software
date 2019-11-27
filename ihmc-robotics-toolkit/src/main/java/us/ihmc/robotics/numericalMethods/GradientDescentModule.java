@@ -48,6 +48,11 @@ public class GradientDescentModule
       }
    }
 
+   public void setAlpha(double value)
+   {
+      alpha = value;
+   }
+
    private void reduceStepSize()
    {
       alpha = alpha / reducingStepSizeRatio;
@@ -163,6 +168,8 @@ public class GradientDescentModule
          }
 
          newQuery = function.getQuery(optimalInput);
+         if (DEBUG)
+            System.out.println("cur Query " + pastQuery + " new Query " + newQuery);
 
          if (newQuery > pastQuery)
          {

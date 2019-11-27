@@ -189,6 +189,62 @@ public class StereoVisionPointCloudDataLoader
 
       return messagesInTimeOrder;
    }
+   
+   public static List<Long> extractTimestamps(File selectedDataFolder)
+   {
+      File[] listOfFiles = selectedDataFolder.listFiles();
+
+      List<File> sensorPoseFiles = new ArrayList<>();
+      List<Long> timestamps = new ArrayList<Long>();
+      List<Long> timestampsInTimeOrder = new ArrayList<>();
+
+      for (File file : listOfFiles)
+      {
+         if (file.isFile())
+         {
+            String fileName = file.getName();
+
+            if (fileName.contains(StereoVisionPointCloudDataExporter.SENSOR_POSE_FILE_NAME_HEADER))
+               sensorPoseFiles.add(file);
+         }
+      }
+
+      for (int i = 0; i < sensorPoseFiles.size(); i++)
+      {
+         File sensorPoseFile = sensorPoseFiles.get(i);
+         long sensorPoseTimestamp = extractTimestamp(sensorPoseFile.getName());
+
+         for (int j = 0; j < sensorPoseFiles.size(); j++)
+         {
+            File pointCloudFile = sensorPoseFiles.get(j);
+            long pointCloudTimestamp = extractTimestamp(pointCloudFile.getName());
+            if (sensorPoseTimestamp == pointCloudTimestamp)
+            {
+               timestamps.add(sensorPoseTimestamp);
+            }
+         }
+      }
+
+      int numberOfMessages = timestamps.size();
+      for (int i = 0; i < numberOfMessages; i++)
+      {
+         long minTimestamp = Long.MAX_VALUE;
+         for (int j = 0; j < timestamps.size(); j++)
+         {
+            if (timestamps.get(j) < minTimestamp)
+            {
+               minTimestamp = timestamps.get(j);
+            }
+         }
+
+         if (timestamps.remove(minTimestamp))
+         {
+            timestampsInTimeOrder.add(minTimestamp);
+         }
+      }
+
+      return timestampsInTimeOrder;
+   }
 
    public static long extractTimestamp(String fileName)
    {
