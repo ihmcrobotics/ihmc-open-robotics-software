@@ -10,9 +10,9 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -69,7 +69,7 @@ public class StereoVisionPointCloudGraphic extends Group
     * ===============================================================================
     */
    // TODO : remove.
-   public void addPointsMeshes(Point3D[] points, Color colorToViz)
+   public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)
    {
       Point3D32 scanPoint = new Point3D32();
 
@@ -81,7 +81,16 @@ public class StereoVisionPointCloudGraphic extends Group
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
       }
    }
-   
+
+   public void addPointsMeshes(Point3DReadOnly[] points, RigidBodyTransformReadOnly sensorPose, Color colorToViz)
+   {
+      Point3D32 sensorPosition = new Point3D32();
+      sensorPosition.set(sensorPose.getTranslation());
+      Color color = Color.rgb(0, 0xFF, 0);
+      meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), sensorPosition, color);
+      addPointsMeshes(points, colorToViz);
+   }
+
    public void addSingleMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, Color colorToViz)
    {
       addMesh(stereoVisionPointCloudMessage, colorToViz);
@@ -102,7 +111,6 @@ public class StereoVisionPointCloudGraphic extends Group
       meshBuilder.clear();
       messageNodes = updatePointCloudMeshViews;
    }
-
 
    /**
     * for test
