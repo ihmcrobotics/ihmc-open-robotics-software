@@ -24,7 +24,7 @@ import java.util.*;
 
 public class SimulatedDepthCamera
 {
-   private static final boolean USE_METHOD_2 = true;
+   private static final boolean USE_METHOD_2 = false;
 
    private final ReferenceFrame cameraFrame;
 
