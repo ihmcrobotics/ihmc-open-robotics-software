@@ -11,7 +11,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
-import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
+import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -66,7 +66,7 @@ public class AtlasBehaviorUIDemo
       {
          new Thread(() -> {
             LogTools.info("Creating planar region publisher");
-            new FakeREAModule(ENVIRONMENT.get(), createRobotModel()).start();
+            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel()).start();
          }).start();
 
          new Thread(() -> {
