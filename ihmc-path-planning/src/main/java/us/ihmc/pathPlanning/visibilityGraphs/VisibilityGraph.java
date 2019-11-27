@@ -730,9 +730,16 @@ public class VisibilityGraph
 
       for (VisibilityGraphEdge edge : edges)
       {
-         ConnectionPoint3D sourcePoint = edge.getSourcePointInWorld();
-         ConnectionPoint3D targetPoint = edge.getTargetPointInWorld();
-         connections.add(new Connection(sourcePoint, targetPoint));
+         if (edge == null)
+         {
+            // not sure why this is null sometimes
+         }
+         else
+         {
+            ConnectionPoint3D sourcePoint = edge.getSourcePointInWorld();
+            ConnectionPoint3D targetPoint = edge.getTargetPointInWorld();
+            connections.add(new Connection(sourcePoint, targetPoint));
+         }
       }
 
       return connections;
