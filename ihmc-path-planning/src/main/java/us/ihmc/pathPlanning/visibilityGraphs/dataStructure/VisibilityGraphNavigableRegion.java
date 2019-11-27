@@ -14,6 +14,14 @@ import us.ihmc.robotics.geometry.PlanarRegion;
  */
 public class VisibilityGraphNavigableRegion
 {
+   /**
+    * This enables a potential 2X speed boost by replacing for loops
+    * with a parallel streamed forEach. It breaks a few tests and there
+    * is a null edge in the resulting visibility map.
+    * See more: https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-open-robotics-software/pull-requests/1393
+    */
+   private static final boolean ENABLE_EXPERIMENTAL_SPEEDUP = false;
+
    private final NavigableRegion navigableRegion;
 
    private final ArrayList<VisibilityGraphNode> preferredHomeRegionNodes = new ArrayList<>();
@@ -374,8 +382,20 @@ public class VisibilityGraphNavigableRegion
       List<VisibilityGraphNode> allNavigableNodes = getAllNavigableNodes();
       List<VisibilityGraphNode> allPreferredNavigableNodes = getAllPreferredNavigableNodes();
 
-      for (VisibilityGraphNode targetNode : allNavigableNodes)
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false);
+      if (ENABLE_EXPERIMENTAL_SPEEDUP)
+      {
+         allNavigableNodes.parallelStream()
+                          .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
+                                                                                             targetNode,
+                                                                                             nonPreferredWeight,
+                                                                                             nonPreferredStaticCost,
+                                                                                             false));
+      }
+      else
+      {
+         for (VisibilityGraphNode targetNode : allNavigableNodes)
+            addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false);
+      }
 
       double weight;
       double cost;
@@ -390,8 +410,20 @@ public class VisibilityGraphNavigableRegion
          cost = nonPreferredStaticCost;
       }
 
-      for (VisibilityGraphNode targetNode : allPreferredNavigableNodes)
-         addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode());
+      if (ENABLE_EXPERIMENTAL_SPEEDUP)
+      {
+         allPreferredNavigableNodes.parallelStream()
+                                   .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
+                                                                                                      targetNode,
+                                                                                                      weight,
+                                                                                                      cost,
+                                                                                                      sourceNode.isPreferredNode()));
+      }
+      else
+      {
+         for (VisibilityGraphNode targetNode : allPreferredNavigableNodes)
+            addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode());
+      }
    }
 
    public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost,
