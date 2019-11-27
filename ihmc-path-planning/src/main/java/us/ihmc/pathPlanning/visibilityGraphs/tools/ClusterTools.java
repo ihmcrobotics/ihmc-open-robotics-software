@@ -541,8 +541,9 @@ public class ClusterTools
       // inter region connections...
       if (includePreferredExtrusions)
       {
-         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(homeRegion.getConvexPolygons(), preferredNavigableCalculator));
+         List<ConvexPolygon2D> polygons = homeRegion.getConvexPolygons();
+         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNonNavigableCalculator));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNavigableCalculator));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
@@ -624,8 +625,8 @@ public class ClusterTools
                                                                                                                  nonNavigableExtrusionsInFlatWorld,
                                                                                                                  transformFromWorldToHome);
 
-      List<List<Point2DReadOnly>> preferredNavigableExtrusionsInHomeRegionLocal = null;
-      List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
+      List<List<? extends Point2DReadOnly>> preferredNavigableExtrusionsInHomeRegionLocal = null;
+      List<List<? extends Point2DReadOnly>> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
          // actually extrude the points
@@ -639,10 +640,12 @@ public class ClusterTools
 
          // Project the points back to the the home region.
          preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         preferredNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld, transformFromWorldToHome));
+         preferredNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
+                                                                                                      transformFromWorldToHome));
 
-         preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
-                                                                                                       transformFromWorldToHome);
+         preferredNonNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+         preferredNonNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
+                                                                                                         transformFromWorldToHome));
       }
 
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);

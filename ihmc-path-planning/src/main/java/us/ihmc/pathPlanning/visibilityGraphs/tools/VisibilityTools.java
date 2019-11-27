@@ -460,7 +460,7 @@ public class VisibilityTools
       {
          boolean closed = cluster.isClosed();
 
-         List<? extends Point2DReadOnly> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
+         List<List<Point2DReadOnly>> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
          if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
          {
@@ -482,10 +482,10 @@ public class VisibilityTools
 
             if (checkPreferredExtrusions)
             {
-               boolean startsInPreferredRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, preferredNonNavigableExtrusions,
-                                                                                                           preferredNonNavigableExtrusions.size(), true, 0.0);
-
-               if (!startsInPreferredRegion && !VisibilityTools.isPointVisible(observer, targetPoint, preferredNonNavigableExtrusions, closed))
+               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion,
+                                                                                                                                                                                  extrusion.size(), true, 0.0));
+               boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
+               if (!startsInPreferredRegion && isNotVisible)
                   return false;
             }
          }
@@ -495,11 +495,11 @@ public class VisibilityTools
             {
                // if you don't start in a preferred region, you have to cross into one. This means that if we start outside, we should not check check for
                // visibility, as we are trying to get in.
-               boolean startsInPreferredRegion = EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, preferredNonNavigableExtrusions,
-                                                                                                           preferredNonNavigableExtrusions.size(), true, 0.0);
-               boolean pointIsVisible = VisibilityTools.isPointVisible(observer, targetPoint, preferredNonNavigableExtrusions, closed);
+               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion,
+                                                                                                           extrusion.size(), true, 0.0));
+               boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
 
-               if (startsInPreferredRegion && !pointIsVisible)
+               if (startsInPreferredRegion && isNotVisible)
                   return false;
             }
          }

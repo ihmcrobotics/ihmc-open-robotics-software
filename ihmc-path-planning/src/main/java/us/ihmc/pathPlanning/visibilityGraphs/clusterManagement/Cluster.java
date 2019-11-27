@@ -32,7 +32,7 @@ public class Cluster
 
    private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
    private final List<List<Point2DReadOnly>> preferredNavigableExtrusionsInLocal = new ArrayList<>();
-   private final List<Point2DReadOnly> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
+   private final List<List<Point2DReadOnly>> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
    private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
 
@@ -103,8 +103,8 @@ public class Cluster
 
    public void clearPreferredNonNavigableExtrusions()
    {
-      nonNavigableExtrusionsBoundingBox.setToNaN();
-      nonNavigableExtrusionsInLocal.clear();
+      preferredNonNavigableExtrusionsBoundingBox.setToNaN();
+      preferredNonNavigableExtrusionsInLocal.clear();
    }
 
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
@@ -239,7 +239,6 @@ public class Cluster
       navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal);
    }
 
-
    public int getNumberOfNavigableExtrusions()
    {
       return navigableExtrusionsInLocal.size();
@@ -248,11 +247,6 @@ public class Cluster
    public Point2DReadOnly getNavigableExtrusionInLocal(int i)
    {
       return navigableExtrusionsInLocal.get(i);
-   }
-
-   public Point3DReadOnly getNavigableExtrusionInWorld(int i)
-   {
-      return toWorld3D(getNavigableExtrusionInLocal(i));
    }
 
    public List<Point2DReadOnly> getNavigableExtrusionsInLocal()
@@ -286,15 +280,6 @@ public class Cluster
       return extrusionsInWorld;
    }
 
-   public List<List<Point2DReadOnly>> getPreferredNavigableExtrusionsInWorld2D()
-   {
-      List<List<Point2DReadOnly>> extrusionsInWorld = new ArrayList<>();
-      for (List<Point2DReadOnly> preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
-         extrusionsInWorld.add(preferredExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList()));
-      return extrusionsInWorld;
-   }
-
-
    public void addPreferredNavigableExtrusionInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
    {
       List<Point2DReadOnly> listCopy = navigableExtrusionInLocal.stream().map(Point2D::new).collect(Collectors.toList());
@@ -311,14 +296,10 @@ public class Cluster
       return preferredNavigableExtrusionsInLocal;
    }
 
-   public void setPreferredNavigableExtrusionsInLocal(List<List<Point2DReadOnly>> listsOfPoints)
+   public void setPreferredNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> listsOfPoints)
    {
       preferredNavigableExtrusionsInLocal.clear();
-      for (List<Point2DReadOnly> points : listsOfPoints)
-      {
-         List<Point2DReadOnly> listCopy = new ArrayList<>(points);
-         preferredNavigableExtrusionsInLocal.add(listCopy);
-      }
+      addPreferredNavigableExtrusionsInLocal(listsOfPoints);
    }
 
 
@@ -379,25 +360,20 @@ public class Cluster
       return nonNavigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
    }
 
-
-   public void setPreferredNonNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   public void setPreferredNonNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> points)
    {
       clearPreferredNonNavigableExtrusions();
       addPreferredNonNavigableExtrusionsInLocal(points);
    }
 
-   public void addPreferredNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
+   public void addPreferredNonNavigableExtrusionInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
    {
-      preferredNonNavigableExtrusionsBoundingBox.updateToIncludePoint(nonNavigableExtrusionInLocal);
-      preferredNonNavigableExtrusionsInLocal.add(new Point2D(nonNavigableExtrusionInLocal));
+      List<Point2DReadOnly> listCopy = nonNavigableExtrusionInLocal.stream().map(Point2D::new).collect(Collectors.toList());
+      listCopy.forEach(preferredNonNavigableExtrusionsBoundingBox::updateToIncludePoint);
+      preferredNonNavigableExtrusionsInLocal.add(listCopy);
    }
 
-   public void addPreferredNonNavigableExtrusionInLocal(Point3DReadOnly nonNavigableExtrusionInLocal)
-   {
-      addPreferredNonNavigableExtrusionInLocal(new Point2D(nonNavigableExtrusionInLocal));
-   }
-
-   public void addPreferredNonNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
+   public void addPreferredNonNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionInLocal.forEach(this::addPreferredNonNavigableExtrusionInLocal);
    }
@@ -407,34 +383,16 @@ public class Cluster
       return preferredNonNavigableExtrusionsBoundingBox;
    }
 
-   public int getNumberOfPreferredNonNavigableExtrusions()
-   {
-      return preferredNonNavigableExtrusionsInLocal.size();
-   }
-
-   public Point2DReadOnly getPreferredNonNavigableExtrusionInLocal(int i)
-   {
-      return preferredNonNavigableExtrusionsInLocal.get(i);
-   }
-
-   public Point3DReadOnly getPreferredNonNavigableExtrusionInWorld(int i)
-   {
-      return toWorld3D(getPreferredNonNavigableExtrusionInLocal(i));
-   }
-
-   public List<Point2DReadOnly> getPreferredNonNavigableExtrusionsInLocal()
+   public List<List<Point2DReadOnly>> getPreferredNonNavigableExtrusionsInLocal()
    {
       return preferredNonNavigableExtrusionsInLocal;
    }
 
-   public List<Point3DReadOnly> getPreferredNonNavigableExtrusionsInWorld()
+   public List<List<Point3DReadOnly>> getPreferredNonNavigableExtrusionsInWorld()
    {
-      return preferredNonNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
-   }
-
-   public List<Point2DReadOnly> getPreferredNonNavigableExtrusionsInWorld2D()
-   {
-      return preferredNonNavigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+      List<List<Point3DReadOnly>> listToReturn = new ArrayList<>();
+      preferredNonNavigableExtrusionsInLocal.forEach(pointList -> listToReturn.add(pointList.stream().map(this::toWorld3D).collect(Collectors.toList())));
+      return listToReturn;
    }
 
 
