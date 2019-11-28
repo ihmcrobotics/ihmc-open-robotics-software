@@ -209,7 +209,7 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
+               double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
                // FIXME is this check necessary?
