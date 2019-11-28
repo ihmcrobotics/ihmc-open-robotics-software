@@ -45,7 +45,7 @@ public class IhmcSLAMEndToEndTest extends Application
 
       for (int i = 0; i < slam.getOriginalPointCloudMap().size(); i++)
       {
-         stereoVisionPointCloudGraphic.addPointsMeshes(slam.getOriginalPointCloudMap().get(i), slam.getOriginalSensorPoses().get(i), Color.BLACK);
+         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getOriginalPointCloudMap().get(i), slam.getOriginalSensorPoses().get(i), Color.BLACK);
       }
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {

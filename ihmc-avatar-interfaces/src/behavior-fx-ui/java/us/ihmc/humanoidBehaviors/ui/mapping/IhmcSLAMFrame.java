@@ -99,6 +99,11 @@ public class IhmcSLAMFrame
    {
       return originalSensorPoseToWorld;
    }
+   
+   public RigidBodyTransformReadOnly getInitialSensorPoseToWorld()
+   {
+      return sensorPoseToWorld;
+   }
 
    public Point3DReadOnly[] getPointCloud()
    {
