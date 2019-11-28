@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -591,10 +592,9 @@ public class ClusterTools
 
          obstacleConcaveHullInWorld.add(obstacleConcaveHullVertexInWorld);
 
-         // FIXME could we just use the height thing? We don't have to do a line intersection, do we?
-         Point3D obstacleConcaveHullVertexProjectedDownToHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(obstacleConcaveHullVertexInWorld, homeRegion);
+         double zInHomeRegion = homeRegion.getPlaneZGivenXY(obstacleConcaveHullVertexInWorld.getX(), obstacleConcaveHullVertexInWorld.getY());
 
-         double obstacleHeight = obstacleConcaveHullVertexInWorld.getZ() - obstacleConcaveHullVertexProjectedDownToHomeRegion.getZ();
+         double obstacleHeight = obstacleConcaveHullVertexInWorld.getZ() - zInHomeRegion;
          Point3D temporaryClusterPoint = new Point3D(obstacleConcaveHullVertexInWorld);
          temporaryClusterPoint.setZ(obstacleHeight);
 

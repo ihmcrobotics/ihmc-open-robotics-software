@@ -10,7 +10,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.tools.property.StoredProperty;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
@@ -425,10 +424,9 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
 
             //TOOD: ++++++JerryPratt: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
             //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength()
-            //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
             //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
             //TODO: But somehow that's not right, since if we change 0.25 to 1.0 below, we get a Runtime Exception: Tried to create a line from two coincidal points!?
-            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0)) //0.25)) //1.0))
+            if (!PlanarRegionTools.isRegionAOverlappingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0))
                return false;
 
             double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(potentialObstacleRegion, navigableRegion);
