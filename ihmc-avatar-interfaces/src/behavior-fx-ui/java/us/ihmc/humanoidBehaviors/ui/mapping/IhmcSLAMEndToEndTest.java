@@ -18,7 +18,11 @@ public class IhmcSLAMEndToEndTest extends Application
 
    //private final String stereoPath = "E:\\Data\\Walking10\\PointCloud\\";
    //private final String stereoPath = "E:\\Data\\Walking9-fixed-warmup\\PointCloud\\";
-   private final String stereoPath = "E:\\Data\\Walking7-fixedframe\\PointCloud\\";
+   //private final String stereoPath = "E:\\Data\\Walking7-fixedframe\\PointCloud\\";
+   //private final String stereoPath = "E:\\Data\\Complicated\\PointCloud\\";
+   //private final String stereoPath = "E:\\Data\\SimpleArea\\PointCloud\\";
+   //private final String stereoPath = "E:\\Data\\SimpleArea2\\PointCloud\\";
+   private final String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -30,7 +34,6 @@ public class IhmcSLAMEndToEndTest extends Application
       IhmcSLAM slam = new IhmcSLAM();
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
-      //for (int i = 1; i < 30; i++)
          slam.addFrame(messages.get(i));
 
       View3DFactory view3dFactory = new View3DFactory(1200, 800);
@@ -49,7 +52,7 @@ public class IhmcSLAMEndToEndTest extends Application
       }
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {
-         stereoVisionPointCloudGraphic.addPointsMeshes(slam.getPointCloudMap().get(i), slam.getSensorPoses().get(i), Color.BLUE);
+         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getPointCloudMap().get(i), slam.getSensorPoses().get(i), Color.BLUE);
       }
 
       stereoVisionPointCloudGraphic.generateMeshes();

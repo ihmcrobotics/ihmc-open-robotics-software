@@ -16,7 +16,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class IhmcSLAM
 {
@@ -42,7 +41,7 @@ public class IhmcSLAM
    private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
 
    private static final double OPTIMIZER_POSITION_LIMIT = 0.05;
-   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(1.0);
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(3.0);
 
    private static final TDoubleArrayList initialQuery = new TDoubleArrayList();
    private static final TDoubleArrayList lowerLimit = new TDoubleArrayList();
@@ -64,11 +63,21 @@ public class IhmcSLAM
       }
    }
 
+   //TODO: fix this.
+   private void updatePlanarRegionsMap(IhmcSLAMFrame frame)
+   {
+      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frame.getPointCloud(),
+                                                                                                         frame.getSensorPose().getTranslation(),
+                                                                                                         OCTREE_RESOLUTION);
+
+      planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
+                                                             polygonizerParameters);
+   }
+
    private void updatePlanarRegionsMap()
    {
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, OCTREE_RESOLUTION);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
-      System.out.println("planarRegionsMap " + planarRegionsMap.getNumberOfPlanarRegions());
    }
 
    private IhmcSLAMFrame getLatestFrame()
@@ -103,12 +112,10 @@ public class IhmcSLAM
 
       if (mergeable)
       {
-         //TODO: do slam.
          RigidBodyTransform optimizedMultiplier = computeOptimizedMultiplier(validPlanes, frame.getInitialSensorPoseToWorld());
+         frame.updateSLAM(optimizedMultiplier);
          System.out.println("optimizedMultiplier");
          System.out.println(optimizedMultiplier);
-
-         frame.updateSLAM(optimizedMultiplier);
 
          slamFrames.add(frame);
          pointCloudMap.add(frame.getPointCloud());
