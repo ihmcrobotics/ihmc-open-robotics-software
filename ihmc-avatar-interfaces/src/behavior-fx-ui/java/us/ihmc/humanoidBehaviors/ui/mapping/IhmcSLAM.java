@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
@@ -13,6 +15,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.numericalMethods.GradientDescentModule;
+import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class IhmcSLAM
 {
@@ -37,9 +41,27 @@ public class IhmcSLAM
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
 
-   public IhmcSLAM()
-   {
+   private static final double OPTIMIZER_POSITION_LIMIT = 0.05;
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(1.0);
 
+   private static final TDoubleArrayList initialQuery = new TDoubleArrayList();
+   private static final TDoubleArrayList lowerLimit = new TDoubleArrayList();
+   private static final TDoubleArrayList upperLimit = new TDoubleArrayList();
+
+   static
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         initialQuery.add(0.0);
+         lowerLimit.add(-OPTIMIZER_POSITION_LIMIT);
+         upperLimit.add(OPTIMIZER_POSITION_LIMIT);
+      }
+      for (int i = 0; i < 3; i++)
+      {
+         initialQuery.add(0.0);
+         lowerLimit.add(-OPTIMIZER_ANGLE_LIMIT);
+         upperLimit.add(OPTIMIZER_ANGLE_LIMIT);
+      }
    }
 
    private void updatePlanarRegionsMap()
@@ -82,6 +104,12 @@ public class IhmcSLAM
       if (mergeable)
       {
          //TODO: do slam.
+         RigidBodyTransform optimizedMultiplier = computeOptimizedMultiplier(validPlanes, frame.getInitialSensorPoseToWorld());
+         System.out.println("optimizedMultiplier");
+         System.out.println(optimizedMultiplier);
+
+         frame.updateSLAM(optimizedMultiplier);
+
          slamFrames.add(frame);
          pointCloudMap.add(frame.getPointCloud());
          sensorPoses.add(frame.getSensorPose());
@@ -89,10 +117,38 @@ public class IhmcSLAM
          updatePlanarRegionsMap();
       }
 
-      if(DEBUG)
+      if (DEBUG)
          System.out.println("mergeable " + mergeable);
 
       return mergeable;
+   }
+
+   private RigidBodyTransform computeOptimizedMultiplier(List<Plane3D> validPlanes, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   {
+      PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(planarRegionsMap, validPlanes, transformWorldToSensorPose);
+      GradientDescentModule optimizer = new GradientDescentModule(function, initialQuery);
+
+      int maxIterations = 100;
+      double convergenceThreshold = 10E-5;
+      double optimizerStepSize = -0.1;
+      double optimizerPerturbationSize = 0.0001;
+
+      optimizer.setInputLowerLimit(lowerLimit);
+      optimizer.setInputUpperLimit(upperLimit);
+      optimizer.setMaximumIterations(maxIterations);
+      optimizer.setConvergenceThreshold(convergenceThreshold);
+      optimizer.setStepSize(optimizerStepSize);
+      optimizer.setPerturbationSize(optimizerPerturbationSize);
+
+      int run = optimizer.run();
+      System.out.println("optimizer Query() " + run + " " + function.getQuery(initialQuery) + " " + optimizer.getOptimalQuery());
+      TDoubleArrayList optimalInput = optimizer.getOptimalInput();
+
+      RigidBodyTransform transformer = new RigidBodyTransform();
+      function.convertToSensorPoseMultiplier(optimalInput, transformer);
+
+      System.out.println(optimalInput.get(0) + " " + optimalInput.get(1));
+      return transformer;
    }
 
    public List<Point3DReadOnly[]> getOriginalPointCloudMap()
