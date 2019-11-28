@@ -146,13 +146,32 @@ public class IhmcSLAMTools
 
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
-      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(false);
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
       segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
+
+      segmentationCalculator.compute(referenceOctree.getRoot());
+
+      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
+
+      return rawData;
+   }
+   
+   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
+   {
+      NormalOcTree referenceOctree = computeOctreeData(pointCloud, sensorPosition, octreeResolution);
+
+      PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
+      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+
+      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
+      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
+      segmentationCalculator.setSensorPosition(sensorPosition);
 
       segmentationCalculator.compute(referenceOctree.getRoot());
 
