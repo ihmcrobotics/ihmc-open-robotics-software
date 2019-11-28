@@ -30,6 +30,7 @@ public class IhmcSLAMEndToEndTest extends Application
       IhmcSLAM slam = new IhmcSLAM();
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
+      //for (int i = 1; i < 30; i++)
          slam.addFrame(messages.get(i));
 
       View3DFactory view3dFactory = new View3DFactory(1200, 800);

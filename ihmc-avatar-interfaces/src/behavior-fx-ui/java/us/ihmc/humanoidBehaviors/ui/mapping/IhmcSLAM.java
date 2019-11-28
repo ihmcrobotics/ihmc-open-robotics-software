@@ -6,28 +6,24 @@ import java.util.List;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
-import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAM
 {
+   private static final boolean DEBUG = true;
+
    public static final double OCTREE_RESOLUTION = 0.02;
 
+   public static final double VALID_PLANES_RATIO_THRESHOLD = 0.3;
+
    public static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
-   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = 30.0 / 180.0 * Math.PI;
+   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(30.0);
 
    private final List<Point3DReadOnly[]> originalPointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> originalSensorPoses = new ArrayList<>();
@@ -50,6 +46,7 @@ public class IhmcSLAM
    {
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, OCTREE_RESOLUTION);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      System.out.println("planarRegionsMap " + planarRegionsMap.getNumberOfPlanarRegions());
    }
 
    private IhmcSLAMFrame getLatestFrame()
@@ -77,14 +74,23 @@ public class IhmcSLAM
       originalSensorPoses.add(frame.getSensorPose());
 
       boolean mergeable = true;
+      List<Plane3D> validPlanes = IhmcSLAMTools.computeValidPlanes(planarRegionsMap, frame, OCTREE_RESOLUTION, VALID_PLANES_RATIO_THRESHOLD,
+                                                                   MAXIMUM_DISTANCE_OF_SIMILARITY, MAXIMUM_ANGLE_OF_SIMILARITY);
+      if (validPlanes == null)
+         mergeable = false;
+
       if (mergeable)
       {
+         //TODO: do slam.
          slamFrames.add(frame);
          pointCloudMap.add(frame.getPointCloud());
          sensorPoses.add(frame.getSensorPose());
 
          updatePlanarRegionsMap();
       }
+
+      if(DEBUG)
+         System.out.println("mergeable " + mergeable);
 
       return mergeable;
    }
@@ -114,52 +120,4 @@ public class IhmcSLAM
       return planarRegionsMap;
    }
 
-   private List<Plane3D> computeValidPlanes(PlanarRegionsList planarRegionsMap, NormalOcTree octree)
-   {
-      int numberOfPlanarRegions = planarRegionsMap.getNumberOfPlanarRegions();
-      List<Plane3D> validPlanes = new ArrayList<>();
-      NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
-      UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
-      for (UIOcTreeNode uiOcTreeNode : octreeForViz)
-      {
-         if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
-            continue;
-
-         Vector3D planeNormal = new Vector3D();
-         Point3D pointOnPlane = new Point3D();
-
-         uiOcTreeNode.getNormal(planeNormal);
-         uiOcTreeNode.getHitLocation(pointOnPlane);
-         Plane3D octreePlane = new Plane3D(pointOnPlane, planeNormal);
-
-         int indexClosestPlanarRegion = -1;
-         double minimumDistance = Double.MAX_VALUE;
-         for (int j = 0; j < numberOfPlanarRegions; j++)
-         {
-            PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
-            Plane3D plane = planarRegion.getPlane();
-            double distance = plane.distance(octreePlane.getPoint());
-            if (distance < minimumDistance)
-            {
-               minimumDistance = distance;
-               indexClosestPlanarRegion = j;
-            }
-         }
-         double angleDistance = Math.abs(planarRegionsMap.getPlanarRegion(indexClosestPlanarRegion).getPlane().getNormal().dot(octreePlane.getNormal()));
-
-         if (minimumDistance < MAXIMUM_DISTANCE_OF_SIMILARITY && angleDistance > Math.cos(MAXIMUM_ANGLE_OF_SIMILARITY))
-         {
-            validPlanes.add(octreePlane);
-         }
-      }
-
-      System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes());
-      System.out.println("validPlanes are " + validPlanes.size());
-      double ratio = (double) validPlanes.size() / octreeForViz.getNumberOfNodes();
-      System.out.println("ratio " + ratio);
-      if (ratio < 0.3)
-         return null;
-
-      return validPlanes;
-   }
 }
