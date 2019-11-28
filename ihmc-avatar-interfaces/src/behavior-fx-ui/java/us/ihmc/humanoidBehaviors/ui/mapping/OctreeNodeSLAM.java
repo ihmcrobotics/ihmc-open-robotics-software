@@ -69,10 +69,14 @@ public class OctreeNodeSLAM
       System.out.println(optimizedTransform);
 
       //optimizedTransform.transform(originalSensorPose);
-      originalSensorPose.preMultiply(optimizedTransform);
+      //originalSensorPose.preMultiply(optimizedTransform);
+      RigidBodyTransform transformer = new RigidBodyTransform(originalSensorPose);
+      transformer.multiply(optimizedTransform);
+      transformer.multiplyInvertOther(originalSensorPose);
+      
       for (int i = 0; i < originalPointCloud.length; i++)
       {
-         optimizedTransform.transform(originalPointCloud[i]);
+         transformer.transform(originalPointCloud[i]);
       }
       pointCloudMap.add(originalPointCloud);
       sensorPoses.add(originalSensorPose);
@@ -184,11 +188,12 @@ public class OctreeNodeSLAM
       preMultiplier.setTranslation(optimalInput.get(0), optimalInput.get(1), optimalInput.get(2));
       preMultiplier.setRotationYawPitchRoll(optimalInput.get(3), optimalInput.get(4), optimalInput.get(5));
 
-      RigidBodyTransform transformer = new RigidBodyTransform(transformWorldToSensorPose);
-      transformer.multiply(preMultiplier);
-      transformer.multiplyInvertOther(transformWorldToSensorPose);
-
-      return transformer;
+      return preMultiplier;
+//      RigidBodyTransform transformer = new RigidBodyTransform(transformWorldToSensorPose);
+//      transformer.multiply(preMultiplier);
+//      transformer.multiplyInvertOther(transformWorldToSensorPose);
+//
+//      return transformer;
    }
 
    public void computePlanarRegionsMap(Point3D[] pointCloud, RigidBodyTransform sensorPose)
@@ -301,7 +306,7 @@ public class OctreeNodeSLAM
             int index = -1;
             for (int j = 0; j < numberOfPlanarRegions; j++)
             {
-               PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
+               PlanarRegion planarRegion = map.getPlanarRegion(j);
                Plane3D plane = planarRegion.getPlane();
                double distance = plane.distance(convertedPlanes.get(i).getPoint());
                if (distance < minimumDistance)
@@ -311,7 +316,7 @@ public class OctreeNodeSLAM
                }
             }
 
-            PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(index);
+            PlanarRegion planarRegion = map.getPlanarRegion(index);
             Plane3D plane = planarRegion.getPlane();
             double angleDistance = 1 - Math.abs(plane.getNormal().dot(convertedPlanes.get(i).getNormal()));
             double centerDistance = 0;
