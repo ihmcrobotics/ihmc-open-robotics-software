@@ -38,9 +38,10 @@ public class IhmcSLAMFrame
 
       transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
+      optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
       originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
+      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
          optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
@@ -63,7 +64,7 @@ public class IhmcSLAMFrame
       sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
 
       originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
+      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
          optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
@@ -126,11 +127,18 @@ public class IhmcSLAMFrame
          minY = Math.min(minY, pointCloudToSensorFrame[i].getY());
       }
 
-      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.sensorPoseToWorld;
-      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertPointsToSensorPose(previousSensorPoseToWorld, pointCloudToSensorFrame);
+      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
+
+      Point3D[] pointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
+      for (int i = 0; i < pointCloudToWorld.length; i++)
+      {
+         pointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
+         sensorPoseToWorld.transform(pointCloudToWorld[i]);
+      }
+      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToSensorPose(previousSensorPoseToWorld, pointCloudToWorld);
       boolean[] isInPreviousView = new boolean[convertedPointsToPreviousSensorPose.length];
       int numberOfPointsInPreviousView = 0;
-      for (int i = 0; i < pointCloudToSensorFrame.length; i++)
+      for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
       {
          Point3D point = convertedPointsToPreviousSensorPose[i];
          isInPreviousView[i] = false;
@@ -150,7 +158,7 @@ public class IhmcSLAMFrame
       {
          if (isInPreviousView[i])
          {
-            pointsInPreviousView[index] = new Point3D(pointCloudToSensorFrame[i]);
+            pointsInPreviousView[index] = new Point3D(pointCloudToWorld[i]);
             index++;
          }
       }

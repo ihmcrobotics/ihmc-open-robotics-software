@@ -1,12 +1,15 @@
 package us.ihmc.humanoidBehaviors.ui.mapping;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
@@ -14,11 +17,17 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
+import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
+import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMTools
 {
@@ -39,7 +48,7 @@ public class IhmcSLAMTools
       return new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
    }
 
-   public static Point3D[] createConvertPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
+   public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
    {
       Point3D[] convertedPoints = new Point3D[pointCloud.length];
       RigidBodyTransform inverseTransformer = new RigidBodyTransform(sensorPose);
@@ -52,6 +61,19 @@ public class IhmcSLAMTools
       }
 
       return convertedPoints;
+   }
+
+   public static Point3D[] createConvertedPointsToOtherSensorPose(RigidBodyTransformReadOnly sensorPose, RigidBodyTransformReadOnly otherSensorPose,
+                                                                  Point3DReadOnly[] pointCloudToSensorPose)
+   {
+      Point3D[] pointCloudToWorld = new Point3D[pointCloudToSensorPose.length];
+      for (int i = 0; i < pointCloudToWorld.length; i++)
+      {
+         pointCloudToWorld[i] = new Point3D(pointCloudToSensorPose[i]);
+         sensorPose.transform(pointCloudToWorld[i]);
+      }
+
+      return createConvertedPointsToSensorPose(otherSensorPose, pointCloudToWorld);
    }
 
    private static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition)
@@ -139,4 +161,55 @@ public class IhmcSLAMTools
       return rawData;
    }
 
+   public static List<Plane3D> computeValidPlanes(PlanarRegionsList planarRegionsMap, IhmcSLAMFrame frame, double octreeResolution, double validRatio,
+                                                  double maximumDistance, double maximumAngle)
+   {
+      NormalOcTree octree = frame.computeOctreeInPreviousView(octreeResolution);
+
+      int numberOfPlanarRegions = planarRegionsMap.getNumberOfPlanarRegions();
+      List<Plane3D> validPlanes = new ArrayList<>();
+      NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
+      UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
+      for (UIOcTreeNode uiOcTreeNode : octreeForViz)
+      {
+         if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
+            continue;
+
+         Vector3D planeNormal = new Vector3D();
+         Point3D pointOnPlane = new Point3D();
+
+         uiOcTreeNode.getNormal(planeNormal);
+         uiOcTreeNode.getHitLocation(pointOnPlane);
+         Plane3D octreePlane = new Plane3D(pointOnPlane, planeNormal);
+
+         int indexClosestPlanarRegion = -1;
+         double minimumDistance = Double.MAX_VALUE;
+         for (int j = 0; j < numberOfPlanarRegions; j++)
+         {
+            PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
+            Plane3D plane = planarRegion.getPlane();
+            double distance = plane.distance(octreePlane.getPoint());
+            if (distance < minimumDistance)
+            {
+               minimumDistance = distance;
+               indexClosestPlanarRegion = j;
+            }
+         }
+         double angleDistance = Math.abs(planarRegionsMap.getPlanarRegion(indexClosestPlanarRegion).getPlane().getNormal().dot(octreePlane.getNormal()));
+
+         //System.out.println("minimumDistance " + minimumDistance + " Math.cos(maximumAngle) " + Math.cos(maximumAngle));
+         if (minimumDistance < maximumDistance && angleDistance > Math.cos(maximumAngle))
+         {
+            validPlanes.add(octreePlane);
+         }
+      }
+
+      double ratio = (double) validPlanes.size() / octreeForViz.getNumberOfNodes();
+      System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " validPlanes are " + validPlanes.size() + " ratio " + ratio);
+
+      if (ratio < validRatio)
+         return null;
+
+      return validPlanes;
+   }
 }
