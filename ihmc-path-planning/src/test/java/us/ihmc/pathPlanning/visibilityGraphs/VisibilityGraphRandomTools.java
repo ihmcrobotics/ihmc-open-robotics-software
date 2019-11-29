@@ -55,8 +55,7 @@ public class VisibilityGraphRandomTools
          cluster.addRawPointInLocal(rawPointsInLocalExpected.get(i));
       for (int i = 0; i < numberOfNavigableExtrusions; i++)
          cluster.addNavigableExtrusionInLocal(navigableExtrusionsInLocalExpected.get(i));
-      for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
-         cluster.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocalExpected.get(i));
+      cluster.addNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInLocalExpected);
 
       return cluster;
    }

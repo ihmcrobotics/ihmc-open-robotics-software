@@ -224,6 +224,7 @@ public class NavigableRegionsManager
                double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
+               stack.remove(neighbor);
                stack.add(neighbor);
             }
          }

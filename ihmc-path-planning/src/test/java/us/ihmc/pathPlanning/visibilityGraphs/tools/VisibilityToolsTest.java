@@ -36,12 +36,16 @@ public class VisibilityToolsTest
    public void testIsPointVisibleForStaticMaps()
    {
       Cluster keepOutClusterOne = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-      keepOutClusterOne.addNonNavigableExtrusionInLocal(new Point2D(-0.1, 0.5));
-      keepOutClusterOne.addNonNavigableExtrusionInLocal(new Point2D(1.1, 0.5));
+      List<Point2DReadOnly> clusterOne = new ArrayList<>();
+      clusterOne.add(new Point2D(-0.1, 0.5));
+      clusterOne.add(new Point2D(1.1, 0.5));
+      keepOutClusterOne.addNonNavigableExtrusionsInLocal(clusterOne);
 
       Cluster keepOutClusterTwo = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-      keepOutClusterTwo.addNonNavigableExtrusionInLocal(new Point2D(2.5, -0.1));
-      keepOutClusterTwo.addNonNavigableExtrusionInLocal(new Point2D(2.5, 1.1));
+      List<Point2DReadOnly> clusterTwo = new ArrayList<>();
+      clusterTwo.add(new Point2D(2.5, -0.1));
+      clusterTwo.add(new Point2D(2.5, 1.1));
+      keepOutClusterTwo.addNonNavigableExtrusionsInLocal(clusterTwo);
 
       List<Cluster> clusters = new ArrayList<>();
       clusters.add(keepOutClusterOne);
@@ -320,16 +324,20 @@ public class VisibilityToolsTest
    public void testIsPointVisibleForStaticMapsClosedPolygonVsOpenMultiLine()
    {
       Cluster keepOutClusterPolygon = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 0.0));
-      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(0.0, 1.0));
-      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(1.0, 1.0));
-      keepOutClusterPolygon.addNonNavigableExtrusionInLocal(new Point2D(1.0, 0.0));
+      List<Point2D> polygonPoints = new ArrayList<>();
+      polygonPoints.add(new Point2D(0.0, 0.0));
+      polygonPoints.add(new Point2D(0.0, 1.0));
+      polygonPoints.add(new Point2D(1.0, 1.0));
+      polygonPoints.add(new Point2D(1.0, 0.0));
+      keepOutClusterPolygon.addNonNavigableExtrusionsInLocal(polygonPoints);
 
       Cluster keepOutClusterMultiline = new Cluster(ExtrusionSide.INSIDE, ClusterType.MULTI_LINE);
-      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(0.0, 0.0));
-      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(0.0, 1.0));
-      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(1.0, 1.0));
-      keepOutClusterMultiline.addNonNavigableExtrusionInLocal(new Point2D(1.0, 0.0));
+      List<Point2D> multilinePoints = new ArrayList<>();
+      multilinePoints.add(new Point2D(0.0, 0.0));
+      multilinePoints.add(new Point2D(0.0, 1.0));
+      multilinePoints.add(new Point2D(1.0, 1.0));
+      multilinePoints.add(new Point2D(1.0, 0.0));
+      keepOutClusterMultiline.addNonNavigableExtrusionsInLocal(multilinePoints);
 
       Point2D pointOutside = new Point2D(0.5, -1.0);
       Point2D pointInside = new Point2D(0.5, 0.5);
