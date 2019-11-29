@@ -21,15 +21,16 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.GraphEdge;
-import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
+import us.ihmc.pathPlanning.graph.search.AStarIterationData;
+import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.listeners.HeuristicSearchAndActionPolicyDefinitions;
 import us.ihmc.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
@@ -43,7 +44,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;

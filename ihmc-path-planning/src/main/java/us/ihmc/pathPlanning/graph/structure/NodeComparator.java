@@ -1,10 +1,7 @@
-package us.ihmc.footstepPlanning.graphSearch.heuristics;
+package us.ihmc.pathPlanning.graph.structure;
 
 import java.util.Comparator;
 import java.util.function.ToDoubleFunction;
-
-import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 
 public class NodeComparator<N> implements Comparator<N>
 {
