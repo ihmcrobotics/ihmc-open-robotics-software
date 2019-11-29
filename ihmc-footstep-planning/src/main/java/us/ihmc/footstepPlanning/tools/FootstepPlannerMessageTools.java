@@ -140,6 +140,7 @@ public class FootstepPlannerMessageTools
       packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
+      packet.setHeightForMaxAvoidance(parameters.getHeightForMaxAvoidance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
       packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());

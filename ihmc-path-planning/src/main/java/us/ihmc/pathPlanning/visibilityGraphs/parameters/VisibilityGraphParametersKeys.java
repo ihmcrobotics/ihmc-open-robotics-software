@@ -24,6 +24,7 @@ public class VisibilityGraphParametersKeys
    public static final DoubleStoredPropertyKey regionOrthogonalAngle                       = keys.addDoubleKey("Region orthogonal angle", Math.toRadians(75.0));
    public static final DoubleStoredPropertyKey searchHostRegionEpsilon                     = keys.addDoubleKey("Search host region epsilon", 0.03);
    public static final DoubleStoredPropertyKey canDuckUnderHeight                          = keys.addDoubleKey("Can duck under height", 2.0);
+   public static final DoubleStoredPropertyKey heightForMaxAvoidance                       = keys.addDoubleKey("Height for max avoidance", 1.0);
    public static final DoubleStoredPropertyKey canEasilyStepOverHeight                     = keys.addDoubleKey("Can easily step over height", 0.03);
    public static final DoubleStoredPropertyKey lengthForLongInterRegionEdge                = keys.addDoubleKey("Length for long inter region edge", 0.3);
 

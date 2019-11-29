@@ -24,6 +24,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double preferred_obstacle_extrusion_distance_ = -11.1;
    public double obstacle_extrusion_distance_if_not_too_high_to_step_ = -11.1;
    public double too_high_to_step_distance_ = -11.1;
+   public double height_for_max_avoidance_ = -11.1;
    public double cluster_resolution_ = -11.1;
    public double exploration_distance_from_start_goal_ = -11.1;
    public double planar_region_min_area_;
@@ -86,6 +87,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       obstacle_extrusion_distance_if_not_too_high_to_step_ = other.obstacle_extrusion_distance_if_not_too_high_to_step_;
 
       too_high_to_step_distance_ = other.too_high_to_step_distance_;
+
+      height_for_max_avoidance_ = other.height_for_max_avoidance_;
 
       cluster_resolution_ = other.cluster_resolution_;
 
@@ -216,6 +219,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double getTooHighToStepDistance()
    {
       return too_high_to_step_distance_;
+   }
+
+   public void setHeightForMaxAvoidance(double height_for_max_avoidance)
+   {
+      height_for_max_avoidance_ = height_for_max_avoidance;
+   }
+   public double getHeightForMaxAvoidance()
+   {
+      return height_for_max_avoidance_;
    }
 
    public void setClusterResolution(double cluster_resolution)
@@ -465,6 +477,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.too_high_to_step_distance_, other.too_high_to_step_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_for_max_avoidance_, other.height_for_max_avoidance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cluster_resolution_, other.cluster_resolution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.exploration_distance_from_start_goal_, other.exploration_distance_from_start_goal_, epsilon)) return false;
@@ -538,6 +552,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.too_high_to_step_distance_ != otherMyClass.too_high_to_step_distance_) return false;
 
+      if(this.height_for_max_avoidance_ != otherMyClass.height_for_max_avoidance_) return false;
+
       if(this.cluster_resolution_ != otherMyClass.cluster_resolution_) return false;
 
       if(this.exploration_distance_from_start_goal_ != otherMyClass.exploration_distance_from_start_goal_) return false;
@@ -608,6 +624,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.obstacle_extrusion_distance_if_not_too_high_to_step_);      builder.append(", ");
       builder.append("too_high_to_step_distance=");
       builder.append(this.too_high_to_step_distance_);      builder.append(", ");
+      builder.append("height_for_max_avoidance=");
+      builder.append(this.height_for_max_avoidance_);      builder.append(", ");
       builder.append("cluster_resolution=");
       builder.append(this.cluster_resolution_);      builder.append(", ");
       builder.append("exploration_distance_from_start_goal=");

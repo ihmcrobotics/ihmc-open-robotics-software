@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.parameters;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -59,6 +60,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    default double getTooHighToStepDistance()
    {
       return get(tooHighToStepDistance);
+   }
+
+   default double getHeightForMaxAvoidance()
+   {
+      return get(heightForMaxAvoidance);
    }
 
    default double getClusterResolution()
@@ -280,7 +286,8 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          }
          else
          {
-            return getPreferredObstacleExtrusionDistance();
+            double alpha = MathTools.clamp((obstacleHeight - getTooHighToStepDistance()) / (getHeightForMaxAvoidance() - getTooHighToStepDistance()), 0.0, 1.0);
+            return InterpolationTools.linearInterpolate(getObstacleExtrusionDistance(), getPreferredObstacleExtrusionDistance(), alpha);
          }
       };
    }
