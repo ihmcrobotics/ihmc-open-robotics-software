@@ -29,7 +29,7 @@ public class VisibilityTools
       return isPointVisible(observer, targetPoint, points.getPoints(), closed);
    }
 
-   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<Point2DReadOnly> listOfPointsInCluster,
                                         boolean closed)
    {
       int size = listOfPointsInCluster.size();
@@ -55,8 +55,8 @@ public class VisibilityTools
       return true;
    }
 
-   public static boolean isPointVisibleInclusive(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
-                                                 boolean closed)
+   public static boolean isPointVisibleInclusive(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<Point2DReadOnly> listOfPointsInCluster,
+                                        boolean closed)
    {
       int size = listOfPointsInCluster.size();
       int endIndex = size - 1;
@@ -96,7 +96,7 @@ public class VisibilityTools
    }
 
    public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine,
-                                          List<? extends Point2DReadOnly> listOfPointsInCluster, Point2DBasics closestPointOnLineToPack,
+                                          List<Point2DReadOnly> listOfPointsInCluster, Point2DBasics closestPointOnLineToPack,
                                           Point2DBasics closestPointOnClusterToPack, Vector2DBasics normalToClusterToPack, boolean closed)
    {
       int numberOfVertices = listOfPointsInCluster.size();
