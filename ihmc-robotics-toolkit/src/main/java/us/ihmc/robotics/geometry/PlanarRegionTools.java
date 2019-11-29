@@ -100,11 +100,8 @@ public class PlanarRegionTools
 
    public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      query.getTransformToWorld(transformToWorld);
-
       Point2D originInLocal = new Point2D(circleOriginInWorld);
-      originInLocal.applyInverseTransform(transformToWorld, false);
+      originInLocal.applyTransform(query.getTransformToLocal(), false);
 
       return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
    }
