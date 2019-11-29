@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -386,20 +387,21 @@ public class VisibilityGraphNavigableRegion
       List<VisibilityGraphNode> allNavigableNodes = getAllNavigableNodes();
       List<VisibilityGraphNode> allPreferredNavigableNodes = getAllPreferredNavigableNodes();
 
+      Stream<VisibilityGraphNode> navigableNodeStream;
+      Stream<VisibilityGraphNode> preferredNavigableNodeStream;
       if (ENABLE_EXPERIMENTAL_SPEEDUP)
       {
-         allNavigableNodes.parallelStream()
-                          .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
-                                                                                             targetNode,
-                                                                                             nonPreferredWeight,
-                                                                                             nonPreferredStaticCost,
-                                                                                             false));
+         navigableNodeStream = allNavigableNodes.parallelStream();
+         preferredNavigableNodeStream = allPreferredNavigableNodes.parallelStream();
       }
       else
       {
-         for (VisibilityGraphNode targetNode : allNavigableNodes)
-            addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false);
+         navigableNodeStream = allNavigableNodes.stream();
+         preferredNavigableNodeStream = allPreferredNavigableNodes.stream();
       }
+
+      navigableNodeStream
+            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false));
 
       double weight;
       double cost;
@@ -414,24 +416,12 @@ public class VisibilityGraphNavigableRegion
          cost = nonPreferredStaticCost;
       }
 
-      if (ENABLE_EXPERIMENTAL_SPEEDUP)
-      {
-         allPreferredNavigableNodes.parallelStream()
-                                   .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode,
-                                                                                                      targetNode,
-                                                                                                      weight,
-                                                                                                      cost,
-                                                                                                      sourceNode.isPreferredNode()));
-      }
-      else
-      {
-         for (VisibilityGraphNode targetNode : allPreferredNavigableNodes)
-            addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode());
-      }
+      preferredNavigableNodeStream
+            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode()));
    }
 
-   public void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost,
-                                                           boolean bothEndsArePreferred)
+   public synchronized void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight,
+                                                                        double staticCost, boolean bothEndsArePreferred)
    {
       checkNavigableRegionConsistency(sourceNode, targetNode);
 
