@@ -482,7 +482,8 @@ public class VisibilityTools
 
          List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
-         if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
+         boolean isAnOuterExtrusion = cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE;
+         if (isAnOuterExtrusion)
          {
             BoundingBox2D outerMostBoundingBoxToCheck = checkPreferredExtrusions ?
                   cluster.getPreferredNonNavigableExtrusionsBoundingBox() :
@@ -498,38 +499,24 @@ public class VisibilityTools
                   continue;
                }
             }
-
-            // if it starts in a preferred region, that means you're already inside a preferred extrusion. This means that if we start inside, we should not
-            // check for visibility, as we are trying to get out.
-
-            if (checkPreferredExtrusions)
-            {
-               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(
-                     extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(), extrusion.size(), true, 0.0));
-               boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(
-                     extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
-               if (!startsInPreferredRegion && isNotVisible)
-                  return false;
-            }
-         }
-         else
-         { // we're checking an inner extrusion, likely a home region one. we want to be able to transition from outside a preferred region into one
-            if (checkPreferredExtrusions)
-            {
-               // if you don't start in a preferred region, you have to cross into one. This means that if we start outside, we should not check check for
-               // visibility, as we are trying to get in.
-               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(
-                     extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(), extrusion.size(), true, 0.0));
-               boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(
-                     extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
-
-               if (startsInPreferredRegion && isNotVisible)
-                  return false;
-            }
          }
 
          if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
             return false;
+
+         // this is more expensive, as you potentially have to check multiple regions.
+         if (checkPreferredExtrusions)
+         {
+            boolean startsInPreferredRegion = preferredNonNavigableExtrusions.stream().anyMatch(
+                  extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(), extrusion.size(), true, 0.0));
+            boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
+                  extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
+
+            // If we start in a preferred region, that means you're already in a preferred extrusion. If it's an outer extrusion, we want to get out of the
+            // non-preferred area, so we shouldn't check for visibility. If it's an inner extrusion, we want to cross into the non-preferred area.
+            if (isAnOuterExtrusion ^ startsInPreferredRegion && isNotVisible)
+               return false;
+         }
       }
 
       return true;
