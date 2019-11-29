@@ -2,12 +2,8 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +17,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Extrusion
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.io.IOException;
@@ -390,8 +385,8 @@ public class VisibilityToolsTest
          lineSegmentStart2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, -10.0, 0.0), lineSegmentDirection2, closestPointOnLineSegment2);
          lineSegmentEnd2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
 
-         double actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
-                                                                                             lineSegmentEnd2);
+         double actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+                                                                                               lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
 
          // Set the end points of the line segment 2 before the expected
@@ -404,10 +399,10 @@ public class VisibilityToolsTest
          closestPointOnLineSegment2.set(lineSegmentEnd2);
          expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
 
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
 
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
 
@@ -445,14 +440,14 @@ public class VisibilityToolsTest
          lineSegmentEnd2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
          double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
 
-         double actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
-                                                                                             lineSegmentEnd2);
+         double actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+                                                                                               lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
 
@@ -497,14 +492,14 @@ public class VisibilityToolsTest
          lineSegmentEnd2.scaleAdd(alpha2, lineSegmentDirection2, closestPointOnLineSegment2);
 
          double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
-         double actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
-                                                                                             lineSegmentEnd2);
+         double actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+                                                                                               lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = VisibilityTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = VisGraphGeometryTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
          assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
    }
