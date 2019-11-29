@@ -98,8 +98,8 @@ public class ClusterToolsTest
       boolean extrudeToTheLeft = false;
       int numberOfExtrusions = 3;
       double extrusionDistance = 0.5;
-      List<Point2D> extrusions = ClusterTools.extrudeMultiplePointsAtOutsideCorner(cornerPointToExtrude, previousEdge, nextEdge, extrudeToTheLeft,
-                                                                                   numberOfExtrusions, extrusionDistance);
+      List<Point2DReadOnly> extrusions = ClusterTools.extrudeMultiplePointsAtOutsideCorner(cornerPointToExtrude, previousEdge, nextEdge, extrudeToTheLeft,
+                                                                                           numberOfExtrusions, extrusionDistance);
 
       assertEquals(numberOfExtrusions, extrusions.size());
 
@@ -323,7 +323,7 @@ public class ClusterToolsTest
       extrusionDistance = 0.1;
       extrudeToTheLeft = true;
 
-      Point2D pointD = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
+      Point2DReadOnly pointD = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
 
       Line2D lineAB = new Line2D(pointA, pointB);
       Vector2DBasics vectorAB = lineAB.getDirection();
@@ -349,25 +349,25 @@ public class ClusterToolsTest
       assertEquals(1.0, vectorBC.dot(vectorDF), EPSILON);
    }
 
-   private Point2D evaluateExtrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft,
-                                                            Point2D expectedAnswer)
+   private Point2DReadOnly evaluateExtrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance,
+                                                                    boolean extrudeToTheLeft, Point2D expectedAnswer)
    {
-      Point2D extrudedPoint = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
+      Point2DReadOnly extrudedPoint = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedAnswer, extrudedPoint, EPSILON);
 
       return extrudedPoint;
    }
 
-   private Point2D extrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft)
+   private Point2DReadOnly extrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft)
    {
       LineSegment2D edgePrev = new LineSegment2D(pointA, pointB);
       LineSegment2D edgeNext = new LineSegment2D(pointB, pointC);
 
-      List<Point2D> extrudedPointList = new ArrayList<>();
+      List<Point2DReadOnly> extrudedPointList = new ArrayList<>();
       extrudedPointList.add(ClusterTools.extrudeSinglePointAtInsideCorner(pointB, edgePrev, edgeNext, extrudeToTheLeft, extrusionDistance));
 
       assertEquals(1, extrudedPointList.size());
-      Point2D extrudedPoint = extrudedPointList.get(0);
+      Point2DReadOnly extrudedPoint = extrudedPointList.get(0);
       return extrudedPoint;
    }
 
