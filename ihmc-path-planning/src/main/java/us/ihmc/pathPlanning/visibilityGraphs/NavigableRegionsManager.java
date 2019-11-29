@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -103,10 +104,19 @@ public class NavigableRegionsManager
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
                                                                         boolean fullyExpandVisibilityGraph)
    {
+      double initializeStartTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
          return null;
 
-      return planInternal();
+      double planStartTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      if (debug)
+         LogTools.info("Initialization duration = " + (planStartTime - initializeStartTime));
+      List<Point3DReadOnly> plan = planInternal();
+      double planEndTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+      if (debug)
+         LogTools.info("Planning duration = " + (planEndTime - planStartTime));
+      return plan;
    }
 
    List<Point3DReadOnly> resetAndPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
@@ -214,8 +224,6 @@ public class NavigableRegionsManager
                double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
-               // FIXME is this check necessary?
-               stack.remove(neighbor);
                stack.add(neighbor);
             }
          }
@@ -267,13 +275,13 @@ public class NavigableRegionsManager
          throw new RuntimeException("Node has already been expanded!!");
       }
 
-      if (!nodeToExpand.getEdgesHaveBeenDetermined()) // compute edge costs
+      if (!nodeToExpand.getEdgesHaveBeenDetermined())
       {
+         // compute the possible edges
          visibilityGraph.computeInnerAndInterEdges(nodeToExpand);
       }
 
       nodeToExpand.setHasBeenExpanded(true);
-
       return nodeToExpand.getEdges();
    }
 
