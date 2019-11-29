@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.graph;
+package us.ihmc.pathPlanning.graph.structure;
 
 import java.util.*;
 

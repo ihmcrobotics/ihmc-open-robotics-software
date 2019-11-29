@@ -1,7 +1,7 @@
-package us.ihmc.footstepPlanning.graphSearch.planners;
+package us.ihmc.pathPlanning.graph.search;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.DirectedGraph;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
+import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
 import java.util.HashSet;
 import java.util.PriorityQueue;
