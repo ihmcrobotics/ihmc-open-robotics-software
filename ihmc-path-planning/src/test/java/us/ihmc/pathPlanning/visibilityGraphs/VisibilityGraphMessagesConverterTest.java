@@ -9,6 +9,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
@@ -49,7 +50,7 @@ public class VisibilityGraphMessagesConverterTest
 
          List<Point3D> rawPointsInLocalExpected = new ArrayList<>();
          List<Point2D> navigableExtrusionsInLocalExpected = new ArrayList<>();
-         List<Point2D> nonNavigableExtrusionsInLocalExpected = new ArrayList<>();
+         List<Point2DReadOnly> nonNavigableExtrusionsInLocalExpected = new ArrayList<>();
 
          for (int i = 0; i < numberOfRawPoints; i++)
             rawPointsInLocalExpected.add(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
@@ -65,8 +66,7 @@ public class VisibilityGraphMessagesConverterTest
             clusterToConvert.addRawPointInLocal(rawPointsInLocalExpected.get(i));
          for (int i = 0; i < numberOfNavigableExtrusions; i++)
             clusterToConvert.addNavigableExtrusionInLocal(navigableExtrusionsInLocalExpected.get(i));
-         for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
-            clusterToConvert.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocalExpected.get(i));
+         clusterToConvert.addNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInLocalExpected);
 
          VisibilityClusterMessage message = VisibilityGraphMessagesConverter.convertToVisibilityClusterMessage(clusterToConvert);
          Cluster convertedCluster = VisibilityGraphMessagesConverter.convertToCluster(message);

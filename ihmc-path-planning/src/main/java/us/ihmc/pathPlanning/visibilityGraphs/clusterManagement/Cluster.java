@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -111,7 +114,7 @@ public class Cluster
       if (nonNavigableExtrusionInLocal.isEmpty())
          return false;
 
-      BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
+      BoundingBox2DReadOnly boundingBox = getNonNavigableExtrusionsBoundingBox();
 
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
@@ -299,14 +302,13 @@ public class Cluster
       addPreferredNavigableExtrusionsInLocal(listsOfPoints);
    }
 
-
    public void setNonNavigableExtrusionsInLocal(ExtrusionHull points)
    {
       clearNonNavigableExtrusions();
       addNonNavigableExtrusionsInLocal(points);
    }
 
-   public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
+   private void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsBoundingBox.updateToIncludePoint(nonNavigableExtrusionInLocal);
       this.nonNavigableExtrusionInLocal.addPoint(nonNavigableExtrusionInLocal);
@@ -322,7 +324,7 @@ public class Cluster
       nonNavigableExtrusionInLocal.stream().forEach(this::addNonNavigableExtrusionInLocal);
    }
 
-   public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
+   public BoundingBox2DReadOnly getNonNavigableExtrusionsBoundingBox()
    {
       return nonNavigableExtrusionsBoundingBox;
    }
@@ -375,7 +377,7 @@ public class Cluster
       nonNavigableExtrusionInLocal.forEach(this::addPreferredNonNavigableExtrusionInLocal);
    }
 
-   public BoundingBox2D getPreferredNonNavigableExtrusionsBoundingBox()
+   public BoundingBox2DReadOnly getPreferredNonNavigableExtrusionsBoundingBox()
    {
       return preferredNonNavigableExtrusionsBoundingBox;
    }
@@ -394,33 +396,33 @@ public class Cluster
 
 
 
-   private Point3D toWorld3D(Point2DReadOnly pointInLocal)
+   private Point3DReadOnly toWorld3D(Point2DReadOnly pointInLocal)
    {
       return toWorld3D(new Point3D(pointInLocal));
    }
 
-   private Point2D toWorld2D(Point3DReadOnly pointInLocal)
+   private Point2DReadOnly toWorld2D(Point3DReadOnly pointInLocal)
    {
       Point2D pointInWorld = new Point2D(pointInLocal);
       transformToWorld.transform(pointInWorld, false);
       return pointInWorld;
    }
 
-   private Point2D toWorld2D(Point2DReadOnly pointInLocal)
+   private Point2DReadOnly toWorld2D(Point2DReadOnly pointInLocal)
    {
       Point2D pointInWorld = new Point2D(pointInLocal);
       transformToWorld.transform(pointInWorld, false);
       return pointInWorld;
    }
 
-   private Point3D toWorld3D(Point3DReadOnly pointInLocal)
+   private Point3DReadOnly toWorld3D(Point3DReadOnly pointInLocal)
    {
       Point3D pointInWorld = new Point3D(pointInLocal);
       transformToWorld.transform(pointInWorld);
       return pointInWorld;
    }
 
-   private Point3D toLocal3D(Point3DReadOnly pointInWorld)
+   private Point3DReadOnly toLocal3D(Point3DReadOnly pointInWorld)
    {
       Point3D pointInLocal = new Point3D();
       transformToWorld.inverseTransform(pointInWorld, pointInLocal);
