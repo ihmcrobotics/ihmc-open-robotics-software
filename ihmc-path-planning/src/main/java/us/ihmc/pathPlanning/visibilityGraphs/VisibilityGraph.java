@@ -67,7 +67,7 @@ public class VisibilityGraph
          }
       };
 
-      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
 
       for (NavigableRegion navigableRegion : navigableRegionsList)
       {
@@ -119,10 +119,10 @@ public class VisibilityGraph
          List<Cluster> targetObstacleClusters = targetNavigableRegion.getObstacleClusters();
          List<VisibilityGraphNode> allNavigableNodes = targetVisibilityGraphNavigableRegion.getAllNavigableNodes();
          List<VisibilityGraphNode> allPreferredNavigableNodes = targetVisibilityGraphNavigableRegion.getAllPreferredNavigableNodes();
-         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNaviableRegionsList(),
+         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allNavigableNodes, navigableRegions.getNavigableRegionsList(),
                                                    targetObstacleClusters, crossRegionEdges, filter, parameters.getWeightForNonPreferredEdge() * edgeWeight,
                                                    parameters.getCostForNonPreferredNode(), parameters.getLengthForLongInterRegionEdge());
-         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allPreferredNavigableNodes, navigableRegions.getNaviableRegionsList(),
+         createVisibilityConnectionsWhenOnNoRegion(sourceNode, allPreferredNavigableNodes, navigableRegions.getNavigableRegionsList(),
                                                    targetObstacleClusters, crossRegionEdges, filter, edgeWeight, 0.0,
                                                    parameters.getLengthForLongInterRegionEdge());
       }

@@ -30,7 +30,7 @@ public class NavigableRegionTools
    {
       List<NavigableRegion> containers = new ArrayList<>();
 
-      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
       if (navigableRegionsList == null)
          return null;
 
