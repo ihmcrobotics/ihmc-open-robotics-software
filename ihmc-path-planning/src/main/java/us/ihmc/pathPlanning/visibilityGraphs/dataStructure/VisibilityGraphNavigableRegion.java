@@ -30,13 +30,16 @@ public class VisibilityGraphNavigableRegion
    private final ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
    private final ArrayList<List<VisibilityGraphNode>> obstacleNavigableNodes = new ArrayList<>();
    private final ArrayList<List<VisibilityGraphNode>> obstaclePreferredNavigableNodes = new ArrayList<>();
-   private final ArrayList<VisibilityGraphNode> intermediateObstacleNodes = new ArrayList<>();
 
    private final ArrayList<VisibilityGraphEdge> innerRegionEdges = new ArrayList<>();
 
-   public VisibilityGraphNavigableRegion(NavigableRegion navigableRegion)
+   private final boolean createEdgesAroundClusterRing;
+   private boolean haveNodesBeenCreated = false;
+
+   public VisibilityGraphNavigableRegion(NavigableRegion navigableRegion, boolean createEdgesAroundClusterRing)
    {
       this.navigableRegion = navigableRegion;
+      this.createEdgesAroundClusterRing = createEdgesAroundClusterRing;
    }
 
    public NavigableRegion getNavigableRegion()
@@ -51,11 +54,17 @@ public class VisibilityGraphNavigableRegion
 
    public List<VisibilityGraphNode> getHomeRegionNodes()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
+
       return homeRegionNodes;
    }
 
    public List<VisibilityGraphNode> getAllNavigableNodes()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
+
       //TODO: Store them all in one list instead of several to not require this???
       ArrayList<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
       allNavigableNodes.addAll(homeRegionNodes);
@@ -70,6 +79,9 @@ public class VisibilityGraphNavigableRegion
 
    public List<VisibilityGraphNode> getAllPreferredNavigableNodes()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
+
       //TODO: Store them all in one list instead of several to not require this???
       ArrayList<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
       allNavigableNodes.addAll(preferredHomeRegionNodes);
@@ -82,32 +94,28 @@ public class VisibilityGraphNavigableRegion
       return allNavigableNodes;
    }
 
-   public void addIntermediateObstacleNode(VisibilityGraphNode node)
-   {
-      intermediateObstacleNodes.add(node);
-   }
-
    public List<List<VisibilityGraphNode>> getObstaclePreferredNavigableNodes()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
       return obstaclePreferredNavigableNodes;
    }
 
    public List<List<VisibilityGraphNode>> getObstacleNavigableNodes()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
       return obstacleNavigableNodes;
    }
 
    public List<VisibilityGraphEdge> getAllEdges()
    {
+      if (!haveNodesBeenCreated)
+         createNavigableRegionNodes();
       return innerRegionEdges;
    }
 
-   public void addInnerRegionEdge(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
-   {
-      addInnerRegionEdge(sourceNode, targetNode, 1.0, 0.0);
-   }
-
-   public void addInnerRegionEdge(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost)
+   private void addInnerRegionEdge(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost)
    {
       VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
       edge.setEdgeWeight(weight);
@@ -117,8 +125,11 @@ public class VisibilityGraphNavigableRegion
       innerRegionEdges.add(edge);
    }
 
-   public void createNavigableRegionNodes(boolean createEdgesAroundClusterRing)
+   public void createNavigableRegionNodes()
    {
+      if (haveNodesBeenCreated)
+         return;
+
       PlanarRegion homePlanarRegion = navigableRegion.getHomePlanarRegion();
       Cluster homeRegionCluster = navigableRegion.getHomeRegionCluster();
       List<Cluster> allClusters = navigableRegion.getAllClusters();
@@ -143,6 +154,8 @@ public class VisibilityGraphNavigableRegion
          createNavigableRegionNodes(this, obstacleCluster, homePlanarRegion, allClusters, obstaclePreferredNodes, obstacleNodes,
                                     innerRegionEdges, createEdgesAroundClusterRing);
       }
+
+      haveNodesBeenCreated = true;
    }
 
    /**
@@ -230,7 +243,7 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   public static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
+   private static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
                                                  PlanarRegion homeRegion, List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodesToPack,
                                                  List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack,
                                                  boolean createEdgesAroundClusterRing)
@@ -311,7 +324,7 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   public static void addClusterSelfVisibility(List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodes, List<VisibilityGraphNode> nodes,
+   private static void addClusterSelfVisibility(List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodes, List<VisibilityGraphNode> nodes,
                                                List<VisibilityGraphEdge> edgesToPack, double nonPreferredEdgeWeight, double nonPreferredStaticCost)
    {
       // Going through all of the possible combinations of two points for finding connections going from the preferred to the preferred
@@ -343,7 +356,7 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   public static void addCrossClusterVisibility(List<VisibilityGraphNode> sourceNodes, List<VisibilityGraphNode> targetNodes, List<Cluster> allClusters,
+   private static void addCrossClusterVisibility(List<VisibilityGraphNode> sourceNodes, List<VisibilityGraphNode> targetNodes, List<Cluster> allClusters,
                                                 ArrayList<VisibilityGraphEdge> edgesToPack, double edgeWeight, double edgeStaticCost,
                                                 boolean connectsToPreferredMap)
    {
@@ -354,7 +367,7 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   public static void addClusterVisibility(List<Cluster> allClusters, VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodes, int targetStartIndex,
+   private static void addClusterVisibility(List<Cluster> allClusters, VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodes, int targetStartIndex,
                                            List<VisibilityGraphEdge> edgesToPack, double edgeWeight, double staticCost, boolean connectsAllOnPreferredMap)
    {
       for (int targetIndex = targetStartIndex; targetIndex < targetNodes.size(); targetIndex++)

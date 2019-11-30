@@ -21,6 +21,11 @@ import java.util.List;
 
 public class VisibilityGraph
 {
+   private static final boolean createNavigableRegionNodesOnConstruction = false;
+   //TODO: +++JerryPratt: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
+   // Set createEdgesAroundClusterRing to true if at the beginning you want to create loops around the clusters.
+   private static final boolean createEdgesAroundClusterRing = false;
+
    // Flag for whether to just connect the shortest interconnecting edge, or all of them.
    //TODO: Try this on for size for a while and if shortest edge seems like always the best way to go, remove the flag.
    protected static final boolean ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE = false;
@@ -66,13 +71,10 @@ public class VisibilityGraph
 
       for (NavigableRegion navigableRegion : navigableRegionsList)
       {
-         VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
+         VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion, createEdgesAroundClusterRing);
 
-         //TODO: +++JerryPratt: Just get rid of createEdgesAroundClusterRing? Or store Nodes with clusters somehow?
-         // Set createEdgesAroundClusterRing to true if at the beginning you want to create loops around the clusters.
-         boolean createEdgesAroundClusterRing = false;
-
-         visibilityGraphNavigableRegion.createNavigableRegionNodes(createEdgesAroundClusterRing);
+         if (createNavigableRegionNodesOnConstruction)
+            visibilityGraphNavigableRegion.createNavigableRegionNodes();
 
          visibilityGraphNavigableRegions.add(visibilityGraphNavigableRegion);
       }
@@ -249,7 +251,7 @@ public class VisibilityGraph
       Point3D projectedSourceInWorld = new Point3D(sourceInLocal);
       navigableRegion.transformFromLocalToWorld(projectedSourceInWorld);
 
-      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion);
+      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion, createEdgesAroundClusterRing);
       return new VisibilityGraphNode(projectedSourceInWorld, sourceInLocal, visibilityGraphNavigableRegion, -1, true);
    }
 
