@@ -123,9 +123,8 @@ public class VisibilityGraphNavigableRegion
       Cluster homeRegionCluster = navigableRegion.getHomeRegionCluster();
       List<Cluster> allClusters = navigableRegion.getAllClusters();
       List<Cluster> obstacleClusters = navigableRegion.getObstacleClusters();
-      int mapId = navigableRegion.getMapId();
 
-      createNavigableRegionNodes(this, homeRegionCluster, homePlanarRegion, allClusters, mapId, preferredHomeRegionNodes, homeRegionNodes,
+      createNavigableRegionNodes(this, homeRegionCluster, homePlanarRegion, allClusters, preferredHomeRegionNodes, homeRegionNodes,
                                  innerRegionEdges, createEdgesAroundClusterRing);
 
       obstaclePreferredNavigableNodes.clear();
@@ -141,7 +140,7 @@ public class VisibilityGraphNavigableRegion
          Cluster obstacleCluster = obstacleClusters.get(i);
          List<VisibilityGraphNode> obstacleNodes = obstacleNavigableNodes.get(i);
          List<VisibilityGraphNode> obstaclePreferredNodes = obstaclePreferredNavigableNodes.get(i);
-         createNavigableRegionNodes(this, obstacleCluster, homePlanarRegion, allClusters, mapId, obstaclePreferredNodes, obstacleNodes,
+         createNavigableRegionNodes(this, obstacleCluster, homePlanarRegion, allClusters, obstaclePreferredNodes, obstacleNodes,
                                     innerRegionEdges, createEdgesAroundClusterRing);
       }
    }
@@ -231,18 +230,13 @@ public class VisibilityGraphNavigableRegion
       }
    }
 
-   // FIXME check the combinatorics
    public static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
-                                                 PlanarRegion homeRegion, List<Cluster> allClusters, int mapId, List<VisibilityGraphNode> preferredNodesToPack,
+                                                 PlanarRegion homeRegion, List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodesToPack,
                                                  List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack,
                                                  boolean createEdgesAroundClusterRing)
    {
       List<ExtrusionHull> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
       ExtrusionHull navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
-      boolean[][] arePreferredPointsActuallyNavigable = VisibilityTools
-            .checkIfListOfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, preferredNavigableExtrusionPoints);
-      boolean[] arePointsActuallyNavigable = VisibilityTools
-            .checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints.getPoints());
 
       ArrayList<VisibilityGraphNode> newPreferredNodes = new ArrayList<>();
       ArrayList<VisibilityGraphNode> newNodes = new ArrayList<>();
@@ -252,10 +246,9 @@ public class VisibilityGraphNavigableRegion
       {
          for (int nodeIndex = 0; nodeIndex < preferredNavigableExtrusionPoints.get(clusterIndex).size(); nodeIndex++)
          {
-            if (arePreferredPointsActuallyNavigable[clusterIndex][nodeIndex])
+            Point2DReadOnly nodePointInLocal = preferredNavigableExtrusionPoints.get(clusterIndex).get(nodeIndex);
+            if (VisibilityTools.checkIfPointIsInRegionAndOutsidePreferredNonNavigableZone(nodePointInLocal, homeRegion, allClusters))
             {
-               Point2DReadOnly nodePointInLocal = preferredNavigableExtrusionPoints.get(clusterIndex).get(nodeIndex);
-
                Point3D sourcePointInWorld = new Point3D(nodePointInLocal);
                homeRegion.transformFromLocalToWorld(sourcePointInWorld);
                VisibilityGraphNode node = new VisibilityGraphNode(sourcePointInWorld, nodePointInLocal, visibilityGraphNavigableRegion, true);
@@ -269,10 +262,10 @@ public class VisibilityGraphNavigableRegion
       // create nodes
       for (int nodeIndex = 0; nodeIndex < navigableExtrusionPoints.size(); nodeIndex++)
       {
-         if (arePointsActuallyNavigable[nodeIndex])
-         {
-            Point2DReadOnly nodePointInLocal = navigableExtrusionPoints.get(nodeIndex);
+         Point2DReadOnly nodePointInLocal = navigableExtrusionPoints.get(nodeIndex);
 
+         if (VisibilityTools.checkIfPointIsInRegionAndOutsideNonNavigableZone(nodePointInLocal, homeRegion, allClusters))
+         {
             Point3D sourcePointInWorld = new Point3D(nodePointInLocal);
             homeRegion.transformFromLocalToWorld(sourcePointInWorld);
             VisibilityGraphNode node = new VisibilityGraphNode(sourcePointInWorld, nodePointInLocal, visibilityGraphNavigableRegion, false);

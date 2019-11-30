@@ -248,46 +248,30 @@ public class VisibilityTools
       return minDistance;
    }
 
-   private static boolean isNotInsideANonNavigableZone(Point2DReadOnly query, List<Cluster> clusters)
+   public static boolean checkIfPointIsInRegionAndOutsidePreferredNonNavigableZone(Point2DReadOnly query, PlanarRegion homeRegion, List<Cluster> allClusters)
    {
-      return clusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
+      // Check that the point is actually navigable
+      boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
+
+      if (isNavigable)
+      {
+         isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsidePreferredNonNavigableZone(query));
+      }
+
+      return isNavigable;
    }
 
-   public static boolean[][] checkIfListOfPointsInsidePlanarRegionAndOutsideNonNavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
-                                                                                              List<ExtrusionHull> navigableExtrusionPoints)
+   public static boolean checkIfPointIsInRegionAndOutsideNonNavigableZone(Point2DReadOnly query, PlanarRegion homeRegion, List<Cluster> allClusters)
    {
-      // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
-      boolean[][] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()][];
-      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
+      // Check that the point is actually navigable
+      boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
+
+      if (isNavigable)
       {
-         arePointsActuallyNavigable[i] = checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters,
-                                                                                                    navigableExtrusionPoints.get(i).getPoints());
+         isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsideNonNavigableZone(query));
       }
-      return arePointsActuallyNavigable;
-   }
 
-   public static boolean[] checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
-                                                                                      List<? extends Point2DReadOnly> navigableExtrusionPoints)
-   {
-      // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
-      boolean[] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()];
-      Arrays.fill(arePointsActuallyNavigable, true);
-
-      for (int i = 0; i < navigableExtrusionPoints.size(); i++)
-      {
-         // Check that the point is actually navigable
-         Point2DReadOnly query = navigableExtrusionPoints.get(i);
-
-         boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
-
-         if (isNavigable)
-         {
-            isNavigable = isNotInsideANonNavigableZone(query, allClusters);
-         }
-
-         arePointsActuallyNavigable[i] = isNavigable;
-      }
-      return arePointsActuallyNavigable;
+      return isNavigable;
    }
 
    //TODO: Rename.
