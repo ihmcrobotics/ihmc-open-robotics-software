@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -23,8 +22,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import java.util.stream.Collectors;
 
 public class PathOrientationCalculator
 {
@@ -145,7 +142,7 @@ public class PathOrientationCalculator
       List<Cluster> allObstacleClusters = new ArrayList<>();
       if (parameters.getComputeOrientationsToAvoidObstacles())
       {
-         visibilityMapSolution.getNavigableRegions().getNaviableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
+         visibilityMapSolution.getNavigableRegions().getNavigableRegionsList().forEach(region -> allObstacleClusters.addAll(region.getObstacleClusters()));
       }
 
       for (int pathIndex = 1; pathIndex < pathPosesToPack.size() - 1; pathIndex++)

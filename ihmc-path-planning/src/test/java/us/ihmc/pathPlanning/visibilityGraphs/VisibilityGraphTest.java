@@ -60,7 +60,7 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
-      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
       assertEquals(1, navigableRegionsList.size());
 
       NavigableRegion navigableRegion = navigableRegionsList.get(0);
@@ -234,7 +234,7 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> naviableRegionsList = navigableRegions.getNavigableRegionsList();
       assertEquals(2, naviableRegionsList.size());
 
       NavigableRegion navigableRegion0 = naviableRegionsList.get(0);
@@ -586,7 +586,7 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
-      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
       assertEquals(2, navigableRegionsList.size());
 
       NavigableRegion navigableRegion0 = navigableRegionsList.get(0);

@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -18,11 +17,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -185,7 +182,7 @@ public class ObstacleAndCliffAvoidanceProcessor implements BodyPathPostProcessor
 
       List<LineSegment2DReadOnly> cliffEdges = new ArrayList<>();
       boolean isShiftedPointNearACliff = isNearCliff(shiftedPoint, maxInterRegionConnectionLength, cliffHeightToAvoid, endRegion,
-                                                     allNavigableRegions.getNaviableRegionsList(), cliffEdges);
+                                                     allNavigableRegions.getNavigableRegionsList(), cliffEdges);
 
       Vector2D nodeShift = new Vector2D();
 

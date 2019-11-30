@@ -70,7 +70,7 @@ public class NavigableRegionsManager
    {
       ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
 
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> naviableRegionsList = navigableRegions.getNavigableRegionsList();
 
       for (NavigableRegion navigableRegion : naviableRegionsList)
       {
