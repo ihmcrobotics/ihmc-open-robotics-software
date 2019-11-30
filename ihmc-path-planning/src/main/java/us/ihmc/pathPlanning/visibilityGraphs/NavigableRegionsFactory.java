@@ -23,7 +23,7 @@ public class NavigableRegionsFactory
 {
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
 
-   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParametersReadOnly parameters)
+   public static List<NavigableRegion> createNavigableRegion(List<PlanarRegion> allRegions, VisibilityGraphsParametersReadOnly parameters)
    {
       List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 
@@ -39,14 +39,14 @@ public class NavigableRegionsFactory
          if (!navigableRegionFilter.isPlanarRegionNavigable(candidate, otherRegions))
             continue;
 
-         NavigableRegion navigableRegion = createNavigableRegions(candidate, otherRegions, parameters);
+         NavigableRegion navigableRegion = createNavigableRegion(candidate, otherRegions, parameters);
          navigableRegions.add(navigableRegion);
       }
 
       return navigableRegions;
    }
 
-   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParametersReadOnly parameters)
+   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, VisibilityGraphsParametersReadOnly parameters)
    {
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
@@ -56,18 +56,18 @@ public class NavigableRegionsFactory
       ObstacleExtrusionDistanceCalculator preferredObstacleCalculator = parameters.getPreferredObstacleExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegions(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
-                                    preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator,
-                                    parameters.includePreferredExtrusions());
+      return createNavigableRegion(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
+                                   preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator,
+                                   parameters.includePreferredExtrusions());
    }
 
-   public static NavigableRegion createNavigableRegions(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
-                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
-                                                        NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
-                                                        NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                        ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
-                                                        ObstacleExtrusionDistanceCalculator obstacleCalculator,
-                                                        boolean includePreferredExtrusions)
+   public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
+                                                       ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
+                                                       NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
+                                                       NavigableExtrusionDistanceCalculator navigableCalculator,
+                                                       ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
+                                                       ObstacleExtrusionDistanceCalculator obstacleCalculator,
+                                                       boolean includePreferredExtrusions)
    {
       NavigableRegion navigableRegion = new NavigableRegion(region);
       PlanarRegion homeRegion = navigableRegion.getHomePlanarRegion();
