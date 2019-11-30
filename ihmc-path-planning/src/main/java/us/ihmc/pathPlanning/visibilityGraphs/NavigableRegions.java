@@ -53,7 +53,7 @@ public class NavigableRegions
 
    public void createNavigableRegions()
    {
-      navigableRegions = NavigableRegionsFactory.createNavigableRegions(regions, parameters);
+      navigableRegions = NavigableRegionsFactory.createNavigableRegion(regions, parameters);
    }
 
    public List<NavigableRegion> getNavigableRegionsList()
