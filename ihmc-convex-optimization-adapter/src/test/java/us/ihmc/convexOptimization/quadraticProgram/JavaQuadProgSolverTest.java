@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -70,7 +70,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
          CommonOps.mult(Aeq, x, bEqualityVerify);
 
          // Verify Ax=b Equality constraints hold:
-         JUnitTools.assertMatrixEquals(bEqualityVerify, beq, epsilon);
+         MatrixTestTools.assertMatrixEquals(bEqualityVerify, beq, epsilon);
 
          // Verify Ax<b Inequality constraints hold:
          DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
@@ -85,8 +85,8 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
          Assert.assertArrayEquals("repeat = " + repeat, x.getData(), xWrapper.getData(), 1e-10);
       }
 
-      PrintTools.info("Wrapper solve time : " + wrapperSolverTimer.getAverageTime());
-      PrintTools.info("Java solve time : " + javaSolverTimer.getAverageTime());
+      LogTools.info("Wrapper solve time : " + wrapperSolverTimer.getAverageTime());
+      LogTools.info("Java solve time : " + javaSolverTimer.getAverageTime());
    }
 
    @Test
@@ -146,10 +146,10 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
          simpleTotalTimer.stopMeasurement();
       }
 
-      PrintTools.info("Quad Prog total time : " + quadProgTotalTimer.getAverageTime());
-      PrintTools.info("Simple total time : " + simpleTotalTimer.getAverageTime());
-      PrintTools.info("Quad Prog solve time : " + quadProgTimer.getAverageTime());
-      PrintTools.info("Simple solve time : " + simpleTimer.getAverageTime());
+      LogTools.info("Quad Prog total time : " + quadProgTotalTimer.getAverageTime());
+      LogTools.info("Simple total time : " + simpleTotalTimer.getAverageTime());
+      LogTools.info("Quad Prog solve time : " + quadProgTimer.getAverageTime());
+      LogTools.info("Simple solve time : " + simpleTimer.getAverageTime());
    }
 
    @Test
@@ -207,7 +207,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
          CommonOps.mult(Aeq, x, bEqualityVerify);
 
          // Verify Ax=b Equality constraints hold:
-         JUnitTools.assertMatrixEquals(bEqualityVerify, beq, epsilon);
+         MatrixTestTools.assertMatrixEquals(bEqualityVerify, beq, epsilon);
 
          // Verify Ax<b Inequality constraints hold:
          DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
@@ -251,7 +251,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       solver.setLinearInequalityConstraints(Ain, bin);
       solver.solve(x);
 
-      PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+      LogTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
       solver.clear();
       solver.setQuadraticCostFunction(Q, f, 0.0);
       solver.setLinearEqualityConstraints(Aeq, beq);
@@ -262,7 +262,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
       if (!correct)
       {
-         PrintTools.info("Failed. Java Result was " + x.get(0) + ", expected -2.0");
+         LogTools.info("Failed. Java Result was " + x.get(0) + ", expected -2.0");
       }
    }
 

@@ -1,6 +1,9 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -18,18 +21,13 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.QRPDecomposition;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixIO;
-import org.ejml.ops.NormOps;
-import org.ejml.ops.RandomMatrices;
-import org.ejml.ops.SingularOps;
+import org.ejml.ops.*;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.robotics.testing.MatrixTestTools;
 public class GenericActiveSetQPSolverTest
 {
    /** 
@@ -350,7 +348,7 @@ public class GenericActiveSetQPSolverTest
       // complies to equality constraint - zero violation
       DenseMatrix64F equalityConstraintViolation= new DenseMatrix64F(solver.linearEqualityConstraintB);
       CommonOps.multAdd(-1,solver.linearEqualityConstraintA, xopt, equalityConstraintViolation);
-      JUnitTools.assertMatrixEqualsZero(equalityConstraintViolation, 1e-10);
+      MatrixTestTools.assertMatrixEqualsZero(equalityConstraintViolation, 1e-10);
 
       // complies to inequality constraint - violation>0
       DenseMatrix64F inequalityConstraintViolation= new DenseMatrix64F(solver.linearInequalityConstraintB);
@@ -511,6 +509,7 @@ public class GenericActiveSetQPSolverTest
         
         String qpsPath="YamlQpProblems/";
         InputStream input = getClass().getClassLoader().getResourceAsStream(qpsPath+qpsFileName);
+        @SuppressWarnings("unchecked")
         Map<String, Object> object = (Map<String, Object>) yaml.load(input);
         
         beq=MatrixTools.yamlFieldToMatrix(null,"beq",object);

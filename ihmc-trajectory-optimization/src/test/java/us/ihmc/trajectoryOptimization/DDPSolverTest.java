@@ -1,17 +1,16 @@
 package us.ihmc.trajectoryOptimization;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
 
-import java.util.Random;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class DDPSolverTest
 {
@@ -106,8 +105,8 @@ public class DDPSolverTest
       CommonOps.add(currentControl, feedforwardTerm, updatedControlAlternative);
       CommonOps.multAdd(gainMatrix, stateError, updatedControlAlternative);
 
-      JUnitTools.assertMatrixEquals(updatedControlAlternative, updatedControl, 1e-12);
-      JUnitTools.assertMatrixEquals(updatedControlExpected, updatedControl, 1e-12);
+      MatrixTestTools.assertMatrixEquals(updatedControlAlternative, updatedControl, 1e-12);
+      MatrixTestTools.assertMatrixEquals(updatedControlExpected, updatedControl, 1e-12);
    }
 
    @Test
@@ -169,12 +168,12 @@ public class DDPSolverTest
       QxuExpected.set(L_XU);
       CommonOps.multAdd(aV, f_U, QxuExpected);
 
-      JUnitTools.assertMatrixEquals(QxExpected, Qx, 1e-12);
-      JUnitTools.assertMatrixEquals(QuExpected, Qu, 1e-12);
-      JUnitTools.assertMatrixEquals(QxxExpected, Qxx, 1e-12);
-      JUnitTools.assertMatrixEquals(QuuExpected, Quu, 1e-12);
-      JUnitTools.assertMatrixEquals(QxuExpected, Qxu, 1e-12);
-      JUnitTools.assertMatrixEquals(QuxExpected, Qux, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QxExpected, Qx, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QuExpected, Qu, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QxxExpected, Qxx, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QuuExpected, Quu, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QxuExpected, Qxu, 1e-12);
+      MatrixTestTools.assertMatrixEquals(QuxExpected, Qux, 1e-12);
    }
 
 
@@ -304,8 +303,8 @@ public class DDPSolverTest
       CommonOps.multAddTransA(gainMatrix, Q_U, V_X_expected);
       CommonOps.multAdd(Q_XU, gainMatrix, V_XX_expected);
 
-      JUnitTools.assertMatrixEquals(V_X_expected, V_X, 1e-12);
-      JUnitTools.assertMatrixEquals(V_XX_expected, V_XX, 1e-12);
+      MatrixTestTools.assertMatrixEquals(V_X_expected, V_X, 1e-12);
+      MatrixTestTools.assertMatrixEquals(V_XX_expected, V_XX, 1e-12);
    }
 
    @Test
@@ -423,8 +422,8 @@ public class DDPSolverTest
       CommonOps.mult(-1.0, Q_UU_inv, Q_UX, gainExpected);
       CommonOps.mult(-1.0, Q_UU_inv, Q_U, feedforwardExpected);
 
-      JUnitTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-6);
-      JUnitTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
+      MatrixTestTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-6);
+      MatrixTestTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
    }
 
    @Test
@@ -459,10 +458,10 @@ public class DDPSolverTest
 
       CommonOps.add(d_original, abc, d_expected);
 
-      JUnitTools.assertMatrixEquals(a_expected, a, 1e-12);
-      JUnitTools.assertMatrixEquals(b_expected, b, 1e-12);
-      JUnitTools.assertMatrixEquals(c_expected, c, 1e-12);
-      JUnitTools.assertMatrixEquals(d_expected, d, 1e-12);
+      MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
+      MatrixTestTools.assertMatrixEquals(b_expected, b, 1e-12);
+      MatrixTestTools.assertMatrixEquals(c_expected, c, 1e-12);
+      MatrixTestTools.assertMatrixEquals(d_expected, d, 1e-12);
 
       double alpha = RandomNumbers.nextDouble(random, 1000);
 
@@ -470,10 +469,10 @@ public class DDPSolverTest
       CommonOps.add(d_original, alpha, abc, d_expected);
       calculator.addMultQuad(alpha, a, b, c, d);
 
-      JUnitTools.assertMatrixEquals(a_expected, a, 1e-12);
-      JUnitTools.assertMatrixEquals(b_expected, b, 1e-12);
-      JUnitTools.assertMatrixEquals(c_expected, c, 1e-12);
-      JUnitTools.assertMatrixEquals(d_expected, d, 1e-12);
+      MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
+      MatrixTestTools.assertMatrixEquals(b_expected, b, 1e-12);
+      MatrixTestTools.assertMatrixEquals(c_expected, c, 1e-12);
+      MatrixTestTools.assertMatrixEquals(d_expected, d, 1e-12);
    }
 
    private class TestDynamics implements DiscreteHybridDynamics<DefaultDiscreteState>

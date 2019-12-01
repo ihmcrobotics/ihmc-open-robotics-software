@@ -7,13 +7,11 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class DiagonalMatrixToolsTest
 {
@@ -38,15 +36,15 @@ public class DiagonalMatrixToolsTest
 
          otherInvMatrixB.set(matrix);
 
-         LinearSolver solver = LinearSolverFactory.linear(size);
+         LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(size);
          solver.setA(matrix);
          solver.invert(invMatrix);
 
          DiagonalMatrixTools.invertDiagonalMatrix(matrix, otherInvMatrix);
          DiagonalMatrixTools.invertDiagonalMatrix(otherInvMatrixB);
 
-         JUnitTools.assertMatrixEquals(invMatrix, otherInvMatrix, epsilon);
-         JUnitTools.assertMatrixEquals(invMatrix, otherInvMatrixB, epsilon);
+         MatrixTestTools.assertMatrixEquals(invMatrix, otherInvMatrix, epsilon);
+         MatrixTestTools.assertMatrixEquals(invMatrix, otherInvMatrixB, epsilon);
 
          for (int row = 0; row < size; row++)
          {
@@ -60,7 +58,7 @@ public class DiagonalMatrixToolsTest
          }
 
          DiagonalMatrixTools.invertDiagonalMatrix(otherInvMatrix);
-         JUnitTools.assertMatrixEquals(matrix, otherInvMatrix, epsilon);
+         MatrixTestTools.assertMatrixEquals(matrix, otherInvMatrix, epsilon);
       }
    }
 
@@ -95,9 +93,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.preMult(diagonalVector, randomMatrix, solutionB);
          CommonOps.mult(diagonal, randomMatrix, otherSolution);
 
-         JUnitTools.assertMatrixEquals(otherSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(otherSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(otherSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(otherSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -130,7 +128,7 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.preMult(diagonalVector, randomMatrix, solution);
          CommonOps.mult(diagonal, randomMatrix, otherSolution);
 
-         JUnitTools.assertMatrixEquals(otherSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(otherSolution, solution, epsilon);
       }
    }
 
@@ -183,13 +181,13 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.preMultAddBlock(diagonalVector, randomMatrix, solutionC, startRow, startCol);
          DiagonalMatrixTools.preMultAddBlock(scalar, diagonalVector, randomMatrix, solutionD, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionD, epsilon);
 
-         JUnitTools.assertMatrixEquals(solution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(solutionB, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(solutionB, solutionD, epsilon);
       }
    }
 
@@ -224,9 +222,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.postMult(randomMatrix, diagonalVector, solutionB);
          CommonOps.mult(randomMatrix, diagonal, otherSolution);
 
-         JUnitTools.assertMatrixEquals(otherSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(otherSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(otherSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(otherSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -259,7 +257,7 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.postMult(randomMatrix, diagonalVector, solution);
          CommonOps.mult(randomMatrix, diagonal, otherSolution);
 
-         JUnitTools.assertMatrixEquals(solution, otherSolution, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, otherSolution, epsilon);
       }
    }
 
@@ -285,7 +283,7 @@ public class DiagonalMatrixToolsTest
       DiagonalMatrixTools.postMultTransA(A, diagonal, solution);
       CommonOps.multTransA(A, diagonal, expectedSolution);
 
-      JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
+      MatrixTestTools.assertMatrixEquals(solution, expectedSolution, epsilon);
    }
 
    @Test
@@ -319,9 +317,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.postMultTransA(randomMatrix, diagonalVector, solutionB);
          CommonOps.multTransA(randomMatrix, diagonal, expectedSolution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -355,7 +353,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multInner(randomMatrix, diagonal, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -399,10 +397,10 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.multInner(randomMatrix, diagonalScalar, solutionB);
          DiagonalMatrixTools.multInner(randomMatrix, diagonalVector, solutionC);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionC, epsilon);
       }
    }
 
@@ -434,7 +432,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multOuter(randomMatrix, diagonal, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -476,10 +474,10 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.multOuter(randomMatrix, diagonalScalar, solutionB);
          DiagonalMatrixTools.multOuter(randomMatrix, diagonalVector, solutionC);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionC, epsilon);
       }
    }
 
@@ -516,8 +514,8 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.multAddInner(randomMatrix, diagonal, solution);
          DiagonalMatrixTools.multAddInner(scale, randomMatrix, diagonal, solutionB);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
       }
    }
 
@@ -561,12 +559,12 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.multAddInner(randomMatrix, diagonalVector, solutionD);
          DiagonalMatrixTools.multAddInner(scale, randomMatrix, diagonalVector, solutionE);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionD, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionE, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionD, epsilon);
-         JUnitTools.assertMatrixEquals(solutionB, solutionE, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionE, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(solutionB, solutionE, epsilon);
       }
    }
 
@@ -611,9 +609,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonalVector, solutionB, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -654,7 +652,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // top middle
@@ -687,7 +685,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // top right
@@ -720,7 +718,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // middle left
@@ -753,7 +751,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // middle
@@ -786,7 +784,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // middle right
@@ -819,7 +817,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // bottom left
@@ -852,7 +850,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // bottom middle
@@ -885,7 +883,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
       // bottom right
@@ -918,7 +916,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.multAddBlockInner(randomMatrix, diagonal, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
 
    }
@@ -953,7 +951,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.innerDiagonalMult(randomMatrixA, diagonal, randomMatrixB, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -992,9 +990,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.innerDiagonalMult(randomMatrixA, diagonal, randomMatrixB, solution);
          DiagonalMatrixTools.innerDiagonalMult(randomMatrixA, diagonalVector, randomMatrixB, solutionB);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -1031,7 +1029,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.innerDiagonalMult(randomMatrixA, diagonalVector, randomMatrixB, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -1065,7 +1063,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.innerDiagonalMultTransA(randomMatrixA, diagonal, randomMatrixB, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -1104,9 +1102,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.innerDiagonalMultTransA(randomMatrixA, diagonal, randomMatrixB, solution);
          DiagonalMatrixTools.innerDiagonalMultTransA(randomMatrixA, diagonalVector, randomMatrixB, solutionB);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -1143,7 +1141,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.innerDiagonalMultTransA(randomMatrixA, diagonalVector, randomMatrixB, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -1182,9 +1180,9 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.innerDiagonalMultAddTransA(randomMatrixA, diagonal, randomMatrixB, solution);
          DiagonalMatrixTools.innerDiagonalMultAddTransA(randomMatrixA, diagonalVector, randomMatrixB, solutionB);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionB, epsilon);
       }
    }
 
@@ -1221,7 +1219,7 @@ public class DiagonalMatrixToolsTest
 
          DiagonalMatrixTools.innerDiagonalMultAddTransA(randomMatrixA, diagonalVector, randomMatrixB, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
       }
    }
 
@@ -1276,12 +1274,12 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.innerDiagonalMultAddBlockTransA(scale, randomMatrixA, diagonal, randomMatrixB, solutionB, rowStart, colStart);
          DiagonalMatrixTools.innerDiagonalMultAddBlockTransA(scale, randomMatrixA, diagonalVector, randomMatrixB, solutionD, rowStart, colStart);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(solution, solutionC, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionD, epsilon);
-         JUnitTools.assertMatrixEquals(solutionB, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(solution, solutionC, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionD, epsilon);
+         MatrixTestTools.assertMatrixEquals(solutionB, solutionD, epsilon);
       }
    }
 
@@ -1332,8 +1330,8 @@ public class DiagonalMatrixToolsTest
          DiagonalMatrixTools.innerDiagonalMultAddBlockTransA(randomMatrixA, diagonalVector, randomMatrixB, solution, rowStart, colStart);
          DiagonalMatrixTools.innerDiagonalMultAddBlockTransA(scale, randomMatrixA, diagonalVector, randomMatrixB, solutionB, rowStart, colStart);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, epsilon);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, epsilon);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, epsilon);
       }
    }
 }
