@@ -1,6 +1,8 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,33 +12,16 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.struct.EulerType;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class MatrixToolsTest
 {
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
-
    @Test
    public void testSetToNaNDenseMatrix()
    {
@@ -78,20 +63,6 @@ public class MatrixToolsTest
 
       assertEquals(col[0], test.get(0, 1), 1e-8);
       assertEquals(col[1], test.get(1, 1), 1e-8);
-
-   }
-
-   @Test
-   public void testSetMatrixFromOneBasedArrayDenseMatrix()
-   {
-      DenseMatrix64F test = new DenseMatrix64F(2, 1);
-
-      double[] col = new double[] {0.0, 3.0, 4.0};
-
-      MatrixTools.setMatrixFromOneBasedArray(test, col);
-
-      assertEquals(col[1], test.get(0, 0), 1e-8);
-      assertEquals(col[2], test.get(1, 0), 1e-8);
 
    }
 
@@ -138,28 +109,6 @@ public class MatrixToolsTest
       {
          assertEquals(expected[i], res.get(i, 0), 1e-8);
       }
-   }
-
-   @Test
-   public void tranformSe3IntoTransform3D()
-   {
-      Se3_F64 a = new Se3_F64();
-      ConvertRotation3D_F64.eulerToMatrix(EulerType.XYZ, 0.1, -0.5, 1.2, a.getR());
-      a.getT().set(3.3, 1.2, -9);
-
-      RigidBodyTransform b = new RigidBodyTransform();
-      MatrixTools.tranformSe3IntoTransform3D(a, b);
-
-      Point3D_F64 p0 = new Point3D_F64(-1, 2, 3);
-      Point3D p1 = new Point3D(p0.x, p0.y, p0.z);
-
-      SePointOps_F64.transform(a, p0, p0);
-
-      b.transform(p1);
-
-      assertEquals(p0.x, p1.getX(), 1e-8);
-      assertEquals(p0.y, p1.getY(), 1e-8);
-      assertEquals(p0.z, p1.getZ(), 1e-8);
    }
 
    @Test
