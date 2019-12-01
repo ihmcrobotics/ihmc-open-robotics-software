@@ -242,7 +242,7 @@ public class VisibilityGraph
       sourceSpoof.addVertex(0.0, 0.0);
       sourceSpoof.update();
       PlanarRegion sourceRegion = new PlanarRegion(sourceSpoofTransform, sourceSpoof);
-      NavigableRegion navigableRegion = new NavigableRegion(sourceRegion);
+      NavigableRegion navigableRegion = new NavigableRegion(sourceRegion, new Cluster(Cluster.ExtrusionSide.OUTSIDE, Cluster.ClusterType.POLYGON), new ArrayList<>());
 
       Point3D sourceInLocal3D = new Point3D(sourceInWorld);
       navigableRegion.transformFromWorldToLocal(sourceInLocal3D);
