@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.ejml.alg.dense.misc.TransposeAlgs;
@@ -17,9 +16,8 @@ import org.ejml.ops.MatrixIO;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 
@@ -568,55 +566,10 @@ public class MatrixTools
       }
    }
 
-   public static <T> int computeIndicesIntoVector(List<T> keys, Map<T, Integer> indices, Map<T, Integer> sizes)
-   {
-      int stateStartIndex = 0;
-
-      for (T port : keys)
-      {
-         indices.put(port, stateStartIndex);
-         stateStartIndex += sizes.get(port);
-      }
-
-      return stateStartIndex;
-   }
-
-   public static <RowKeyType, ColumnKeyType> void insertMatrixBlock(DenseMatrix64F bigMatrix, DenseMatrix64F matrixBlock, RowKeyType rowKey,
-                                                                    Map<? super RowKeyType, Integer> rowStartIndices, ColumnKeyType columnKey,
-                                                                    Map<? super ColumnKeyType, Integer> columnStartIndices)
-   {
-      if (matrixBlock != null)
-      {
-         int rowStartIndex = rowStartIndices.get(rowKey);
-         int columnStartIndex = columnStartIndices.get(columnKey);
-         CommonOps.insert(matrixBlock, bigMatrix, rowStartIndex, columnStartIndex);
-      }
-   }
-
-   public static <RowKeyType> void insertVectorBlock(DenseMatrix64F bigVector, DenseMatrix64F vectorBlock, RowKeyType rowKey,
-                                                     Map<? super RowKeyType, Integer> startIndices)
-   {
-      if (vectorBlock != null)
-      {
-         int rowStartIndex = startIndices.get(rowKey);
-         CommonOps.insert(vectorBlock, bigVector, rowStartIndex, 0);
-      }
-   }
-
-   public static <RowKeyType> void extractVectorBlock(DenseMatrix64F vectorBlockToPack, DenseMatrix64F bigVector, RowKeyType rowKey,
-                                                      Map<? super RowKeyType, Integer> rowStartIndices, Map<? super RowKeyType, Integer> sizes)
-   {
-      int rowStartIndex = rowStartIndices.get(rowKey);
-      int stateSize = sizes.get(rowKey);
-      vectorBlockToPack.reshape(stateSize, 1);
-      CommonOps.extract(bigVector, rowStartIndex, rowStartIndex + stateSize, 0, 1, vectorBlockToPack, 0, 0);
-   }
-
    public static String denseMatrixToString(DenseMatrix64F mat)
    {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       MatrixIO.print(new PrintStream(stream), mat, "%13.6g");
-
       return stream.toString();
    }
 
@@ -647,42 +600,21 @@ public class MatrixTools
     * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
     *
     * @param matrix
-    * @param point
+    * @param tuple
     */
-   public static void mult(DenseMatrix64F matrix, Point3DBasics point)
+   public static void mult(DenseMatrix64F matrix, Tuple3DBasics tuple)
    {
       if (matrix.numCols != 3 || matrix.numRows != 3)
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = point.getX();
-      double y = point.getY();
-      double z = point.getZ();
+      double x = tuple.getX();
+      double y = tuple.getY();
+      double z = tuple.getZ();
 
-      point.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      point.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      point.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
-   }
-
-   /**
-    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
-    *
-    * @param matrix
-    * @param vector
-    */
-   public static void mult(DenseMatrix64F matrix, Vector3DBasics vector)
-   {
-      if (matrix.numCols != 3 || matrix.numRows != 3)
-      {
-         throw new RuntimeException("Improperly sized matrices.");
-      }
-      double x = vector.getX();
-      double y = vector.getY();
-      double z = vector.getZ();
-
-      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
+      tuple.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
+      tuple.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
+      tuple.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
    }
 
    /**
@@ -1107,7 +1039,11 @@ public class MatrixTools
     */
    public static void zeroColumn(int column, DenseMatrix64F matrix)
    {
-      scaleColumn(0.0, column, matrix);
+      if (column < 0 || column >= matrix.getNumCols())
+         throw new IllegalArgumentException("Specified column index is out of bounds: " + column + ", number of columns in matrix: " + matrix.getNumCols());
+      
+      for (int row = 0; row < matrix.getNumRows(); row++)
+         matrix.unsafe_set(row, column, 0.0);
    }
 
    /**
@@ -1120,7 +1056,11 @@ public class MatrixTools
     */
    public static void zeroRow(int row, DenseMatrix64F matrix)
    {
-      scaleRow(0.0, row, matrix);
+      if (row < 0 || row >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + row + ", number of rows in matrix: " + matrix.getNumRows());
+      
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(row, column, 0.0);
    }
 
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
