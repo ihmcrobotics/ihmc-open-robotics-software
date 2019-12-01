@@ -258,12 +258,28 @@ public class MatrixTools
     */
    public static void setMatrixColumnFromArray(DenseMatrix64F matrix, int column, double[] columnValues, int startRow)
    {
-      if (matrix.getNumRows() < columnValues.length + startRow)
-         throw new IllegalArgumentException("matrix numRows is too small: " + matrix.getNumRows() + ", expected: " + columnValues.length);
+      setMatrixColumnFromArray(matrix, column, columnValues, startRow, columnValues.length);
+   }
+
+   /**
+    * Set a column of a Matrix to an Array
+    *
+    * @param matrix       Matrix to set
+    * @param column       Column
+    * @param columnValues
+    */
+   public static void setMatrixColumnFromArray(DenseMatrix64F matrix, int column, double[] columnValues, int startRow, int dataLength)
+   {
+      if (dataLength == 0)
+         return;
+      if (columnValues.length < startRow + dataLength)
+         throw new IllegalArgumentException("columnValues Rows is too small: " + columnValues.length + ", expected: " + (dataLength + 1));
+      if (matrix.getNumRows() < startRow + dataLength)
+         throw new IllegalArgumentException("matrix numRows is too small: " + matrix.getNumRows() + ", expected: " + (dataLength + 1));
       if (matrix.getNumCols() <= column)
          throw new IllegalArgumentException("matrix numCols is too small: " + matrix.getNumCols() + ", expected: " + (column + 1));
 
-      for (int i = startRow; i < columnValues.length; i++)
+      for (int i = startRow; i < startRow + dataLength; i++)
       {
          matrix.unsafe_set(i, column, columnValues[i]);
       }
