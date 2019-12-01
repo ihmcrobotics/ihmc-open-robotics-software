@@ -12,24 +12,17 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixDimensionException;
+import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.MatrixIO;
 
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -54,7 +47,7 @@ public class MatrixTools
     */
    public static void setToNaN(DenseMatrix64F matrix)
    {
-      setToValue(matrix, Double.NaN);
+      CommonOps.fill(matrix, Double.NaN);
    }
 
    /**
@@ -64,42 +57,21 @@ public class MatrixTools
     */
    public static void setToZero(DenseMatrix64F matrix)
    {
-      setToValue(matrix, 0.0);
-   }
-
-   private static void setToValue(DenseMatrix64F matrix, double val)
-   {
-      for (int i = 0; i < matrix.numRows; i++)
-      {
-         for (int j = 0; j < matrix.numCols; j++)
-         {
-            matrix.unsafe_set(i, j, val);
-         }
-      }
+      CommonOps.fill(matrix, 0.0);
    }
 
    public static boolean containsNaN(DenseMatrix64F matrix)
    {
-      for (int i = 0; i < matrix.numRows; i++)
-      {
-         for (int j = 0; j < matrix.numCols; j++)
-         {
-            if (Double.isNaN(matrix.unsafe_get(i, j)))
-               return true;
-         }
-      }
-      return false;
+      return MatrixFeatures.hasNaN(matrix);
    }
 
    /**
     * This method tries to be smart about converting the various yaml fields to DenseMatrix64F
-    * 
+    *
     * @param val
     * @param fieldName
-    * @param object
-    * 
-    *           Map<String, Object> object = (Map<String, Object>) yaml.load(input);
-    *           yamlFieldToMatrix(beq,"beq",object);
+    * @param object    Map<String, Object> object = (Map<String, Object>) yaml.load(input);
+    *                  yamlFieldToMatrix(beq,"beq",object);
     */
    public static DenseMatrix64F yamlFieldToMatrix(DenseMatrix64F val, String fieldName, Map<String, Object> object)
    {
@@ -169,7 +141,6 @@ public class MatrixTools
    /**
     * Same as CommonOps.mult but allow a,b,c to be zero rol/col matrices c = a * b;
     */
-
    public static void multAllowEmptyMatrix(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
    {
       if (a.numRows != c.numRows || b.numCols != c.numCols)
@@ -187,7 +158,6 @@ public class MatrixTools
    /**
     * same as CommonOps.multAdd but allow a,b,c to be empty matrices
     */
-
    public static void multAddAllowEmptyMatrix(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
    {
       if (a.numRows != c.numRows || b.numCols != c.numCols)
@@ -210,33 +180,18 @@ public class MatrixTools
    }
 
    /**
-    * set matrixToSet from vectorElements
-    */
-
-   public static void setVector(DenseMatrix64F vectorToSet, double[] vectorElements)
-   {
-      if (vectorToSet.numCols != 1)
-         throw new RuntimeException("first argument has to be column vector");
-      for (int i = 0; i < vectorElements.length; i++)
-      {
-         vectorToSet.set(i, 0, vectorElements[i]);
-      }
-   }
-
-   /**
     * return a newVector based on vectorElements
     */
    public static DenseMatrix64F createVector(double[] vectorElements)
    {
       DenseMatrix64F ret = new DenseMatrix64F(vectorElements.length, 1);
-      setVector(ret, vectorElements);
-
+      setMatrixColumnFromArray(ret, 0, vectorElements);
       return ret;
    }
 
    /**
-    * find the index of the first largest element in a vector in the range of [startIndex,
-    * endIndex), not including the endIndex
+    * find the index of the first largest element in a vector in the range of [startIndex, endIndex),
+    * not including the endIndex
     */
    public static int findMaxElementIndex(double m[], int startIndex, int endIndex)
    {
@@ -254,9 +209,7 @@ public class MatrixTools
    }
 
    /**
-    * AtGA = A' * G * A
-    * 
-    * if AtGA is null, a new Matrix will be allocated and returned
+    * AtGA = A' * G * A if AtGA is null, a new Matrix will be allocated and returned
     */
    public static DenseMatrix64F multQuad(DenseMatrix64F A, DenseMatrix64F G, DenseMatrix64F AtGA)
    {
@@ -294,96 +247,53 @@ public class MatrixTools
 
    }
 
-   static enum Relation
-   {
-      LESSTHAN, EQUAL, GREATERTHAN
-   };
-
-   public static DenseMatrix64F compare(DenseMatrix64F a, Relation r, DenseMatrix64F b, double eps)
-   {
-      assert (a.numCols == b.numCols && a.numRows == b.numRows);
-      DenseMatrix64F result = new DenseMatrix64F(a.numRows, a.numCols);
-      for (int i = 0; i < a.numCols; i++)
-         for (int j = 0; j < a.numRows; j++)
-         {
-
-            double testVal = a.get(i, j) - b.get(i, j);
-            switch (r)
-            {
-            case LESSTHAN:
-               result.unsafe_set(i, j, testVal < 0 ? 1 : 0);
-               break;
-            case EQUAL:
-               result.unsafe_set(i, j, Math.abs(testVal) < eps ? 1 : 0);
-               break;
-            case GREATERTHAN:
-               result.unsafe_set(i, j, testVal > 0 ? 1 : 0);
-               break;
-            default:
-               throw new RuntimeException("shoun't be here");
-            }
-         }
-      return result;
-   }
-
    /**
     * Set a column of a Matrix to an Array
     *
-    * @param matrix Matrix to set
-    * @param column Column
+    * @param matrix       Matrix to set
+    * @param column       Column
     * @param columnValues
     */
    public static void setMatrixColumnFromArray(DenseMatrix64F matrix, int column, double[] columnValues)
    {
-      for (int i = 0; i < matrix.numRows; i++)
-      {
-         matrix.unsafe_set(i, column, columnValues[i]);
-      }
+      setMatrixColumnFromArray(matrix, column, columnValues, 0);
    }
 
    /**
     * Set a column of a Matrix to an Array
     *
-    * @param matrix Matrix to set
-    * @param column Column
+    * @param matrix       Matrix to set
+    * @param column       Column
     * @param columnValues
     */
    public static void setMatrixColumnFromArray(DenseMatrix64F matrix, int column, double[] columnValues, int startRow)
    {
+      if (matrix.getNumRows() < columnValues.length + startRow)
+         throw new IllegalArgumentException("matrix numRows is too small: " + matrix.getNumRows() + ", expected: " + columnValues.length);
+      if (matrix.getNumCols() <= column)
+         throw new IllegalArgumentException("matrix numCols is too small: " + matrix.getNumCols() + ", expected: " + (column + 1));
+
       for (int i = startRow; i < columnValues.length; i++)
       {
          matrix.unsafe_set(i, column, columnValues[i]);
       }
    }
 
-   public static void setMatrixFromOneBasedArray(DenseMatrix64F ret, double[] oneBasedArray)
-   {
-      for (int i = 0; i < oneBasedArray.length - 1; i++)
-      {
-         ret.set(i, 0, oneBasedArray[i + 1]);
-      }
-   }
-
-   public static void setOneBasedArrayFromMatrix(double[] oneBasedArrayToPack, DenseMatrix64F matrix)
-   {
-      int index = 1;
-      for (int i = 0; i < matrix.getNumRows(); i++)
-      {
-         oneBasedArrayToPack[index++] = matrix.get(i, 0);
-      }
-   }
-
    /**
-    *
     * Differentiates a row vector by subtracting the previous element from the current element
     *
     * @param vectorToDiff Row vector
-    * @param startRow Row to start at
+    * @param startRow     Row to start at
     * @param numberOfRows Rows to differentiate
     * @param vectorToPack Result row vector
     */
    public static void diff(DenseMatrix64F vectorToDiff, int startRow, int numberOfRows, DenseMatrix64F vectorToPack)
    {
+      if (vectorToDiff.getNumCols() != 1)
+         throw new IllegalArgumentException("vectorToDiff is not a column vector");
+      if (vectorToPack.getNumCols() != 1)
+         throw new IllegalArgumentException("vectorToPack is not a column vector");
+
       for (int i = 1; i < numberOfRows; i++)
       {
          vectorToPack.unsafe_set(i - 1, 0, vectorToDiff.unsafe_get(startRow + i, 0) - vectorToDiff.unsafe_get(startRow + i - 1, 0));
@@ -400,7 +310,7 @@ public class MatrixTools
    {
       diff(vectorToDiff, 0, vectorToDiff.length, vectorToPack);
    }
-   
+
    /**
     * Differentiates an array by subtracting the previous element from the current element
     *
@@ -409,6 +319,9 @@ public class MatrixTools
     */
    public static void diff(double[] vectorToDiff, int startRow, int numberOfRows, DenseMatrix64F vectorToPack)
    {
+      if (vectorToPack.getNumCols() != 1)
+         throw new IllegalArgumentException("vectorToPack is not a column vector");
+
       for (int i = 1; i < numberOfRows; i++)
       {
          vectorToPack.unsafe_set(i - 1, 0, vectorToDiff[startRow + i] - vectorToDiff[startRow + i - 1]);
@@ -424,23 +337,28 @@ public class MatrixTools
    }
 
    /**
-    *
     * Sets a block of a matrix
     *
-    * @param dest Set a block of this matrix
-    * @param destStartRow Row index of the top left corner of the block to set
+    * @param dest            Set a block of this matrix
+    * @param destStartRow    Row index of the top left corner of the block to set
     * @param destStartColumn Column index of the top left corner of the block to set
-    * @param src Get a block of this matrix
-    * @param srcStartRow Row index of the top left corner of the block to use from otherMatrix
-    * @param srcStartColumn Column index of the top left corner of the block to use from otherMatrix
-    * @param numberOfRows Row size of the block
+    * @param src             Get a block of this matrix
+    * @param srcStartRow     Row index of the top left corner of the block to use from otherMatrix
+    * @param srcStartColumn  Column index of the top left corner of the block to use from otherMatrix
+    * @param numberOfRows    Row size of the block
     * @param numberOfColumns Column size of the block
-    * @param scale Scale the block from otherMatrix by this value
-    *
+    * @param scale           Scale the block from otherMatrix by this value
     */
    public static void setMatrixBlock(DenseMatrix64F dest, int destStartRow, int destStartColumn, DenseMatrix64F src, int srcStartRow, int srcStartColumn,
                                      int numberOfRows, int numberOfColumns, double scale)
    {
+      if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
+               + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
+      if (src.getNumRows() < numberOfRows + srcStartRow || src.getNumCols() < numberOfColumns + srcStartColumn)
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: "
+               + (numberOfColumns + srcStartColumn) + "], was: [rows: " + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
+
       for (int i = 0; i < numberOfRows; i++)
       {
          for (int j = 0; j < numberOfColumns; j++)
@@ -454,13 +372,13 @@ public class MatrixTools
     * Sets matrixToPack to the entries of input in the specified rows and columns
     *
     * @param matrixToPack matrix to pack
-    * @param input input matrix
-    * @param rows rows of input matrix to use in setting matrix to pack
-    * @param columns columns of input matrix to use in setting matrix to pack
+    * @param input        input matrix
+    * @param rows         rows of input matrix to use in setting matrix to pack
+    * @param columns      columns of input matrix to use in setting matrix to pack
     */
    public static void getMatrixBlock(DenseMatrix64F matrixToPack, DenseMatrix64F input, int[] rows, int[] columns)
    {
-      if ((rows.length != matrixToPack.getNumRows()) || (columns.length != matrixToPack.getNumCols()))
+      if (rows.length != matrixToPack.getNumRows() || columns.length != matrixToPack.getNumCols())
       {
          throw new RuntimeException("The size of matrixToPack is not rows.length * columns.length");
       }
@@ -480,28 +398,34 @@ public class MatrixTools
    }
 
    /**
-    *
     * Adds to a block of a matrix
     *
-    * @param dest Add to a block of this matrix
-    * @param destStartRow Row index of the top left corner of the block to set
+    * @param dest            Add to a block of this matrix
+    * @param destStartRow    Row index of the top left corner of the block to set
     * @param destStartColumn Column index of the top left corner of the block to set
-    * @param src Get a block of this matrix
-    * @param srcStartRow Row index of the top left corner of the block to use from otherMatrix
-    * @param srcStartColumn Column index of the top left corner of the block to use from otherMatrix
-    * @param numberOfRows Row size of the block
+    * @param src             Get a block of this matrix
+    * @param srcStartRow     Row index of the top left corner of the block to use from otherMatrix
+    * @param srcStartColumn  Column index of the top left corner of the block to use from otherMatrix
+    * @param numberOfRows    Row size of the block
     * @param numberOfColumns Column size of the block
-    * @param scale Scale the block from otherMatrix by this value
-    *
+    * @param scale           Scale the block from otherMatrix by this value
     */
    public static void addMatrixBlock(DenseMatrix64F dest, int destStartRow, int destStartColumn, DenseMatrix64F src, int srcStartRow, int srcStartColumn,
                                      int numberOfRows, int numberOfColumns, double scale)
    {
+      if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
+               + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
+      if (src.getNumRows() < numberOfRows + srcStartRow || src.getNumCols() < numberOfColumns + srcStartColumn)
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: "
+               + (numberOfColumns + srcStartColumn) + "], was: [rows: " + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
+
       for (int i = 0; i < numberOfRows; i++)
       {
          for (int j = 0; j < numberOfColumns; j++)
          {
-            dest.unsafe_set(destStartRow + i, destStartColumn + j,
+            dest.unsafe_set(destStartRow + i,
+                            destStartColumn + j,
                             dest.unsafe_get(destStartRow + i, destStartColumn + j) + scale * src.unsafe_get(srcStartRow + i, srcStartColumn + j));
          }
       }
@@ -525,61 +449,10 @@ public class MatrixTools
       }
    }
 
-   public static void extractColumns(DenseMatrix64F source, TIntArrayList srcColumns, DenseMatrix64F dest, int destStartColumn)
-   {
-      for (int i = 0; i < srcColumns.size(); i++)
-      {
-         int index = srcColumns.get(i);
-         CommonOps.extract(source, 0, source.getNumRows(), index, index + 1, dest, 0, destStartColumn);
-         destStartColumn++;
-      }
-   }
-
-   public static void linspace(double[] vector, double d1, double d2, int n)
-   {
-      // double[] vector = new double[n];
-
-      for (int i = 0; i < n; i++)
-      {
-         vector[i] = d1 + i * ((d2 - d1) / ((double) (n - 1)));
-      }
-
-      // return vector;
-
-   }
-
-   public static double[] linspace(double d1, double d2, int n)
-   {
-      double[] vector = new double[n];
-      linspace(vector, d1, d2, n);
-
-      return vector;
-
-   }
-
-   public static DenseMatrix64F flipUpDown(DenseMatrix64F matrix)
-   {
-      DenseMatrix64F ret = matrix.copy();
-      int nRows = ret.getNumRows();
-      int nColumns = ret.getNumCols();
-
-      for (int i = 0; i < nRows; i++)
-      {
-         int newRowNumber = nRows - i - 1;
-         for (int j = 0; j < nColumns; j++)
-         {
-            ret.set(newRowNumber, j, matrix.get(i, j));
-         }
-      }
-
-      return ret;
-   }
-
    public static DenseMatrix64F mult(DenseMatrix64F A, DenseMatrix64F B)
    {
       DenseMatrix64F C = new DenseMatrix64F(A.getNumRows(), B.getNumCols());
       CommonOps.mult(A, B, C);
-
       return C;
    }
 
@@ -620,58 +493,22 @@ public class MatrixTools
    }
 
    /**
-    * Sets all the diagonal elements equal to one and everything else equal to zero.
-    * If this is a square matrix then it will be an identity matrix.
+    * Sets all the diagonal elements equal to one and everything else equal to zero. If this is a
+    * square matrix then it will be an identity matrix.
     *
     * @param mat A square matrix.
     */
-   public static void setDiagonal( RowD1Matrix64F mat , double diagonalValue)
+   public static void setDiagonal(RowD1Matrix64F mat, double diagonalValue)
    {
       int width = mat.numRows < mat.numCols ? mat.numRows : mat.numCols;
 
       Arrays.fill(mat.data, 0, mat.getNumElements(), 0);
 
       int index = 0;
-      for( int i = 0; i < width; i++ , index += mat.numCols + 1) {
+      for (int i = 0; i < width; i++, index += mat.numCols + 1)
+      {
          mat.data[index] = diagonalValue;
       }
-   }
-
-   /**
-    * Returns the resulting matrix from vector1*transpose(vector2)
-    *
-    * @param vector1
-    * @param vector2
-    */
-   public static Matrix3D vectorTimesVectorTranspose(Vector3DReadOnly vector1, Vector3DReadOnly vector2)
-   {
-      Matrix3D matrix = new Matrix3D();
-
-      double[] array1 = new double[3];
-      double[] array2 = new double[3];
-
-      vector1.get(array1);
-      vector2.get(array2);
-
-      for (int row = 0; row < 3; row++)
-      {
-         for (int column = 0; column < 3; column++)
-         {
-            matrix.setElement(row, column, array1[row] * array2[column]);
-         }
-      }
-
-      return matrix;
-   }
-
-   /**
-    * Returns the resulting matrix from vector*transpose(vector)
-    *
-    * @param vector
-    */
-   public static Matrix3D vectorTimesVectorTranspose(Vector3DReadOnly vector)
-   {
-      return vectorTimesVectorTranspose(vector, vector);
    }
 
    public static void vectorToSkewSymmetricMatrix(DenseMatrix64F matrixToPack, Tuple3DReadOnly tuple)
@@ -711,80 +548,9 @@ public class MatrixTools
       M.setM22(-axbx - ayby);
    }
 
-   public static void setMatrixColumnToVector(int columnIndex, DenseMatrix64F Matrix, DenseMatrix64F vector)
+   public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, double[] dest)
    {
-      for (int i = 0; i < Matrix.getNumRows(); i++)
-      {
-         Matrix.set(i, columnIndex, vector.get(i, columnIndex));
-      }
-   }
-
-   public static void setMatrixRowToVector(int rowIndex, DenseMatrix64F Matrix, DenseMatrix64F vector)
-   {
-      for (int i = 0; i < Matrix.getNumCols(); i++)
-      {
-         Matrix.set(rowIndex, i, vector.get(i));
-      }
-   }
-
-   public static void tranformSe3IntoTransform3D(Se3_F64 from, RigidBodyTransform to)
-   {
-
-      DenseMatrix64F R = from.getR();
-      Vector3D_F64 T = from.getT();
-
-      RotationMatrix Rd = new RotationMatrix(R);
-
-      to.setRotation(Rd);
-      to.setTranslation(new Vector3D(T.x, T.y, T.z));
-   }
-
-   public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2D framePoint)
-   {
-      matrix.set(0, 0, framePoint.getX());
-      matrix.set(1, 0, framePoint.getY());
-   }
-
-   public static void transformColumnVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
-   {
-      framePoint.setX(matrix.get(0, 0));
-      framePoint.setY(matrix.get(1, 0));
-   }
-
-   public static void transformFrameVector2dIntoColumnVector(DenseMatrix64F matrix, FrameVector2D frameVector)
-   {
-      matrix.set(0, 0, frameVector.getX());
-      matrix.set(1, 0, frameVector.getY());
-   }
-
-   public static void transformColumnVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2D frameVector)
-   {
-      frameVector.setX(matrix.get(0, 0));
-      frameVector.setY(matrix.get(1, 0));
-   }
-
-   public static void transformFramePoint2dIntoRowVector(DenseMatrix64F matrix, FramePoint2D framePoint)
-   {
-      matrix.set(0, 0, framePoint.getX());
-      matrix.set(0, 1, framePoint.getY());
-   }
-
-   public static void transformRowVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
-   {
-      framePoint.setX(matrix.get(0, 0));
-      framePoint.setX(matrix.get(0, 1));
-   }
-
-   public static void transformFrameVector2dIntoRowVector(DenseMatrix64F matrix, FrameVector2D frameVector)
-   {
-      matrix.set(0, 0, frameVector.getX());
-      matrix.set(0, 1, frameVector.getY());
-   }
-
-   public static void transformRowVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2D frameVector)
-   {
-      frameVector.setX(matrix.get(0, 0));
-      frameVector.setY(matrix.get(0, 1));
+      return denseMatrixToArrayColumnMajor(src, 0, 0, src.getNumRows(), src.getNumCols(), dest, 0);
    }
 
    public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, int srcStartRow, int srcStartCol, int numRows, int numCols, double[] dest,
@@ -810,23 +576,9 @@ public class MatrixTools
       }
    }
 
-   public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, double[] dest)
-   {
-      return denseMatrixToArrayColumnMajor(src, 0, 0, src.getNumRows(), src.getNumCols(), dest, 0);
-   }
-
-   public static void extractTuple3dFromEJMLVector(Tuple3DBasics tuple3d, DenseMatrix64F ejmlVector, int[] indices)
-   {
-      tuple3d.setX(ejmlVector.get(indices[0], 0));
-      tuple3d.setY(ejmlVector.get(indices[1], 0));
-      tuple3d.setZ(ejmlVector.get(indices[2], 0));
-   }
-
    public static void extractTuple3dFromEJMLVector(Tuple3DBasics tuple3d, DenseMatrix64F ejmlVector, int startIndex)
    {
-      tuple3d.setX(ejmlVector.get(startIndex + 0, 0));
-      tuple3d.setY(ejmlVector.get(startIndex + 1, 0));
-      tuple3d.setZ(ejmlVector.get(startIndex + 2, 0));
+      tuple3d.set(startIndex, ejmlVector);
    }
 
    public static void extractFrameTupleFromEJMLVector(FrameTuple3DBasics frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
@@ -970,9 +722,8 @@ public class MatrixTools
    }
 
    /**
-    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be
-    * 3x3.
-    * 
+    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
+    *
     * @param matrix
     * @param point
     */
@@ -992,9 +743,8 @@ public class MatrixTools
    }
 
    /**
-    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be
-    * 3x3.
-    * 
+    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
+    *
     * @param matrix
     * @param vector
     */
@@ -1014,9 +764,8 @@ public class MatrixTools
    }
 
    /**
-    * Multiply a 4x4 matrix by a 4x1 vector. Since result is stored in vector, the matrix must be
-    * 4x4.
-    * 
+    * Multiply a 4x4 matrix by a 4x1 vector. Since result is stored in vector, the matrix must be 4x4.
+    *
     * @param matrix
     * @param vector
     */
@@ -1037,17 +786,17 @@ public class MatrixTools
       vector.setS(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * s);
    }
 
-
    /**
     * Removes a row of the given matrix, indicated by {@code indexOfRowToRemove}.
     *
     * @param matrixToRemoveRowTo the matrix from which the row is to be removed. Modified.
-    * @param indexOfRowToRemove the column index to remove.
+    * @param indexOfRowToRemove  the column index to remove.
     */
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
    {
       if (indexOfRowToRemove >= matrixToRemoveRowTo.getNumRows())
-         throw new RuntimeException("The index indexOfRowToRemove was expected to be in [0, " + (matrixToRemoveRowTo.getNumRows() - 1) + "], but was: " + indexOfRowToRemove);
+         throw new RuntimeException("The index indexOfRowToRemove was expected to be in [0, " + (matrixToRemoveRowTo.getNumRows() - 1) + "], but was: "
+               + indexOfRowToRemove);
 
       for (int columnIndex = 0; columnIndex < matrixToRemoveRowTo.getNumCols(); columnIndex++)
       {
@@ -1069,12 +818,13 @@ public class MatrixTools
     * Removes a column of the given matrix, indicated by {@code indexOfColumnToRemove}.
     *
     * @param matrixToRemoveColumnTo the matrix from which the column is to be removed. Modified.
-    * @param indexOfColumnToRemove the column index to remove.
+    * @param indexOfColumnToRemove  the column index to remove.
     */
    public static void removeColumn(DenseMatrix64F matrixToRemoveColumnTo, int indexOfColumnToRemove)
    {
       if (indexOfColumnToRemove >= matrixToRemoveColumnTo.getNumCols())
-         throw new RuntimeException("The index indexOfColumnToRemove was expected to be in [0, " + (matrixToRemoveColumnTo.getNumCols() - 1) + "], but was: " + indexOfColumnToRemove);
+         throw new RuntimeException("The index indexOfColumnToRemove was expected to be in [0, " + (matrixToRemoveColumnTo.getNumCols() - 1) + "], but was: "
+               + indexOfColumnToRemove);
 
       int rowIndex = 1;
       for (int index = indexOfColumnToRemove + 1; index < matrixToRemoveColumnTo.getNumElements(); index++)
@@ -1093,9 +843,9 @@ public class MatrixTools
     * <p>
     * A row is determined to be a 'zero-row' if: &sum;<sub>i=0:N</sub>|M<sub>row,i</sub>| <= epsilon
     * </p>
-    * 
+    *
     * @param matrixToModify the matrix from which 'zero-rows' have to be removed. Modified.
-    * @param epsilon the tolerance to use for determining if a row is a 'zero-row'.
+    * @param epsilon        the tolerance to use for determining if a row is a 'zero-row'.
     */
    public static void removeZeroRows(DenseMatrix64F matrixToModify, double epsilon)
    {
@@ -1108,14 +858,14 @@ public class MatrixTools
     * <p>
     * A row is determined to be a 'zero-row' if: &sum;<sub>i=0:N</sub>|M<sub>row,i</sub>| <= epsilon
     * </p>
-    * 
+    *
     * @param matrixToModify the matrix from which 'zero-rows' have to be removed. Modified.
-    * @param startRow the first row index to be tested.
-    * @param endRow the last row index to be tested.
-    * @param epsilon the tolerance to use for determining if a row is a 'zero-row'.
+    * @param startRow       the first row index to be tested.
+    * @param endRow         the last row index to be tested.
+    * @param epsilon        the tolerance to use for determining if a row is a 'zero-row'.
     * @throws IllegalArgumentException if {@code startRow > endRow}.
-    * @throws RuntimeException if {@code startRow} or {@code endRow} are not in [0,
-    *            {@code matrixToModify.getNumrows()}[.
+    * @throws RuntimeException         if {@code startRow} or {@code endRow} are not in [0,
+    *                                  {@code matrixToModify.getNumrows()}[.
     */
    public static void removeZeroRows(DenseMatrix64F matrixToModify, int startRow, int endRow, double epsilon)
    {
@@ -1148,13 +898,12 @@ public class MatrixTools
     * b<sub>ij</sub> = &alpha;*a<sub>ji</sub><br>
     * where 'b' is the scaled transpose of 'a'.
     * </p>
-    * 
     * Transpose algorithm taken from
     * {@link TransposeAlgs#standard(org.ejml.data.RowD1Matrix64F, org.ejml.data.RowD1Matrix64F)}.
-    * 
+    *
     * @param alpha the amount each element is multiplied by.
-    * @param a The matrix that is to be scaled and transposed. Not modified.
-    * @param b Where the scaled transpose is stored. Modified.
+    * @param a     The matrix that is to be scaled and transposed. Not modified.
+    * @param b     Where the scaled transpose is stored. Modified.
     */
    public static void scaleTranspose(double alpha, DenseMatrix64F a, DenseMatrix64F b)
    {
@@ -1180,7 +929,7 @@ public class MatrixTools
     * Scales the elements of {@param column} of {@param matrix} by the value {@param alpha}.
     * </p>
     *
-    * @param alpha value to scale by
+    * @param alpha  value to scale by
     * @param column column to scale
     * @param matrix matrix modify
     */
@@ -1198,8 +947,8 @@ public class MatrixTools
     * Scales the elements of {@param row} of {@param matrix} by the value {@param alpha}.
     * </p>
     *
-    * @param alpha value to scale by
-    * @param row row to scale
+    * @param alpha  value to scale by
+    * @param row    row to scale
     * @param matrix matrix modify
     */
    public static void scaleRow(double alpha, int row, DenseMatrix64F matrix)
@@ -1213,12 +962,13 @@ public class MatrixTools
 
    /**
     * <p>
-    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of
+    * {@param matrix}.
     * </p>
     *
     * @param valuesToSet row vector to add
-    * @param rowIndex row to add to
-    * @param matrix matrix modify
+    * @param rowIndex    row to add to
+    * @param matrix      matrix modify
     */
    public static void setRow(DenseMatrix64F valuesToSet, int rowIndex, DenseMatrix64F matrix)
    {
@@ -1227,13 +977,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and sets them to the elements of {@param rowIndex} row of {@param matrix}.
+    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and sets them to the elements
+    * of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
-    * @param alpha row value multiplier
+    * @param alpha       row value multiplier
     * @param valuesToSet row vector to add
-    * @param rowIndex row to add to
-    * @param matrix matrix modify
+    * @param rowIndex    row to add to
+    * @param matrix      matrix modify
     */
    public static void setRow(double alpha, DenseMatrix64F valuesToSet, int rowIndex, DenseMatrix64F matrix)
    {
@@ -1242,13 +993,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Sets the elements of {@param valuesToSet} to the elements of {@param rowIndex} row of
+    * {@param matrix}.
     * </p>
     *
     * @param originRowIndex row index to set
-    * @param valuesToSet row vector to add
-    * @param destRowIndex row to set to
-    * @param matrix matrix modify
+    * @param valuesToSet    row vector to add
+    * @param destRowIndex   row to set to
+    * @param matrix         matrix modify
     */
    public static void setRow(int originRowIndex, DenseMatrix64F valuesToSet, int destRowIndex, DenseMatrix64F matrix)
    {
@@ -1256,11 +1008,11 @@ public class MatrixTools
          throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
 
       if (originRowIndex < 0 || originRowIndex >= valuesToSet.getNumRows())
-         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToSet.getNumRows());
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: "
+               + valuesToSet.getNumRows());
 
       if (valuesToSet.getNumCols() != matrix.getNumCols())
          throw new IllegalArgumentException("Trying to add a row that is the improper length");
-
 
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(destRowIndex, column, valuesToSet.unsafe_get(originRowIndex, column));
@@ -1268,13 +1020,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Scales the elements of the {@param originRowIndex} of {@param valuesToSet} and sets them to the elements of {@param rowIndex} row of {@param matrix}.
+    * Scales the elements of the {@param originRowIndex} of {@param valuesToSet} and sets them to the
+    * elements of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
     * @param originRowIndex row index to set
-    * @param valuesToSet row vector to set
-    * @param destRowIndex row index to set to
-    * @param matrix matrix modify
+    * @param valuesToSet    row vector to set
+    * @param destRowIndex   row index to set to
+    * @param matrix         matrix modify
     */
    public static void setRow(int originRowIndex, double alpha, DenseMatrix64F valuesToSet, int destRowIndex, DenseMatrix64F matrix)
    {
@@ -1282,11 +1035,11 @@ public class MatrixTools
          throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
 
       if (originRowIndex < 0 || originRowIndex >= valuesToSet.getNumRows())
-         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToSet.getNumRows());
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: "
+               + valuesToSet.getNumRows());
 
       if (valuesToSet.getNumCols() != matrix.getNumCols())
          throw new IllegalArgumentException("Trying to add a row that is the improper length");
-
 
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(destRowIndex, column, alpha * valuesToSet.unsafe_get(originRowIndex, column));
@@ -1294,13 +1047,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Sets the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of rows {@param destRowIndices} of {@param matrix}.
+    * Sets the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of
+    * rows {@param destRowIndices} of {@param matrix}.
     * </p>
     *
     * @param originRowIndices indices of the rows to add
-    * @param valuesToSet matrix to pull row vectors from
-    * @param destRowIndices indices of the row to add to
-    * @param matrix matrix modify
+    * @param valuesToSet      matrix to pull row vectors from
+    * @param destRowIndices   indices of the row to add to
+    * @param matrix           matrix modify
     */
    public static void setRows(int[] originRowIndices, DenseMatrix64F valuesToSet, int[] destRowIndices, DenseMatrix64F matrix)
    {
@@ -1315,12 +1069,13 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Adds the elements of {@param valuesToAdd} to the elements of {@param rowIndex} row of
+    * {@param matrix}.
     * </p>
     *
     * @param valuesToAdd row vector to add
-    * @param rowIndex row to add to
-    * @param matrix matrix modify
+    * @param rowIndex    row to add to
+    * @param matrix      matrix modify
     */
    public static void addRow(DenseMatrix64F valuesToAdd, int rowIndex, DenseMatrix64F matrix)
    {
@@ -1329,13 +1084,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and adds to the elements of {@param rowIndex} row of {@param matrix}.
+    * Multiplies the elements of {@param valuesToAdd} by {@param alpha} and adds to the elements of
+    * {@param rowIndex} row of {@param matrix}.
     * </p>
     *
-    * @param alpha scalar multiplier of row being added
+    * @param alpha       scalar multiplier of row being added
     * @param valuesToAdd row vector to add
-    * @param rowIndex row index of vector destination
-    * @param matrix matrix modify
+    * @param rowIndex    row index of vector destination
+    * @param matrix      matrix modify
     */
    public static void addRow(double alpha, DenseMatrix64F valuesToAdd, int rowIndex, DenseMatrix64F matrix)
    {
@@ -1344,13 +1100,14 @@ public class MatrixTools
 
    /**
     * <p>
-    * Adds the elements of row {@param originRowIndex} of {@param valuesToAdd} to the elements of {@param rowIndex} row of {@param matrix}.
+    * Adds the elements of row {@param originRowIndex} of {@param valuesToAdd} to the elements of
+    * {@param rowIndex} row of {@param matrix}.
     * </p>
     *
     * @param originRowIndex row index of vector to add
-    * @param valuesToAdd row vector to add
-    * @param destRowIndex row index of vector destination
-    * @param matrix matrix modify
+    * @param valuesToAdd    row vector to add
+    * @param destRowIndex   row index of vector destination
+    * @param matrix         matrix modify
     */
    public static void addRow(int originRowIndex, DenseMatrix64F valuesToAdd, int destRowIndex, DenseMatrix64F matrix)
    {
@@ -1358,11 +1115,11 @@ public class MatrixTools
          throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
 
       if (originRowIndex < 0 || originRowIndex >= valuesToAdd.getNumRows())
-         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToAdd.getNumRows());
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: "
+               + valuesToAdd.getNumRows());
 
       if (valuesToAdd.getNumCols() != matrix.getNumCols())
          throw new IllegalArgumentException("Trying to add a row that is the improper length");
-
 
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(destRowIndex, column, valuesToAdd.unsafe_get(originRowIndex, column) + matrix.unsafe_get(destRowIndex, column));
@@ -1370,14 +1127,15 @@ public class MatrixTools
 
    /**
     * <p>
-    * Scales the elements of row {@param originRowIndex} of {@param valuesToAdd} by {@param alpha} and adds them to the elements of {@param rowIndex} row of {@param matrix}.
+    * Scales the elements of row {@param originRowIndex} of {@param valuesToAdd} by {@param alpha} and
+    * adds them to the elements of {@param rowIndex} row of {@param matrix}.
     * </p>
     *
     * @param originRowIndex row index of vector to add
-    * @param alpha scalar multiplier of row
-    * @param valuesToAdd row vector to add
-    * @param destRowIndex row index of vector destination
-    * @param matrix matrix modify
+    * @param alpha          scalar multiplier of row
+    * @param valuesToAdd    row vector to add
+    * @param destRowIndex   row index of vector destination
+    * @param matrix         matrix modify
     */
    public static void addRow(int originRowIndex, double alpha, DenseMatrix64F valuesToAdd, int destRowIndex, DenseMatrix64F matrix)
    {
@@ -1385,26 +1143,26 @@ public class MatrixTools
          throw new IllegalArgumentException("Specified row index is out of bounds: " + destRowIndex + ", number of rows in matrix: " + matrix.getNumRows());
 
       if (originRowIndex < 0 || originRowIndex >= valuesToAdd.getNumRows())
-         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: " + valuesToAdd.getNumRows());
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + originRowIndex + ", number of rows in matrix: "
+               + valuesToAdd.getNumRows());
 
       if (valuesToAdd.getNumCols() != matrix.getNumCols())
          throw new IllegalArgumentException("Trying to add a row that is the improper length");
-
 
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(destRowIndex, column, alpha * valuesToAdd.unsafe_get(originRowIndex, column) + matrix.unsafe_get(destRowIndex, column));
    }
 
-
    /**
     * <p>
-    * Adds the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of rows {@param destRowIndices} of {@param matrix}.
+    * Adds the elements of rows {@param originRowIndices} of {@param valuesToAdd} to the elements of
+    * rows {@param destRowIndices} of {@param matrix}.
     * </p>
     *
     * @param originRowIndices indices of the rows to add
-    * @param valuesToAdd matrix to pull row vectors from
-    * @param destRowIndices indices of the row to add to
-    * @param matrix matrix modify
+    * @param valuesToAdd      matrix to pull row vectors from
+    * @param destRowIndices   indices of the row to add to
+    * @param matrix           matrix modify
     */
    public static void addRows(int[] originRowIndices, DenseMatrix64F valuesToAdd, int[] destRowIndices, DenseMatrix64F matrix)
    {
@@ -1416,7 +1174,6 @@ public class MatrixTools
          addRow(originRowIndices[i], valuesToAdd, destRowIndices[i], matrix);
       }
    }
-
 
    /**
     * <p>
@@ -1436,7 +1193,7 @@ public class MatrixTools
     * Zeros the elements of {@param row} of {@param matrix}.
     * </p>
     *
-    * @param row row to scale
+    * @param row    row to scale
     * @param matrix matrix modify
     */
    public static void zeroRow(int row, DenseMatrix64F matrix)
@@ -1480,7 +1237,7 @@ public class MatrixTools
 
    public static void checkMatrixDimensions(DenseMatrix64F matrixToCheck, int expectedRows, int expectedColumns)
    {
-      if ((matrixToCheck.getNumRows() != expectedRows) || (matrixToCheck.getNumCols() != expectedColumns))
+      if (matrixToCheck.getNumRows() != expectedRows || matrixToCheck.getNumCols() != expectedColumns)
       {
          String message = "Matrix dimensions are (" + matrixToCheck.getNumRows() + ", " + matrixToCheck.getNumCols() + "), expected (" + expectedRows + ","
                + expectedColumns + ")";
@@ -1490,87 +1247,98 @@ public class MatrixTools
    }
 
    /**
-    * <p>Performs the following operation:<br>
+    * <p>
+    * Performs the following operation:<br>
     * <br>
-    * c = c + a * b
-    * </br>
+    * c = c + a * b </br>
     * </p>
     * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The right matrix in the multiplication operation. Not modified.
     * @param c Where the results of the operation are stored. Modified.
     */
-   public static void multAddBlock( RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   public static void multAddBlock(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int rowStart, int colStart)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if( a.numCols != b.numRows ) {
+      else if (a.numCols != b.numRows)
+      {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
       int aIndexStart = 0;
 
-      for( int i = 0; i < a.numRows; i++ ) {
-         for( int j = 0; j < b.numCols; j++ ) {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
             double total = 0;
 
             int indexA = aIndexStart;
             int indexB = j;
             int end = indexA + b.numRows;
-            while( indexA < end ) {
+            while (indexA < end)
+            {
                total += a.data[indexA++] * b.data[indexB];
                indexB += b.numCols;
             }
 
-            int cIndex = (i+rowStart)*c.numCols + j + colStart;
-            c.data[ cIndex] +=  total;
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
+            c.data[cIndex] += total;
          }
          aIndexStart += a.numCols;
       }
    }
 
    /**
-    * <p>Performs the following operation:<br>
+    * <p>
+    * Performs the following operation:<br>
     * <br>
-    * c = c + scalar * a * b
-    * </br>
+    * c = c + scalar * a * b </br>
     * </p>
     * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The right matrix in the multiplication operation. Not modified.
     * @param c Where the results of the operation are stored. Modified.
     */
-   public static void multAddBlock( double scalar, RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart )
+   public static void multAddBlock(double scalar, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int rowStart, int colStart)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if( a.numCols != b.numRows ) {
+      else if (a.numCols != b.numRows)
+      {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
       int aIndexStart = 0;
 
-      for( int i = 0; i < a.numRows; i++ ) {
-         for( int j = 0; j < b.numCols; j++ ) {
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
             double total = 0;
 
             int indexA = aIndexStart;
             int indexB = j;
             int end = indexA + b.numRows;
-            while( indexA < end ) {
+            while (indexA < end)
+            {
                total += a.data[indexA++] * b.data[indexB];
                indexB += b.numCols;
             }
 
-            int cIndex = (i+rowStart)*c.numCols + j + colStart;
-            c.data[ cIndex] += scalar * total;
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
+            c.data[cIndex] += scalar * total;
          }
          aIndexStart += a.numCols;
       }
    }
 
    /**
-    * <p>Computes the matrix multiplication inner product:<br>
+    * <p>
+    * Computes the matrix multiplication inner product:<br>
     * <br>
     * c = c + a * b<sup>T</sup> * b <br>
     * <br>
@@ -1579,6 +1347,7 @@ public class MatrixTools
     * <p>
     * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
     * </p>
+    *
     * @param a The scalar multiplier of the matrix.
     * @param b The matrix being multiplied. Not modified.
     * @param c Where the results of the operation are stored. Modified.
@@ -1624,23 +1393,28 @@ public class MatrixTools
    }
 
    /**
-    * <p>Computes the matrix multiplication inner product:<br>
+    * <p>
+    * Computes the matrix multiplication inner product:<br>
     * <br>
     * c = c + a * b<sup>T</sup> * b <br>
     * <br>
-    * c<sub>(cRowStart + i) (cColStart + j)</sub> = c<sub>(cRowStart + i) (cColStart + j)</sub> + a * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub> }
+    * c<sub>(cRowStart + i) (cColStart + j)</sub> = c<sub>(cRowStart + i) (cColStart + j)</sub> + a *
+    * &sum;<sub>k=1:n</sub> { b<sub>ki</sub> * b<sub>kj</sub> }
     * </p>
-    * <p> The block is added to matrix 'c' starting at cStartRow, cStartCol </p>
+    * <p>
+    * The block is added to matrix 'c' starting at cStartRow, cStartCol
+    * </p>
     * <p>
     * Is faster than using a generic matrix multiplication by taking advantage of symmetry.
     * </p>
-    * @param a The scalar multiplier for the inner operation.
-    * @param b The matrix being multiplied. Not modified.
-    * @param c Where the results of the operation are stored. Modified.
+    *
+    * @param a         The scalar multiplier for the inner operation.
+    * @param b         The matrix being multiplied. Not modified.
+    * @param c         Where the results of the operation are stored. Modified.
     * @param cRowStart The row index to start writing to in the block 'c'.
     * @param cColStart The col index to start writing to in the block 'c'.
     */
-   public static void multAddBlockInner(double a, RowD1Matrix64F b,  RowD1Matrix64F c, int cRowStart, int cColStart)
+   public static void multAddBlockInner(double a, RowD1Matrix64F b, RowD1Matrix64F c, int cRowStart, int cColStart)
    {
       if (b == c)
          throw new IllegalArgumentException("'b' cannot be the same matrix as 'c'");
@@ -1681,78 +1455,88 @@ public class MatrixTools
    }
 
    /**
-    * <p>Performs the following operation:<br>
+    * <p>
+    * Performs the following operation:<br>
     * <br>
-    * c = c + a<sup>T</sup> * b
-    * </br>
+    * c = c + a<sup>T</sup> * b </br>
     * </p>
     * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The right matrix in the multiplication operation. Not modified.
     * @param c Where the results of the operation are stored. Modified.
     */
-   public static void multAddBlockTransA( RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart)
+   public static void multAddBlockTransA(RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int rowStart, int colStart)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if( a.numRows != b.numRows ) {
+      else if (a.numRows != b.numRows)
+      {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
-      for( int i = 0; i < a.numCols; i++ ) {
-         for( int j = 0; j < b.numCols; j++ ) {
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
             int indexA = i;
             int indexB = j;
-            int end = indexB + b.numRows*b.numCols;
+            int end = indexB + b.numRows * b.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexB < end; indexB += b.numCols ) {
+            for (; indexB < end; indexB += b.numCols)
+            {
                total += a.data[indexA] * b.data[indexB];
                indexA += a.numCols;
             }
 
-            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
             c.data[cIndex] += total;
          }
       }
    }
 
    /**
-    * <p>Performs the following operation:<br>
+    * <p>
+    * Performs the following operation:<br>
     * <br>
-    * c = c + scalar * a<sup>T</sup> * b
-    * </br>
+    * c = c + scalar * a<sup>T</sup> * b </br>
     * </p>
     * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
     * @param a The left matrix in the multiplication operation. Not modified.
     * @param b The right matrix in the multiplication operation. Not modified.
     * @param c Where the results of the operation are stored. Modified.
     */
-   public static void multAddBlockTransA(double scalar,  RowD1Matrix64F a , RowD1Matrix64F b , RowD1Matrix64F c, int rowStart, int colStart)
+   public static void multAddBlockTransA(double scalar, RowD1Matrix64F a, RowD1Matrix64F b, RowD1Matrix64F c, int rowStart, int colStart)
    {
-      if( a == c || b == c )
+      if (a == c || b == c)
          throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-      else if( a.numRows != b.numRows ) {
+      else if (a.numRows != b.numRows)
+      {
          throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
       }
 
-      for( int i = 0; i < a.numCols; i++ ) {
-         for( int j = 0; j < b.numCols; j++ ) {
+      for (int i = 0; i < a.numCols; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
             int indexA = i;
             int indexB = j;
-            int end = indexB + b.numRows*b.numCols;
+            int end = indexB + b.numRows * b.numCols;
 
             double total = 0;
 
             // loop for k
-            for(; indexB < end; indexB += b.numCols ) {
+            for (; indexB < end; indexB += b.numCols)
+            {
                total += a.data[indexA] * b.data[indexB];
                indexA += a.numCols;
             }
 
-            int cIndex = (i+rowStart)*c.numCols + j + colStart;
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
             c.data[cIndex] += scalar * total;
          }
       }
