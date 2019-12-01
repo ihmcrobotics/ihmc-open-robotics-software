@@ -12,11 +12,9 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Conversions;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class NativeCommonOpsTest
 {
@@ -65,7 +63,7 @@ public class NativeCommonOpsTest
          CommonOps.mult(A, B, expected);
          ejmlTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(expected, actual, epsilon);
+         MatrixTestTools.assertMatrixEquals(expected, actual, epsilon);
       }
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
@@ -117,7 +115,7 @@ public class NativeCommonOpsTest
          CommonOps.multTransA(A, tempBA, expected);
          ejmlTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(expected, actual, epsilon);
+         MatrixTestTools.assertMatrixEquals(expected, actual, epsilon);
       }
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
@@ -165,7 +163,7 @@ public class NativeCommonOpsTest
          solver.invert(ejmlResult);
          ejmlTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(ejmlResult, nativeResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(ejmlResult, nativeResult, epsilon);
       }
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
@@ -219,8 +217,8 @@ public class NativeCommonOpsTest
          solver.solve(b, ejmlResult);
          ejmlTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(x, nativeResult, epsilon);
-         JUnitTools.assertMatrixEquals(x, ejmlResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(x, nativeResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(x, ejmlResult, epsilon);
       }
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");
@@ -294,9 +292,9 @@ public class NativeCommonOpsTest
          undampedSolver.solve(b, ejmlUndampedResult);
          ejmlUndampedTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(ejmlDampedResult, nativeDampedResult, epsilon);
-         JUnitTools.assertMatrixEquals(x, nativeUndampedResult, epsilon);
-         JUnitTools.assertMatrixEquals(x, ejmlUndampedResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(ejmlDampedResult, nativeDampedResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(x, nativeUndampedResult, epsilon);
+         MatrixTestTools.assertMatrixEquals(x, ejmlUndampedResult, epsilon);
       }
 
       System.out.println("Native damped took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeDampedTime / iterations)), 3) + " ms on average");
@@ -351,7 +349,7 @@ public class NativeCommonOpsTest
          calculator.projectOntoNullspace(A, B, expected);
          ejmlTime += System.nanoTime();
 
-         JUnitTools.assertMatrixEquals(expected, actual, epsilon);
+         MatrixTestTools.assertMatrixEquals(expected, actual, epsilon);
       }
 
       System.out.println("Native took " + Precision.round(Conversions.nanosecondsToMilliseconds((double) (nativeTime / iterations)), 3) + " ms on average");

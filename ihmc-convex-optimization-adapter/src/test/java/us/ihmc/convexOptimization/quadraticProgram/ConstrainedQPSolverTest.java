@@ -1,19 +1,17 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ConstrainedQPSolverTest
 {
@@ -86,7 +84,7 @@ public class ConstrainedQPSolverTest
             CommonOps.mult(Aeq, x, bEqualityVerify);
 
             // Verify Ax=b Equality constraints hold:
-            JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+            MatrixTestTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
 
             // Verify Ax<b Inequality constraints hold:
             DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
@@ -114,7 +112,7 @@ public class ConstrainedQPSolverTest
             CommonOps.mult(Aeq, x, bEqualityVerify);
 
             // Verify Ax=b Equality constraints hold:
-            JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+            MatrixTestTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
 
             // Verify Ax<b Inequality constraints hold:
             DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
@@ -154,16 +152,16 @@ public class ConstrainedQPSolverTest
          if (solver instanceof CompositeActiveSetQPSolver)
             continue;
 
-         PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+         LogTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
          solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
          boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
          if (!correct)
-            PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
+            LogTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
          Assert.assertTrue(correct);
       }
 
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
-      PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+      LogTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
 
       solver.clear();
       solver.setQuadraticCostFunction(Q, f, 0.0);
@@ -174,7 +172,7 @@ public class ConstrainedQPSolverTest
       //solver.solve(Q, f, 0.0, Aeq, beq, Ain, bin, x, false);
       boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
       if (!correct)
-         PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
+         LogTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
       Assert.assertTrue(correct);
    }
 

@@ -18,7 +18,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class MatrixToolsTest
 {
@@ -95,16 +95,16 @@ public class MatrixToolsTest
          assertEquals(expected[i], res.get(i, 0), 1e-8);
       }
    }
-   
+
    @Test
    public void testDiffDoubleArrayDenseMatrixRange()
    {
       double[] vals = new double[] {Double.NaN, Double.NaN, 1.0, 3.0, 4.0, 9.0, 16.0, 32.0, Double.NaN};
       double[] expected = new double[] {2.0, 1.0, 5.0, 7.0, 16.0};
       DenseMatrix64F res = new DenseMatrix64F(5, 1);
-      
+
       MatrixTools.diff(vals, 2, 6, res);
-      
+
       for (int i = 0; i < 5; i++)
       {
          assertEquals(expected[i], res.get(i, 0), 1e-8);
@@ -161,7 +161,7 @@ public class MatrixToolsTest
             expectedMatrix.set(indexOfRowToSet, j, randomRow.get(0, j));
 
          MatrixTools.setRow(randomRow, indexOfRowToSet, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numCols = RandomNumbers.nextInt(random, 1, 100);
@@ -176,7 +176,7 @@ public class MatrixToolsTest
             expectedMatrix.set(indexOfRowToSet, j, randomMultiplier * randomRow.get(0, j));
 
          MatrixTools.setRow(randomMultiplier, randomRow, indexOfRowToSet, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          int numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -192,7 +192,7 @@ public class MatrixToolsTest
             expectedMatrix.set(indexOfRowToSet, j, randomRow.get(indexOfOriginRow, j));
 
          MatrixTools.setRow(indexOfOriginRow, randomRow, indexOfRowToSet, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -210,9 +210,7 @@ public class MatrixToolsTest
             expectedMatrix.set(indexOfRowToSet, j, randomMultiplier * randomRow.get(indexOfOriginRow, j));
 
          MatrixTools.setRow(indexOfOriginRow, randomMultiplier, randomRow, indexOfRowToSet, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
-
-
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -233,10 +231,9 @@ public class MatrixToolsTest
          }
 
          MatrixTools.setRows(originRowIndices, randomRow, destRowIndices, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
       }
    }
-
 
    @Test
    public void testAddRow()
@@ -257,7 +254,7 @@ public class MatrixToolsTest
             expectedMatrix.add(indexOfRowToAdd, j, randomRow.get(0, j));
 
          MatrixTools.addRow(randomRow, indexOfRowToAdd, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numCols = RandomNumbers.nextInt(random, 1, 100);
@@ -272,7 +269,7 @@ public class MatrixToolsTest
             expectedMatrix.add(indexOfRowToAdd, j, randomMultiplier * randomRow.get(0, j));
 
          MatrixTools.addRow(randomMultiplier, randomRow, indexOfRowToAdd, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          int numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -288,7 +285,7 @@ public class MatrixToolsTest
             expectedMatrix.add(indexOfRowToAdd, j, randomRow.get(indexOfOriginRow, j));
 
          MatrixTools.addRow(indexOfOriginRow, randomRow, indexOfRowToAdd, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -306,9 +303,7 @@ public class MatrixToolsTest
             expectedMatrix.add(indexOfRowToAdd, j, randomMultiplier * randomRow.get(indexOfOriginRow, j));
 
          MatrixTools.addRow(indexOfOriginRow, randomMultiplier, randomRow, indexOfRowToAdd, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
-
-
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
 
          numRows = RandomNumbers.nextInt(random, 1, 100);
          numOriginRows = RandomNumbers.nextInt(random, 1, 100);
@@ -329,7 +324,7 @@ public class MatrixToolsTest
          }
 
          MatrixTools.addRows(originRowIndices, randomRow, destRowIndices, matrixToTest);
-         JUnitTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
+         MatrixTestTools.assertMatrixEquals(expectedMatrix, matrixToTest, 1.0e-10);
       }
    }
 
@@ -543,8 +538,8 @@ public class MatrixToolsTest
          MatrixTools.multAddBlockTransA(randomMatrixA, randomMatrixB, solution, rowStart, colStart);
          MatrixTools.multAddBlockTransA(scale, randomMatrixA, randomMatrixB, solutionB, rowStart, colStart);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
       }
    }
 
@@ -582,8 +577,8 @@ public class MatrixToolsTest
          MatrixTools.multAddBlock(randomMatrixA, randomMatrixB, solution, rowStart, colStart);
          MatrixTools.multAddBlock(scale, randomMatrixA, randomMatrixB, solutionB, rowStart, colStart);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
-         JUnitTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolutionB, solutionB, 1e-6);
       }
    }
 
@@ -624,7 +619,7 @@ public class MatrixToolsTest
 
          MatrixTools.multAddBlockInner(diagonalValue, randomMatrix, solution, startRow, startCol);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
       }
    }
 
@@ -651,7 +646,7 @@ public class MatrixToolsTest
 
          MatrixTools.multAddInner(diagonalScalar, randomMatrix, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
       }
    }
 
@@ -672,14 +667,13 @@ public class MatrixToolsTest
          DenseMatrix64F solution = RandomMatrices.createRandom(variables, variables, -50, 50, random);
          DenseMatrix64F expectedSolution = new DenseMatrix64F(solution);
 
-
          DenseMatrix64F tempJtW = new DenseMatrix64F(variables, taskSize);
          CommonOps.transpose(randomMatrix, tempJtW);
          CommonOps.multAdd(scale, tempJtW, randomMatrix, expectedSolution);
 
          MatrixTools.multAddInner(scale, randomMatrix, solution);
 
-         JUnitTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
+         MatrixTestTools.assertMatrixEquals(expectedSolution, solution, 1e-6);
       }
    }
 }
