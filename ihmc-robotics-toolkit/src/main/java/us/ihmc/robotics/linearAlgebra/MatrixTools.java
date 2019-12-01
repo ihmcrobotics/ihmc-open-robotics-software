@@ -17,19 +17,11 @@ import org.ejml.ops.MatrixIO;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class MatrixTools
 {
@@ -574,76 +566,6 @@ public class MatrixTools
       {
          diagonal[i] = matrix.get(i, i);
       }
-   }
-
-   public static void extractTuple3dFromEJMLVector(Tuple3DBasics tuple3d, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      tuple3d.set(startIndex, ejmlVector);
-   }
-
-   public static void extractFrameTupleFromEJMLVector(FrameTuple3DBasics frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
-   {
-      frameTuple.setToZero(desiredFrame);
-      frameTuple.setX(ejmlVector.get(startIndex + 0, 0));
-      frameTuple.setY(ejmlVector.get(startIndex + 1, 0));
-      frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
-   }
-
-   public static void extractFixedFrameTupleFromEJMLVector(FixedFrameTuple3DBasics yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      yoFrameTuple.setX(ejmlVector.get(startIndex + 0, 0));
-      yoFrameTuple.setY(ejmlVector.get(startIndex + 1, 0));
-      yoFrameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
-   }
-
-   public static void extractAddFixedFrameTupleFromEJMLVector(FixedFrameTuple3DBasics yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      yoFrameTuple.addX(ejmlVector.get(startIndex + 0, 0));
-      yoFrameTuple.addY(ejmlVector.get(startIndex + 1, 0));
-      yoFrameTuple.addZ(ejmlVector.get(startIndex + 2, 0));
-   }
-
-   public static void extractYoFrameQuaternionFromEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      double x = matrix.get(index++, 0);
-      double y = matrix.get(index++, 0);
-      double z = matrix.get(index++, 0);
-      double w = matrix.get(index++, 0);
-      yoFrameQuaternion.set(x, y, z, w);
-   }
-
-   public static void extractFrameOrientationFromEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      double x = matrix.get(index++, 0);
-      double y = matrix.get(index++, 0);
-      double z = matrix.get(index++, 0);
-      double w = matrix.get(index++, 0);
-      frameOrientation.set(x, y, z, w);
-   }
-
-   public static void insertTuple3dIntoEJMLVector(Tuple3DReadOnly tuple3d, DenseMatrix64F ejmlVector, int[] indices)
-   {
-      ejmlVector.set(indices[0], 0, tuple3d.getX());
-      ejmlVector.set(indices[1], 0, tuple3d.getY());
-      ejmlVector.set(indices[2], 0, tuple3d.getZ());
-   }
-
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple3DReadOnly frameTuple, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
-      ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
-      ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
-   }
-
-   public static void insertFrameQuaternionIntoEJMLVector(FrameQuaternionReadOnly frameOrientation, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, frameOrientation.getX());
-      matrix.set(index++, 0, frameOrientation.getY());
-      matrix.set(index++, 0, frameOrientation.getZ());
-      matrix.set(index++, 0, frameOrientation.getS());
    }
 
    public static <T> int computeIndicesIntoVector(List<T> keys, Map<T, Integer> indices, Map<T, Integer> sizes)

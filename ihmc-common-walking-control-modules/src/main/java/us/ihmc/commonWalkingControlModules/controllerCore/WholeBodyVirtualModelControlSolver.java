@@ -43,7 +43,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -295,8 +294,12 @@ public class WholeBodyVirtualModelControlSolver
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
-      MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
-      MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
+      yoDesiredMomentumRateAngular.addX(momentumRate.get(0, 0));
+      yoDesiredMomentumRateAngular.addY(momentumRate.get(1, 0));
+      yoDesiredMomentumRateAngular.addZ(momentumRate.get(2, 0));
+      yoDesiredMomentumRateLinear.addX(momentumRate.get(3, 0));
+      yoDesiredMomentumRateLinear.addY(momentumRate.get(4, 0));
+      yoDesiredMomentumRateLinear.addZ(momentumRate.get(5, 0));
    }
 
    private void handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)

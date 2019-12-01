@@ -455,7 +455,7 @@ public class MatrixToolsTest
          DenseMatrix64F matrixToTest = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
          FramePoint3D framePointToInsert = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
          int startRowToInsertFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
-         MatrixTools.insertFrameTupleIntoEJMLVector(framePointToInsert, matrixToTest, startRowToInsertFrameTuple);
+         framePointToInsert.get(startRowToInsertFrameTuple, matrixToTest);
 
          assertEquals(framePointToInsert.getX(), matrixToTest.get(startRowToInsertFrameTuple + 0, 0), 1.0e-10);
          assertEquals(framePointToInsert.getY(), matrixToTest.get(startRowToInsertFrameTuple + 1, 0), 1.0e-10);
@@ -473,7 +473,7 @@ public class MatrixToolsTest
          DenseMatrix64F matrixToExtractFrom = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
          FramePoint3D framePointToTest = new FramePoint3D(null, -1.0, -1.0, -1.0);
          int startRowToExtractFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
-         MatrixTools.extractFrameTupleFromEJMLVector(framePointToTest, matrixToExtractFrom, ReferenceFrame.getWorldFrame(), startRowToExtractFrameTuple);
+         framePointToTest.setIncludingFrame(ReferenceFrame.getWorldFrame(), startRowToExtractFrameTuple, matrixToExtractFrom);
 
          assertEquals(framePointToTest.getReferenceFrame(), ReferenceFrame.getWorldFrame());
          assertEquals(framePointToTest.getX(), matrixToExtractFrom.get(startRowToExtractFrameTuple + 0, 0), 1.0e-10);
