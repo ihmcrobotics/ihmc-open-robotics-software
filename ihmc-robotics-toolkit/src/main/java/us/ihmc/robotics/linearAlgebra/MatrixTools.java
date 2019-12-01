@@ -342,6 +342,9 @@ public class MatrixTools
    public static void setMatrixBlock(DenseMatrix64F dest, int destStartRow, int destStartColumn, DenseMatrix64F src, int srcStartRow, int srcStartColumn,
                                      int numberOfRows, int numberOfColumns, double scale)
    {
+      if (numberOfRows == 0 || numberOfColumns == 0)
+         return;
+
       if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
          throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
                + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
@@ -403,6 +406,9 @@ public class MatrixTools
    public static void addMatrixBlock(DenseMatrix64F dest, int destStartRow, int destStartColumn, DenseMatrix64F src, int srcStartRow, int srcStartColumn,
                                      int numberOfRows, int numberOfColumns, double scale)
    {
+      if (numberOfRows == 0 || numberOfColumns == 0)
+         return;
+
       if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
          throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
                + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
@@ -1041,7 +1047,7 @@ public class MatrixTools
    {
       if (column < 0 || column >= matrix.getNumCols())
          throw new IllegalArgumentException("Specified column index is out of bounds: " + column + ", number of columns in matrix: " + matrix.getNumCols());
-      
+
       for (int row = 0; row < matrix.getNumRows(); row++)
          matrix.unsafe_set(row, column, 0.0);
    }
@@ -1058,7 +1064,7 @@ public class MatrixTools
    {
       if (row < 0 || row >= matrix.getNumRows())
          throw new IllegalArgumentException("Specified row index is out of bounds: " + row + ", number of rows in matrix: " + matrix.getNumRows());
-      
+
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(row, column, 0.0);
    }
