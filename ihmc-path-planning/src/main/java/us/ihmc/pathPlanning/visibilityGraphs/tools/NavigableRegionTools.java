@@ -106,7 +106,7 @@ public class NavigableRegionTools
       if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
          return false;
 
-      if (!isPointInsideNavigableRegion(navigableRegion, pointInLocalToCheck))
+      if (!navigableRegion.getHomePlanarRegion().isPointInside(pointInLocalToCheck))
          return false;
 
       for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
