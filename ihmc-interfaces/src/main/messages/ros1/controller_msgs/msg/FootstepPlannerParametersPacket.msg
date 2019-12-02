@@ -180,6 +180,20 @@ float64 translation_scale_from_grandparent_node
 # Field default value -11.1
 float64 maximum_step_z
 
+# Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+# 
+# The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+# A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+# Field default value -11.1
+float64 minimum_step_z_when_fully_pitched
+
+# Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+# 
+# The maximum distance is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+# A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+# Field default value -11.1
+float64 maximum_step_x_when_fully_pitched
+
 # This is the reduction factor for the max yaw when the step is at max reach.
 # This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
 # If this returns 0.0, the max yaw is not modified, even at full reach.
