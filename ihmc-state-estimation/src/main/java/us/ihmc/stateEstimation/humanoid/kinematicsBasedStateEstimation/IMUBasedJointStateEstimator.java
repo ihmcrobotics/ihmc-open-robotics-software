@@ -75,13 +75,13 @@ public class IMUBasedJointStateEstimator
       {
          OneDoFJointBasics joint = joints[i];
 
-         double qd_sensorMap = sensorMap.getJointVelocityProcessedOutput(joint);
+         double qd_sensorMap = sensorMap.getJointVelocityOutput(joint);
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);
          double qd_fused = (1.0 - alphaVelocity) * qd_sensorMap + alphaVelocity * qd_IMU;
 
          jointVelocities.get(joint).update(qd_fused);
 
-         double q_sensorMap = sensorMap.getJointPositionProcessedOutput(joint);
+         double q_sensorMap = sensorMap.getJointPositionOutput(joint);
          double q_IMU = jointPositions.get(joint).getDoubleValue() + estimatorDT * qd_IMU; // is qd_IMU or qd_fused better here?
          double q_fused = (1.0 - alphaPosition) * q_sensorMap + alphaPosition * q_IMU;
 
