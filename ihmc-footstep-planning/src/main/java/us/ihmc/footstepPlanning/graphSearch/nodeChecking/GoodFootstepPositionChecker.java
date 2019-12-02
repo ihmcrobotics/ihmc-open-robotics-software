@@ -18,6 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -151,6 +152,18 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
             return false;
          }
+      }
+
+      double stepReach3D = EuclidCoreTools.norm(stepReach, solePositionInParentZUpFrame.getZ());
+      double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMaximumStepYaw(),
+                                                           stepReach3D / parameters.getMaximumStepReach());
+      double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMinimumStepYaw(),
+                                                           stepReach3D / parameters.getMaximumStepReach());
+      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(nodeToCheck.getYaw(), previousNode.getYaw());
+      if (!MathTools.intervalContains(robotSide.negateIfRightSide(yaw), minYaw, maxYaw))
+      {
+         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
+         return false;
       }
 
       if (graph != null)
