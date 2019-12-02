@@ -116,6 +116,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
+      double maxReach = parameters.getMaximumStepReach();
       if (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
          if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()))
@@ -129,6 +130,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
             return false;
          }
+         maxReach = EuclidCoreTools.norm(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepYWhenForwardAndDown() - parameters.getIdealFootstepWidth());
       }
 
       double widthRelativeToIdeal = solePositionInParentZUpFrame.getY() - robotSide.negateIfRightSide(parameters.getIdealFootstepWidth());
@@ -152,15 +154,17 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
             return false;
          }
+         maxReach = parameters.getMaximumStepReachWhenSteppingUp();
       }
 
       double stepReach3D = EuclidCoreTools.norm(stepReach, solePositionInParentZUpFrame.getZ());
+      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(solePositionInParentZUpFrame.getZ() / parameters.getMaximumStepZ()));
       double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMaximumStepYaw(),
-                                                           stepReach3D / parameters.getMaximumStepReach());
+                                                           maxInterpolationFactor);
       double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMinimumStepYaw(),
-                                                           stepReach3D / parameters.getMaximumStepReach());
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(nodeToCheck.getYaw(), previousNode.getYaw());
-      if (!MathTools.intervalContains(robotSide.negateIfRightSide(yaw), minYaw, maxYaw))
+                                                           maxInterpolationFactor);
+      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(nodeToCheck.getYaw(), previousNode.getYaw());
+      if (!MathTools.intervalContains(robotSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
          return false;

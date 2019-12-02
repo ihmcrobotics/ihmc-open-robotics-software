@@ -5,6 +5,7 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
@@ -13,6 +14,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -238,6 +241,46 @@ public class GoodFootstepPositionCheckerTest
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.getRejectionReason());
    }
 
+   @Test
+   public void testMaxMinYawOnLeftFootAtOriginSteppingUp()
+   {
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      double maxYaw = 1.2;
+      double minYaw = -0.5;
+      double yawReduction = 0.5;
+      parameters.setMaximumStepYaw(maxYaw);
+      parameters.setMinimumStepYaw(minYaw);
+      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+
+      double maxYawAtFullLength = yawReduction * maxYaw;
+      double minYawAtFullLength = yawReduction * minYaw;
+
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper);
+
+      double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
+      double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaximumStepReach());
+      double reachAtChild = EuclidCoreTools.norm(snappedXPosition, snappedYPosition - parameters.getIdealFootstepWidth());
+
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      FootstepNode parentNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
+      FootstepNode childNodeAtMaxYaw = new FootstepNode(snappedXPosition, parameters.getIdealFootstepWidth(), snapDownToYaw(maxValue), RobotSide.LEFT);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(0.25, 0.15);
+      planarRegionsListGenerator.translate(snappedXPosition, snappedYPosition, 0.2);
+      planarRegionsListGenerator.addRectangle(0.25, 0.15);
+
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+
+      snapper.setPlanarRegions(planarRegionsList);
+      nodeChecker.setPlanarRegions(planarRegionsList);
+
+      assertFalse(nodeChecker.isNodeValid(childNodeAtMaxYaw, parentNode));
+      assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.getRejectionReason());
+   }
+
 
    private static double snapToGrid(double value)
    {
@@ -252,6 +295,11 @@ public class GoodFootstepPositionCheckerTest
    private static double snapDownToYaw(double yaw)
    {
       return LatticeNode.gridSizeYaw * Math.floor(yaw / LatticeNode.gridSizeYaw);
+   }
+
+   private static double snapDownToGrid(double yaw)
+   {
+      return LatticeNode.gridSizeXY * Math.floor(yaw / LatticeNode.gridSizeXY);
    }
 
    private static double snapUpToYaw(double yaw)
