@@ -48,11 +48,6 @@ public class GradientDescentModule
       }
    }
 
-   public void setAlpha(double value)
-   {
-      alpha = value;
-   }
-
    private void reduceStepSize()
    {
       alpha = alpha / reducingStepSizeRatio;
