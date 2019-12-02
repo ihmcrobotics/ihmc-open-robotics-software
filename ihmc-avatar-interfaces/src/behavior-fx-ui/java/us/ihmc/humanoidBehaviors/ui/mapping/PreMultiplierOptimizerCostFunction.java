@@ -17,9 +17,9 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
 {
    private PlanarRegionsList map;
    private List<Plane3D> planes;
-   private static final double angleScaler = 1.0;
-   private static final double angleWeight = 0.5;
-   private static final double snanppingWeight = 0.05;
+   private static final double ANGLE_SCALER = 1.0;
+   private static final double ANGLE_WEIGHT = 0.5;
+   private static final double SNAPPING_PARALLEL_WEIGHT = 0.05;
    private RigidBodyTransformReadOnly transformWorldToSensorPose;
 
    public PreMultiplierOptimizerCostFunction(PlanarRegionsList map, List<Plane3D> planes, RigidBodyTransformReadOnly transformWorldToSensorPose)
@@ -28,18 +28,18 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
       this.planes = planes;
       this.transformWorldToSensorPose = transformWorldToSensorPose;
    }
-   
+
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      transformToPack.setRotationYawPitchRoll(input.get(3) / angleScaler, input.get(4) / angleScaler, input.get(5) / angleScaler);
+      transformToPack.setRotationYawPitchRoll(input.get(3) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(5) / ANGLE_SCALER);
    }
 
    public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
       convertToSensorPoseMultiplier(input, preMultiplier);
-      
+
       transformToPack.set(transformWorldToSensorPose);
       transformToPack.multiply(preMultiplier);
       transformToPack.multiplyInvertOther(transformWorldToSensorPose);
@@ -49,7 +49,7 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
    public double getQuery(TDoubleArrayList values)
    {
       /**
-       * values : dx, dy, dz, du, dv, dw
+       * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
        */
       RigidBodyTransform transformer = new RigidBodyTransform();
       convertToPointCloudTransformer(values, transformer);
@@ -90,7 +90,7 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
          if (!planarRegion.isPointInsideByProjectionOntoXYPlane(convertedPlanes.get(i).getPoint()))
             centerDistance = plane.getPoint().distance(convertedPlanes.get(i).getPoint());
 
-         double distanceCost = minimumDistance + angleWeight * angleDistance + snanppingWeight * centerDistance;
+         double distanceCost = minimumDistance + ANGLE_WEIGHT * angleDistance + SNAPPING_PARALLEL_WEIGHT * centerDistance;
          {
             cost = cost + distanceCost;
          }
@@ -98,5 +98,4 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
 
       return cost;
    }
-
 }
