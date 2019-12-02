@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -63,9 +62,15 @@ public class IhmcSLAMViewer
       stereoVisionPointCloudGraphic.addPointsMeshes(pointCloud, color);
    }
 
-   public void addStereoMessage(StereoVisionPointCloudMessage message, Color sensorPoseColor, Color pointCloudColor)
+   public void addStereoMessage(StereoVisionPointCloudMessage message, Color pointCloudColor)
    {
       stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMesh(message, pointCloudColor);
+   }
+
+   public void addStereoMessage(StereoVisionPointCloudMessage message, Color sensorPoseColor, Color pointCloudColor)
+   {
+      stereoVisionPointCloudGraphic.addPointsMeshes(IhmcSLAMTools.extractPointsFromMessage(message), pointCloudColor);
+      stereoVisionPointCloudGraphic.addSensorPoseMesh(IhmcSLAMTools.extractSensorPoseFromMessage(message), sensorPoseColor);
    }
 
    public void addOctree(NormalOcTree octree, Color color, double octreeResolution)
@@ -89,7 +94,7 @@ public class IhmcSLAMViewer
    public void start(String title)
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
-      
+
       Platform.runLater(new Runnable()
       {
          @Override
