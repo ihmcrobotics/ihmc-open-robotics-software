@@ -19,7 +19,7 @@ public class PointCloudGraphic extends Group
 {
    private static final float ORIGIN_POINT_SIZE = 0.05f;
    private static final float SCAN_POINT_SIZE = 0.0075f;
-   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 2000;
+   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 5000;
 
    private static final int palleteSizeForMeshBuilder = 2048;
 
