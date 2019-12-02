@@ -5,6 +5,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Application;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -31,7 +32,7 @@ public class EnvironmentMappingViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
+      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
 
       File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
       File[] listOfFiles = dataFolder.listFiles();
@@ -86,7 +87,9 @@ public class EnvironmentMappingViewer extends Application
          {
             List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
             System.out.println("Point cloud messages (" + messagesFromFile.size() + ")");
-            stereoVisionPointCloudGraphic.generateMeshes(messagesFromFile);
+            stereoVisionPointCloudGraphic.initializeMeshes();
+            stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMeshes(messagesFromFile, Color.GREEN);
+            stereoVisionPointCloudGraphic.generateMeshes();
             stereoVisionPointCloudGraphic.update();
             view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
             System.out.println("are rendered.");

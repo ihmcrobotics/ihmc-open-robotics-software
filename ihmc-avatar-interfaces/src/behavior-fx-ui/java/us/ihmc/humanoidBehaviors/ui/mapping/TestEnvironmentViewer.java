@@ -54,7 +54,7 @@ public class TestEnvironmentViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
+      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
 
       for (int i = 0; i < numbersToViz.size(); i++)
       {
@@ -65,8 +65,8 @@ public class TestEnvironmentViewer extends Application
       }
 
       stereoVisionPointCloudGraphic.initializeMeshes();
-      stereoVisionPointCloudGraphic.addSingleMesh(messagesFromFile.get(0), Color.RED);
-      stereoVisionPointCloudGraphic.addSingleMesh(messagesFromFile.get(1), Color.BLUE);
+      stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMesh(messagesFromFile.get(0), Color.RED);
+      stereoVisionPointCloudGraphic.addStereoVisionPointCloudMessageMesh(messagesFromFile.get(1), Color.BLUE);
       stereoVisionPointCloudGraphic.generateMeshes();
 
       stereoVisionPointCloudGraphic.update();
