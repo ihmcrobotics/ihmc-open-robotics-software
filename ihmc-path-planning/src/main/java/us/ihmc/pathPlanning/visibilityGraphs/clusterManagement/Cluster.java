@@ -120,6 +120,7 @@ public class Cluster
       {
          if (!boundingBox.isInsideInclusive(query))
             return true;
+         // TODO look to see if NavigableRegionTools.isPointInsideConvexPolygon2D is faster
          return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
       }
       else
