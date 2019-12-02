@@ -179,7 +179,7 @@ public class AvatarSimulationFactory
       try
       {
          if (!SystemUtils.IS_OS_WINDOWS)
-            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2 / 3));
+            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
       }
       catch (NullPointerException npe)
       {
