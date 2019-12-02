@@ -5,8 +5,11 @@ import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public class RobotConfigurationDataFactory
 {
@@ -17,6 +20,28 @@ public class RobotConfigurationDataFactory
       return message;
    }
 
+   public static int calculateJointNameHash(List<? extends OneDoFJointStateReadOnly> jointStates, List<? extends ForceSensorDataReadOnly> forceSensorData,
+                                            List<? extends IMUSensorReadOnly> imuSensorData)
+   {
+      CRC32 crc = new CRC32();
+      for (OneDoFJointStateReadOnly jointState : jointStates)
+      {
+         crc.update(jointState.getJointName().getBytes());
+      }
+
+      for (ForceSensorDataReadOnly forceSensorOutput : forceSensorData)
+      {
+         crc.update(forceSensorOutput.getSensorName().getBytes());
+      }
+
+      for (IMUSensorReadOnly imuOutput : imuSensorData)
+      {
+         crc.update(imuOutput.getSensorName().getBytes());
+      }
+
+      return (int) crc.getValue();
+   }
+
    public static int calculateJointNameHash(OneDoFJointReadOnly[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       CRC32 crc = new CRC32();
@@ -24,17 +49,17 @@ public class RobotConfigurationDataFactory
       {
          crc.update(joint.getName().getBytes());
       }
-   
+
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
          crc.update(forceSensorDefinition.getSensorName().getBytes());
       }
-   
+
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
          crc.update(imuDefinition.getName().getBytes());
       }
-   
+
       return (int) crc.getValue();
    }
 
@@ -43,7 +68,7 @@ public class RobotConfigurationDataFactory
       robotConfigurationData.getJointAngles().reset();
       robotConfigurationData.getJointVelocities().reset();
       robotConfigurationData.getJointTorques().reset();
-      
+
       for (int i = 0; i < newJointData.length; i++)
       {
          robotConfigurationData.getJointAngles().add((float) newJointData[i].getQ());
@@ -57,7 +82,7 @@ public class RobotConfigurationDataFactory
       robotConfigurationData.getJointAngles().reset();
       robotConfigurationData.getJointVelocities().reset();
       robotConfigurationData.getJointTorques().reset();
-      
+
       for (int i = 0; i < newJointData.size(); i++)
       {
          robotConfigurationData.getJointAngles().add((float) newJointData.get(i).getQ());
