@@ -88,14 +88,15 @@ public class NavigableRegionTools
       return minHeight;
    }
 
-   public static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
+   private static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
       pointInLocalToCheck.applyTransform(navigableRegion.getTransformFromWorldToLocal(), false);
       return isPointInLocalInsideNavigableRegion(navigableRegion, pointInLocalToCheck, epsilon);
    }
 
-   public static boolean isPointInLocalInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
+   //TODO: Unit tests for all of this.
+   private static boolean isPointInLocalInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
    {
       PlanarRegion planarRegion = navigableRegion.getHomePlanarRegion();
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
@@ -106,18 +107,14 @@ public class NavigableRegionTools
       if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
          return false;
 
-      if (!navigableRegion.getHomePlanarRegion().isPointInside(pointInLocalToCheck))
+      if (!navigableRegion.getHomePlanarRegion().isPointInside(pointInLocalToCheck, epsilon))
          return false;
 
-      for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
-      {
-         if (isPointInsideClosedConcaveHullOfCluster(obstacleCluster, pointInLocalToCheck))
-            return false;
-      }
+      if (navigableRegion.getObstacleClusters().stream().anyMatch(obstacleCluster -> obstacleCluster.isInsideNonNavigableZone(pointInLocalToCheck)))
+         return false;
 
       List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
       // If inside the convex hull at this point, then if there is only one polygon, you are also inside that too...
-      //TODO: Unit tests for all of this.
       if (convexPolygons.size() == 1)
       {
          return true;
@@ -127,33 +124,19 @@ public class NavigableRegionTools
       {
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
 
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
-
-            if (isInsidePolygon)
-               return true;
-         }
-         return false;
-
-         //         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+         //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+         // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
+         //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
+         return convexPolygons.stream().anyMatch(polygon -> isPointInsideConvexPolygon2D(polygon, pointInLocalToCheck));
+//         return convexPolygons.stream().anyMatch(polygon -> polygon.isPointInside(pointInLocalToCheck));
       }
       else
       {
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
 
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
-
-            if (isInsidePolygon)
-               return true;
+         return convexPolygons.stream().anyMatch(polygon -> polygon.isPointInside(pointInLocalToCheck, epsilon));
+//         for (ConvexPolygon2D convexPolygon : convexPolygons)
+//         {
 
             //TODO: +++JerryPratt: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
             // When ClusterTools.extrudePolygon() is buggy...
@@ -166,9 +149,8 @@ public class NavigableRegionTools
             //         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
             //
             //         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
-         }
+//         }
       }
-      return false;
    }
 
    /**
