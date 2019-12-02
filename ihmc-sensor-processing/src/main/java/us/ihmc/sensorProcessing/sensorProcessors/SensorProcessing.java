@@ -345,11 +345,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
 
          OneDoFJointStateReadOnly rawSensorOutput = OneDoFJointStateReadOnly.createFromProviders(jointName,
-                                                                                                               rawJointPosition,
-                                                                                                               rawJointVelocity,
-                                                                                                               rawJointAcceleration,
-                                                                                                               rawJointTau,
-                                                                                                               jointEnabledIndicator);
+                                                                                                 rawJointPosition,
+                                                                                                 rawJointVelocity,
+                                                                                                 rawJointAcceleration,
+                                                                                                 rawJointTau,
+                                                                                                 jointEnabledIndicator);
          inputJointSensorList.add(rawSensorOutput);
          inputJointSensorMap.put(oneDoFJoint, rawSensorOutput);
       }
@@ -421,11 +421,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          String jointName = oneDoFJoint.getName();
 
          OneDoFJointStateReadOnly processedSensorOutput = OneDoFJointStateReadOnly.createFromProviders(jointName,
-                                                                                                                     outputJointPositions.get(oneDoFJoint),
-                                                                                                                     outputJointVelocities.get(oneDoFJoint),
-                                                                                                                     outputJointAccelerations.get(oneDoFJoint),
-                                                                                                                     outputJointTaus.get(oneDoFJoint),
-                                                                                                                     jointEnabledIndicators.get(oneDoFJoint));
+                                                                                                       outputJointPositions.get(oneDoFJoint),
+                                                                                                       outputJointVelocities.get(oneDoFJoint),
+                                                                                                       outputJointAccelerations.get(oneDoFJoint),
+                                                                                                       outputJointTaus.get(oneDoFJoint),
+                                                                                                       jointEnabledIndicators.get(oneDoFJoint));
          outputJointSensorList.add(processedSensorOutput);
          outputJointSensorMap.put(oneDoFJoint, processedSensorOutput);
       }
