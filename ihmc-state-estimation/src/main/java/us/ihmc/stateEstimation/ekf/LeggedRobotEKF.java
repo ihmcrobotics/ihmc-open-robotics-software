@@ -41,7 +41,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -107,7 +106,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final YoBoolean fixRobot = new YoBoolean("FixRobot", registry);
 
    public LeggedRobotEKF(FloatingJointBasics rootJoint, List<OneDoFJointBasics> oneDoFJoints, String primaryImuName, Map<String, IMUDefinition> imuSensorMap,
-                         Map<String, ImmutablePair<ReferenceFrame, ForceSensorDefinition>> forceSensorMap, SensorRawOutputMapReadOnly sensorOutput,
+                         Map<String, ImmutablePair<ReferenceFrame, ForceSensorDefinition>> forceSensorMap, SensorOutputMapReadOnly rawSensorOutput,
                          SensorOutputMapReadOnly processedSensorOutput, double dt, double gravity, Map<String, String> jointGroups,
                          YoGraphicsListRegistry graphicsListRegistry, List<OneDoFJointBasics> referenceJoints)
    {
@@ -146,7 +145,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
       for (String forceSensorName : forceSensorMap.keySet())
       {
-         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorProcessedOutputs().getByName(forceSensorName);
+         ForceSensorDataReadOnly forceSensorOutput = sensorOutput.getForceSensorOutputs().getByName(forceSensorName);
          ReferenceFrame soleFrame = forceSensorMap.get(forceSensorName).getLeft();
          ReferenceFrame measurementFrame = forceSensorMap.get(forceSensorName).getRight().getSensorFrame();
          RigidBodyBasics foot = forceSensorMap.get(forceSensorName).getRight().getRigidBody();
@@ -170,7 +169,7 @@ public class LeggedRobotEKF implements StateEstimatorController
          RigidBodyBasics imuBody = imuSensorMap.get(imuName).getRigidBody();
          ReferenceFrame imuFrame = imuSensorMap.get(imuName).getIMUFrame();
 
-         IMUSensorReadOnly imuOutput = sensorOutput.getIMUProcessedOutputs().stream().filter(imu -> imu.getSensorName().equals(imuName)).findFirst().get();
+         IMUSensorReadOnly imuOutput = sensorOutput.getIMUOutputs().stream().filter(imu -> imu.getSensorName().equals(imuName)).findFirst().get();
          LogTools.info("Adding angular velocity sensor " + imuName);
          AngularVelocitySensor angularVelocitySensor = new AngularVelocitySensor(name + "AngularVelocity", dt, imuBody, imuFrame, false, registry);
          angularVelocitySensors.add(angularVelocitySensor);
@@ -258,9 +257,9 @@ public class LeggedRobotEKF implements StateEstimatorController
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
-         double jointPositionMeasurement = processedSensorOutput.getJointPositionProcessedOutput(referenceJoints.get(jointIdx));
+         double jointPositionMeasurement = processedSensorOutput.getJointPositionOutput(referenceJoints.get(jointIdx));
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
-         double jointVelocityMeasurement = processedSensorOutput.getJointVelocityProcessedOutput(referenceJoints.get(jointIdx));
+         double jointVelocityMeasurement = processedSensorOutput.getJointVelocityOutput(referenceJoints.get(jointIdx));
          jointVelocitySensors.get(jointIdx).setJointVelocityMeasurement(jointVelocityMeasurement);
       }
 

@@ -22,7 +22,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -30,23 +29,25 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
+public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly
 {
    private final String name;
    private final FloatingRootJointRobot robot;
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
-   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> revoluteJoints = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
-   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
+   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
+
+   private final SensorOutputMapReadOnly rawSensorOutputMap = createRawSensorOutputMap();
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
@@ -54,13 +55,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         ReferenceFrames referenceFrames)
+                                          ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingJointBasics rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         ReferenceFrames referenceFrames)
+                                          ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
@@ -77,7 +78,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDegreeOfFreedomJoint, oneDoFJoint);
+            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
             revoluteJoints.add(jointPair);
          }
       }
@@ -126,8 +127,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
-      this.controllerTimestamp.set(timestamp);
-      this.sensorHeadPPSTimetamp.set(timestamp);
+      controllerTimestamp.set(timestamp);
+      sensorHeadPPSTimetamp.set(timestamp);
 
       if (forceSensorDataHolderToUpdate != null)
       {
@@ -141,14 +142,14 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
-   {      
+   {
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame pelvisFrame = rootJoint.getFrameAfterJoint();
 
       // Update base frames without updating all frames to transform velocity into pelvis
       elevatorFrame.update();
       pelvisFrame.update();
-      
+
       FrameVector3D linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
@@ -186,7 +187,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
-         if (pinJoint == null) continue;
+         if (pinJoint == null)
+            continue;
 
          revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
@@ -219,63 +221,39 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQ();
    }
 
    @Override
-   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQd();
    }
 
    @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getQdd();
    }
 
    @Override
-   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
    {
       return oneDoFJoint.getTau();
    }
 
    @Override
-   public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+   public List<? extends IMUSensorReadOnly> getIMUOutputs()
    {
       return new ArrayList<>();
    }
 
    @Override
-   public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+   public ForceSensorDataHolderReadOnly getForceSensorOutputs()
    {
       return forceSensorDataHolderToUpdate;
-   }
-
-   @Override
-   public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getQ();
-   }
-
-   @Override
-   public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getQd();
-   }
-
-   @Override
-   public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getQdd();
-   }
-
-   @Override
-   public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return oneDoFJoint.getTau();
    }
 
    @Override
@@ -284,15 +262,75 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return true; //oneDoFJoint.isEnabled();
    }
 
-   @Override
-   public List<? extends IMUSensorReadOnly> getIMURawOutputs()
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
-      return new ArrayList<>();
+      return rawSensorOutputMap;
    }
 
-   @Override
-   public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
+   private SensorOutputMapReadOnly createRawSensorOutputMap()
    {
-      return forceSensorDataHolderToUpdate;
+      return new SensorOutputMapReadOnly()
+      {
+
+         @Override
+         public long getWallTime()
+         {
+            return SDFPerfectSimulatedSensorReader.this.getWallTime();
+         }
+
+         @Override
+         public long getMonotonicTime()
+         {
+            return SDFPerfectSimulatedSensorReader.this.getMonotonicTime();
+         }
+
+         @Override
+         public long getSyncTimestamp()
+         {
+            return SDFPerfectSimulatedSensorReader.this.getSyncTimestamp();
+         }
+
+         @Override
+         public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
+         {
+            return oneDoFJoint.getQ();
+         }
+
+         @Override
+         public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
+         {
+            return oneDoFJoint.getQd();
+         }
+
+         @Override
+         public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
+         {
+            return oneDoFJoint.getQdd();
+         }
+
+         @Override
+         public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
+         {
+            return oneDoFJoint.getTau();
+         }
+
+         @Override
+         public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
+         {
+            return SDFPerfectSimulatedSensorReader.this.isJointEnabled(oneDoFJoint);
+         }
+
+         @Override
+         public List<? extends IMUSensorReadOnly> getIMUOutputs()
+         {
+            return new ArrayList<>();
+         }
+
+         @Override
+         public ForceSensorDataHolderReadOnly getForceSensorOutputs()
+         {
+            return forceSensorDataHolderToUpdate;
+         }
+      };
    }
 }
