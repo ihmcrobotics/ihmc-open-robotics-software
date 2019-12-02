@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.net.util.SubnetUtils;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -62,6 +63,8 @@ public class RTPSCommunicationFactory
 
       if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet))
       {
+         String restrictionHost = NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet);
+         System.out.println("Scanning interfaces for restriction: " +  restrictionHost);
          for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
          {
             InetAddress address = interfaceAddress.getAddress();
@@ -69,10 +72,15 @@ public class RTPSCommunicationFactory
             if (address instanceof Inet4Address)
             {
                short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
-               SubnetUtils subnetUtils = new SubnetUtils(NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet) + "/" + Short.toString(netmaskAsShort));
-               boolean inRange = subnetUtils.getInfo().isInRange(address.getHostAddress());
+               SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
+
+               String interfaceHost = address.getHostAddress();
+               SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + Short.toString(netmaskAsShort)).getInfo();
+
+               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress());
                if (inRange)
                {
+                  System.out.println("Found address in range: " + address);
                   foundAddressRestriction = address;
                   break;
                }
