@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidBehaviors.RemoteREAInterface;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
