@@ -43,9 +43,12 @@ public class PlanarRegionTools
       double minBzInWorld = regionB.getBoundingBox3dInWorld().getMinZ();
       double maxBzInWorld = regionB.getBoundingBox3dInWorld().getMaxZ();
 
-      // TODO add an initial bounding box check
+      // check some of the bounding boxes first
+      double maxAzInWorld = regionA.getBoundingBox3dInWorld().getMaxZ();
+      if (maxAzInWorld > maxBzInWorld + epsilon)
+         return true;
 
-      ConvexPolygon2D convexHullA = regionA.getConvexHull();
+      ConvexPolygon2DReadOnly convexHullA = regionA.getConvexHull();
 
       RigidBodyTransformReadOnly transformToWorldA = regionA.getTransformToWorld();
       RigidBodyTransformReadOnly transformFromWorldToLocalB = regionB.getTransformToLocal();
@@ -64,38 +67,11 @@ public class PlanarRegionTools
          pointAInLocalB.set(pointAInWorld);
          transformFromWorldToLocalB.transform(pointAInLocalB);
 
-         if (pointAInWorld.getZ() > maxBzInWorld + epsilon)
-            return true;
-
          if ((pointAInWorld.getZ() > minBzInWorld + epsilon) && (pointAInLocalB.getZ() > epsilon))
             return true;
       }
 
       return false;
-   }
-
-   private static double[] getMinAndMaxZInWorld(List<? extends Point2DReadOnly> pointsInLocal, RigidBodyTransformReadOnly transformToWorld)
-   {
-      double minZ = Double.POSITIVE_INFINITY;
-      double maxZ = Double.NEGATIVE_INFINITY;
-
-      Point3D pointInWorld = new Point3D();
-
-      for (Point2DReadOnly pointInLocal : pointsInLocal)
-      {
-         pointInWorld.set(pointInLocal);
-         pointInWorld.setZ(0.0);
-         transformToWorld.transform(pointInWorld);
-
-         double pointZInWorld = pointInWorld.getZ();
-         if (pointZInWorld < minZ)
-            minZ = pointZInWorld;
-
-         if (pointZInWorld > maxZ)
-            maxZ = pointZInWorld;
-      }
-
-      return new double[] {minZ, maxZ};
    }
 
    public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
@@ -111,6 +87,7 @@ public class PlanarRegionTools
       return isPointInsidePolygon(Arrays.asList(polygon), pointToCheck);
    }
 
+   // TODO this seems like it could be a lot faster. Compare to NavigableRegionTools.isPointInsideClosedConcaveHull
    public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck)
    {
       if (polygon.size() < 3)
@@ -211,16 +188,6 @@ public class PlanarRegionTools
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
       pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
       return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon);
-   }
-
-   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck)
-   {
-      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck));
-   }
-
-   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck, double epsilon)
-   {
-      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck), epsilon);
    }
 
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck)
@@ -950,7 +917,7 @@ public class PlanarRegionTools
       return projectPolygonVertically(planarRegion.getTransformToWorld(), planarRegion.getConvexHull());
    }
 
-   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2D polygonInLocalToProjectVertically)
+   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2DReadOnly polygonInLocalToProjectVertically)
    {
       List<? extends Point2DReadOnly> verticesToProject = polygonInLocalToProjectVertically.getPolygonVerticesView();
 
@@ -962,6 +929,7 @@ public class PlanarRegionTools
          transformToWorld.transform(pointToProjectInWorld);
          projectedPolygon.addVertex(pointToProjectInWorld.getX(), pointToProjectInWorld.getY());
       }
+      projectedPolygon.update();
 
       return projectedPolygon;
    }

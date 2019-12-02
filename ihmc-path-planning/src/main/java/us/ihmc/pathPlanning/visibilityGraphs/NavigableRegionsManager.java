@@ -129,6 +129,7 @@ public class NavigableRegionsManager
 
    boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
    {
+      // FIXME this is also done in the reset method below
       if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
          return false;
 
