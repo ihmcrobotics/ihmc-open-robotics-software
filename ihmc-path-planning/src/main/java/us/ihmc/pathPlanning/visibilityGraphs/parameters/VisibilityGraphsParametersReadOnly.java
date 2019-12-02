@@ -436,9 +436,12 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
             if (!PlanarRegionTools.isRegionAOverlappingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0))
                return false;
 
-            double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(potentialObstacleRegion, navigableRegion);
-            if (minimumHeight > getCanDuckUnderHeight())
+            if (potentialObstacleRegion.getBoundingBox3dInWorld().getMinZ() > navigableRegion.getBoundingBox3dInWorld().getMaxZ() + getCanDuckUnderHeight())
                return false;
+            // TODO is this necessary now?
+//            double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(potentialObstacleRegion, navigableRegion);
+//            if (minimumHeight > getCanDuckUnderHeight())
+//               return false;
 
             if (!PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(potentialObstacleRegion, navigableRegion, getCanEasilyStepOverHeight()))
                return false;

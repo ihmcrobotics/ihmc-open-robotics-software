@@ -337,8 +337,7 @@ public class VisibilityGraph
    {
       NavigableRegion hostNavigableRegion = NavigableRegionTools
             .getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, ceilingHeight, searchHostEpsilon);
-      VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = getVisibilityGraphNavigableRegion(hostNavigableRegion);
-      return visibilityGraphNavigableRegion;
+      return getVisibilityGraphNavigableRegion(hostNavigableRegion);
    }
 
    private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegion(NavigableRegion navigableRegion)
