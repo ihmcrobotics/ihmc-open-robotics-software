@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
@@ -84,10 +85,10 @@ public class NavigableRegionsFactory
 
       for (Cluster cluster : navigableRegion.getAllClusters()) // fills long edges with interpolated points for visibility graph building later
       {
-         List<Point2DReadOnly> expandListOf2DPoints = PointCloudTools.addPointsAlongPolygon(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
-         List<List<Point2DReadOnly>> currentListOfPreferred2DPoints = cluster.getPreferredNavigableExtrusionsInLocal();
-         List<List<? extends Point2DReadOnly>> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(listOfPoints -> PointCloudTools
-               .addPointsAlongPolygon(listOfPoints, clusterResolution)).collect(Collectors.toList());
+         ExtrusionHull expandListOf2DPoints = PointCloudTools.addPointsAlongExtrusionHull(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
+         List<ExtrusionHull> currentListOfPreferred2DPoints = cluster.getPreferredNavigableExtrusionsInLocal();
+         List<ExtrusionHull> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(extrusion -> PointCloudTools
+               .addPointsAlongExtrusionHull(extrusion, clusterResolution)).collect(Collectors.toList());
          cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
          cluster.setPreferredNavigableExtrusionsInLocal(expandedListOfPreferred2DPoints);
       }

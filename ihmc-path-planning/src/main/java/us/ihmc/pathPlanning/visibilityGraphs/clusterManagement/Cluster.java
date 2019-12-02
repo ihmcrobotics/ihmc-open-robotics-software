@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 /**
@@ -31,10 +30,10 @@ public class Cluster
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
-   private final List<List<Point2DReadOnly>> preferredNavigableExtrusionsInLocal = new ArrayList<>();
-   private final List<List<Point2DReadOnly>> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
-   private final List<Point2DReadOnly> navigableExtrusionsInLocal = new ArrayList<>();
-   private final List<Point2DReadOnly> nonNavigableExtrusionsInLocal = new ArrayList<>();
+   private final List<ExtrusionHull> preferredNavigableExtrusionsInLocal = new ArrayList<>();
+   private final List<ExtrusionHull> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
+   private final ExtrusionHull navigableExtrusionsInLocal = new ExtrusionHull();
+   private final ExtrusionHull nonNavigableExtrusionInLocal = new ExtrusionHull();
 
    private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    private final BoundingBox2D preferredNonNavigableExtrusionsBoundingBox = new BoundingBox2D(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
@@ -98,7 +97,7 @@ public class Cluster
    public void clearNonNavigableExtrusions()
    {
       nonNavigableExtrusionsBoundingBox.setToNaN();
-      nonNavigableExtrusionsInLocal.clear();
+      nonNavigableExtrusionInLocal.clear();
    }
 
    public void clearPreferredNonNavigableExtrusions()
@@ -109,7 +108,7 @@ public class Cluster
 
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
    {
-      if (nonNavigableExtrusionsInLocal.isEmpty())
+      if (nonNavigableExtrusionInLocal.isEmpty())
          return false;
 
       BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
@@ -118,13 +117,13 @@ public class Cluster
       {
          if (!boundingBox.isInsideInclusive(query))
             return true;
-         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
+         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
       }
       else
       {
          if (!boundingBox.isInsideInclusive(query))
             return false;
-         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionsInLocal, query);
+         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
       }
    }
 
@@ -231,12 +230,12 @@ public class Cluster
 
    public void addNavigableExtrusionInLocal(Point2DReadOnly navigableExtrusionInLocal)
    {
-      navigableExtrusionsInLocal.add(new Point2D(navigableExtrusionInLocal));
+      navigableExtrusionsInLocal.addPoint(navigableExtrusionInLocal);
    }
 
-   public void addNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
+   public void addNavigableExtrusionsInLocal(ExtrusionHull navigableExtrusionInLocal)
    {
-      navigableExtrusionInLocal.forEach(this::addNavigableExtrusionInLocal);
+      navigableExtrusionsInLocal.addAllPoints(navigableExtrusionInLocal);
    }
 
    public int getNumberOfNavigableExtrusions()
@@ -249,16 +248,15 @@ public class Cluster
       return navigableExtrusionsInLocal.get(i);
    }
 
-   public List<Point2DReadOnly> getNavigableExtrusionsInLocal()
+   public ExtrusionHull getNavigableExtrusionsInLocal()
    {
       return navigableExtrusionsInLocal;
    }
 
-   public void setNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   public void setNavigableExtrusionsInLocal(ExtrusionHull points)
    {
       navigableExtrusionsInLocal.clear();
-      navigableExtrusionsInLocal.addAll(points);
-
+      addNavigableExtrusionsInLocal(points);
    }
 
    public List<Point3DReadOnly> getNavigableExtrusionsInWorld()
@@ -266,44 +264,43 @@ public class Cluster
       return navigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
-   public List<Point2DReadOnly> getNavigableExtrusionsInWorld2D()
+   public ExtrusionHull getNavigableExtrusionsInWorld2D()
    {
-      return navigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+      return navigableExtrusionsInLocal.copy(extrusionHull -> extrusionHull.stream().map(this::toWorld2D).collect(Collectors.toList()));
    }
 
 
    public List<List<Point3DReadOnly>> getPreferredNavigableExtrusionsInWorld()
    {
       List<List<Point3DReadOnly>> extrusionsInWorld = new ArrayList<>();
-      for (List<Point2DReadOnly> preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
+      for (ExtrusionHull preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
          extrusionsInWorld.add(preferredExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList()));
       return extrusionsInWorld;
    }
 
-   public void addPreferredNavigableExtrusionInLocal(List<? extends Point2DReadOnly> navigableExtrusionInLocal)
+   public void addPreferredNavigableExtrusionInLocal(ExtrusionHull navigableExtrusionInLocal)
    {
-      List<Point2DReadOnly> listCopy = navigableExtrusionInLocal.stream().map(Point2D::new).collect(Collectors.toList());
-      preferredNavigableExtrusionsInLocal.add(listCopy);
+      preferredNavigableExtrusionsInLocal.add(navigableExtrusionInLocal.copy());
    }
 
-   public void addPreferredNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> navigableExtrusionInLocal)
+   public void addPreferredNavigableExtrusionsInLocal(List<ExtrusionHull> navigableExtrusionInLocal)
    {
       navigableExtrusionInLocal.forEach(this::addPreferredNavigableExtrusionInLocal);
    }
 
-   public List<List<Point2DReadOnly>> getPreferredNavigableExtrusionsInLocal()
+   public List<ExtrusionHull> getPreferredNavigableExtrusionsInLocal()
    {
       return preferredNavigableExtrusionsInLocal;
    }
 
-   public void setPreferredNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> listsOfPoints)
+   public void setPreferredNavigableExtrusionsInLocal(List<ExtrusionHull> listsOfPoints)
    {
       preferredNavigableExtrusionsInLocal.clear();
       addPreferredNavigableExtrusionsInLocal(listsOfPoints);
    }
 
 
-   public void setNonNavigableExtrusionsInLocal(List<Point2DReadOnly> points)
+   public void setNonNavigableExtrusionsInLocal(ExtrusionHull points)
    {
       clearNonNavigableExtrusions();
       addNonNavigableExtrusionsInLocal(points);
@@ -312,7 +309,7 @@ public class Cluster
    public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsBoundingBox.updateToIncludePoint(nonNavigableExtrusionInLocal);
-      nonNavigableExtrusionsInLocal.add(new Point2D(nonNavigableExtrusionInLocal));
+      this.nonNavigableExtrusionInLocal.addPoint(nonNavigableExtrusionInLocal);
    }
 
    public void addNonNavigableExtrusionInLocal(Point3DReadOnly nonNavigableExtrusionInLocal)
@@ -320,9 +317,9 @@ public class Cluster
       addNonNavigableExtrusionInLocal(new Point2D(nonNavigableExtrusionInLocal));
    }
 
-   public void addNonNavigableExtrusionsInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
+   public void addNonNavigableExtrusionsInLocal(ExtrusionHull nonNavigableExtrusionInLocal)
    {
-      nonNavigableExtrusionInLocal.forEach(this::addNonNavigableExtrusionInLocal);
+      nonNavigableExtrusionInLocal.stream().forEach(this::addNonNavigableExtrusionInLocal);
    }
 
    public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
@@ -332,12 +329,12 @@ public class Cluster
 
    public int getNumberOfNonNavigableExtrusions()
    {
-      return nonNavigableExtrusionsInLocal.size();
+      return nonNavigableExtrusionInLocal.size();
    }
 
    public Point2DReadOnly getNonNavigableExtrusionInLocal(int i)
    {
-      return nonNavigableExtrusionsInLocal.get(i);
+      return nonNavigableExtrusionInLocal.get(i);
    }
 
    public Point3DReadOnly getNonNavigableExtrusionInWorld(int i)
@@ -345,35 +342,35 @@ public class Cluster
       return toWorld3D(getNonNavigableExtrusionInLocal(i));
    }
 
-   public List<Point2DReadOnly> getNonNavigableExtrusionsInLocal()
+   public ExtrusionHull getNonNavigableExtrusionsInLocal()
    {
-      return nonNavigableExtrusionsInLocal;
+      return nonNavigableExtrusionInLocal;
    }
 
    public List<Point3DReadOnly> getNonNavigableExtrusionsInWorld()
    {
-      return nonNavigableExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
+      return nonNavigableExtrusionInLocal.stream().map(this::toWorld3D).collect(Collectors.toList());
    }
 
-   public List<Point2DReadOnly> getNonNavigableExtrusionsInWorld2D()
+   public ExtrusionHull getNonNavigableExtrusionsInWorld2D()
    {
-      return nonNavigableExtrusionsInLocal.stream().map(this::toWorld2D).collect(Collectors.toList());
+      return nonNavigableExtrusionInLocal.copy(extrusionHull -> extrusionHull.stream().map(this::toWorld2D).collect(Collectors.toList()));
    }
 
-   public void setPreferredNonNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> points)
+   public void setPreferredNonNavigableExtrusionsInLocal(List<ExtrusionHull> points)
    {
       clearPreferredNonNavigableExtrusions();
       addPreferredNonNavigableExtrusionsInLocal(points);
    }
 
-   public void addPreferredNonNavigableExtrusionInLocal(List<? extends Point2DReadOnly> nonNavigableExtrusionInLocal)
+   public void addPreferredNonNavigableExtrusionInLocal(ExtrusionHull nonNavigableExtrusionInLocal)
    {
-      List<Point2DReadOnly> listCopy = nonNavigableExtrusionInLocal.stream().map(Point2D::new).collect(Collectors.toList());
-      listCopy.forEach(preferredNonNavigableExtrusionsBoundingBox::updateToIncludePoint);
-      preferredNonNavigableExtrusionsInLocal.add(listCopy);
+      ExtrusionHull extrusionCopy = nonNavigableExtrusionInLocal.copy();
+      extrusionCopy.stream().forEach(preferredNonNavigableExtrusionsBoundingBox::updateToIncludePoint);
+      preferredNonNavigableExtrusionsInLocal.add(extrusionCopy);
    }
 
-   public void addPreferredNonNavigableExtrusionsInLocal(List<List<? extends Point2DReadOnly>> nonNavigableExtrusionInLocal)
+   public void addPreferredNonNavigableExtrusionsInLocal(List<ExtrusionHull> nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionInLocal.forEach(this::addPreferredNonNavigableExtrusionInLocal);
    }
@@ -383,7 +380,7 @@ public class Cluster
       return preferredNonNavigableExtrusionsBoundingBox;
    }
 
-   public List<List<Point2DReadOnly>> getPreferredNonNavigableExtrusionsInLocal()
+   public List<ExtrusionHull> getPreferredNonNavigableExtrusionsInLocal()
    {
       return preferredNonNavigableExtrusionsInLocal;
    }

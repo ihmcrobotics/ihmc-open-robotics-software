@@ -253,7 +253,7 @@ public class ObstacleAndCliffAvoidanceProcessor implements BodyPathPostProcessor
       Point2D closestPointToThrowAway = new Point2D();
       Cluster homeCluster = homeRegion.getHomeRegionCluster();
       double distanceToContainingCluster = VisibilityTools
-            .distanceToCluster(shiftedPoint, homeCluster.getNavigableExtrusionsInWorld2D(), closestPointToThrowAway, null);
+            .distanceToCluster(shiftedPoint, homeCluster.getNavigableExtrusionsInWorld2D().getPoints(), closestPointToThrowAway, null);
 
       if (distanceToContainingCluster < -desiredDistanceFromCliff)
          return false;

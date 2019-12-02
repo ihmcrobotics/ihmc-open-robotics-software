@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -235,12 +236,12 @@ public class VisibilityGraphNavigableRegion
                                                  List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack,
                                                  boolean createEdgesAroundClusterRing)
    {
-      List<List<Point2DReadOnly>> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
-      List<? extends Point2DReadOnly> navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
+      List<ExtrusionHull> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
+      ExtrusionHull navigableExtrusionPoints = clusterToBuildMapOf.getNavigableExtrusionsInLocal();
       boolean[][] arePreferredPointsActuallyNavigable = VisibilityTools
             .checkIfListOfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, preferredNavigableExtrusionPoints);
       boolean[] arePointsActuallyNavigable = VisibilityTools
-            .checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints);
+            .checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints.getPoints());
 
       ArrayList<VisibilityGraphNode> newPreferredNodes = new ArrayList<>();
       ArrayList<VisibilityGraphNode> newNodes = new ArrayList<>();

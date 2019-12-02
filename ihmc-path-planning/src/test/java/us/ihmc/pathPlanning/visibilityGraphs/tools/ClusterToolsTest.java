@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
@@ -542,7 +543,7 @@ public class ClusterToolsTest
       obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(1, obstacleClusters.size());
       Cluster cluster = obstacleClusters.get(0);
-      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      ExtrusionHull nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
 
       obstacleRegions.clear();
@@ -765,19 +766,19 @@ public class ClusterToolsTest
       assertEquals(1, obstacleClusters.size());
 
       Cluster cluster = obstacleClusters.get(0);
-      List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
-      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      ExtrusionHull navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
+      ExtrusionHull nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, navigableExtrusionsInLocal.size());
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
 
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.0, -0.2)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(-0.2, 0.0)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.0, 0.2)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.1, 0.4)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.2, 0.4)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.6, 0.0)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.2, -0.4)));
-      assertTrue(listContains(navigableExtrusionsInLocal, new Point2D(0.1, -0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.0, -0.2)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(-0.2, 0.0)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.0, 0.2)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.1, 0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.2, 0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.6, 0.0)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.2, -0.4)));
+      assertTrue(listContains(navigableExtrusionsInLocal.getPoints(), new Point2D(0.1, -0.4)));
    }
 
    @Test
@@ -980,7 +981,7 @@ public class ClusterToolsTest
 
       List<ConvexPolygon2D> polygons = new ArrayList<>();
       polygons.add(polygon);
-      List<List<? extends Point2DReadOnly>> extrudedPoints = ClusterTools.extrudePolygonInward(polygons, calculator);
+      List<ExtrusionHull> extrudedPoints = ClusterTools.extrudePolygonInward(polygons, calculator);
 
       assertEquals(1, extrudedPoints.size());
       assertEquals(expectedPointsInWorld3D.size() , extrudedPoints.get(0).size());
