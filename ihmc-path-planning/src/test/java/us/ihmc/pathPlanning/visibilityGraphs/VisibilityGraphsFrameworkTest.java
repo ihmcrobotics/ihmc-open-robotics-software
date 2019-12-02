@@ -268,7 +268,7 @@ public class VisibilityGraphsFrameworkTest
       }
 
       boolean testWithOcclusions = true;
-      ENABLE_TIMERS = true;
+      ENABLE_TIMERS = false;
       DYNAMIC_WAIT_FOR_CLICK = false;
       maxPointsInRegion = Integer.MAX_VALUE;
       walkerMarchingSpeed = 0.7;
