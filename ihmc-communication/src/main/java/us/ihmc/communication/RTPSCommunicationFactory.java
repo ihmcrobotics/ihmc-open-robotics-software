@@ -21,6 +21,7 @@ import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
 import us.ihmc.pubsub.participant.Participant;
+import us.ihmc.ros2.Ros2Distro;
 
 /**
  * Creates and Manages participants
@@ -49,6 +50,7 @@ public class RTPSCommunicationFactory
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
          LogTools.info("Setting the RTPS Domain ID to " + rtpsDomainID);
+         LogTools.info("ROS 2 Distro is set to " + Ros2Distro.fromEnvironment());
       }
       else
       {
