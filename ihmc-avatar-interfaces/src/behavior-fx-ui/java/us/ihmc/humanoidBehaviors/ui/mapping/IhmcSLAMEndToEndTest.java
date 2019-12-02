@@ -42,7 +42,7 @@ public class IhmcSLAMEndToEndTest extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      StereoVisionPointCloudGraphic stereoVisionPointCloudGraphic = new StereoVisionPointCloudGraphic();
+      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
 
       stereoVisionPointCloudGraphic.initializeMeshes();
 
