@@ -621,6 +621,7 @@ public class ConvexPolygonScalerTest
       assertTrue(success);
    }
 
+   @Disabled
    @Test
    public void testCaseScalingRedundantPolygon()
    {
