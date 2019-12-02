@@ -25,15 +25,15 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public ForceSensorData(ForceSensorDefinition forceSensorDefinition)
    {
-      setFrameAndBody(forceSensorDefinition);
+      setDefinition(forceSensorDefinition);
    }
 
-   public void setFrameAndBody(ForceSensorDefinition forceSensorDefinition)
+   public void setDefinition(ForceSensorDefinition forceSensorDefinition)
    {
-      setFrameAndBody(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getRigidBody());
+      setDefinition(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getRigidBody());
    }
 
-   public void setFrameAndBody(ReferenceFrame measurementFrame, RigidBodyBasics measurementLink)
+   public void setDefinition(ReferenceFrame measurementFrame, RigidBodyBasics measurementLink)
    {
       this.measurementFrame = measurementFrame;
       this.measurementLink = measurementLink;

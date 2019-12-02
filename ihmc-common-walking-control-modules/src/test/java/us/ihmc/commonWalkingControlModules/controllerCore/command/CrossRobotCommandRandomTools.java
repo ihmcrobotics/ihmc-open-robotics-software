@@ -1609,7 +1609,7 @@ public class CrossRobotCommandRandomTools
    {
       ForceSensorData next = new ForceSensorData();
       List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
-      next.setFrameAndBody(nextElementIn(random, possibleFrames), nextElementIn(random, allBodies));
+      next.setDefinition(nextElementIn(random, possibleFrames), nextElementIn(random, allBodies));
       next.setWrench(nextDenseMatrix64F(random, 6, 1));
       return next;
    }
