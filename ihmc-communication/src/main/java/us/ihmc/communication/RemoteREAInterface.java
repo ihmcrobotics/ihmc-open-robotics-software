@@ -1,10 +1,7 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.communication;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2NodeInterface;
