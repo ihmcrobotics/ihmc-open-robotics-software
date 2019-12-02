@@ -1,7 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -13,6 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -94,6 +99,19 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       if (Math.abs(solePositionInParentZUpFrame.getZ()) > parameters.getMaximumStepZ())
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
+         return false;
+      }
+
+      double alpha = Math.max(0.0, -previousSnappedSoleTransform.getRotation().getPitch() / parameters.getMinimumSurfaceInclineRadians());
+      double minZ = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alpha);
+      double minX = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alpha);
+      double stepDownFraction = -solePositionInParentZUpFrame.getZ() / minZ;
+      double stepForwardFraction = solePositionInParentZUpFrame.getX() / minX;
+
+      // TODO eliminate the 1.5, and look at the actual max step z and max step reach to ensure those are valid if there's not any pitching
+      if (stepDownFraction > 1.0 || stepForwardFraction > 1.0 || (stepDownFraction + stepForwardFraction > 1.5))
+      {
+         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
          return false;
       }
 
