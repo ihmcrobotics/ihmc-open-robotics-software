@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
@@ -170,75 +171,75 @@ public class VisibilityToolsTest
    {
       double navEpsilon = 5e-3;
       // create big nonNavigableCluster
-      List<Point2DReadOnly> nonNavigableExtrusions = new ArrayList<>();
-      nonNavigableExtrusions.add(new Point2D(10.0, 4.0));
-      nonNavigableExtrusions.add(new Point2D(10.0, -4.0));
-      nonNavigableExtrusions.add(new Point2D(-10.0, -4.0));
-      nonNavigableExtrusions.add(new Point2D(-10.0, 4.0));
+      ExtrusionHull nonNavigableExtrusions = new ExtrusionHull();
+      nonNavigableExtrusions.addPoint(new Point2D(10.0, 4.0));
+      nonNavigableExtrusions.addPoint(new Point2D(10.0, -4.0));
+      nonNavigableExtrusions.addPoint(new Point2D(-10.0, -4.0));
+      nonNavigableExtrusions.addPoint(new Point2D(-10.0, 4.0));
 
-      List<Point2DReadOnly> navigableExtrusions = new ArrayList<>();
-      navigableExtrusions.add(new Point2D(10.0 - navEpsilon, 4.0 - navEpsilon));
-      navigableExtrusions.add(new Point2D(10.0 - navEpsilon, -4.0 + navEpsilon));
-      navigableExtrusions.add(new Point2D(-10.0 + navEpsilon, -4.0 + navEpsilon));
-      navigableExtrusions.add(new Point2D(-10.0 + navEpsilon, 4.0 - navEpsilon));
+      ExtrusionHull navigableExtrusions = new ExtrusionHull();
+      navigableExtrusions.addPoint(new Point2D(10.0 - navEpsilon, 4.0 - navEpsilon));
+      navigableExtrusions.addPoint(new Point2D(10.0 - navEpsilon, -4.0 + navEpsilon));
+      navigableExtrusions.addPoint(new Point2D(-10.0 + navEpsilon, -4.0 + navEpsilon));
+      navigableExtrusions.addPoint(new Point2D(-10.0 + navEpsilon, 4.0 - navEpsilon));
 
 
-      List<Point2DReadOnly> preferredNonNavigableExtrusion0 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNonNavigableExtrusion1 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNonNavigableExtrusion2 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNonNavigableExtrusion3 = new ArrayList<>();
+      ExtrusionHull preferredNonNavigableExtrusion0 = new ExtrusionHull();
+      ExtrusionHull preferredNonNavigableExtrusion1 = new ExtrusionHull();
+      ExtrusionHull preferredNonNavigableExtrusion2 = new ExtrusionHull();
+      ExtrusionHull preferredNonNavigableExtrusion3 = new ExtrusionHull();
 
-      List<Point2DReadOnly> preferredNavigableExtrusion0 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNavigableExtrusion1 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNavigableExtrusion2 = new ArrayList<>();
-      List<Point2DReadOnly> preferredNavigableExtrusion3 = new ArrayList<>();
+      ExtrusionHull preferredNavigableExtrusion0 = new ExtrusionHull();
+      ExtrusionHull preferredNavigableExtrusion1 = new ExtrusionHull();
+      ExtrusionHull preferredNavigableExtrusion2 = new ExtrusionHull();
+      ExtrusionHull preferredNavigableExtrusion3 = new ExtrusionHull();
 
       // check ordering
-      preferredNonNavigableExtrusion0.add(new Point2D(-9.5, 3.5));
-      preferredNonNavigableExtrusion0.add(new Point2D(-5.5, 3.5));
-      preferredNonNavigableExtrusion0.add(new Point2D(-5.5, -3.5));
-      preferredNonNavigableExtrusion0.add(new Point2D(-9.5, -3.5));
+      preferredNonNavigableExtrusion0.addPoint(new Point2D(-9.5, 3.5));
+      preferredNonNavigableExtrusion0.addPoint(new Point2D(-5.5, 3.5));
+      preferredNonNavigableExtrusion0.addPoint(new Point2D(-5.5, -3.5));
+      preferredNonNavigableExtrusion0.addPoint(new Point2D(-9.5, -3.5));
 
-      preferredNavigableExtrusion0.add(new Point2D(-9.5 + navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion0.add(new Point2D(-5.5 - navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion0.add(new Point2D(-5.5 - navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion0.add(new Point2D(-9.5 + navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion0.addPoint(new Point2D(-9.5 + navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion0.addPoint(new Point2D(-5.5 - navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion0.addPoint(new Point2D(-5.5 - navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion0.addPoint(new Point2D(-9.5 + navEpsilon, -3.5 + navEpsilon));
 
-      preferredNonNavigableExtrusion1.add(new Point2D(-4.5, 3.5));
-      preferredNonNavigableExtrusion1.add(new Point2D(-0.5, 3.5));
-      preferredNonNavigableExtrusion1.add(new Point2D(-0.5, -3.5));
-      preferredNonNavigableExtrusion1.add(new Point2D(-4.5, -3.5));
+      preferredNonNavigableExtrusion1.addPoint(new Point2D(-4.5, 3.5));
+      preferredNonNavigableExtrusion1.addPoint(new Point2D(-0.5, 3.5));
+      preferredNonNavigableExtrusion1.addPoint(new Point2D(-0.5, -3.5));
+      preferredNonNavigableExtrusion1.addPoint(new Point2D(-4.5, -3.5));
 
-      preferredNavigableExtrusion1.add(new Point2D(-4.5 + navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion1.add(new Point2D(-0.5 - navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion1.add(new Point2D(-0.5 - navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion1.add(new Point2D(-4.5 + navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion1.addPoint(new Point2D(-4.5 + navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion1.addPoint(new Point2D(-0.5 - navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion1.addPoint(new Point2D(-0.5 - navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion1.addPoint(new Point2D(-4.5 + navEpsilon, -3.5 + navEpsilon));
 
-      preferredNonNavigableExtrusion2.add(new Point2D(4.5, 3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(4.5, -3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(0.5, -3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(0.5, 3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(4.5, 3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(4.5, -3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(0.5, -3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(0.5, 3.5));
 
-      preferredNavigableExtrusion2.add(new Point2D(4.5 - navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(4.5 - navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(0.5 + navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(0.5 + navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(4.5 - navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(4.5 - navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(0.5 + navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(0.5 + navEpsilon, 3.5 - navEpsilon));
 
-      preferredNonNavigableExtrusion2.add(new Point2D(9.5, 3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(9.5, -3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(5.5, -3.5));
-      preferredNonNavigableExtrusion2.add(new Point2D(5.5, 3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(9.5, 3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(9.5, -3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(5.5, -3.5));
+      preferredNonNavigableExtrusion2.addPoint(new Point2D(5.5, 3.5));
 
-      preferredNavigableExtrusion2.add(new Point2D(9.5 - navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(9.5 - navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(5.5 + navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.add(new Point2D(5.5 + navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(9.5 - navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(9.5 - navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(5.5 + navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion2.addPoint(new Point2D(5.5 + navEpsilon, 3.5 - navEpsilon));
 
-      navigableExtrusions = PointCloudTools.addPointsAlongPolygon(navigableExtrusions, 0.2);
-      preferredNavigableExtrusion0 = PointCloudTools.addPointsAlongPolygon(preferredNavigableExtrusion0, 0.2);
-      preferredNavigableExtrusion1 = PointCloudTools.addPointsAlongPolygon(preferredNavigableExtrusion1, 0.2);
-      preferredNavigableExtrusion2 = PointCloudTools.addPointsAlongPolygon(preferredNavigableExtrusion2, 0.2);
-      preferredNavigableExtrusion3 = PointCloudTools.addPointsAlongPolygon(preferredNavigableExtrusion3, 0.2);
+      navigableExtrusions = PointCloudTools.addPointsAlongExtrusionHull(navigableExtrusions, 0.2);
+      preferredNavigableExtrusion0 = PointCloudTools.addPointsAlongExtrusionHull(preferredNavigableExtrusion0, 0.2);
+      preferredNavigableExtrusion1 = PointCloudTools.addPointsAlongExtrusionHull(preferredNavigableExtrusion1, 0.2);
+      preferredNavigableExtrusion2 = PointCloudTools.addPointsAlongExtrusionHull(preferredNavigableExtrusion2, 0.2);
+      preferredNavigableExtrusion3 = PointCloudTools.addPointsAlongExtrusionHull(preferredNavigableExtrusion3, 0.2);
 
       Cluster cluster = new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON);
       cluster.addNonNavigableExtrusionsInLocal(nonNavigableExtrusions);
@@ -255,18 +256,18 @@ public class VisibilityToolsTest
       List<Cluster> allClusters = new ArrayList<>();
       allClusters.add(cluster);
 
-      List<List<Point2DReadOnly>> preferredNavigableExtrusions = new ArrayList<>();
+      List<ExtrusionHull> preferredNavigableExtrusions = new ArrayList<>();
       preferredNavigableExtrusions.add(preferredNavigableExtrusion0);
       preferredNavigableExtrusions.add(preferredNavigableExtrusion1);
       preferredNavigableExtrusions.add(preferredNavigableExtrusion2);
       preferredNavigableExtrusions.add(preferredNavigableExtrusion3);
 
       // test self visibility
-      for (List<Point2DReadOnly> preferredNavigableExtrusion : preferredNavigableExtrusions)
+      for (ExtrusionHull preferredNavigableExtrusion : preferredNavigableExtrusions)
       {
-         for (Point2DReadOnly point : preferredNavigableExtrusion)
+         for (Point2DReadOnly point : preferredNavigableExtrusion.getPoints())
          {
-            for (Point2DReadOnly otherPoint : preferredNavigableExtrusion)
+            for (Point2DReadOnly otherPoint : preferredNavigableExtrusion.getPoints())
             {
                if (otherPoint == point)
                   continue;
@@ -277,7 +278,7 @@ public class VisibilityToolsTest
       }
 
       ConvexPolygon2D nonNavigableExtrusion0 = new ConvexPolygon2D();
-      preferredNonNavigableExtrusion0.forEach(nonNavigableExtrusion0::addVertex);
+      preferredNonNavigableExtrusion0.getPoints().forEach(nonNavigableExtrusion0::addVertex);
       nonNavigableExtrusion0.update();
 
       // a point from the back of extrusion 0 shouldn't hit extrusion 1
@@ -289,15 +290,15 @@ public class VisibilityToolsTest
       // check random child to any random other region
       for (int iter = 0; iter < iters; iter++)
       {
-         for (List<Point2DReadOnly> preferredNavigableExtrusion : preferredNavigableExtrusions)
+         for (ExtrusionHull preferredNavigableExtrusion : preferredNavigableExtrusions)
          {
-            for (List<Point2DReadOnly> otherPreferredExtrusion : preferredNavigableExtrusions)
+            for (ExtrusionHull otherPreferredExtrusion : preferredNavigableExtrusions)
             {
                if (preferredNavigableExtrusion == otherPreferredExtrusion)
                   continue;
 
-               Point2DReadOnly interiorPoint = createRandomInteriorPoint(preferredNavigableExtrusion, random);
-               Point2DReadOnly otherInteriorPoint = createRandomInteriorPoint(preferredNavigableExtrusion, random);
+               Point2DReadOnly interiorPoint = createRandomInteriorPoint(preferredNavigableExtrusion.getPoints(), random);
+               Point2DReadOnly otherInteriorPoint = createRandomInteriorPoint(preferredNavigableExtrusion.getPoints(), random);
 
                assertTrue(VisibilityTools.isPointVisibleForStaticMaps(allClusters, interiorPoint, otherInteriorPoint, true));
             }

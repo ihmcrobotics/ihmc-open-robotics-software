@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityTools;
@@ -158,7 +159,7 @@ public class PostProcessingTools
 
       for (Cluster cluster : clusters)
       {
-         List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
+         ExtrusionHull clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
 
          Point2D closestPointInCluster = new Point2D();
          VisibilityTools.distanceToCluster(pointInWorld, clusterPolygon, closestPointInCluster, null);
@@ -218,7 +219,7 @@ public class PostProcessingTools
       {
          for (Cluster cluster : navigableRegion.getObstacleClusters())
          {
-            List<Point2DReadOnly> clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
+            ExtrusionHull clusterPolygon = cluster.getNonNavigableExtrusionsInWorld2D();
             boolean isClosed = cluster.isClosed();
 
             Point2D closestPointInCluster = new Point2D();

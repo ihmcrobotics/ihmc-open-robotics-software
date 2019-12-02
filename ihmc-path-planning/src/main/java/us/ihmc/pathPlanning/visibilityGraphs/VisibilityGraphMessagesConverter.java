@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
@@ -94,10 +95,10 @@ public class VisibilityGraphMessagesConverter
          return message;
 
       List<? extends Point3DReadOnly> rawPointsInLocal = cluster.getRawPointsInLocal3D();
-      List<Point2DReadOnly> navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
-      List<List<Point2DReadOnly>> preferredNavigableExtrusionsInLocal = cluster.getPreferredNavigableExtrusionsInLocal();
-      List<Point2DReadOnly> nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
-      List<List<Point2DReadOnly>> preferredNonNavigableExtrusionsInLocal = cluster.getPreferredNonNavigableExtrusionsInLocal();
+      ExtrusionHull navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
+      List<ExtrusionHull> preferredNavigableExtrusionsInLocal = cluster.getPreferredNavigableExtrusionsInLocal();
+      ExtrusionHull nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
+      List<ExtrusionHull> preferredNonNavigableExtrusionsInLocal = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
       message.setExtrusionSide(cluster.getExtrusionSide().toByte());
       message.setType(cluster.getType().toByte());
@@ -110,14 +111,14 @@ public class VisibilityGraphMessagesConverter
          message.getNonNavigableExtrusionsInLocal().getPoints().add().set(nonNavigableExtrusionsInLocal.get(i));
       for (int i = 0; i < preferredNonNavigableExtrusionsInLocal.size(); i++)
       {
-         List<Point2DReadOnly> extrusions = preferredNonNavigableExtrusionsInLocal.get(i);
+         ExtrusionHull extrusions = preferredNonNavigableExtrusionsInLocal.get(i);
          VisibilityClusterPointsMessage points = message.getPreferredNonNavigableExtrusionsInLocal().add();
          for (int j = 0; j < preferredNonNavigableExtrusionsInLocal.get(i).size(); j++)
             points.getPoints().add().set(extrusions.get(j));
       }
       for (int i = 0; i < preferredNavigableExtrusionsInLocal.size(); i++)
       {
-         List<Point2DReadOnly> extrusions = preferredNavigableExtrusionsInLocal.get(i);
+         ExtrusionHull extrusions = preferredNavigableExtrusionsInLocal.get(i);
          VisibilityClusterPointsMessage points = message.getPreferredNavigableExtrusionsInLocal().add();
          for (int j = 0; j < preferredNavigableExtrusionsInLocal.get(i).size(); j++)
             points.getPoints().add().set(extrusions.get(j));
@@ -241,20 +242,16 @@ public class VisibilityGraphMessagesConverter
          cluster.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocal.get(i));
       for (int i = 0; i < preferredNavigableExtrusionsInLocal.size(); i++)
       {
-         List<Point2D> extrusionPoints = new ArrayList<>();
+         ExtrusionHull extrusionPoints = new ExtrusionHull();
          List<Point3D> points = preferredNavigableExtrusionsInLocal.get(i).getPoints();
-         for (int j = 0; j < points.size(); j++)
-         {
-            extrusionPoints.add(new Point2D(points.get(j)));
-         }
+         points.forEach(extrusionPoints::addPoint);
          cluster.addPreferredNavigableExtrusionInLocal(extrusionPoints);
       }
       for (int i = 0; i < preferredNonNavigableExtrusionsInLocal.size(); i++)
       {
-         List<Point2D> extrusionPoints = new ArrayList<>();
+         ExtrusionHull extrusionPoints = new ExtrusionHull();
          List<Point3D> points = preferredNonNavigableExtrusionsInLocal.get(i).getPoints();
-         for (int j = 0; j < points.size(); j++)
-            extrusionPoints.add(new Point2D(points.get(j)));
+         points.forEach(extrusionPoints::addPoint);
          cluster.addPreferredNonNavigableExtrusionInLocal(extrusionPoints);
       }
 

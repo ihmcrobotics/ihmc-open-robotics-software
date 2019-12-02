@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraph;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
@@ -23,6 +24,11 @@ import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 public class VisibilityTools
 {
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, ExtrusionHull points, boolean closed)
+   {
+      return isPointVisible(observer, targetPoint, points.getPoints(), closed);
+   }
+
    public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster,
                                         boolean closed)
    {
@@ -79,6 +85,14 @@ public class VisibilityTools
          }
       }
       return true;
+   }
+
+   public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine,
+                                          ExtrusionHull extrusion, Point2DBasics closestPointOnLineToPack,
+                                          Point2DBasics closestPointOnClusterToPack, Vector2DBasics normalToClusterToPack, boolean closed)
+   {
+      return distanceToCluster(firstPointOfLine, secondPointOfLine, extrusion.getPoints(), closestPointOnLineToPack, closestPointOnClusterToPack,
+                               normalToClusterToPack, closed);
    }
 
    public static double distanceToCluster(Point2DReadOnly firstPointOfLine, Point2DReadOnly secondPointOfLine,
@@ -156,6 +170,12 @@ public class VisibilityTools
       if (!pointIsVisible)
          minDistance = -minDistance;
       return minDistance;
+   }
+
+   public static double distanceToCluster(Point2DReadOnly point, ExtrusionHull extrusion,
+                                          Point2DBasics closestPointInCluster, Vector2DBasics normalToCluster)
+   {
+      return distanceToCluster(point, extrusion.getPoints(), closestPointInCluster, normalToCluster);
    }
 
    public static double distanceToCluster(Point2DReadOnly point, List<? extends Point2DReadOnly> listOfPointsInCluster,
@@ -413,13 +433,13 @@ public class VisibilityTools
    }
 
    public static boolean[][] checkIfListOfPointsInsidePlanarRegionAndOutsideNonNavigableZones(PlanarRegion homeRegion, List<Cluster> allClusters,
-                                                                                              List<List<Point2DReadOnly>> navigableExtrusionPoints)
+                                                                                              List<ExtrusionHull> navigableExtrusionPoints)
    {
       // We first go through the extrusions and check if they are actually navigable, i.e. inside the home region and not inside any non-navigable zone.
       boolean[][] arePointsActuallyNavigable = new boolean[navigableExtrusionPoints.size()][];
       for (int i = 0; i < navigableExtrusionPoints.size(); i++)
       {
-         arePointsActuallyNavigable[i] = checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints.get(i));
+         arePointsActuallyNavigable[i] = checkIfPointsInsidePlanarRegionAndOutsideNonNavigableZones(homeRegion, allClusters, navigableExtrusionPoints.get(i).getPoints());
       }
       return arePointsActuallyNavigable;
    }
@@ -460,7 +480,7 @@ public class VisibilityTools
       {
          boolean closed = cluster.isClosed();
 
-         List<List<Point2DReadOnly>> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
+         List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
          if (cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE)
          {
@@ -482,7 +502,7 @@ public class VisibilityTools
 
             if (checkPreferredExtrusions)
             {
-               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion,
+               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(),
                                                                                                                                                                                   extrusion.size(), true, 0.0));
                boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
                if (!startsInPreferredRegion && isNotVisible)
@@ -495,7 +515,7 @@ public class VisibilityTools
             {
                // if you don't start in a preferred region, you have to cross into one. This means that if we start outside, we should not check check for
                // visibility, as we are trying to get in.
-               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion,
+               boolean startsInPreferredRegion = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(),
                                                                                                            extrusion.size(), true, 0.0));
                boolean isNotVisible = preferredNonNavigableExtrusions.parallelStream().anyMatch(extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
 

@@ -26,6 +26,7 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
@@ -907,7 +908,7 @@ public class NavigableRegionsManagerTest
          {
             for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
             {
-               List<Point2DReadOnly> clusterPolygon = obstacleCluster.getNonNavigableExtrusionsInWorld2D();
+               ExtrusionHull clusterPolygon = obstacleCluster.getNonNavigableExtrusionsInWorld2D();
                Point2D closestPointOnCluster = new Point2D();
                double distanceToCluster = VisibilityTools.distanceToCluster(new Point2D(actualPose.getPosition()), clusterPolygon, closestPointOnCluster, null);
                if (distanceToCluster < distanceToObstacles)

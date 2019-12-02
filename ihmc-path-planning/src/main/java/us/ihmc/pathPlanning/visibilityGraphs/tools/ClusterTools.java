@@ -30,6 +30,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
@@ -46,16 +47,16 @@ public class ClusterTools
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
-   public static List<List<? extends Point2DReadOnly>> extrudePolygonInward(List<ConvexPolygon2D> polygons, ObstacleExtrusionDistanceCalculator calculator)
+   public static List<ExtrusionHull> extrudePolygonInward(List<ConvexPolygon2D> polygons, ObstacleExtrusionDistanceCalculator calculator)
    {
-      List<List<? extends Point2DReadOnly>> listOfExtrusions = new ArrayList<>();
+      List<ExtrusionHull> listOfExtrusions = new ArrayList<>();
       for (ConvexPolygon2DReadOnly polygon : polygons)
       {
          double[] extrusionDistances = polygon.getPolygonVerticesView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
          ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
          extrudeConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
 
-         listOfExtrusions.add(scaledPolygon.getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
+         listOfExtrusions.add(new ExtrusionHull(scaledPolygon.getPolygonVerticesView()));
       }
 
       return listOfExtrusions;
@@ -183,9 +184,9 @@ public class ClusterTools
       return foundSolution;
    }
 
-   public static List<? extends Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
+   public static ExtrusionHull extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
    {
-      return extrudePolygon(extrudeToTheLeft, cluster.getRawPointsInLocal3D(), calculator);
+      return new ExtrusionHull(extrudePolygon(extrudeToTheLeft, cluster.getRawPointsInLocal3D(), calculator));
    }
 
    public static List<? extends Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, List<Point3DReadOnly> rawPoints, ObstacleExtrusionDistanceCalculator calculator)
@@ -619,14 +620,14 @@ public class ClusterTools
       // Project the points back up to the home region.
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
-      List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
-                                                                                                              transformFromWorldToHome);
-      List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion,
-                                                                                                                 nonNavigableExtrusionsInFlatWorld,
-                                                                                                                 transformFromWorldToHome);
+      ExtrusionHull navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
+                                                                                                      transformFromWorldToHome);
+      ExtrusionHull nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion,
+                                                                                                         nonNavigableExtrusionsInFlatWorld,
+                                                                                                         transformFromWorldToHome);
 
-      List<List<? extends Point2DReadOnly>> preferredNavigableExtrusionsInHomeRegionLocal = null;
-      List<List<? extends Point2DReadOnly>> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
+      List<ExtrusionHull> preferredNavigableExtrusionsInHomeRegionLocal = null;
+      List<ExtrusionHull> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
          // actually extrude the points
@@ -667,11 +668,11 @@ public class ClusterTools
       return verticalExtrusion ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
    }
 
-   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
+   private static ExtrusionHull projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
                                                                                    List<? extends Point2DReadOnly> pointsToProjectInWorld,
                                                                                    RigidBodyTransform transformFromWorldToPlanarRegion)
    {
-      List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+      ExtrusionHull navigableExtrusionsInHomeRegionLocal = new ExtrusionHull();
       for (int i = 0; i < pointsToProjectInWorld.size(); i++)
       {
          Point2DReadOnly navigableExtrusionInFlatWorld = pointsToProjectInWorld.get(i);
@@ -680,8 +681,7 @@ public class ClusterTools
          Point3D extrudedPointOnHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(navigableExtrusionInFlatWorld3D, planarRegionToProjectOnto);
 
          transformFromWorldToPlanarRegion.transform(extrudedPointOnHomeRegion);
-         Point2D navigableExtrusionInHomeRegionLocal = new Point2D(extrudedPointOnHomeRegion);
-         navigableExtrusionsInHomeRegionLocal.add(navigableExtrusionInHomeRegionLocal);
+         navigableExtrusionsInHomeRegionLocal.addPoint(extrudedPointOnHomeRegion);
       }
 
       return navigableExtrusionsInHomeRegionLocal;

@@ -612,7 +612,7 @@ public class VisibilityGraph
                Point2D sourceInRegionLocal2D = new Point2D(sourceInRegionLocal);
                Point2D targetInRegionLocal2D = new Point2D(targetInRegionLocal);
                boolean isPointVisible = VisibilityTools.isPointVisibleInclusive(sourceInRegionLocal2D, targetInRegionLocal2D,
-                                                                                cluster.getNavigableExtrusionsInLocal(), cluster.isClosed());
+                                                                                cluster.getNavigableExtrusionsInLocal().getPoints(), cluster.isClosed());
 
                if (!isPointVisible)
                {
