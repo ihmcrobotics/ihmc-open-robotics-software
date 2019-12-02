@@ -171,8 +171,6 @@ public class DepthFirstFootstepPlanner implements BodyPathAndFootstepPlanner
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
          goalNodes.put(side, goalNode);
       }
-
-      nodeExpansion.setGoalNodes(goalNodes);
    }
 
    private void checkGoalType(FootstepPlannerGoal goal)
