@@ -49,7 +49,7 @@ public class RTPSCommunicationFactory
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
-         LogTools.info("Setting the RTPS Domain ID to " + rtpsDomainID);
+         LogTools.info("Using DDS/ROS 2 Domain ID " + rtpsDomainID);
          LogTools.info("ROS 2 Distro is set to " + Ros2Distro.fromEnvironment());
       }
       else
