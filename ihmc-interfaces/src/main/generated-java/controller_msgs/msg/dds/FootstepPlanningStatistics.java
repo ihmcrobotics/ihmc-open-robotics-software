@@ -30,6 +30,7 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_BLOCKING_BODY = (byte) 15;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY = (byte) 16;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM = (byte) 17;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_YAWS_TOO_MUCH = (byte) 18;
    /**
             * Total time taken by the toolbox to generate plan
             */
@@ -49,7 +50,7 @@ public class FootstepPlanningStatistics extends Packet<FootstepPlanningStatistic
 
    public FootstepPlanningStatistics()
    {
-      rejection_fractions_ = new us.ihmc.idl.IDLSequence.Double (19, "type_6");
+      rejection_fractions_ = new us.ihmc.idl.IDLSequence.Double (20, "type_6");
 
    }
 
