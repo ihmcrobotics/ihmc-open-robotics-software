@@ -14,6 +14,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
@@ -23,6 +24,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -329,6 +332,11 @@ public class FootstepPlannerUI
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
    {
       uiRobotController.setRobotLowLevelMessenger(robotLowLevelMessenger);
+   }
+
+   public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
+   {
+      uiRobotController.setREAStateRequestPublisher(reaStateRequestPublisher);
    }
 
    public JavaFXMessager getMessager()

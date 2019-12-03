@@ -73,6 +73,8 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
+      packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
       packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
       packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
@@ -140,6 +142,7 @@ public class FootstepPlannerMessageTools
       packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
+      packet.setHeightForMaxAvoidance(parameters.getHeightForMaxAvoidance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
       packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());

@@ -2,15 +2,14 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DRCPerfectSensorReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    private RawSensorReader rawSensorReader;
-   private SensorOutputMapReadOnly sensorOutputMapReadOnly;
-   private SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
+   private SensorOutputMapReadOnly processedSensorOutputMap;
+   private SensorOutputMapReadOnly rawSensorOutputMap;
 
    public DRCPerfectSensorReader(double estimateDT)
    {
@@ -21,26 +20,26 @@ public class DRCPerfectSensorReader implements SensorReader
       this.rawSensorReader = rawSensorReader;
    }
 
-   public void setSensorOutputMapReadOnly(SensorOutputMapReadOnly sensorOutputMapReadOnly)
+   public void setProcessedSensorOutputMap(SensorOutputMapReadOnly processedSensorOutputMap)
    {
-      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.processedSensorOutputMap = processedSensorOutputMap;
    }
 
-   public void setSensorRawOutputMapReadOnly(SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly)
+   public void setRawSensorOutputMap(SensorOutputMapReadOnly rawSensorOutputMap)
    {
-      this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
-   }
-
-   @Override
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
-   {
-      return sensorOutputMapReadOnly;
+      this.rawSensorOutputMap = rawSensorOutputMap;
    }
 
    @Override
-   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   public SensorOutputMapReadOnly getProcessedSensorOutputMap()
    {
-      return sensorRawOutputMapReadOnly;
+      return processedSensorOutputMap;
+   }
+
+   @Override
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
+   {
+      return rawSensorOutputMap;
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -55,6 +54,6 @@ public class DRCPerfectSensorReader implements SensorReader
       {
          rawSensorReader.read();
       }
-      return sensorOutputMapReadOnly.getMonotonicTime();
+      return processedSensorOutputMap.getMonotonicTime();
    }
 }

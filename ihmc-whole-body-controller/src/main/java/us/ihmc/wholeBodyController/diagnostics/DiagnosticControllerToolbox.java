@@ -138,7 +138,7 @@ public class DiagnosticControllerToolbox
 
    public IMUSensorReadOnly getIMUSensorReadOnly(String imuName)
    {
-      List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMap.getIMUProcessedOutputs();
+      List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMap.getIMUOutputs();
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
          if (imuProcessedOutputs.get(i).getSensorName().equals(imuName))
