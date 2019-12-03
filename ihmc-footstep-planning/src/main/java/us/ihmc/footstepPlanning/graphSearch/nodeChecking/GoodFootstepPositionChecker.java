@@ -160,9 +160,9 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       double stepReach3D = EuclidCoreTools.norm(stepReach, solePositionInParentZUpFrame.getZ());
       double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(solePositionInParentZUpFrame.getZ() / parameters.getMaximumStepZ()));
       maxInterpolationFactor = Math.min(maxInterpolationFactor, 1.0);
-      double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMaximumStepYaw(),
+      double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw(),
                                                            maxInterpolationFactor);
-      double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), parameters.getStepYawReductionFactorAtMaxReach() * parameters.getMinimumStepYaw(),
+      double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw(),
                                                            maxInterpolationFactor);
       double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(nodeToCheck.getYaw(), previousNode.getYaw());
       if (!MathTools.intervalContains(robotSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
