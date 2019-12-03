@@ -53,7 +53,7 @@ public class RobotConfigurationDataPublisherFactory
    }
 
    /**
-    * Creates an estimator output that will provide the robot configuration data as follows:
+    * Sets the sensor source to use to get the data to publish:
     * <ul>
     * <li>joint states are obtained from the {@code fullRobotModel}.
     * <li>timestamps, force sensor data, and IMU data are obtained from {@code sensorOutput}.
@@ -62,13 +62,13 @@ public class RobotConfigurationDataPublisherFactory
     * @param fullRobotModel to get joint state.
     * @param sensorOutput   to get timestamps, force sensor data, and IMU data.
     */
-   public void setEstimatorOutput(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutput)
+   public void setSensorSource(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutput)
    {
-      setEstimatorOutput(fullRobotModel, sensorOutput.getForceSensorOutputs(), sensorOutput);
+      setSensorSource(fullRobotModel, sensorOutput.getForceSensorOutputs(), sensorOutput);
    }
 
    /**
-    * Creates an estimator output that will provide the robot configuration data as follows:
+    * Sets the sensor source to use to get the data to publish:
     * <ul>
     * <li>joint states are obtained from the {@code fullRobotModel}.
     * <li>force sensor data from the given {@code forceSensorDataHolderToSend}.
@@ -79,8 +79,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param forceSensorDataHolderToSend to get force sensor data.
     * @param sensorOutput                to get timestamps and IMU data.
     */
-   public void setEstimatorOutput(FullRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolderToSend,
-                                  SensorOutputMapReadOnly sensorOutput)
+   public void setSensorSource(FullRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolderToSend, SensorOutputMapReadOnly sensorOutput)
    {
       FloatingJointStateReadOnly rootJointStateOutput = FloatingJointStateReadOnly.fromFloatingJoint(fullRobotModel.getRootJoint());
       List<OneDoFJointStateReadOnly> jointSensorOutputs = new ArrayList<>();
@@ -93,12 +92,21 @@ public class RobotConfigurationDataPublisherFactory
          else
             jointSensorOutputs.add(OneDoFJointStateReadOnly.createFromOneDoFJoint(joint, oneDoFJointOutput::isJointEnabled));
       }
-      setEstimatorOutput(sensorOutput, rootJointStateOutput, jointSensorOutputs, forceSensorDataHolderToSend, sensorOutput.getIMUOutputs());
+      setSensorSource(sensorOutput, rootJointStateOutput, jointSensorOutputs, forceSensorDataHolderToSend, sensorOutput.getIMUOutputs());
    }
 
-   public void setEstimatorOutput(SensorTimestampHolder sensorTimestampHolder, FloatingJointStateReadOnly rootJointStateOutput,
-                                  List<? extends OneDoFJointStateReadOnly> jointSensorOutputs, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                  List<? extends IMUSensorReadOnly> imuSensorOutputs)
+   /**
+    * Sets the sensor source to use to get the data to publish.
+    * 
+    * @param sensorTimestampHolder to get timestamps.
+    * @param rootJointStateOutput  to get root joint state.
+    * @param jointSensorOutputs    to get the 1-DoF joint states.
+    * @param forceSensorDataHolder to get the force sensor data.
+    * @param imuSensorOutputs      to get the IMU data.
+    */
+   public void setSensorSource(SensorTimestampHolder sensorTimestampHolder, FloatingJointStateReadOnly rootJointStateOutput,
+                               List<? extends OneDoFJointStateReadOnly> jointSensorOutputs, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                               List<? extends IMUSensorReadOnly> imuSensorOutputs)
    {
       oneDoFJointSensorData.set(jointSensorOutputs);
       rootJointSensorData.set(rootJointStateOutput);
@@ -114,24 +122,24 @@ public class RobotConfigurationDataPublisherFactory
     * </p>
     * 
     * @param fullHumanoidRobotModel the instance to get the definitions from.
-    * @see #setDefinitionsToSend(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
+    * @see #setDefinitionsToPublish(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
     */
-   public void setDefinitionsToSend(FullHumanoidRobotModel fullHumanoidRobotModel)
+   public void setDefinitionsToPublish(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
-      setDefinitionsToSend(FullRobotModelUtils.getAllJointsExcludingHands(fullHumanoidRobotModel),
-                           fullHumanoidRobotModel.getForceSensorDefinitions(),
-                           fullHumanoidRobotModel.getIMUDefinitions());
+      setDefinitionsToPublish(FullRobotModelUtils.getAllJointsExcludingHands(fullHumanoidRobotModel),
+                              fullHumanoidRobotModel.getForceSensorDefinitions(),
+                              fullHumanoidRobotModel.getIMUDefinitions());
    }
 
    /**
     * Extracts and sets the sensor definitions from the given {@code fullRobotModel}.
     * 
     * @param fullRobotModel the instance to get the definitions from.
-    * @see #setDefinitionsToSend(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
+    * @see #setDefinitionsToPublish(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
     */
-   public void setDefinitionsToSend(FullRobotModel fullRobotModel)
+   public void setDefinitionsToPublish(FullRobotModel fullRobotModel)
    {
-      setDefinitionsToSend(fullRobotModel.getOneDoFJoints(), fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      setDefinitionsToPublish(fullRobotModel.getOneDoFJoints(), fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
    }
 
    /**
@@ -141,7 +149,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param forceSensorDefinitions only the data for the given force sensors will be published.
     * @param imuDefinitions         only the data for the given IMUs will be published.
     */
-   public void setDefinitionsToSend(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   public void setDefinitionsToPublish(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       jointsField.set(joints);
       forceSensorDefinitionsField.set(forceSensorDefinitions);
