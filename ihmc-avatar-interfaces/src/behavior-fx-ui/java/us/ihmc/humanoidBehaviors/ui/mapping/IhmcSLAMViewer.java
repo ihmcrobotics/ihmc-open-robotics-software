@@ -8,8 +8,8 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -32,12 +32,12 @@ public class IhmcSLAMViewer
       normalOctreeGraphic.initialize();
    }
 
-   public void addSensorPose(RigidBodyTransform sensorPose)
+   public void addSensorPose(RigidBodyTransformReadOnly sensorPose)
    {
       addSensorPose(sensorPose, DEFAULT_SENSOR_POSE_COLOR);
    }
 
-   public void addPointCloud(Point3D[] pointCloud)
+   public void addPointCloud(Point3DReadOnly[] pointCloud)
    {
       addPointCloud(pointCloud, DEFAULT_POINT_CLOUD_COLOR);
    }
@@ -52,14 +52,14 @@ public class IhmcSLAMViewer
       addOctree(octree, DEFAULT_OCTREE_COLOR, octreeResolution);
    }
 
-   public void addSensorPose(RigidBodyTransform sensorPose, Color color)
+   public void addSensorPose(RigidBodyTransformReadOnly sensorPose, Color color)
    {
       stereoVisionPointCloudGraphic.addSensorPoseMesh(sensorPose, color);
    }
 
-   public void addPointCloud(Point3D[] pointCloud, Color color)
+   public void addPointCloud(Point3DReadOnly[] point3dReadOnlies, Color color)
    {
-      stereoVisionPointCloudGraphic.addPointsMeshes(pointCloud, color);
+      stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color);
    }
 
    public void addStereoMessage(StereoVisionPointCloudMessage message, Color pointCloudColor)
