@@ -9,7 +9,14 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMTest
 {
@@ -105,7 +112,26 @@ public class IhmcSLAMTest
    @Test
    public void testPlanarRegionsForSimulatedPointCloudFrame()
    {
+      double stairHeight = 0.3;
+      double stairWidth = 0.5;
+      double stairLength = 0.25;
 
+      StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength);
+      Point3DReadOnly[] pointCloud = IhmcSLAMTools.extractPointsFromMessage(message);
+      RigidBodyTransformReadOnly sensorPose = IhmcSLAMTools.extractSensorPoseFromMessage(message);
+
+      double octreeResolution = 0.02;
+      ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+
+      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution);
+      PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+
+      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      viewer.addPlanarRegions(planarRegionsMap);
+      viewer.start("testPlanarRegionsForSimulatedPointCloudFrame");
+
+      ThreadTools.sleepForever();
    }
 
    @Test
