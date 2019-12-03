@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +32,11 @@ public class ClusterTest
 
       Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
-      List<Point2D> clusterPoints = new ArrayList<>();
-      clusterPoints.add(new Point2D(0.1, -0.1));
-      clusterPoints.add(new Point2D(1.1, -0.1));
-      clusterPoints.add(new Point2D(1.1, 1.1));
-      clusterPoints.add(new Point2D(0.1, 1.1));
+      ExtrusionHull clusterPoints = new ExtrusionHull();
+      clusterPoints.addPoint(new Point2D(0.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, 1.1));
+      clusterPoints.addPoint(new Point2D(0.1, 1.1));
       obstacleCluster.addNonNavigableExtrusionsInLocal(clusterPoints);
 
       assertFalse(obstacleCluster.isInsideNonNavigableZone(pointA));
@@ -49,11 +50,11 @@ public class ClusterTest
    {
       Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
-      List<Point2D> clusterPoints = new ArrayList<>();
-      clusterPoints.add(new Point2D(0.1, -0.1));
-      clusterPoints.add(new Point2D(1.1, -0.1));
-      clusterPoints.add(new Point2D(1.1, 1.6));
-      clusterPoints.add(new Point2D(0.3, 1.1));
+      ExtrusionHull clusterPoints = new ExtrusionHull();
+      clusterPoints.addPoint(new Point2D(0.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, 1.6));
+      clusterPoints.addPoint(new Point2D(0.3, 1.1));
       obstacleCluster.addNonNavigableExtrusionsInLocal(clusterPoints);
 
       BoundingBox2DReadOnly boundingBox = obstacleCluster.getNonNavigableExtrusionsBoundingBox();
