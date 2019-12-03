@@ -187,6 +187,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointTaus = new LinkedHashMap<>();
+   private final List<OneDoFJointStateReadOnly> inputJointSensorList = new ArrayList<>();
+   private final LinkedHashMap<OneDoFJointBasics, OneDoFJointStateReadOnly> inputJointSensorMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> inputOrientations = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, YoFrameVector3D> inputAngularVelocities = new LinkedHashMap<>();
@@ -218,6 +220,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> outputJointVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> outputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> outputJointTaus = new LinkedHashMap<>();
+   private final List<OneDoFJointStateReadOnly> outputJointSensorList = new ArrayList<>();
+   private final LinkedHashMap<OneDoFJointBasics, OneDoFJointStateReadOnly> outputJointSensorMap = new LinkedHashMap<>();
 
    private final ArrayList<DiagnosticUpdatable> diagnosticModules = new ArrayList<>();
 
@@ -266,33 +270,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
 
       @Override
-      public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
+      public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
       {
-         return inputJointPositions.get(oneDoFJoint).getDoubleValue();
+         return inputJointSensorMap.get(oneDoFJoint);
       }
 
       @Override
-      public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
+      public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
       {
-         return inputJointVelocities.get(oneDoFJoint).getDoubleValue();
-      }
-
-      @Override
-      public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-      {
-         return inputJointAccelerations.get(oneDoFJoint).getDoubleValue();
-      }
-
-      @Override
-      public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-      {
-         return inputJointTaus.get(oneDoFJoint).getDoubleValue();
-      }
-
-      @Override
-      public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-      {
-         return SensorProcessing.this.isJointEnabled(oneDoFJoint);
+         return inputJointSensorList;
       }
 
       @Override
@@ -357,6 +343,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          YoBoolean jointEnabledIndicator = new YoBoolean("joint_enabled_" + jointName, registry);
          jointEnabledIndicator.set(true);
          jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
+
+         OneDoFJointStateReadOnly rawSensorOutput = OneDoFJointStateReadOnly.createFromProviders(jointName,
+                                                                                                 rawJointPosition,
+                                                                                                 rawJointVelocity,
+                                                                                                 rawJointAcceleration,
+                                                                                                 rawJointTau,
+                                                                                                 jointEnabledIndicator);
+         inputJointSensorList.add(rawSensorOutput);
+         inputJointSensorMap.put(oneDoFJoint, rawSensorOutput);
       }
 
       SensorNoiseParameters sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
@@ -419,6 +414,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       outputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
 
       sensorProcessingConfiguration.configureSensorProcessing(this);
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJointBasics oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         OneDoFJointStateReadOnly processedSensorOutput = OneDoFJointStateReadOnly.createFromProviders(jointName,
+                                                                                                       outputJointPositions.get(oneDoFJoint),
+                                                                                                       outputJointVelocities.get(oneDoFJoint),
+                                                                                                       outputJointAccelerations.get(oneDoFJoint),
+                                                                                                       outputJointTaus.get(oneDoFJoint),
+                                                                                                       jointEnabledIndicators.get(oneDoFJoint));
+         outputJointSensorList.add(processedSensorOutput);
+         outputJointSensorMap.put(oneDoFJoint, processedSensorOutput);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -2239,27 +2250,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    }
 
    @Override
-   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
-      return outputJointPositions.get(oneDoFJoint).getDoubleValue();
+      return outputJointSensorMap.get(oneDoFJoint);
    }
 
    @Override
-   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint)
+   public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
    {
-      return outputJointVelocities.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
-   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return outputJointAccelerations.get(oneDoFJoint).getDoubleValue();
-   }
-
-   @Override
-   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return outputJointTaus.get(oneDoFJoint).getDoubleValue();
+      return outputJointSensorList;
    }
 
    @Override
@@ -2277,12 +2276,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   @Override
-   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-   {
-      return jointEnabledIndicators.get(oneDoFJoint).getBooleanValue();
    }
 
    public List<OneDoFJointBasics> getJointSensorDefinitions()

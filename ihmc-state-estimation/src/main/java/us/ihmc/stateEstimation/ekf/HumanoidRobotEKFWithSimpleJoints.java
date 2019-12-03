@@ -27,6 +27,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -122,8 +123,9 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       {
          OneDoFJoint simpleJoint = simpleJoints.get(jointIdx);
          OneDoFJoint referenceJoint = referenceJoints.get(jointIdx);
-         simpleJoint.setQ(processedSensorOutput.getJointPositionOutput(referenceJoint));
-         simpleJoint.setQd(processedSensorOutput.getJointVelocityOutput(referenceJoint));
+         OneDoFJointStateReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoint);
+         simpleJoint.setQ(processedJointOutput.getPosition());
+         simpleJoint.setQd(processedJointOutput.getVelocity());
       }
 
       leggedRobotEKF.doControl();
