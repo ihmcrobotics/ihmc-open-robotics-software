@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = true;
+   private final static boolean debug = false;
    private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
@@ -104,19 +104,10 @@ public class NavigableRegionsManager
    private List<Point3DReadOnly> calculateVisibilityMapWhileFindingPath(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld,
                                                                         boolean fullyExpandVisibilityGraph)
    {
-      double initializeStartTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-
       if (!initialize(startInWorld, goalInWorld, fullyExpandVisibilityGraph))
          return null;
 
-      double planStartTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-      if (debug)
-         LogTools.info("Initialization duration = " + (planStartTime - initializeStartTime));
-      List<Point3DReadOnly> plan = planInternal();
-      double planEndTime = Conversions.nanosecondsToSeconds(System.nanoTime());
-      if (debug)
-         LogTools.info("Planning duration = " + (planEndTime - planStartTime));
-      return plan;
+      return planInternal();
    }
 
    List<Point3DReadOnly> resetAndPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
