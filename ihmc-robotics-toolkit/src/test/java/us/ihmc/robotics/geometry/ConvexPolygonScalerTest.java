@@ -625,6 +625,8 @@ public class ConvexPolygonScalerTest
    @Test
    public void testCaseScalingRedundantPolygon()
    {
+      // This has extra, collinear points added along the edges of the points. However, these aren't removed when generating the polygon. This then causes
+      // the scaler to fail.
       List<Point3D> fewerPoints = new ArrayList<>();
       fewerPoints.add(new Point3D(0.2, 0.2, 0.0));
       fewerPoints.add(new Point3D(0.2, 0.1, 0.0));
