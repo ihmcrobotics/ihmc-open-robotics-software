@@ -17,7 +17,7 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
                                                                           double stairLength)
    {
-      return generateMessageSimpleStair(preMultiplier, stairHeight, stairWidth, stairLength, stairLength);
+      return generateMessageSimpleStair(preMultiplier, stairHeight, stairWidth, stairLength, stairLength, true);
    }
 
    /**
@@ -27,11 +27,17 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
                                                                           double stairLengthUpper)
    {
-      return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper);
+      return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, true);
+   }
+   
+   public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
+                                                                          double stairLengthUpper, boolean generateVertical)
+   {
+      return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, generateVertical);
    }
 
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
-                                                                          double stairLengthLower, double stairLengthUpper)
+                                                                          double stairLengthLower, double stairLengthUpper, boolean generateVertical)
    {
       int numberOfPoints = 5000;
 
@@ -68,10 +74,12 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
       polygonThr.update();
 
       centroidPoses.add(centerOne);
-      centroidPoses.add(centerTwo);
+      if(generateVertical)
+         centroidPoses.add(centerTwo);
       centroidPoses.add(centerThr);
       convexPolygons.add(polygonOne);
-      convexPolygons.add(polygonTwo);
+      if(generateVertical)
+         convexPolygons.add(polygonTwo);
       convexPolygons.add(polygonThr);
 
       for (RigidBodyTransform centroid : centroidPoses)
