@@ -253,14 +253,6 @@ public class VisibilityGraphTestTools
       {
          EuclidCoreTestTools
                .assertPoint2DGeometricallyEquals(clusterExpected.getNavigableExtrusionInLocal(i), clusterActual.getNavigableExtrusionInLocal(i), epsilon);
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals(clusterExpected.getNavigableExtrusionInWorld(i), clusterActual.getNavigableExtrusionInWorld(i), epsilon);
-
-         FramePoint3D framePoint = new FramePoint3D(localFrame, clusterExpected.getNavigableExtrusionInLocal(i));
-         framePoint.changeFrame(worldFrame);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterExpected.getNavigableExtrusionInWorld(i), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(framePoint, clusterActual.getNavigableExtrusionInWorld(i), epsilon);
       }
 
       int numberOfNonNavigableExtrusions = clusterExpected.getNumberOfNonNavigableExtrusions();

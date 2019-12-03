@@ -52,6 +52,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(tooHighToStepDistance, distance);
    }
 
+   default void setHeightForMaxAvoidance(double distance)
+   {
+      set(heightForMaxAvoidance, distance);
+   }
+
    default void setClusterResolution(double resolution)
    {
       set(clusterResolution, resolution);
@@ -177,6 +182,8 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setObstacleExtrusionDistanceIfNotTooHighToStep(packet.getObstacleExtrusionDistanceIfNotTooHighToStep());
       if (packet.getTooHighToStepDistance() != noValue)
          setTooHighToStepDistance(packet.getTooHighToStepDistance());
+      if (packet.getHeightForMaxAvoidance() != noValue)
+         setHeightForMaxAvoidance(packet.getHeightForMaxAvoidance());
       if (packet.getClusterResolution() != noValue)
          setClusterResolution(packet.getClusterResolution());
       if (packet.getExplorationDistanceFromStartGoal() != noValue)

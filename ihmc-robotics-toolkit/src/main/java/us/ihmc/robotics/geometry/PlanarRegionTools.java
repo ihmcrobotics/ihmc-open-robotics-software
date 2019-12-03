@@ -4,12 +4,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.*;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -40,25 +39,18 @@ public class PlanarRegionTools
     */
    public static boolean isPlanarRegionAAbovePlanarRegionB(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
    {
+      // first, check the bounding boxes
+      double minBzInWorld = regionB.getBoundingBox3dInWorld().getMinZ();
+      double maxBzInWorld = regionB.getBoundingBox3dInWorld().getMaxZ();
+
+      // TODO add an initial bounding box check
+
       ConvexPolygon2D convexHullA = regionA.getConvexHull();
-      ConvexPolygon2D convexHullB = regionB.getConvexHull();
 
-      RigidBodyTransform transformToWorldA = new RigidBodyTransform();
-      regionA.getTransformToWorld(transformToWorldA);
-
-      RigidBodyTransform transformToWorldB = new RigidBodyTransform();
-      regionB.getTransformToWorld(transformToWorldB);
-      RigidBodyTransform transformFromWorldToLocalB = new RigidBodyTransform();
-      transformFromWorldToLocalB.set(transformToWorldB);
-      transformFromWorldToLocalB.invert();
+      RigidBodyTransformReadOnly transformToWorldA = regionA.getTransformToWorld();
+      RigidBodyTransformReadOnly transformFromWorldToLocalB = regionB.getTransformToLocal();
 
       List<? extends Point2DReadOnly> verticesA = convexHullA.getPolygonVerticesView();
-      List<? extends Point2DReadOnly> verticesB = convexHullB.getPolygonVerticesView();
-
-      double[] regionBMinAndMaxZ = PlanarRegionTools.getMinAndMaxZInWorld(verticesB, transformToWorldB);
-
-      double minBzInWorld = regionBMinAndMaxZ[0];
-      double maxBzInWorld = regionBMinAndMaxZ[1];
 
       Point3D pointAInWorld = new Point3D();
       Point3D pointAInLocalB = new Point3D();
@@ -82,7 +74,7 @@ public class PlanarRegionTools
       return false;
    }
 
-   private static double[] getMinAndMaxZInWorld(List<? extends Point2DReadOnly> pointsInLocal, RigidBodyTransform transformToWorld)
+   private static double[] getMinAndMaxZInWorld(List<? extends Point2DReadOnly> pointsInLocal, RigidBodyTransformReadOnly transformToWorld)
    {
       double minZ = Double.POSITIVE_INFINITY;
       double maxZ = Double.NEGATIVE_INFINITY;
@@ -701,8 +693,7 @@ public class PlanarRegionTools
     */
    public static double computeMinHeightOfRegionAAboveRegionB(PlanarRegion regionA, PlanarRegion regionB)
    {
-      RigidBodyTransform transformFromAToWorld = new RigidBodyTransform();
-      regionA.getTransformToWorld(transformFromAToWorld);
+      RigidBodyTransformReadOnly transformFromAToWorld = regionA.getTransformToWorld();
 
       double minZOfAProjectedToB = Double.POSITIVE_INFINITY;
       ConvexPolygon2D convexHullInLocalA = regionA.getConvexHull();
@@ -719,8 +710,7 @@ public class PlanarRegionTools
          }
       }
 
-      RigidBodyTransform transformFromBToWorld = new RigidBodyTransform();
-      regionB.getTransformToWorld(transformFromBToWorld);
+      RigidBodyTransformReadOnly transformFromBToWorld = regionB.getTransformToWorld();
 
       double minZOfBProjectedToA = Double.POSITIVE_INFINITY;
       ConvexPolygon2D convexHullInLocalB = regionB.getConvexHull();
@@ -933,58 +923,79 @@ public class PlanarRegionTools
    /**
     * Check if the vertical projections of the convex hulls of two planar regions overlap within epsilon.
     */
-   public static boolean isRegionAOverlapingWithRegionB(PlanarRegion regionOne, PlanarRegion regionTwo, double epsilon)
+   public static boolean isRegionAOverlappingWithRegionB(PlanarRegion regionOne, PlanarRegion regionTwo, double epsilon)
    {
-      ConvexPolygon2D convexHullOne = getVerticallyProjectedConvexHull(regionOne);
-      ConvexPolygon2D convexHullTwo = getVerticallyProjectedConvexHull(regionTwo);
+      BoundingBox2DReadOnly boundingBoxOne = getVerticallyProjectedBoundingBox(regionOne);
+      BoundingBox2DReadOnly boundingBoxTwo = getVerticallyProjectedBoundingBox(regionTwo);
 
-      boolean boundingBoxesOfProjectionsIntersect = convexHullOne.getBoundingBox().intersectsEpsilon(convexHullTwo.getBoundingBox(), epsilon);
-      return boundingBoxesOfProjectionsIntersect;
+      // first check the bounding boxes
+      if (!boundingBoxOne.intersectsEpsilon(boundingBoxTwo, epsilon))
+         return false;
 
-      //++++++JerryPratt: Fix this and use this if you want it to be more accurate. However, if this is just for approximate tests and can have false positives, then bounding boxes are fine.
-      //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+//      ConvexPolygon2D convexHullOne = getVerticallyProjectedConvexHull(regionOne);
+//      ConvexPolygon2D convexHullTwo = getVerticallyProjectedConvexHull(regionTwo);
+
+      return true;
+      //++++++JerryPratt: FixMe fix this and use this if you want it to be more accurate.
+//      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+   }
+
+   public static BoundingBox2DReadOnly getVerticallyProjectedBoundingBox(PlanarRegion planarRegion)
+   {
+      BoundingBox3DReadOnly boundingBox3D = planarRegion.getBoundingBox3dInWorld();
+      Point3DReadOnly maxPoint = boundingBox3D.getMaxPoint();
+      Point3DReadOnly minPoint = boundingBox3D.getMinPoint();
+      return new BoundingBox2D(minPoint.getX(), minPoint.getY(), maxPoint.getX(), maxPoint.getY());
    }
 
    public static ConvexPolygon2D getVerticallyProjectedConvexHull(PlanarRegion planarRegion)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
-
-      return projectPolygonVertically(transformToWorld, planarRegion.getConvexHull());
+      return projectPolygonVertically(planarRegion.getTransformToWorld(), planarRegion.getConvexHull());
    }
 
-   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransform transformToWorld, ConvexPolygon2D polygonToProjectVertically)
+   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2D polygonInLocalToProjectVertically)
    {
-      List<? extends Point2DReadOnly> verticesToProject = polygonToProjectVertically.getPolygonVerticesView();
-      List<Point2D> projectedVertices = new ArrayList<>();
+      List<? extends Point2DReadOnly> verticesToProject = polygonInLocalToProjectVertically.getPolygonVerticesView();
+
+      ConvexPolygon2D projectedPolygon = new ConvexPolygon2D();
 
       for (Point2DReadOnly vertexToProject : verticesToProject)
       {
          Point3D pointToProjectInWorld = new Point3D(vertexToProject);
-         {
-            transformToWorld.transform(pointToProjectInWorld);
-            projectedVertices.add(new Point2D(pointToProjectInWorld));
-         }
+         transformToWorld.transform(pointToProjectInWorld);
+         projectedPolygon.addVertex(pointToProjectInWorld.getX(), pointToProjectInWorld.getY());
       }
 
-      return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(projectedVertices));
+      return projectedPolygon;
    }
 
    //TODO: Should be more efficient way to do this check. And should be moved to Euclid Polygon Tools.
    public static boolean doPolygonsIntersect(ConvexPolygon2D polygonOne, ConvexPolygon2D polygonTwo, double epsilon)
    {
-      //TODO: Hack for lines since methods below crash when only two points:
       if (polygonOne.getNumberOfVertices() == 2)
       {
-         double rectangleWidth = 0.001;
-         polygonOne = createSmallRectangleFromLineSegment(polygonOne, rectangleWidth);
+         if (polygonTwo.getNumberOfVertices() == 2)
+         {
+            return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(new Point3D(polygonOne.getVertex(0)), new Point3D(polygonOne.getVertex(1)), new Point3D(polygonTwo.getVertex(0)), new Point3D(polygonTwo.getVertex(1))) < epsilon;
+         }
+         else
+         {
+            Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonOne.getVertex(0), polygonOne.getVertex(1),
+                                                                                                                    polygonTwo.getVertexBufferView(),
+                                                                                                                    polygonTwo.getNumberOfVertices(),
+                                                                                                                    polygonTwo.isClockwiseOrdered());
+            return intersections != null;
+         }
+      }
+      else if (polygonTwo.getNumberOfVertices() == 2)
+      {
+         Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonTwo.getVertex(0), polygonTwo.getVertex(1),
+                                                                                                                 polygonOne.getVertexBufferView(),
+                                                                                                                 polygonOne.getNumberOfVertices(),
+                                                                                                                 polygonOne.isClockwiseOrdered());
+         return intersections != null;
       }
 
-      if (polygonTwo.getNumberOfVertices() == 2)
-      {
-         double rectangleWidth = 0.001;
-         polygonTwo = createSmallRectangleFromLineSegment(polygonTwo, rectangleWidth);
-      }
 
       //TODO: Inefficient:
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
