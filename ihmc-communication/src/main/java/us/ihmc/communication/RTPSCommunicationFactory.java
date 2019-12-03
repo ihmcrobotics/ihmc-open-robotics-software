@@ -64,7 +64,13 @@ public class RTPSCommunicationFactory
       if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet))
       {
          String restrictionHost = NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet);
-         System.out.println("Scanning interfaces for restriction: " +  restrictionHost);
+         LogTools.info("Scanning interfaces for restriction: " +  restrictionHost);
+
+         SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
+         LogTools.info("Restriction subnet info: " + restrictionSubnetInfo);
+         LogTools.info("Restriction address: " + restrictionSubnetInfo.getAddress());
+         LogTools.info("Restriction Netmask: " + restrictionSubnetInfo.getNetmask());
+
          for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
          {
             InetAddress address = interfaceAddress.getAddress();
@@ -72,15 +78,19 @@ public class RTPSCommunicationFactory
             if (address instanceof Inet4Address)
             {
                short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
-               SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
 
                String interfaceHost = address.getHostAddress();
                SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + Short.toString(netmaskAsShort)).getInfo();
 
-               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress());
+               LogTools.info("Interface Subnet Info: " + interfaceSubnetInfo);
+               LogTools.info("Interface address: " + interfaceSubnetInfo.getAddress());
+               LogTools.info("Interface netmask: " + interfaceSubnetInfo.getNetmask());
+
+//               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress()); -- This worked on Windows, but not Linux: Doug
+               boolean inRange = restrictionSubnetInfo.isInRange(interfaceSubnetInfo.getAddress()); // This works on Linux. Hopefully works on Windows?
                if (inRange)
                {
-                  System.out.println("Found address in range: " + address);
+                  LogTools.info("Found address in range: " + address);
                   foundAddressRestriction = address;
                   break;
                }
