@@ -17,19 +17,36 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
 
    private PlanarRegionsList planarRegionsList;
-   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
+   private final BooleanSupplier checkForPathCollisions;
+   private final DoubleSupplier idealFootstepWidth;
+   private final DoubleSupplier heightOffset;
+   private final DoubleSupplier heightExtrusion;
 
    public ObstacleBetweenNodesChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
-      this.parameters = parameters;
+      this(snapper, parameters::checkForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
+   }
+
+   public ObstacleBetweenNodesChecker(FootstepNodeSnapper snapper,
+                                      BooleanSupplier checkForPathCollisions,
+                                      DoubleSupplier idealFootstepWidth,
+                                      DoubleSupplier heightOffset,
+                                      DoubleSupplier heightExtrusion)
+   {
       this.snapper = snapper;
+      this.checkForPathCollisions = checkForPathCollisions;
+      this.idealFootstepWidth = idealFootstepWidth;
+      this.heightOffset = heightOffset;
+      this.heightExtrusion = heightExtrusion;
    }
 
    @Override
@@ -52,7 +69,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || !parameters.checkForPathCollisions())
+      if (previousNode == null || !checkForPathCollisions.getAsBoolean())
          return true;
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
@@ -61,8 +78,8 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
 
-      Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
-      Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+      Point3D nodePosition = new Point3D(node.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
+      Point3D previousNodePosition = new Point3D(previousNode.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
 
       snapTransform.transform(nodePosition);
       previousSnapTransform.transform(previousNodePosition);
@@ -85,8 +102,8 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
     */
    private boolean isObstacleBetweenNodes(Point3D nodePosition, Point3D previousNodePosition, List<PlanarRegion> planarRegions)
    {
-      double groundClearance = parameters.getBodyBoxBaseZ();
-      double regionHeight = parameters.getBodyBoxHeight();
+      double groundClearance = heightOffset.getAsDouble();
+      double regionHeight = heightExtrusion.getAsDouble();
       PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, regionHeight);
 
       for (PlanarRegion region : planarRegions)
