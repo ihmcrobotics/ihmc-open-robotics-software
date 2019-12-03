@@ -5,6 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -118,10 +119,11 @@ public class JointStateUpdater
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointStateReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(oneDoFJoint);
 
-         double positionSensorData = sensorMap.getJointPositionOutput(oneDoFJoint);
-         double velocitySensorData = sensorMap.getJointVelocityOutput(oneDoFJoint);
-         double torqueSensorData = sensorMap.getJointTauOutput(oneDoFJoint);
+         double positionSensorData = jointSensorOutput.getPosition();
+         double velocitySensorData = jointSensorOutput.getVelocity();
+         double torqueSensorData = jointSensorOutput.getEffort();
 
          if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {

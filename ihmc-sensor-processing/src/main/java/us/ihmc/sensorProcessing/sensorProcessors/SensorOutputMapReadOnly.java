@@ -8,17 +8,11 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface SensorOutputMapReadOnly extends SensorTimestampHolder
 {
-   public double getJointPositionOutput(OneDoFJointBasics oneDoFJoint);
+   OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint);
 
-   public double getJointVelocityOutput(OneDoFJointBasics oneDoFJoint);
+   List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs();
 
-   public double getJointAccelerationOutput(OneDoFJointBasics oneDoFJoint);
+   List<? extends IMUSensorReadOnly> getIMUOutputs();
 
-   public double getJointTauOutput(OneDoFJointBasics oneDoFJoint);
-
-   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint);
-
-   public List<? extends IMUSensorReadOnly> getIMUOutputs();
-
-   public ForceSensorDataHolderReadOnly getForceSensorOutputs();
+   ForceSensorDataHolderReadOnly getForceSensorOutputs();
 }
