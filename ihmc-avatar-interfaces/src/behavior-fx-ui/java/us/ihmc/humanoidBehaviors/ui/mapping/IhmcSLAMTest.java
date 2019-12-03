@@ -73,7 +73,7 @@ public class IhmcSLAMTest
       StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, stairHeight,
                                                                                                                           stairWidth,
                                                                                                                           stairLength - movingForward,
-                                                                                                                          stairLength + movingForward);
+                                                                                                                          stairLength + movingForward, true);
       IhmcSLAMViewer viewer = new IhmcSLAMViewer();
       viewer.addStereoMessage(messageOne, Color.BLUE);
       viewer.addStereoMessage(messageTwo, Color.GREEN);
