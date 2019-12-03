@@ -206,8 +206,8 @@ public class AvatarEstimatorThread
             forceSensorDataHolderToSend = forceSensorDataHolder;
 
          RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
-         factory.setDefinitionsToSend(estimatorFullRobotModel);
-         factory.setEstimatorOutput(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
+         factory.setDefinitionsToPublish(estimatorFullRobotModel);
+         factory.setSensorSource(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
          factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
          factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
 

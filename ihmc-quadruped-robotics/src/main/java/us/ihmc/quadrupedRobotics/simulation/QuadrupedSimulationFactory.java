@@ -326,8 +326,8 @@ public class QuadrupedSimulationFactory
    private void createPoseCommunicator()
    {
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
-      factory.setDefinitionsToSend(fullRobotModel.get());
-      factory.setEstimatorOutput(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
+      factory.setDefinitionsToPublish(fullRobotModel.get());
+      factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
       factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
       factory.setROS2Info(realtimeRos2Node, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName()));
 

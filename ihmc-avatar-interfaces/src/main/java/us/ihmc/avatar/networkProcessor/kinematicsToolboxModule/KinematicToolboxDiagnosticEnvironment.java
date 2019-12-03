@@ -48,8 +48,8 @@ public class KinematicToolboxDiagnosticEnvironment
 
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
-      factory.setDefinitionsToSend(humanoidFullRobotModel);
-      factory.setEstimatorOutput(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
+      factory.setDefinitionsToPublish(humanoidFullRobotModel);
+      factory.setSensorSource(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
       factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
 
