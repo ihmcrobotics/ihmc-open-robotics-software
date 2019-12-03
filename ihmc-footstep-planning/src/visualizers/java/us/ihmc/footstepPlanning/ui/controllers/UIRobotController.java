@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -24,11 +26,18 @@ public class UIRobotController
    private Button standPrep;
    @FXML
    private Button shutdown;
+   @FXML
+   private Button abortWalking;
+   @FXML
+   private Button pauseWalking;
+   @FXML
+   private Button continueWalking;
 
    @FXML
    private CheckBox enableSupportRegions;
    @FXML
    private Spinner<Double> supportRegionScale;
+   private IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    public void initialize()
    {
@@ -42,6 +51,8 @@ public class UIRobotController
       freeze.setDisable(robotLowLevelMessenger == null);
       standPrep.setDisable(robotLowLevelMessenger == null);
       shutdown.setDisable(robotLowLevelMessenger == null);
+      abortWalking.setDisable(robotLowLevelMessenger == null);
+      pauseWalking.setDisable(robotLowLevelMessenger == null);
    }
 
    @FXML
@@ -77,12 +88,37 @@ public class UIRobotController
    }
 
    @FXML
+   public void abortWalking()
+   {
+      robotLowLevelMessenger.sendAbortWalkingRequest();
+   }
+
+   @FXML
+   public void pauseWalking()
+   {
+      robotLowLevelMessenger.sendPauseWalkingRequest();
+   }
+
+   @FXML
+   public void continueWalking()
+   {
+      robotLowLevelMessenger.sendContinueWalkingRequest();
+   }
+
+   @FXML
    public void sendSupportRegionParameters()
    {
       BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParametersTopic, supportPlanarRegionParametersMessage);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportPlanarRegionParametersMessage);
+   }
+
+   @FXML public void clearREA()
+   {
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
    }
 
    public void attachMessager(JavaFXMessager messager)
@@ -95,5 +131,10 @@ public class UIRobotController
    {
       this.robotLowLevelMessenger = robotLowLevelMessenger;
       updateButtons();
+   }
+
+   public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
+   {
+      this.reaStateRequestPublisher = reaStateRequestPublisher;
    }
 }

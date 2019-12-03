@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

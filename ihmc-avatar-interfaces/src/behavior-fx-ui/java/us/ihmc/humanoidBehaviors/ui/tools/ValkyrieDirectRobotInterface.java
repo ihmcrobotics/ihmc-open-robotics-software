@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.tools;
 
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -13,11 +15,21 @@ import us.ihmc.ros2.Ros2Node;
 public class ValkyrieDirectRobotInterface implements RobotLowLevelMessenger
 {
    private final IHMCROS2Publisher<HighLevelStateMessage> highLevelStatePublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public ValkyrieDirectRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
       highLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, subscriberTopicNameGenerator);
+      abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
+   }
+
+   @Override
+   public void sendAbortWalkingRequest()
+   {
+      abortWalkingPublisher.publish(new AbortWalkingMessage());
    }
 
    @Override
@@ -34,5 +46,21 @@ public class ValkyrieDirectRobotInterface implements RobotLowLevelMessenger
       HighLevelStateMessage message = new HighLevelStateMessage();
       message.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
       highLevelStatePublisher.publish(message);
+   }
+
+   @Override
+   public void sendPauseWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(true);
+      pauseWalkingPublisher.publish(message);
+   }
+
+   @Override
+   public void sendContinueWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(false);
+      pauseWalkingPublisher.publish(message);
    }
 }

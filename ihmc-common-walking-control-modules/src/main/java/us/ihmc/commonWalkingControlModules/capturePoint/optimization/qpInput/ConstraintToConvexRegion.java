@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
@@ -35,6 +36,10 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
 
    /** convex polygon in which to constrain the variable. */
    private final ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+
+   private final ConvexPolygon2D scaledConvexPolygon = new ConvexPolygon2D();
+
+   private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
    /**
     * Creates the Constraint To Convex Region. Refer to the class documentation: {@link ConstraintToConvexRegion}.
@@ -160,7 +165,8 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
     */
    public void formulateConstraint()
    {
-      PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, deltaInside);
+      scaler.scaleConvexPolygon(convexPolygon, deltaInside, scaledConvexPolygon);
+      PolygonWiggler.convertToInequalityConstraints(scaledConvexPolygon, Aineq, bineq, 0.0);
       CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 

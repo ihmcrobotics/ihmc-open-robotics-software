@@ -28,6 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -59,28 +60,30 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
-      assertEquals(1, naviableRegionsList.size());
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      assertEquals(1, navigableRegionsList.size());
 
-      NavigableRegion navigableRegion = naviableRegionsList.get(0);
+      NavigableRegion navigableRegion = navigableRegionsList.get(0);
       assertEquals(97, navigableRegion.getMapId());
 
-      InterRegionConnectionFilter filter = new InterRegionConnectionFilter()
+      double maxDistance = 0.1;
+      InterRegionConnectionFilter interRegionFilter = new InterRegionConnectionFilter()
       {
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {
             double distance = source.distance(target);
-            return distance < 0.1;
+            return distance < getMaximumInterRegionConnectionDistance();
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
-            return 0.1;
+            return maxDistance;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
+      // TODO should this use a separate preferred filter?
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, interRegionFilter, interRegionFilter, interRegionFilter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -239,22 +242,24 @@ public class VisibilityGraphTest
       assertEquals(77, navigableRegion0.getMapId());
       assertEquals(63, navigableRegion1.getMapId());
 
+      double maxDistance = 0.58;
       InterRegionConnectionFilter filter = new InterRegionConnectionFilter()
       {
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {
             double distance = source.distance(target);
-            return distance < 0.58;
+            return distance < getMaximumInterRegionConnectionDistance();
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
-            return 0.58;
+            return maxDistance;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
+      // TODO should this use a separate preferred filter?
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -468,22 +473,24 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
+      double maxDistance = 0.58;
       InterRegionConnectionFilter filter = new InterRegionConnectionFilter()
       {
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {
             double distance = source.distance(target);
-            return distance < 0.58;
+            return distance < getMaximumInterRegionConnectionDistance();
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
-            return 0.58;
+            return maxDistance;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
+      // TODO should this use a different preferred filter?
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -579,30 +586,32 @@ public class VisibilityGraphTest
       NavigableRegions navigableRegions = new NavigableRegions(parameters, planarRegions);
       navigableRegions.createNavigableRegions();
 
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
-      assertEquals(2, naviableRegionsList.size());
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      assertEquals(2, navigableRegionsList.size());
 
-      NavigableRegion navigableRegion0 = naviableRegionsList.get(0);
-      NavigableRegion navigableRegion1 = naviableRegionsList.get(1);
+      NavigableRegion navigableRegion0 = navigableRegionsList.get(0);
+      NavigableRegion navigableRegion1 = navigableRegionsList.get(1);
       assertEquals(77, navigableRegion0.getMapId());
       assertEquals(63, navigableRegion1.getMapId());
 
+      double maxDistance = 0.58;
       InterRegionConnectionFilter filter = new InterRegionConnectionFilter()
       {
          @Override
          public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
          {
             double distance = source.distance(target);
-            return distance < 0.58;
+            return distance < getMaximumInterRegionConnectionDistance();
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
          {
-            return 0.58;
+            return maxDistance;
          }
       };
-      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, parameters);
+      // TODO should this use a separate preferred filter?
+      VisibilityGraph visibilityGraph = new VisibilityGraph(navigableRegions, filter, filter, filter, parameters);
       visibilityGraph.fullyExpandVisibilityGraph();
 
       ArrayList<VisibilityGraphNavigableRegion> visibilityGraphNavigableRegions = visibilityGraph.getVisibilityGraphNavigableRegions();
@@ -962,7 +971,7 @@ public class VisibilityGraphTest
 
    private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
    {
-      return new DefaultVisibilityGraphParameters()
+      VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters()
       {
          @Override
          public PlanarRegionFilter getPlanarRegionFilter()
@@ -977,11 +986,7 @@ public class VisibilityGraphTest
             };
          }
 
-         @Override
-         public double getClusterResolution()
-         {
-            return 0.501;
-         }
+
 
          @Override
          public NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
@@ -996,6 +1001,9 @@ public class VisibilityGraphTest
             };
          }
       };
+      parameters.setClusterResolution(0.501);
+      parameters.setIncludePreferredExtrusions(false);
+      return parameters;
    }
 
 }

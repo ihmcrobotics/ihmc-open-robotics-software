@@ -30,10 +30,11 @@ public class AtlasStepInPlaceBehaviorTest
    private AvatarSimulation avatarSimulation;
    private AtlasRobotModel robotModel;
 
+   @Disabled
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");

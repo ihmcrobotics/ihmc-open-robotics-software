@@ -1,3 +1,4 @@
+
 # This message commands the finger controller to move robot valkyrie finger.
 int8 ROBOT_SIDE_LEFT=0
 

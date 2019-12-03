@@ -186,10 +186,11 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    {
       // The gains were computed for simDT = 0.0001sec. This assumes that the gains should be inversely proportional to the simulation DT.
       double simDTRef = 0.0001;
+      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       if (useSoftGroundContactParameters)
       {
-         double scale = Math.pow(simDTRef / simDT, 0.25);
+         double scale = modelScale * Math.pow(simDTRef / simDT, 0.25);
          linearGroundContactModel.setZStiffness(4000.0 * scale);
          linearGroundContactModel.setZDamping(750.0 * scale);
          linearGroundContactModel.setXYStiffness(50000.0 * scale);
@@ -197,7 +198,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       }
       else
       {
-         double scale = Math.pow(simDTRef / simDT, 0.6);
+         double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
          linearGroundContactModel.setZStiffness(2000.0 * scale);
          linearGroundContactModel.setZDamping(1500.0 * scale);
          linearGroundContactModel.setXYStiffness(50000.0 * scale);
@@ -207,19 +208,21 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
    {
+      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
+
       if (useSoftGroundContactParameters)
       {
-         bidirectionGroundContactModel.setZStiffness(4000.0);
-         bidirectionGroundContactModel.setZDamping(750.0);
-         bidirectionGroundContactModel.setXYStiffness(50000.0);
-         bidirectionGroundContactModel.setXYDamping(1000.0);
+         bidirectionGroundContactModel.setZStiffness(modelScale * 4000.0);
+         bidirectionGroundContactModel.setZDamping(modelScale * 750.0);
+         bidirectionGroundContactModel.setXYStiffness(modelScale * 50000.0);
+         bidirectionGroundContactModel.setXYDamping(modelScale * 1000.0);
       }
       else
       {
-         bidirectionGroundContactModel.setZStiffness(2000.0);
-         bidirectionGroundContactModel.setZDamping(1500.0);
-         bidirectionGroundContactModel.setXYStiffness(50000.0);
-         bidirectionGroundContactModel.setXYDamping(2000.0);
+         bidirectionGroundContactModel.setZStiffness(modelScale * 2000.0);
+         bidirectionGroundContactModel.setZDamping(modelScale * 1500.0);
+         bidirectionGroundContactModel.setXYStiffness(modelScale * 50000.0);
+         bidirectionGroundContactModel.setXYDamping(modelScale * 2000.0);
       }
    }
 }

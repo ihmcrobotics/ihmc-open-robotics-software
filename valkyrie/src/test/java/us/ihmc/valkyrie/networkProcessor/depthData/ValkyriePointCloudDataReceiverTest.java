@@ -13,7 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @Disabled
 public class ValkyriePointCloudDataReceiverTest extends HumanoidPointCloudDataReceiverTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    @Test

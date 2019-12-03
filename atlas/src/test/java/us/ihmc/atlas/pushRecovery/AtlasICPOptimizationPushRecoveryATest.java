@@ -1,5 +1,6 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -94,6 +95,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       return 0.8;
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
@@ -102,6 +104,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationBackwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
@@ -110,6 +113,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationForwardPushInSlowSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
@@ -118,6 +122,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationForwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
@@ -126,6 +131,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationLongInwardPushInSwing() throws Exception
@@ -134,6 +140,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationLongInwardPushInSwing();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
@@ -142,6 +149,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
+   @Tag("humanoid-push-recovery-slow")
    @Override
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception

@@ -36,8 +36,8 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @Disabled
 public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBodyTrajectoryToolboxControllerTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-   private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+   private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -36,7 +36,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
 
    private final LidarScanPublisher lidarScanPublisher;
-   private final StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
+   private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
+   private final AtlasPointCloudSensorManager pointCloudSensorManager;
+
+   private static final boolean ENABLE_STEREO_PUBLISHER = false;
+   private static final boolean ENABLE_DEPTH_PUBLISHER = true;
+   private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = true;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -46,8 +51,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final String robotName;
 
    public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
-                                  RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation,
-                                  DRCRobotJointMap jointMap, RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
+                                  RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
+                                  RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
    {
       this.robotName = robotName;
       this.rosClockCalculator = rosClockCalculator;
@@ -62,9 +67,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
 
-      stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
-      stereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
+      multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
+      multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
+      pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory, ros2Node, rcdTopicName, rosClockCalculator,
+                                                                 USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
    }
 
    @Override
@@ -102,7 +109,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.receiveLidarFromROSAsPointCloud2WithSource(multisenseLidarParameters.getRosTopic(), rosMainNode);
       lidarScanPublisher.setScanFrameToWorldFrame();
 
-      stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS(multisenseStereoParameters.getRosTopic(), rosMainNode);
+      if (ENABLE_STEREO_PUBLISHER)
+         multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
+      if (ENABLE_DEPTH_PUBLISHER)
+         pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
                                                                                     rosClockCalculator, multisenseLeftEyeCameraParameters,
@@ -120,7 +130,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
       lidarScanPublisher.start();
-      stereoVisionPointCloudPublisher.start();
+
+      if (ENABLE_STEREO_PUBLISHER)
+         multisenseStereoVisionPointCloudPublisher.start();
+      if (ENABLE_DEPTH_PUBLISHER)
+         pointCloudSensorManager.start();
 
       rosClockCalculator.setROSMainNode(rosMainNode);
 
@@ -137,5 +151,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void connect() throws IOException
    {
+
    }
+
 }

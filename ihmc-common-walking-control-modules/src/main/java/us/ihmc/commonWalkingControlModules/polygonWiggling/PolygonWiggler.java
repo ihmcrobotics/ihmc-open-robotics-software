@@ -7,6 +7,7 @@ import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -287,6 +288,16 @@ public class PolygonWiggler
 
    public static void convertToInequalityConstraintsPoint(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b)
    {
+      convertToInequalityConstraintsPoint(polygon.getVertex(0), A, b);
+   }
+
+   public static void convertToInequalityConstraintsPoint(Point2DReadOnly point, DenseMatrix64F A, DenseMatrix64F b)
+   {
+      convertToInequalityConstraintsPoint(point.getX(), point.getY(), A, b);
+   }
+
+   public static void convertToInequalityConstraintsPoint(double x, double y, DenseMatrix64F A, DenseMatrix64F b)
+   {
       A.reshape(4, 2);
       b.reshape(4, 1);
 
@@ -299,49 +310,61 @@ public class PolygonWiggler
       A.set(3, 0, 0.0);
       A.set(3, 1, -1.0);
 
-      Point2DReadOnly point = polygon.getVertex(0);
-
-      b.set(0, 0, point.getX());
-      b.set(1, 0, point.getY());
-      b.set(2, 0, -point.getX());
-      b.set(3, 0, -point.getY());
+      b.set(0, 0, x);
+      b.set(1, 0, y);
+      b.set(2, 0, -x);
+      b.set(3, 0, -y);
    }
 
    public static void convertToInequalityConstraintsLine(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
-      A.reshape(4, 2);
-      b.reshape(4, 1);
-
-      Vector2D tempVector = new Vector2D();
-
       // constrain to lying on 2d line
       Point2DReadOnly firstPoint = polygon.getVertex(0);
       Point2DReadOnly secondPoint = polygon.getNextVertex(0);
 
-      tempVector.set(secondPoint);
-      tempVector.sub(firstPoint);
+      // if the distance isn't long enough, then this is equivalently a line constraint.
+      if (firstPoint.distance(secondPoint) <= 2.0 * deltaInside)
+      {
+         double x = 0.5 * (firstPoint.getX() + secondPoint.getX());
+         double y = 0.5 * (firstPoint.getY() + secondPoint.getY());
 
-      tempVector.normalize();
+         convertToInequalityConstraintsPoint(x, y, A, b);
+      }
+      else
+      {
+         A.reshape(4, 2);
+         b.reshape(4, 1);
 
-      // set regular line
-      A.set(0, 0, -tempVector.getY());
-      A.set(0, 1, tempVector.getX());
-      b.set(0, firstPoint.getY() * tempVector.getX() - firstPoint.getX() * tempVector.getY());
+         double vectorX = secondPoint.getX() - firstPoint.getX();
+         double vectorY = secondPoint.getY() - firstPoint.getY();
 
-      A.set(1, 0, tempVector.getY());
-      A.set(1, 1, -tempVector.getX());
-      b.set(1, -b.get(0));
+         // set regular line. This is done by saying y <= ax + b and y >= ax + b, which only has a solution at when y = ax + b.
+         /*
+         The standard line equation is y <= ax + b. This can then be written as -ax + y <= b. Another way to write this is then the same thing as saying
+         -(y2 - y1) / (x2 - x1) x + y <= y1 - (y2 - y1) / (x2 - x1) x1, which can then again be rewritten as
+         -(y2 - y1) x + (x2 - x1) y <= (x2 - x1) y1 - (y2 - y1) x1.
 
+         If we say that vy = y2 - y1 and vx = x2 - x1, then this is simply -vy x + vx y <= vx y1 - vy x1. We can additionally shift this inside by d by saying
+         -vy x + vx y <= vx y1 - vy x1 - d.
+          */
+         A.set(0, 0, -vectorY);
+         A.set(0, 1, vectorX);
+         b.set(0, firstPoint.getY() * vectorX - firstPoint.getX() * vectorY);
 
-      // set first point boundary line // // TODO: 5/2/17 add in deltaInside
-      A.set(2, 0, -tempVector.getX());
-      A.set(2, 1, -tempVector.getY());
-      b.set(2, -deltaInside - firstPoint.getX() * tempVector.getX() - firstPoint.getY() * tempVector.getY());
+         A.set(1, 0, vectorY);
+         A.set(1, 1, -vectorX);
+         b.set(1, -b.get(0));
 
-      // set second point boundary line
-      A.set(3, 0, tempVector.getX());
-      A.set(3, 1, tempVector.getY());
-      b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
+         // set first point boundary line
+         A.set(2, 0, -vectorX);
+         A.set(2, 1, -vectorY);
+         b.set(2, -deltaInside - firstPoint.getX() * vectorX - firstPoint.getY() * vectorY);
+
+         // set second point boundary line
+         A.set(3, 0, vectorX);
+         A.set(3, 1, vectorY);
+         b.set(3, -deltaInside + secondPoint.getX() * vectorX + secondPoint.getY() * vectorY);
+      }
    }
 
    public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
@@ -383,7 +406,7 @@ public class PolygonWiggler
       }
    }
 
-   private static boolean isAllowed(int index, int... indicesToIgnore)
+   private static boolean isAllowed(int index, int[] indicesToIgnore)
    {
       for (int i = 0; i < indicesToIgnore.length; i++)
       {

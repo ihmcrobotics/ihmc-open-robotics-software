@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -50,14 +51,12 @@ public class DCMPlanner implements DCMPlannerInterface
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
-   private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
-   private final YoDouble controllerTime;
-   private final YoDouble omega;
+   private final YoDouble omega = new YoDouble("omegaForPlanning", registry);
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
-   private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
+   private final YoFramePoint3D perfectVRPPosition = new YoFramePoint3D("perfectVRPPosition", worldFrame, registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
@@ -78,27 +77,25 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final boolean debug;
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(dcmPlannerParameters, omega, gravity, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+      this(dcmPlannerParameters, nominalHeight, gravity, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
    {
-      this.omega = omega;
-      this.controllerTime = robotTimestamp;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      omega.addVariableChangedListener(v ->
-            comHeight.set(gravity / MathTools.square(omega.getDoubleValue()))
-      );
+      comHeight.addVariableChangedListener(v ->
+            omega.set(Math.sqrt(gravity / comHeight.getDoubleValue())));
+      comHeight.set(nominalHeight);
 
 
       DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
@@ -131,17 +128,8 @@ public class DCMPlanner implements DCMPlannerInterface
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
-   public void clearStepSequence()
-   {
-      stepSequence.clear();
-      numberOfStepsInPlanner.set(0);
-   }
-
-   public void beganStep()
-   {
-   }
-
-   public void completedStep()
+   @Override
+   public void initialize()
    {
    }
 
@@ -149,45 +137,27 @@ public class DCMPlanner implements DCMPlannerInterface
    {
    }
 
-   public void addStepToSequence(QuadrupedTimedStep step)
+   public void setNominalCoMHeight(double comHeight)
    {
-      stepSequence.add(step);
-      numberOfStepsInPlanner.increment();
+      this.comHeight.set(comHeight);
    }
 
-   public void initializeForStanding()
+   /**
+    * The current position {@param currentDCMPosition} must be the DCM position and the current velocity {@param currentDCMVelocity} must be the  DCM Velocity
+    */
+   @Override
+   public void setInitialState(double initialTime, FramePoint3DReadOnly currentDCMPosition, FrameVector3DReadOnly currentDCMVelocity,
+                               FramePoint3DReadOnly copPosition)
    {
-      isStanding.set(true);
-      timedContactSequence.clear();
-      piecewiseConstantCopTrajectory.resetVariables();
-      dcmTrajectory.resetVariables();
+      timeAtStartOfState.set(initialTime);
+      dcmPositionAtStartOfState.set(currentDCMPosition);
+      dcmVelocityAtStartOfState.set(currentDCMVelocity);
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
-                                     FrameVector3DReadOnly currentDCMVelocity)
-   {
-      isStanding.set(false);
-
-      double currentTime = controllerTime.getDoubleValue();
-      boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
-
-      if (isCurrentPlanValid)
-      {
-         // compute dcm trajectory
-         computeDcmTrajectory(currentContactStates);
-
-         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
-         timeAtStartOfState.set(controllerTime.getDoubleValue());
-         computeTransitionTrajectory();
-      }
-   }
-
-   private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
+   private void computeDcmTrajectory(double currentTime, List<RobotQuadrant> currentFeetInContact, List<? extends QuadrupedTimedStep> stepSequence)
    {
       // compute piecewise constant center of pressure plan
-      double currentTime = controllerTime.getDoubleValue();
-      timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
+      timedContactSequence.update(stepSequence, soleFrames, currentFeetInContact, currentTime);
       piecewiseConstantCopTrajectory.initializeTrajectory(currentTime, timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
@@ -251,9 +221,11 @@ public class DCMPlanner implements DCMPlannerInterface
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
    private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
-   public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                   FixedFrameVector3DBasics desiredDCMVelocityToPack)
+   @Override
+   public void computeSetpoints(double currentTime, List<? extends QuadrupedTimedStep> stepSequence, List<RobotQuadrant> currentFeetInContact)
    {
+      isStanding.set(stepSequence.isEmpty());
+
       if (isStanding.getBooleanValue())
       {
          // update desired dcm position
@@ -263,9 +235,8 @@ public class DCMPlanner implements DCMPlannerInterface
       }
       else
       {
-         computeDcmTrajectory(currentContactStates);
+         computeDcmTrajectory(currentTime, currentFeetInContact, stepSequence);
 
-         double currentTime = controllerTime.getDoubleValue();
          dcmTrajectory.computeTrajectory(currentTime);
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
@@ -284,16 +255,12 @@ public class DCMPlanner implements DCMPlannerInterface
          dcmTrajectory.getPositionAtEndOfSwing(finalDCM);
       }
 
-      desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());
-      desiredDCMVelocity.changeFrame(desiredDCMVelocityToPack.getReferenceFrame());
-
       if (debug)
          runOutputDebugChecks();
 
-      desiredDCMPositionToPack.set(desiredDCMPosition);
-      desiredDCMVelocityToPack.set(desiredDCMVelocity);
-
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectCMPPosition);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectVRPPosition);
+      perfectCMPPosition.set(perfectVRPPosition);
+      perfectCMPPosition.subZ(comHeight.getDoubleValue());
    }
 
 
@@ -310,19 +277,55 @@ public class DCMPlanner implements DCMPlannerInterface
       finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCMPosition);
    }
 
-   public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   public FramePoint3DReadOnly getFinalDCMPosition()
    {
-      finalDesiredDCMToPack.setMatchingFrame(finalDCM);
-   }
-
-   @Override
-   public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
-   {
-      desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
+      return finalDCM;
    }
 
    public double getFinalTime()
    {
       return dcmTransitionTrajectory.getFinalTime();
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredDCMPosition()
+   {
+      return desiredDCMPosition;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredDCMVelocity()
+   {
+      return desiredDCMVelocity;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredCoMPosition()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
+   {
+      return null;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getDesiredCoMAcceleration()
+   {
+      return null;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredVRPPosition()
+   {
+      return perfectVRPPosition;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getDesiredECMPPosition()
+   {
+      return perfectCMPPosition;
    }
 }

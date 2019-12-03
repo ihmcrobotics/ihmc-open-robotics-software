@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.behaviorTests;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.behaviorTests.HumanoidHandDesiredConfigurationBehaviorTest;
@@ -12,7 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDesiredConfigurationBehaviorTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -26,6 +27,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("fast")
    @Override
    @Test
    public void testCloseHand() throws SimulationExceededMaximumTimeException
@@ -33,6 +35,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
       super.testCloseHand();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
@@ -40,6 +43,7 @@ public class ValkyrieHandDesiredConfigurationBehaviorTest extends HumanoidHandDe
       super.testPauseAndResumeCloseHand();
    }
 
+   @Tag("humanoid-behaviors-slow")
    @Override
    @Test
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException

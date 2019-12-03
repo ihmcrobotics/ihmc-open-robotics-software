@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -85,6 +86,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+@Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
 {
    private static final boolean VERBOSE = false;

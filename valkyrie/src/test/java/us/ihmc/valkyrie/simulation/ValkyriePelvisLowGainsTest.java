@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -14,9 +15,10 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @Disabled
+@Tag("fast")
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       // Disable joint damping to make sure that damping isn't causing the problem.
       private static final boolean enableJointDamping = false;

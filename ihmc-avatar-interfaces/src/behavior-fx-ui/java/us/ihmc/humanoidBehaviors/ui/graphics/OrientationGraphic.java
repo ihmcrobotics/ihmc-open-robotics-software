@@ -4,9 +4,12 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
@@ -43,9 +46,32 @@ public class OrientationGraphic
       return pose;
    }
 
+   public void setPose(Pose3DReadOnly pose)
+   {
+      this.pose.set(pose);
+      update();
+   }
+
+   public void setPosition(Point3DReadOnly position)
+   {
+      this.pose.setPosition(position);
+      update();
+   }
+
+   public void setOrientation(Orientation3DReadOnly orientation)
+   {
+      this.pose.setOrientation(orientation);
+      update();
+   }
+
    public void update()
    {
       JavaFXGraphicTools.setNodeTransformFromPose(arrow, pose);
+   }
+
+   public void setVisible(boolean visible)
+   {
+      arrow.setVisible(visible);
    }
 
    public Node getNode()

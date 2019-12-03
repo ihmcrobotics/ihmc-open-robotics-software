@@ -43,12 +43,13 @@ public class AtlasPatrolBehaviorTest
    private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
    private Ros2Node ros2Node;
 
+   @Disabled
    @Test
    public void testPatrolBehavior() throws IOException
    {
       new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
 
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");

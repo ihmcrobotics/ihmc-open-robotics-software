@@ -45,7 +45,6 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
       setMaximumZPenetrationOnValleyRegions(Double.POSITIVE_INFINITY);
       setIdealFootstepWidth(0.22);
       setIdealFootstepLength(0.3);
-      setBodyGroundClearance(0.25);
       setBodyBoxWidth(0.7);
       setBodyBoxHeight(1.5);
       setBodyBoxDepth(0.3);

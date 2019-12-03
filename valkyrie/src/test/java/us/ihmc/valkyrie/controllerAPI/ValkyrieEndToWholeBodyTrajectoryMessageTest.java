@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndWholeBodyTrajectoryMessageTest;
@@ -10,7 +11,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBodyTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -24,6 +25,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api-slow-2")
    @Override
    @Test
    public void testIssue47BadChestTrajectoryMessage() throws Exception
@@ -31,6 +33,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
       super.testIssue47BadChestTrajectoryMessage();
    }
 
+   @Tag("controller-api-slow-2")
    @Override
    @Test
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
@@ -38,6 +41,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
       super.testIssue47BadPelvisTrajectoryMessage();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleWaypoint() throws Exception
@@ -45,6 +49,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
       super.testSingleWaypoint();
    }
 
+   @Tag("controller-api-slow-2")
    @Override
    @Test
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
@@ -52,6 +57,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
       super.testSingleWaypointUsingMessageOfMessages();
    }
 
+   @Tag("controller-api-slow-2")
    @Override
    @Test
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception

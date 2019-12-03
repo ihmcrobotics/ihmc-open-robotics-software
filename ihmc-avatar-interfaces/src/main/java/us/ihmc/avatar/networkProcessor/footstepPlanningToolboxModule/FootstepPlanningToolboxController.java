@@ -16,6 +16,8 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -39,16 +41,15 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.SplinePathWithAStarPlanner;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
+import us.ihmc.footstepPlanning.graphSearch.planners.*;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
@@ -57,7 +58,6 @@ import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -72,6 +72,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
+   private static final double timeWithoutRequestBeforeGoingToSleep = 2.5;
+
    private final YoEnum<FootstepPlannerType> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlannerType.class);
    private final EnumMap<FootstepPlannerType, BodyPathAndFootstepPlanner> plannerMap = new EnumMap<>(FootstepPlannerType.class);
 
@@ -80,15 +82,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final AtomicReference<VisibilityGraphsParametersPacket> latestVisibilityGraphsParametersReference = new AtomicReference<>(null);
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
-   private final YoBoolean isDone = new YoBoolean("isDone", registry);
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
-   private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoDouble timeout = new YoDouble("ToolboxTimeout", registry);
+   private final YoDouble bestEffortTimeout = new YoDouble("ToolboxBestEffortTimeout", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
+   private final Stopwatch stopwatch = new Stopwatch();
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
-
-   private double dt;
 
    private final FootstepPlannerParametersBasics footstepPlanningParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphsParameters;
@@ -96,10 +96,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    public FootstepPlanningToolboxController(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                                             VisibilityGraphsParametersBasics visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
-                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
-      this.dt = dt;
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame;
@@ -124,7 +123,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
-      isDone.set(true);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
    }
 
@@ -194,16 +192,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
-      toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 20.0)
-      {
-         if (DEBUG)
-            LogTools.info("Hard timeout at " + toolboxTime.getDoubleValue());
-         reportMessage(packStepResult(null, null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
-         isDone.set(true);
-         return;
-      }
-
       BodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
       if (planarRegionsList.isPresent())
@@ -249,19 +237,22 @@ public class FootstepPlanningToolboxController extends ToolboxController
          LogTools.info("Finishing up the planner");
       plannerMap.get(activePlanner.getEnumValue()).cancelPlanning();
       reportMessage(packStatus(FootstepPlannerStatus.IDLE));
-      isDone.set(true);
    }
 
    @Override
    public boolean initialize()
    {
-      isDone.set(false);
+      stopwatch.start();
       requestedPlanarRegions.set(false);
-      toolboxTime.set(0.0);
 
-      FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
-      if (request == null)
-         return false;
+      FootstepPlanningRequestPacket request = null;
+      while(request == null)
+      {
+         request = latestRequestReference.getAndSet(null);
+         ThreadTools.sleep(10);
+         if(stopwatch.lapElapsed() > timeWithoutRequestBeforeGoingToSleep)
+            return false;
+      }
 
       planId.set(request.getPlannerRequestId());
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
@@ -331,18 +322,37 @@ public class FootstepPlanningToolboxController extends ToolboxController
          planner.setTimeout(Double.POSITIVE_INFINITY);
       }
 
+      double bestEffortTimeout = request.getBestEffortTimeout();
+      if (bestEffortTimeout > 0.0 && Double.isFinite(bestEffortTimeout))
+      {
+         planner.setBestEffortTimeout(bestEffortTimeout);
+         this.bestEffortTimeout.set(bestEffortTimeout);
+
+         if (DEBUG)
+         {
+            LogTools.info("Setting best effort timeout to " + bestEffortTimeout);
+         }
+      }
+      else
+      {
+         planner.setBestEffortTimeout(0.0);
+      }
+
       return true;
    }
 
    private void sendMessageToUI(String message)
    {
+      if (DEBUG)
+         LogTools.info(message);
+
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(message));
    }
 
    @Override
    public boolean isDone()
    {
-      return isDone.getBooleanValue();
+      return true;
    }
 
    private BodyPathPlanMessage packPathResult(BodyPathPlan bodyPathPlan, FootstepPlanningResult status)
@@ -445,8 +455,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
          sendListOfStatistics((ListOfStatistics) plannerStatistics);
          break;
       case VISIBILITY_GRAPH:
-         reportMessage(VisibilityGraphMessagesConverter
-                             .convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), (VisibilityGraphStatistics) plannerStatistics));
+         reportVisibilityGraphStatistics((VisibilityGraphStatistics) plannerStatistics);
+         break;
+      case GRAPH_SEARCH:
+         reportGraphSearchStatistics((GraphSearchStatistics) plannerStatistics);
          break;
       }
    }
@@ -455,6 +467,17 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       while (listOfStatistics.getNumberOfStatistics() > 0)
          sendPlannerStatistics(listOfStatistics.pollStatistics());
+   }
+
+   private void reportVisibilityGraphStatistics(VisibilityGraphStatistics plannerStatistics)
+   {
+      reportMessage(VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId.getIntegerValue(), plannerStatistics));
+   }
+
+   private void reportGraphSearchStatistics(GraphSearchStatistics graphSearchStatistics)
+   {
+      reportMessage(FootstepPlannerMessageConverter.convertExpandedNodesToMessage(planId.getIntegerValue(), graphSearchStatistics.getExpandedNodes()));
+      reportMessage(FootstepPlannerMessageConverter.convertFullGraphToMessage(planId.getIntegerValue(), graphSearchStatistics.getFullGraph()));
    }
 
    public void setTextToSpeechPublisher(IHMCRealtimeROS2Publisher<TextToSpeechPacket> publisher)

@@ -1,3 +1,5 @@
+# This message is part of the IHMC footstep planning module.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
@@ -48,6 +50,9 @@ float64 goal_yaw_proximity
 
 # Timeout in seconds
 float64 timeout
+
+# Best effort timeout in seconds
+float64 best_effort_timeout
 
 # Max body path length if using body path
 float64 horizon_length

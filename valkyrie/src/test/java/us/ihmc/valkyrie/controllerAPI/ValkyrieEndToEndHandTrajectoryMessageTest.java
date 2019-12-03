@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -33,12 +34,11 @@ import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTable
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       @Override
       public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
@@ -47,6 +47,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       };
    };
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
@@ -54,6 +55,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testCustomControlFrame();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -61,6 +63,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
@@ -68,6 +71,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testMultipleTrajectoryPoints();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testQueuedMessages() throws Exception
@@ -75,6 +79,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testQueuedMessages();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
@@ -82,6 +87,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testQueueStoppedWithOverrideMessage();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
@@ -89,6 +95,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testQueueWithWrongPreviousId();
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testSingleTrajectoryPoint() throws Exception
@@ -96,6 +103,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testSingleTrajectoryPoint();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
@@ -103,6 +111,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       super.testStopAllTrajectory();
    }
 
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testHoldHandWhileWalking() throws SimulationExceededMaximumTimeException
@@ -137,7 +146,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       calculator.compute(2.5);
       FrameEuclideanTrajectoryPointList trajectoryPoints = calculator.getTrajectoryPoints();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
-      for (int i=0;i<trajectoryPoints.getNumberOfTrajectoryPoints();i++)
+      for (int i = 0; i < trajectoryPoints.getNumberOfTrajectoryPoints(); i++)
       {
          FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
          double time = trajectoryPoint.getTime() + firstTrajectoryTime;
@@ -170,6 +179,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       assertEquals(testEnvironment.getBallRadius(), ballHeight, 0.01);
    }
 
+   @Tag("controller-api-2")
    @Override
    @Test
    public void testStreaming() throws Exception
@@ -178,19 +188,19 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   public DRCRobotModel getRobotModel()
+   public ValkyrieRobotModel getRobotModel()
    {
       return robotModel;
    }
 
    public DRCRobotModel getRobotModelWithHandContacts()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      return new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public RobotContactPointParameters<RobotSide> getContactPointParameters()
          {
-            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), null);
+            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), robotModel.getRobotPhysicalProperties(), null);
             contactPointParameters.createAdditionalHandContactPoints();
             return contactPointParameters;
          }
@@ -212,6 +222,6 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    @Override
    public double getLegLength()
    {
-      return ValkyriePhysicalProperties.getLegLength();
+      return robotModel.getRobotPhysicalProperties().getLegLength();
    }
 }

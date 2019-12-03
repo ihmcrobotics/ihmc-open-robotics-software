@@ -28,11 +28,11 @@ apply plugin: 'java'
 
 repositories {
    maven {
-      url  "http://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
+      url  "https://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
    }
 
    maven {
-      url  "http://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
+      url  "https://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
    }
 
    /*  

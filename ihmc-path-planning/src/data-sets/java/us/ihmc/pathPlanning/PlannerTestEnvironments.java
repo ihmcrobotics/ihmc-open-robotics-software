@@ -4,9 +4,11 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -16,6 +18,7 @@ import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsLi
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class PlannerTestEnvironments
@@ -34,6 +37,60 @@ public class PlannerTestEnvironments
 
       return generator.getPlanarRegionsList();
    }
+
+   public static PlanarRegionsList getMultiRegionFlatGround()
+   {
+      List<ConvexPolygon2D> polygons = new ArrayList<>();
+      ConvexPolygon2D polygon0 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
+      polygons.add(polygon0);
+      polygons.add(polygon1);
+      polygons.add(polygon2);
+      polygons.add(polygon3);
+
+      polygon0.addVertex(-10.0, 4.0);
+      polygon0.addVertex(-10.0, -4.0);
+      polygon0.addVertex(-5.0, 4.0);
+      polygon0.addVertex(-5.0, -4.0);
+      polygon0.update();
+
+      polygon1.addVertex(-5.0, 4.0);
+      polygon1.addVertex(-5.0, -4.0);
+      polygon1.addVertex(-0.0, 3.99);
+      polygon1.addVertex(-0.0, -3.99);
+      polygon1.update();
+
+      polygon2.addVertex(0.0, 3.99);
+      polygon2.addVertex(0.0, -3.99);
+      polygon2.addVertex(5.0, 3.99);
+      polygon2.addVertex(5.0, -3.99);
+      polygon2.update();
+
+      polygon3.addVertex(10.0, 4.0);
+      polygon3.addVertex(10.0, -4.0);
+      polygon3.addVertex(5.0, 3.99);
+      polygon3.addVertex(5.0, -3.99);
+      polygon3.update();
+
+      Point2D[] concaveHullVertices = new Point2D[8];
+      concaveHullVertices[0] = new Point2D(10.0, 4.0);
+      concaveHullVertices[1] = new Point2D(10.0, -4.0);
+      concaveHullVertices[2] = new Point2D(5.0, -3.99);
+      concaveHullVertices[3] = new Point2D(-5.0, -3.99);
+      concaveHullVertices[4] = new Point2D(-10.0, -4.0);
+      concaveHullVertices[5] = new Point2D(-10.0, 4.0);
+      concaveHullVertices[6] = new Point2D(-5.0, 3.99);
+      concaveHullVertices[7] = new Point2D(5.0, 3.99);
+
+      PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, polygons);
+      PlanarRegionsList regions = new PlanarRegionsList();
+      regions.addPlanarRegion(groundRegion);
+
+      return regions;
+   }
+
 
    public static PlanarRegionsList getStepUpsAndDowns()
    {
@@ -452,13 +509,186 @@ public class PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList getSimpleCorridor()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(-1.0, 0.0, 0.0);
+
+      generator.translate(5.0, 0.0, 0.0);
+      generator.addRectangle(10.0, 3.0);
+      generator.translate(-5.0, 0.0, 0.0);
+
+      generator.translate(0.0, 1.5, 0.0);
+      generator.rotate(Math.toRadians(90.0), Axis.X);
+      generator.addRectangleReferencedAtNegativeXYCorner(10.0, 2.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.X);
+      generator.translate(0.0, -1.5, 0.0);
+
+      generator.translate(10.0, -1.5, 0.0);
+      generator.rotate(Math.toRadians(180.0), Axis.Z);
+      generator.rotate(Math.toRadians(90.0), Axis.X);
+      generator.addRectangleReferencedAtNegativeXYCorner(10.0, 2.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.X);
+      generator.rotate(Math.toRadians(-180.0), Axis.Z);
+      generator.translate(-10.0, 1.5, 0.0);
+
+      generator.translate(0.0, 0.0, 1.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.addRectangle(2.0, 3.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.translate(0.0, 0.0, -1.0);
+
+      generator.translate(10.0, 0.0, 1.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.addRectangle(2.0, 3.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.translate(-10.0, 0.0, -1.0);
+
+      generator.translate(1.0, 0.0, 0.0);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getCorridorWith1Wall()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      generator.translate(-1.0, 0.0, 0.0);
+
+      generator.translate(3.0, 0.5, 1.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.addRectangle(2.0, 2.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.translate(-3.0, -0.5, -1.0);
+
+      generator.translate(1.0, 0.0, 0.0);
+
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      planarRegionsList.addPlanarRegionsList(getSimpleCorridor());
+
+      return planarRegionsList;
+   }
+
+   public static PlanarRegionsList getTrickCorridor()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(-3.0, 0.0, 0.0);
+
+      // floor
+      generator.translate(5.0, -1.5, 0.0);
+      generator.addRectangle(10.0, 6.0);
+      generator.translate(-5.0, 1.5, 0.0);
+
+      drawTrickyCorridorWalls(generator);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getTrickCorridorWCutFloor()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(-3.0, 0.0, 0.0);
+
+      // floor
+      generator.translate(2.5, -1.5, 0.0);
+      generator.addRectangle(5.0, 6.0);
+      generator.translate(-2.5, 1.5, 0.0);
+      generator.translate(7.5, -1.5, 0.0);
+      generator.addRectangle(5.0, 6.0);
+      generator.translate(-7.5, 1.5, 0.0);
+
+      drawTrickyCorridorWalls(generator);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static void drawTrickyCorridorWalls(PlanarRegionsListGenerator generator)
+   {
+      // left wall
+      generator.translate(0.0, 1.5, 0.0);
+      generator.rotate(Math.toRadians(90.0), Axis.X);
+      generator.addRectangleReferencedAtNegativeXYCorner(10.0, 2.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.X);
+      generator.translate(0.0, -1.5, 0.0);
+
+      // obstacle wall
+      generator.translate(5.0, 0.5, 1.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.addRectangle(2.0, 2.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.translate(-5.0, -0.5, -1.0);
+
+      // dead end wall
+      generator.translate(7.0, 0.0, 1.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.addRectangle(2.0, 3.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.translate(-7.0, 0.0, -1.0);
+
+      // corridor split wall
+      generator.translate(7.0, -1.5, 0.0);
+      generator.rotate(Math.toRadians(180.0), Axis.Z);
+      generator.rotate(Math.toRadians(90.0), Axis.X);
+      generator.addRectangleReferencedAtNegativeXYCorner(5.0, 2.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.X);
+      generator.rotate(Math.toRadians(-180.0), Axis.Z);
+      generator.translate(-7.0, 1.5, 0.0);
+
+      // right wall
+      generator.translate(10.0, -4.5, 0.0);
+      generator.rotate(Math.toRadians(180.0), Axis.Z);
+      generator.rotate(Math.toRadians(90.0), Axis.X);
+      generator.addRectangleReferencedAtNegativeXYCorner(10.0, 2.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.X);
+      generator.rotate(Math.toRadians(-180.0), Axis.Z);
+      generator.translate(-10.0, 4.5, 0.0);
+
+      // close end wall
+      generator.translate(0.0, -1.5, 1.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.addRectangle(2.0, 6.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.translate(0.0, 1.5, -1.0);
+
+      // opposize end wall
+      generator.translate(10.0, -1.5, 1.0);
+      generator.rotate(Math.toRadians(-90.0), Axis.Y);
+      generator.addRectangle(2.0, 6.0);
+      generator.rotate(Math.toRadians(90.0), Axis.Y);
+      generator.translate(-10.0, 0.0, -1.0);
+
+      generator.translate(3.0, 1.5, 0.0);
+   }
+
+   public static PlanarRegionsList getSimplePlatform()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      // floor
+      generator.addRectangle(10.0, 6.0);
+
+      // top platform
+      generator.translate(0.0, 0.0, 0.46);
+      generator.addRectangle(1.14, 1.14);
+
+      generator.identity();
+      generator.translate((1.14 + 0.38) / 2.0, 0.0, 0.36);
+      generator.addRectangle(0.38, 1.14);
+
+      generator.translate(0.38, 0.0, -0.15);
+      generator.addRectangle(0.38, 1.14);
+
+      return generator.getPlanarRegionsList();
+   }
+
+
    public static void main(String[] args)
    {
-      String dataSetNameSuffix = "QuadrupedEnvironment3";
+      String dataSetNameSuffix = "MultiRegionFlatGround";
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
       String date = LocalDateTime.now().format(dateTimeFormatter);
 
-      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getQuadrupedEnvironment3());
+      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getMultiRegionFlatGround());
       DataSetIOTools.exportDataSet(dataSet);
    }
 }

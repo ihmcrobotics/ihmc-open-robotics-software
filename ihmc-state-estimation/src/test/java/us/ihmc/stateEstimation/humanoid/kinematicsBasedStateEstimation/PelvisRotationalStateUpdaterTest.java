@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,12 +46,6 @@ public class PelvisRotationalStateUpdaterTest
    private static final double EPS = 1e-10;
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
 	@Test
    public void testConstructorWithOneIMU()
@@ -146,7 +138,7 @@ public class PelvisRotationalStateUpdaterTest
       rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
       
       // Need to initialize the sensor data source manually
-      jointAndIMUSensorDataSource.initialize();
+      jointAndIMUSensorDataSource.startComputation(0, 0, -1);
       pelvisRotationalStateUpdater.initialize();
 
       rotationEstimated.set(rootJoint.getJointPose().getOrientation());
@@ -186,7 +178,6 @@ public class PelvisRotationalStateUpdaterTest
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       inverseDynamicsStructure.getElevator().updateFramesRecursively();
-      inverseDynamicsStructure.updateInternalState();
       
       for (int i = 0; i < stateEstimatorSensorDefinitions.getIMUSensorDefinitions().size(); i++)
       {
@@ -237,7 +228,7 @@ public class PelvisRotationalStateUpdaterTest
       SensorProcessing sensorDataSource = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       
       imuSensors.clear();
-      imuSensors.addAll(sensorDataSource.getIMUProcessedOutputs());
+      imuSensors.addAll(sensorDataSource.getIMUOutputs());
       
       return sensorDataSource;
    }

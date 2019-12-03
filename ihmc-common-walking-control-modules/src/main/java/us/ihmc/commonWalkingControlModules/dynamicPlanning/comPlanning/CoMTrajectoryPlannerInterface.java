@@ -14,6 +14,8 @@ public interface CoMTrajectoryPlannerInterface
     */
    void setNominalCoMHeight(double nominalCoMHeight);
 
+   double getNominalCoMHeight();
+
    /**
     * Solves for the desired center of mass trajectory.
     */
@@ -36,7 +38,7 @@ public interface CoMTrajectoryPlannerInterface
 
    void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
                 FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
-                FixedFramePoint3DBasics vrpPositionToPack);
+                FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack);
 
    /**
     * Sets the initial center of mass position. Note that this should be set at every change in contact! This sets the initial
@@ -73,5 +75,10 @@ public interface CoMTrajectoryPlannerInterface
     * Gets the desired position of the Virtual Repellent Point computed in {@link #compute(double)}.
     */
    FramePoint3DReadOnly getDesiredVRPPosition();
+
+   /**
+    * Gets the desired position of the Enhanced Centroidal Momentum Pivot point computed in {@link #compute(double)}.
+    */
+   FramePoint3DReadOnly getDesiredECMPPosition();
 
 }

@@ -89,23 +89,27 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
     * compute piecewise center of pressure plan given an array of upcoming steps
     * @param stepSequence list of upcoming steps (input)
     * @param soleFrames current sole frames (input)
-    * @param currentContactState current sole contact state (input)
+    * @param currentFeetInContact current sole contact state (input)
     * @param currentTime current time (input)
     */
    public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<? extends ReferenceFrame> soleFrames,
-                      QuadrantDependentList<YoEnum<ContactState>> currentContactState, double currentTime)
+                      List<RobotQuadrant> currentFeetInContact, double currentTime)
    {
       super.clear();
 
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (resetStartingFootPositions || currentContactState.get(robotQuadrant).getEnumValue().isLoadBearing())
+         if (resetStartingFootPositions || currentFeetInContact.contains(robotQuadrant))
          {
             startingSolePosition.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
             startingSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            contactState.set(robotQuadrant, ContactState.IN_CONTACT);
          }
-         contactState.set(robotQuadrant, currentContactState.get(robotQuadrant).getEnumValue());
+         else
+         {
+            contactState.set(robotQuadrant, ContactState.NO_CONTACT);
+         }
       }
 
       resetStartingFootPositions = false;
@@ -122,7 +126,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       int numberOfStepTransitions = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (!currentContactState.get(robotQuadrant).getEnumValue().isLoadBearing())
+         if (!currentFeetInContact.contains(robotQuadrant))
          {
             QuadrupedTimedStep firstStepForQuadrant = getFirstStepForQuadrant(robotQuadrant, stepSequence);
 

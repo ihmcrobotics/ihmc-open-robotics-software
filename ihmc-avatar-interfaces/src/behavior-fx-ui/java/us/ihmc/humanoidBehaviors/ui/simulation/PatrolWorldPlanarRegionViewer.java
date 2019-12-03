@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 
@@ -16,7 +17,7 @@ public class PatrolWorldPlanarRegionViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter());
+      regionsGraphic.generateMeshes(PlannerTestEnvironments.getTrickCorridor());
       regionsGraphic.update();
 
       view3dFactory.addNodeToView(regionsGraphic);

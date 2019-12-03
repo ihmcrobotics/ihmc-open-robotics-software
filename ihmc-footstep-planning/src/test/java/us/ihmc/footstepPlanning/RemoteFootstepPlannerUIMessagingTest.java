@@ -39,7 +39,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -231,18 +230,18 @@ public class RemoteFootstepPlannerUIMessagingTest
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, startPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, planningType);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
-         messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+         messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
          int ticks = 0;
          while (planningRequestReference.get() == null)
@@ -284,19 +283,19 @@ public class RemoteFootstepPlannerUIMessagingTest
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT));
       localNode.spin();
 
-      AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
-      AtomicReference<Point3D> startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
+      AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      AtomicReference<Point3D> startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
 
-      AtomicReference<Quaternion> goalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationTopic);
-      AtomicReference<Quaternion> startOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic);
+      AtomicReference<Quaternion> goalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientation);
+      AtomicReference<Quaternion> startOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientation);
 
-      AtomicReference<FootstepPlannerType> planningTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
-      AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSideTopic);
+      AtomicReference<FootstepPlannerType> planningTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType);
+      AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout);
+      AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide);
 
-      AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
 
-      AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -382,20 +381,20 @@ public class RemoteFootstepPlannerUIMessagingTest
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, startPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, planningType);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, planarRegionsList);
-         messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSideTopic, robotSide);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, plannerRequestId);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, horizonLength);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, randomParameters);
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, randomVisibilityGraphParameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+         messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, randomParameters);
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, randomVisibilityGraphParameters);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
          int ticks = 0;
          while (footstepPlannerParametersReference.get() == null)
@@ -427,14 +426,14 @@ public class RemoteFootstepPlannerUIMessagingTest
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT));
 
       localNode.spin();
-      AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic);
-      AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
-      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
-      AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
-      AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathDataTopic);
-      AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic);
-      AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic);
+      AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
+      AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId);
+      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTaken);
+      AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathData);
+      AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPosition);
+      AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientation);
 
       for (int iter = 0; iter < iters; iter++)
       {

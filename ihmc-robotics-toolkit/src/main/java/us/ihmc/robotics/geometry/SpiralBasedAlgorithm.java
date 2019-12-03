@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 /**
@@ -29,7 +30,7 @@ public class SpiralBasedAlgorithm
    }
 
 
-   public static Point3D[] generatePointsOnSphere(Point3D sphereOrigin, double sphereRadius, int numberOfPointsToGenerate)
+   public static Point3D[] generatePointsOnSphere(Point3DReadOnly sphereOrigin, double sphereRadius, int numberOfPointsToGenerate)
    {
       return generatePointsOnSphere(sphereOrigin, sphereRadius, numberOfPointsToGenerate, computeMagicDeltaN(numberOfPointsToGenerate));
    }
@@ -38,7 +39,7 @@ public class SpiralBasedAlgorithm
     * Generates a number of points uniformly distributed over the surface of a sphere using a spiral-based approach.
     * This algorithm can be found in the paper: "Distributing Many Points on a Sphere" by E.B. Saff and B.J. Kuijlaars. (PDF version was on Google on the 02/13/2015).
     */
-   public static Point3D[] generatePointsOnSphere(Point3D sphereOrigin, double sphereRadius, int numberOfPointsToGenerate, double deltaN)
+   public static Point3D[] generatePointsOnSphere(Point3DReadOnly sphereOrigin, double sphereRadius, int numberOfPointsToGenerate, double deltaN)
    {
       Point3D[] pointsOnSphere = new Point3D[numberOfPointsToGenerate];
 
