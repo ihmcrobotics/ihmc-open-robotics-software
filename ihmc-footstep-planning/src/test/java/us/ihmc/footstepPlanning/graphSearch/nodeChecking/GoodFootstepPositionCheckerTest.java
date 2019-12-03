@@ -269,7 +269,7 @@ public class GoodFootstepPositionCheckerTest
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(0.25, 0.15);
-      planarRegionsListGenerator.translate(snappedXPosition, snappedYPosition, 0.2);
+      planarRegionsListGenerator.translate(snappedXPosition, snappedYPosition, 0.15);
       planarRegionsListGenerator.addRectangle(0.25, 0.15);
 
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();

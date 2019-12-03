@@ -17,6 +17,83 @@ import static us.ihmc.robotics.Assert.assertTrue;
 public class ParameterBasedNodeExpansionTest
 {
    private static final double epsilon = 1e-6;
+
+   @Test
+   public void testExpansionAlongBoundsFromOriginDefaultParametersWithRight()
+   {
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+
+      double maxYaw = parameters.getMaximumStepYaw();
+      double minYaw = parameters.getMinimumStepYaw();
+      double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
+
+      double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
+      double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
+
+      Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
+      FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
+      FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
+      FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
+      FootstepNode mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
+      FootstepNode mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
+      FootstepNode mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
+      FootstepNode mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
+
+      assertTrue(mostForward.getX() < parameters.getMaximumStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > parameters.getMinimumStepLength() - epsilon);
+      assertTrue(mostInward.getY() < -parameters.getMinimumStepWidth() + epsilon);
+      assertTrue(mostOutward.getY() > -parameters.getMaximumStepWidth() - epsilon);
+
+      double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
+      double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaximumStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaximumStepReach());
+      double minOutwardYaw = snapToYawGrid(-mostOutwardYawMax - epsilon);
+      double maxInwardYaw = snapToYawGrid(-mostInwardYawMin + epsilon);
+      assertTrue(mostOutwardYawed.getYaw() > minOutwardYaw - epsilon);
+      assertTrue(mostInwardYawed.getYaw() < maxInwardYaw + epsilon);
+      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaximumStepReach());
+   }
+
+   @Test
+   public void testExpansionAlongBoundsFromOriginDefaultParametersWithLeft()
+   {
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+
+      double maxYaw = parameters.getMaximumStepYaw();
+      double minYaw = parameters.getMinimumStepYaw();
+      double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
+
+      double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
+      double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
+
+      Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT));
+      FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
+      FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
+      FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
+      FootstepNode mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
+      FootstepNode mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
+      FootstepNode mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
+      FootstepNode mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
+
+      assertTrue(mostForward.getX() < parameters.getMaximumStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > parameters.getMinimumStepLength() - epsilon);
+      assertTrue(mostInward.getY() > parameters.getMinimumStepWidth() - epsilon);
+      assertTrue(mostOutward.getY() < parameters.getMaximumStepWidth() + epsilon);
+
+      double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
+      double mostInwardYawedReach = getReachAtNode(mostInwardYawed, parameters.getIdealFootstepWidth());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaximumStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaximumStepReach());
+      double maxOutwardYaw = snapToYawGrid(mostOutwardYawMax + epsilon);
+      double maxInwardYaw = snapToYawGrid(mostInwardYawMin + epsilon);
+      assertTrue(mostOutwardYawed.getYaw() < maxOutwardYaw + epsilon);
+      assertTrue(mostInwardYawed.getYaw() > maxInwardYaw - epsilon);
+      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaximumStepReach());
+   }
+
    @Test
    public void testExpansionAlongBoundsFromOrigin()
    {
@@ -30,8 +107,8 @@ public class ParameterBasedNodeExpansionTest
       parameters.setMinimumStepYaw(minYaw);
       parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
-      double maxYawAtFullLength = yawReduction * maxYaw;
-      double minYawAtFullLength = yawReduction * minYaw;
+      double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
+      double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
       Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
