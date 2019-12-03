@@ -31,6 +31,18 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
    private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
 
+   /**
+    * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
+    * 
+    * @param realtimeRos2Node            the ROS 2 node to create the publisher with.
+    * @param publisherTopicNameGenerator the generator to use to create the name of the topic.
+    * @param rootJointSensorData         the data provider for the root joint.
+    * @param jointSensorData             the data providers for the 1-DoF joints.
+    * @param imuSensorData               the data providers for the IMUs.
+    * @param forceSensorData             the data providers for the force sensors.
+    * @param timestampHolder             the data provider for the timestamps.
+    * @param robotMotionStatusHolder     the data provider for the robot motion status.
+    */
    public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node, MessageTopicNameGenerator publisherTopicNameGenerator,
                                           FloatingJointStateReadOnly rootJointSensorData, List<? extends OneDoFJointStateReadOnly> jointSensorData,
                                           List<? extends IMUSensorReadOnly> imuSensorData, List<? extends ForceSensorDataReadOnly> forceSensorData,
