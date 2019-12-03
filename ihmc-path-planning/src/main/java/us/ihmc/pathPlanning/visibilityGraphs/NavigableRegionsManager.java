@@ -28,6 +28,8 @@ public class NavigableRegionsManager
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
+   private static final double minimumConnectionDistance = 1e-4;
+
    private VisibilityGraph visibilityGraph;
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
@@ -209,7 +211,7 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
+               double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
                // FIXME is this check necessary?
@@ -232,7 +234,11 @@ public class NavigableRegionsManager
 
       while (nodeWalkingBack != null)
       {
-         nodePath.add(nodeWalkingBack);
+         if (nodePath.size() == 0)
+            nodePath.add(nodeWalkingBack);
+         else if (nodePath.get(nodePath.size() - 1).distanceXY(nodeWalkingBack) > minimumConnectionDistance)
+            nodePath.add(nodeWalkingBack);
+
          nodeWalkingBack = nodeWalkingBack.getBestParentNode();
       }
       Collections.reverse(nodePath);

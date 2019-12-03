@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.net.util.SubnetUtils;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -21,6 +22,7 @@ import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
 import us.ihmc.pubsub.participant.Participant;
+import us.ihmc.ros2.Ros2Distro;
 
 /**
  * Creates and Manages participants
@@ -48,7 +50,8 @@ public class RTPSCommunicationFactory
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
-         LogTools.info("Setting the RTPS Domain ID to " + rtpsDomainID);
+         LogTools.info("Using DDS/ROS 2 Domain ID " + rtpsDomainID);
+         LogTools.info("ROS 2 Distro is set to " + Ros2Distro.fromEnvironment());
       }
       else
       {
@@ -60,6 +63,14 @@ public class RTPSCommunicationFactory
 
       if (MACHINE_INTERFACE_ADDRESSES != null && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet))
       {
+         String restrictionHost = NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet);
+         LogTools.info("Scanning interfaces for restriction: " +  restrictionHost);
+
+         SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
+         LogTools.info("Restriction subnet info: " + restrictionSubnetInfo);
+         LogTools.info("Restriction address: " + restrictionSubnetInfo.getAddress());
+         LogTools.info("Restriction Netmask: " + restrictionSubnetInfo.getNetmask());
+
          for (InterfaceAddress interfaceAddress : MACHINE_INTERFACE_ADDRESSES)
          {
             InetAddress address = interfaceAddress.getAddress();
@@ -67,10 +78,19 @@ public class RTPSCommunicationFactory
             if (address instanceof Inet4Address)
             {
                short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
-               SubnetUtils subnetUtils = new SubnetUtils(NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet) + "/" + Short.toString(netmaskAsShort));
-               boolean inRange = subnetUtils.getInfo().isInRange(address.getHostAddress());
+
+               String interfaceHost = address.getHostAddress();
+               SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + Short.toString(netmaskAsShort)).getInfo();
+
+               LogTools.info("Interface Subnet Info: " + interfaceSubnetInfo);
+               LogTools.info("Interface address: " + interfaceSubnetInfo.getAddress());
+               LogTools.info("Interface netmask: " + interfaceSubnetInfo.getNetmask());
+
+//               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress()); -- This worked on Windows, but not Linux: Doug
+               boolean inRange = restrictionSubnetInfo.isInRange(interfaceSubnetInfo.getAddress()); // This works on Linux. Hopefully works on Windows?
                if (inRange)
                {
+                  LogTools.info("Found address in range: " + address);
                   foundAddressRestriction = address;
                   break;
                }

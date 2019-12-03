@@ -146,7 +146,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 //      datasetsToIgnore.add(DataSetName._20171216_111326_CrossoverPlatforms);
    }
    private static final List<DataSetName> fastDatasets = Arrays.asList(DataSetName._20171215_214730_CinderBlockField,
-                                                                       DataSetName._20171114_135559_PartialShallowMaze,
+//                                                                       DataSetName._20171114_135559_PartialShallowMaze,
                                                                        DataSetName._20171218_204953_FlatGroundWithWall,
                                                                        DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
 
@@ -194,8 +194,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
    public VisibilityGraphsParametersBasics getTestVisibilityGraphsParameters()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
-//      parameters.setPerformPostProcessingNodeShifting(true);
       parameters.setComputeOrientationsToAvoidObstacles(false);
+      parameters.setIncludePreferredExtrusions(false);
       parameters.setReturnBestEffortSolution(true);
       return parameters;
    }
@@ -625,7 +625,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       double expectedDuration = (dataSet.getPlannerInput().getStartPosition().distanceXY(dataSet.getPlannerInput().getGoalPosition())) / 0.2; // uses estimate speed of 0.2
       double maxDuration = 4.0 * expectedDuration;
-      double absoluteMaxDuration = 4.0 * expectedDuration;
+      double absoluteMaxDuration = 10.0 * expectedDuration;
       boolean timedOut = false;
       double startTime = Conversions.nanosecondsToSeconds(System.nanoTime());
       String message = "";
@@ -1334,7 +1334,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField, false);
+      String errorMessage = test.runAssertions(DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest, false);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 

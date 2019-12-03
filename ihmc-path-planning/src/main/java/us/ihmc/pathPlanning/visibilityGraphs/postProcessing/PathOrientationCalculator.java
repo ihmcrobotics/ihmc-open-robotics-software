@@ -88,6 +88,10 @@ public class PathOrientationCalculator
                path.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
+               // we had enough room to reach the previous heading, and we just started, let's re-do the desired orientation
+               if (pathIndex == 1)
+                  desiredOrientation = AngleTools.interpolateAngle(previousHeading, nextHeading, 0.5);
+
                pathIndex++;
             }
             else if (previousLength > parameters.getObstacleExtrusionDistance())
@@ -96,6 +100,10 @@ public class PathOrientationCalculator
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, 0.5);
                path.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
+
+               // we had enough room to reach the previous heading, and we just started, let's re-do the desired orientation
+               if (pathIndex == 1)
+                  desiredOrientation = AngleTools.interpolateAngle(previousHeading, nextHeading, 0.5);
 
                pathIndex++;
             }

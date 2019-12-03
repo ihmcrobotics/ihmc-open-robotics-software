@@ -188,7 +188,7 @@ public class NavigableRegionTools
 
    public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
    {
-      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal(), test);
+      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
    }
 
    public static boolean isPointInsideClosedConcaveHull(List<Point2DReadOnly> vertices, Point2DReadOnly test)

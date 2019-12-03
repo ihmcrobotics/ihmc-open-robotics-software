@@ -47,7 +47,6 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -84,8 +83,8 @@ public class AvatarEstimatorThread
 
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
 
-   private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
-   private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
+   private final SensorOutputMapReadOnly processedSensorOutputMap;
+   private final SensorOutputMapReadOnly rawSensorOutputMap;
    private final DRCPoseCommunicator poseCommunicator;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
@@ -131,8 +130,8 @@ public class AvatarEstimatorThread
       estimatorController = new ModularRobotController("EstimatorController");
 
 
-      sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
-      sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
+      processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
+      rawSensorOutputMap = sensorReader.getRawSensorOutputMap();
 
       if (realtimeRos2Node != null)
          controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
@@ -143,7 +142,7 @@ public class AvatarEstimatorThread
       if (sensorReaderFactory.useStateEstimator())
       {
          // Updates the force sensor data when running with the estimator.
-         forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(), sensorOutputMapReadOnly,
+         forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(), processedSensorOutputMap,
                                                                forceSensorDataHolder, stateEstimatorParameters, gravity,
                                                                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
 
@@ -176,7 +175,7 @@ public class AvatarEstimatorThread
             contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
                                                                additionalContactTransforms.get(i));
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
-                         .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
+                         .setSensorOutputMapReadOnly(processedSensorOutputMap).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
                          .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolder)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
@@ -189,7 +188,7 @@ public class AvatarEstimatorThread
          drcStateEstimator = null;
       }
 
-      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
+      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), rawSensorOutputMap);
       estimatorController.addRobotController(robotJointLimitWatcher);
 
       if (realtimeRos2Node != null)
@@ -205,7 +204,7 @@ public class AvatarEstimatorThread
 
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
-                                                    sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
+                                                    processedSensorOutputMap, rawSensorOutputMap, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
       }
       else
@@ -238,7 +237,7 @@ public class AvatarEstimatorThread
          String primaryImuName = sensorInformation.getPrimaryBodyImu();
          Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
          ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
-                                                                  sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
+                                                                  rawSensorOutputMap, estimatorDT, gravity, processedSensorOutputMap,
                                                                   yoGraphicsListRegistry, estimatorFullRobotModel);
 
          InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
@@ -260,7 +259,7 @@ public class AvatarEstimatorThread
          String primaryImuName = sensorInformation.getPrimaryBodyImu();
          Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
          ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
-                                                                  sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
+                                                                  rawSensorOutputMap, estimatorDT, gravity, processedSensorOutputMap,
                                                                   yoGraphicsListRegistry, estimatorFullRobotModel);
 
          InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
@@ -352,7 +351,7 @@ public class AvatarEstimatorThread
 
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      sensorReader.getSensorOutputMapReadOnly().reset();
+      sensorReader.initialize();
 
       if (ekfStateEstimator != null)
          ekfStateEstimator.initializeEstimator(rootJointTransform, jointPositions);

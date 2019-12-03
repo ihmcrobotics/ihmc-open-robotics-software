@@ -5,6 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -71,9 +72,9 @@ public class JointStateUpdater
       String pelvisIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft();
       String chestIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight();
 
-      for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
+      for (int i = 0; i < sensorOutputMapReadOnly.getIMUOutputs().size(); i++)
       {
-         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
+         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUOutputs().get(i);
          if (sensorReadOnly.getSensorName().equals(pelvisIMUName))
             pelvisIMU = sensorReadOnly;
 
@@ -118,10 +119,11 @@ public class JointStateUpdater
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointStateReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(oneDoFJoint);
 
-         double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
-         double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
-         double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
+         double positionSensorData = jointSensorOutput.getPosition();
+         double velocitySensorData = jointSensorOutput.getVelocity();
+         double torqueSensorData = jointSensorOutput.getEffort();
 
          if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {

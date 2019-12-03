@@ -275,7 +275,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setFullRobotModel(fullRobotModel.get());
          stateEstimatorFactory.setGravity(gravity.get());
          stateEstimatorFactory.setSensorInformation(sensorInformation.get());
-         stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
+         stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getProcessedSensorOutputMap());
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -335,7 +335,7 @@ public class QuadrupedSimulationFactory
                                                  publisherTopicNameGenerator,
                                                  realtimeRos2Node,
                                                  timestampProvider.get(),
-                                                 sensorReader.getSensorRawOutputMapReadOnly(),
+                                                 sensorReader.getRawSensorOutputMap(),
                                                  controllerManager.getMotionStatusHolder(),
                                                  null);
    }

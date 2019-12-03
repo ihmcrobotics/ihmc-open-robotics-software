@@ -4,9 +4,11 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -16,6 +18,7 @@ import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsLi
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class PlannerTestEnvironments
@@ -34,6 +37,60 @@ public class PlannerTestEnvironments
 
       return generator.getPlanarRegionsList();
    }
+
+   public static PlanarRegionsList getMultiRegionFlatGround()
+   {
+      List<ConvexPolygon2D> polygons = new ArrayList<>();
+      ConvexPolygon2D polygon0 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
+      polygons.add(polygon0);
+      polygons.add(polygon1);
+      polygons.add(polygon2);
+      polygons.add(polygon3);
+
+      polygon0.addVertex(-10.0, 4.0);
+      polygon0.addVertex(-10.0, -4.0);
+      polygon0.addVertex(-5.0, 4.0);
+      polygon0.addVertex(-5.0, -4.0);
+      polygon0.update();
+
+      polygon1.addVertex(-5.0, 4.0);
+      polygon1.addVertex(-5.0, -4.0);
+      polygon1.addVertex(-0.0, 3.99);
+      polygon1.addVertex(-0.0, -3.99);
+      polygon1.update();
+
+      polygon2.addVertex(0.0, 3.99);
+      polygon2.addVertex(0.0, -3.99);
+      polygon2.addVertex(5.0, 3.99);
+      polygon2.addVertex(5.0, -3.99);
+      polygon2.update();
+
+      polygon3.addVertex(10.0, 4.0);
+      polygon3.addVertex(10.0, -4.0);
+      polygon3.addVertex(5.0, 3.99);
+      polygon3.addVertex(5.0, -3.99);
+      polygon3.update();
+
+      Point2D[] concaveHullVertices = new Point2D[8];
+      concaveHullVertices[0] = new Point2D(10.0, 4.0);
+      concaveHullVertices[1] = new Point2D(10.0, -4.0);
+      concaveHullVertices[2] = new Point2D(5.0, -3.99);
+      concaveHullVertices[3] = new Point2D(-5.0, -3.99);
+      concaveHullVertices[4] = new Point2D(-10.0, -4.0);
+      concaveHullVertices[5] = new Point2D(-10.0, 4.0);
+      concaveHullVertices[6] = new Point2D(-5.0, 3.99);
+      concaveHullVertices[7] = new Point2D(5.0, 3.99);
+
+      PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, polygons);
+      PlanarRegionsList regions = new PlanarRegionsList();
+      regions.addPlanarRegion(groundRegion);
+
+      return regions;
+   }
+
 
    public static PlanarRegionsList getStepUpsAndDowns()
    {
@@ -627,11 +684,11 @@ public class PlannerTestEnvironments
 
    public static void main(String[] args)
    {
-      String dataSetNameSuffix = "SimplePlatform";
+      String dataSetNameSuffix = "MultiRegionFlatGround";
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
       String date = LocalDateTime.now().format(dateTimeFormatter);
 
-      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getSimplePlatform());
+      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getMultiRegionFlatGround());
       DataSetIOTools.exportDataSet(dataSet);
    }
 }
