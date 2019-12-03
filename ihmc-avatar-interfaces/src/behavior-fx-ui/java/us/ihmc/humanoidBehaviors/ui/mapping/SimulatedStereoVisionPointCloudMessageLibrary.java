@@ -20,10 +20,6 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
       return generateMessageSimpleStair(preMultiplier, stairHeight, stairWidth, stairLength, stairLength, true);
    }
 
-   /**
-    * Generate StereoVisionPointCloudMessage which is watching two stairs with front side.
-    * @return
-    */
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
                                                                           double stairLengthUpper)
    {
@@ -36,6 +32,9 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
       return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, generateVertical);
    }
 
+   /**
+    * Generate StereoVisionPointCloudMessage which is watching two stairs with front side.
+    */
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
                                                                           double stairLengthLower, double stairLengthUpper, boolean generateVertical)
    {
