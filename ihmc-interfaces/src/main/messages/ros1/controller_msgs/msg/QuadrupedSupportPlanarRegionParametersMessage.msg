@@ -1,3 +1,6 @@
+# This message sets the parameters of the BipedalSupportPlanarRegionPublisher
+# The support planar region is set to be a rectangle at each of the feet.
+
 # Enables the QuadrupedSupportPlanarRegionPublish module
 bool enable
 

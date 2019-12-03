@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.controllerAPI.EndToEndAdjustFootstepMessageTest;
@@ -10,7 +11,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToEndAdjustFootstepMessageTest extends EndToEndAdjustFootstepMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -24,6 +25,7 @@ public class ValkyrieEndToEndAdjustFootstepMessageTest extends EndToEndAdjustFoo
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Tag("controller-api-slow")
    @Override
    @Test
    public void testAdjustFootstepOnce() throws Exception

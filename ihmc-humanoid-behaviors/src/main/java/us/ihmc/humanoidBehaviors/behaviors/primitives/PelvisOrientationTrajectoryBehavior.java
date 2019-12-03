@@ -77,8 +77,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      
-      
+
    }
 
    @Override //TODO: Not currently implemented for this behavior
@@ -89,16 +88,16 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone() 
+   public boolean isDone()
    {
-      if(hasPacketBeenSent.getBooleanValue())
+      if (hasPacketBeenSent.getBooleanValue())
       {
-      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
-         trajectoryTimeElapsed.set(false);
-      else
-         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
+         if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+            trajectoryTimeElapsed.set(false);
+         else
+            trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+         return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
       }
       else
          return false;

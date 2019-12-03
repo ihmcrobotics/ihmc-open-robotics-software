@@ -1,3 +1,6 @@
+# This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
+# It is published frequently from the IHMC state estimator.
+
 int8 ROBOT_MOTION_STATUS_UNKNOWN=0
 
 int8 ROBOT_MOTION_STATUS_STANDING=1

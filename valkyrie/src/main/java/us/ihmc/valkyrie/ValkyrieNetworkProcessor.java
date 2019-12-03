@@ -13,7 +13,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 
 public class ValkyrieNetworkProcessor
 {
-   private static final DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+   private static final DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
    public static final boolean launchFootstepPlannerModule = true;
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
@@ -24,7 +24,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableLocalControllerCommunicator(false);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
-      networkModuleParams.enableKinematicsStreamingToolbox(true);
+      networkModuleParams.enableKinematicsStreamingToolbox(true, ValkyrieKinematicsStreamingToolboxModule.class);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(launchFootstepPlannerModule);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);

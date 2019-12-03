@@ -1,6 +1,7 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -17,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-rough-terrain")
 public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
 {
    @Override

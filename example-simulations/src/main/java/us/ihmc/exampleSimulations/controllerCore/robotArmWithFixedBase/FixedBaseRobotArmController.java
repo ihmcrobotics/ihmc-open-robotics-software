@@ -76,6 +76,7 @@ public class FixedBaseRobotArmController implements RobotController
    private final SpatialFeedbackControlCommand handSpatialCommand = new SpatialFeedbackControlCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
 
+   private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final WholeBodyControllerCore controllerCore;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
@@ -118,7 +119,7 @@ public class FixedBaseRobotArmController implements RobotController
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, yoGraphicsListRegistry, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
@@ -239,7 +240,7 @@ public class FixedBaseRobotArmController implements RobotController
       controllerCoreCommand.setControllerCoreMode(controllerCoreMode.getEnumValue());
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
-         robotArm.updateSCSRobotJointTaus(lowLevelOneDoFJointDesiredDataHolder);
+         robotArm.updateJointTaus(lowLevelOneDoFJointDesiredDataHolder);
       else
          robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
 
@@ -341,6 +342,11 @@ public class FixedBaseRobotArmController implements RobotController
       return selectionMatrix;
    }
 
+   public void setToRandomConfiguration()
+   {
+      setRandomConfiguration.set(true);
+   }
+
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
@@ -372,5 +378,10 @@ public class FixedBaseRobotArmController implements RobotController
    public YoBoolean getGoToTarget()
    {
       return goToTarget;
+   }
+
+   public WholeBodyControlCoreToolbox getControlCoreToolbox()
+   {
+      return controlCoreToolbox;
    }
 }

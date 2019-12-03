@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.19.6"
-   id("us.ihmc.ihmc-ci") version "5.0"
-   id("us.ihmc.ihmc-cd") version "1.7"
+   id("us.ihmc.ihmc-build") version "0.19.7"
+   id("us.ihmc.ihmc-ci") version "5.3"
+   id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
 }
@@ -32,10 +32,10 @@ mainDependencies {
       setChanging(true)
    }
    api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
-   api("us.ihmc:simulation-construction-set:0.12.15")
-   api("us.ihmc:ihmc-graphics-description:0.12.12")
-   api("us.ihmc:ihmc-robot-description:0.12.7")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.9")
+   api("us.ihmc:simulation-construction-set:0.12.16")
+   api("us.ihmc:ihmc-graphics-description:0.12.13")
+   api("us.ihmc:ihmc-robot-description:0.12.8")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")
@@ -43,7 +43,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:source")
+   api("us.ihmc:ihmc-robot-data-logger:0.12.1")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-perception:source")
@@ -121,7 +121,11 @@ tasks.create("deploy") {
    dependsOn("installDist")
 
    doLast {
-      remote.session("link02", "val") // control
+      val valkyrie_link_ip: String by project
+      val valkyrie_realtime_username: String by project
+      val valkyrie_realtime_password: String by project
+
+      remote.session(valkyrie_link_ip, valkyrie_realtime_username, valkyrie_realtime_password) // control
       {
          exec("mkdir -p $directory")
 
@@ -149,7 +153,11 @@ tasks.create("deployNetworkProcessor") {
 
 fun deployNetworkProcessor()
 {
-   remote.session("zelda02", "val") // perception
+   val valkyrie_zelda_ip: String by project
+   val valkyrie_realtime_username: String by project
+   val valkyrie_realtime_password: String by project
+
+   remote.session(valkyrie_zelda_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
    {
       exec("mkdir -p $directory")
 

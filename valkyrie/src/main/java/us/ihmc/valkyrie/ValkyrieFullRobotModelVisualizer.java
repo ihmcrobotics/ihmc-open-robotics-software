@@ -27,7 +27,7 @@ public class ValkyrieFullRobotModelVisualizer
 //      FullRobotModel fullRobotModel = robotInterface.getFullRobotModelFactory().create();
 //      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotInterface.getGeneralizedSDFRobotModel();
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
 
       RobotDescription robotDescription = robotModel.getRobotDescription();

@@ -23,8 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
@@ -32,6 +31,7 @@ import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
+import us.ihmc.robotics.robotDescription.modelLoaders.LogModelLoader;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
@@ -291,7 +291,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             LogTools.error("Could not instantiate LogModelLoader: {}. Defaulting to SDFModelLoader.", handshake.getModelLoaderClass());
             modelLoader = new SDFModelLoader();
          }
-         modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip(), null);
+         modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip());
          robot = new RobotFromDescription(modelLoader.createRobot());
       }
 

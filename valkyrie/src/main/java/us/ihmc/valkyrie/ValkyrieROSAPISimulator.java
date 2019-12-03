@@ -49,7 +49,7 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
    {
       Options opt = parseArguments(args);
       
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       
       DRCStartingLocation startingLocation;
       try

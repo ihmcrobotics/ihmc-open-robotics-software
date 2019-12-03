@@ -9,7 +9,7 @@ import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
+import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
@@ -74,7 +74,7 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private Window window;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
-   private FakeREAModule fakeREAModule;
+   private SimulatedREAModule simulatedREAModule;
 
    private PlanarRegionsList map = new PlanarRegionsList();
    private PlanarRegionsGraphic mapGraphic;
@@ -135,7 +135,7 @@ public class PlanarRegionSLAMUITabController extends Group
       visualizer = new PlanarRegionSLAMGraphic();
       visualizer.setStateListener(this::onVisualizerStateChange);
 
-      fakeREAModule = new FakeREAModule(loadDataSet(DATASET_1));
+      simulatedREAModule = new SimulatedREAModule(loadDataSet(DATASET_1));
 
       animationTimer.start();
    }
@@ -244,36 +244,36 @@ public class PlanarRegionSLAMUITabController extends Group
    {
       if (fakeREAPublisherCheckbox.isSelected())
       {
-         fakeREAModule.start();
+         simulatedREAModule.start();
       }
       else
       {
-         fakeREAModule.stop();
+         simulatedREAModule.stop();
       }
    }
 
    @FXML private void dataset1RadioButton()
    {
       setRadioButtonSelection(dataset1RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_1));
+      simulatedREAModule.setMap(loadDataSet(DATASET_1));
    }
 
    @FXML private void dataset2RadioButton()
    {
       setRadioButtonSelection(dataset2RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_2));
+      simulatedREAModule.setMap(loadDataSet(DATASET_2));
    }
 
    @FXML private void dataset3RadioButton()
    {
       setRadioButtonSelection(dataset3RadioButton);
-      fakeREAModule.setRegionsToPublish(loadDataSet(DATASET_3));
+      simulatedREAModule.setMap(loadDataSet(DATASET_3));
    }
 
    @FXML private void loadFromFileRadioButton()
    {
       setRadioButtonSelection(loadFromFileRadioButton);
-      fakeREAModule.setRegionsToPublish(PlanarRegionDataImporter.importUsingFileChooser(window));
+      simulatedREAModule.setMap(PlanarRegionDataImporter.importUsingFileChooser(window));
    }
 
    @FXML private void saveParametersButton()

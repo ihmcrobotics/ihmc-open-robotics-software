@@ -32,6 +32,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(obstacleExtrusionDistance, distance);
    }
 
+   default void setPreferredNavigableExtrusionDistance(double distance)
+   {
+      set(preferredNavigableExtrusionDistance, distance);
+   }
+
    default void setPreferredObstacleExtrusionDistance(double distance)
    {
       set(preferredObstacleExtrusionDistance, distance);
@@ -45,6 +50,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
    default void setTooHighToStepDistance(double distance)
    {
       set(tooHighToStepDistance, distance);
+   }
+
+   default void setHeightForMaxAvoidance(double distance)
+   {
+      set(heightForMaxAvoidance, distance);
    }
 
    default void setClusterResolution(double resolution)
@@ -117,6 +127,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(returnBestEffortSolution, returnBestEffort);
    }
 
+   default void setIncludePreferredExtrusions(boolean include)
+   {
+      set(includePreferredExtrusions, include);
+   }
+
    default void setHeuristicWeight(double weight)
    {
       set(heuristicWeight, weight);
@@ -137,55 +152,76 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(occludedGoalEdgeWeight, weight);
    }
 
+   default void setWeightForNonPreferredEdge(double weight)
+   {
+      set(weightForNonPreferredEdge, weight);
+   }
+
+   default void setCostForNonPreferredNode(double cost)
+   {
+      set(costForNonPreferredNode, cost);
+   }
+
    default void set(VisibilityGraphsParametersPacket packet)
    {
-      if (packet.getMaxInterRegionConnectionLength() != -1.0)
+      double noValue = VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE;
+
+      if (packet.getMaxInterRegionConnectionLength() != noValue)
          setMaxInterRegionConnectionLength(packet.getMaxInterRegionConnectionLength());
-      if (packet.getNormalZThresholdForAccessibleRegions() != -1.0)
+      if (packet.getNormalZThresholdForAccessibleRegions() != noValue)
          setNormalZThresholdForAccessibleRegions(packet.getNormalZThresholdForAccessibleRegions());
-      if (packet.getNavigableExtrusionDistance() != -1.0)
+      if (packet.getNavigableExtrusionDistance() != noValue)
          setNavigableExtrusionDistance(packet.getNavigableExtrusionDistance());
-      if (packet.getObstacleExtrusionDistance() != -1.0)
+      if (packet.getObstacleExtrusionDistance() != noValue)
          setObstacleExtrusionDistance(packet.getObstacleExtrusionDistance());
-      if (packet.getPreferredObstacleExtrusionDistance() != -1.0)
+      if (packet.getPreferredNavigableExtrusionDistance() != noValue)
+         setPreferredNavigableExtrusionDistance(packet.getPreferredNavigableExtrusionDistance());
+      if (packet.getPreferredObstacleExtrusionDistance() != noValue)
          setPreferredObstacleExtrusionDistance(packet.getPreferredObstacleExtrusionDistance());
-      if (packet.getObstacleExtrusionDistanceIfNotTooHighToStep() != -1.0)
+      if (packet.getObstacleExtrusionDistanceIfNotTooHighToStep() != noValue)
          setObstacleExtrusionDistanceIfNotTooHighToStep(packet.getObstacleExtrusionDistanceIfNotTooHighToStep());
-      if (packet.getTooHighToStepDistance() != -1.0)
+      if (packet.getTooHighToStepDistance() != noValue)
          setTooHighToStepDistance(packet.getTooHighToStepDistance());
-      if (packet.getClusterResolution() != -1.0)
+      if (packet.getHeightForMaxAvoidance() != noValue)
+         setHeightForMaxAvoidance(packet.getHeightForMaxAvoidance());
+      if (packet.getClusterResolution() != noValue)
          setClusterResolution(packet.getClusterResolution());
-      if (packet.getExplorationDistanceFromStartGoal() != -1.0)
+      if (packet.getExplorationDistanceFromStartGoal() != noValue)
          setExplorationDistanceFromStartGoal(packet.getExplorationDistanceFromStartGoal());
-      if (packet.getPlanarRegionMinArea() != -1.0)
+      if (packet.getPlanarRegionMinArea() != noValue)
          setPlanarRegionMinArea(packet.getPlanarRegionMinArea());
-      if (packet.getPlanarRegionMinSize() != -1)
+      if (packet.getPlanarRegionMinSize() > 0)
          setPlanarRegionMinSize((int) packet.getPlanarRegionMinSize());
-      if (packet.getRegionOrthogonalAngle() != -1.0)
+      if (packet.getRegionOrthogonalAngle() != noValue)
          setRegionOrthogonalAngle(packet.getRegionOrthogonalAngle());
-      if (packet.getSearchHostRegionEpsilon() != -1.0)
+      if (packet.getSearchHostRegionEpsilon() != noValue)
          setSearchHostRegionEpsilon(packet.getSearchHostRegionEpsilon());
-      if (packet.getCanDuckUnderHeight() != -1.0)
+      if (packet.getCanDuckUnderHeight() != noValue)
          setCanDuckUnderHeight(packet.getCanDuckUnderHeight());
-      if (packet.getCanEasilyStepOverHeight() != -1.0)
+      if (packet.getCanEasilyStepOverHeight() != noValue)
          setCanEasilyStepOverHeight(packet.getCanEasilyStepOverHeight());
-      if (packet.getLengthForLongInterRegionEdge() != -1.0)
+      if (packet.getLengthForLongInterRegionEdge() != noValue)
          setLengthForLongInterRegionEdge(packet.getLengthForLongInterRegionEdge());
-      if (packet.getHeuristicWeight() != -1.0)
+      if (packet.getHeuristicWeight() != noValue)
          setHeuristicWeight(packet.getHeuristicWeight());
-      if (packet.getDistanceWeight() != -1.0)
+      if (packet.getDistanceWeight() != noValue)
          setDistanceWeight(packet.getDistanceWeight());
-      if (packet.getElevationWeight() != -1.0)
+      if (packet.getElevationWeight() != noValue)
          setElevationWeight(packet.getElevationWeight());
-      if (packet.getOccludedGoalEdgeWeight() != -1.0)
+      if (packet.getOccludedGoalEdgeWeight() != noValue)
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
-      if (packet.getWeightForInterRegionEdge() != -1.0)
+      if (packet.getWeightForInterRegionEdge() != noValue)
          setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
+      if (packet.getWeightForNonPreferredEdge() != noValue)
+         setWeightForNonPreferredEdge(packet.getWeightForNonPreferredEdge());
+      if (packet.getCostForNonPreferredNode() != noValue)
+         setCostForNonPreferredNode(packet.getCostForNonPreferredNode());
 
       setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());
+      setIncludePreferredExtrusions(packet.getIncludePreferredExtrusions());
    }
 
 }

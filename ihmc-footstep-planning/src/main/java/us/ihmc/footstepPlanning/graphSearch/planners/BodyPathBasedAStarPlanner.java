@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -121,6 +122,12 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    }
 
    @Override
+   public void setBestEffortTimeout(double timeout)
+   {
+      footstepPlanner.setBestEffortTimeout(timeout);
+   }
+
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       footstepPlanner.setPlanarRegions(planarRegionsList);
@@ -179,5 +186,11 @@ public class BodyPathBasedAStarPlanner implements FootstepPlanner
    public FootstepPlan getPlan()
    {
       return footstepPlanner.getPlan();
+   }
+
+   @Override
+   public PlannerStatistics<?> getPlannerStatistics()
+   {
+      return footstepPlanner.getPlannerStatistics();
    }
 }

@@ -398,9 +398,20 @@ public class MatrixTools
     */
    public static void diff(double[] vectorToDiff, DenseMatrix64F vectorToPack)
    {
-      for (int i = 1; i < vectorToDiff.length; i++)
+      diff(vectorToDiff, 0, vectorToDiff.length, vectorToPack);
+   }
+   
+   /**
+    * Differentiates an array by subtracting the previous element from the current element
+    *
+    * @param vectorToDiff
+    * @param vectorToPack Result row vector
+    */
+   public static void diff(double[] vectorToDiff, int startRow, int numberOfRows, DenseMatrix64F vectorToPack)
+   {
+      for (int i = 1; i < numberOfRows; i++)
       {
-         vectorToPack.unsafe_set(i - 1, 0, vectorToDiff[i] - vectorToDiff[i - 1]);
+         vectorToPack.unsafe_set(i - 1, 0, vectorToDiff[startRow + i] - vectorToDiff[startRow + i - 1]);
       }
    }
 

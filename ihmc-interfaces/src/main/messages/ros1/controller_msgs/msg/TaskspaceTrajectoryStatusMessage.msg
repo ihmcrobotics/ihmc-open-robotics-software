@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# The walking controller uses this message to report when it completed the execution of a trajectory message.
+
 # The trajectory input was received and accepted, the execution just started.
 int8 TRAJECTORY_EXECUTION_STATUS_STARTED=0
 

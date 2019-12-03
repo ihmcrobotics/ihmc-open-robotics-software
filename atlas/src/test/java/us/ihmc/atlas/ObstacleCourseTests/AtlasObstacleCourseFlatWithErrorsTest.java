@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Tag("humanoid-flat-ground-slow-3")
 public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlatWithErrorsTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -36,7 +37,6 @@ public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlat
    }
 
    @Override
-   @Tag("allocation")
    @Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {

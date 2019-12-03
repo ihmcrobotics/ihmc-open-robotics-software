@@ -127,12 +127,20 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       if (ADD_FIDUCIAL_BOX_ROBOT)
       {
-         FloatingFiducialBoxRobot robot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50);
+         FloatingFiducialBoxRobot robot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50,"1");
 
-         robot.setPosition(6.0, 0.0, 2.0);
+         robot.setPosition(2.0, 0.0, 1.25);
          robot.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
 
          environmentRobots.add(robot);
+         
+         /*
+         FloatingFiducialBoxRobot robot1 = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50,"2");
+
+         robot1.setPosition(-2, 0.0, 1.25);
+         robot1.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
+
+         environmentRobots.add(robot1);*/
       }
 //      if (ADD_LIMBO_BAR)
 //      {
@@ -554,6 +562,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       // 4. Two cinder block high hurdle for testcase purposes only, not part of actual trial obstacle course
       combinedTerrainObject.addTerrainObject(setUpZigZagHurdles("zigZagHurdlesTwoHigh", courseAngleDeg, startDistance, new int[] {8, 7}, 45.0));
 
+      // 5. Add a block/wall far out so that there is a far object to test SLAM against.
+      setUpWall(combinedTerrainObject, new double[] {12.0f, 15.0f}, 0.65, 1.0, 1.0, 45.0, YoAppearance.DarkGoldenRod());
       return combinedTerrainObject;
    }
 

@@ -7,8 +7,9 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelFromDescription;
@@ -67,7 +68,7 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
 
    public LogModelProvider createLogModelProvider()
    {
-      return new SDFLogModelProvider(sdfParameters);
+      return new DefaultLogModelProvider<>(SDFModelLoader.class, sdfParameters.getSdfModelName(), sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories());
    }
 
    @Override

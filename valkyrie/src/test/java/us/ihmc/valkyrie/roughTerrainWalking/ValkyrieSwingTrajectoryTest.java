@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -9,9 +10,10 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@Tag("humanoid-rough-terrain-slow")
 public class ValkyrieSwingTrajectoryTest extends DRCSwingTrajectoryTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

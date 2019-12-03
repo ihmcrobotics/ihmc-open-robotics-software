@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,13 +12,18 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
+@Tag("humanoid-obstacle-slow")
 public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrialsTerrainTest
 {
-   private final AdditionalSimulationContactPoints<RobotSide> footContactPoints = new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 3, 4, true,
-                                                                                                                                   false);
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, footContactPoints);
+   private final ValkyrieRobotModel robotModel = createRobotModel();
+
+   private static ValkyrieRobotModel createRobotModel()
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      robotModel.setSimulationContactPoints(new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 3, 4, true, false));
+      return robotModel;
+   }
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -28,8 +34,8 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    @Override
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 5, 4, true, false);
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, simulationContactPoints);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      robotModel.setSimulationContactPoints(new AdditionalSimulationContactPoints<RobotSide>(RobotSide.values, 5, 4, true, false));
       return robotModel;
    }
 
@@ -67,9 +73,9 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
 
    /**
-    * This test doesn't make any sense. We have plenty of tests evaluating robustness to foot slip,
-    * and that one adds random foot slip while stepping narrow cinder blocks. The test will often
-    * fail because the foot contact points are on the edge of a cinder block.
+    * This test doesn't make any sense. We have plenty of tests evaluating robustness to foot slip, and
+    * that one adds random foot slip while stepping narrow cinder blocks. The test will often fail
+    * because the foot contact points are on the edge of a cinder block.
     */
    @Override
    @Disabled

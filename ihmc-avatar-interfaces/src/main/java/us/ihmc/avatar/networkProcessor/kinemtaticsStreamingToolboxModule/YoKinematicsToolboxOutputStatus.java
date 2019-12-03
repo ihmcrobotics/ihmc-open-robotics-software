@@ -24,12 +24,14 @@ public class YoKinematicsToolboxOutputStatus
    {
       NO_STATUS, INITIALIZE_SUCCESSFUL, INITIALIZE_FAILURE_MISSING_RCD, RUNNING;
 
+      public static final Status[] values = values();
+
       public static Status fromByte(byte enumAsByte)
       {
          if (enumAsByte == -1)
             return null;
          else
-            return values()[enumAsByte];
+            return values[enumAsByte];
       }
 
       public static byte toByte(Status status)
@@ -74,6 +76,17 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointVelocity = new YoFixedFrameSpatialVector(namePrefix + "DesiredVelocity" + rootJoint.getName(), ReferenceFrame.getWorldFrame(), registry);
    }
 
+   public void setToNaN()
+   {
+      currentToolboxState.set(null);
+      for (YoDouble desiredJointAngle : desiredJointAngles)
+         desiredJointAngle.setToNaN();
+      for (YoDouble desiredJointVelocity : desiredJointVelocities)
+         desiredJointVelocity.setToNaN();
+      desiredRootJointPose.setToNaN();
+      desiredRootJointVelocity.setToNaN();
+   }
+
    public void set(KinematicsToolboxOutputStatus status)
    {
       if (status.getJointNameHash() != jointNameHash.getValue())
@@ -105,6 +118,8 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointVelocity.set(other.desiredRootJointVelocity);
    }
 
+   private final KinematicsToolboxOutputStatus interpolationStatus = new KinematicsToolboxOutputStatus();
+
    public void interpolate(KinematicsToolboxOutputStatus end, double alpha)
    {
       interpolate(this.getStatus(), end, alpha);
@@ -112,12 +127,14 @@ public class YoKinematicsToolboxOutputStatus
 
    public void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha)
    {
-      set(MessageTools.interpolateMessages(start, end, alpha));
+      MessageTools.interpolateMessages(start, end, alpha, interpolationStatus);
+      set(interpolationStatus);
    }
 
    public void interpolate(KinematicsToolboxOutputStatus start, KinematicsToolboxOutputStatus end, double alpha, double alphaDot)
    {
-      set(MessageTools.interpolate(start, end, alpha, alphaDot));
+      MessageTools.interpolate(start, end, alpha, alphaDot, interpolationStatus);
+      set(interpolationStatus);
    }
 
    public void scaleVelocities(double scaleFactor)
@@ -127,7 +144,6 @@ public class YoKinematicsToolboxOutputStatus
          desiredJointVelocities[i].set(desiredJointVelocities[i].getValue() * scaleFactor);
       }
       desiredRootJointVelocity.scale(scaleFactor);
-      
    }
 
    private final Vector4D quaternionDot = new Vector4D();
@@ -154,11 +170,16 @@ public class YoKinematicsToolboxOutputStatus
                                                                 desiredRootJointVelocity.getAngularPart());
    }
 
+   private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
+
    public KinematicsToolboxOutputStatus getStatus()
    {
-      KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
       status.setJointNameHash(jointNameHash.getValue());
       status.setCurrentToolboxState(Status.toByte(currentToolboxState.getEnumValue()));
+
+      status.getDesiredJointAngles().reset();
+      status.getDesiredJointVelocities().reset();
+
       for (int i = 0; i < numberOfJoints; i++)
       {
          status.getDesiredJointAngles().add((float) desiredJointAngles[i].getValue());

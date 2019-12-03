@@ -1,16 +1,14 @@
 package us.ihmc.avatar.pushRecovery;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
-import static us.ihmc.robotics.Assert.*;
-
-@Tag("humanoid-push-recovery")
 public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryTestSetup
 {
    @Test
@@ -33,7 +31,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
@@ -99,7 +96,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
@@ -120,7 +116,6 @@ public abstract class AvatarICPOptimizationPushRecoveryATest extends AvatarICPOp
       validateTest(footsteps);
    }
 
-   @Tag("humanoid-push-recovery-slow")
    @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {

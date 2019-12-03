@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shzQdDesired,root.atlas.qd_l_arm_shz</Variables>
+		<Variables>root.atlas.qd_l_arm_shz,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_shzPDController.qd_d_l_arm_shz,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_shzLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shzQdDesired,root.atlas.qd_r_arm_shz</Variables>
+		<Variables>root.atlas.qd_r_arm_shz,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_shzPDController.qd_d_r_arm_shz,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_shzLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shxQdDesired,root.atlas.qd_l_arm_shx</Variables>
+		<Variables>root.atlas.qd_l_arm_shx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_shxPDController.qd_d_l_arm_shx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_shxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shxQdDesired,root.atlas.qd_r_arm_shx</Variables>
+		<Variables>root.atlas.qd_r_arm_shx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_shxPDController.qd_d_r_arm_shx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_shxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elyQdDesired,root.atlas.qd_l_arm_ely</Variables>
+		<Variables>root.atlas.qd_l_arm_ely,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_elyPDController.qd_d_l_arm_ely,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_elyLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elyQdDesired,root.atlas.qd_r_arm_ely</Variables>
+		<Variables>root.atlas.qd_r_arm_ely,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_elyPDController.qd_d_r_arm_ely,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_elyLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elxQdDesired,root.atlas.qd_l_arm_elx</Variables>
+		<Variables>root.atlas.qd_l_arm_elx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_elxPDController.qd_d_l_arm_elx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_elxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elxQdDesired,root.atlas.qd_r_arm_elx</Variables>
+		<Variables>root.atlas.qd_r_arm_elx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_elxPDController.qd_d_r_arm_elx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_elxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wryQdDesired,root.atlas.qd_l_arm_wry</Variables>
+		<Variables>root.atlas.qd_l_arm_wry,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_wryPDController.qd_d_l_arm_wry,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_wryLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wryQdDesired,root.atlas.qd_r_arm_wry</Variables>
+		<Variables>root.atlas.qd_r_arm_wry,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_wryPDController.qd_d_r_arm_wry,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_wryLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wrxQdDesired,root.atlas.qd_l_arm_wrx</Variables>
+		<Variables>root.atlas.qd_l_arm_wrx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_wrxPDController.qd_d_l_arm_wrx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_wrxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wrxQdDesired,root.atlas.qd_r_arm_wrx</Variables>
+		<Variables>root.atlas.qd_r_arm_wrx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_wrxPDController.qd_d_r_arm_wrx,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_wrxLowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -146,7 +146,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wry2QdDesired,root.atlas.qd_l_arm_wry2</Variables>
+		<Variables>root.atlas.qd_l_arm_wry2,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.l_arm_wry2PDController.qd_d_l_arm_wry2,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_arm_wry2LowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -158,7 +158,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wry2QdDesired,root.atlas.qd_r_arm_wry2</Variables>
+		<Variables>root.atlas.qd_r_arm_wry2,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.r_arm_wry2PDController.qd_d_r_arm_wry2,root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_arm_wry2LowLevelDesiredVelocityHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>

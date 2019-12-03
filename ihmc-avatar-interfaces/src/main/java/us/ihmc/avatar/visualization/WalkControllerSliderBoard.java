@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,6 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.CommonNames;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,26 +36,29 @@ public class WalkControllerSliderBoard
       // TODO: FIXME: This is a super rough, temporary fix for
       // https://github.com/ihmcrobotics/ihmc-open-robotics-software/issues/26
       boolean DEBUG_WITH_SLIDERBOARD = false;
-      if (DEBUG_WITH_SLIDERBOARD) {
-	      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
-	      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
+      if (DEBUG_WITH_SLIDERBOARD)
+      {
+         sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
+         sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
 
-	      sliderBoardConfigurationManager.setSlider(2, "kp_comHeight", registry, 0.0, 40.0);
-	      sliderBoardConfigurationManager.setKnob(2, "kd_comHeight", registry, 0.0, 13.0);
+         sliderBoardConfigurationManager.setSlider(2, "kp_comHeight", registry, 0.0, 40.0);
+         sliderBoardConfigurationManager.setKnob(2, "kd_comHeight", registry, 0.0, 13.0);
 
-	      sliderBoardConfigurationManager.setSlider(3, "kpPelvisOrientation", registry, 0.0, 100.0);
-	      sliderBoardConfigurationManager.setKnob(3, "zetaPelvisOrientation", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(3, "kpPelvisOrientation", registry, 0.0, 100.0);
+         sliderBoardConfigurationManager.setKnob(3, "zetaPelvisOrientation", registry, 0.0, 1.0);
 
-	      sliderBoardConfigurationManager.setSlider(4, "kpUpperBody", registry, 0.0, 200.0);
-	      sliderBoardConfigurationManager.setKnob(4, "zetaUpperBody", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(4, "kpUpperBody", registry, 0.0, 200.0);
+         sliderBoardConfigurationManager.setKnob(4, "zetaUpperBody", registry, 0.0, 1.0);
 
-	      sliderBoardConfigurationManager.setSlider(5, "kpAllArmJointsL", registry, 0.0, 120.0);
-	      sliderBoardConfigurationManager.setKnob(5, "zetaAllArmJointsL", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(5, "kpAllArmJointsL", registry, 0.0, 120.0);
+         sliderBoardConfigurationManager.setKnob(5, "zetaAllArmJointsL", registry, 0.0, 1.0);
 
-	      sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsR", registry, 0.0, 120.0);
-	      sliderBoardConfigurationManager.setKnob(6, "zetaAllArmJointsR", registry, 0.0, 1.0);
-      } else {
-    	  System.out.println("Only claiming sliders 7 and 8 (for tuning change DEBUG_WITH_SLIDERBOARD to true in WalkControllerSliderBoard.java");
+         sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsR", registry, 0.0, 120.0);
+         sliderBoardConfigurationManager.setKnob(6, "zetaAllArmJointsR", registry, 0.0, 1.0);
+      }
+      else
+      {
+         System.out.println("Only claiming sliders 7 and 8 (for tuning change DEBUG_WITH_SLIDERBOARD to true in WalkControllerSliderBoard.java");
       }
 
       sliderBoardConfigurationManager.setSlider(7, CommonNames.doIHMCControlRatio.toString(), registry, 0.0, 1.0);
@@ -105,7 +112,6 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.ICPAndCoPFun.toString());
       sliderBoardConfigurationManager.clearControls();
 
-
       /* Terrain Exploration Section */
       sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetX", registry, -0.2, 0.2);
       sliderBoardConfigurationManager.setSlider(2, "footCoPOffsetY", registry, -0.1, 0.1);
@@ -142,20 +148,23 @@ public class WalkControllerSliderBoard
 
    }
 
-   private void setupIndividualHandControl(final SliderBoardConfigurationManager sliderBoardConfigurationManager,
-         final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+   private void setupIndividualHandControl(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final YoEnum<SliderBoardMode> sliderBoardMode,
+                                           final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
       sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length - 1);
-      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardParameters().getSliderBoardControlledFingerJointsWithLimits();
+      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardParameters()
+                                                                                                                              .getSliderBoardControlledFingerJointsWithLimits();
       //This currently assumes you don't have more than 8 actuatable finger joints per hand because the sliderboard only has 8 sliders.
       for (RobotSide side : RobotSide.values())
       {
          int i = 0;
          for (String actuatableFingerJointName : actuatableFingerJointsWithLimits.get(side).keySet())
          {
-            sliderBoardConfigurationManager.setSlider(++i, actuatableFingerJointName + CommonNames.q_d.toString(), registry,
-            actuatableFingerJointsWithLimits.get(side).get(actuatableFingerJointName).getLeft(), actuatableFingerJointsWithLimits.get(side).get(actuatableFingerJointName)
-                  .getRight());
+            sliderBoardConfigurationManager.setSlider(++i,
+                                                      actuatableFingerJointName + CommonNames.q_d.toString(),
+                                                      registry,
+                                                      actuatableFingerJointsWithLimits.get(side).get(actuatableFingerJointName).getLeft(),
+                                                      actuatableFingerJointsWithLimits.get(side).get(actuatableFingerJointName).getRight());
          }
          if (side == RobotSide.LEFT)
          {
@@ -169,8 +178,8 @@ public class WalkControllerSliderBoard
       }
    }
 
-   private void setupHeadAndHandSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager,
-         final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+   private void setupHeadAndHandSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final YoEnum<SliderBoardMode> sliderBoardMode,
+                                        final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
 
       //Make sure the joints you want to control are not being controlled by any other control module.
@@ -179,16 +188,28 @@ public class WalkControllerSliderBoard
       final YoDouble headYawPercentage = new YoDouble("SliderHeadYawPercentage", registry);
       final YoDouble lowerHeadPitchPercentage = new YoDouble("SliderLowerHeadPitchPercentage", registry);
       final YoDouble upperHeadPitchPercentage = new YoDouble("SliderUpperHeadPitchPercentage", registry);
-      final AlphaFilteredYoVariable alphaFilteredHeadYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredHeadYawPercentage",registry,alpha,headYawPercentage);
-      final AlphaFilteredYoVariable alphaFilteredUpperHeadPitchPercentage = new AlphaFilteredYoVariable("AlphaFilteredUpperHeadPitchPercentage",registry,alpha,upperHeadPitchPercentage);
-      final AlphaFilteredYoVariable alphaFilteredLowerHeadPitchYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredLowerHeadPitchPercentage",registry,alpha,lowerHeadPitchPercentage);
-      final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointsWithLimits = drcRobotModel
-            .getSliderBoardParameters().getSliderBoardControlledNeckJointsWithLimits();
+      final AlphaFilteredYoVariable alphaFilteredHeadYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredHeadYawPercentage",
+                                                                                                 registry,
+                                                                                                 alpha,
+                                                                                                 headYawPercentage);
+      final AlphaFilteredYoVariable alphaFilteredUpperHeadPitchPercentage = new AlphaFilteredYoVariable("AlphaFilteredUpperHeadPitchPercentage",
+                                                                                                        registry,
+                                                                                                        alpha,
+                                                                                                        upperHeadPitchPercentage);
+      final AlphaFilteredYoVariable alphaFilteredLowerHeadPitchYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredLowerHeadPitchPercentage",
+                                                                                                           registry,
+                                                                                                           alpha,
+                                                                                                           lowerHeadPitchPercentage);
+      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
+      SliderBoardParameters sliderBoardParameters = drcRobotModel.getSliderBoardParameters();
+      HighLevelControllerParameters highLevelControllerParameters = drcRobotModel.getHighLevelControllerParameters();
+      WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
+      final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointsWithLimits = sliderBoardParameters.getSliderBoardControlledNeckJointsWithLimits();
       int sliderNumber = 0;
 
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))
       {
-         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.DISTAL_NECK_YAW));
+         double standPrepAngle = standPrepParameters.getSetpoint(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW));
          double neckYawJointRange = Math.abs(sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_YAW).getRight()
                - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_YAW).getLeft());
          double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_YAW).getLeft())
@@ -197,9 +218,9 @@ public class WalkControllerSliderBoard
          headYawPercentage.set(standPrepPercentage);
          alphaFilteredHeadYawPercentage.set(headYawPercentage.getDoubleValue());
       }
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.PROXIMAL_NECK_PITCH))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.PROXIMAL_NECK_PITCH))
       {
-         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH));
+         double standPrepAngle = standPrepParameters.getSetpoint(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH));
          double lowerNeckPitchJointRange = Math.abs(sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.PROXIMAL_NECK_PITCH).getRight()
                - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.PROXIMAL_NECK_PITCH).getLeft());
          double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.PROXIMAL_NECK_PITCH).getLeft())
@@ -208,9 +229,9 @@ public class WalkControllerSliderBoard
          lowerHeadPitchPercentage.set(standPrepPercentage);
          alphaFilteredLowerHeadPitchYawPercentage.set(lowerHeadPitchPercentage.getDoubleValue());
       }
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_PITCH))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_PITCH))
       {
-         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
+         double standPrepAngle = standPrepParameters.getSetpoint(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
          double upperNeckPitchJointRange = Math.abs(sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_PITCH).getRight()
                - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_PITCH).getLeft());
          double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.DISTAL_NECK_PITCH).getLeft())
@@ -223,7 +244,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.HeadJointControl.toString());
       sliderBoardConfigurationManager.clearControls();
 
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))
       {
          headYawPercentage.addVariableChangedListener(new VariableChangedListener()
          {
@@ -234,14 +255,15 @@ public class WalkControllerSliderBoard
                NeckJointName headYaw = NeckJointName.DISTAL_NECK_YAW;
                double neckYawJointRange = sliderBoardControlledNeckJointsWithLimits.get(headYaw).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(headYaw) + "_unconstrained"
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(headYaw) + "_unconstrained"
                      + CommonNames.q_d);
-               desiredAngle.set(alphaFilteredHeadYawPercentage.getDoubleValue() * neckYawJointRange + sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft());
+               desiredAngle.set(alphaFilteredHeadYawPercentage.getDoubleValue() * neckYawJointRange
+                     + sliderBoardControlledNeckJointsWithLimits.get(headYaw).getLeft());
             }
          });
       }
 
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_PITCH))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_PITCH))
       {
          upperHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
          {
@@ -252,14 +274,15 @@ public class WalkControllerSliderBoard
                NeckJointName upperHeadPitch = NeckJointName.DISTAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch)
-                     + "_unconstrained" + CommonNames.q_d);
-               desiredAngle.set(alphaFilteredUpperHeadPitchPercentage.getDoubleValue() * jointRange + sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft());
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(upperHeadPitch) + "_unconstrained"
+                     + CommonNames.q_d);
+               desiredAngle.set(alphaFilteredUpperHeadPitchPercentage.getDoubleValue() * jointRange
+                     + sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).getLeft());
             }
          });
       }
 
-      if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.PROXIMAL_NECK_PITCH))
+      if (Arrays.asList(jointMap.getNeckJointNames()).contains(NeckJointName.PROXIMAL_NECK_PITCH))
       {
          lowerHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
          {
@@ -270,9 +293,10 @@ public class WalkControllerSliderBoard
                NeckJointName lowerHeadPitch = NeckJointName.PROXIMAL_NECK_PITCH;
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getRight()
                      - sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft();
-               YoDouble desiredAngle = (YoDouble) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(lowerHeadPitch)
-                     + "_unconstrained" + CommonNames.q_d);
-               desiredAngle.set(alphaFilteredLowerHeadPitchYawPercentage.getDoubleValue() * jointRange + sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft());
+               YoDouble desiredAngle = (YoDouble) registry.getVariable(jointMap.getNeckJointName(lowerHeadPitch) + "_unconstrained"
+                     + CommonNames.q_d);
+               desiredAngle.set(alphaFilteredLowerHeadPitchYawPercentage.getDoubleValue() * jointRange
+                     + sliderBoardControlledNeckJointsWithLimits.get(lowerHeadPitch).getLeft());
             }
          });
       }

@@ -26,6 +26,8 @@ public class FootstepPlannerCostsUIController
    private Spinner<Double> costPerStep;
    @FXML
    private Spinner<Double> aStarHeuristicsWeight;
+   @FXML
+   private Spinner<Double> visGraphHeuristicsWeight;
 
    @FXML
    private Spinner<Double> yawWeight;
@@ -42,6 +44,17 @@ public class FootstepPlannerCostsUIController
    private Spinner<Double> stepUpWeight;
    @FXML
    private Spinner<Double> stepDownWeight;
+   @FXML
+   private Spinner<Double> footholdAreaWeight;
+   @FXML
+   private Spinner<Double> longStepWeight;
+
+   @FXML
+   private Spinner<Double> bodyPathViolationWeight;
+   @FXML
+   private Spinner<Double> distanceFromPathTolerance;
+   @FXML
+   private Spinner<Double> deltaYawFromReferenceTolerance;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -57,15 +70,22 @@ public class FootstepPlannerCostsUIController
    {
       costPerStep.setValueFactory(createLowWeightValueFactory());
       aStarHeuristicsWeight.setValueFactory(createHighWeightValueFactory());
+      visGraphHeuristicsWeight.setValueFactory(createHighWeightValueFactory());
 
       yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.01));
       pitchWeight.setValueFactory(createLowWeightValueFactory());
       rollWeight.setValueFactory(createLowWeightValueFactory());
+      footholdAreaWeight.setValueFactory(createLowWeightValueFactory());
+      longStepWeight.setValueFactory(createLowWeightValueFactory());
+      bodyPathViolationWeight.setValueFactory(createHighWeightValueFactory());
 
       forwardWeight.setValueFactory(createLowWeightValueFactory());
       lateralWeight.setValueFactory(createLowWeightValueFactory());
       stepUpWeight.setValueFactory(createLowWeightValueFactory());
       stepDownWeight.setValueFactory(createLowWeightValueFactory());
+
+      distanceFromPathTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.3, 0.05));
+      deltaYawFromReferenceTolerance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.2, 0.05));
    }
 
    public void bindControls()
@@ -77,6 +97,7 @@ public class FootstepPlannerCostsUIController
       javaFXStoredPropertyMap.put(useQuadraticHeightCost, FootstepPlannerParameterKeys.useQuadraticHeightCost);
       javaFXStoredPropertyMap.put(costPerStep, FootstepPlannerParameterKeys.costPerStep);
       javaFXStoredPropertyMap.put(aStarHeuristicsWeight, FootstepPlannerParameterKeys.aStarHeuristicsWeight);
+      javaFXStoredPropertyMap.put(visGraphHeuristicsWeight, FootstepPlannerParameterKeys.visGraphWithAStarHeuristicsWeight);
       javaFXStoredPropertyMap.put(yawWeight, FootstepPlannerParameterKeys.yawWeight);
       javaFXStoredPropertyMap.put(pitchWeight, FootstepPlannerParameterKeys.pitchWeight);
       javaFXStoredPropertyMap.put(rollWeight, FootstepPlannerParameterKeys.rollWeight);
@@ -84,8 +105,13 @@ public class FootstepPlannerCostsUIController
       javaFXStoredPropertyMap.put(lateralWeight, FootstepPlannerParameterKeys.lateralWeight);
       javaFXStoredPropertyMap.put(stepUpWeight, FootstepPlannerParameterKeys.stepUpWeight);
       javaFXStoredPropertyMap.put(stepDownWeight, FootstepPlannerParameterKeys.stepDownWeight);
+      javaFXStoredPropertyMap.put(footholdAreaWeight, FootstepPlannerParameterKeys.footholdAreaWeight);
+      javaFXStoredPropertyMap.put(longStepWeight, FootstepPlannerParameterKeys.longStepWeight);
+      javaFXStoredPropertyMap.put(bodyPathViolationWeight, FootstepPlannerParameterKeys.bodyPathViolationWeight);
+      javaFXStoredPropertyMap.put(distanceFromPathTolerance, FootstepPlannerParameterKeys.distanceFromPathTolerance);
+      javaFXStoredPropertyMap.put(deltaYawFromReferenceTolerance, FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, v ->
       {
          planningParameters.set(v);
 
@@ -99,7 +125,7 @@ public class FootstepPlannerCostsUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createLowWeightValueFactory()

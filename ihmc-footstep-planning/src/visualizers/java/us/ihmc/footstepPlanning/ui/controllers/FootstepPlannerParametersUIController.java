@@ -22,6 +22,11 @@ public class FootstepPlannerParametersUIController
    private CheckBox performHeuristicSearchPolicies;
 
    @FXML
+   private Spinner<Double> idealStepWidth;
+   @FXML
+   private Spinner<Double> idealStepLength;
+
+   @FXML
    private Spinner<Double> maxStepLength;
    @FXML
    private Spinner<Double> maxStepWidth;
@@ -39,6 +44,8 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> maxStepYaw;
    @FXML
    private Spinner<Double> minStepYaw;
+   @FXML
+   private Spinner<Double> stepYawReductionFactor;
    @FXML
    private Spinner<Double> minFootholdPercent;
 
@@ -69,9 +76,13 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Spinner<Double> maxStepUpX;
    @FXML
+   private Spinner<Double> maxStepUpY;
+   @FXML
    private Spinner<Double> stepUpHeight;
    @FXML
    private Spinner<Double> maxStepDownX;
+   @FXML
+   private Spinner<Double> maxStepDownY;
    @FXML
    private Spinner<Double> stepDownHeight;
 
@@ -99,6 +110,9 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
+      idealStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.3, 0.02));
+      idealStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.22, 0.01));
+
       maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
@@ -107,12 +121,15 @@ public class FootstepPlannerParametersUIController
       maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       maxStepUpX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
+      maxStepUpY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       stepUpHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
       maxStepDownX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
+      maxStepDownY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
       stepDownHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
 
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
+      stepYawReductionFactor.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
       minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
 
       minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
@@ -139,6 +156,8 @@ public class FootstepPlannerParametersUIController
       setupControls();
 
       JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap.put(idealStepLength, FootstepPlannerParameterKeys.idealFootstepLength);
+      javaFXStoredPropertyMap.put(idealStepWidth, FootstepPlannerParameterKeys.idealFootstepWidth);
       javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
       javaFXStoredPropertyMap.put(performHeuristicSearchPolicies, FootstepPlannerParameterKeys.performHeuristicSearchPolicies);
       javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
@@ -149,6 +168,7 @@ public class FootstepPlannerParametersUIController
       javaFXStoredPropertyMap.put(minSurfaceIncline, FootstepPlannerParameterKeys.minSurfaceIncline);
       javaFXStoredPropertyMap.put(maxStepYaw, FootstepPlannerParameterKeys.maxStepYaw);
       javaFXStoredPropertyMap.put(minStepYaw, FootstepPlannerParameterKeys.minStepYaw);
+      javaFXStoredPropertyMap.put(stepYawReductionFactor, FootstepPlannerParameterKeys.stepYawReductionFactorAtMaxReach);
       javaFXStoredPropertyMap.put(minFootholdPercent, FootstepPlannerParameterKeys.minFootholdPercent);
       javaFXStoredPropertyMap.put(minXClearance, FootstepPlannerParameterKeys.minXClearanceFromStance);
       javaFXStoredPropertyMap.put(minYClearance, FootstepPlannerParameterKeys.minYClearanceFromStance);
@@ -158,12 +178,14 @@ public class FootstepPlannerParametersUIController
       javaFXStoredPropertyMap.put(maxYawWiggleSpinner, FootstepPlannerParameterKeys.maximumYawWiggle);
       javaFXStoredPropertyMap.put(wiggleInsideDeltaSpinner, FootstepPlannerParameterKeys.wiggleInsideDelta);
       javaFXStoredPropertyMap.put(maxStepUpX, FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp);
+      javaFXStoredPropertyMap.put(maxStepUpY, FootstepPlannerParameterKeys.maximumStepWidthWhenSteppingUp);
       javaFXStoredPropertyMap.put(stepUpHeight, FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp);
       javaFXStoredPropertyMap.put(maxStepDownX, FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown);
+      javaFXStoredPropertyMap.put(maxStepDownY, FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown);
       javaFXStoredPropertyMap.put(stepDownHeight, FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown);
 
       // set messager updates to update all stored properties and select JavaFX properties
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
          planningParameters.set(parameters);
 
@@ -189,7 +211,7 @@ public class FootstepPlannerParametersUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 
 

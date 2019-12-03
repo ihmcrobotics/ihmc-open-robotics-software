@@ -57,7 +57,7 @@ public class FootstepNodeCheckingUIController
       nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.RenderShiftedWaypointsTopic, renderShiftedWaypointSteps.selectedProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RenderShiftedWaypoints, renderShiftedWaypointSteps.selectedProperty(), false);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createPositionValueFactory()

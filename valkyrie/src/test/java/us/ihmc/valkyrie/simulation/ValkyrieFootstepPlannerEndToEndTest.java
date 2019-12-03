@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,11 +24,12 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
+@Tag("fast")
 @Disabled
 public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
 {
    private static final boolean showCollisionGraphics = true;
-   private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -198,8 +198,10 @@
                         <parameter name="userDesiredICPOffsetY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="manualModeICPOffset" type="BooleanParameter" value="false" />
                      </registry>
-                     <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                   </registry>
                </registry>
                <registry name="RigidBodyGains">
@@ -1344,6 +1346,60 @@
             <parameter name="armJointVelocityBacklashSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
             <parameter name="armJointPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
             <parameter name="fingerPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
+         </registry>
+         <registry name="leftHipYaw">
+            <parameter name="leftHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="rightHipYaw">
+            <parameter name="rightHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="torsoYaw">
+            <parameter name="torsoYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="leftHipRoll">
+            <parameter name="leftHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipRoll">
+            <parameter name="rightHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftHipPitch">
+            <parameter name="leftHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipPitch">
+            <parameter name="rightHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftKneePitch">
+            <parameter name="leftKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightKneePitch">
+            <parameter name="rightKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftShoulderPitch">
+            <parameter name="leftShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="rightShoulderPitch">
+            <parameter name="rightShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="leftAnklePitch">
+            <parameter name="leftAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftShoulderRoll">
+            <parameter name="leftShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightShoulderRoll">
+            <parameter name="rightShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftShoulderYaw">
+            <parameter name="leftShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightShoulderYaw">
+            <parameter name="rightShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="leftElbowPitch">
+            <parameter name="leftElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightElbowPitch">
+            <parameter name="rightElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
          </registry>
       </registry>
       <parameter name="ContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="120.0" />

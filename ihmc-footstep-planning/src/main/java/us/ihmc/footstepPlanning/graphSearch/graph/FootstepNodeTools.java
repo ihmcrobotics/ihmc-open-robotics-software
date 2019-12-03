@@ -1,11 +1,17 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class FootstepNodeTools
@@ -46,6 +52,34 @@ public class FootstepNodeTools
       snapTransform.transform(transformToPack);
    }
 
+   public static Point3DReadOnly getNodePositionInWorld(FootstepNode node, RigidBodyTransform snapTransform)
+   {
+      Point3D nodeInWorld = new Point3D();
+      getNodePositionInWorld(node, nodeInWorld, snapTransform);
+
+      return nodeInWorld;
+   }
+
+   public static void getNodePositionInWorld(FootstepNode node, Point3DBasics nodeInWorld, RigidBodyTransform snapTransform)
+   {
+      nodeInWorld.set(node.getX(), node.getY(), 0.0);
+      snapTransform.transform(nodeInWorld);
+   }
+
+   public static Pose3DReadOnly getNodePoseInWorld(FootstepNode node, RigidBodyTransform snapTransform)
+   {
+      Pose3D nodeInWorld = new Pose3D();
+      getNodePoseInWorld(node, nodeInWorld, snapTransform);
+
+      return nodeInWorld;
+   }
+
+   public static void getNodePoseInWorld(FootstepNode node, Pose3DBasics nodeInWorld, RigidBodyTransform snapTransform)
+   {
+      RigidBodyTransform snappedTransform = new RigidBodyTransform();
+      getSnappedNodeTransform(node, snapTransform, snappedTransform);
+      nodeInWorld.set(snappedTransform);
+   }
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep node
     *
