@@ -1,3 +1,4 @@
+
 # This message is part of the IHMC footstep planning module.
 
 float64 DEFAULT_NO_VALUE = -11.1
@@ -20,6 +21,8 @@ float64 preferred_obstacle_extrusion_distance -11.1
 float64 obstacle_extrusion_distance_if_not_too_high_to_step -11.1
 
 float64 too_high_to_step_distance -11.1
+
+float64 height_for_max_avoidance -11.1
 
 float64 cluster_resolution -11.1
 

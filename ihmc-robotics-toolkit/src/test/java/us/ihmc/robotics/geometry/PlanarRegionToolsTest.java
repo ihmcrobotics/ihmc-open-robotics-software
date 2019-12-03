@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -12,11 +11,9 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -570,7 +567,7 @@ public class PlanarRegionToolsTest
    @Test
    public void testIsRegionAOverlapingWithRegionB()
    {
-      //TODO: +++JerryPratt: Get this to pass by fixing isRegionAOverlapingWithRegionB()
+      //TODO: +++JerryPratt: Get this to pass by fixing isRegionAOverlappingWithRegionB()
       ConvexPolygon2D polygonA = new ConvexPolygon2D();
       polygonA.addVertex(1.0, 1.0);
       polygonA.addVertex(1.0, -1.0);
@@ -589,33 +586,33 @@ public class PlanarRegionToolsTest
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
       double epsilonForCheck = 0.0;
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionA, epsilonForCheck));
       epsilonForCheck = 0.099;
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionA, epsilonForCheck));
       epsilonForCheck = 0.101;
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionA, epsilonForCheck));
       epsilonForCheck = 100.0;
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionA, regionB, epsilonForCheck));
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionA, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionA, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionA, epsilonForCheck));
 
       RigidBodyTransform transformC = new RigidBodyTransform();
       transformC.setRotationEuler(0.0, Math.PI / 2.0, 0.0);
       PlanarRegion regionC = new PlanarRegion(transformC, polygonA);
       epsilonForCheck = 0.0;
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionC, regionB, epsilonForCheck));
       epsilonForCheck = 1.098;
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
-      assertFalse(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionC, regionB, epsilonForCheck));
       epsilonForCheck = 1.102;
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionC, regionB, epsilonForCheck));
       epsilonForCheck = 100.0;
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionB, regionC, epsilonForCheck));
-      assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionC, epsilonForCheck));
+      assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionC, regionB, epsilonForCheck));
    }
 
    @Test

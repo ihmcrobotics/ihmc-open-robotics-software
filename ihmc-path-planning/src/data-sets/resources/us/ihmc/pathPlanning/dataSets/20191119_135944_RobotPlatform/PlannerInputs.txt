@@ -1,0 +1,7 @@
+start_position -0.01 0.06 -0.04
+goal_position -0.61 1.78 -0.47
+start_yaw 1.82
+goal_yaw 1.87
+
+vis_graph_status test
+
