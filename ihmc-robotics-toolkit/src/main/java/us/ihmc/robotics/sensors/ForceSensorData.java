@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
@@ -16,6 +17,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 {
    private final DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
+   private String sensorName;
    private ReferenceFrame measurementFrame;
    private RigidBodyBasics measurementLink;
 
@@ -25,16 +27,17 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public ForceSensorData(ForceSensorDefinition forceSensorDefinition)
    {
-      setFrameAndBody(forceSensorDefinition);
+      setDefinition(forceSensorDefinition);
    }
 
-   public void setFrameAndBody(ForceSensorDefinition forceSensorDefinition)
+   public void setDefinition(ForceSensorDefinition forceSensorDefinition)
    {
-      setFrameAndBody(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getRigidBody());
+      setDefinition(forceSensorDefinition.getSensorName(), forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getRigidBody());
    }
 
-   public void setFrameAndBody(ReferenceFrame measurementFrame, RigidBodyBasics measurementLink)
+   public void setDefinition(String sensorName, ReferenceFrame measurementFrame, RigidBodyBasics measurementLink)
    {
+      this.sensorName = sensorName;
       this.measurementFrame = measurementFrame;
       this.measurementLink = measurementLink;
    }
@@ -52,7 +55,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public void setWrench(float[] newWrench)
    {
-      for (int i = 0; i < Wrench.SIZE; i++)
+      for (int i = 0; i < SpatialVectorReadOnly.SIZE; i++)
       {
          wrench.set(i, 0, newWrench[i]);
       }
@@ -63,6 +66,12 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
       measurementFrame.checkReferenceFrameMatch(newWrench.getReferenceFrame());
       measurementFrame.checkReferenceFrameMatch(newWrench.getBodyFrame());
       newWrench.get(wrench);
+   }
+
+   @Override
+   public String getSensorName()
+   {
+      return sensorName;
    }
 
    @Override
@@ -100,7 +109,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
    @Override
    public void getWrench(float[] wrenchToPack)
    {
-      for (int i = 0; i < Wrench.SIZE; i++)
+      for (int i = 0; i < SpatialVectorReadOnly.SIZE; i++)
       {
          wrenchToPack[i] = (float) wrench.get(i, 0);
       }
@@ -114,6 +123,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public void set(ForceSensorDataReadOnly other)
    {
+      sensorName = other.getSensorName();
       measurementFrame = other.getMeasurementFrame();
       measurementLink = other.getMeasurementLink();
       other.getWrench(wrench);
@@ -129,6 +139,8 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
       else if (obj instanceof ForceSensorData)
       {
          ForceSensorData other = (ForceSensorData) obj;
+         if (sensorName == null ? other.sensorName != null : !sensorName.equals(other.sensorName))
+            return false;
          if (measurementFrame != other.measurementFrame)
             return false;
          if (measurementLink != other.measurementLink)

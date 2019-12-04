@@ -50,7 +50,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
          forceSensorMap.put(definition, forceSensorData);
       }
       forceSensorDatas.add(forceSensorData);
-      forceSensorData.setFrameAndBody(forceSensorDefinition);
+      forceSensorData.setDefinition(forceSensorDefinition);
 
       return forceSensorData;
    }
