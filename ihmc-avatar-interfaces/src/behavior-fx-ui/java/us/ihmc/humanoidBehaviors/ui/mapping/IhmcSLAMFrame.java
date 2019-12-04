@@ -26,7 +26,7 @@ public class IhmcSLAMFrame
    // this.sensorPoseToWorld * this.slamTransformer.
    private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
-   private final Point3DReadOnly[] originalPointCloudToWorld;
+   private final Point3DReadOnly[] originalPointCloudToWorld;  // For comparison after mapping.
    private final Point3DReadOnly[] pointCloudToSensorFrame;
    private final Point3D[] optimizedPointCloudToWorld;
 
@@ -168,7 +168,9 @@ public class IhmcSLAMFrame
          }
       }
 
-      NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
+      // TODO: fix: When previousSensorPoseToWorld is close to a plane, the octree is not even for the plane.
+      //NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
+      NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, new Point3D(0.0, 0.0, 10.0), octreeResolution);
       return octree;
    }
 }

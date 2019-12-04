@@ -12,6 +12,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMTest
 {
-
    @Test
    public void testViewer()
    {
@@ -61,12 +61,11 @@ public class IhmcSLAMTest
       double stairWidth = 0.5;
       double stairLength = 0.25;
 
-      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth,
-                                                                                                                          stairLength + movingForward,
-                                                                                                                          stairLength - movingForward);
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength,
+                                                                                                                          stairLength);
 
-      double translationX = movingForward;
-      double translationY = 0.00;
+      double translationX = movingForward / 2;
+      double translationY = 0.0;
       double translationZ = 0.0;
       double rotateY = Math.toRadians(1.0);
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
@@ -171,10 +170,10 @@ public class IhmcSLAMTest
          pointCloudMap.add(pointCloud);
 
          List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution);
+         System.out.println("rawData " + rawData.size());
 
          planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
                                                                 polygonizerParameters);
-
       }
 
       IhmcSLAMViewer viewer = new IhmcSLAMViewer();
@@ -186,15 +185,57 @@ public class IhmcSLAMTest
          Color color = Color.rgb(redScaler, 0, blueScaler);
          viewer.addPointCloud(pointCloudMap.get(i), color);
       }
+
       viewer.start("testPlanarRegionsForFlatGround");
 
       ThreadTools.sleepForever();
    }
 
-   @Test
+   @Test // TODO : Fix with Sylvain. see IhmcSLAMFrame.
    public void testInverseInterpolation()
    {
+      double movingForward = 0.05;
 
+      double stairHeight = 0.3;
+      double stairWidth = 0.5;
+      double stairLength = 0.25;
+
+      double octreeResolution = 0.02;
+
+      RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
+      sensorPoseOne.setTranslation(0.0, 0.0, 1.0);
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne,
+                                                                                                                          new RigidBodyTransform(), stairHeight,
+                                                                                                                          stairWidth, stairLength, stairLength,
+                                                                                                                          false);
+
+      double translationX = movingForward / 2;
+      double translationY = 0.0;
+      double translationZ = 0.0;
+      double rotateY = Math.toRadians(0.0);
+      RigidBodyTransform preMultiplier = new RigidBodyTransform();
+      preMultiplier.setTranslation(translationX, translationY, translationZ);
+      preMultiplier.appendPitchRotation(rotateY);
+
+      RigidBodyTransform sensorPoseTwo = new RigidBodyTransform();
+      sensorPoseTwo.setTranslation(movingForward, 0.0, 1.0);
+      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
+                                                                                                                          stairHeight, stairWidth,
+                                                                                                                          stairLength - movingForward,
+                                                                                                                          stairLength + movingForward, false);
+
+      IhmcSLAMFrame frameOne = new IhmcSLAMFrame(messageOne);
+      IhmcSLAMFrame frameTwo = new IhmcSLAMFrame(frameOne, messageTwo);
+      NormalOcTree overlappedOctreeNode = frameTwo.computeOctreeInPreviousView(octreeResolution);
+
+      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      viewer.addSensorPose(frameOne.getSensorPose(), Color.BLUE);
+      viewer.addSensorPose(frameTwo.getSensorPose(), Color.GREEN);
+      viewer.addPointCloud(frameTwo.getPointCloud(), Color.GREEN);
+      viewer.addOctree(overlappedOctreeNode, Color.BEIGE, octreeResolution);
+      viewer.start("testSimulatedBadFrame");
+
+      ThreadTools.sleepForever();
    }
 
    @Test
