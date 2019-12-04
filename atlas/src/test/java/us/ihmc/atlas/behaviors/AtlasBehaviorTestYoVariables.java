@@ -1,12 +1,12 @@
 package us.ihmc.atlas.behaviors;
 
 import us.ihmc.avatar.AvatarTestYoVariables;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 
 public class AtlasBehaviorTestYoVariables extends AvatarTestYoVariables
 {
-   public AtlasBehaviorTestYoVariables(SimulationConstructionSet scs)
+   public AtlasBehaviorTestYoVariables(YoVariableHolder yoVariableHolder)
    {
-      super(scs);
+      super(yoVariableHolder);
    }
 }
