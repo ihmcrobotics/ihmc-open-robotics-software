@@ -87,8 +87,7 @@ public class IhmcSLAMTools
          double z = points[i].getZ();
          pointCloud.add(x, y, z);
       }
-      //return new Scan(new Point3D(sensorPosition), pointCloud);
-      return new Scan(new Point3D(0.0, 0.0, 40.0), pointCloud);   // TODO: fix this with REPORT 1 in IhmcSLAMFrame.
+      return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
    public static NormalOcTree computeOctreeData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
@@ -108,6 +107,7 @@ public class IhmcSLAMTools
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
       referenceOctree.setNormalEstimationParameters(normalEstimationParameters);
 
       referenceOctree.updateNormals();

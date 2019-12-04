@@ -168,9 +168,7 @@ public class IhmcSLAMFrame
          }
       }
 
-      // TODO: fix: When previousSensorPoseToWorld is close to a plane, the octree is not even for the plane. REPORT 1.
-      //NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
-      NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, new Point3D(0.0, 0.0, 10.0), octreeResolution);
+      NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
       return octree;
    }
 }
