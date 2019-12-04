@@ -22,7 +22,7 @@ public class VisibilityGraphNavigableRegion
     * is a null edge in the resulting visibility map.
     * See more: https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-open-robotics-software/pull-requests/1393
     */
-   private static final boolean ENABLE_EXPERIMENTAL_SPEEDUP = false;
+   public static final boolean ENABLE_EXPERIMENTAL_SPEEDUP = false;
 
    private final NavigableRegion navigableRegion;
 

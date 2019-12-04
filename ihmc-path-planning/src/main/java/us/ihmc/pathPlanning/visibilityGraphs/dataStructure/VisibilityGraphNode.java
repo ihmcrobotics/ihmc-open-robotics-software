@@ -83,14 +83,9 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return edges;
    }
 
-   public double distance(VisibilityGraphNode target)
+   public double distanceXYSquared(VisibilityGraphNode target)
    {
-      return pointInWorld.distance(target.pointInWorld);
-   }
-
-   public double distanceXY(VisibilityGraphNode target)
-   {
-      return pointInWorld.distanceXY(target.pointInWorld);
+      return pointInWorld.distanceXYSquared(target.pointInWorld);
    }
 
    public double getCostFromStart()
