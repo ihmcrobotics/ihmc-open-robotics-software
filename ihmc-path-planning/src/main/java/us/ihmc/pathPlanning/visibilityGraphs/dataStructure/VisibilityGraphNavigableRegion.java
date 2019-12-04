@@ -30,6 +30,8 @@ public class VisibilityGraphNavigableRegion
    private final ArrayList<VisibilityGraphNode> homeRegionNodes = new ArrayList<>();
    private final ArrayList<List<VisibilityGraphNode>> obstacleNavigableNodes = new ArrayList<>();
    private final ArrayList<List<VisibilityGraphNode>> obstaclePreferredNavigableNodes = new ArrayList<>();
+   private final List<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
+   private final List<VisibilityGraphNode> allPreferredNavigableNodes = new ArrayList<>();
 
    private final ArrayList<VisibilityGraphEdge> innerRegionEdges = new ArrayList<>();
 
@@ -65,15 +67,6 @@ public class VisibilityGraphNavigableRegion
       if (!haveNodesBeenCreated)
          createNavigableRegionNodes();
 
-      //TODO: Store them all in one list instead of several to not require this???
-      ArrayList<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
-      allNavigableNodes.addAll(homeRegionNodes);
-
-      for (List<VisibilityGraphNode> obstacleNodes : obstacleNavigableNodes)
-      {
-         allNavigableNodes.addAll(obstacleNodes);
-      }
-
       return allNavigableNodes;
    }
 
@@ -82,22 +75,14 @@ public class VisibilityGraphNavigableRegion
       if (!haveNodesBeenCreated)
          createNavigableRegionNodes();
 
-      //TODO: Store them all in one list instead of several to not require this???
-      ArrayList<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
-      allNavigableNodes.addAll(preferredHomeRegionNodes);
-
-      for (List<VisibilityGraphNode> obstacleNodes : obstaclePreferredNavigableNodes)
-      {
-         allNavigableNodes.addAll(obstacleNodes);
-      }
-
-      return allNavigableNodes;
+      return allPreferredNavigableNodes;
    }
 
    public List<List<VisibilityGraphNode>> getObstaclePreferredNavigableNodes()
    {
       if (!haveNodesBeenCreated)
          createNavigableRegionNodes();
+
       return obstaclePreferredNavigableNodes;
    }
 
@@ -154,6 +139,12 @@ public class VisibilityGraphNavigableRegion
          createNavigableRegionNodes(this, obstacleCluster, homePlanarRegion, allClusters, obstaclePreferredNodes, obstacleNodes,
                                     innerRegionEdges, createEdgesAroundClusterRing);
       }
+
+      allNavigableNodes.addAll(homeRegionNodes);
+      obstacleNavigableNodes.forEach(allNavigableNodes::addAll);
+
+      allPreferredNavigableNodes.addAll(preferredHomeRegionNodes);
+      obstaclePreferredNavigableNodes.forEach(allPreferredNavigableNodes::addAll);
 
       haveNodesBeenCreated = true;
    }
