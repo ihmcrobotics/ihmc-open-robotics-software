@@ -19,7 +19,8 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
+import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
@@ -32,7 +33,8 @@ public class NormalOctreeGraphic extends Group
    private List<Node> lastNodes = null;
    private volatile List<Node> updatePointCloudMeshViews;
 
-   private final JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+   private static final int palleteSizeForMeshBuilder = 2048;
+   private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
 
    private final RecyclingArrayList<Point3D> plane = new RecyclingArrayList<>(0, SupplierBuilder.createFromEmptyConstructor(Point3D.class));
    private final IntersectionPlaneBoxCalculator intersectionPlaneBoxCalculator = new IntersectionPlaneBoxCalculator();
@@ -40,12 +42,15 @@ public class NormalOctreeGraphic extends Group
    public void initialize()
    {
       updatePointCloudMeshViews = new ArrayList<>();
-
       meshBuilder.clear();
    }
 
    public void generateMeshes()
    {
+      MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
+      scanMeshView.setMaterial(meshBuilder.generateMaterial());
+
+      updatePointCloudMeshViews.add(scanMeshView);
       meshBuilder.clear();
       messageNodes = updatePointCloudMeshViews;
    }
@@ -76,7 +81,7 @@ public class NormalOctreeGraphic extends Group
             triangleIndices[index++] = j - 1;
             triangleIndices[index++] = j;
          }
-         
+
          Point3D32[] vertices = new Point3D32[plane.size()];
          TexCoord2f[] texCoords = new TexCoord2f[plane.size()];
          Vector3D32[] normals = new Vector3D32[plane.size()];
@@ -89,14 +94,8 @@ public class NormalOctreeGraphic extends Group
          }
 
          MeshDataHolder octreePlaneMeshDataHolder = new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
-         meshBuilder.addMesh(octreePlaneMeshDataHolder);
+         meshBuilder.addMesh(octreePlaneMeshDataHolder, colorToViz);
       }
-
-      MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
-      Material material = new PhongMaterial(colorToViz);
-      scanMeshView.setMaterial(material);
-
-      updatePointCloudMeshViews.add(scanMeshView);
    }
 
    public void addMesh(NormalOcTree octree, double octreeResolution, Color colorToViz)
@@ -145,14 +144,8 @@ public class NormalOctreeGraphic extends Group
          }
 
          MeshDataHolder octreePlaneMeshDataHolder = new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
-         meshBuilder.addMesh(octreePlaneMeshDataHolder);
+         meshBuilder.addMesh(octreePlaneMeshDataHolder, colorToViz);
       }
-
-      MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
-      Material material = new PhongMaterial(colorToViz);
-      scanMeshView.setMaterial(material);
-
-      updatePointCloudMeshViews.add(scanMeshView);
    }
 
    public void generateMeshes(List<NormalOcTree> octreeMap, double octreeResolution)
