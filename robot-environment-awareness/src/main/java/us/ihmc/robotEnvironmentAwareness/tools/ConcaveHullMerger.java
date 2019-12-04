@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.tools;
 
 import java.util.ArrayList;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -276,10 +277,11 @@ public class ConcaveHullMerger
       if (!exitedWithoutALoop)
       {
          LogTools.error("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!");
-         if (listener != null)
-         {
-            listener.hullGotLooped(originalHullOne, originalHullTwo, mergedVertices);
-         }
+         throw new UncheckedExecutionException("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!", new Exception());
+//         if (listener != null)
+//         {
+//            listener.hullGotLooped(originalHullOne, originalHullTwo, mergedVertices);
+//         }
       }
 
       BoundingBox2D finalBoundingBox = createBoundingBox(mergedVertices);

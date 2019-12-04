@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -43,6 +44,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -116,6 +118,8 @@ public class AtlasCorridorNavigationTest
          }).start();
       }
 
+      ThreadTools.sleepSeconds(2.0); // wait a bit for other threads to start
+
       // create map subscriber
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
 
@@ -125,13 +129,13 @@ public class AtlasCorridorNavigationTest
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
 
       boolean fullyExpandVisibilityGraph = false;
-      Point3D start = new Point3D();
       Point3D goal = new Point3D(6.0, 0.0, 0.0);
       FramePose3D robotPose = new FramePose3D();
       robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       List<Point3DReadOnly> pathPoints = null;
       List<? extends Pose3DReadOnly> path = null;
+
 
       while (robotPose.getPosition().distance(goal) > 0.5)
       {
@@ -141,8 +145,7 @@ public class AtlasCorridorNavigationTest
          PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(visibilityGraphParameters);
          PlanarRegionsList latestMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest());
          manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
-         robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
-         robotPose.changeFrame(ReferenceFrame.getWorldFrame());
+         LogTools.info("Planning with occlusions");
          pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
          if (pathPoints == null)
          {
@@ -153,6 +156,7 @@ public class AtlasCorridorNavigationTest
          LogTools.info("Found path.");
          try
          {
+            LogTools.info("Computing poses from path");
             path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
          }
          catch (Exception e)
@@ -165,8 +169,8 @@ public class AtlasCorridorNavigationTest
 
          bodyPath.setPoseWaypoints(path);
 
-         Pose3D startPose = new Pose3D();
-         bodyPath.getPointAlongPath(0.0, startPose);
+//         Pose3D startPose = new Pose3D();
+         bodyPath.getPointAlongPath(0.0, robotPose);
          Pose3D finalPose = new Pose3D();
          bodyPath.getPointAlongPath(1.0, finalPose);
 
@@ -175,9 +179,9 @@ public class AtlasCorridorNavigationTest
          double defaultStepWidth = parameters.getIdealFootstepWidth();
 
          FramePose3D initialMidFootPose = new FramePose3D();
-         initialMidFootPose.setX(startPose.getX());
-         initialMidFootPose.setY(startPose.getY());
-         initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+         initialMidFootPose.setX(robotPose.getX());
+         initialMidFootPose.setY(robotPose.getY());
+         initialMidFootPose.setOrientationYawPitchRoll(robotPose.getYaw(), 0.0, 0.0);
          PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
          RobotSide initialStanceFootSide = RobotSide.RIGHT;
@@ -188,7 +192,7 @@ public class AtlasCorridorNavigationTest
          FramePose3D goalPose = new FramePose3D();
          goalPose.setX(finalPose.getX());
          goalPose.setY(finalPose.getY());
-         goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+         goalPose.setOrientationYawPitchRoll(robotPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
          FootstepPlannerParametersReadOnly footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
@@ -204,17 +208,27 @@ public class AtlasCorridorNavigationTest
                                                                  stepCostCalculator,
                                                                  snapper,
                                                                  registry);
+         LogTools.info("Running footstep planner");
          FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, latestMap, true);
 
          // make robot walk a little of the path
          if (VISUALIZE) robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
 
          FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-         for (int i = 0; i < 3; i++)
+
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
          {
+            SimpleFootstep footstep = footstepPlan.getFootstep(i);
+
+            if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 1.5)
+            {
+               break; // don't go farther than 0.3 meters
+            }
+
             shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
          }
 
+         LogTools.info("Requesting walk");
          TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
                shortenedFootstepPlan,
                1.0,
@@ -222,7 +236,16 @@ public class AtlasCorridorNavigationTest
                ExecutionMode.OVERRIDE));
 
          // wait for robot to finish walking
-         walkingStatusNotification.blockingPoll();
+         Stopwatch stopwatch = new Stopwatch().start();
+         double timeout = 3.0;
+         while (!walkingStatusNotification.poll() && stopwatch.lapElapsed() < timeout)
+         {
+            ThreadTools.sleep(100);
+         }
+         if (stopwatch.lapElapsed() >= timeout)
+         {
+            LogTools.info("Walking timed out.");
+         }
 
          robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
