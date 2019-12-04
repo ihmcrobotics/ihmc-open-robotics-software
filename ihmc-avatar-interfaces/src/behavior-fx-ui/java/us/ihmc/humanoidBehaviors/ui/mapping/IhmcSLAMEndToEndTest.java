@@ -8,9 +8,12 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMEndToEndTest extends Application
 {
@@ -24,6 +27,10 @@ public class IhmcSLAMEndToEndTest extends Application
    //private final String stereoPath = "E:\\Data\\SimpleArea2\\PointCloud\\";
    private final String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
 
+   private final boolean showLidarPlanarRegions = false;
+   //private final String planarRegionsPath = "E:\\Data\\SimpleArea3\\20191127_222138_PlanarRegion\\";
+   private final String planarRegionsPath = "E:\\Data\\Walking7-fixedframe\\PlanarRegions\\";
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
@@ -31,7 +38,7 @@ public class IhmcSLAMEndToEndTest extends Application
       messages.addAll(messagesFromFile);
       System.out.println("number of messages " + messages.size());
 
-      IhmcSLAM slam = new IhmcSLAM();
+      IhmcSLAM slam = new IhmcSLAM(true);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
          slam.addFrame(messages.get(i));
@@ -48,11 +55,11 @@ public class IhmcSLAMEndToEndTest extends Application
 
       for (int i = 0; i < slam.getOriginalPointCloudMap().size(); i++)
       {
-         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getOriginalPointCloudMap().get(i), slam.getOriginalSensorPoses().get(i), Color.BLACK);
+         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getOriginalPointCloudMap().get(i), slam.getOriginalSensorPoses().get(i), Color.BLACK, Color.BLACK);
       }
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {
-         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getPointCloudMap().get(i), slam.getSensorPoses().get(i), Color.BLUE);
+         //stereoVisionPointCloudGraphic.addPointsMeshes(slam.getPointCloudMap().get(i), slam.getSensorPoses().get(i), Color.BLUE, Color.BLUE);
       }
 
       stereoVisionPointCloudGraphic.generateMeshes();
@@ -60,6 +67,17 @@ public class IhmcSLAMEndToEndTest extends Application
       view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
 
       regionsGraphic.generateMeshes(slam.getPlanarRegionsMap());
+      if (showLidarPlanarRegions)
+      {
+         PlanarRegionsList importPlanarRegionData = PlanarRegionFileTools.importPlanarRegionData(new File(planarRegionsPath));
+         RigidBodyTransform preMultiplier = new RigidBodyTransform();
+         preMultiplier.appendRollRotation(Math.toRadians(-2.0));
+         preMultiplier.setTranslation(-0.1, 0.1, -0.0);
+         
+         //preMultiplier.appendPitchRotation(Math.toRadians(-5.0));
+         importPlanarRegionData.transformByPreMultiply(preMultiplier);
+         regionsGraphic.generateMeshes(importPlanarRegionData);
+      }
       regionsGraphic.update();
       view3dFactory.addNodeToView(regionsGraphic);
 
