@@ -663,7 +663,7 @@ public class PlanarRegionTools
       {
          Point3D vertexOfAInWorld = new Point3D(convexHullInLocalA.getVertex(i));
          transformFromAToWorld.transform(vertexOfAInWorld);
-         Point3D vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
+         Point3DReadOnly vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
          if (vertexOfAProjectedToBInWorld != null)
          {
             double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
@@ -706,17 +706,9 @@ public class PlanarRegionTools
     */
    public static Point3D projectInZToPlanarRegion(Point3DReadOnly pointInWorldToProjectInZ, PlanarRegion planarRegion)
    {
-      Vector3D surfaceNormalInWorld = planarRegion.getNormal();
-
-      RigidBodyTransformReadOnly transformToWorld = planarRegion.getTransformToWorld();
-
-      Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
-      transformToWorld.transform(planarRegionReferencePointInWorld);
-
-      Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
-
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld, pointInWorldToProjectInZ,
-                                                                     verticalLine);
+      Point3D projectedPoint = new Point3D(pointInWorldToProjectInZ);
+      projectedPoint.setZ(planarRegion.getPlaneZGivenXY(pointInWorldToProjectInZ.getX(), pointInWorldToProjectInZ.getY()));
+      return projectedPoint;
    }
 
    public static boolean allVerticesAreAbovePlane3D(Plane3D plane, PlanarRegion planarRegion)

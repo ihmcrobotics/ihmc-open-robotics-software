@@ -11,15 +11,18 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.*;
 
@@ -32,6 +35,33 @@ public class PlanarRegionToolsTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
+
+   @Test
+   public void testProjectInZToPlanarRegion()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3D randomPointToProject = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
+         PlanarRegion randomRegion = new PlanarRegion(EuclidCoreRandomTools.nextRigidBodyTransform(random), new ArrayList<>());
+
+         Point3DReadOnly projectedRandomPoint = PlanarRegionTools.projectInZToPlanarRegion(randomPointToProject, randomRegion);
+
+         Vector3D surfaceNormalInWorld = randomRegion.getNormal();
+
+         RigidBodyTransformReadOnly transformToWorld = randomRegion.getTransformToWorld();
+
+         Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
+         transformToWorld.transform(planarRegionReferencePointInWorld);
+
+         Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
+
+         Point3D expectedProjectedPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld,
+                                                                                                  randomPointToProject, verticalLine);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedProjectedPoint, projectedRandomPoint, 1e-8);
+      }
+   }
 
    @Test
    public void testComputeMinHeightOfRegionAAboveRegionB()
