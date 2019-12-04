@@ -132,7 +132,17 @@ public class IhmcSLAMFrame
          minY = Math.min(minY, pointCloudToSensorFrame[i].getY());
       }
 
-      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
+      boolean ignorePreviousOrientation = true;
+      RigidBodyTransform previousSensorPoseToWorld;
+      if(ignorePreviousOrientation)
+      {
+         previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
+         previousSensorPoseToWorld.setRotation(optimizedSensorPoseToWorld.getRotation());
+      }
+      else
+      {
+         previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
+      }
 
       Point3D[] pointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < pointCloudToWorld.length; i++)
