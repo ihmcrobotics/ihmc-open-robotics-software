@@ -9,6 +9,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class SimulatedStereoVisionPointCloudMessageLibrary
 {
+   private static final int NUMBER_OF_POINTS = 5000;
+   private static final RigidBodyTransform fixedSensorPose = new RigidBodyTransform();
+   static
+   {
+      fixedSensorPose.setTranslation(0.0, 0.0, 100.0);
+   }
+
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLength)
    {
       return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLength);
@@ -17,31 +24,35 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
                                                                           double stairLength)
    {
-      return generateMessageSimpleStair(preMultiplier, stairHeight, stairWidth, stairLength, stairLength, true);
+      return generateMessageSimpleStair(fixedSensorPose, preMultiplier, stairHeight, stairWidth, stairLength, stairLength, true);
    }
 
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
                                                                           double stairLengthUpper)
    {
-      return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, true);
+      return generateMessageSimpleStair(fixedSensorPose, new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, true);
    }
-   
+
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
                                                                           double stairLengthUpper, boolean generateVertical)
    {
-      return generateMessageSimpleStair(new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper, generateVertical);
+      return generateMessageSimpleStair(fixedSensorPose, new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper,
+                                        generateVertical);
+   }
+
+   public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
+                                                                          double stairLengthLower, double stairLengthUpper, boolean generateVertical)
+   {
+      return generateMessageSimpleStair(fixedSensorPose, preMultiplier, stairHeight, stairWidth, stairLengthLower, stairLengthUpper, generateVertical);
    }
 
    /**
     * Generate StereoVisionPointCloudMessage which is watching two stairs with front side.
     */
-   public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform preMultiplier, double stairHeight, double stairWidth,
-                                                                          double stairLengthLower, double stairLengthUpper, boolean generateVertical)
+   public static StereoVisionPointCloudMessage generateMessageSimpleStair(RigidBodyTransform sensorPose, RigidBodyTransform preMultiplier, double stairHeight,
+                                                                          double stairWidth, double stairLengthLower, double stairLengthUpper,
+                                                                          boolean generateVertical)
    {
-      int numberOfPoints = 5000;
-
-      RigidBodyTransform sensorPose = new RigidBodyTransform();
-      sensorPose.setTranslation(0.0, 0.0, 1.0);
       List<RigidBodyTransform> centroidPoses = new ArrayList<>();
       List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
 
@@ -73,16 +84,38 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
       polygonThr.update();
 
       centroidPoses.add(centerOne);
-      if(generateVertical)
+      if (generateVertical)
          centroidPoses.add(centerTwo);
       centroidPoses.add(centerThr);
       convexPolygons.add(polygonOne);
-      if(generateVertical)
+      if (generateVertical)
          convexPolygons.add(polygonTwo);
       convexPolygons.add(polygonThr);
 
       for (RigidBodyTransform centroid : centroidPoses)
          centroid.preMultiply(preMultiplier);
-      return SimulatedStereoVisionPointCloudMessageFactory.generateStereoVisionPointCloudMessage(sensorPose, numberOfPoints, convexPolygons, centroidPoses);
+      return SimulatedStereoVisionPointCloudMessageFactory.generateStereoVisionPointCloudMessage(sensorPose, NUMBER_OF_POINTS, convexPolygons, centroidPoses);
+   }
+
+   public static StereoVisionPointCloudMessage generateMessageSimplePlane(RigidBodyTransform sensorPose, RigidBodyTransform preMultiplier, double length,
+                                                                          double width)
+   {
+      List<RigidBodyTransform> centroidPoses = new ArrayList<>();
+      List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
+
+      RigidBodyTransform center = new RigidBodyTransform();
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(length / 2, width / 2);
+      polygon.addVertex(length / 2, -width / 2);
+      polygon.addVertex(-length / 2, -width / 2);
+      polygon.addVertex(-length / 2, width / 2);
+      polygon.update();
+
+      centroidPoses.add(center);
+      convexPolygons.add(polygon);
+
+      for (RigidBodyTransform centroid : centroidPoses)
+         centroid.preMultiply(preMultiplier);
+      return SimulatedStereoVisionPointCloudMessageFactory.generateStereoVisionPointCloudMessage(sensorPose, NUMBER_OF_POINTS, convexPolygons, centroidPoses);
    }
 }
