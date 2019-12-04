@@ -461,59 +461,20 @@ public class VisibilityGraph
                                                              boolean onlyUseShortestEdge, double lengthForLongInterRegionEdge,  double weightForInterRegionEdge,
                                                              double staticEdgeCost)
    {
-      PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
-      ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
-      Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
-
-      RigidBodyTransformReadOnly transformFromWorldToSource = sourceHomeRegion.getTransformToLocal();
-
       List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
 
       double lengthForLongEdgeSquared = MathTools.square(lengthForLongInterRegionEdge);
 
-      for (VisibilityGraphNode targetNode : targetNodeList)
+      if (VisibilityGraphNavigableRegion.ENABLE_EXPERIMENTAL_SPEEDUP)
       {
-         ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
-         if (filter.isConnectionValid(sourceInWorld, targetInWorld))
+         targetNodeList.parallelStream().forEach(targetNode -> addInterEdgeIfVisible(sourceNode, targetNode, sourceObstacleClusters, targetObstacleClusters,
+                                                                                     filter, lengthForLongEdgeSquared, potentialEdges));
+      }
+      else
+      {
+         for (VisibilityGraphNode targetNode : targetNodeList)
          {
-            //TODO: +++++++JerryPratt: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
-            double xyDistanceSquared = sourceInWorld.distanceXYSquared(targetInWorld);
-            if (xyDistanceSquared < lengthForLongEdgeSquared)
-            {
-               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-               potentialEdges.add(edge);
-            }
-            else // Check if the edge is visible if it is a long one.
-            {
-               PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
-               RigidBodyTransformReadOnly transformFromWorldToTarget = targetHomeRegion.getTransformToLocal();
-
-               Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
-
-               Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
-               Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
-
-               transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
-               transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
-
-               Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
-               Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
-
-               boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
-
-               //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
-               boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
-                                                                                                           targetInSourceLocal, checkForPreferredVisibility);
-               boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
-                                                                                                           sourceInTargetLocal, checkForPreferredVisibility);
-
-
-               if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
-               {
-                  VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-                  potentialEdges.add(edge);
-               }
-            }
+            addInterEdgeIfVisible(sourceNode, targetNode, sourceObstacleClusters, targetObstacleClusters, filter, lengthForLongEdgeSquared, potentialEdges);
          }
       }
 
@@ -539,7 +500,60 @@ public class VisibilityGraph
          }
          edgesToPack.addAll(potentialEdges);
       }
+   }
 
+   private static void addInterEdgeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode,
+                                             List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters, InterRegionConnectionFilter filter,
+                                             double lengthForLongInterRegionEdgeSquared,  List<VisibilityGraphEdge> edgesToPack)
+   {
+      PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+      ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
+      Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
+      RigidBodyTransformReadOnly transformFromWorldToSource = sourceHomeRegion.getTransformToLocal();
+
+      ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
+      if (filter.isConnectionValid(sourceInWorld, targetInWorld))
+      {
+         //TODO: +++++++JerryPratt: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
+         double xyDistanceSquared = sourceInWorld.distanceXYSquared(targetInWorld);
+         if (xyDistanceSquared < lengthForLongInterRegionEdgeSquared)
+         {
+            VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+            edgesToPack.add(edge);
+         }
+         else // Check if the edge is visible if it is a long one.
+         {
+            PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+            RigidBodyTransformReadOnly transformFromWorldToTarget = targetHomeRegion.getTransformToLocal();
+
+            Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
+
+            // TODO can I not just set the height directly?
+            Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+            Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
+
+            transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
+            transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
+
+            Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
+            Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
+
+            boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
+
+            //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
+            boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
+                                                                                                        targetInSourceLocal, checkForPreferredVisibility);
+            boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
+                                                                                                        sourceInTargetLocal, checkForPreferredVisibility);
+
+
+            if ((targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles))
+            {
+               VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
+               edgesToPack.add(edge);
+            }
+         }
+      }
    }
 
    public static void createVisibilityConnectionsWhenOnNoRegion(VisibilityGraphNode sourceNode, List<VisibilityGraphNode> allNavigableNodes,
