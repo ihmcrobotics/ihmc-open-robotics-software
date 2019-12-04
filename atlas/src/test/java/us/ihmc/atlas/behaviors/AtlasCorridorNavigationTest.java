@@ -87,14 +87,6 @@ public class AtlasCorridorNavigationTest
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
    {
-      // start_position 0.0 0.0 0.0
-      // goal_position 6.0 0.0 0.0
-      // vis_graph_status test
-      // step_planner_status dev
-      // a_star_timeout 10.0
-      // vis_graph_with_a_star_timeout 45.0
-      // requires_occlusion false
-
       new Thread(() -> {
          LogTools.info("Creating simulate REA module");
          new SimulatedREAModule(PlannerTestEnvironments.getTrickCorridor(), createRobotModel(), pubSubMode).start();
@@ -111,11 +103,6 @@ public class AtlasCorridorNavigationTest
          {
             HumanoidKinematicsSimulation.createForAutomatedTest(createRobotModel(), createYoVariableServer);
          }
-      }).start();
-
-      new Thread(() -> {
-         LogTools.info("Creating footstep toolbox");
-         new MultiStageFootstepPlanningModule(createRobotModel(), null, false, pubSubMode);
       }).start();
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
@@ -175,10 +162,6 @@ public class AtlasCorridorNavigationTest
 
          // request footstep plan
          WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
-//         for (Pose3DReadOnly waypoint3d : path)
-//         {
-//            waypoints.add(new Pose3D(waypoint3d));
-//         }
 
          bodyPath.setPoseWaypoints(path);
 
@@ -207,7 +190,6 @@ public class AtlasCorridorNavigationTest
          goalPose.setY(finalPose.getY());
          goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
-
          FootstepPlannerParametersReadOnly footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
@@ -224,11 +206,17 @@ public class AtlasCorridorNavigationTest
                                                                  registry);
          FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, latestMap, true);
 
+         // make robot walk a little of the path
          if (VISUALIZE) robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
-         // make robot walk with path
+
+         FootstepPlan shortenedFootstepPlan = new FootstepPlan();
+         for (int i = 0; i < 3; i++)
+         {
+            shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
+         }
 
          TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
-               footstepPlan,
+               shortenedFootstepPlan,
                1.0,
                0.5,
                ExecutionMode.OVERRIDE));
