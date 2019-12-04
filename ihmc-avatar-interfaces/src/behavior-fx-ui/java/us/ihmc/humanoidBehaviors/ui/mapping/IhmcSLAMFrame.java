@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.mapping;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -26,7 +28,7 @@ public class IhmcSLAMFrame
    // this.sensorPoseToWorld * this.slamTransformer.
    private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
-   private final Point3DReadOnly[] originalPointCloudToWorld;  // For comparison after mapping.
+   private final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
    private final Point3DReadOnly[] pointCloudToSensorFrame;
    private final Point3D[] optimizedPointCloudToWorld;
 
@@ -99,7 +101,7 @@ public class IhmcSLAMFrame
    {
       return originalSensorPoseToWorld;
    }
-   
+
    public RigidBodyTransformReadOnly getInitialSensorPoseToWorld()
    {
       return sensorPoseToWorld;
@@ -117,24 +119,19 @@ public class IhmcSLAMFrame
 
    public NormalOcTree computeOctreeInPreviousView(double octreeResolution)
    {
-      // TODO: redefine this X-Y window with 2Dconcave hull.
-      double maxX = 0.0;
-      double minX = Double.MAX_VALUE;
-      double maxY = 0.0;
-      double minY = Double.MAX_VALUE;
+      double[][] vertex = new double[pointCloudToSensorFrame.length][2];
 
       for (int i = 0; i < pointCloudToSensorFrame.length; i++)
       {
-         maxX = Math.max(maxX, pointCloudToSensorFrame[i].getX());
-         maxY = Math.max(maxY, pointCloudToSensorFrame[i].getY());
-
-         minX = Math.min(minX, pointCloudToSensorFrame[i].getX());
-         minY = Math.min(minY, pointCloudToSensorFrame[i].getY());
+         vertex[i][0] = pointCloudToSensorFrame[i].getX();
+         vertex[i][1] = pointCloudToSensorFrame[i].getY();
       }
+      Vertex2DSupplier supplier = Vertex2DSupplier.asVertex2DSupplier(vertex);
+      ConvexPolygon2D window = new ConvexPolygon2D(supplier);
 
       boolean ignorePreviousOrientation = true;
       RigidBodyTransform previousSensorPoseToWorld;
-      if(ignorePreviousOrientation)
+      if (ignorePreviousOrientation)
       {
          previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
          previousSensorPoseToWorld.setRotation(optimizedSensorPoseToWorld.getRotation());
@@ -157,13 +154,10 @@ public class IhmcSLAMFrame
       {
          Point3D point = convertedPointsToPreviousSensorPose[i];
          isInPreviousView[i] = false;
-         if (minX < point.getX() && point.getX() < maxX)
+         if (window.isPointInside(point.getX(), point.getY()))
          {
-            if (minY < point.getY() && point.getY() < maxY)
-            {
-               isInPreviousView[i] = true;
-               numberOfPointsInPreviousView++;
-            }
+            isInPreviousView[i] = true;
+            numberOfPointsInPreviousView++;
          }
       }
 
