@@ -111,6 +111,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<SensorReader> sensorReaderField = new OptionalFactoryField<>("sensorReader");
    private final OptionalFactoryField<SensorOutputMapReadOnly> rawSensorOutputMapField = new OptionalFactoryField<>("rawSensorOutputMap");
    private final OptionalFactoryField<SensorOutputMapReadOnly> processedSensorOutputMapField = new OptionalFactoryField<>("processedSensorOutputMap");
+   private final OptionalFactoryField<ForceSensorStateUpdater> forceSensorStateUpdaterField = new OptionalFactoryField<>("forceSensorStateUpdater");
 
    private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
 
@@ -462,7 +463,29 @@ public class AvatarEstimatorThreadFactory
       return ekfStateEstimator;
    }
 
-   private final OptionalFactoryField<ForceSensorStateUpdater> forceSensorStateUpdaterField = new OptionalFactoryField<>("forceSensorStateUpdater");
+   public RealtimeRos2Node getRealtimeRos2Node()
+   {
+      if (realtimeRos2NodeField.hasValue())
+         return realtimeRos2NodeField.get();
+      else
+         return null;
+   }
+
+   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   {
+      if (publisherTopicNameGeneratorField.hasValue())
+         return publisherTopicNameGeneratorField.get();
+      else
+         return null;
+   }
+
+   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   {
+      if (subscriberTopicNameGeneratorField.hasValue())
+         return subscriberTopicNameGeneratorField.get();
+      else
+         return null;
+   }
 
    public ForceSensorStateUpdater getForceSensorStateUpdater()
    {
