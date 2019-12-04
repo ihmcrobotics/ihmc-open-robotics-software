@@ -191,7 +191,7 @@ public class IhmcSLAMTest
       ThreadTools.sleepForever();
    }
 
-   @Test // TODO : Fix with Sylvain. see IhmcSLAMFrame.
+   @Test
    public void testInverseInterpolation()
    {
       double movingForward = 0.05;
