@@ -157,7 +157,7 @@ public class AtlasCorridorNavigationTest
          try
          {
             LogTools.info("Computing poses from path");
-            path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
+            path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), robotPose.getOrientation(), robotPose.getOrientation());
          }
          catch (Exception e)
          {
@@ -169,8 +169,8 @@ public class AtlasCorridorNavigationTest
 
          bodyPath.setPoseWaypoints(path);
 
-//         Pose3D startPose = new Pose3D();
-         bodyPath.getPointAlongPath(0.0, robotPose);
+         Pose3D startPose = new Pose3D();
+         bodyPath.getPointAlongPath(0.0, startPose);
          Pose3D finalPose = new Pose3D();
          bodyPath.getPointAlongPath(1.0, finalPose);
 
@@ -179,9 +179,9 @@ public class AtlasCorridorNavigationTest
          double defaultStepWidth = parameters.getIdealFootstepWidth();
 
          FramePose3D initialMidFootPose = new FramePose3D();
-         initialMidFootPose.setX(robotPose.getX());
-         initialMidFootPose.setY(robotPose.getY());
-         initialMidFootPose.setOrientationYawPitchRoll(robotPose.getYaw(), 0.0, 0.0);
+         initialMidFootPose.setX(startPose.getX());
+         initialMidFootPose.setY(startPose.getY());
+         initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
          PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
          RobotSide initialStanceFootSide = RobotSide.RIGHT;
@@ -192,7 +192,7 @@ public class AtlasCorridorNavigationTest
          FramePose3D goalPose = new FramePose3D();
          goalPose.setX(finalPose.getX());
          goalPose.setY(finalPose.getY());
-         goalPose.setOrientationYawPitchRoll(robotPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
+         goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
          FootstepPlannerParametersReadOnly footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
@@ -249,6 +249,7 @@ public class AtlasCorridorNavigationTest
 
          robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
+         LogTools.info("yaw: {}", robotPose.getYaw());
       }
    }
 
