@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -24,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -40,6 +38,7 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
@@ -57,7 +56,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
@@ -131,11 +129,11 @@ public class AtlasCorridorNavigationTest
       boolean fullyExpandVisibilityGraph = false;
       Point3D goal = new Point3D(6.0, 0.0, 0.0);
       FramePose3D robotPose = new FramePose3D();
-      robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
+      HumanoidRobotState latestHumanoidRobotState = humanoidRobotState.pollHumanoidRobotState();
+      robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       List<Point3DReadOnly> pathPoints = null;
       List<? extends Pose3DReadOnly> path = null;
-
 
       while (robotPose.getPosition().distance(goal) > 0.5)
       {
@@ -165,6 +163,7 @@ public class AtlasCorridorNavigationTest
          }
 
          // request footstep plan
+         LogTools.info("Preparing footstep planner request 1");
          WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
          bodyPath.setPoseWaypoints(path);
@@ -174,26 +173,32 @@ public class AtlasCorridorNavigationTest
          Pose3D finalPose = new Pose3D();
          bodyPath.getPointAlongPath(1.0, finalPose);
 
-         YoVariableRegistry registry = new YoVariableRegistry("registry");
-         FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-         double defaultStepWidth = parameters.getIdealFootstepWidth();
+         RobotSide initialStanceFootSide = null;
+         FramePose3D initialStanceFootPose = null;
+         FramePose3D leftSolePose = new FramePose3D();
+         leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+         leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePose3D rightSolePose = new FramePose3D();
+         rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
+         rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FramePose3D initialMidFootPose = new FramePose3D();
-         initialMidFootPose.setX(startPose.getX());
-         initialMidFootPose.setY(startPose.getY());
-         initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
-         PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
-
-         RobotSide initialStanceFootSide = RobotSide.RIGHT;
-         FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
-         initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
-         initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         if (leftSolePose.getPosition().distance(finalPose.getPosition()) <= rightSolePose.getPosition().distance(finalPose.getPosition()))
+         {
+            initialStanceFootSide = RobotSide.LEFT;
+            initialStanceFootPose = leftSolePose;
+         }
+         else
+         {
+            initialStanceFootSide = RobotSide.RIGHT;
+            initialStanceFootPose = rightSolePose;
+         }
 
          FramePose3D goalPose = new FramePose3D();
          goalPose.setX(finalPose.getX());
          goalPose.setY(finalPose.getY());
          goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
+         LogTools.info("Preparing footstep planner request 2");
          FootstepPlannerParametersReadOnly footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
@@ -201,6 +206,8 @@ public class AtlasCorridorNavigationTest
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, footstepPlannerParameters, snapper, bodyPath);
 
+         LogTools.info("Creating A* planner");
+         YoVariableRegistry registry = new YoVariableRegistry("registry");
          AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                                  nodeChecker,
                                                                  heuristics,
@@ -247,7 +254,10 @@ public class AtlasCorridorNavigationTest
             LogTools.info("Walking timed out.");
          }
 
-         robotPose.setToZero(humanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
+         ThreadTools.sleep(500); // try to get a little more perception data TODO wait for a SLAM update
+
+         latestHumanoidRobotState = humanoidRobotState.pollHumanoidRobotState();
+         robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("yaw: {}", robotPose.getYaw());
       }
