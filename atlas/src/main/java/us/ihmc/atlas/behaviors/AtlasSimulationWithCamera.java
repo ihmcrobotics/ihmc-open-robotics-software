@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -9,20 +8,11 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.codecs.generated.YUVPicture;
-import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
-import us.ihmc.codecs.yuv.JPEGEncoder;
-import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
@@ -38,10 +28,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
@@ -142,7 +128,7 @@ public class AtlasSimulationWithCamera
       scs.startStreamingVideoData(cameraConfiguration,
                                   width,
                                   height,
-                                  new VideoDataServerImageCallback(new VideoPacketCallback()),
+                                  new VideoDataServerImageCallback(new SCSVideoDataROS2Bridge(scsCameraPublisher::publish)),
                                   timeStampProvider,
                                   framesPerSecond);
 
@@ -151,54 +137,6 @@ public class AtlasSimulationWithCamera
             "root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
 
       return scs;
-   }
-
-   private static final Object hackyLockBecauseJPEGEncoderIsNotThreadsafe = new Object();
-
-   class VideoPacketCallback implements VideoDataServer
-   {
-      private final YUVPictureConverter converter = new YUVPictureConverter();
-      private final JPEGEncoder encoder = new JPEGEncoder();
-
-      @Override
-      public void onFrame(VideoSource videoSource,
-                          BufferedImage bufferedImage,
-                          long timeStamp,
-                          Point3DReadOnly cameraPosition,
-                          QuaternionReadOnly cameraOrientation,
-                          IntrinsicParameters intrinsicParameters)
-      {
-
-         YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
-         try
-         {
-            ByteBuffer buffer;
-            synchronized (hackyLockBecauseJPEGEncoderIsNotThreadsafe)
-            {
-               buffer = encoder.encode(picture, 75);
-            }
-            byte[] data = new byte[buffer.remaining()];
-            buffer.get(data);
-            VideoPacket videoPacket = HumanoidMessageTools.createVideoPacket(videoSource,
-                                                                             timeStamp,
-                                                                             data,
-                                                                             cameraPosition,
-                                                                             cameraOrientation,
-                                                                             intrinsicParameters);
-            scsCameraPublisher.publish(videoPacket);
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-         picture.delete();
-      }
-
-      @Override
-      public boolean isConnected()
-      {
-         return true; // do nothing
-      }
    }
 
    public static void main(String[] args)
