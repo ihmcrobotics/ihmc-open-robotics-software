@@ -28,7 +28,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepNodeBodyCollisionDetector collisionDetector;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -36,14 +35,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
    {
-      this(footPolygonsInSoleFrame, parameters, null);
-   }
-
-   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepNodeBodyCollisionDetector collisionDetector)
-   {
       this.parameters = parameters;
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.collisionDetector = collisionDetector;
    }
 
    public void addPlannerListener(BipedalFootstepPlannerListener listener)
@@ -67,50 +60,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          return FootstepNodeSnapData.emptyData();
       }
 
-      if (shiftFootToAvoidBodyCollision(footstepNode, snapTransform))
-      {
-         return doShiftFromNearCollision(footstepNode, snapTransform);
-      }
-      else
-      {
-         return doSnapAndWiggle(footstepNode, snapTransform);
-      }
-   }
-
-   private FootstepNodeSnapData doShiftFromNearCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
-   {
-      Point3DReadOnly snappedNode = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snappedNode.getZ());
-      double distanceOfClosestPointInFront = collisionData.getDistanceOfClosestPointInFront();
-      double distanceOfClosestPointInBack = collisionData.getDistanceOfClosestPointInBack();
-
-      double translationX;
-      double maximumTranslationX = 0.5 * LatticeNode.gridSizeXY;
-      if(Double.isNaN(distanceOfClosestPointInFront))
-      {
-         translationX = maximumTranslationX;
-      }
-      else if(Double.isNaN(distanceOfClosestPointInBack))
-      {
-         translationX = - maximumTranslationX;
-      }
-      else
-      {
-         translationX = 0.5 * (distanceOfClosestPointInFront - distanceOfClosestPointInBack);
-      }
-
-      snapTransform.appendTranslation(translationX, 0.0, 0.0);
-      return new FootstepNodeSnapData(snapTransform);
-   }
-
-   private boolean shiftFootToAvoidBodyCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
-   {
-      if(collisionDetector == null || !parameters.checkForBodyBoxCollisions())
-         return false;
-
-      Point3DReadOnly footstepInWorld = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, footstepInWorld.getZ());
-      return !Double.isNaN(collisionData.getDistanceOfClosestPointInFront()) || !Double.isNaN(collisionData.getDistanceOfClosestPointInBack());
+      return doSnapAndWiggle(footstepNode, snapTransform);
    }
 
    private FootstepNodeSnapData doSnapAndWiggle(FootstepNode footstepNode, RigidBodyTransform snapTransform)
@@ -124,16 +74,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
       if (wiggleTransformLocalToLocal == null)
       {
-         if (parameters.getRejectIfCannotFullyWiggleInside())
-         {
-            rejectNode(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
-            return FootstepNodeSnapData.emptyData();
-         }
-         else
-         {
-            FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
-            return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
-         }
+         FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
+         return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
       }
 
       RigidBodyTransform wiggleTransformWorldToWorld = getWiggleTransformInWorldFrame(wiggleTransformLocalToLocal);

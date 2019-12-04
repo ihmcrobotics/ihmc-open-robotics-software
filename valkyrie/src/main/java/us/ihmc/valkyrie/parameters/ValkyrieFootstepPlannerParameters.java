@@ -38,7 +38,6 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setWiggleIntoConvexHullOfPlanarRegions(true);
       setMaximumXYWiggleDistance(0.04);
       setMaximumYawWiggle(0.3);
-      setRejectIfCannotFullyWiggleInside(false);
       setMaximumStepZWhenSteppingUp(0.05);
       setMaximumStepReachWhenSteppingUp(0.32);
       setMaximumStepZWhenForwardAndDown(0.05);
