@@ -123,6 +123,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
 
    public void set(ForceSensorDataReadOnly other)
    {
+      sensorName = other.getSensorName();
       measurementFrame = other.getMeasurementFrame();
       measurementLink = other.getMeasurementLink();
       other.getWrench(wrench);
