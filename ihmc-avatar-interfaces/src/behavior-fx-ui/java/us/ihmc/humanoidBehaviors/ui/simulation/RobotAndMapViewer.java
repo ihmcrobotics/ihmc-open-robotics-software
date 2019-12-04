@@ -1,48 +1,60 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
-import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
-import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 
-import java.io.File;
+import java.util.ArrayList;
 
-public class RobotAndMapViewer extends Application
+public class RobotAndMapViewer
 {
-   public RobotAndMapViewer(DRCRobotModel robotModel)
-   {
+   private FootstepPlanGraphic footstepPlanGraphic;
 
+   public RobotAndMapViewer(DRCRobotModel robotModel, Ros2Node ros2Node)
+   {
+      Platform.runLater(() ->
+      {
+         View3DFactory view3dFactory = new View3DFactory(1200, 800);
+         view3dFactory.addCameraController(0.05, 2000.0, true);
+         view3dFactory.addWorldCoordinateSystem(0.3);
+         view3dFactory.addDefaultLighting();
+
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+         view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+
+         footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+         view3dFactory.addNodeToView(footstepPlanGraphic);
+
+         Stage primaryStage = new Stage();
+         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setMaximized(false);
+         primaryStage.setScene(view3dFactory.getScene());
+
+         primaryStage.show();
+         primaryStage.toFront();
+      });
    }
 
-   @Override
-   public void start(Stage primaryStage) throws Exception
+   public void setFootstepsToVisualize(FootstepPlan footstepPlan)
    {
-      View3DFactory view3dFactory = new View3DFactory(1200, 800);
-      view3dFactory.addCameraController(0.05, 2000.0,true);
-      view3dFactory.addWorldCoordinateSystem(0.3);
-      view3dFactory.addDefaultLighting();
-
-      PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
-      regionsGraphic.generateMeshes(PlanarRegionFileTools.importPlanarRegionData(dataFolder));
-      regionsGraphic.update();
-
-      view3dFactory.addNodeToView(regionsGraphic);
-      view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
-
-      primaryStage.setTitle(dataFolder.getPath());
-      primaryStage.setMaximized(false);
-      primaryStage.setScene(view3dFactory.getScene());
-
-      primaryStage.show();
-   }
-
-   public static void main(String[] args)
-   {
-      launch(args);
+      ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         FramePose3D soleFramePoseToPack = new FramePose3D();
+         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
+      }
+      footstepPlanGraphic.generateMeshesAsynchronously(footstepLocations);
    }
 }
