@@ -95,36 +95,25 @@ public class SimulatedREAModule
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
          {
             PlanarRegionsList visibleRegions = simulatedDepthCamera.filterMapToVisible(map);
-//            PlanarRegionsList regionsToSubmit;
             if (i++ % 10 == 0)
             {
-               if (!slamMap.isEmpty())
+               if (slamMap.isEmpty())
+               {
+                  slamMap = visibleRegions;
+               }
+               else
                {
                   try
                   {
                      slamMap = PlanarRegionSLAM.slam(slamMap, visibleRegions, planarRegionSLAMParameters, (ConcaveHullMergerListener) null).getMergedMap();
-//                     regionsToSubmit = slamMap;
                   }
                   catch (Exception e)
                   {
-//                     regionsToSubmit = slamMap;
-//                     regionsToSubmit = new PlanarRegionsList();
-//                     regionsToSubmit.addPlanarRegionsList(slamMap);
-//                     regionsToSubmit.addPlanarRegionsList(visibleRegions);
+                     // do nothing but need to fix these crashes
                   }
                }
-               else
-               {
-                  slamMap = visibleRegions;
-//                  regionsToSubmit = slamMap;
-               }
             }
-            else
-            {
-//               regionsToSubmit = new PlanarRegionsList();
-//               regionsToSubmit.addPlanarRegionsList(slamMap);
-//               regionsToSubmit.addPlanarRegionsList(visibleRegions);
-            }
+
             combinedRegionsList.addAll(slamMap.getPlanarRegionsAsList());
          }
          else

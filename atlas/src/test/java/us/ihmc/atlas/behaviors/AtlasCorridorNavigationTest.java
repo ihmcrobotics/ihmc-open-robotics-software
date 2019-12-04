@@ -67,6 +67,7 @@ import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.time.Duration;
 import java.util.List;
 
 public class AtlasCorridorNavigationTest
@@ -90,6 +91,11 @@ public class AtlasCorridorNavigationTest
 
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
+   {
+      assertTimeoutPreemptively(Duration.ofSeconds(60), this::runAtlasToGoalInTrickyCorridor);
+   }
+
+   private void runAtlasToGoalInTrickyCorridor()
    {
       new Thread(() -> {
          LogTools.info("Creating simulate REA module");
@@ -149,15 +155,14 @@ public class AtlasCorridorNavigationTest
          manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
          LogTools.info("Planning with occlusions");
          pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
-         if (pathPoints == null)
+         if (pathPoints == null || pathPoints.isEmpty())
          {
             LogTools.error("Path not found.");
             ThreadTools.sleepSeconds(1.0);
             continue;
          }
-         LogTools.info("Found path.");
-         LogTools.info("Computing poses from path");
 
+         LogTools.info("Computing poses from path");
          // find last two path points
          Point3DReadOnly lastPoint = pathPoints.get(pathPoints.size() - 1);
          Point3DReadOnly runnerUpPoint = pathPoints.get(pathPoints.size() - 2);
@@ -265,7 +270,7 @@ public class AtlasCorridorNavigationTest
          latestHumanoidRobotState = humanoidRobotState.pollHumanoidRobotState();
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
-         LogTools.info("yaw: {}", robotPose.getYaw());
+         LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
       }
    }
 
