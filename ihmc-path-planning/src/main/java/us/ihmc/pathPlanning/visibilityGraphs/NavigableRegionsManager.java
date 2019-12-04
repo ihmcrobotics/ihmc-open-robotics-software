@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = false;
-   private final static boolean fullyExpandVisibilityGraph = false;
+   private final static boolean debug = true;
+   private final static boolean fullyExpandVisibilityGraph = true;
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
@@ -216,7 +216,6 @@ public class NavigableRegionsManager
                double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
                neighbor.setEstimatedCostToGoal(heuristicCost);
 
-               stack.remove(neighbor);
                stack.add(neighbor);
             }
          }
@@ -235,10 +234,10 @@ public class NavigableRegionsManager
 
       while (nodeWalkingBack != null)
       {
-         if (nodePath.size() == 0)
+//         if (nodePath.size() == 0)
             nodePath.add(nodeWalkingBack);
-         else if (nodePath.get(nodePath.size() - 1).distanceXY(nodeWalkingBack) > minimumConnectionDistance)
-            nodePath.add(nodeWalkingBack);
+//         else if (nodePath.get(nodePath.size() - 1).distanceXY(nodeWalkingBack) > minimumConnectionDistance)
+//            nodePath.add(nodeWalkingBack);
 
          nodeWalkingBack = nodeWalkingBack.getBestParentNode();
       }
@@ -289,11 +288,19 @@ public class NavigableRegionsManager
 
       double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
 
-      double angle = Math.atan(verticalDistance / horizontalDistance);
 
       double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
       // 2/pi to scale error from {0:90} degrees or {0:pi/2} radians degrees to {0:1}
-      double elevationCost = parameters.getElevationWeight() * angle * (2.0 / Math.PI);
+      double elevationCost;
+      if (parameters.getElevationWeight() > 0.0)
+      {
+         double angle = Math.atan(verticalDistance / horizontalDistance);
+         elevationCost = parameters.getElevationWeight() * angle * (2.0 / Math.PI);
+      }
+      else
+      {
+         elevationCost = 0.0;
+      }
 
       return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
