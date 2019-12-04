@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -318,6 +319,17 @@ public class AvatarEstimatorThreadFactory
    {
       if (jointDesiredOutputWriter != null)
          jointDesiredOutputWriterField.set(jointDesiredOutputWriter);
+   }
+
+   /**
+    * Optional: sets a custom publisher for {@link RobotConfigurationData}.
+    *
+    * @param publisher the custom publisher.
+    */
+   public void setRobotConfigurationDataPublisher(RobotConfigurationDataPublisher publisher)
+   {
+      if (publisher != null)
+         robotConfigurationDataPublisherField.set(publisher);
    }
 
    /**
