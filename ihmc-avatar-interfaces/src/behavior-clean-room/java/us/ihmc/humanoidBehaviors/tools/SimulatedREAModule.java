@@ -32,16 +32,16 @@ public class SimulatedREAModule
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera virtualCameraFOV;
 
-   public SimulatedREAModule(PlanarRegionsList map)
+   public SimulatedREAModule(PlanarRegionsList map, PubSubImplementation pubSubImplementation)
    {
-      this(map, null);
+      this(map, null, pubSubImplementation);
    }
 
-   public SimulatedREAModule(PlanarRegionsList map, DRCRobotModel robotModel)
+   public SimulatedREAModule(PlanarRegionsList map, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       this.map = map;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA.getNodeName());
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
 
