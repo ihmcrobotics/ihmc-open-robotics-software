@@ -8,7 +8,9 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -18,6 +20,8 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 public class PointCloudGraphic extends Group
 {
    private static final float ORIGIN_POINT_SIZE = 0.05f;
+   private static final float LENGTH_SENSOR_FRAME_AXIS = 0.1f;
+   private static final float WIDTH_SENSOR_FRAME_AXIS = 0.01f;
    private static final float SCAN_POINT_SIZE = 0.0075f;
    private static final int NUMBER_OF_POINTS_PER_MESSAGE = 100000;
 
@@ -86,6 +90,20 @@ public class PointCloudGraphic extends Group
       Point3D32 sensorPosition = new Point3D32();
       sensorPosition.set(sensorPose.getTranslation());
       meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), sensorPosition, colorToViz);
+
+      RotationMatrix rotation = new RotationMatrix(sensorPose.getRotation());
+      Point3D xAxis = new Point3D();
+      Point3D yAxis = new Point3D();
+      Point3D zAxis = new Point3D();
+      rotation.getColumn(0, xAxis);
+      rotation.getColumn(1, yAxis);
+      rotation.getColumn(2, zAxis);
+      xAxis.scale(LENGTH_SENSOR_FRAME_AXIS);
+      yAxis.scale(LENGTH_SENSOR_FRAME_AXIS);
+      zAxis.scale(LENGTH_SENSOR_FRAME_AXIS);
+      meshBuilder.addMesh(MeshDataGenerator.Line(new Point3D(), xAxis, WIDTH_SENSOR_FRAME_AXIS), sensorPosition, Color.RED);
+      meshBuilder.addMesh(MeshDataGenerator.Line(new Point3D(), yAxis, WIDTH_SENSOR_FRAME_AXIS), sensorPosition, Color.GREEN);
+      meshBuilder.addMesh(MeshDataGenerator.Line(new Point3D(), zAxis, WIDTH_SENSOR_FRAME_AXIS), sensorPosition, Color.BLUE);
    }
 
    public void addPointsMeshes(Point3DReadOnly[] points, RigidBodyTransformReadOnly sensorPose, Color pointCloudColor, Color sensorPoseColor)
