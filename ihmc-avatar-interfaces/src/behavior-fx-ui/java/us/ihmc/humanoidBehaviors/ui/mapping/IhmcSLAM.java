@@ -122,6 +122,7 @@ public class IhmcSLAM
          sensorPoses.add(frame.getSensorPose());
 
          updatePlanarRegionsMap();
+         //updatePlanarRegionsMap(frame);
       }
 
       if (DEBUG)
