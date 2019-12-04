@@ -28,11 +28,7 @@ import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDF
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.model.*;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
@@ -63,20 +59,10 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.CameraMount;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.ViewportConfiguration;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.*;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.systemIdentification.frictionId.simulators.CoulombViscousStribeckFrictionParameters;
 import us.ihmc.systemIdentification.frictionId.simulators.SimulatedFrictionController;
@@ -198,7 +184,10 @@ public class QuadrupedSimulationFactory
       }
       else
       {
-         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), stateEstimatorFootSwitches);
+         SDFQuadrupedPerfectSimulatedSensor perfectSensors = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), stateEstimatorFootSwitches);
+         for (IMUDefinition imuDefinition : fullRobotModel.get().getIMUDefinitions())
+            perfectSensors.addIMUSensor(imuDefinition);
+         sensorReader = perfectSensors;
       }
 
       if (this.sensorReaderWrapper != null)
@@ -328,7 +317,7 @@ public class QuadrupedSimulationFactory
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
       factory.setDefinitionsToPublish(fullRobotModel.get());
       factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
-      factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
+      factory.setRobotMotionStatusHolder(controllerManager.getMotionStatusHolder());
       factory.setROS2Info(realtimeRos2Node, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName()));
 
       robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
