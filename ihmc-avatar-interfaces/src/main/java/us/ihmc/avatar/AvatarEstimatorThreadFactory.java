@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -112,21 +113,73 @@ public class AvatarEstimatorThreadFactory
 
    private final OptionalFactoryField<JointDesiredOutputWriter> jointDesiredOutputWriterField = new OptionalFactoryField<>("jointDesiredOutputWriter");
 
+   /**
+    * Creates a new factory to create {@link AvatarEstimatorThread}.
+    * <p>
+    * Example for configuring this factory:
+    *
+    * <pre>
+    * AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
+    * avatarEstimatorThreadFactory.setROS2Info(realtimeRos2Node, robotName);
+    * avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
+    * avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
+    * avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
+    * avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
+    * avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
+    * avatarEstimatorThreadFactory.setGravity(gravity);
+    * AvatarEstimatorThread estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
+    * </pre>
+    *
+    * Where {@code robotModel} is an implementation of {@link DRCRobotModel}.
+    * </p>
+    */
    public AvatarEstimatorThreadFactory()
    {
    }
 
+   /**
+    * Sets the magnitude of gravity to use in the state estimator, the sign of the value is not
+    * considered.
+    *
+    * @param gravity magnitude of the gravitational acceleration.
+    */
    public void setGravity(double gravity)
    {
       gravityField.set(gravity);
    }
 
+   /**
+    * Configure this factory as follows:
+    * <ul>
+    * <li>Set the full-robot model using {@link DRCRobotModel#createFullRobotModel()}.
+    * <li>Set the controller parameters using {@link DRCRobotModel}.
+    * <li>Set the state estimator parameters using {@link DRCRobotModel#getStateEstimatorParameters()}.
+    * <li>Set the sensor information using {@link DRCRobotModel#getSensorInformation()}.
+    * <li>Set the contact point parameters using {@link DRCRobotModel#getContactPointParameters()}.
+    * </ul>
+    *
+    * @param robotModel the robot model used to configure this factory.
+    */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
       configureWithWholeBodyControllerParameters(robotModel);
       setEstimatorFullRobotModel(robotModel.createFullRobotModel());
    }
 
+   /**
+    * Configure this factory as follows:
+    * <ul>
+    * <li>Set the controller parameters using {@link WholeBodyControllerParameters}.
+    * <li>Set the state estimator parameters using
+    * {@link WholeBodyControllerParameters#getStateEstimatorParameters()}.
+    * <li>Set the sensor information using
+    * {@link WholeBodyControllerParameters#getSensorInformation()}.
+    * <li>Set the contact point parameters using
+    * {@link WholeBodyControllerParameters#getContactPointParameters()}.
+    * </ul>
+    *
+    * @param wholeBodyControllerParameters the parameters used to configure this factory.
+    */
    public void configureWithWholeBodyControllerParameters(WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters)
    {
       setConrollerParameters(wholeBodyControllerParameters);
@@ -167,52 +220,119 @@ public class AvatarEstimatorThreadFactory
       subscriberTopicNameGeneratorField.set(subscriberTopicNameGenerator);
    }
 
+   /**
+    * Sets the full-robot model that is to be used by the state estimator.
+    *
+    * @param estimatorFullRobotModel the full-robot model
+    */
    public void setEstimatorFullRobotModel(FullHumanoidRobotModel estimatorFullRobotModel)
    {
       estimatorFullRobotModelField.set(estimatorFullRobotModel);
    }
 
+   /**
+    * Sets the sensor information that is to be used by the state estimator to retrieve sensors such as
+    * wrist force/torque sensors.
+    *
+    * @param sensorInformation the sensor information.
+    */
    public void setSensorInformation(HumanoidRobotSensorInformation sensorInformation)
    {
       sensorInformationField.set(sensorInformation);
    }
 
+   /**
+    * Sets the contact point parameters that is used by the state estimator for creating contactable
+    * bodies.
+    *
+    * @param contactPointParameters the contact point parameters.
+    */
    public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       contactPointParametersField.set(contactPointParameters);
    }
 
+   /**
+    * Sets the state estimator parameters used to configure things such as filters.
+    *
+    * @param stateEstimatorParameters the state estimator parameters.
+    */
    public void setStateEstimatorParamters(StateEstimatorParameters stateEstimatorParameters)
    {
       stateEstimatorParametersField.set(stateEstimatorParameters);
    }
 
+   /**
+    * Sets the parameters required to load Yo parameters, see
+    * {@link ParameterLoaderHelper#loadParameters(Object, WholeBodyControllerParameters, YoVariableRegistry)}.
+    *
+    * @param controllerParameters the controller parameters.
+    */
    public void setConrollerParameters(WholeBodyControllerParameters<RobotSide> controllerParameters)
    {
       controllerParametersField.set(controllerParameters);
    }
 
+   /**
+    * Sets the factory used to create the sensor reader.
+    *
+    * @param sensorReaderFactory the sensor reader factory.
+    */
    public void setSensorReaderFactory(SensorReaderFactory sensorReaderFactory)
    {
       sensorReaderFactoryField.set(sensorReaderFactory);
    }
 
+   /**
+    * The factory to create the context for the state estimator needed to run with the
+    * {@link BarrierScheduler}.
+    *
+    * @param contextDataFactory the context factory.
+    */
    public void setHumanoidRobotContextDataFactory(HumanoidRobotContextDataFactory contextDataFactory)
    {
       humanoidRobotContextDataFactoryField.set(contextDataFactory);
    }
 
+   /**
+    * Optional: sets the subscriber to receive pelvis pose update from an external module that performs
+    * localization.
+    * <p>
+    * This is used internally to the state estimator to slowly correct the drift on the estimated robot
+    * position.
+    * </p>
+    *
+    * @param externalPelvisPoseSubscriber the pelvis pose subscriber.
+    */
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       externalPelvisPoseSubscriberField.set(externalPelvisPoseSubscriber);
    }
 
+   /**
+    * Optional: sets the low-level output writer, this is rarely needed.
+    *
+    * @param jointDesiredOutputWriter the joint desired output writer.
+    */
    public void setJointDesiredOutputWriter(JointDesiredOutputWriter jointDesiredOutputWriter)
    {
       if (jointDesiredOutputWriter != null)
          jointDesiredOutputWriterField.set(jointDesiredOutputWriter);
    }
 
+   /**
+    * Optional: sets the main state estimator to use.
+    * <p>
+    * Two distinct state estimators can be built with this factory using:
+    * <ul>
+    * <li>{@link #createDRCKinematicsStateEstimator()} to create the default main state estimator.
+    * <li>{@link #createEKFStateEstimator()} to create a state estimator that is based on an Extended
+    * Kalman Filter.
+    * </ul>
+    * </p>
+    *
+    * @param mainStateEstimator the instance of the main state estimator.
+    */
    public void setMainStateEstimator(StateEstimatorController mainStateEstimator)
    {
       if (mainStateEstimatorField.hasValue())
@@ -220,11 +340,23 @@ public class AvatarEstimatorThreadFactory
       mainStateEstimatorField.set(mainStateEstimator);
    }
 
+   /**
+    * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
+    *
+    * @param secondaryStateEstimator the secondary state estimator.
+    */
    public void addSecondaryStateEstimator(StateEstimatorController secondaryStateEstimator)
    {
       addSecondaryStateEstimators(() -> false, secondaryStateEstimator);
    }
 
+   /**
+    * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
+    *
+    * @param reinitializeVariableName name of the {@link YoBoolean} to create that can be used via SCS
+    *                                 to manually reinitilize the secondary state estimator.
+    * @param secondaryStateEstimator  the secondary state estimator.
+    */
    public void addSecondaryStateEstimator(String reinitializeVariableName, StateEstimatorController secondaryStateEstimator)
    {
       YoBoolean reinitialize = new YoBoolean(reinitializeVariableName, estimatorRegistry);
@@ -237,6 +369,14 @@ public class AvatarEstimatorThreadFactory
       addSecondaryStateEstimators(reinitilizeSupplier, secondaryStateEstimator);
    }
 
+   /**
+    * Optional: adds a secondary state estimator to run in parallel to the main state estimator.
+    *
+    * @param reinitilizeSupplier     function check at every tick to determine whether the secondary
+    *                                state estimator should be reinitilized. See
+    *                                {@link AvatarEstimatorThread#run()}.
+    * @param secondaryStateEstimator the secondary state estimator.
+    */
    public void addSecondaryStateEstimators(BooleanSupplier reinitilizeSupplier, StateEstimatorController secondaryStateEstimator)
    {
       getSecondaryStateEstimators().add(reinitilizeSupplier, secondaryStateEstimator);
