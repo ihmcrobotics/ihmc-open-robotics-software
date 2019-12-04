@@ -66,7 +66,7 @@ public class AtlasBehaviorUIDemo
       {
          new Thread(() -> {
             LogTools.info("Creating planar region publisher");
-            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel()).start();
+            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), PubSubImplementation.FAST_RTPS).start();
          }).start();
 
          new Thread(() -> {
