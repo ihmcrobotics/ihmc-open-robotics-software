@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
@@ -26,7 +27,9 @@ public class RobotAndMapViewer
       Platform.runLater(() ->
       {
          View3DFactory view3dFactory = new View3DFactory(1200, 800);
-         view3dFactory.addCameraController(0.05, 2000.0, true);
+         FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
+         double isoZoomOut = 12.0;
+         camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 

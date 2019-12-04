@@ -9,6 +9,9 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -17,6 +20,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SimulatedREAModule
 {
@@ -30,7 +34,10 @@ public class SimulatedREAModule
    private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
-   private SimulatedDepthCamera virtualCameraFOV;
+   private SimulatedDepthCamera simulatedDepthCamera;
+
+   PlanarRegionsList slamMap = new PlanarRegionsList();
+   PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
    public SimulatedREAModule(PlanarRegionsList map, PubSubImplementation pubSubImplementation)
    {
@@ -51,7 +58,7 @@ public class SimulatedREAModule
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;
-         virtualCameraFOV = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
+         simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
       }
 
       new ROS2Callback<>(ros2Node,
@@ -78,6 +85,8 @@ public class SimulatedREAModule
       this.map = map;
    }
 
+   int i = 0;
+
    private void process()
    {
       remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
@@ -86,7 +95,38 @@ public class SimulatedREAModule
       {
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
          {
-            combinedRegionsList.addAll(virtualCameraFOV.filterMapToVisible(map).getPlanarRegionsAsList());
+            PlanarRegionsList visibleRegions = simulatedDepthCamera.filterMapToVisible(map);
+//            PlanarRegionsList regionsToSubmit;
+            if (i++ % 10 == 0)
+            {
+               if (!slamMap.isEmpty())
+               {
+                  try
+                  {
+                     slamMap = PlanarRegionSLAM.slam(slamMap, visibleRegions, planarRegionSLAMParameters, (ConcaveHullMergerListener) null).getMergedMap();
+//                     regionsToSubmit = slamMap;
+                  }
+                  catch (Exception e)
+                  {
+//                     regionsToSubmit = slamMap;
+//                     regionsToSubmit = new PlanarRegionsList();
+//                     regionsToSubmit.addPlanarRegionsList(slamMap);
+//                     regionsToSubmit.addPlanarRegionsList(visibleRegions);
+                  }
+               }
+               else
+               {
+                  slamMap = visibleRegions;
+//                  regionsToSubmit = slamMap;
+               }
+            }
+            else
+            {
+//               regionsToSubmit = new PlanarRegionsList();
+//               regionsToSubmit.addPlanarRegionsList(slamMap);
+//               regionsToSubmit.addPlanarRegionsList(visibleRegions);
+            }
+            combinedRegionsList.addAll(slamMap.getPlanarRegionsAsList());
          }
          else
          {
