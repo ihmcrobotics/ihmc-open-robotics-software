@@ -9,8 +9,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Input;
@@ -18,25 +20,32 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
@@ -61,13 +70,19 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalcu
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class AtlasCorridorNavigationTest
@@ -132,14 +147,14 @@ public class AtlasCorridorNavigationTest
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
 
       // subscribe to robot pose
-      RemoteSyncedHumanoidRobotState humanoidRobotState = new RemoteSyncedHumanoidRobotState(createRobotModel(), ros2Node);
-
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
+//      SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons();
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       boolean fullyExpandVisibilityGraph = false;
       Point3D goal = new Point3D(6.0, 0.0, 0.0);
       FramePose3D robotPose = new FramePose3D();
-      HumanoidRobotState latestHumanoidRobotState = humanoidRobotState.pollHumanoidRobotState();
+      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       List<Point3DReadOnly> pathPoints = null;
@@ -152,6 +167,14 @@ public class AtlasCorridorNavigationTest
          OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(manager);
          PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(visibilityGraphParameters);
          PlanarRegionsList latestMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest());
+
+         if (latestMap.isEmpty())
+         {
+            LogTools.info("No regions yet.");
+            ThreadTools.sleep(100);
+            continue;
+         }
+
          manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
          LogTools.info("Planning with occlusions");
          pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
@@ -209,12 +232,20 @@ public class AtlasCorridorNavigationTest
          goalPose.setY(finalPose.getY());
          goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
+         // TODO: Figure out how to best effort plan with footstep snapping
+         // Use BodyPathBasedAStarPlanner instead of manual?
+
          LogTools.info("Preparing footstep planner request 2");
-         FootstepPlannerParametersReadOnly footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-         FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
+         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+         footstepPlannerParameters.setReturnBestEffortPlan(true);
+         FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
+         FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+         FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
+         BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
+         PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
+         FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
          FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(footstepPlannerParameters);
-         FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, footstepPlannerParameters, snapper, bodyPath);
 
          LogTools.info("Creating A* planner");
@@ -227,7 +258,45 @@ public class AtlasCorridorNavigationTest
                                                                  snapper,
                                                                  registry);
          LogTools.info("Running footstep planner");
-         FootstepPlan footstepPlan = PlannerTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, latestMap, true);
+         planner.setPlanningHorizonLength(100.0);
+         FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
+         footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+         footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
+         planner.setPlanarRegions(latestMap);
+         planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
+         planner.setGoal(footstepPlannerGoal);
+
+         Stopwatch footstepPlannerStopwatch = new Stopwatch().start();
+         FootstepPlanningResult result = planner.plan();
+         LogTools.info("Planning took " + footstepPlannerStopwatch.lapElapsed() + "s");
+
+         if (!result.validForExecution())
+         {
+            LogTools.error("Footstep plan not valid for execution! {}", result);
+
+            HashMap<BipedalFootstepPlannerNodeRejectionReason, Integer> reasons = new HashMap<>();
+            for (PlannerNodeData nodeDatum : planner.getPlannerStatistics().getFullGraph().getNodeData())
+            {
+               BipedalFootstepPlannerNodeRejectionReason rejectionReason = nodeDatum.getRejectionReason();
+               if (!reasons.containsKey(rejectionReason))
+               {
+                  reasons.put(rejectionReason, 1);
+               }
+               else
+               {
+                  reasons.put(rejectionReason, reasons.get(rejectionReason) + 1);
+               }
+            }
+            for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : reasons.keySet())
+            {
+               System.out.println("Reason: " + rejectionReason + "  " + reasons.get(rejectionReason));
+            }
+
+            continue;
+         }
+
+         FootstepPlan footstepPlan = planner.getPlan();
+         LogTools.info("Got {} footsteps", footstepPlan.getNumberOfSteps());
 
          // make robot walk a little of the path
          if (VISUALIZE) robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
@@ -267,7 +336,7 @@ public class AtlasCorridorNavigationTest
 
          ThreadTools.sleep(500); // try to get a little more perception data TODO wait for a SLAM update
 
-         latestHumanoidRobotState = humanoidRobotState.pollHumanoidRobotState();
+         latestHumanoidRobotState = robot.pollHumanoidRobotState();
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
@@ -278,5 +347,19 @@ public class AtlasCorridorNavigationTest
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+   }
+
+   private SideDependentList<ConvexPolygon2D> createFootPolygons()
+   {
+      AtlasContactPointParameters contactPointParameters = createRobotModel().getContactPointParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+         footPolygons.set(side, scaledFoot);
+      }
+
+      return footPolygons;
    }
 }
