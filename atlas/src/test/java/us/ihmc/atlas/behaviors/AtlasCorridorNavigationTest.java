@@ -265,6 +265,7 @@ public class AtlasCorridorNavigationTest
          planner.setPlanarRegions(latestMap);
          planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
          planner.setGoal(footstepPlannerGoal);
+         planner.setBestEffortTimeout(2.0);
 
          Stopwatch footstepPlannerStopwatch = new Stopwatch().start();
          FootstepPlanningResult result = planner.plan();
@@ -292,6 +293,7 @@ public class AtlasCorridorNavigationTest
                System.out.println("Reason: " + rejectionReason + "  " + reasons.get(rejectionReason));
             }
 
+            ThreadTools.sleep(1000);
             continue;
          }
 
