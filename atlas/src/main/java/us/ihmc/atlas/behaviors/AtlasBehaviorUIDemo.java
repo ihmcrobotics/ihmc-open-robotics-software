@@ -53,7 +53,7 @@ public class AtlasBehaviorUIDemo
    private static final Supplier<PlanarRegionsList> SLAM_REAL_DATA = BehaviorPlanarRegionEnvironments::realDataFromAtlasSLAMDataset20190710;
    private static final Supplier<PlanarRegionsList> CORRIDOR = PlannerTestEnvironments::getTrickCorridor;
 
-   private static final Supplier<PlanarRegionsList> ENVIRONMENT = UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER;
+   private static final Supplier<PlanarRegionsList> ENVIRONMENT = CORRIDOR;
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
    private final int recordFrequencySpeedup = 10;
