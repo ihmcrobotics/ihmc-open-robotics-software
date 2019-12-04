@@ -20,7 +20,6 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class SimulatedREAModule
 {
