@@ -155,7 +155,7 @@ public class AtlasCorridorNavigationTest
          manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
          LogTools.info("Planning with occlusions");
          pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
-         if (pathPoints == null || pathPoints.isEmpty())
+         if (pathPoints == null || pathPoints.size() < 2)
          {
             LogTools.error("Path not found.");
             ThreadTools.sleepSeconds(1.0);
