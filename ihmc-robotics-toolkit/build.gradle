@@ -48,4 +48,5 @@ testDependencies {
    api("org.jfree:jcommon:1.0.21")
 
    api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("org.hamcrest:hamcrest:2.2")
 }
