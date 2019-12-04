@@ -17,11 +17,15 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -152,15 +156,17 @@ public class AtlasCorridorNavigationTest
             continue;
          }
          LogTools.info("Found path.");
-         try
-         {
-            LogTools.info("Computing poses from path");
-            path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), robotPose.getOrientation(), robotPose.getOrientation());
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
+         LogTools.info("Computing poses from path");
+
+         // find last two path points
+         Point3DReadOnly lastPoint = pathPoints.get(pathPoints.size() - 1);
+         Point3DReadOnly runnerUpPoint = pathPoints.get(pathPoints.size() - 2);
+         Vector2D vector = new Vector2D(lastPoint);
+         vector.sub(runnerUpPoint.getX(), runnerUpPoint.getY());
+         vector.normalize();
+         AxisAngle finalOrientation = new AxisAngle(Math.atan2(vector.getY(), vector.getX()), 0.0, 0.0);
+
+         path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), robotPose.getOrientation(), finalOrientation);
 
          // request footstep plan
          LogTools.info("Preparing footstep planner request 1");
