@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -19,7 +21,6 @@ import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -70,6 +71,6 @@ public class AtlasCorridorNavigationTest
    private AtlasRobotModel createRobotModel()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
    }
 }
