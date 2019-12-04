@@ -520,11 +520,8 @@ public class ClusterTools
    public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator preferredCalculator,
                                                  NavigableExtrusionDistanceCalculator calculator, boolean includePreferredExtrusions)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      homeRegion.getTransformToWorld(transformToWorld);
-
       Cluster homeRegionCluster = new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON);
-      homeRegionCluster.setTransformToWorld(transformToWorld);
+      homeRegionCluster.setTransformToWorld(homeRegion.getTransformToWorld());
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
 
       double preferredExtrusionDistance = preferredCalculator.computeNavigableExtrusionDistance(homeRegion);
@@ -580,8 +577,7 @@ public class ClusterTools
    {
       Point2D[] concaveHull = obstacleRegion.getConcaveHull();
 
-      RigidBodyTransform transformFromObstacleToWorld = new RigidBodyTransform();
-      obstacleRegion.getTransformToWorld(transformFromObstacleToWorld);
+      RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 
       // Transform the obstacle to world and also Project the obstacle to z = 0:
       List<Point3DReadOnly> obstacleConcaveHullInWorld = new ArrayList<>();

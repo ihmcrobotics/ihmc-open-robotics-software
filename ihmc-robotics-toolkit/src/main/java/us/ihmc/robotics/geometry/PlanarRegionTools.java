@@ -183,10 +183,8 @@ public class PlanarRegionTools
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
-      pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
+      pointInLocalToCheck.applyTransform(planarRegion.getTransformToLocal(), false);
       return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon);
    }
 
@@ -498,13 +496,12 @@ public class PlanarRegionTools
 
    public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius, PlanarRegion query)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      query.getTransformToWorld(transformToWorld);
+      RigidBodyTransformReadOnly transformToLocal = query.getTransformToLocal();
 
       Point3D firstEndPointInLocal = new Point3D(capsuleSegmentInWorld.getFirstEndpoint());
       Point3D secondEndPointInLocal = new Point3D(capsuleSegmentInWorld.getSecondEndpoint());
-      firstEndPointInLocal.applyInverseTransform(transformToWorld);
-      secondEndPointInLocal.applyInverseTransform(transformToWorld);
+      firstEndPointInLocal.applyTransform(transformToLocal);
+      secondEndPointInLocal.applyTransform(transformToLocal);
 
       Point2D[] concaveHull = query.getConcaveHull();
 
@@ -711,8 +708,7 @@ public class PlanarRegionTools
    {
       Vector3D surfaceNormalInWorld = planarRegion.getNormal();
 
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
+      RigidBodyTransformReadOnly transformToWorld = planarRegion.getTransformToWorld();
 
       Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
       transformToWorld.transform(planarRegionReferencePointInWorld);
@@ -1054,8 +1050,8 @@ public class PlanarRegionTools
     */
    public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
@@ -1071,7 +1067,7 @@ public class PlanarRegionTools
       }
 
       Point3D intersectionInPlaneFrame = new Point3D(intersectionWithPlane);
-      intersectionInPlaneFrame.applyInverseTransform(regionToWorld);
+      intersectionInPlaneFrame.applyTransform(regionToLocal);
       Point2D intersectionInPlaneFrame2D = new Point2D(intersectionInPlaneFrame);
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
@@ -1092,8 +1088,8 @@ public class PlanarRegionTools
     */
    public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLineInWorld)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
       Point3DReadOnly pointOnPlane = new Point3D(region.getConvexPolygon(0).getVertex(0));
@@ -1101,8 +1097,8 @@ public class PlanarRegionTools
       Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
       Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
 
-      pointOnLineInLocal.applyInverseTransform(regionToWorld);
-      directionOfLineInLocal.applyInverseTransform(regionToWorld);
+      pointOnLineInLocal.applyTransform(regionToLocal);
+      directionOfLineInLocal.applyTransform(regionToLocal);
 
       Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal,
                                                                                                      directionOfLineInLocal);
@@ -1150,8 +1146,8 @@ public class PlanarRegionTools
 
    public static Point3D intersectRegionWithRay(PlanarRegion region, Point3DReadOnly rayStart, Vector3D rayDirection)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
@@ -1167,7 +1163,7 @@ public class PlanarRegionTools
       }
 
       Point3D intersectionInPlaneFrame = new Point3D(intersectionWithPlane);
-      intersectionInPlaneFrame.applyInverseTransform(regionToWorld);
+      intersectionInPlaneFrame.applyTransform(regionToLocal);
       // checking convex hull here - might be better to check all polygons to avoid false positive
       if (!region.getConvexHull().isPointInside(intersectionInPlaneFrame.getX(), intersectionInPlaneFrame.getY()))
       {
