@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -468,14 +469,16 @@ public class VisibilityGraph
 
       List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
 
+      double lengthForLongEdgeSquared = MathTools.square(lengthForLongInterRegionEdge);
+
       for (VisibilityGraphNode targetNode : targetNodeList)
       {
          ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
          if (filter.isConnectionValid(sourceInWorld, targetInWorld))
          {
             //TODO: +++++++JerryPratt: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
-            double xyDistance = sourceInWorld.distanceXY(targetInWorld);
-            if (xyDistance < lengthForLongInterRegionEdge)
+            double xyDistanceSquared = sourceInWorld.distanceXYSquared(targetInWorld);
+            if (xyDistanceSquared < lengthForLongEdgeSquared)
             {
                VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
                potentialEdges.add(edge);
@@ -558,6 +561,7 @@ public class VisibilityGraph
 
 
       List<VisibilityGraphEdge> potentialEdges = new ArrayList<>();
+      double lengthForLongEdgeSquared = MathTools.square(lengthForLongInterRegionEdge);
 
       for (VisibilityGraphNode targetNode : allNavigableNodes)
       {
@@ -565,8 +569,8 @@ public class VisibilityGraph
             continue;
 
          ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
-         double xyDistance = sourceInWorld.distanceXY(targetInWorld);
-         if (xyDistance < lengthForLongInterRegionEdge)
+         double xyDistanceSquared = sourceInWorld.distanceXYSquared(targetInWorld);
+         if (xyDistanceSquared < lengthForLongEdgeSquared)
          {
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             potentialEdges.add(edge);
@@ -654,17 +658,17 @@ public class VisibilityGraph
    private static VisibilityGraphEdge findShortestEdgeXY(VisibilityGraphNode sourceNode, List<VisibilityGraphEdge> potentialEdges)
    {
       VisibilityGraphEdge shortestEdgeXY = null;
-      double shortestLengthXY = Double.POSITIVE_INFINITY;
+      double shortestLengthXYSquared = Double.POSITIVE_INFINITY;
 
       for (VisibilityGraphEdge potentialEdge : potentialEdges)
       {
          VisibilityGraphNode targetNode = potentialEdge.getTargetNode();
-         double distance = sourceNode.distanceXY(targetNode);
+         double distanceSquared = sourceNode.distanceXYSquared(targetNode);
 
-         if (distance < shortestLengthXY)
+         if (distanceSquared < shortestLengthXYSquared)
          {
             shortestEdgeXY = potentialEdge;
-            shortestLengthXY = distance;
+            shortestLengthXYSquared = distanceSquared;
          }
       }
       return shortestEdgeXY;
