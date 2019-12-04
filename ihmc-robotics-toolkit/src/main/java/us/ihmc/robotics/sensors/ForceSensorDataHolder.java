@@ -24,6 +24,14 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    {
    }
 
+   public ForceSensorDataHolder(ForceSensorDefinition[] forceSensors)
+   {
+      for (ForceSensorDefinition forceSensorDefinition : forceSensors)
+      {
+         registerForceSensor(forceSensorDefinition);
+      }
+   }
+
    public ForceSensorDataHolder(List<ForceSensorDefinition> forceSensors)
    {
       for (ForceSensorDefinition forceSensorDefinition : forceSensors)
