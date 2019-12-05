@@ -100,11 +100,6 @@ public class PlanarRegionTools
 
    public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, double pointToCheckX, double pointToCheckY)
    {
-      if (polygon.size() < 3)
-      {
-         return false;
-      }
-
       return isPointInsideConcaveHull(polygon, pointToCheckX, pointToCheckY);
    }
 
