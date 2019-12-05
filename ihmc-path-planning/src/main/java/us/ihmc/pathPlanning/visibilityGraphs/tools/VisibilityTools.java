@@ -20,9 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D;
-import static us.ihmc.euclid.tools.EuclidCoreTools.norm;
-import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 public class VisibilityTools
 {
@@ -31,7 +28,7 @@ public class VisibilityTools
       return isPointVisible(observer, targetPoint, points.getPoints(), closed);
    }
 
-   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<Point2DReadOnly> listOfPointsInCluster, boolean closed)
+   public static boolean isPointVisible(Point2DReadOnly observer, Point2DReadOnly targetPoint, List<? extends Point2DReadOnly> listOfPointsInCluster, boolean closed)
    {
       int size = listOfPointsInCluster.size();
       int endIndex = size - 1;
@@ -305,38 +302,26 @@ public class VisibilityTools
                   continue;
                }
             }
-
-            /*
-            ConvexPolygon2DReadOnly convexHullToCheck = checkPreferredExtrusions ? cluster.getPreferredNonNavigableExtrusionsConvexHull() :
-                  cluster.getNonNavigableExtrusionsConvexHull();
-
-            if (checkPreferredExtrusions && !convexHullToCheck.isPointInside(observer) && !convexHullToCheck.isPointInside(targetPoint))
-            {
-               if (VisibilityTools.isPointVisible(observer, targetPoint, convexHullToCheck.getPolygonVerticesView(), true))
-               {
-                  continue;
-               }
-            }
-
-             */
          }
-
-         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
-            return false;
 
          // this is more expensive, as you potentially have to check multiple regions.
          if (checkPreferredExtrusions)
          {
-            boolean startsInPreferredRegion = preferredNonNavigableExtrusions.stream().anyMatch(
-                  extrusion -> EuclidGeometryPolygonTools.isPoint2DInsideConvexPolygon2D(observer, extrusion.getPoints(), extrusion.size(), true, 0.0));
-            boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
-                  extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
-
             // If we start in a preferred region, that means you're already in a preferred extrusion. If it's an outer extrusion, we want to get out of the
             // non-preferred area, so we shouldn't check for visibility. If it's an inner extrusion, we want to cross into the non-preferred area.
-            if (isAnOuterExtrusion ^ startsInPreferredRegion && isNotVisible)
-               return false;
+            boolean startsInPreferredRegion = preferredNonNavigableExtrusions.stream().anyMatch(
+                  extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), observer));
+            if (isAnOuterExtrusion ^ startsInPreferredRegion)
+            {
+               boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
+                     extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
+               if (isNotVisible)
+                  return false;
+            }
          }
+
+         if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
+            return false;
       }
 
       return true;
