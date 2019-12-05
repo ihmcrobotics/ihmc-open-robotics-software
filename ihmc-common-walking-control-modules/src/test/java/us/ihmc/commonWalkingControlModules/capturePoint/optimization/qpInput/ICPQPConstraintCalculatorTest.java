@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.robotics.testing.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ICPQPConstraintCalculatorTest

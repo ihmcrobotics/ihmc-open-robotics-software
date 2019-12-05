@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

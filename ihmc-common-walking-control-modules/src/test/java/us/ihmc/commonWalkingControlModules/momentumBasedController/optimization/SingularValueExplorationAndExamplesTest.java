@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.testing.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class SingularValueExplorationAndExamplesTest
 {

@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 
 public class LIPMDynamicsTest

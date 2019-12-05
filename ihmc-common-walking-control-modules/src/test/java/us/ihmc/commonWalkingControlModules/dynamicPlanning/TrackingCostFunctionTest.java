@@ -5,8 +5,8 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 public abstract class TrackingCostFunctionTest<E extends Enum<E>>

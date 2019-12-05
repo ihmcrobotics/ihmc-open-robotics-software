@@ -4,8 +4,8 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 public abstract class CostFunctionTest<E extends Enum<E>>
