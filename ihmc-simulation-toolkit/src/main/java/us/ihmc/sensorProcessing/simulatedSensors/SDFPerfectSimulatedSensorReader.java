@@ -1,10 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -22,7 +18,9 @@ import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
+import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -49,6 +47,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
+   private final List<IMUSensor> imuSensors = new ArrayList<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
@@ -93,6 +92,11 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
    {
       forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
+   }
+
+   public void addIMUSensor(IMUDefinition imuDefinition)
+   {
+      imuSensors.add(new IMUSensor(imuDefinition, null));
    }
 
    @Override
@@ -144,6 +148,16 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             forceTorqueSensor.calculate();
             forceSensorDataHolderToUpdate.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
          }
+      }
+
+      for (IMUSensor imuSensor : imuSensors)
+      {
+         ReferenceFrame measurementFrame = imuSensor.getMeasurementFrame();
+         Twist twist = new Twist(imuSensor.getMeasurementLink().getBodyFixedFrame().getTwistOfFrame());
+         twist.changeFrame(measurementFrame);
+         imuSensor.setOrientationMeasurement(measurementFrame.getTransformToRoot().getRotation());
+         imuSensor.setAngularVelocityMeasurement(twist.getAngularPart());
+         // TODO Add acceleration update.
       }
    }
 
@@ -241,7 +255,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    @Override
    public List<? extends IMUSensorReadOnly> getIMUOutputs()
    {
-      return new ArrayList<>();
+      return imuSensors;
    }
 
    @Override
