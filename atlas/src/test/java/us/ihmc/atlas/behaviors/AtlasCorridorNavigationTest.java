@@ -12,7 +12,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Input;
@@ -26,17 +26,13 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
@@ -46,14 +42,11 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -71,17 +64,14 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -91,6 +81,7 @@ public class AtlasCorridorNavigationTest
 
    private RobotAndMapViewer robotAndMapViewer;
    private PubSubImplementation pubSubMode = PubSubImplementation.FAST_RTPS;
+   private Notification slamUpdated;
 
    @BeforeAll
    static public void beforeAll()
@@ -107,11 +98,22 @@ public class AtlasCorridorNavigationTest
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
    {
-      assertTimeoutPreemptively(Duration.ofSeconds(60), () ->
+      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getTrickCorridor(), new Point3D(6.0, 0.0, 0.0), 60);
+   }
+
+   @Test
+   public void testAtlasMakesItToGoalInMazeCorridor()
+   {
+      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(), new Point3D(1.5 * 4.0, 1.5, 0.0), 200);
+   }
+
+   private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout)
+   {
+      assertTimeoutPreemptively(Duration.ofSeconds(timeout), () ->
       {
          try
          {
-            runAtlasToGoalInTrickyCorridor();
+            runAtlasToGoalUsingBodyPathWithOcclusions(map, goal);
          }
          catch (Exception e)
          {
@@ -120,11 +122,13 @@ public class AtlasCorridorNavigationTest
       });
    }
 
-   private void runAtlasToGoalInTrickyCorridor()
+   private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal)
    {
       new Thread(() -> {
          LogTools.info("Creating simulate REA module");
-         new SimulatedREAModule(PlannerTestEnvironments.getTrickCorridor(), createRobotModel(), pubSubMode).start();
+         SimulatedREAModule simulatedREAModule = new SimulatedREAModule(map, createRobotModel(), pubSubMode);
+         slamUpdated = simulatedREAModule.getSlamUpdated();
+         simulatedREAModule.start();
       }).start();
 
       new Thread(() -> {
@@ -162,7 +166,6 @@ public class AtlasCorridorNavigationTest
 //      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       boolean fullyExpandVisibilityGraph = false;
-      Point3D goal = new Point3D(6.0, 0.0, 0.0);
       FramePose3D robotPose = new FramePose3D();
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
@@ -352,6 +355,10 @@ public class AtlasCorridorNavigationTest
          }
 
          ThreadTools.sleep(500); // try to get a little more perception data TODO wait for a SLAM update
+         while (!slamUpdated.poll())
+         {
+            ThreadTools.sleep(100);
+         }
 
          latestHumanoidRobotState = robot.pollHumanoidRobotState();
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
