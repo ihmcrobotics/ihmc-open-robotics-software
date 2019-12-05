@@ -4,10 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
+import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class TimeAdjustmentSolver
 {
