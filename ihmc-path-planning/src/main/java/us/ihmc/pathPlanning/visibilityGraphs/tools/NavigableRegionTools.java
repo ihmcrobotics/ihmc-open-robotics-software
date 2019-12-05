@@ -17,6 +17,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConcaveHull;
 
@@ -29,22 +30,15 @@ public class NavigableRegionTools
 
    public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double ceilingHeight, double epsilon)
    {
-      List<NavigableRegion> containers = new ArrayList<>();
-
       List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
       if (navigableRegionsList == null)
          return null;
 
-      for (NavigableRegion navigableRegion : navigableRegionsList)
-      {
+      List<NavigableRegion> containers = navigableRegionsList.stream().filter(navigableRegion -> {
          if (computeMinHeightOfNavigableRegionAbovePoint(navigableRegion, point) > ceilingHeight)
-            continue;
-
-         if (isPointInWorldInsideNavigableRegion(navigableRegion, point, epsilon))
-         {
-            containers.add(navigableRegion);
-         }
-      }
+            return false;
+         return isPointInWorldInsideNavigableRegion(navigableRegion, point, epsilon);
+      }).collect(Collectors.toList());
 
       if (containers.isEmpty())
          return null;
@@ -52,10 +46,9 @@ public class NavigableRegionTools
          return containers.get(0);
 
       Point3D pointOnRegion = new Point3D();
-      Vector3D regionNormal = new Vector3D();
 
       NavigableRegion closestContainer = containers.get(0);
-      closestContainer.getHomePlanarRegion().getNormal(regionNormal);
+      Vector3D regionNormal = closestContainer.getHomePlanarRegion().getNormal();
       closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
       double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
 
