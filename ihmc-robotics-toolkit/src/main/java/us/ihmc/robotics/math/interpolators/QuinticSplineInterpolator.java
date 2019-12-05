@@ -6,12 +6,12 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
 
 /**
  * Quintic spline interpolator This class calculates a spline through multiple waypoints, minimizing

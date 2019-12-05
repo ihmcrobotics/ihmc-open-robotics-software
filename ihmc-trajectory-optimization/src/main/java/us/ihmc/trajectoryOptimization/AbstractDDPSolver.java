@@ -1,17 +1,18 @@
 package us.ihmc.trajectoryOptimization;
 
-import gnu.trove.list.array.TIntArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
+
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-
-import java.util.List;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 
 public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInterface<E>
 {

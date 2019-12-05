@@ -7,6 +7,8 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 import org.ejml.ops.SpecializedOps;
 
+import us.ihmc.matrixlib.MatrixTools;
+
 public class MatrixExponentialCalculator
 {
    private final int size;

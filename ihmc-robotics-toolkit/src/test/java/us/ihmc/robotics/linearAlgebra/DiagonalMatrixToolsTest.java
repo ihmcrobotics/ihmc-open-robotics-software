@@ -10,6 +10,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.testing.MatrixTestTools;
 
