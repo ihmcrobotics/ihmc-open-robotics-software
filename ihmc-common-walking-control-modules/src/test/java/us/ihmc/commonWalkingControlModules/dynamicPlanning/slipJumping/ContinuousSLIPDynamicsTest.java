@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class ContinuousSLIPDynamicsTest
 {

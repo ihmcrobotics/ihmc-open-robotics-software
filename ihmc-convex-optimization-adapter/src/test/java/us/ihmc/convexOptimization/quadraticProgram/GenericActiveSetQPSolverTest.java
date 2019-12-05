@@ -25,9 +25,9 @@ import org.ejml.ops.*;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.robotics.testing.MatrixTestTools;
 public class GenericActiveSetQPSolverTest
 {
    /** 

@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
-import us.ihmc.robotics.testing.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 

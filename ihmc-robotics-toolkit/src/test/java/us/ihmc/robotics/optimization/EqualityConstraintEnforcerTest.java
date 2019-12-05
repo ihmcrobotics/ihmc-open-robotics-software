@@ -5,8 +5,8 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class EqualityConstraintEnforcerTest
 {

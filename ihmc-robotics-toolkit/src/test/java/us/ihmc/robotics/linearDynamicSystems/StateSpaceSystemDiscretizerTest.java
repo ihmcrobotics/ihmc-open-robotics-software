@@ -26,7 +26,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.testing.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class StateSpaceSystemDiscretizerTest
 {

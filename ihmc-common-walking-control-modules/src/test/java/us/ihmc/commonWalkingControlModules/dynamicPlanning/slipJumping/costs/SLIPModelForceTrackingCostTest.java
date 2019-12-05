@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 public class SLIPModelForceTrackingCostTest extends CostFunctionTest<SLIPState>

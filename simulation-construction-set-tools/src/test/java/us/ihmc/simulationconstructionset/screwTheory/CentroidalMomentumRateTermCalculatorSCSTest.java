@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
@@ -22,7 +23,6 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 

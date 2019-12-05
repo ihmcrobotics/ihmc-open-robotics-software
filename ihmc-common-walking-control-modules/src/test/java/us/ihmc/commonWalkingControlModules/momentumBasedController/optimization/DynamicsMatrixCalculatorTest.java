@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.testing.MatrixTestTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

@@ -18,8 +18,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.testing.MatrixTestTools;
 
 public class MatrixToolsTest
 {
