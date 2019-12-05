@@ -116,14 +116,13 @@ public class Cluster
 
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
             return true;
-         // TODO look to see if NavigableRegionTools.isPointInsideConvexPolygon2D is faster
          return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
       }
       else
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
             return false;
          return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
       }
@@ -138,13 +137,13 @@ public class Cluster
 
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
             return true;
          return preferredNonNavigableExtrusionsInLocal.stream().noneMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
       }
       else
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
             return false;
          return preferredNonNavigableExtrusionsInLocal.stream().anyMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
       }
