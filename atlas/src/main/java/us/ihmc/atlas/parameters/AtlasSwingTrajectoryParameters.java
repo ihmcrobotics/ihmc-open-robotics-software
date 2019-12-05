@@ -85,7 +85,7 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    @Override
    public boolean addOrientationMidpointForObstacleClearance()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
