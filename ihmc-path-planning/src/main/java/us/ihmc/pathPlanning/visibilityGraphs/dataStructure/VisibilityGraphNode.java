@@ -159,7 +159,6 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return pointInWorld.toString();
    }
 
-
    private static int computeHashCode(VisibilityGraphNode node)
    {
       final int prime = 31;

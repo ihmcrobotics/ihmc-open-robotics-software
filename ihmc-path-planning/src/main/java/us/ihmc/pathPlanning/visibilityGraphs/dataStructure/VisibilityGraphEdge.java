@@ -18,12 +18,14 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    private final VisibilityGraphNode targetNode;
 
    private double edgeWeight;
+   private final int hashCode;
 
    public VisibilityGraphEdge(VisibilityGraphNode source, VisibilityGraphNode target)
    {
       this.sourceNode = source;
       this.targetNode = target;
       this.edgeWeight = defaultEdgeWeight;
+      this.hashCode = computeHashCode(this);
    }
 
    public VisibilityGraphNode getSourceNode()
@@ -56,11 +58,6 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return edgeWeight;
    }
 
-   public double percentageAlongConnection(Point3DReadOnly query)
-   {
-      return EuclidGeometryTools.percentageAlongLineSegment3D(query, sourceNode.getPointInWorld(), targetNode.getPointInWorld());
-   }
-
    public void registerEnds()
    {
       sourceNode.addEdge(this);
@@ -75,16 +72,22 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    }
 
    @Override
-   public boolean equals(Object object)
+   public boolean equals(Object obj)
    {
-      if (object == null)
+      if (this == obj)
+         return true;
+      if (obj == null)
          return false;
+      if (getClass() != obj.getClass())
+         return false;
+      VisibilityGraphEdge other = (VisibilityGraphEdge) obj;
+      return epsilonEquals(other, 1e-8);
+   }
 
-      if (object instanceof VisibilityGraphEdge)
-      {
-         return equals((VisibilityGraphEdge) object);
-      }
-      return false;
+   @Override
+   public int hashCode()
+   {
+      return hashCode;
    }
 
    public boolean equals(VisibilityGraphEdge other)
@@ -113,5 +116,10 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    public Point3DReadOnly getSecondEndpoint()
    {
       return targetNode.getPointInWorld();
+   }
+
+   private static int computeHashCode(VisibilityGraphEdge edge)
+   {
+      return edge.getSourceNode().hashCode() + edge.getTargetNode().hashCode();
    }
 }
