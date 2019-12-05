@@ -4,35 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
 {
-   private PlanarRegionsList map;
-   private List<Plane3D> planes;
+   private List<IhmcSurfaceElement> surfaceElements;
+   private static final double POSITION_WEIGHT = 1.0;
    private static final double ANGLE_SCALER = 1.0;
-   private static final double ANGLE_WEIGHT = 0.5;
-   private static final double SNAPPING_PARALLEL_WEIGHT = 0.05;
+   private static final double ANGLE_WEIGHT = 5.0;
+   private static final double SNAPPING_PARALLEL_WEIGHT = 5.0;
+
+   private static final double LEAST_SQUARE_WEIGHT = 0.1;
+
    private RigidBodyTransformReadOnly transformWorldToSensorPose;
 
-   public PreMultiplierOptimizerCostFunction(PlanarRegionsList map, List<Plane3D> planes, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   public PreMultiplierOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements,
+                                             RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
-      this.map = map;
-      this.planes = planes;
+      this.surfaceElements = surfaceElements;
       this.transformWorldToSensorPose = transformWorldToSensorPose;
    }
 
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      transformToPack.setRotationYawPitchRoll(input.get(3) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(5) / ANGLE_SCALER);
+      transformToPack.setRotationYawPitchRoll(input.get(3) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(5) / ANGLE_SCALER); // TODO: improve this.
    }
 
    public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
@@ -54,47 +54,42 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
       RigidBodyTransform transformer = new RigidBodyTransform();
       convertToPointCloudTransformer(values, transformer);
 
-      List<Plane3D> convertedPlanes = new ArrayList<>();
-      for (int i = 0; i < planes.size(); i++)
+      List<IhmcSurfaceElement> convertedElements = new ArrayList<>();
+      for (int i = 0; i < surfaceElements.size(); i++)
       {
-         Vector3D convertedNormal = planes.get(i).getNormalCopy();
-         Point3D convertedCenter = planes.get(i).getPointCopy();
+         Vector3D convertedNormal = surfaceElements.get(i).getPlane().getNormalCopy();
+         Point3D convertedCenter = surfaceElements.get(i).getPlane().getPointCopy();
 
          transformer.transform(convertedNormal);
          transformer.transform(convertedCenter);
-         convertedPlanes.add(new Plane3D(convertedCenter, convertedNormal));
+         IhmcSurfaceElement convertedElement = new IhmcSurfaceElement(surfaceElements.get(i));
+         convertedElement.setPlane(convertedCenter, convertedNormal);
+         convertedElements.add(convertedElement);
       }
 
       double cost = 0;
-      int numberOfPlanarRegions = map.getNumberOfPlanarRegions();
-      for (int i = 0; i < convertedPlanes.size(); i++)
+      int cnt = 0;
+      for (int i = 0; i < convertedElements.size(); i++)
       {
-         double minimumDistance = Double.MAX_VALUE;
-         int index = -1;
-         for (int j = 0; j < numberOfPlanarRegions; j++)
+         IhmcSurfaceElement convertedElement = convertedElements.get(i);
+         double distance = convertedElement.getDistance(POSITION_WEIGHT, ANGLE_WEIGHT);
+
+         double squareOfInput = 0.0;
+         for (double value : values.toArray())
          {
-            PlanarRegion planarRegion = map.getPlanarRegion(j);
-            Plane3D plane = planarRegion.getPlane();
-            double distance = plane.distance(convertedPlanes.get(i).getPoint());
-            if (distance < minimumDistance)
-            {
-               minimumDistance = distance;
-               index = j;
-            }
+            squareOfInput = squareOfInput + value * value;
          }
 
-         PlanarRegion planarRegion = map.getPlanarRegion(index);
-         Plane3D plane = planarRegion.getPlane();
-         double angleDistance = 1 - Math.abs(plane.getNormal().dot(convertedPlanes.get(i).getNormal()));
-         double centerDistance = 0;
-         if (!planarRegion.isPointInsideByProjectionOntoXYPlane(convertedPlanes.get(i).getPoint()))
-            centerDistance = plane.getPoint().distance(convertedPlanes.get(i).getPoint());
-
-         double distanceCost = minimumDistance + ANGLE_WEIGHT * angleDistance + SNAPPING_PARALLEL_WEIGHT * centerDistance;
+         double distanceCost = distance + LEAST_SQUARE_WEIGHT * squareOfInput;
          {
             cost = cost + distanceCost;
          }
+         if (convertedElement.isInPlanarRegion())
+            cnt++;
       }
+
+      double snappingScore = 1 - (double) cnt / convertedElements.size();
+      cost = cost + snappingScore * SNAPPING_PARALLEL_WEIGHT;
 
       return cost;
    }

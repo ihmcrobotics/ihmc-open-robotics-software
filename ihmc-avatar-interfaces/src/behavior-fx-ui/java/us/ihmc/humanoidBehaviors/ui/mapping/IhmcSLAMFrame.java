@@ -119,6 +119,9 @@ public class IhmcSLAMFrame
 
    public NormalOcTree computeOctreeInPreviousView(double octreeResolution)
    {
+      if(previousFrame == null)
+         return null;
+      
       double[][] vertex = new double[pointCloudToSensorFrame.length][2];
 
       for (int i = 0; i < pointCloudToSensorFrame.length; i++)

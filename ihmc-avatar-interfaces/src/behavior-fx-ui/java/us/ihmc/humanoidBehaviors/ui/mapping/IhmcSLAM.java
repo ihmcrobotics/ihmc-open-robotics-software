@@ -43,11 +43,11 @@ public class IhmcSLAM
    private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
 
    private static final double OPTIMIZER_POSITION_LIMIT = 0.05;
-   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(0.0);
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(8.0);
 
-   private static final TDoubleArrayList initialQuery = new TDoubleArrayList();
-   private static final TDoubleArrayList lowerLimit = new TDoubleArrayList();
-   private static final TDoubleArrayList upperLimit = new TDoubleArrayList();
+   public static final TDoubleArrayList initialQuery = new TDoubleArrayList();
+   public static final TDoubleArrayList lowerLimit = new TDoubleArrayList();
+   public static final TDoubleArrayList upperLimit = new TDoubleArrayList();
 
    static
    {
@@ -118,8 +118,9 @@ public class IhmcSLAM
       }
       else
       {
-         List<Plane3D> validPlanes = IhmcSLAMTools.computeValidPlanes(planarRegionsMap, frame, OCTREE_RESOLUTION, VALID_PLANES_RATIO_THRESHOLD,
-                                                                      MAXIMUM_DISTANCE_OF_SIMILARITY, MAXIMUM_ANGLE_OF_SIMILARITY);
+         List<IhmcSurfaceElement> validPlanes = IhmcSLAMTools.computeMergeableSurfaceElements(planarRegionsMap, frame, OCTREE_RESOLUTION,
+                                                                                              VALID_PLANES_RATIO_THRESHOLD, MAXIMUM_DISTANCE_OF_SIMILARITY,
+                                                                                              MAXIMUM_ANGLE_OF_SIMILARITY);
          if (validPlanes == null)
          {
             mergeable = false;
@@ -149,14 +150,14 @@ public class IhmcSLAM
       return mergeable;
    }
 
-   private RigidBodyTransform computeOptimizedMultiplier(List<Plane3D> validPlanes, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   private RigidBodyTransform computeOptimizedMultiplier(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
-      PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(planarRegionsMap, validPlanes, transformWorldToSensorPose);
+      PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(surfaceElements, transformWorldToSensorPose);
       GradientDescentModule optimizer = new GradientDescentModule(function, initialQuery);
 
       int maxIterations = 100;
       double convergenceThreshold = 10E-5;
-      double optimizerStepSize = -0.1;
+      double optimizerStepSize = -0.5;
       double optimizerPerturbationSize = 0.0001;
 
       optimizer.setInputLowerLimit(lowerLimit);

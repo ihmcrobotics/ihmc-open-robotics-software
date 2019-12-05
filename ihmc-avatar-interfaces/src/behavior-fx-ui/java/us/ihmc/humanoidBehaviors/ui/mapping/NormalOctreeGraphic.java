@@ -6,8 +6,6 @@ import java.util.List;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
@@ -53,6 +51,50 @@ public class NormalOctreeGraphic extends Group
       updatePointCloudMeshViews.add(scanMeshView);
       meshBuilder.clear();
       messageNodes = updatePointCloudMeshViews;
+   }
+
+   public void addMesh(List<IhmcSurfaceElement> elements, Color colorToViz)
+   {
+      for (IhmcSurfaceElement element : elements)
+      {
+         Plane3D singlePlane = element.getPlane();
+         Vector3D planeNormal = new Vector3D();
+         Point3D pointOnPlane = new Point3D();
+
+         singlePlane.getNormal(planeNormal);
+         singlePlane.getPoint(pointOnPlane);
+
+         intersectionPlaneBoxCalculator.setCube(element.getResolution(), pointOnPlane.getX(), pointOnPlane.getY(), pointOnPlane.getZ());
+         intersectionPlaneBoxCalculator.setPlane(pointOnPlane, planeNormal);
+         intersectionPlaneBoxCalculator.computeIntersections(plane);
+
+         if (plane.size() < 3)
+            continue;
+
+         int numberOfTriangles = plane.size() - 2;
+         int[] triangleIndices = new int[3 * numberOfTriangles];
+         int index = 0;
+         for (int j = 2; j < plane.size(); j++)
+         {
+            triangleIndices[index++] = 0;
+            triangleIndices[index++] = j - 1;
+            triangleIndices[index++] = j;
+         }
+
+         Point3D32[] vertices = new Point3D32[plane.size()];
+         TexCoord2f[] texCoords = new TexCoord2f[plane.size()];
+         Vector3D32[] normals = new Vector3D32[plane.size()];
+
+         for (int j = 0; j < plane.size(); j++)
+         {
+            vertices[j] = new Point3D32(plane.get(j));
+            texCoords[j] = new TexCoord2f();
+            normals[j] = new Vector3D32(planeNormal);
+         }
+
+         MeshDataHolder octreePlaneMeshDataHolder = new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
+         meshBuilder.addMesh(octreePlaneMeshDataHolder, colorToViz);
+      }
    }
 
    public void addMesh(List<Plane3D> planes, double octreeResolution, Color colorToViz)
