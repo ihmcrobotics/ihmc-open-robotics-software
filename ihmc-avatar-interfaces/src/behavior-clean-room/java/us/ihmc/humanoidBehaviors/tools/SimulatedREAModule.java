@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -35,8 +36,10 @@ public class SimulatedREAModule
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
-   PlanarRegionsList slamMap = new PlanarRegionsList();
-   PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
+   private PlanarRegionsList slamMap = new PlanarRegionsList();
+   private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
+
+   private Notification slamUpdated = new Notification();
 
    public SimulatedREAModule(PlanarRegionsList map, PubSubImplementation pubSubImplementation)
    {
@@ -106,6 +109,7 @@ public class SimulatedREAModule
                   try
                   {
                      slamMap = PlanarRegionSLAM.slam(slamMap, visibleRegions, planarRegionSLAMParameters, (ConcaveHullMergerListener) null).getMergedMap();
+                     slamUpdated.set();
                   }
                   catch (Exception e)
                   {
@@ -158,5 +162,10 @@ public class SimulatedREAModule
             }
          }
       }
+   }
+
+   public Notification getSlamUpdated()
+   {
+      return slamUpdated;
    }
 }
