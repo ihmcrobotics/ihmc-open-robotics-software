@@ -46,17 +46,10 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return targetNode.getPointInWorld();
    }
 
-   public void registerEdgeWithNodes()
-   {
-      sourceNode.addEdge(this);
-      targetNode.addEdge(this);
-   }
-
    public void setEdgeWeight(double edgeWeight)
    {
       this.edgeWeight = edgeWeight;
    }
-
 
    public double getEdgeWeight()
    {

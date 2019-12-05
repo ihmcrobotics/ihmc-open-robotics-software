@@ -105,7 +105,6 @@ public class VisibilityGraphNavigableRegion
       VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
       edge.setEdgeWeight(weight);
       sourceNode.addEdge(edge);
-      targetNode.addEdge(edge);
       innerRegionEdges.add(edge);
    }
 
@@ -369,7 +368,7 @@ public class VisibilityGraphNavigableRegion
          {
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             edge.setEdgeWeight(edgeWeight);
-            edge.registerEdgeWithNodes();
+            sourceNode.addEdge(edge);
 
             edgesToPack.add(edge);
          }
@@ -406,7 +405,6 @@ public class VisibilityGraphNavigableRegion
 
    public synchronized void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight)
    {
-
       checkNavigableRegionConsistency(sourceNode, targetNode);
 
       if (VisibilityTools.isInnerRegionEdgeValid(sourceNode, targetNode))

@@ -483,7 +483,7 @@ public class VisibilityGraph
          if (shortestEdgeXY != null)
          {
             shortestEdgeXY.setEdgeWeight(weightForInterRegionEdge);
-            shortestEdgeXY.registerEdgeWithNodes();
+            sourceNode.addEdge(shortestEdgeXY);
             edgesToPack.add(shortestEdgeXY);
          }
       }
@@ -492,7 +492,7 @@ public class VisibilityGraph
          for (VisibilityGraphEdge edge : potentialEdges)
          {
             edge.setEdgeWeight(weightForInterRegionEdge);
-            edge.registerEdgeWithNodes();
+            sourceNode.addEdge(edge);
          }
          edgesToPack.addAll(potentialEdges);
       }
@@ -605,8 +605,8 @@ public class VisibilityGraph
 
          if (shortestEdgeXY != null)
          {
-            shortestEdgeXY.registerEdgeWithNodes();
             shortestEdgeXY.setEdgeWeight(edgeWeight);
+            sourceNode.addEdge(shortestEdgeXY);
             edgesToPack.add(shortestEdgeXY);
          }
       }
@@ -614,8 +614,8 @@ public class VisibilityGraph
       {
          for (VisibilityGraphEdge edge : potentialEdges)
          {
-            edge.registerEdgeWithNodes();
             edge.setEdgeWeight(edgeWeight);
+            sourceNode.addEdge(edge);
          }
          edgesToPack.addAll(potentialEdges);
       }
