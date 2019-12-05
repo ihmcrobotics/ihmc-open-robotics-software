@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import java.util.*;
 
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.randomizeAxisAngle;
 import static us.ihmc.robotics.Assert.*;
 import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -887,6 +888,21 @@ public class PlanarRegionToolsTest
       PlanarRegion regionA = new PlanarRegion(transformToWorld, polygonA);
       BoundingBox2D boundingBox2D = PlanarRegionTools.getLocalBoundingBox2DInLocal(regionA);
       assertEquals(boundingBox2D, new BoundingBox2D(2.0, 3.0, 4.1, 5.1));
+   }
+
+   @Test
+   public void testIsPointInsideConcaveHull()
+   {
+      Random random = new Random(1738L);
+      for (int iterA = 0; iterA < ITERATIONS; iterA++)
+      {
+         ConvexPolygon2D randomPolygon = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, 20);
+         for (int iterB = 0; iterB < ITERATIONS; iterB++)
+         {
+            Point2D randomPoint = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+            assertEquals(randomPolygon.isPointInside(randomPoint), PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), randomPoint.getX(), randomPoint.getY()));
+         }
+      }
    }
 
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)

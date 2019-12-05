@@ -90,24 +90,4 @@ public class NavigableRegionTools
 
       return navigableRegion.getObstacleClusters().stream().noneMatch(obstacleCluster -> obstacleCluster.isInsideNonNavigableZone(pointInLocalToCheck));
    }
-
-   /**
-    * Return true if the given point is contained inside the boundary.
-    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
-    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
-    *
-    * @param test The point to check
-    * @return true if the point is inside the boundary, false otherwise
-    *
-    */
-   public static boolean isPointInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly test)
-   {
-      return isPointInsideClosedConcaveHullOfCluster(navigableRegion.getHomeRegionCluster(), test);
-   }
-
-   public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
-   {
-      return PlanarRegionTools.isPointInsideConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
-   }
 }
