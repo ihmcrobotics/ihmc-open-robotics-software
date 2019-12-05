@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ public class VisibilityGraphNavigableRegion
    private final List<VisibilityGraphNode> allNavigableNodes = new ArrayList<>();
    private final List<VisibilityGraphNode> allPreferredNavigableNodes = new ArrayList<>();
 
-   private final ArrayList<VisibilityGraphEdge> innerRegionEdges = new ArrayList<>();
+   private final HashSet<VisibilityGraphEdge> innerRegionEdges = new HashSet<>();
 
    private final boolean createEdgesAroundClusterRing;
    private boolean haveNodesBeenCreated = false;
@@ -93,7 +94,7 @@ public class VisibilityGraphNavigableRegion
       return obstacleNavigableNodes;
    }
 
-   public List<VisibilityGraphEdge> getAllEdges()
+   public HashSet<VisibilityGraphEdge> getAllEdges()
    {
       if (!haveNodesBeenCreated)
          createNavigableRegionNodes();
@@ -235,7 +236,7 @@ public class VisibilityGraphNavigableRegion
 
    private static void createNavigableRegionNodes(VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, Cluster clusterToBuildMapOf,
                                                  PlanarRegion homeRegion, List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodesToPack,
-                                                 List<VisibilityGraphNode> nodesToPack, ArrayList<VisibilityGraphEdge> edgesToPack,
+                                                 List<VisibilityGraphNode> nodesToPack, HashSet<VisibilityGraphEdge> edgesToPack,
                                                  boolean createEdgesAroundClusterRing)
    {
       List<ExtrusionHull> preferredNavigableExtrusionPoints = clusterToBuildMapOf.getPreferredNavigableExtrusionsInLocal();
@@ -286,7 +287,7 @@ public class VisibilityGraphNavigableRegion
    }
 
    private static void createEdgesAroundClusterRing(ArrayList<VisibilityGraphNode> newNodes, List<Cluster> allClusters,
-                                                    ArrayList<VisibilityGraphEdge> edgesToPack, boolean checkForPreferredVisibility)
+                                                    HashSet<VisibilityGraphEdge> edgesToPack, boolean checkForPreferredVisibility)
    {
       // Go around the ring looking for connections.
       for (int sourceIndex = 0; sourceIndex < newNodes.size(); sourceIndex++)
@@ -313,7 +314,7 @@ public class VisibilityGraphNavigableRegion
    }
 
    private static void addClusterSelfVisibility(List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodes, List<VisibilityGraphNode> nodes,
-                                               List<VisibilityGraphEdge> edgesToPack, double nonPreferredEdgeWeight)
+                                                HashSet<VisibilityGraphEdge> edgesToPack, double nonPreferredEdgeWeight)
    {
       // Going through all of the possible combinations of two points for finding connections going from the preferred to the preferred
       for (int sourceIndex = 0; sourceIndex < preferredNodes.size(); sourceIndex++)
@@ -345,7 +346,7 @@ public class VisibilityGraphNavigableRegion
    }
 
    private static void addCrossClusterVisibility(List<VisibilityGraphNode> sourceNodes, List<VisibilityGraphNode> targetNodes, List<Cluster> allClusters,
-                                                ArrayList<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsToPreferredMap)
+                                                 HashSet<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsToPreferredMap)
    {
       for (int sourceIndex = 0; sourceIndex < sourceNodes.size(); sourceIndex++)
       {
@@ -355,7 +356,7 @@ public class VisibilityGraphNavigableRegion
    }
 
    private static void addClusterVisibility(List<Cluster> allClusters, VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodes, int targetStartIndex,
-                                           List<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsAllOnPreferredMap)
+                                            HashSet<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsAllOnPreferredMap)
    {
       for (int targetIndex = targetStartIndex; targetIndex < targetNodes.size(); targetIndex++)
       {

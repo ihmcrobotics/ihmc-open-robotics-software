@@ -207,7 +207,7 @@ public class NavigableRegionsManager
 
          checkAndHandleBestEffortNode(nodeToExpand);
 
-         List<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
+         HashSet<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
          expandedNodesCount += neighboringEdges.size();
 
          // A* using XY distance heuristic
@@ -272,7 +272,7 @@ public class NavigableRegionsManager
    /**
     * This computes edge costs.
     */
-   List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
+   HashSet<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
    {
       if (nodeToExpand.getHasBeenExpanded())
       {

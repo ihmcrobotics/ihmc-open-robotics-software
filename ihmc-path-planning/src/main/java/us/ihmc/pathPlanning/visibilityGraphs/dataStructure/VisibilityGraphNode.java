@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -30,7 +31,7 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    private final boolean isPreferredNode;
    private final int hashCode;
 
-   private final ArrayList<VisibilityGraphEdge> edges = new ArrayList<>();
+   private final HashSet<VisibilityGraphEdge> edges = new HashSet<>();
 
    public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
                               boolean isPreferredNode)
@@ -77,7 +78,7 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       }
    }
 
-   public List<VisibilityGraphEdge> getEdges()
+   public HashSet<VisibilityGraphEdge> getEdges()
    {
       return edges;
    }

@@ -2,10 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import static us.ihmc.robotics.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -90,7 +87,7 @@ public class VisibilityGraphTest
       assertEquals(1, visibilityGraphNavigableRegions.size());
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = visibilityGraphNavigableRegions.get(0);
 
-      List<VisibilityGraphEdge> navigableRegionEdges = visibilityGraphNavigableRegion.getAllEdges();
+      HashSet<VisibilityGraphEdge> navigableRegionEdges = visibilityGraphNavigableRegion.getAllEdges();
 
       assertEquals(28, navigableRegionEdges.size());
       List<VisibilityGraphNode> homeRegionNodes = visibilityGraphNavigableRegion.getHomeRegionNodes();
@@ -174,7 +171,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(97, startNode.getRegionId());
-      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+      HashSet<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
 
       Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
       ConnectionPoint3D startInWorld = startNode.getPointInWorld();
@@ -188,7 +185,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(97, goalNode.getRegionId());
-      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
+      HashSet<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
 
       Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
       ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
@@ -267,8 +264,8 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
 
-      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
-      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
 
       assertEquals(28, internalEdges0.size());
       assertEquals(28, internalEdges1.size());
@@ -396,7 +393,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
-      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+      HashSet<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
 
       Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
       ConnectionPoint3D startInWorld = startNode.getPointInWorld();
@@ -410,7 +407,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());
-      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
+      HashSet<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
 
       Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
       ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
@@ -498,8 +495,8 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
 
-      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
-      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
 
       assertEquals(28, internalEdges0.size());
       assertEquals(28, internalEdges1.size());
@@ -620,8 +617,8 @@ public class VisibilityGraphTest
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion0 = visibilityGraphNavigableRegions.get(0);
       VisibilityGraphNavigableRegion visibilityGraphNavigableRegion1 = visibilityGraphNavigableRegions.get(1);
 
-      List<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
-      List<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges0 = visibilityGraphNavigableRegion0.getAllEdges();
+      HashSet<VisibilityGraphEdge> internalEdges1 = visibilityGraphNavigableRegion1.getAllEdges();
 
       List<VisibilityGraphNode> nodes0 = visibilityGraphNavigableRegion0.getHomeRegionNodes();
       List<VisibilityGraphNode> nodes1 = visibilityGraphNavigableRegion1.getHomeRegionNodes();
@@ -840,7 +837,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode startNode = visibilityGraph.getStartNode();
       assertEquals(77, startNode.getRegionId());
-      List<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
+      HashSet<VisibilityGraphEdge> startEdges = visibilityGraph.getStartEdges();
 
       Point2DReadOnly startInLocal = startNode.getPoint2DInLocal();
       ConnectionPoint3D startInWorld = startNode.getPointInWorld();
@@ -862,7 +859,7 @@ public class VisibilityGraphTest
 
       VisibilityGraphNode goalNode = visibilityGraph.getGoalNode();
       assertEquals(63, goalNode.getRegionId());
-      List<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
+      HashSet<VisibilityGraphEdge> goalEdges = visibilityGraph.getGoalEdges();
 
       Point2DReadOnly goalInLocal = goalNode.getPoint2DInLocal();
       ConnectionPoint3D goalInWorld = goalNode.getPointInWorld();
