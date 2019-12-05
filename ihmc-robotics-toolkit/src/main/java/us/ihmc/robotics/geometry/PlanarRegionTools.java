@@ -105,58 +105,7 @@ public class PlanarRegionTools
          return false;
       }
 
-      Point2DReadOnly rayOrigin = new Point2D(pointToCheckX, pointToCheckY);
-      Vector2D rayDirection = new Vector2D();
-
-      Point2D pointOnArbitraryEdge = new Point2D();
-
-      for (int i = 0; i < polygon.size(); i++)
-      { // Picking an edge that is not parallel to the ray.
-         Point2DReadOnly edgeStart = polygon.get(i);
-         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
-         Vector2D edgeDirection = new Vector2D();
-         edgeDirection.sub(edgeEnd, edgeStart);
-
-         pointOnArbitraryEdge.interpolate(edgeStart, edgeEnd, 0.5);
-         rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
-
-         double cross = edgeDirection.cross(rayDirection);
-
-         if (Math.abs(cross) > 1.0e-3)
-            break;
-      }
-
-      int numberOfIntersections = 0;
-
-      Point2D previousIntersection = null;
-      Point2D currentIntersection = null;
-
-      for (int i = 0; i < polygon.size(); i++)
-      {
-         Point2DReadOnly edgeStart = polygon.get(i);
-         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
-
-         currentIntersection = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
-
-         if (currentIntersection != null)
-         { // There is an intersection
-            if (previousIntersection == null || !currentIntersection.epsilonEquals(previousIntersection, 1.0e-10))
-            { // Because the intersection is different from the previous, the intersection is not on a vertex.
-               numberOfIntersections++;
-            }
-         }
-
-         previousIntersection = currentIntersection;
-      }
-
-      if (numberOfIntersections == 0)
-      {
-         //Could be both outside or inside
-         return false;
-      }
-
-      // If the number of intersections is odd, the point is inside.
-      return numberOfIntersections % 2 != 0;
+      return isPointInsideConcaveHull(polygon, pointToCheckX, pointToCheckY);
    }
 
 
@@ -227,6 +176,56 @@ public class PlanarRegionTools
    }
 
    /**
+    * Return true if the given point is contained inside the boundary.
+    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    *
+    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
+    *
+    * @param test The point to check
+    * @return true if the point is inside the boundary, false otherwise
+    *
+    */
+   public static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY)
+   {
+      return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
+   }
+
+   // FIXME this is currently private, because the epsilon feature is untested.
+   private static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY, double epsilon)
+   {
+      int numberOfVertices = polygon.length;
+
+      int i;
+      int j;
+      boolean result = false;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly vertex = polygon[i];
+         Point2DReadOnly previousVertex = polygon[j];
+
+         if (rayIntersectsWithEdge(vertex, previousVertex, testX, testY))
+         {
+            result = !result;
+         }
+      }
+
+      if (result)
+         return true;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly vertex = polygon[i];
+         Point2DReadOnly previousVertex = polygon[j];
+
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(testX, testY, vertex, previousVertex) <= epsilon)
+            return true;
+      }
+
+      return false;
+   }
+
+   /**
     * Checks to see if a ray starting at {@param startOfRayX} and {@param startOfRayY} and casting in the positive X direction intersects with the edge
     * going from {@param previousVertex} to {@param vertex}.
     */
@@ -267,22 +266,21 @@ public class PlanarRegionTools
          return false;
       if (!convexHull.isPointInside(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
-      List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
 
       // If inside the convex hull at this point, then if there is only one polygon, you are also inside that too...
-      //TODO: Unit tests for all of this.
-      if (convexPolygons.size() == 1)
+      if (planarRegion.getNumberOfConvexPolygons() == 1)
       {
          return true;
       }
 
-      // FIXME this should just work for the entire concave hull. why does it not? does the concave hull algorithm work if the points are on the bounds?
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         return planarRegion.getConvexPolygons().stream().anyMatch(polygon -> isPointInsideConcaveHull(polygon.getPolygonVerticesView(), pointInLocalToCheckX, pointInLocalToCheckY));
+         return isPointInsideConcaveHull(planarRegion.getConcaveHull(), pointInLocalToCheckX, pointInLocalToCheckY);
       }
       else
       {
+         List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
          //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
          // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
