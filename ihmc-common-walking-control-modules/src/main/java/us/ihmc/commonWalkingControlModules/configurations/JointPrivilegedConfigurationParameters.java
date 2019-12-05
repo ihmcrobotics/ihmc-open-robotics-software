@@ -32,7 +32,7 @@ public class JointPrivilegedConfigurationParameters
     */
    public double getNullspaceProjectionAlpha()
    {
-      return 0.05;
+      return 0.1;
    }
 
    /**
