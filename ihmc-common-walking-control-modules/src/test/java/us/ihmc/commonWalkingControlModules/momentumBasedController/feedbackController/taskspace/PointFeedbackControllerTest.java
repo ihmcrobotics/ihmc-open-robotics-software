@@ -274,7 +274,7 @@ public final class PointFeedbackControllerTest
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
       SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
-      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver(registry);
+      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver();
 
       DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       DenseMatrix64F solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);
