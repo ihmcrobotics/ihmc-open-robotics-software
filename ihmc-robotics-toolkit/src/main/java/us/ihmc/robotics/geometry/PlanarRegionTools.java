@@ -156,9 +156,25 @@ public class PlanarRegionTools
       }
 
       // If the number of intersections is odd, the point is inside.
-      return numberOfIntersections % 2 != 0;   }
+      return numberOfIntersections % 2 != 0;
+   }
 
 
+
+   /**
+    * Return true if the given point is contained inside the boundary.
+    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    *
+    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
+    *
+    * @param test The point to check
+    * @return true if the point is inside the boundary, false otherwise
+    *
+    */
+   public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, Point2DReadOnly test)
+   {
+      return isPointInsideConcaveHull(polygon, test.getX(), test.getY());
+   }
 
    /**
     * Return true if the given point is contained inside the boundary.
@@ -172,6 +188,12 @@ public class PlanarRegionTools
     */
    public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY)
    {
+      return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
+   }
+
+   // FIXME this is currently private, because the epsilon feature is untested.
+   private static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY, double epsilon)
+   {
       int numberOfVertices = polygon.size();
 
       int i;
@@ -180,52 +202,41 @@ public class PlanarRegionTools
 
       for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
       {
-         Point2DReadOnly iVertex = polygon.get(i);
-         Point2DReadOnly jVertex = polygon.get(j);
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly previousVertex = polygon.get(j);
 
-         if (testVertex(iVertex, jVertex, testX, testY))
+         if (rayIntersectsWithEdge(vertex, previousVertex, testX, testY))
          {
             result = !result;
          }
       }
-      return result;
-   }
 
-   /**
-    * Return true if the given point is contained inside the boundary.
-    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
-    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
-    *
-    * @param test The point to check
-    * @return true if the point is inside the boundary, false otherwise
-    *
-    */
-   public static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY)
-   {
-      int numberOfVertices = polygon.length;
-
-      int i;
-      int j;
-      boolean result = false;
+      if (result)
+         return true;
 
       for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
       {
-         Point2DReadOnly iVertex = polygon[i];
-         Point2DReadOnly jVertex = polygon[j];
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly previousVertex = polygon.get(j);
 
-         if (testVertex(iVertex, jVertex, testX, testY))
-         {
-            result = !result;
-         }
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(testX, testY, vertex, previousVertex) <= epsilon)
+            return true;
       }
-      return result;
+
+      return false;
    }
 
-   private static boolean testVertex(Point2DReadOnly iVertex, Point2DReadOnly jVertex, double testX, double testY)
+   /**
+    * Checks to see if a ray starting at {@param startOfRayX} and {@param startOfRayY} and casting in the positive X direction intersects with the edge
+    * going from {@param previousVertex} to {@param vertex}.
+    */
+   static boolean rayIntersectsWithEdge(Point2DReadOnly vertex, Point2DReadOnly previousVertex, double startOfRayX, double startOfRayY)
    {
-      return (iVertex.getY() > testY) != (jVertex.getY() > testY)
-            && (testX < (jVertex.getX() - iVertex.getX()) * (testY - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX());
+      // if the Y position is to the left or right of both vertices, it definitely does not intersect with the edge, because its too high or too low
+      if (startOfRayY < vertex.getY() == startOfRayY < previousVertex.getY())
+         return false;
+      // checks to see if the line through the point actually intersects with a line segment.
+      return (startOfRayX < (previousVertex.getX() - vertex.getX()) / (previousVertex.getY() - vertex.getY()) * (startOfRayY - vertex.getY())  + vertex.getX());
    }
 
 
