@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 public class NavigableRegionsManager
 {
    private final static boolean debug = true;
-   private final static boolean fullyExpandVisibilityGraph = true;
+   private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
@@ -38,6 +37,8 @@ public class NavigableRegionsManager
    private Point3DReadOnly goalInWorld;
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
+
+   private NavigableRegionsListener listener = null;
 
    public NavigableRegionsManager()
    {
@@ -64,6 +65,11 @@ public class NavigableRegionsManager
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
       this.postProcessor = postProcessor;
+   }
+
+   public void setListener(NavigableRegionsListener listener)
+   {
+      this.listener = listener;
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
@@ -190,6 +196,8 @@ public class NavigableRegionsManager
          if (expandedNodes.contains(nodeToExpand))
             continue;
          expandedNodes.add(nodeToExpand);
+         if (listener != null)
+            listener.addExpandedNode(nodeToExpand);
 
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
@@ -202,6 +210,9 @@ public class NavigableRegionsManager
          // A* using XY distance heuristic
          for (VisibilityGraphEdge neighboringEdge : neighboringEdges)
          {
+            if (listener != null)
+               listener.addEdge(neighboringEdge);
+
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
             double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight(), neighboringEdge.getStaticEdgeCost());
