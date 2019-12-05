@@ -3,18 +3,20 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
+import java.util.function.DoubleSupplier;
+
 public class PerStepCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DoubleSupplier costPerStep;
 
-   public PerStepCost(FootstepPlannerParametersReadOnly parameters)
+   public PerStepCost(DoubleSupplier costPerStep)
    {
-      this.parameters = parameters;
+      this.costPerStep = costPerStep;
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      return parameters.getCostPerStep();
+      return costPerStep.getAsDouble();
    }
 }

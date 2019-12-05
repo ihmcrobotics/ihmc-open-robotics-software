@@ -257,7 +257,8 @@ public class StepGeneratorJavaFXController
       double collisionBoxWidth = 1.15;
       double collisionBoxHeight = 1.0;
       double collisionXYProximityCheck = 0.01;
-      collisionDetector = new BoundingBoxCollisionDetector(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
+      collisionDetector = new BoundingBoxCollisionDetector();
+      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
    }
 
    private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
