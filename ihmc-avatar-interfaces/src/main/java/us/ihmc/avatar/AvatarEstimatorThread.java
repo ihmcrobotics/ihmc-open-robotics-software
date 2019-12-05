@@ -67,7 +67,9 @@ public class AvatarEstimatorThread extends ModularRobotController
       // This is to preserve the registry hierarchy for the parameters to work
       estimatorRegistry.addChild(super.getYoVariableRegistry());
 
-      addRobotController(mainStateEstimator);
+      if (mainStateEstimator != null)
+         addRobotController(mainStateEstimator);
+
       for (int i = 0; i < secondaryStateEstimators.size(); i++)
       {
          addRobotController(secondaryStateEstimators.get(i).getRight());
@@ -82,11 +84,11 @@ public class AvatarEstimatorThread extends ModularRobotController
       {
          if (firstTick.getBooleanValue())
          {
-            mainStateEstimator.initialize();
+            initialize();
+
             if (forceSensorStateUpdater != null)
-            {
                forceSensorStateUpdater.initialize();
-            }
+
             firstTick.set(false);
          }
 
@@ -98,7 +100,9 @@ public class AvatarEstimatorThread extends ModularRobotController
          }
 
          sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
-         mainStateEstimator.doControl();
+
+         doControl();
+
          if (forceSensorStateUpdater != null)
          {
             forceSensorStateUpdater.updateForceSensorState();
@@ -120,7 +124,9 @@ public class AvatarEstimatorThread extends ModularRobotController
    public void initializeStateEstimators(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       sensorReader.initialize();
-      mainStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
+
+      if (mainStateEstimator != null)
+         mainStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
 
       for (int i = 0; i < secondaryStateEstimators.size(); i++)
       {

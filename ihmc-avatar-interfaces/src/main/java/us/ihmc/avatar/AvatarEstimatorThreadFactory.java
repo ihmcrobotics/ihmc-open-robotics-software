@@ -392,6 +392,8 @@ public class AvatarEstimatorThreadFactory
     */
    public void addSecondaryStateEstimators(BooleanSupplier reinitilizeSupplier, StateEstimatorController secondaryStateEstimator)
    {
+      if (!useStateEstimator())
+         throw new IllegalArgumentException("Cannot add state estimator because SensorReaderFactory.useStateEstimator() is false.");
       getSecondaryStateEstimators().add(reinitilizeSupplier, secondaryStateEstimator);
    }
 
@@ -421,6 +423,9 @@ public class AvatarEstimatorThreadFactory
 
    public StateEstimatorController createDRCKinematicsStateEstimator()
    {
+      if (!useStateEstimator())
+         return null;
+
       // Create DRC Estimator:
       KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();
       estimatorFactory.setEstimatorFullRobotModel(getEstimatorFullRobotModel());
@@ -438,6 +443,9 @@ public class AvatarEstimatorThreadFactory
 
    public StateEstimatorController createEKFStateEstimator()
    {
+      if (!useStateEstimator())
+         return null;
+
       double estimatorDT = getStateEstimatorParameters().getEstimatorDT();
       HumanoidRobotSensorInformation sensorInformation = getSensorInformation();
       SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -489,7 +497,7 @@ public class AvatarEstimatorThreadFactory
 
    public ForceSensorStateUpdater getForceSensorStateUpdater()
    {
-      if (!getSensorReaderFactory().useStateEstimator())
+      if (!useStateEstimator())
          return null;
       if (!forceSensorStateUpdaterField.hasValue())
       {
@@ -609,6 +617,11 @@ public class AvatarEstimatorThreadFactory
    public SensorReaderFactory getSensorReaderFactory()
    {
       return sensorReaderFactoryField.get();
+   }
+
+   public boolean useStateEstimator()
+   {
+      return getSensorReaderFactory().useStateEstimator();
    }
 
    public SensorReader getSensorReader()
