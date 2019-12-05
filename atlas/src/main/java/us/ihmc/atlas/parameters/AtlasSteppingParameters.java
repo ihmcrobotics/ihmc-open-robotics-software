@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 
 public class AtlasSteppingParameters implements SteppingParameters
 {
-   private final AtlasJointMap jointMap;
+   protected final AtlasJointMap jointMap;
 
    public AtlasSteppingParameters(AtlasJointMap jointMap)
    {
