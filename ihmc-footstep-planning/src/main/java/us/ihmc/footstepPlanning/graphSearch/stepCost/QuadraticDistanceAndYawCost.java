@@ -9,9 +9,17 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.util.function.DoubleSupplier;
+
 public class QuadraticDistanceAndYawCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DoubleSupplier idealFootstepWidth;
+   private final DoubleSupplier idealFootstepLength;
+   private final DoubleSupplier longStepWeight;
+   private final DoubleSupplier forwardWeight;
+   private final DoubleSupplier lateralWeight;
+   private final DoubleSupplier yawWeight;
+   private final DoubleSupplier costPerStep;
 
    private final FramePoint3D endNodePosition = new FramePoint3D();
    private final FramePose3D startNodePose = new FramePose3D(ReferenceFrame.getWorldFrame());
@@ -19,14 +27,37 @@ public class QuadraticDistanceAndYawCost implements FootstepCost
 
    public QuadraticDistanceAndYawCost(FootstepPlannerParametersReadOnly parameters)
    {
-      this.parameters = parameters;
+      this(parameters::getIdealFootstepWidth,
+           parameters::getIdealFootstepLength,
+           parameters::getLongStepWeight,
+           parameters::getForwardWeight,
+           parameters::getLateralWeight,
+           parameters::getYawWeight,
+           parameters::getCostPerStep);
+   }
+
+   public QuadraticDistanceAndYawCost(DoubleSupplier idealFootstepWidth,
+                                      DoubleSupplier idealFootstepLength,
+                                      DoubleSupplier longStepWeight,
+                                      DoubleSupplier forwardWeight,
+                                      DoubleSupplier lateralWeight,
+                                      DoubleSupplier yawWeight,
+                                      DoubleSupplier costPerStep)
+   {
+      this.idealFootstepWidth = idealFootstepWidth;
+      this.idealFootstepLength = idealFootstepLength;
+      this.longStepWeight = longStepWeight;
+      this.forwardWeight = forwardWeight;
+      this.lateralWeight = lateralWeight;
+      this.yawWeight = yawWeight;
+      this.costPerStep = costPerStep;
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      Point2D startPoint = startNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
-      Point2D endPoint = endNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
+      Point2D startPoint = startNode.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble());
+      Point2D endPoint = endNode.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble());
 
       startNodePose.setPosition(startPoint.getX(), startPoint.getY(), 0.0);
       startNodePose.setOrientationYawPitchRoll(startNode.getYaw(), 0.0, 0.0);
@@ -37,18 +68,18 @@ public class QuadraticDistanceAndYawCost implements FootstepCost
 
       double stepDistance = endNodePosition.distanceFromOrigin();
       double cost;
-      if (stepDistance > parameters.getIdealFootstepLength())
+      if (stepDistance > idealFootstepLength.getAsDouble())
       {
-         cost = parameters.getLongStepWeight() * stepDistance;
+         cost = longStepWeight.getAsDouble() * stepDistance;
       }
       else
       {
-         cost = parameters.getForwardWeight() * Math.pow(endNodePosition.getX(), 2.0);
-         cost += parameters.getLateralWeight() * Math.pow(endNodePosition.getY(), 2.0);
+         cost = forwardWeight.getAsDouble() * Math.pow(endNodePosition.getX(), 2.0);
+         cost += lateralWeight.getAsDouble() * Math.pow(endNodePosition.getY(), 2.0);
       }
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
-      cost += parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep();
+      cost += yawWeight.getAsDouble() * Math.abs(yaw) + costPerStep.getAsDouble();
 
       return cost;
    }

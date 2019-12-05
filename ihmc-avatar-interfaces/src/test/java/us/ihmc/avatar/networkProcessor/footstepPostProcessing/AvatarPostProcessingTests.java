@@ -1,21 +1,30 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -49,7 +58,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -70,21 +78,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
@@ -119,15 +115,14 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
-      networkModuleParameters.enableNetworkProcessor(true);
-      networkModuleParameters.enableLocalControllerCommunicator(true);
-
-      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, DomainFactory.PubSubImplementation.INTRAPROCESS);
-      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, true, DomainFactory.PubSubImplementation.INTRAPROCESS);
-
-      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
+      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(),
+                                                                null,
+                                                                !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
+                                                                DomainFactory.PubSubImplementation.INTRAPROCESS);
+      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(),
+                                                                                null,
+                                                                                !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
+                                                                                DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       plannerOutputStatus = new AtomicReference<>();
       postProcessingOutputStatus = new AtomicReference<>();
