@@ -6,6 +6,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator

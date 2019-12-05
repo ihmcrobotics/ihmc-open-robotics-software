@@ -6,9 +6,9 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 
 /**
  * Utilizes the same procedure as the Simple Efficient Active Set QP Solver, but assumes that the
