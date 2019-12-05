@@ -6,22 +6,9 @@ public class AtlasJointPrivilegedConfigurationParameters extends JointPrivileged
 {
    private final boolean runningOnRealRobot;
 
-   private double nullspaceProjectionAlpha = super.getNullspaceProjectionAlpha();
-
    public AtlasJointPrivilegedConfigurationParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-   }
-
-   @Override
-   public double getNullspaceProjectionAlpha()
-   {
-      return nullspaceProjectionAlpha;
-   }
-
-   public void setNullspaceProjectionAlpha(double nullspaceProjectionAlpha)
-   {
-      this.nullspaceProjectionAlpha = nullspaceProjectionAlpha;
    }
 
    /** {@inheritDoc} */
