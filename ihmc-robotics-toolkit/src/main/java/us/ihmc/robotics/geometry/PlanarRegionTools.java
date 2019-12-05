@@ -575,23 +575,18 @@ public class PlanarRegionTools
 
    public static Point2DReadOnly getAverageCentroid2DInLocal(PlanarRegion planarRegion)
    {
-      // FIXME this is wrong.
       Point2D centroid = new Point2D();
 
-      int count = 0;
-      double xSum = 0.0;
-      double ySum = 0.0;
+      double totalArea = 0.0;
       for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
+         double area = convexPolygon.getArea();
+         totalArea += area;
          Point2DReadOnly convexPolygonCentroid = convexPolygon.getCentroid();
-
-         xSum += convexPolygonCentroid.getX();
-         ySum += convexPolygonCentroid.getY();
-         ++count;
+         centroid.scaleAdd(area, convexPolygonCentroid, centroid);
       }
 
-      centroid.setX(xSum / count);
-      centroid.setY(ySum / count);
+      centroid.scale(1.0 / totalArea);
 
       return centroid;
    }
