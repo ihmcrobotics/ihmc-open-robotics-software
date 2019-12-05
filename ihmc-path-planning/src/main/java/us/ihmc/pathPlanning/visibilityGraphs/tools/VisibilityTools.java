@@ -1,12 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -15,12 +12,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -268,14 +263,24 @@ public class VisibilityTools
       return isNavigable;
    }
 
-   //TODO: Rename.
-   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
+   public static boolean isInnerRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
    {
-      return isPointVisibleForStaticMaps(clusters, observer, targetPoint, false);
+      boolean bothEndsArePreferred = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
+      List<Cluster> allClusters = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getAllClusters();
+
+      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
+      Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
+
+      return isPointVisibleToPointInSameRegion(allClusters, sourceNodeInLocal, targetNodeInLocal, bothEndsArePreferred);
    }
 
-   public static boolean isPointVisibleForStaticMaps(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint,
-                                                     boolean checkPreferredExtrusions)
+   static boolean isPointVisibleToPointInSameRegion(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
+   {
+      return isPointVisibleToPointInSameRegion(clusters, observer, targetPoint, false);
+   }
+
+   public static boolean isPointVisibleToPointInSameRegion(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint,
+                                                           boolean checkPreferredExtrusions)
    {
       for (Cluster cluster : clusters)
       {
@@ -283,6 +288,7 @@ public class VisibilityTools
 
          List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
 
+         // if it's an outer extrusion, it's an obstacle. This means that you cannot pass through it.
          boolean isAnOuterExtrusion = cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE;
          if (isAnOuterExtrusion)
          {
@@ -324,20 +330,10 @@ public class VisibilityTools
       return true;
    }
 
-   public static boolean isInnerRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
-   {
-      boolean bothEndsArePreferred = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
-      List<Cluster> allClusters = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getAllClusters();
-
-      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
-      Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
-
-      return VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNodeInLocal, targetNodeInLocal, bothEndsArePreferred);
-   }
-
-   public static boolean isInterRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode,
-                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters, InterRegionConnectionFilter filter,
-                                              double lengthForLongInterRegionEdgeSquared)
+   public static boolean isInterRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, List<Cluster> sourceObstacleClusters,
+                                                List<PlanarRegion> sourceObstacleRegions, List<Cluster> targetObstacleClusters,
+                                                List<PlanarRegion> targetObstacleRegions, InterRegionConnectionFilter filter,
+                                                double lengthForLongInterRegionEdgeSquared)
    {
 
       ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
@@ -377,12 +373,63 @@ public class VisibilityTools
       boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
 
       //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
-      boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
-                                                                                                  targetInSourceLocal, checkForPreferredVisibility);
-      boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
-                                                                                                  sourceInTargetLocal, checkForPreferredVisibility);
+      boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleToPointInOtherRegion(sourceObstacleClusters, sourceObstacleRegions,
+                                                                                                         sourceInSourceLocal, targetHomeRegion,
+                                                                                                         targetInSourceLocal, checkForPreferredVisibility);
+      boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleToPointInOtherRegion(targetObstacleClusters, targetObstacleRegions,
+                                                                                                         targetInTargetLocal,  sourceHomeRegion,
+                                                                                                         sourceInTargetLocal, checkForPreferredVisibility);
 
 
       return targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles;
+   }
+
+   public static boolean isPointVisibleToPointInOtherRegion(List<Cluster> observerObstacleClusters, List<PlanarRegion> observerObstacleRegions,
+                                                            Point2DReadOnly observer, PlanarRegion targetRegion, Point2DReadOnly targetPoint,
+                                                           boolean checkPreferredExtrusions)
+   {
+      for (int i = 0; i < observerObstacleClusters.size(); i++)
+      {
+         if (observerObstacleRegions.get(i) == targetRegion)
+            continue;
+
+         Cluster cluster = observerObstacleClusters.get(i);
+
+         boolean closed = cluster.isClosed();
+
+         List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
+
+         // if it's an outer extrusion, it's an obstacle. This means that you cannot pass through it.
+         boolean isAnOuterExtrusion = cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE;
+         if (isAnOuterExtrusion)
+         {
+            BoundingBox2DReadOnly outerMostBoundingBoxToCheck = checkPreferredExtrusions ?
+                  cluster.getPreferredNonNavigableExtrusionsBoundingBox() : cluster.getNonNavigableExtrusionsBoundingBox();
+
+            // If either the target or observer or both are in the bounding box, we have to check the interior bounding box.
+            // If both are outside the bounding box, then we can check if the line segment does not intersect.
+            // If that is the case, then the point is visible and we can check the next one.
+            if (!outerMostBoundingBoxToCheck.isInsideInclusive(observer) && !outerMostBoundingBoxToCheck.isInsideInclusive(targetPoint))
+            {
+               if (!outerMostBoundingBoxToCheck.doesIntersectWithLineSegment2D(observer, targetPoint))
+               {
+                  continue;
+               }
+            }
+         }
+
+         // this is more expensive, as you potentially have to check multiple regions.
+         if (checkPreferredExtrusions)
+         {
+            boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
+                  extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
+            if (isNotVisible)
+               return false;
+         }
+         else if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
+            return false;
+      }
+
+      return true;
    }
 }

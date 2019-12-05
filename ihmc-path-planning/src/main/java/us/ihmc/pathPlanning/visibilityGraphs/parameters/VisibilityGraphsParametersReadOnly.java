@@ -241,7 +241,8 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          }
          else
          {
-            return getObstacleExtrusionDistance();
+            double alpha = MathTools.clamp((obstacleHeight - getTooHighToStepDistance()) / (getHeightForMaxAvoidance() - getTooHighToStepDistance()), 0.0, 1.0);
+            return InterpolationTools.linearInterpolate(getObstacleExtrusionDistanceIfNotTooHighToStep(), getObstacleExtrusionDistance(), alpha);
          }
       };
    }

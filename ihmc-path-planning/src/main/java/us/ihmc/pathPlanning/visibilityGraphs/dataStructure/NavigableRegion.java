@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsFactory;
@@ -21,6 +22,7 @@ public class NavigableRegion
 
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
+   private List<PlanarRegion> obstacleRegions = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
 
    public NavigableRegion(PlanarRegion homePlanarRegion, Cluster homeRegionCluster, List<Cluster> obstacleClusters)
@@ -45,14 +47,15 @@ public class NavigableRegion
       allClusters.add(homeCluster);
    }
 
-   public void addObstacleClusters(Iterable<Cluster> obstacleClusters)
+   public void addObstacleClusters(Iterable<ImmutablePair<Cluster, PlanarRegion>> obstacleClusters)
    {
-      obstacleClusters.forEach(this::addObstacleCluster);
+      obstacleClusters.forEach(pair -> addObstacleCluster(pair.getLeft(), pair.getRight()));
    }
 
-   public void addObstacleCluster(Cluster obstacleCluster)
+   public void addObstacleCluster(Cluster obstacleCluster, PlanarRegion associatedRegion)
    {
       obstacleClusters.add(obstacleCluster);
+      obstacleRegions.add(associatedRegion);
       allClusters.add(obstacleCluster);
    }
 
@@ -103,6 +106,13 @@ public class NavigableRegion
       populateClusters();
 
       return obstacleClusters;
+   }
+
+   public List<PlanarRegion> getObstacleRegions()
+   {
+      populateClusters();
+
+      return obstacleRegions;
    }
 
    public List<Cluster> getAllClusters()
