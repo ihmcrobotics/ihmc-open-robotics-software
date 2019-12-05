@@ -25,7 +25,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -134,7 +133,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
    private static final String robotName = "testBot";
-   private MultiStageFootstepPlanningModule toolboxModule;
+   private FootstepPlanningToolboxModule toolboxModule;
 
    private RealtimeRos2Node ros2Node;
 
@@ -282,7 +281,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
-      toolboxModule = new MultiStageFootstepPlanningModule(getRobotModel(), null, true, pubSubImplementation);
+      toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, pubSubImplementation);
    }
 
    private DRCRobotModel getRobotModel()
