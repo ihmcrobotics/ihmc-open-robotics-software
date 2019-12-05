@@ -253,6 +253,7 @@ public class AtlasCorridorNavigationTest
          LogTools.info("Preparing footstep planner request 2");
          FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          footstepPlannerParameters.setReturnBestEffortPlan(true);
+         footstepPlannerParameters.setMaximumStepYaw(1.0);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
 //         FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
