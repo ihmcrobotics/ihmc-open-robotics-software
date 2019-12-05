@@ -657,12 +657,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal)
    {
-      for (int i = 0; i < convexPolygons.size(); i++)
-      {
-         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal))
-            return true;
-      }
-      return false;
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, 0.0);
    }
 
    /**
@@ -676,12 +671,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal, double epsilon)
    {
-      for (int i = 0; i < convexPolygons.size(); i++)
-      {
-         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal, epsilon))
-            return true;
-      }
-      return false;
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, epsilon);
    }
 
    /**

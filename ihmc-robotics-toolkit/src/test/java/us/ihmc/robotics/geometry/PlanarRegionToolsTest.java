@@ -93,7 +93,7 @@ public class PlanarRegionToolsTest
 
       expectedCentroid.scaleAdd(smallSquare.getArea() / totalArea, smallSquare.getCentroid(), expectedCentroid);
 
-      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedCentroid, PlanarRegionTools.getAverageCentroid2DInLocal(planarRegion), EPSILON);
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedCentroid, PlanarRegionTools.getCentroid2DInLocal(planarRegion), EPSILON);
    }
 
    @Test
