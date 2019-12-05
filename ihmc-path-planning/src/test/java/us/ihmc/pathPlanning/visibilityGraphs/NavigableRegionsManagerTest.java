@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,6 +29,8 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EstimatedCostToGoal;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
@@ -46,6 +49,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.testing.JUnitTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +59,7 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertFalse;
-
+import static us.ihmc.robotics.Assert.assertNotEquals;
 
 public class NavigableRegionsManagerTest
 {
@@ -692,6 +696,11 @@ public class NavigableRegionsManagerTest
    public void testStairs()
    {
       VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
+      ((VisibilityGraphsParametersBasics) parameters).setPerformPostProcessingNodeShifting(false);
+      ((VisibilityGraphsParametersBasics) parameters).setMaxInterRegionConnectionLength(0.25);
+      ((VisibilityGraphsParametersBasics) parameters).setPreferredObstacleExtrusionDistance(1.0);
+      ((VisibilityGraphsParametersBasics) parameters).setPreferredNavigableExtrusionDistance(0.2);
+      ((VisibilityGraphsParametersBasics) parameters).setIncludePreferredExtrusions(true);
 
       double heightDelta = 0.1;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -715,21 +724,39 @@ public class NavigableRegionsManagerTest
       Point3D start = new Point3D(0.0, 0.0, 0.0);
       Point3D goal = new Point3D(2.5, 0.0, 0.0);
 
-      NavigableRegionsListener listener = new NavigableRegionsListener();
+      Point3D start2 = new Point3D(0.3, 0.0, 0.1);
+      Point3D start3 = new Point3D(0.6, 0.0, 0.2);
+      Point3D start4 = new Point3D(0.95, 0.0, 0.3);
+
+      EstimatedCostToGoal heuristic = new EstimatedCostToGoal(parameters);
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor);
-      navigableRegionsManager.setListener(listener);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(parameters, planarRegionsList.getPlanarRegionsAsList(), postProcessor, heuristic);
       navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
       List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(start, goal);
       List<? extends Pose3DReadOnly> posePath = orientationCalculator
             .computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 
-      VisibilityGraphNavigableRegion startRegion = navigableRegionsManager.getVisibilityGraph().getVisibilityGraphNavigableRegionContainingThisPoint(start, 2.0, 1e-3);
+      VisibilityGraphNavigableRegion region1 = navigableRegionsManager.getVisibilityGraph().getVisibilityGraphNavigableRegionContainingThisPoint(start, 2.0, 0.1);
+      VisibilityGraphNavigableRegion region2 = navigableRegionsManager.getVisibilityGraph().getVisibilityGraphNavigableRegionContainingThisPoint(start2, 2.0, 0.1);
+      VisibilityGraphNavigableRegion region3 = navigableRegionsManager.getVisibilityGraph().getVisibilityGraphNavigableRegionContainingThisPoint(start3, 2.0, 0.1);
 
-      Point3DReadOnly expectedNextPointToExpand = getClosestPointOnClusterToPoint(startRegion.getNavigableRegion().getHomeRegionCluster().getNavigableExtrusionsInWorld(), goal);
-      checkEstimatedCostToGoal(parameters, listener, goal);
+      List<Point3DReadOnly> expectedPath = new ArrayList<>();
+      expectedPath.add(getClosestPointOnClusterToPoint(region1.getNavigableRegion().getObstacleClusters().get(0).getNavigableExtrusionsInWorld(), start));
+      expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getHomeRegionCluster().getNavigableExtrusionsInWorld(), expectedPath.get(0)));
+      expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getObstacleClusters().get(0).getNavigableExtrusionsInWorld(), expectedPath.get(1)));
+
+      InterRegionConnectionFilter prefToPrefFilter = parameters.getPreferredToPreferredInterRegionConnectionFilter();
+      Assert.assertTrue(region1.getAllPreferredNavigableNodes().size() == 1);
+      Assert.assertTrue(region2.getAllPreferredNavigableNodes().size() == 1);
+      Assert.assertTrue(region3.getAllPreferredNavigableNodes().size() == 1);
+
+      VisibilityGraphNode region1PrefNode = region1.getAllPreferredNavigableNodes().get(0);
+      VisibilityGraphNode region2PrefNode = region2.getAllPreferredNavigableNodes().get(0);
+      VisibilityGraphNode region3PrefNode = region3.getAllPreferredNavigableNodes().get(0);
+      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region2PrefNode.getPointInWorld()));
+      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region3PrefNode.getPointInWorld()));
 
       if (visualize)
       {
@@ -739,14 +766,6 @@ public class NavigableRegionsManagerTest
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
 
-   private void checkEstimatedCostToGoal(VisibilityGraphsParametersReadOnly parameters, NavigableRegionsListener listener, Point3DReadOnly goal)
-   {
-      double weight = parameters.getDistanceWeight() * parameters.getHeuristicWeight();
-      for (VisibilityGraphNode node : listener.getExpandedNodes())
-      {
-         assertEquals(weight * node.getPointInWorld().distance(goal), node.getEstimatedCostToGoal(), 1e-7);
-      }
-   }
 
    public Point3DReadOnly getClosestPointOnClusterToPoint(List<Point3DReadOnly> points, Point3DReadOnly goal)
    {

@@ -9,6 +9,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EdgeCostCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EstimatedCostToGoal;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.PathNodeComparator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -44,8 +45,6 @@ public class NavigableRegionsManager
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
-   private NavigableRegionsListener listener = null;
-
    public NavigableRegionsManager()
    {
       this(null, null, null);
@@ -78,11 +77,6 @@ public class NavigableRegionsManager
       this.postProcessor = postProcessor;
       this.heuristic = heuristic;
       costCalculator = new EdgeCostCalculator(parameters);
-   }
-
-   public void setListener(NavigableRegionsListener listener)
-   {
-      this.listener = listener;
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
@@ -181,12 +175,11 @@ public class NavigableRegionsManager
          return false;
       }
 
-      PathNodeComparator comparator = new PathNodeComparator();
+      PathNodeComparator comparator = new PathNodeComparator(heuristic);
       stack = new PriorityQueue<>(comparator);
 
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(heuristic.compute(startNode));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
 
@@ -210,8 +203,6 @@ public class NavigableRegionsManager
          if (expandedNodes.contains(nodeToExpand))
             continue;
          expandedNodes.add(nodeToExpand);
-         if (listener != null)
-            listener.addExpandedNode(nodeToExpand);
 
          if (checkAndHandleNodeAtGoal(nodeToExpand))
             break;
@@ -224,9 +215,6 @@ public class NavigableRegionsManager
          // A* using XY distance heuristic
          for (VisibilityGraphEdge neighboringEdge : neighboringEdges)
          {
-            if (listener != null)
-               listener.addEdge(neighboringEdge);
-
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
             double connectionCost = costCalculator.computeEdgeCost(neighboringEdge);
@@ -237,8 +225,6 @@ public class NavigableRegionsManager
             if (Double.isNaN(currentCostFromStart) || (newCostFromStart < currentCostFromStart))
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
-
-               neighbor.setEstimatedCostToGoal(heuristic.compute(neighbor));
 
                stack.add(neighbor);
             }
@@ -344,8 +330,8 @@ public class NavigableRegionsManager
       if (nodeToExpand.equals(startNode))
          return;
 
-      double expandedTotalCost = nodeToExpand.getCostFromStart() + nodeToExpand.getEstimatedCostToGoal();
-      if (endNode == null || expandedTotalCost < endNode.getCostFromStart() + endNode.getEstimatedCostToGoal())
+      double expandedTotalCost = nodeToExpand.getCostFromStart() + heuristic.compute(nodeToExpand);
+      if (endNode == null || expandedTotalCost < endNode.getCostFromStart() + heuristic.compute(endNode))
       {
          endNode = nodeToExpand;
       }
