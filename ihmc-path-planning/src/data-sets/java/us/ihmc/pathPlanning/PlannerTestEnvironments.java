@@ -664,7 +664,7 @@ public class PlannerTestEnvironments
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      double squareSize = 1.5;
+      double squareSize = 2.3;
       double halfSquareSize = squareSize / 2.0;
       double courseWidth = 4.0 * squareSize;
       double halfCourseWidth = courseWidth / 2.0;

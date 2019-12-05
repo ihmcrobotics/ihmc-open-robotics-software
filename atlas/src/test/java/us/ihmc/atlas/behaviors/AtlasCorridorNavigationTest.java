@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.thread.Notification;
@@ -33,6 +34,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
@@ -72,6 +75,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -104,7 +108,7 @@ public class AtlasCorridorNavigationTest
    @Test
    public void testAtlasMakesItToGoalInMazeCorridor()
    {
-      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(), new Point3D(1.5 * 4.0, 1.5, 0.0), 200);
+      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(), new Point3D(2.3 * 4.0, 2.3, 0.0), 200);
    }
 
    private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout)
@@ -155,7 +159,7 @@ public class AtlasCorridorNavigationTest
          }).start();
       }
 
-      ThreadTools.sleepSeconds(2.0); // wait a bit for other threads to start
+      ThreadTools.sleepSeconds(5.0); // wait a bit for other threads to start
 
       // create map subscriber
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
@@ -175,7 +179,24 @@ public class AtlasCorridorNavigationTest
 
       while (robotPose.getPosition().distance(goal) > 0.5)
       {
+         ThreadTools.sleep(300); // try to get a little more perception data TODO wait for a SLAM update
+         slamUpdated.poll(); // throw away a poll. Make sure to get a new scan here
+         while (!slamUpdated.poll())
+         {
+            ThreadTools.sleep(100);
+         }
+         ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
+
+         latestHumanoidRobotState = robot.pollHumanoidRobotState();
+         robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+         robotPose.changeFrame(ReferenceFrame.getWorldFrame());
+         LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
+
          VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
+//         visibilityGraphParameters.setNavigableExtrusionDistance(0.2);
+         visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
+//         visibilityGraphParameters.setPreferredNavigableExtrusionDistance(0.60);
+//         visibilityGraphParameters.setPreferredObstacleExtrusionDistance(0.6);
          NavigableRegionsManager manager = new NavigableRegionsManager(visibilityGraphParameters, null, new ObstacleAvoidanceProcessor(visibilityGraphParameters));
          OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(manager);
          PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(visibilityGraphParameters);
@@ -249,20 +270,35 @@ public class AtlasCorridorNavigationTest
          // TODO: Figure out how to best effort plan with footstep snapping
          // Use BodyPathBasedAStarPlanner instead of manual?
 
-
+         boolean useFastFlatInvalidFootsteps = true;
          LogTools.info("Preparing footstep planner request 2");
-         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+         FootstepPlannerParametersBasics footstepPlannerParameters = new AtlasFootstepPlannerParameters();
+//         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          footstepPlannerParameters.setReturnBestEffortPlan(true);
-         footstepPlannerParameters.setMaximumStepYaw(1.0);
+         footstepPlannerParameters.setMaximumStepYaw(1.5);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-//         FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-         FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
+         FootstepNodeSnapper snapper;
+         if (useFastFlatInvalidFootsteps)
+         {
+            snapper = new FlatGroundFootstepNodeSnapper();
+         }
+         else
+         {
+            snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+         }
          FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
          BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
          PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-//         FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-//         FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
-         FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
+         FootstepNodeChecker nodeChecker;
+         if (useFastFlatInvalidFootsteps)
+         {
+            nodeChecker = new AlwaysValidNodeChecker();
+         }
+         else
+         {
+            // nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+            nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
+         }
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
          FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(footstepPlannerParameters);
          CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, footstepPlannerParameters, snapper, bodyPath);
@@ -328,7 +364,7 @@ public class AtlasCorridorNavigationTest
          {
             SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-            if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 1.5)
+            if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 2.5)
             {
                break; // don't go farther than 0.3 meters
             }
@@ -354,17 +390,6 @@ public class AtlasCorridorNavigationTest
          {
             LogTools.info("Walking timed out.");
          }
-
-         ThreadTools.sleep(500); // try to get a little more perception data TODO wait for a SLAM update
-         while (!slamUpdated.poll())
-         {
-            ThreadTools.sleep(100);
-         }
-
-         latestHumanoidRobotState = robot.pollHumanoidRobotState();
-         robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-         robotPose.changeFrame(ReferenceFrame.getWorldFrame());
-         LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
       }
    }
 
