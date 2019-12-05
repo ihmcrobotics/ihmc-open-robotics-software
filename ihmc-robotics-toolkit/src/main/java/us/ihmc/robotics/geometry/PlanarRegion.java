@@ -564,7 +564,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInWorld2DInside(Point3DReadOnly point3dInWorld)
    {
-      return isPointInWorld2DInside(point3dInWorld, 0.0);
+      return isPointInWorld2DInside(point3dInWorld, 1e-7);
    }
 
    /**
@@ -657,7 +657,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal)
    {
-      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, 0.0);
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, 1e-7);
    }
 
    /**

@@ -98,6 +98,22 @@ public class PlanarRegionToolsTest
    }
 
    @Test
+   public void isPointInsidePlanarRegion()
+   {
+      List<Point2DReadOnly> vertices = new ArrayList<>();
+      vertices.add(new Point2D(0.0, 0.0));
+      vertices.add(new Point2D(0.0, 1.0));
+      vertices.add(new Point2D(1.0, 1.0));
+      vertices.add(new Point2D(1.0, 0.0));
+      ConvexPolygon2D convexPolygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertices));
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      PlanarRegion regionB = new PlanarRegion(transformB, convexPolygonB);
+
+      vertices.forEach(point -> assertTrue(regionB.isPointInside(point)));
+      vertices.forEach(point -> assertTrue(regionB.isPointInWorld2DInside(new Point3D(point))));
+   }
+
+   @Test
    public void testComputeMinHeightOfRegionAAboveRegionB()
    {
       double[][] verticesA = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
