@@ -19,7 +19,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -116,11 +115,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
-      networkModuleParameters.enableNetworkProcessor(true);
-      networkModuleParameters.enableLocalControllerCommunicator(true);
-
       footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(),
                                                                 null,
                                                                 !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
@@ -129,8 +123,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                                 null,
                                                                                 !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
                                                                                 DomainFactory.PubSubImplementation.INTRAPROCESS);
-
-      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
 
       plannerOutputStatus = new AtomicReference<>();
       postProcessingOutputStatus = new AtomicReference<>();
