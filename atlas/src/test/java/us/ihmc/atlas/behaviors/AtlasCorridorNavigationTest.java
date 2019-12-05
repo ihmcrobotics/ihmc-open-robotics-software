@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.thread.Notification;
@@ -137,7 +137,7 @@ public class AtlasCorridorNavigationTest
       new Thread(() -> {
          LogTools.info("Creating simulation");
          boolean createYoVariableServer = false;
-         HumanoidKinematicsSimulation.create(createRobotModel(), createYoVariableServer, pubSubMode);
+         AtlasKinematicSimulation.create(createRobotModel(), createYoVariableServer, pubSubMode);
       }).start();
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
