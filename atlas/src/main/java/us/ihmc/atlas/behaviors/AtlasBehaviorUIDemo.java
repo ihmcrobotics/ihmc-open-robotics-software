@@ -79,7 +79,7 @@ public class AtlasBehaviorUIDemo
          LogTools.info("Creating simulation");
          if (USE_KINEMATIC_SIMULATION)
          {
-            HumanoidKinematicsSimulation.createForManualTest(createRobotModel(), CREATE_YO_VARIABLE_SERVER);
+            HumanoidKinematicsSimulation.create(createRobotModel(), CREATE_YO_VARIABLE_SERVER, PubSubImplementation.FAST_RTPS);
          }
          else
          {

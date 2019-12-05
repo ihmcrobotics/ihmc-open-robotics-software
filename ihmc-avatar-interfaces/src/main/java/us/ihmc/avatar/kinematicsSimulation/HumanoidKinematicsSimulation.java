@@ -36,7 +36,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.pubsub.DomainFactory;
@@ -114,17 +113,7 @@ public class HumanoidKinematicsSimulation
    private SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
 
-   public static void createForManualTest(DRCRobotModel robotModel, boolean createYoVariableServer)
-   {
-      create(robotModel, createYoVariableServer, PubSubImplementation.FAST_RTPS);
-   }
-
-   public static void createForAutomatedTest(DRCRobotModel robotModel, boolean createYoVariableServer)
-   {
-      create(robotModel, createYoVariableServer, PubSubImplementation.INTRAPROCESS);
-   }
-
-   private static void create(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
+   public static void create(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       new HumanoidKinematicsSimulation(robotModel, createYoVariableServer, pubSubImplementation);
    }
