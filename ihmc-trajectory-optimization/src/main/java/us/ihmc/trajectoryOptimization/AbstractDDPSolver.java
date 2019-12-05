@@ -11,8 +11,8 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 
 public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInterface<E>
 {
