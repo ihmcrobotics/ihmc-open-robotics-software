@@ -4,7 +4,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class NavigableRegionsListener
@@ -20,4 +19,8 @@ public class NavigableRegionsListener
    {
    }
 
+   public List<VisibilityGraphNode> getExpandedNodes()
+   {
+      return expandedNodes;
+   }
 }

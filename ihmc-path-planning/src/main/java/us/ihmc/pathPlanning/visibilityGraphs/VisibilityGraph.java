@@ -335,7 +335,7 @@ public class VisibilityGraph
 
 
 
-   private VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
+   public VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegionContainingThisPoint(Point3DReadOnly sourceLocationInWorld, double ceilingHeight, double searchHostEpsilon)
    {
       NavigableRegion hostNavigableRegion = NavigableRegionTools
             .getNavigableRegionContainingThisPoint(sourceLocationInWorld, navigableRegions, ceilingHeight, searchHostEpsilon);
