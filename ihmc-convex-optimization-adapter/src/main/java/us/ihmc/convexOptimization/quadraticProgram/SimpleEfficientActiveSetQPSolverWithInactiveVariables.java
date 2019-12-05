@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends SimpleEfficientActiveSetQPSolver implements
       ActiveSetQPSolverWithInactiveVariablesInterface

@@ -6,7 +6,7 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
  * Solves a Quadratic Program using a simple active set method.
