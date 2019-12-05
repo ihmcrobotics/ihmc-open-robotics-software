@@ -27,10 +27,10 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.TestEnvironmentTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertFalse;
 
 
@@ -725,6 +726,11 @@ public class NavigableRegionsManagerTest
       List<? extends Pose3DReadOnly> posePath = orientationCalculator
             .computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 
+      VisibilityGraphNavigableRegion startRegion = navigableRegionsManager.getVisibilityGraph().getVisibilityGraphNavigableRegionContainingThisPoint(start, 2.0, 1e-3);
+
+      Point3DReadOnly expectedNextPointToExpand = getClosestPointOnClusterToPoint(startRegion.getNavigableRegion().getHomeRegionCluster().getNavigableExtrusionsInWorld(), goal);
+      checkEstimatedCostToGoal(parameters, listener, goal);
+
       if (visualize)
       {
          visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
@@ -732,6 +738,33 @@ public class NavigableRegionsManagerTest
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
    }
+
+   private void checkEstimatedCostToGoal(VisibilityGraphsParametersReadOnly parameters, NavigableRegionsListener listener, Point3DReadOnly goal)
+   {
+      double weight = parameters.getDistanceWeight() * parameters.getHeuristicWeight();
+      for (VisibilityGraphNode node : listener.getExpandedNodes())
+      {
+         assertEquals(weight * node.getPointInWorld().distance(goal), node.getEstimatedCostToGoal(), 1e-7);
+      }
+   }
+
+   public Point3DReadOnly getClosestPointOnClusterToPoint(List<Point3DReadOnly> points, Point3DReadOnly goal)
+   {
+      double minDistance = Double.POSITIVE_INFINITY;
+      Point3DReadOnly pointTOReturn = null;
+      for (Point3DReadOnly point : points)
+      {
+         double distance = point.distanceXY(goal);
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            pointTOReturn = point;
+         }
+      }
+
+      return pointTOReturn;
+   }
+
 
 
    @Disabled
