@@ -9,6 +9,7 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
    private final double modelScale;
    private final boolean runningOnRealRobot;
    private final double min_mechanical_leg_length;
+   private boolean addOrientationMidpointForObstacleClearance = false;
 
    public AtlasSwingTrajectoryParameters(RobotTarget target, double modelScale)
    {
@@ -81,11 +82,16 @@ public class AtlasSwingTrajectoryParameters extends SwingTrajectoryParameters
       return runningOnRealRobot ? 0.8 : 0.5; // Robert: 0.8
    }
 
-   /** {@inheritDoc} */
+  /** {@inheritDoc} */
    @Override
    public boolean addOrientationMidpointForObstacleClearance()
    {
-      return true;
+      return addOrientationMidpointForObstacleClearance;
+   }
+
+   public void setAddOrientationMidpointForObstacleClearance(boolean addOrientationMidpointForObstacleClearance)
+   {
+      this.addOrientationMidpointForObstacleClearance = addOrientationMidpointForObstacleClearance;
    }
 
    /** {@inheritDoc} */

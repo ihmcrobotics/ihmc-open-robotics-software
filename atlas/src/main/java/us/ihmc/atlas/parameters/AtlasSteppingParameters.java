@@ -6,16 +6,23 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 public class AtlasSteppingParameters implements SteppingParameters
 {
    private final AtlasJointMap jointMap;
+   private double minSwingHeightFromStanceFoot;
 
    public AtlasSteppingParameters(AtlasJointMap jointMap)
    {
       this.jointMap = jointMap;
+      minSwingHeightFromStanceFoot = 0.10 * jointMap.getModelScale();
    }
 
    @Override
    public double getMinSwingHeightFromStanceFoot()
    {
-      return 0.05 * jointMap.getModelScale();
+      return minSwingHeightFromStanceFoot;
+   }
+
+   public void setMinSwingHeightFromStanceFootScalar(double minSwingHeightFromStanceFoot)
+   {
+      this.minSwingHeightFromStanceFoot = minSwingHeightFromStanceFoot * jointMap.getModelScale();
    }
 
    @Override
