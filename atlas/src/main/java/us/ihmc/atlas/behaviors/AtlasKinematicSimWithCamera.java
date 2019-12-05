@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -8,20 +7,11 @@ import us.ihmc.atlas.behaviors.scsSensorSimulation.SensorOnlySimulation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
-import us.ihmc.codecs.generated.YUVPicture;
-import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
-import us.ihmc.codecs.yuv.JPEGEncoder;
-import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -30,17 +20,13 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 public class AtlasKinematicSimWithCamera
 {
    private IHMCROS2Publisher<VideoPacket> scsCameraPublisher;
 
    public AtlasKinematicSimWithCamera(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      HumanoidKinematicsSimulation.createForManualTest(robotModel, false);
+      HumanoidKinematicsSimulation.create(robotModel, false, PubSubImplementation.FAST_RTPS);
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
       scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
