@@ -31,12 +31,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
+import us.ihmc.tools.lists.PairList;
 
 public class ClusterTools
 {
@@ -550,21 +552,21 @@ public class ClusterTools
       return homeRegionCluster;
    }
 
-   public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
-                                                      ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
-                                                      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                      boolean includePreferredExtrusions)
+   public static PairList<Cluster, PlanarRegion> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
+                                                                        ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
+                                                                        ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
+                                                                        boolean includePreferredExtrusions)
    {
-      List<Cluster> obstacleClusters = new ArrayList<>();
+      PairList<Cluster, PlanarRegion> obstacleClusters = new PairList<>();
 
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle);
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
          Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
-                                                         homeRegion.getTransformToWorldCopy(), zThresholdBeforeOrthogonal, obstacleRegion,
+                                                         homeRegion.getTransformToWorld(), zThresholdBeforeOrthogonal, obstacleRegion,
                                                          includePreferredExtrusions);
-         obstacleClusters.add(obstacleCluster);
+         obstacleClusters.add(obstacleCluster, obstacleRegion);
       }
 
       return obstacleClusters;

@@ -19,6 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.tools.lists.PairList;
 
 public class NavigableRegionsFactory
 {
@@ -98,12 +99,12 @@ public class NavigableRegionsFactory
             .filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion, DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, planarRegionFilter);
 
       Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator, includePreferredExtrusions);
-      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
-                                                                           obstacleCalculator, includePreferredExtrusions);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
+                                                                                             obstacleCalculator, includePreferredExtrusions);
 
       // fills long edges with interpolated points for visibility graph building later
       addPointsAlongPolygon(homeRegionCluster, clusterResolution);
-      obstacleClusters.forEach(cluster -> addPointsAlongPolygon(cluster, clusterResolution));
+      obstacleClusters.forEach(cluster -> addPointsAlongPolygon(cluster.getLeft(), clusterResolution));
 
       navigableRegionToPack.setHomeRegionCluster(homeRegionCluster);
       navigableRegionToPack.addObstacleClusters(obstacleClusters);

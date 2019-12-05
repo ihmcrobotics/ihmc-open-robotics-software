@@ -302,7 +302,7 @@ public class VisibilityGraphNavigableRegion
             Point2DReadOnly targetPointInLocal = targetNode.getPoint2DInLocal();
 
             // Finally run the expensive test to verify if the target can be seen from the source.
-            if (VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourcePointInLocal, targetPointInLocal, checkForPreferredVisibility))
+            if (VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, sourcePointInLocal, targetPointInLocal, checkForPreferredVisibility))
             {
                VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
                edge.registerEnds();
@@ -363,7 +363,7 @@ public class VisibilityGraphNavigableRegion
          VisibilityGraphNode targetNode = targetNodes.get(targetIndex);
 
          // Finally run the expensive test to verify if the target can be seen from the source.
-         if (VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNode.getPoint2DInLocal(), targetNode.getPoint2DInLocal(), connectsAllOnPreferredMap))
+         if (VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, sourceNode.getPoint2DInLocal(), targetNode.getPoint2DInLocal(), connectsAllOnPreferredMap))
          {
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             edge.setEdgeWeight(edgeWeight);

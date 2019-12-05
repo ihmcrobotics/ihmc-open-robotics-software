@@ -18,7 +18,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,32 +61,32 @@ public class VisibilityToolsTest
       Point2D pointG = new Point2D(3.0, 1.0);
       Point2D pointH = new Point2D(2.0, 1.0);
 
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointB));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointC));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointD));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointB));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointC));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointD));
 
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointE));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointF));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointG));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointA, pointH));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointE));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointF));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointG));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointA, pointH));
 
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointA));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointC));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointD));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointA));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointC));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointD));
 
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointE));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointF));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointG));
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointB, pointH));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointE));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointF));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointG));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointB, pointH));
 
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointA));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointB));
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointD));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointA));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointB));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointD));
 
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointE));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointF));
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointG));
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(clusters, pointC, pointH));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointE));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointF));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointG));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(clusters, pointC, pointH));
    }
 
    @Test
@@ -272,7 +271,7 @@ public class VisibilityToolsTest
                if (otherPoint == point)
                   continue;
 
-               assertTrue(VisibilityTools.isPointVisibleForStaticMaps(allClusters, point, otherPoint, true));
+               assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, point, otherPoint, true));
             }
          }
       }
@@ -284,7 +283,7 @@ public class VisibilityToolsTest
       // a point from the back of extrusion 0 shouldn't hit extrusion 1
       Point2D observer = new Point2D(-9.5 + navEpsilon, 0.0);
       Point2D target = new Point2D(-4.5 + navEpsilon, 0.0);
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(allClusters, observer, target, true));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, observer, target, true));
 
       Random random = new Random(1738L);
       // check random child to any random other region
@@ -300,7 +299,7 @@ public class VisibilityToolsTest
                Point2DReadOnly interiorPoint = createRandomInteriorPoint(preferredNavigableExtrusion.getPoints(), random);
                Point2DReadOnly otherInteriorPoint = createRandomInteriorPoint(preferredNavigableExtrusion.getPoints(), random);
 
-               assertTrue(VisibilityTools.isPointVisibleForStaticMaps(allClusters, interiorPoint, otherInteriorPoint, true));
+               assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, interiorPoint, otherInteriorPoint, true));
             }
          }
       }
@@ -387,11 +386,11 @@ public class VisibilityToolsTest
 
       ArrayList<Cluster> polygonClusters = new ArrayList<>();
       polygonClusters.add(keepOutClusterPolygon);
-      assertFalse(VisibilityTools.isPointVisibleForStaticMaps(polygonClusters, pointOutside, pointInside));
+      assertFalse(VisibilityTools.isPointVisibleToPointInSameRegion(polygonClusters, pointOutside, pointInside));
 
       ArrayList<Cluster> multilineClusters = new ArrayList<>();
       multilineClusters.add(keepOutClusterMultiline);
-      assertTrue(VisibilityTools.isPointVisibleForStaticMaps(multilineClusters, pointOutside, pointInside));
+      assertTrue(VisibilityTools.isPointVisibleToPointInSameRegion(multilineClusters, pointOutside, pointInside));
    }
 
    @Test
