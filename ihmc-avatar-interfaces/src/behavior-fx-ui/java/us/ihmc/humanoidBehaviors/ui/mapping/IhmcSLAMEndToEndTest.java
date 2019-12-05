@@ -38,7 +38,7 @@ public class IhmcSLAMEndToEndTest extends Application
       messages.addAll(messagesFromFile);
       System.out.println("number of messages " + messages.size());
 
-      IhmcSLAM slam = new IhmcSLAM(true);
+      IhmcSLAM slam = new IhmcSLAM(false);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
          slam.addFrame(messages.get(i));

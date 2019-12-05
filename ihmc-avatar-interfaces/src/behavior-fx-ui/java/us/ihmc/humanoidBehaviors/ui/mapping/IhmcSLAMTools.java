@@ -160,8 +160,9 @@ public class IhmcSLAMTools
 
       return rawData;
    }
-   
-   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
+
+   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition,
+                                                                                  double octreeResolution)
    {
       NormalOcTree referenceOctree = computeOctreeData(pointCloud, sensorPosition, octreeResolution);
 
@@ -181,20 +182,22 @@ public class IhmcSLAMTools
       return rawData;
    }
 
-   public static List<Plane3D> computeValidPlanes(PlanarRegionsList planarRegionsMap, IhmcSLAMFrame frame, double octreeResolution, double validRatio,
-                                                  double maximumDistance, double maximumAngle)
+   public static List<IhmcSurfaceElement> computeMergeableSurfaceElements(PlanarRegionsList planarRegionsMap, IhmcSLAMFrame frame, double octreeResolution,
+                                                                      double validRatio, double maximumDistance, double maximumAngle)
    {
       NormalOcTree octree = frame.computeOctreeInPreviousView(octreeResolution);
 
       int numberOfPlanarRegions = planarRegionsMap.getNumberOfPlanarRegions();
-      List<Plane3D> validPlanes = new ArrayList<>();
+      List<IhmcSurfaceElement> surfaceElements = new ArrayList<>();
       NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
       UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
+      int numberOfNodes = 0;
       for (UIOcTreeNode uiOcTreeNode : octreeForViz)
       {
          if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
             continue;
 
+         numberOfNodes++;
          Vector3D planeNormal = new Vector3D();
          Point3D pointOnPlane = new Point3D();
 
@@ -215,21 +218,25 @@ public class IhmcSLAMTools
                indexClosestPlanarRegion = j;
             }
          }
-         double angleDistance = Math.abs(planarRegionsMap.getPlanarRegion(indexClosestPlanarRegion).getPlane().getNormal().dot(octreePlane.getNormal()));
+         PlanarRegion closestPlanarRegion = planarRegionsMap.getPlanarRegion(indexClosestPlanarRegion);
+         double angleDistance = Math.abs(closestPlanarRegion.getPlane().getNormal().dot(octreePlane.getNormal()));
 
-         //System.out.println("minimumDistance " + minimumDistance + " Math.cos(maximumAngle) " + Math.cos(maximumAngle));
          if (minimumDistance < maximumDistance && angleDistance > Math.cos(maximumAngle))
          {
-            validPlanes.add(octreePlane);
+            IhmcSurfaceElement surfaceElement = new IhmcSurfaceElement(octreeResolution);
+            surfaceElement.setPlane(octreePlane);
+            surfaceElement.setMergeablePlanarRegion(closestPlanarRegion);
+            surfaceElements.add(surfaceElement);
          }
       }
 
-      double ratio = (double) validPlanes.size() / octreeForViz.getNumberOfNodes();
-      System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " validPlanes are " + validPlanes.size() + " ratio " + ratio);
+      double ratio = (double) surfaceElements.size() / numberOfNodes;
+      System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " validPlanes are " + surfaceElements.size() + " ratio "
+            + ratio);
 
-      if (ratio < validRatio)
+      if (ratio < validRatio || surfaceElements.size() == 0)
          return null;
 
-      return validPlanes;
+      return surfaceElements;
    }
 }

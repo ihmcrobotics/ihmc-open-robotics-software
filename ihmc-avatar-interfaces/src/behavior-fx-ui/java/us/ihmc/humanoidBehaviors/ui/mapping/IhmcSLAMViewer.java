@@ -82,6 +82,11 @@ public class IhmcSLAMViewer
    {
       normalOctreeGraphic.addMesh(octreePlanes, octreeResolution, color);
    }
+   
+   public void addOctree(List<IhmcSurfaceElement> surfaceElements, Color color)
+   {
+      normalOctreeGraphic.addMesh(surfaceElements, color);
+   }
 
    public void addPlanarRegions(PlanarRegionsList planarRegions)
    {
