@@ -100,11 +100,10 @@ public class VisibilityGraphNavigableRegion
       return innerRegionEdges;
    }
 
-   private void addInnerRegionEdge(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight, double staticCost)
+   private void addInnerRegionEdge(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight)
    {
       VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
       edge.setEdgeWeight(weight);
-      edge.setStaticEdgeCost(staticCost);
       sourceNode.addEdge(edge);
       targetNode.addEdge(edge);
       innerRegionEdges.add(edge);
@@ -152,34 +151,34 @@ public class VisibilityGraphNavigableRegion
    /**
     * Create visibility graph for this region.
     */
-   public void createGraphBetweenInnerClusterRings(double nonPreferredWeight, double nonPreferredStaticCost)
+   public void createGraphBetweenInnerClusterRings(double nonPreferredWeight)
    {
       List<Cluster> allClusters = navigableRegion.getAllClusters();
       createNavigableRegionNodes();
 
-      addClusterSelfVisibility(allClusters, preferredHomeRegionNodes, homeRegionNodes, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost);
+      addClusterSelfVisibility(allClusters, preferredHomeRegionNodes, homeRegionNodes, innerRegionEdges, nonPreferredWeight);
 
       for (int targetIndex = 0; targetIndex < obstacleNavigableNodes.size(); targetIndex++)
       {
          List<VisibilityGraphNode> targetNodes = obstacleNavigableNodes.get(targetIndex);
 
-         addCrossClusterVisibility(preferredHomeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
-         addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
+         addCrossClusterVisibility(preferredHomeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
+         addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
       }
 
       for (int targetIndex = 0; targetIndex < obstaclePreferredNavigableNodes.size(); targetIndex++)
       {
          List<VisibilityGraphNode> targetNodes = obstaclePreferredNavigableNodes.get(targetIndex);
 
-         addCrossClusterVisibility(preferredHomeRegionNodes, targetNodes, allClusters, innerRegionEdges, 1.0, 0.0, true);
-         addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
+         addCrossClusterVisibility(preferredHomeRegionNodes, targetNodes, allClusters, innerRegionEdges, 1.0, true);
+         addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
       }
 
       for (int sourceIndex = 0; sourceIndex < obstacleNavigableNodes.size(); sourceIndex++)
       {
          List<VisibilityGraphNode> obstacleNodes = obstacleNavigableNodes.get(sourceIndex);
          List<VisibilityGraphNode> obstaclePreferredNodes = obstaclePreferredNavigableNodes.get(sourceIndex);
-         addClusterSelfVisibility(allClusters, obstaclePreferredNodes, obstacleNodes, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost);
+         addClusterSelfVisibility(allClusters, obstaclePreferredNodes, obstacleNodes, innerRegionEdges, nonPreferredWeight);
       }
 
       // between all the obstacle non-preferred navigable nodes.
@@ -191,7 +190,7 @@ public class VisibilityGraphNavigableRegion
          {
             List<VisibilityGraphNode> targetNodes = obstacleNavigableNodes.get(targetIndex);
 
-            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
+            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
          }
       }
 
@@ -204,7 +203,7 @@ public class VisibilityGraphNavigableRegion
          {
             List<VisibilityGraphNode> targetNodes = obstaclePreferredNavigableNodes.get(targetIndex);
 
-            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, 1.0, 0.0, true);
+            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, 1.0, true);
          }
       }
 
@@ -217,7 +216,7 @@ public class VisibilityGraphNavigableRegion
          {
             List<VisibilityGraphNode> targetNodes = obstacleNavigableNodes.get(targetIndex);
 
-            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
+            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
          }
       }
 
@@ -230,7 +229,7 @@ public class VisibilityGraphNavigableRegion
          {
             List<VisibilityGraphNode> targetNodes = obstaclePreferredNavigableNodes.get(targetIndex);
 
-            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost, false);
+            addCrossClusterVisibility(sourceNodes, targetNodes, allClusters, innerRegionEdges, nonPreferredWeight, false);
          }
       }
    }
@@ -317,50 +316,49 @@ public class VisibilityGraphNavigableRegion
    }
 
    private static void addClusterSelfVisibility(List<Cluster> allClusters, List<VisibilityGraphNode> preferredNodes, List<VisibilityGraphNode> nodes,
-                                               List<VisibilityGraphEdge> edgesToPack, double nonPreferredEdgeWeight, double nonPreferredStaticCost)
+                                               List<VisibilityGraphEdge> edgesToPack, double nonPreferredEdgeWeight)
    {
       // Going through all of the possible combinations of two points for finding connections going from the preferred to the preferred
       for (int sourceIndex = 0; sourceIndex < preferredNodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = preferredNodes.get(sourceIndex);
-         addClusterVisibility(allClusters, sourceNode, preferredNodes, sourceIndex + 1, edgesToPack, 1.0, 0.0, true);
+         addClusterVisibility(allClusters, sourceNode, preferredNodes, sourceIndex + 1, edgesToPack, 1.0, true);
       }
 
       // Going through all of the possible combinations of two points for finding connections going from the non-preferred to the preferred
       for (int sourceIndex = 0; sourceIndex < nodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = nodes.get(sourceIndex);
-         addClusterVisibility(allClusters, sourceNode, preferredNodes, 0, edgesToPack, nonPreferredEdgeWeight, nonPreferredStaticCost, false);
+         addClusterVisibility(allClusters, sourceNode, preferredNodes, 0, edgesToPack, nonPreferredEdgeWeight, false);
       }
 
       // Going through all of the possible combinations of two points for finding connections going from the preferred to the non-preferred
       for (int sourceIndex = 0; sourceIndex < preferredNodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = preferredNodes.get(sourceIndex);
-         addClusterVisibility(allClusters, sourceNode, nodes, 0, edgesToPack, nonPreferredEdgeWeight, nonPreferredStaticCost, false);
+         addClusterVisibility(allClusters, sourceNode, nodes, 0, edgesToPack, nonPreferredEdgeWeight, false);
       }
 
       // Going through all of the possible combinations of two points for finding connections going from the non-preferred to the non-preferred
       for (int sourceIndex = 0; sourceIndex < nodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = nodes.get(sourceIndex);
-         addClusterVisibility(allClusters, sourceNode, nodes, sourceIndex + 1, edgesToPack, nonPreferredEdgeWeight, nonPreferredStaticCost, false);
+         addClusterVisibility(allClusters, sourceNode, nodes, sourceIndex + 1, edgesToPack, nonPreferredEdgeWeight, false);
       }
    }
 
    private static void addCrossClusterVisibility(List<VisibilityGraphNode> sourceNodes, List<VisibilityGraphNode> targetNodes, List<Cluster> allClusters,
-                                                ArrayList<VisibilityGraphEdge> edgesToPack, double edgeWeight, double edgeStaticCost,
-                                                boolean connectsToPreferredMap)
+                                                ArrayList<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsToPreferredMap)
    {
       for (int sourceIndex = 0; sourceIndex < sourceNodes.size(); sourceIndex++)
       {
          VisibilityGraphNode sourceNode = sourceNodes.get(sourceIndex);
-         addClusterVisibility(allClusters, sourceNode, targetNodes, 0, edgesToPack, edgeWeight, edgeStaticCost, connectsToPreferredMap);
+         addClusterVisibility(allClusters, sourceNode, targetNodes, 0, edgesToPack, edgeWeight, connectsToPreferredMap);
       }
    }
 
    private static void addClusterVisibility(List<Cluster> allClusters, VisibilityGraphNode sourceNode, List<VisibilityGraphNode> targetNodes, int targetStartIndex,
-                                           List<VisibilityGraphEdge> edgesToPack, double edgeWeight, double staticCost, boolean connectsAllOnPreferredMap)
+                                           List<VisibilityGraphEdge> edgesToPack, double edgeWeight, boolean connectsAllOnPreferredMap)
    {
       for (int targetIndex = targetStartIndex; targetIndex < targetNodes.size(); targetIndex++)
       {
@@ -371,7 +369,6 @@ public class VisibilityGraphNavigableRegion
          {
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             edge.setEdgeWeight(edgeWeight);
-            edge.setStaticEdgeCost(staticCost);
             edge.registerEdgeWithNodes();
 
             edgesToPack.add(edge);
@@ -380,7 +377,7 @@ public class VisibilityGraphNavigableRegion
    }
 
 
-   public void addInnerRegionEdgesFromSourceNode(VisibilityGraphNode sourceNode, double nonPreferredWeight, double nonPreferredStaticCost)
+   public void addInnerRegionEdgesFromSourceNode(VisibilityGraphNode sourceNode, double nonPreferredWeight)
    {
       List<VisibilityGraphNode> allNavigableNodes = getAllNavigableNodes();
       List<VisibilityGraphNode> allPreferredNavigableNodes = getAllPreferredNavigableNodes();
@@ -399,40 +396,22 @@ public class VisibilityGraphNavigableRegion
       }
 
       navigableNodeStream
-            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight, nonPreferredStaticCost, false));
+            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, nonPreferredWeight));
 
-      double weight;
-      double cost;
-      if (sourceNode.isPreferredNode())
-      {
-         weight = 1.0;
-         cost = 0.0;
-      }
-      else
-      {
-         weight = nonPreferredWeight;
-         cost = nonPreferredStaticCost;
-      }
+      double weight = sourceNode.isPreferredNode() ? 1.0 : nonPreferredWeight;
 
       preferredNavigableNodeStream
-            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight, cost, sourceNode.isPreferredNode()));
+            .forEach(targetNode -> addInnerEdgeFromSourceToTargetNodeIfVisible(sourceNode, targetNode, weight));
    }
 
-   public synchronized void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight,
-                                                                        double staticCost, boolean bothEndsArePreferred)
+   public synchronized void addInnerEdgeFromSourceToTargetNodeIfVisible(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode, double weight)
    {
+
       checkNavigableRegionConsistency(sourceNode, targetNode);
 
-      List<Cluster> allClusters = navigableRegion.getAllClusters();
-
-      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
-      Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
-
-      boolean targetIsVisible = VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNodeInLocal, targetNodeInLocal, bothEndsArePreferred);
-
-      if (targetIsVisible)
+      if (VisibilityTools.isInnerRegionEdgeValid(sourceNode, targetNode))
       {
-         addInnerRegionEdge(sourceNode, targetNode, weight, staticCost);
+         addInnerRegionEdge(sourceNode, targetNode, weight);
       }
    }
 

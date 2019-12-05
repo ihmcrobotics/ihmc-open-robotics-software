@@ -22,6 +22,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PathOrientationCalculator
 {
@@ -50,16 +51,18 @@ public class PathOrientationCalculator
       if (path.size() < 2)
          return nominalPathPoses;
 
+      List<Point3DReadOnly> pathCopy = path.stream().map(Point3D::new).collect(Collectors.toList());
+
       double startHeading = startOrientation.getYaw();
-      nominalPathPoses.add(new Pose3D(path.get(0), startOrientation));
+      nominalPathPoses.add(new Pose3D(pathCopy.get(0), startOrientation));
 
       int pathIndex = 1;
 
-      while (pathIndex < path.size() - 1)
+      while (pathIndex < pathCopy.size() - 1)
       {
-         Point3DReadOnly previousPosition = path.get(pathIndex - 1);
-         Point3DReadOnly currentPosition = path.get(pathIndex);
-         Point3DReadOnly nextPosition = path.get(pathIndex + 1);
+         Point3DReadOnly previousPosition = pathCopy.get(pathIndex - 1);
+         Point3DReadOnly currentPosition = pathCopy.get(pathIndex);
+         Point3DReadOnly nextPosition = pathCopy.get(pathIndex + 1);
 
          double previousHeading = BodyPathPlannerTools.calculateHeading(previousPosition, currentPosition);
          double nextHeading = BodyPathPlannerTools.calculateHeading(currentPosition, nextPosition);
@@ -82,7 +85,7 @@ public class PathOrientationCalculator
                double alpha = 1.0 - 2.0 * parameters.getPreferredObstacleExtrusionDistance() / previousLength;
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, alpha);
-               path.add(pathIndex, waypointPositionToAdd);
+               pathCopy.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
                // we had enough room to reach the previous heading, and we just started, let's re-do the desired orientation
@@ -95,7 +98,7 @@ public class PathOrientationCalculator
             {
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(previousPosition, currentPosition, 0.5);
-               path.add(pathIndex, waypointPositionToAdd);
+               pathCopy.add(pathIndex, waypointPositionToAdd);
                nominalPathPoses.add(pathIndex, new Pose3D(waypointPositionToAdd, new Quaternion(previousHeading, 0.0, 0.0)));
 
                // we had enough room to reach the previous heading, and we just started, let's re-do the desired orientation
@@ -114,25 +117,25 @@ public class PathOrientationCalculator
                double alpha = 2.0 * parameters.getPreferredObstacleExtrusionDistance() / nextLength;
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(currentPosition, nextPosition, alpha);
-               path.add(pathIndex, waypointPositionToAdd);
+               pathCopy.add(pathIndex, waypointPositionToAdd);
             }
             else if (nextLength > parameters.getObstacleExtrusionDistance())
             {
                Point3DBasics waypointPositionToAdd = new Point3D();
                waypointPositionToAdd.interpolate(currentPosition, nextPosition, 0.5);
-               path.add(pathIndex, waypointPositionToAdd);
+               pathCopy.add(pathIndex, waypointPositionToAdd);
             }
          }
          else
          {
-            nominalPathPoses.add(pathIndex, new Pose3D(path.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
+            nominalPathPoses.add(pathIndex, new Pose3D(pathCopy.get(pathIndex), new Quaternion(desiredOrientation, 0.0, 0.0)));
             pathIndex++;
          }
       }
 
-      int endingSize = path.size();
+      int endingSize = pathCopy.size();
 
-      nominalPathPoses.add(new Pose3D(path.get(endingSize - 1), goalOrientation));
+      nominalPathPoses.add(new Pose3D(pathCopy.get(endingSize - 1), goalOrientation));
 
       return nominalPathPoses;
    }
