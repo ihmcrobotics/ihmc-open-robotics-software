@@ -2,7 +2,7 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public interface ActiveSetQPSolver

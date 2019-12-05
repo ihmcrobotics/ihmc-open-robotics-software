@@ -1,6 +1,6 @@
 package us.ihmc.convexOptimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -17,9 +18,7 @@ import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 
 public abstract class ConvexOptimizationAdapterTest
 {

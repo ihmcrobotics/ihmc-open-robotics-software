@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 
 public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver implements  ActiveSetQPSolverWithInactiveVariablesInterface

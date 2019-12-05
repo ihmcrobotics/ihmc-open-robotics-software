@@ -1,18 +1,14 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
-
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
  * Solves a Quadratic Program using an active set solver based on the
