@@ -155,6 +155,7 @@ public class VisibilityGraphNavigableRegion
    public void createGraphBetweenInnerClusterRings(double nonPreferredWeight, double nonPreferredStaticCost)
    {
       List<Cluster> allClusters = navigableRegion.getAllClusters();
+      createNavigableRegionNodes();
 
       addClusterSelfVisibility(allClusters, preferredHomeRegionNodes, homeRegionNodes, innerRegionEdges, nonPreferredWeight, nonPreferredStaticCost);
 
