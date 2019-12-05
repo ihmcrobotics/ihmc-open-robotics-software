@@ -185,6 +185,7 @@ public class AtlasCorridorNavigationTest
          {
             ThreadTools.sleep(100);
          }
+         mapRegionsInput.getMessageNotification().blockingPoll();
          ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
          latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -193,7 +194,7 @@ public class AtlasCorridorNavigationTest
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
 
          VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
-//         visibilityGraphParameters.setNavigableExtrusionDistance(0.2);
+         visibilityGraphParameters.setNavigableExtrusionDistance(0.3);
          visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
 //         visibilityGraphParameters.setPreferredNavigableExtrusionDistance(0.60);
 //         visibilityGraphParameters.setPreferredObstacleExtrusionDistance(0.6);
@@ -272,8 +273,8 @@ public class AtlasCorridorNavigationTest
 
          boolean useFastFlatInvalidFootsteps = true;
          LogTools.info("Preparing footstep planner request 2");
-         FootstepPlannerParametersBasics footstepPlannerParameters = new AtlasFootstepPlannerParameters();
-//         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+//         FootstepPlannerParametersBasics footstepPlannerParameters = new AtlasFootstepPlannerParameters();
+         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          footstepPlannerParameters.setReturnBestEffortPlan(true);
          footstepPlannerParameters.setMaximumStepYaw(1.5);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
@@ -364,7 +365,7 @@ public class AtlasCorridorNavigationTest
          {
             SimpleFootstep footstep = footstepPlan.getFootstep(i);
 
-            if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 2.5)
+            if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 2.0)
             {
                break; // don't go farther than 0.3 meters
             }

@@ -93,6 +93,7 @@ public class SimulatedREAModule
    {
       remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
+      boolean slamUpdatedTemp = false;
       if (remoteSyncedHumanoidRobotState != null)
       {
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
@@ -109,7 +110,7 @@ public class SimulatedREAModule
                   try
                   {
                      slamMap = PlanarRegionSLAM.slam(slamMap, visibleRegions, planarRegionSLAMParameters, (ConcaveHullMergerListener) null).getMergedMap();
-                     slamUpdated.set();
+                     slamUpdatedTemp = true;
                   }
                   catch (Exception e)
                   {
@@ -136,6 +137,7 @@ public class SimulatedREAModule
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
+         if (slamUpdatedTemp) slamUpdated.set();
       }
    }
 
