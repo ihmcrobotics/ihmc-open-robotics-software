@@ -67,6 +67,9 @@ module controller_msgs
       const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM =
       17;
 
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_YAWS_TOO_MUCH =
+      18;
+
 
       /**
        * This message is part of the IHMC footstep planning module.

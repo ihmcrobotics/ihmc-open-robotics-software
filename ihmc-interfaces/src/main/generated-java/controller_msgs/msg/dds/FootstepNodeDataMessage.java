@@ -33,6 +33,7 @@ public class FootstepNodeDataMessage extends Packet<FootstepNodeDataMessage> imp
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_BLOCKING_BODY = (byte) 15;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY = (byte) 16;
    public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM = (byte) 17;
+   public static final byte BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_YAWS_TOO_MUCH = (byte) 18;
    /**
             * Specifies snap transform translation. NaN if snap was unsuccessful
             */
