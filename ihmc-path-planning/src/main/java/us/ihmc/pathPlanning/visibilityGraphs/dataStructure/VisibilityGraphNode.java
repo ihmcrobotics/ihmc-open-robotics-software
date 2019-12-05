@@ -23,7 +23,6 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    private boolean edgesHaveBeenDetermined = false;
 
    private double costFromStart = Double.NaN;
-   private double estimatedCostToGoal = Double.NaN;
 
    private boolean hasBeenExpanded = false;
    private VisibilityGraphNode bestParentNode = null;
@@ -102,16 +101,6 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    public VisibilityGraphNode getBestParentNode()
    {
       return bestParentNode;
-   }
-
-   public double getEstimatedCostToGoal()
-   {
-      return estimatedCostToGoal;
-   }
-
-   public void setEstimatedCostToGoal(double estimatedCostToGoal)
-   {
-      this.estimatedCostToGoal = estimatedCostToGoal;
    }
 
    public boolean isPreferredNode()

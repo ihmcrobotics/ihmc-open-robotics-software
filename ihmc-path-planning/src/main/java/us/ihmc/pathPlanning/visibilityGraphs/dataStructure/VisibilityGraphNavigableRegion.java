@@ -104,7 +104,7 @@ public class VisibilityGraphNavigableRegion
    {
       VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
       edge.setEdgeWeight(weight);
-      sourceNode.addEdge(edge);
+      edge.registerEnds();
       innerRegionEdges.add(edge);
    }
 
@@ -304,9 +304,7 @@ public class VisibilityGraphNavigableRegion
             if (VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourcePointInLocal, targetPointInLocal, checkForPreferredVisibility))
             {
                VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
-
-               sourceNode.addEdge(edge);
-               targetNode.addEdge(edge);
+               edge.registerEnds();
 
                edgesToPack.add(edge);
             }
@@ -368,7 +366,7 @@ public class VisibilityGraphNavigableRegion
          {
             VisibilityGraphEdge edge = new VisibilityGraphEdge(sourceNode, targetNode);
             edge.setEdgeWeight(edgeWeight);
-            sourceNode.addEdge(edge);
+            edge.registerEnds();
 
             edgesToPack.add(edge);
          }

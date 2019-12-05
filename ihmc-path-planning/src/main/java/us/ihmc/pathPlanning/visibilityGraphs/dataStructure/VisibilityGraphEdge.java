@@ -61,6 +61,12 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return EuclidGeometryTools.percentageAlongLineSegment3D(query, sourceNode.getPointInWorld(), targetNode.getPointInWorld());
    }
 
+   public void registerEnds()
+   {
+      sourceNode.addEdge(this);
+      targetNode.addEdge(this);
+   }
+
    @Override
    public boolean epsilonEquals(VisibilityGraphEdge other, double epsilon)
    {
