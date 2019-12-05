@@ -83,7 +83,7 @@ public class AtlasCorridorNavigationTest
    private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
 
    private RobotAndMapViewer robotAndMapViewer;
-   private PubSubImplementation pubSubMode = PubSubImplementation.FAST_RTPS;
+   private PubSubImplementation pubSubMode = PubSubImplementation.INTRAPROCESS;
    private Notification slamUpdated;
 
    @BeforeAll
