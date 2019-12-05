@@ -1,10 +1,14 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EdgeCostCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EstimatedCostToGoal;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -25,6 +29,8 @@ public class NavigableRegionsManager
    private final VisibilityGraphsParametersReadOnly parameters;
 
    private final BodyPathPostProcessor postProcessor;
+   private final EstimatedCostToGoal heuristic;
+   private final EdgeCostCalculator costCalculator;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
@@ -34,7 +40,7 @@ public class NavigableRegionsManager
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
    private VisibilityGraphNode endNode;
-   private Point3DReadOnly goalInWorld;
+   private final FramePoint3D goalInWorld = new FramePoint3D();
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
@@ -62,9 +68,16 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor)
    {
+      this(parameters, regions, postProcessor, new EstimatedCostToGoal(parameters));
+   }
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor,
+                                  EstimatedCostToGoal heuristic)
+   {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
       this.postProcessor = postProcessor;
+      this.heuristic = heuristic;
+      costCalculator = new EdgeCostCalculator(parameters);
    }
 
    public void setListener(NavigableRegionsListener listener)
@@ -159,7 +172,8 @@ public class NavigableRegionsManager
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       endNode = null;
-      this.goalInWorld = goalInWorld;
+      this.goalInWorld.set(ReferenceFrame.getWorldFrame(), goalInWorld);
+      heuristic.setGoalInWorld(this.goalInWorld);
 
       if ((startNode == null) || (goalNode == null))
       {
@@ -172,7 +186,7 @@ public class NavigableRegionsManager
 
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
+      startNode.setEstimatedCostToGoal(heuristic.compute(startNode));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
 
@@ -215,7 +229,7 @@ public class NavigableRegionsManager
 
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
-            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight(), neighboringEdge.getStaticEdgeCost());
+            double connectionCost = costCalculator.computeEdgeCost(neighboringEdge);
             double newCostFromStart = nodeToExpand.getCostFromStart() + connectionCost;
 
             double currentCostFromStart = neighbor.getCostFromStart();
@@ -224,8 +238,7 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = parameters.getHeuristicWeight() * parameters.getDistanceWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
-               neighbor.setEstimatedCostToGoal(heuristicCost);
+               neighbor.setEstimatedCostToGoal(heuristic.compute(neighbor));
 
                stack.add(neighbor);
             }
@@ -240,19 +253,7 @@ public class NavigableRegionsManager
       visibilityMapSolution.setStartMap(visibilityMapSolutionFromNewVisibilityGraph.getStartMap());
       visibilityMapSolution.setGoalMap(visibilityMapSolutionFromNewVisibilityGraph.getGoalMap());
 
-      List<VisibilityGraphNode> nodePath = new ArrayList<>();
-      VisibilityGraphNode nodeWalkingBack = endNode;
-
-      while (nodeWalkingBack != null)
-      {
-//         if (nodePath.size() == 0)
-            nodePath.add(nodeWalkingBack);
-//         else if (nodePath.get(nodePath.size() - 1).distanceXY(nodeWalkingBack) > minimumConnectionDistance)
-//            nodePath.add(nodeWalkingBack);
-
-         nodeWalkingBack = nodeWalkingBack.getBestParentNode();
-      }
-      Collections.reverse(nodePath);
+      List<VisibilityGraphNode> nodePath = getNodePath();
 
       List<Point3DReadOnly> path;
       if (postProcessor != null)
@@ -266,6 +267,22 @@ public class NavigableRegionsManager
 
       printResults(startBodyPathComputation, expandedNodesCount, iterations, path);
       return path;
+   }
+
+   public List<VisibilityGraphNode> getNodePath()
+   {
+      List<VisibilityGraphNode> nodePath = new ArrayList<>();
+      VisibilityGraphNode nodeWalkingBack = endNode;
+
+      while (nodeWalkingBack != null)
+      {
+         nodePath.add(nodeWalkingBack);
+
+         nodeWalkingBack = nodeWalkingBack.getBestParentNode();
+      }
+      Collections.reverse(nodePath);
+
+      return nodePath;
    }
 
    /**
@@ -286,34 +303,6 @@ public class NavigableRegionsManager
 
       nodeToExpand.setHasBeenExpanded(true);
       return nodeToExpand.getEdges();
-   }
-
-   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight, double staticEdgeCost)
-   {
-      Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
-      Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
-
-      double horizontalDistance = originPointInWorld.distanceXY(nextPointInWorld);
-      if (horizontalDistance <= 0.0)
-         return 0.0;
-
-      double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
-
-
-      double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
-      // 2/pi to scale error from {0:90} degrees or {0:pi/2} radians degrees to {0:1}
-      double elevationCost;
-      if (parameters.getElevationWeight() > 0.0)
-      {
-         double angle = Math.atan(verticalDistance / horizontalDistance);
-         elevationCost = parameters.getElevationWeight() * angle * (2.0 / Math.PI);
-      }
-      else
-      {
-         elevationCost = 0.0;
-      }
-
-      return edgeWeight * distanceCost + elevationCost + staticEdgeCost;
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)
@@ -339,7 +328,7 @@ public class NavigableRegionsManager
 
    private boolean checkAndHandleNodeAtGoal(VisibilityGraphNode nodeToExpand)
    {
-      if (nodeToExpand == goalNode)
+      if (nodeToExpand.equals(goalNode))
       {
          endNode = nodeToExpand;
          return true;
@@ -352,7 +341,7 @@ public class NavigableRegionsManager
       if (!parameters.returnBestEffortSolution())
          return;
 
-      if (nodeToExpand == startNode)
+      if (nodeToExpand.equals(startNode))
          return;
 
       double expandedTotalCost = nodeToExpand.getCostFromStart() + nodeToExpand.getEstimatedCostToGoal();
@@ -369,11 +358,11 @@ public class NavigableRegionsManager
       VisibilityGraphNode sourceNode = neighboringEdge.getSourceNode();
       VisibilityGraphNode targetNode = neighboringEdge.getTargetNode();
 
-      if (nodeToExpand == sourceNode)
+      if (nodeToExpand.equals(sourceNode))
       {
          nextNode = targetNode;
       }
-      else if (nodeToExpand == targetNode)
+      else if (nodeToExpand.equals(targetNode))
       {
          nextNode = sourceNode;
       }

@@ -195,14 +195,6 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    }
 
    /**
-    * This a static cost added to any edge that ends on a non-preferred node.
-    * */
-   default double getCostForNonPreferredNode()
-   {
-      return get(costForNonPreferredNode);
-   }
-
-   /**
     * This flag says whether or not to return a solution even when the goal is not reached.
     * The solution that is returned is the lowest cost path, including estimated cost to goal.
     */
@@ -223,26 +215,12 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
     */
    default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
    {
-      return new NavigableExtrusionDistanceCalculator()
-      {
-         @Override
-         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-         {
-            return getNavigableExtrusionDistance();
-         }
-      };
+      return region -> getNavigableExtrusionDistance();
    }
 
    default NavigableExtrusionDistanceCalculator getPreferredNavigableExtrusionDistanceCalculator()
    {
-      return new NavigableExtrusionDistanceCalculator()
-      {
-         @Override
-         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-         {
-            return getPreferredNavigableExtrusionDistance();
-         }
-      };
+      return region -> getPreferredNavigableExtrusionDistance();
    }
 
    /**

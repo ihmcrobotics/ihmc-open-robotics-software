@@ -18,6 +18,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -319,6 +320,48 @@ public class VisibilityToolsTest
       return interiorPoint;
    }
 
+   @Test
+   public void testIsPointVisibleTroublingCase()
+   {
+      List<Point2DReadOnly> listOfPointsInCluster = new ArrayList<>();
+      listOfPointsInCluster.add(new Point2D(0.101, 0.5));
+      listOfPointsInCluster.add(new Point2D(0.115, 0.535));
+      listOfPointsInCluster.add(new Point2D(0.150, 0.549));
+      listOfPointsInCluster.add(new Point2D(0.450, 0.549));
+      listOfPointsInCluster.add(new Point2D(0.485, 0.535));
+      listOfPointsInCluster.add(new Point2D(0.499, 0.5));
+      listOfPointsInCluster.add(new Point2D(0.499, -0.5));
+      listOfPointsInCluster.add(new Point2D(0.485, -0.535));
+      listOfPointsInCluster.add(new Point2D(0.45, -0.549));
+      listOfPointsInCluster.add(new Point2D(0.15, -0.549));
+      listOfPointsInCluster.add(new Point2D(0.115, -0.535));
+      listOfPointsInCluster.add(new Point2D(0.101, -0.5));
+
+      Point2DReadOnly observer = new Point2D(-0.005, 0.0);
+      Point2DReadOnly target = new Point2D(0.131, 0.0);
+
+      assertFalse(VisibilityTools.isPointVisible(observer, target, listOfPointsInCluster, true));
+
+
+      listOfPointsInCluster = new ArrayList<>();
+      listOfPointsInCluster.add(new Point2D(0.10099999999999998, 0.5));
+      listOfPointsInCluster.add(new Point2D(0.11535176772185912, 0.5346482322781408));
+      listOfPointsInCluster.add(new Point2D(0.14999999999999997, 0.549));
+      listOfPointsInCluster.add(new Point2D(0.450, 0.549));
+      listOfPointsInCluster.add(new Point2D(0.48464823227814086, 0.5346482322781408));
+      listOfPointsInCluster.add(new Point2D(0.49900000000000005, 0.5));
+      listOfPointsInCluster.add(new Point2D(0.49900000000000005, -0.5));
+      listOfPointsInCluster.add(new Point2D(0.48464823227814086, -0.5346482322781408));
+      listOfPointsInCluster.add(new Point2D(0.45, -0.549));
+      listOfPointsInCluster.add(new Point2D(0.14999999999999997, -0.549));
+      listOfPointsInCluster.add(new Point2D(0.11535176772185912, -0.5346482322781408));
+      listOfPointsInCluster.add(new Point2D(0.10099999999999998, -0.5));
+
+      observer = new Point2D(-0.0047499999999999765, 0.0);
+      target = new Point2D(0.1305, 0.0);
+
+      assertFalse(VisibilityTools.isPointVisible(observer, target, listOfPointsInCluster, true));
+   }
 
    @Test
    public void testIsPointVisibleForStaticMapsClosedPolygonVsOpenMultiLine()

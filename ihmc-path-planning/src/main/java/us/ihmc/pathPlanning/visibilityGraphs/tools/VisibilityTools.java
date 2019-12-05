@@ -3,19 +3,26 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 import java.util.Arrays;
 import java.util.List;
 
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphEdge;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
@@ -38,12 +45,7 @@ public class VisibilityTools
       for (int i = 0; i < endIndex; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
-
-         int nextIndex = i + 1;
-         if (nextIndex == size)
-            nextIndex = 0;
-
-         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
+         Point2DReadOnly second = ListWrappingIndexTools.getNext(i, listOfPointsInCluster);
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(first, second, observer, targetPoint))
          {
@@ -64,12 +66,7 @@ public class VisibilityTools
       for (int i = 0; i < endIndex; i++)
       {
          Point2DReadOnly first = listOfPointsInCluster.get(i);
-
-         int nextIndex = i + 1;
-         if (nextIndex == size)
-            nextIndex = 0;
-
-         Point2DReadOnly second = listOfPointsInCluster.get(nextIndex);
+         Point2DReadOnly second = ListWrappingIndexTools.getNext(i, listOfPointsInCluster);
 
          // this will return true if they share a point, which isn't always a good thing
          boolean sharesAPoint = first.epsilonEquals(targetPoint, 1.0e-10);
@@ -325,5 +322,67 @@ public class VisibilityTools
       }
 
       return true;
+   }
+
+   public static boolean isInnerRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
+   {
+      boolean bothEndsArePreferred = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
+      List<Cluster> allClusters = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getAllClusters();
+
+      Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
+      Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
+
+      return VisibilityTools.isPointVisibleForStaticMaps(allClusters, sourceNodeInLocal, targetNodeInLocal, bothEndsArePreferred);
+   }
+
+   public static boolean isInterRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode,
+                                              List<Cluster> sourceObstacleClusters, List<Cluster> targetObstacleClusters, InterRegionConnectionFilter filter,
+                                              double lengthForLongInterRegionEdgeSquared)
+   {
+
+      ConnectionPoint3D sourceInWorld = sourceNode.getPointInWorld();
+
+      ConnectionPoint3D targetInWorld = targetNode.getPointInWorld();
+      if (!filter.isConnectionValid(sourceInWorld, targetInWorld))
+      {
+         return false;
+      }
+
+      PlanarRegion sourceHomeRegion = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+      RigidBodyTransformReadOnly transformFromWorldToSource = sourceHomeRegion.getTransformToLocal();
+      Point2DReadOnly sourceInSourceLocal = sourceNode.getPoint2DInLocal();
+
+      //TODO: +++++++JerryPratt: xyDistance check is a hack to allow connections through keep out regions enough to make them, but not enough to go through walls...
+      double xyDistanceSquared = sourceInWorld.distanceXYSquared(targetInWorld);
+      if (xyDistanceSquared < lengthForLongInterRegionEdgeSquared)
+      {
+         return true;
+      }
+
+      // Check if the edge is visible if it is a long one.
+      PlanarRegion targetHomeRegion = targetNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getHomePlanarRegion();
+      RigidBodyTransformReadOnly transformFromWorldToTarget = targetHomeRegion.getTransformToLocal();
+
+      Point2DReadOnly targetInTargetLocal = targetNode.getPoint2DInLocal();
+
+      Point3D targetProjectedVerticallyOntoSource = PlanarRegionTools.projectInZToPlanarRegion(targetInWorld, sourceHomeRegion);
+      Point3D sourceProjectedVerticallyOntoTarget = PlanarRegionTools.projectInZToPlanarRegion(sourceInWorld, targetHomeRegion);
+
+      transformFromWorldToSource.transform(targetProjectedVerticallyOntoSource);
+      transformFromWorldToTarget.transform(sourceProjectedVerticallyOntoTarget);
+
+      Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
+      Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
+
+      boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
+
+      //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
+      boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleForStaticMaps(sourceObstacleClusters, sourceInSourceLocal,
+                                                                                                  targetInSourceLocal, checkForPreferredVisibility);
+      boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleForStaticMaps(targetObstacleClusters, targetInTargetLocal,
+                                                                                                  sourceInTargetLocal, checkForPreferredVisibility);
+
+
+      return targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles;
    }
 }
