@@ -1,7 +1,5 @@
 package us.ihmc.atlas.networkProcessor.footstepPostProcessing;
 
-import org.junit.jupiter.api.Tag;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
@@ -15,7 +13,6 @@ import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostPro
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
-@Tag("humanoid-behaviors")
 public class AtlasPostProcessingTest extends AvatarPostProcessingTests
 {
 
