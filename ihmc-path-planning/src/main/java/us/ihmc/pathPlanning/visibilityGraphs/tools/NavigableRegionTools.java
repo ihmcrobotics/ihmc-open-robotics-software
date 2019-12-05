@@ -13,11 +13,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConvexPolygon2D;
+import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConcaveHull;
 
 public class NavigableRegionTools
 {
@@ -127,7 +128,7 @@ public class NavigableRegionTools
          //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
          // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
          //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-         return convexPolygons.stream().anyMatch(polygon -> isPointInsideConvexPolygon2D(polygon, pointInLocalToCheck));
+         return convexPolygons.stream().anyMatch(polygon -> isPointInsideConcaveHull(polygon, pointInLocalToCheck));
 //         return convexPolygons.stream().anyMatch(polygon -> polygon.isPointInside(pointInLocalToCheck));
       }
       else
@@ -170,28 +171,6 @@ public class NavigableRegionTools
 
    public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
    {
-      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
-   }
-
-   public static boolean isPointInsideClosedConcaveHull(List<Point2DReadOnly> vertices, Point2DReadOnly test)
-   {
-      int numberOfVertices = vertices.size();
-
-      int i;
-      int j;
-      boolean result = false;
-
-      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
-      {
-         Point2DReadOnly iVertex = vertices.get(i);
-         Point2DReadOnly jVertex = vertices.get(j);
-
-         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
-               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
-         {
-            result = !result;
-         }
-      }
-      return result;
+      return PlanarRegionTools.isPointInsideConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
    }
 }
