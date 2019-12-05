@@ -64,6 +64,39 @@ public class PlanarRegionToolsTest
    }
 
    @Test
+   public void testAverageCentroid2DInLocal()
+   {
+      ConvexPolygon2D bigSquare = new ConvexPolygon2D();
+      bigSquare.addVertex(10.0, 10.0);
+      bigSquare.addVertex(10.0, 0.0);
+      bigSquare.addVertex(-10.0, 0.0);
+      bigSquare.addVertex(-10.0, 10.0);
+      bigSquare.update();
+
+      ConvexPolygon2D smallSquare = new ConvexPolygon2D();
+      smallSquare.addVertex(5.0, -5.0);
+      smallSquare.addVertex(5.0, 0.0);
+      smallSquare.addVertex(-5.0, 0.0);
+      smallSquare.addVertex(-5.0, -5.0);
+      smallSquare.update();
+
+      List<ConvexPolygon2D> squares = new ArrayList<>();
+      squares.add(smallSquare);
+      squares.add(bigSquare);
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), squares);
+
+      double totalArea = bigSquare.getArea() + smallSquare.getArea();
+      assertEquals(totalArea, PlanarRegionTools.computePlanarRegionArea(planarRegion), EPSILON);
+
+      Point2D expectedCentroid = new Point2D(bigSquare.getCentroid());
+      expectedCentroid.scale(bigSquare.getArea() / totalArea);
+
+      expectedCentroid.scaleAdd(smallSquare.getArea() / totalArea, smallSquare.getCentroid(), expectedCentroid);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedCentroid, PlanarRegionTools.getAverageCentroid2DInLocal(planarRegion), EPSILON);
+   }
+
+   @Test
    public void testComputeMinHeightOfRegionAAboveRegionB()
    {
       double[][] verticesA = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};

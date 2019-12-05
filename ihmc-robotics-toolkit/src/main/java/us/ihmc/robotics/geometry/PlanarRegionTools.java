@@ -45,6 +45,9 @@ public class PlanarRegionTools
       double maxAzInWorld = regionA.getBoundingBox3dInWorld().getMaxZ();
       if (maxAzInWorld > maxBzInWorld + epsilon)
          return true;
+      // if this is true, none of the below true conditions can be satisfied.
+      if (maxAzInWorld <= minBzInWorld + epsilon)
+         return false;
 
       ConvexPolygon2DReadOnly convexHullA = regionA.getConvexHull();
 
@@ -570,8 +573,9 @@ public class PlanarRegionTools
       return area;
    }
 
-   public static Point2D getAverageCentroid2DInLocal(PlanarRegion planarRegion)
+   public static Point2DReadOnly getAverageCentroid2DInLocal(PlanarRegion planarRegion)
    {
+      // FIXME this is wrong.
       Point2D centroid = new Point2D();
 
       int count = 0;
@@ -594,7 +598,7 @@ public class PlanarRegionTools
 
    public static Point3D getAverageCentroid3DInWorld(PlanarRegion planarRegion)
    {
-      Point2D averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
+      Point2DReadOnly averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
       Point3D point3D = new Point3D(averageCentroid2DInLocal);
       point3D.applyTransform(planarRegion.getTransformToWorld());
       return point3D;
