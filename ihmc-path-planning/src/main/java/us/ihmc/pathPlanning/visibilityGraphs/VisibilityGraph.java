@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class VisibilityGraph
@@ -274,14 +275,14 @@ public class VisibilityGraph
       return goalNode;
    }
 
-   public List<VisibilityGraphEdge> getStartEdges()
+   public HashSet<VisibilityGraphEdge> getStartEdges()
    {
       if (startNode == null)
          return null;
       return startNode.getEdges();
    }
 
-   public List<VisibilityGraphEdge> getGoalEdges()
+   public HashSet<VisibilityGraphEdge> getGoalEdges()
    {
       if (goalNode == null)
          return null;
@@ -655,7 +656,7 @@ public class VisibilityGraph
       {
 
          NavigableRegion navigableRegion = visibilityGraphNavigableRegion.getNavigableRegion();
-         List<VisibilityGraphEdge> allEdges = visibilityGraphNavigableRegion.getAllEdges();
+         HashSet<VisibilityGraphEdge> allEdges = visibilityGraphNavigableRegion.getAllEdges();
 
          VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
 
@@ -694,7 +695,7 @@ public class VisibilityGraph
       return solution;
    }
 
-   private List<Connection> createConnectionsFromEdges(List<VisibilityGraphEdge> edges)
+   private List<Connection> createConnectionsFromEdges(HashSet<VisibilityGraphEdge> edges)
    {
       List<Connection> connections = new ArrayList<>();
 
