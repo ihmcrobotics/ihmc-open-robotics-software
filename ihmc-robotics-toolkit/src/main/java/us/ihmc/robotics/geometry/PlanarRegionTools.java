@@ -85,6 +85,11 @@ public class PlanarRegionTools
       return isPointInsidePolygon(Arrays.asList(polygon), pointToCheck);
    }
 
+   public static boolean isPointInsidePolygon(ConvexPolygon2DReadOnly polygon, Point2DReadOnly pointToCheck)
+   {
+      return isPointInsidePolygon(polygon.getPolygonVerticesView(), pointToCheck);
+   }
+
    public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck)
    {
       if (polygon.size() < 3)
@@ -142,6 +147,28 @@ public class PlanarRegionTools
       return result;
    }
 
+   public static boolean isPointInsideConcaveHull(Point2D[] polygon, Point2DReadOnly test)
+   {
+      int numberOfVertices = polygon.length;
+
+      int i;
+      int j;
+      boolean result = false;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly iVertex = polygon[i];
+         Point2DReadOnly jVertex = polygon[j];
+
+         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
+               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
+         {
+            result = !result;
+         }
+      }
+      return result;
+   }
+
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
@@ -175,48 +202,14 @@ public class PlanarRegionTools
 
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = isPointInsideConcaveHull(convexPolygon, pointInLocalToCheck);
-
-            if (isInsidePolygon)
-               return true;
-         }
-         return false;
-
-         //         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+         isPointInsideConcaveHull(planarRegion.getConcaveHull(), pointInLocalToCheck);
       }
       else
       {
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
-
-            if (isInsidePolygon)
-               return true;
-
-            //TODO: +++JerryPratt: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
-            // When ClusterTools.extrudePolygon() is buggy...
-            //
-            //            if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
-            //               throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
-            //
-            //         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
-            //         Arrays.fill(epsilons, epsilon);
-            //         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
-            //
-            //         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
-         }
+         //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+         // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
+         return convexPolygons.stream().anyMatch(convexPolygon2D -> convexPolygon2D.isPointInside(pointInLocalToCheck, epsilon));
       }
       return false;
    }
