@@ -1,13 +1,9 @@
-package us.ihmc.footstepPlanning.graphSearch.graph;
+package us.ihmc.pathPlanning.graph.structure;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
- * Class that maintains a directed graph of FootstepNodes.
+ * Class that maintains a directed graph.
  *
  * The graph has to be connected and is grown by adding edges to known or new nodes. These
  * edges must start at known nodes. The class is initialized with a start node and maintains
@@ -15,13 +11,13 @@ import java.util.List;
  *
  * @author Georg
  */
-public class FootstepGraph
+public class DirectedGraph<N>
 {
-   private final HashMap<FootstepEdge, EdgeCost> edgeCostMap = new HashMap<>();
-   private final HashMap<FootstepNode, NodeCost> nodeCostMap = new HashMap<>();
+   private final HashMap<GraphEdge, EdgeCost> edgeCostMap = new HashMap<>();
+   private final HashMap<N, NodeCost> nodeCostMap = new HashMap<>();
 
-   private final HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = new HashMap<>();
-   private final HashMap<FootstepNode, FootstepEdge> incomingBestEdge = new HashMap<>();
+   private final HashMap<N, HashSet<GraphEdge<N>>> outgoingEdges = new HashMap<>();
+   private final HashMap<N, GraphEdge<N>> incomingBestEdge = new HashMap<>();
 
    /**
     * Removes all nodes and edges stored in the graph and
@@ -29,7 +25,7 @@ public class FootstepGraph
     *
     * @param startNode start node of the new graph
     */
-   public void initialize(FootstepNode startNode)
+   public void initialize(N startNode)
    {
       edgeCostMap.clear();
       nodeCostMap.clear();
@@ -37,11 +33,11 @@ public class FootstepGraph
       incomingBestEdge.clear();
 
       nodeCostMap.put(startNode, new NodeCost(0.0));
-      FootstepEdge edgeToStart = new FootstepEdge(null, startNode);
+      GraphEdge<N> edgeToStart = new GraphEdge<>(null, startNode);
       incomingBestEdge.put(startNode, edgeToStart);
    }
 
-   public HashMap<FootstepNode, HashSet<FootstepEdge>> getOutgoingEdges()
+   public HashMap<N, HashSet<GraphEdge<N>>> getOutgoingEdges()
    {
       return outgoingEdges;
    }
@@ -54,16 +50,16 @@ public class FootstepGraph
     * @param endNode
     * @param transitionCost
     */
-   public void checkAndSetEdge(FootstepNode startNode, FootstepNode endNode, double transitionCost)
+   public void checkAndSetEdge(N startNode, N endNode, double transitionCost)
    {
       checkNodeExists(startNode);
 
-      FootstepEdge edge = new FootstepEdge(startNode, endNode);
+      GraphEdge<N> edge = new GraphEdge<>(startNode, endNode);
       if (edgeCostMap.containsKey(edge))
          throw new RuntimeException("Edge exists already.");
 
       if (!outgoingEdges.containsKey(startNode))
-         outgoingEdges.put(startNode, new HashSet<FootstepEdge>());
+         outgoingEdges.put(startNode, new HashSet<>());
       EdgeCost cost = new EdgeCost(transitionCost);
       edgeCostMap.put(edge, cost);
       outgoingEdges.get(startNode).add(edge);
@@ -89,7 +85,7 @@ public class FootstepGraph
    /**
     * Gets the cost associated to traveling from the start node to the given node.
     */
-   public double getCostFromStart(FootstepNode node)
+   public double getCostFromStart(N node)
    {
       checkNodeExists(node);
 
@@ -100,17 +96,17 @@ public class FootstepGraph
     * Returns all nodes required to travel from the start node to the given node.
     * The nodes returned include start and end node of the path.
     */
-   public List<FootstepNode> getPathFromStart(FootstepNode node)
+   public List<N> getPathFromStart(N node)
    {
       checkNodeExists(node);
 
-      ArrayList<FootstepNode> path = new ArrayList<>();
+      ArrayList<N> path = new ArrayList<>();
       path.add(node);
 
-      FootstepEdge edgeFromParent = incomingBestEdge.get(node);
+      GraphEdge<N> edgeFromParent = incomingBestEdge.get(node);
       while (edgeFromParent.getStartNode() != null)
       {
-         FootstepNode parentNode = edgeFromParent.getStartNode();
+         N parentNode = edgeFromParent.getStartNode();
          path.add(parentNode);
          edgeFromParent = incomingBestEdge.get(parentNode);
       }
@@ -123,21 +119,21 @@ public class FootstepGraph
     * Will check if a node exists in the graph.
     * @param node
     */
-   public boolean doesNodeExist(FootstepNode node)
+   public boolean doesNodeExist(N node)
    {
       return nodeCostMap.containsKey(node);
    }
 
-   private void updateChildCostsRecursively(FootstepNode node)
+   private void updateChildCostsRecursively(N node)
    {
       if (!outgoingEdges.containsKey(node))
          return;
 
       double parentNodeCost = nodeCostMap.get(node).getNodeCost();
-      for (FootstepEdge outgoingEdge : outgoingEdges.get(node))
+      for (GraphEdge<N> outgoingEdge : outgoingEdges.get(node))
       {
          double newCost = parentNodeCost + edgeCostMap.get(outgoingEdge).getEdgeCost();
-         FootstepNode childNode = outgoingEdge.getEndNode();
+         N childNode = outgoingEdge.getEndNode();
 
          double oldCost = nodeCostMap.get(childNode).getNodeCost();
          if (oldCost <= newCost)
@@ -149,13 +145,13 @@ public class FootstepGraph
       }
    }
 
-   private void checkNodeExists(FootstepNode node)
+   private void checkNodeExists(N node)
    {
       if (!nodeCostMap.containsKey(node))
          throw new RuntimeException("Node has not been added to graph yet.");
    }
 
-   public FootstepNode getParentNode(FootstepNode node)
+   public N getParentNode(N node)
    {
       return incomingBestEdge.get(node).getStartNode();
    }
