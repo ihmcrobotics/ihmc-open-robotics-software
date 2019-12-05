@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
@@ -108,7 +109,7 @@ public class PlanarRegionsGraphic extends Group
          Vector3D normal = planarRegion.getNormal();
          normal.normalize();
 
-         Point3D centroid = PlanarRegionTools.getAverageCentroid3DInWorld(planarRegion);
+         Point3DReadOnly centroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 
          double length = 0.07;
          double radius = 0.004;

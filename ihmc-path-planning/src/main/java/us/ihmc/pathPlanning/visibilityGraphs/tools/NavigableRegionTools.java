@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConcaveHull;
 
 public class NavigableRegionTools
 {

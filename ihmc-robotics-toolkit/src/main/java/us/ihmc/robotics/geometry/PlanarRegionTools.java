@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -152,6 +151,11 @@ public class PlanarRegionTools
 
    public static boolean isPointInsideConcaveHull(Point2D[] polygon, Point2DReadOnly test)
    {
+      return isPointInsideConcaveHull(polygon, test.getX(), test.getY());
+   }
+
+   public static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY)
+   {
       int numberOfVertices = polygon.length;
 
       int i;
@@ -163,8 +167,8 @@ public class PlanarRegionTools
          Point2DReadOnly iVertex = polygon[i];
          Point2DReadOnly jVertex = polygon[j];
 
-         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
-               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
+         if ((iVertex.getY() > testY) != (jVertex.getY() > testY)
+               && (testX < (jVertex.getX() - iVertex.getX()) * (testY - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
          {
             result = !result;
          }
@@ -187,12 +191,17 @@ public class PlanarRegionTools
 
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
    {
+      return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck.getX(), pointInLocalToCheck.getY(), epsilon);
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, double pointInLocalToCheckX, double pointInLocalToCheckY, double epsilon)
+   {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
       BoundingBox2D boundingBox = convexHull.getBoundingBox();
 
-      if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
+      if (!boundingBox.isInsideEpsilon(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
-      if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
+      if (!convexHull.isPointInside(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
       List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
 
@@ -205,14 +214,14 @@ public class PlanarRegionTools
 
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         isPointInsideConcaveHull(planarRegion.getConcaveHull(), pointInLocalToCheck);
+         isPointInsideConcaveHull(planarRegion.getConcaveHull(), pointInLocalToCheckX, pointInLocalToCheckY);
       }
       else
       {
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
          //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
          // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-         return convexPolygons.stream().anyMatch(convexPolygon2D -> convexPolygon2D.isPointInside(pointInLocalToCheck, epsilon));
+         return convexPolygons.stream().anyMatch(convexPolygon2D -> convexPolygon2D.isPointInside(pointInLocalToCheckX, pointInLocalToCheckY, epsilon));
       }
       return false;
    }
@@ -573,7 +582,7 @@ public class PlanarRegionTools
       return area;
    }
 
-   public static Point2DReadOnly getAverageCentroid2DInLocal(PlanarRegion planarRegion)
+   public static Point2DReadOnly getCentroid2DInLocal(PlanarRegion planarRegion)
    {
       Point2D centroid = new Point2D();
 
@@ -591,10 +600,10 @@ public class PlanarRegionTools
       return centroid;
    }
 
-   public static Point3D getAverageCentroid3DInWorld(PlanarRegion planarRegion)
+   public static Point3DReadOnly getCentroid3DInWorld(PlanarRegion planarRegion)
    {
-      Point2DReadOnly averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
-      Point3D point3D = new Point3D(averageCentroid2DInLocal);
+      Point2DReadOnly centroidInLocal = getCentroid2DInLocal(planarRegion);
+      Point3D point3D = new Point3D(centroidInLocal);
       point3D.applyTransform(planarRegion.getTransformToWorld());
       return point3D;
    }
@@ -621,11 +630,8 @@ public class PlanarRegionTools
          Point3D vertexOfAInWorld = new Point3D(convexHullInLocalA.getVertex(i));
          transformFromAToWorld.transform(vertexOfAInWorld);
          Point3DReadOnly vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
-         if (vertexOfAProjectedToBInWorld != null)
-         {
-            double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
-            minZOfAProjectedToB = Math.min(minZOfAProjectedToB, deltaZ);
-         }
+         double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
+         minZOfAProjectedToB = Math.min(minZOfAProjectedToB, deltaZ);
       }
 
       RigidBodyTransformReadOnly transformFromBToWorld = regionB.getTransformToWorld();
@@ -638,11 +644,8 @@ public class PlanarRegionTools
          Point3D vertexOfBInWorld = new Point3D(convexHullInLocalB.getVertex(i));
          transformFromBToWorld.transform(vertexOfBInWorld);
          Point3D vertexOfBProjectedToAInWorld = projectInZToPlanarRegion(vertexOfBInWorld, regionA);
-         if (vertexOfBProjectedToAInWorld != null)
-         {
-            double deltaZ = vertexOfBProjectedToAInWorld.getZ() - vertexOfBInWorld.getZ();
-            minZOfBProjectedToA = Math.min(minZOfBProjectedToA, deltaZ);
-         }
+         double deltaZ = vertexOfBProjectedToAInWorld.getZ() - vertexOfBInWorld.getZ();
+         minZOfBProjectedToA = Math.min(minZOfBProjectedToA, deltaZ);
       }
 
       if (Double.isInfinite(minZOfAProjectedToB))
