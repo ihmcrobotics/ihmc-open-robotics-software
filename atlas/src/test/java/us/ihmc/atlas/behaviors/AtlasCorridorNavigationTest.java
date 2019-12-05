@@ -184,6 +184,7 @@ public class AtlasCorridorNavigationTest
             ThreadTools.sleepSeconds(1.0);
             continue;
          }
+         robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
 
          LogTools.info("Computing poses from path");
          // find last two path points
@@ -235,15 +236,18 @@ public class AtlasCorridorNavigationTest
          // TODO: Figure out how to best effort plan with footstep snapping
          // Use BodyPathBasedAStarPlanner instead of manual?
 
+
          LogTools.info("Preparing footstep planner request 2");
          FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          footstepPlannerParameters.setReturnBestEffortPlan(true);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-         FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+//         FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+         FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
          BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
          PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-         FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+//         FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+         FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
          FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(footstepPlannerParameters);
          CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, footstepPlannerParameters, snapper, bodyPath);
