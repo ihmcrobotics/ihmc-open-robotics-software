@@ -27,6 +27,7 @@ public class ROS2Tools
 {
    public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
    public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
+   public static final ROS2ModuleIdentifier MAPPING_MODULE = new ROS2ModuleIdentifier("mapping_module", "/map");
    public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
    public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
    public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
