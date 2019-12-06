@@ -3,13 +3,9 @@ package us.ihmc.simulationConstructionSetTools.util.simulationrunner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BooleanSupplier;
 
 import org.opentest4j.AssertionFailedError;
 
-import us.ihmc.commons.RunnableThatThrows;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.testing.GoalOrientedTestGoal;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -27,9 +23,8 @@ import static us.ihmc.robotics.Assert.*;
 public class GoalOrientedTestConductor implements SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
-   private BooleanSupplier keepSCSUp = () -> false;
-   private BooleanSupplier createSCSVideos = () -> false;
-
+   private final SimulationTestingParameters simulationTestingParameters;
+   
    private boolean yoTimeChangedListenerActive = false;
    
    private List<GoalOrientedTestGoal> sustainGoals = new ArrayList<>();
@@ -51,9 +46,8 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
    {
       this.scs = scs;
-      keepSCSUp = simulationTestingParameters::getKeepSCSUp;
-      createSCSVideos = simulationTestingParameters::getCreateSCSVideos;
-
+      this.simulationTestingParameters = simulationTestingParameters;
+      
       YoDouble yoTime = (YoDouble) scs.getVariable("t");
       yoTime.addVariableChangedListener(this::notifyOfVariableChange);
       scs.startOnAThread();
@@ -95,7 +89,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          if (sustainGoalsNotMeeting.size() > 0)
          {
             createAssertionFailedException.set(true);
-            notifyAll();
          }
          else if (terminalGoalsNotMeeting.isEmpty())
          {
@@ -107,7 +100,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
             {
                printSuccessMessage.set(true);
             }
-            notifyAll();
          }
       }
    }
@@ -205,8 +197,10 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
       scs.simulate();
 
-      // Use Java's wait and notifyAll to pause this thread
-      ExceptionTools.handle((RunnableThatThrows) this::wait, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      while (!createAssertionFailedException.get() && !printSuccessMessage.get() && !scsHasCrashed.get())
+      {
+         Thread.yield();
+      }
 
       if(createAssertionFailedException.get())
       {
@@ -238,12 +232,12 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    public void concludeTesting(int additionalStackDepthForRelevantCallingMethod)
    {
-      if (keepSCSUp.getAsBoolean())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
       
-      if (createSCSVideos.getAsBoolean())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod + 1);
       }
@@ -254,12 +248,12 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    public void concludeTesting(String videoName)
    {
-      if (keepSCSUp.getAsBoolean())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
       
-      if (createSCSVideos.getAsBoolean())
+      if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
       }
@@ -303,6 +297,11 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       return scs;
    }
 
+   public void setKeepSCSUp(boolean keepSCSUp)
+   {
+      simulationTestingParameters.setKeepSCSUp(keepSCSUp);
+   }
+
    @Override
    public void simulationDone()
    {
@@ -311,12 +310,11 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    @Override
    public void simulationDoneWithException(Throwable throwable)
    {
-      if (keepSCSUp.getAsBoolean())
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          LogTools.error(throwable.getMessage());
       }
       scsCrashedException = throwable.getMessage();
       scsHasCrashed.set(true);
-      notifyAll();
    }
 }
