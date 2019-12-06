@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 
@@ -33,5 +35,12 @@ public interface ContactStateProvider extends TimeIntervalProvider
    default int getNumberOfBodiesInContact()
    {
       return getBodiesInContact().size();
+   }
+
+   default Vector3DReadOnly getSurfaceNormal()
+   {
+      Vector3D vector3D = new Vector3D();
+      vector3D.setToNaN();
+      return vector3D;
    }
 }
