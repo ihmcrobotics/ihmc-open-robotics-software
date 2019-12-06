@@ -55,7 +55,7 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(List<PlanarRegion> regions)
    {
-      this(null, regions, null);
+      this(new DefaultVisibilityGraphParameters(), regions, null);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions)
