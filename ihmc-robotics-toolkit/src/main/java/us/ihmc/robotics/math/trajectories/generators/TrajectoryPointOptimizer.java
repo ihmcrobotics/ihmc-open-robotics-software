@@ -8,7 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
