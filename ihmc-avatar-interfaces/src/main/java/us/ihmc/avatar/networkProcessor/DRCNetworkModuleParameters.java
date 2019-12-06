@@ -9,22 +9,14 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 public class DRCNetworkModuleParameters
 {
    private boolean useNetworkProcessor = true;
-   private boolean useController;
    private boolean useSensorModule;
    private boolean useSimulatedSensors;
-   private boolean useUiModule;
    private boolean useBehaviorModule;
    private boolean useBehaviorVisualizer;
-   private boolean useHandModule;
-   private boolean usePerceptionModule;
    private boolean useRosModule;
-   private boolean useROSAPICommunicator;
    private boolean useZeroPoseRobotConfigurationPublisher;
    private boolean useMocapModule;
-   private boolean useLocalControllerCommunicator;
    private boolean runAutomaticDiagnostic;
-   private boolean useMultisenseManualTestModule;
-   private boolean useDrillDetectionModule;
    private boolean useWholeBodyTrajectoryToolbox;
    private boolean useWholeBodyTrajectoryToolboxVisualizer;
    private boolean useKinematicsToolbox;
@@ -43,10 +35,6 @@ public class DRCNetworkModuleParameters
    private boolean useTextToSpeechModule;
    private boolean useRobotEnvironmentAwarenessModule;
    private boolean useHeightQuadTreeToolbox;
-   private boolean useRemoteObjectDetectionFeedback;
-   private boolean useLidarScanLogger;
-   private boolean filterControllerInputMessages;
-   private boolean enableJoystickBasedStepping;
    private boolean useBipedalSupportPlanarRegionPublisher;
    private boolean useWalkingPreviewToolbox;
    private boolean useAutoREAStateUpdater;
@@ -60,11 +48,6 @@ public class DRCNetworkModuleParameters
    public boolean isSensorModuleEnabled()
    {
       return useSensorModule;
-   }
-
-   public boolean isPerceptionModuleEnabled()
-   {
-      return usePerceptionModule;
    }
 
    public boolean isBehaviorModuleEnabled()
@@ -132,24 +115,9 @@ public class DRCNetworkModuleParameters
       return useFootstepPostProcessingToolboxVisualizer;
    }
 
-   public boolean isHandModuleEnabled()
-   {
-      return useHandModule;
-   }
-
    public boolean isSimulatedSensorsEnabled()
    {
       return useSimulatedSensors;
-   }
-
-   public boolean isUiModuleEnabled()
-   {
-      return useUiModule;
-   }
-
-   public boolean isMultisenseManualTestModuleEnabled()
-   {
-      return useMultisenseManualTestModule;
    }
 
    public boolean isRobotEnvironmentAwerenessModuleEnabled()
@@ -177,16 +145,6 @@ public class DRCNetworkModuleParameters
       return useHeightQuadTreeToolbox;
    }
 
-   public boolean isLidarScanLoggerEnabled()
-   {
-      return useLidarScanLogger;
-   }
-
-   public void enableMultisenseManualTestModule(boolean b)
-   {
-      useMultisenseManualTestModule = b;
-   }
-
    public void enableZeroPoseRobotConfigurationPublisherModule(boolean b)
    {
       useZeroPoseRobotConfigurationPublisher = b;
@@ -195,20 +153,11 @@ public class DRCNetworkModuleParameters
    public void enableSensorModule(boolean b)
    {
       useSensorModule = b;
-      if (b)
-         useController = true;
-   }
-
-   public void enableUiModule(boolean b)
-   {
-      useUiModule = b;
    }
 
    public void enableBehaviorModule(boolean b)
    {
       useBehaviorModule = b;
-      if (b)
-         useController = true;
    }
 
    public void enableBehaviorVisualizer(boolean useBehaviorVisualizer)
@@ -283,18 +232,6 @@ public class DRCNetworkModuleParameters
       this.useAutoREAStateUpdater = useAutoREAStateUpdater;
    }
 
-   public void enableHandModule(boolean b)
-   {
-      useHandModule = b;
-   }
-
-   public void enablePerceptionModule(boolean b)
-   {
-      usePerceptionModule = b;
-      if (b)
-         useController = true;
-   }
-
    public void enableRobotEnvironmentAwerenessModule(boolean enable)
    {
       this.useRobotEnvironmentAwarenessModule = enable;
@@ -344,43 +281,9 @@ public class DRCNetworkModuleParameters
       return runAutomaticDiagnostic;
    }
 
-   public void enableLocalControllerCommunicator(boolean useLocalControllerCommunicator)
-   {
-      this.useLocalControllerCommunicator = useLocalControllerCommunicator;
-      if (useLocalControllerCommunicator)
-      {
-         this.useController = true;
-      }
-   }
-
-   public boolean isLocalControllerCommunicatorEnabled()
-   {
-      return useLocalControllerCommunicator;
-   }
-
    public boolean isZeroPoseRobotConfigurationPublisherEnabled()
    {
       return useZeroPoseRobotConfigurationPublisher;
-   }
-
-   public void enableROSAPICommunicator(boolean useROSAPICommunicator)
-   {
-      this.useROSAPICommunicator = useROSAPICommunicator;
-   }
-
-   public boolean isROSAPICommunicatorEnabled()
-   {
-      return useROSAPICommunicator;
-   }
-
-   public void enableControllerCommunicator(boolean useControllerCommunicator)
-   {
-      this.useController = useControllerCommunicator;
-   }
-
-   public boolean isControllerCommunicatorEnabled()
-   {
-      return useController;
    }
 
    public void enableNetworkProcessor(boolean useNetworkProcessor)
@@ -401,31 +304,6 @@ public class DRCNetworkModuleParameters
    public boolean isMocapModuleEnabled()
    {
       return this.useMocapModule;
-   }
-
-   public boolean isDrillDetectionModuleEnabled()
-   {
-      return useDrillDetectionModule;
-   }
-
-   public boolean isRemoteObjectDetectionFeedbackEnabled()
-   {
-      return useRemoteObjectDetectionFeedback;
-   }
-
-   public void enableLidarScanLogger(boolean enableLidarScanLogger)
-   {
-      this.useLidarScanLogger = enableLidarScanLogger;
-   }
-
-   public void setUseRemoteObjectDetectionFeedbackEnabled(boolean useRemoteObjectDetectionFeedback)
-   {
-      this.useRemoteObjectDetectionFeedback = useRemoteObjectDetectionFeedback;
-   }
-
-   public void setDrillDetectionModuleEnabled(boolean b)
-   {
-      useDrillDetectionModule = b;
    }
 
    public void enableTextToSpeechModule(boolean useTextToSpeechModule)
@@ -458,7 +336,6 @@ public class DRCNetworkModuleParameters
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
       useSensorModule = true;
       useSimulatedSensors = true;
-      useController = true;
    }
 
    public LocalObjectCommunicator getSimulatedSensorCommunicator()
@@ -469,30 +346,8 @@ public class DRCNetworkModuleParameters
    @Override
    public String toString()
    {
-      return "DRCNetworkModuleParameters [useController=" + useController + "\n useSensorModule=" + useSensorModule + "\n useSimulatedSensors="
-            + useSimulatedSensors + "\n useUiModule=" + useUiModule + "\n useBehaviorModule=" + useBehaviorModule + "\n useBehaviorVisualizer="
-            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
-            + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
-            + "]";
-   }
-
-   public boolean isFilterControllerInputMessages()
-   {
-      return filterControllerInputMessages;
-   }
-
-   public void setFilterControllerInputMessages(boolean filterControllerInputMessages)
-   {
-      this.filterControllerInputMessages = filterControllerInputMessages;
-   }
-
-   public boolean isEnableJoystickBasedStepping()
-   {
-      return enableJoystickBasedStepping;
-   }
-
-   public void setEnableJoystickBasedStepping(boolean enableJoystickBasedStepping)
-   {
-      this.enableJoystickBasedStepping = enableJoystickBasedStepping;
+      return "DRCNetworkModuleParameters [useSensorModule=" + useSensorModule + "\n useSimulatedSensors=" + useSimulatedSensors + "\n useBehaviorModule="
+            + useBehaviorModule + "\n useBehaviorVisualizer=" + useBehaviorVisualizer + "\n useRosModule=" + useRosModule + "\n simulatedSensorCommunicator="
+            + simulatedSensorCommunicator + "\n rosUri=" + rosUri + "]";
    }
 }

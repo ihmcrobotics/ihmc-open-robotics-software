@@ -1,14 +1,12 @@
 package us.ihmc.robotics.optimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.testing.JUnitTools;
 
 public class EqualityConstraintEnforcerTest
 {
@@ -27,7 +25,7 @@ public class EqualityConstraintEnforcerTest
       enforcer.setConstraint(j, p);
       
       DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = enforcer.checkJQEqualsZeroAfterSetConstraint();
-      JUnitTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
+      MatrixTestTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
 //      System.out.println("checkJQEqualsZeroAfterSetConstraint = " + checkJQEqualsZeroAfterSetConstraint);
       
       // Ax = b: x1 + x2 = 5.0;
@@ -63,7 +61,7 @@ public class EqualityConstraintEnforcerTest
       enforcer.setConstraint(j, p);
       
       DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = enforcer.checkJQEqualsZeroAfterSetConstraint();
-      JUnitTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
+      MatrixTestTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
       
       // Ax = b: x1 = 2.0, x2 = 3.0;
       DenseMatrix64F a = new DenseMatrix64F(new double[][]{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}});
@@ -98,7 +96,7 @@ public class EqualityConstraintEnforcerTest
       enforcer.setConstraint(j, p);
       
       DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = enforcer.checkJQEqualsZeroAfterSetConstraint();
-      JUnitTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
+      MatrixTestTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
       
       // Ax = b: x1 + x2 + x3 = 9.0;
       DenseMatrix64F a = new DenseMatrix64F(new double[][]{{1.0, 1.0, 1.0}});
@@ -134,7 +132,7 @@ public class EqualityConstraintEnforcerTest
       enforcer.setConstraint(j, p);
       
       DenseMatrix64F checkJQEqualsZeroAfterSetConstraint = enforcer.checkJQEqualsZeroAfterSetConstraint();
-      JUnitTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
+      MatrixTestTools.assertMatrixEqualsZero(checkJQEqualsZeroAfterSetConstraint, 1e-7);
       
       // Ax = b: x1 = 3.0;
       DenseMatrix64F a = new DenseMatrix64F(new double[][]{{1.0, 0.0}});

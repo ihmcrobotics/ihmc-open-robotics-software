@@ -22,13 +22,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -43,8 +41,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -286,7 +282,7 @@ public final class SpatialFeedbackControllerTest
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
       SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
-      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver(registry);
+      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver();
 
       DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       DenseMatrix64F solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);

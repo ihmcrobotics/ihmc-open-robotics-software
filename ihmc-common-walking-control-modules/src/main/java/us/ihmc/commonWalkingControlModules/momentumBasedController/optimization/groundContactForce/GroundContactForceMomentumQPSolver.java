@@ -4,13 +4,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -115,14 +115,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(),
-                                                                null,
-                                                                !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
-                                                                DomainFactory.PubSubImplementation.INTRAPROCESS);
-      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(),
-                                                                                null,
-                                                                                !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(),
-                                                                                DomainFactory.PubSubImplementation.INTRAPROCESS);
+      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
+      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       plannerOutputStatus = new AtomicReference<>();
       postProcessingOutputStatus = new AtomicReference<>();

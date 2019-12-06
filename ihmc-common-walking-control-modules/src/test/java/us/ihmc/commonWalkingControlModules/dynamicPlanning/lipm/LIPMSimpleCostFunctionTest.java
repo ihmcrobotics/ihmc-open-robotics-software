@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<DefaultDiscreteState>
 {
@@ -136,7 +135,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
 
       costFunction.getCostStateGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, desiredControl, desiredState, constants, gradient);
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
 
    @Test
@@ -181,7 +180,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
 
       costFunction.getCostControlGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, desiredControl, desiredState, constants, gradient);
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-10);
    }
 
    @Test
@@ -214,7 +213,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       costFunction.getCostControlHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 
       CommonOps.scale(2.0, R);
-      JUnitTools.assertMatrixEquals(R, hessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(R, hessian, 1e-10);
    }
 
    @Test
@@ -250,7 +249,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       costFunction.getCostStateHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 
       CommonOps.scale(2.0, Q);
-      JUnitTools.assertMatrixEquals(Q, hessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(Q, hessian, 1e-10);
    }
 
    @Test
@@ -278,7 +277,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
 
       costFunction.getCostStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 
-      JUnitTools.assertMatrixEquals(hessianExpected, hessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(hessianExpected, hessian, 1e-10);
    }
 
 
