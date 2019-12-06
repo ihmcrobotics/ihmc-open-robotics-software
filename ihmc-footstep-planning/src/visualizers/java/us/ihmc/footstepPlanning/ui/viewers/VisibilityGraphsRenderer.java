@@ -1,18 +1,5 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalResetTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowClusterRawPoints;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoalVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowInterRegionVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNavigableRegionVisibilityMaps;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStartVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +15,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.ClusterMeshViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.NavigableRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.VisibilityMapHolderViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class VisibilityGraphsRenderer
 {
@@ -47,12 +36,13 @@ public class VisibilityGraphsRenderer
 
    public VisibilityGraphsRenderer(Messager messager)
    {
-      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalResetTopic, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, VisibilityMapWithNavigableRegionData);
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+                                  ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, VisibilityMapWithNavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       startMapViewer.setCustomColor(Color.YELLOW);
@@ -63,7 +53,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalResetTopic, ShowNavigableRegionVisibilityMaps, VisibilityMapWithNavigableRegionData);
+      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, VisibilityMapWithNavigableRegionData);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);

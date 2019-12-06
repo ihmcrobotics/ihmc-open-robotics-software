@@ -9,6 +9,8 @@ import us.ihmc.mecano.spatial.Wrench;
 
 public interface ForceSensorDataReadOnly
 {
+   public String getSensorName();
+
    public ReferenceFrame getMeasurementFrame();
 
    public RigidBodyBasics getMeasurementLink();

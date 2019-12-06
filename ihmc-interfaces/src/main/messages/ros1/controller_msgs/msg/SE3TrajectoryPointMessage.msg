@@ -1,3 +1,8 @@
+# This message is part of the IHMC whole-body controller API.
+# This class is used to build trajectory messages in taskspace.
+# It holds the necessary information for one trajectory point.
+# Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational).
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

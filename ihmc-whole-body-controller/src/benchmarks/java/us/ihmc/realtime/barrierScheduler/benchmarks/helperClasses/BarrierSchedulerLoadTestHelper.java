@@ -1,11 +1,12 @@
 package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
-import us.ihmc.robotics.time.ExecutionTimer;
 
-import java.util.Random;
+import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

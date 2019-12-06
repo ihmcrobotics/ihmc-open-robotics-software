@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 
 /**
  * TODO: Split this class in two: The part that reads and the part that does the computation on the sensor data as they
@@ -9,6 +8,10 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
  */
 public interface SensorReader
 {
+   public default void initialize()
+   {
+   }
+
    /**
     * Reads the sensor data from the robot. This method should not do any heavy computation and is meant to populate the
     * sensor data context as quickly as possible to be used by the state estimator thread.
@@ -32,7 +35,7 @@ public interface SensorReader
    {
    };
 
-   public abstract SensorOutputMapReadOnly getSensorOutputMapReadOnly();
+   public abstract SensorOutputMapReadOnly getProcessedSensorOutputMap();
 
-   public abstract SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly();
+   public abstract SensorOutputMapReadOnly getRawSensorOutputMap();
 }

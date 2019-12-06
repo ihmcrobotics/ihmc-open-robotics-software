@@ -62,6 +62,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -110,6 +112,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -140,6 +145,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getTimeout());
 
+      cdr.write_type_6(data.getBestEffortTimeout());
+
       cdr.write_type_6(data.getHorizonLength());
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
@@ -166,6 +173,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setGoalYawProximity(cdr.read_type_6());
       	
       data.setTimeout(cdr.read_type_6());
+      	
+      data.setBestEffortTimeout(cdr.read_type_6());
       	
       data.setHorizonLength(cdr.read_type_6());
       	
@@ -194,6 +203,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
       ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
       ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
@@ -218,6 +228,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
       data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
       data.setTimeout(ser.read_type_6("timeout"));
+      data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 

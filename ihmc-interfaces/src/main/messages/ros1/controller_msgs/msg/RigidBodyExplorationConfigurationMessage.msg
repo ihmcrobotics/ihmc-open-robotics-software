@@ -1,3 +1,6 @@
+# Message used to configure the exploration for a RRT-based planner.
+# Main usage is the IHMC WholeBodyTrajectoryToolbox.
+
 int8 CONFIGURATION_SPACE_NAME_X=0
 
 int8 CONFIGURATION_SPACE_NAME_Y=1

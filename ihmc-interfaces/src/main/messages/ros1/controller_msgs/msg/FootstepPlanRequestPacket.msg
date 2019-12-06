@@ -1,3 +1,5 @@
+# (Obsolete) This message is part of the old IHMC footstep planning module.
+
 int8 FOOTSTEP_PLAN_REQUEST_TYPE_START_SEARCH=0
 
 int8 FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH=1

@@ -31,6 +31,7 @@ public class FootstepPlannerCommunicationProperties
       statusMessages.add(BodyPathPlanStatisticsMessage.class);
       statusMessages.add(FootstepNodeDataListMessage.class);
       statusMessages.add(FootstepPlannerOccupancyMapMessage.class);
+      statusMessages.add(FootstepPlannerLatticeMapMessage.class);
       statusMessages.add(FootstepPlannerParametersPacket.class);
 
       toolboxSupportedStatusMessages = Collections.unmodifiableList(statusMessages);

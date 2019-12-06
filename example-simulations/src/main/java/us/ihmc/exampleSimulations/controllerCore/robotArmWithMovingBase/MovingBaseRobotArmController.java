@@ -37,6 +37,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -70,6 +71,7 @@ public class MovingBaseRobotArmController implements RobotController
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
 
    private final WholeBodyControllerCore controllerCore;
+   private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
@@ -114,7 +116,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
+      controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, yoGraphicsListRegistry, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
@@ -364,5 +366,10 @@ public class MovingBaseRobotArmController implements RobotController
    public YoBoolean getGoToTarget()
    {
       return goToTarget;
+   }
+
+   public WholeBodyControlCoreToolbox getControlCoreToolbox()
+   {
+      return controlCoreToolbox;
    }
 }

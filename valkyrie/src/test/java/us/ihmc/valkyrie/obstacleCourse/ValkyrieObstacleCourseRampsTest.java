@@ -13,7 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.trajectoryOptimization.DiscreteHybridDynamics;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.trajectoryOptimization.DiscreteHybridDynamics;
 
 public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
 {

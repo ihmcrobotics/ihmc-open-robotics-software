@@ -1,21 +1,28 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+
+import java.util.function.DoubleSupplier;
 
 public class PitchAndRollBasedCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
+   private final DoubleSupplier pitchWeight;
+   private final DoubleSupplier rollWeight;
 
-   public PitchAndRollBasedCost(FootstepPlannerParametersReadOnly costParameters, FootstepNodeSnapperReadOnly snapper)
+   public PitchAndRollBasedCost(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
-      this.parameters = costParameters;
+      this(parameters::getPitchWeight, parameters::getRollWeight, snapper);
+   }
+
+   public PitchAndRollBasedCost(DoubleSupplier pitchWeight, DoubleSupplier rollWeight, FootstepNodeSnapperReadOnly snapper)
+   {
+      this.pitchWeight = pitchWeight;
+      this.rollWeight = rollWeight;
       this.snapper = snapper;
    }
 
@@ -33,6 +40,6 @@ public class PitchAndRollBasedCost implements FootstepCost
       double pitch = yawPitchRoll[1];
       double roll = yawPitchRoll[2];
 
-      return parameters.getPitchWeight() * Math.abs(pitch) + parameters.getRollWeight() * Math.abs(roll);
+      return pitchWeight.getAsDouble() * Math.abs(pitch) + rollWeight.getAsDouble() * Math.abs(roll);
    }
 }

@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -47,7 +47,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public void addFootstepGraph(FootstepGraph graph)
+   public void addFootstepGraph(DirectedGraph graph)
    {
       this.graph = graph;
       for (int i = 0; i < checkerComponents.size(); i++)

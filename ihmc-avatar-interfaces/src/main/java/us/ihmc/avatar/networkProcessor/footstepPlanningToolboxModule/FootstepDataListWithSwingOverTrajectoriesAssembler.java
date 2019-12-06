@@ -183,9 +183,4 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       footstepDataListMessage.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
-
-   public void setCollisionSphereRadius(double collisionSphereRadius)
-   {
-      this.swingOverPlanarRegionsTrajectoryExpander.setCollisionSphereRadius(collisionSphereRadius);
-   }
 }

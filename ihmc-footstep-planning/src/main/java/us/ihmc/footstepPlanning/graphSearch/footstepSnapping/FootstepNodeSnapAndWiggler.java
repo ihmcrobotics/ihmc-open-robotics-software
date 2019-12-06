@@ -16,19 +16,25 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepNodeBodyCollisionDetector collisionDetector;
+
+   private final BooleanSupplier wiggleIntoConvexHullOfPlanarRegions;
+   private final DoubleSupplier wiggleInsideDelta;
+   private final DoubleSupplier maximumXYWiggleDistance;
+   private final DoubleSupplier maximumYawWiggle;
+   private final DoubleSupplier maximumZPenetrationOnValleyRegions;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
@@ -36,14 +42,27 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
    {
-      this(footPolygonsInSoleFrame, parameters, null);
+      this(footPolygonsInSoleFrame,
+           parameters::getWiggleIntoConvexHullOfPlanarRegions,
+           parameters::getWiggleInsideDelta,
+           parameters::getMaximumXYWiggleDistance,
+           parameters::getMaximumYawWiggle,
+           parameters::getMaximumZPenetrationOnValleyRegions);
    }
 
-   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepNodeBodyCollisionDetector collisionDetector)
+   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                      BooleanSupplier wiggleIntoConvexHullOfPlanarRegions,
+                                      DoubleSupplier wiggleInsideDelta,
+                                      DoubleSupplier maximumXYWiggleDistance,
+                                      DoubleSupplier maximumYawWiggle,
+                                      DoubleSupplier maximumZPenetrationOnValleyRegions)
    {
-      this.parameters = parameters;
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.collisionDetector = collisionDetector;
+      this.wiggleIntoConvexHullOfPlanarRegions = wiggleIntoConvexHullOfPlanarRegions;
+      this.wiggleInsideDelta = wiggleInsideDelta;
+      this.maximumXYWiggleDistance = maximumXYWiggleDistance;
+      this.maximumYawWiggle = maximumYawWiggle;
+      this.maximumZPenetrationOnValleyRegions = maximumZPenetrationOnValleyRegions;
    }
 
    public void addPlannerListener(BipedalFootstepPlannerListener listener)
@@ -67,50 +86,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          return FootstepNodeSnapData.emptyData();
       }
 
-      if (shiftFootToAvoidBodyCollision(footstepNode, snapTransform))
-      {
-         return doShiftFromNearCollision(footstepNode, snapTransform);
-      }
-      else
-      {
-         return doSnapAndWiggle(footstepNode, snapTransform);
-      }
-   }
-
-   private FootstepNodeSnapData doShiftFromNearCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
-   {
-      Point3DReadOnly snappedNode = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snappedNode.getZ());
-      double distanceOfClosestPointInFront = collisionData.getDistanceOfClosestPointInFront();
-      double distanceOfClosestPointInBack = collisionData.getDistanceOfClosestPointInBack();
-
-      double translationX;
-      double maximumTranslationX = 0.5 * LatticeNode.gridSizeXY;
-      if(Double.isNaN(distanceOfClosestPointInFront))
-      {
-         translationX = maximumTranslationX;
-      }
-      else if(Double.isNaN(distanceOfClosestPointInBack))
-      {
-         translationX = - maximumTranslationX;
-      }
-      else
-      {
-         translationX = 0.5 * (distanceOfClosestPointInFront - distanceOfClosestPointInBack);
-      }
-
-      snapTransform.appendTranslation(translationX, 0.0, 0.0);
-      return new FootstepNodeSnapData(snapTransform);
-   }
-
-   private boolean shiftFootToAvoidBodyCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
-   {
-      if(collisionDetector == null || !parameters.checkForBodyBoxCollisions())
-         return false;
-
-      Point3DReadOnly footstepInWorld = FootstepNodeTools.getNodePositionInWorld(footstepNode, snapTransform);
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, footstepInWorld.getZ());
-      return !Double.isNaN(collisionData.getDistanceOfClosestPointInFront()) || !Double.isNaN(collisionData.getDistanceOfClosestPointInBack());
+      return doSnapAndWiggle(footstepNode, snapTransform);
    }
 
    private FootstepNodeSnapData doSnapAndWiggle(FootstepNode footstepNode, RigidBodyTransform snapTransform)
@@ -124,16 +100,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
       if (wiggleTransformLocalToLocal == null)
       {
-         if (parameters.getRejectIfCannotFullyWiggleInside())
-         {
-            rejectNode(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
-            return FootstepNodeSnapData.emptyData();
-         }
-         else
-         {
-            FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
-            return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
-         }
+         FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
+         return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
       }
 
       RigidBodyTransform wiggleTransformWorldToWorld = getWiggleTransformInWorldFrame(wiggleTransformLocalToLocal);
@@ -194,7 +162,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-      if (parameters.getWiggleIntoConvexHullOfPlanarRegions())
+      if (wiggleIntoConvexHullOfPlanarRegions.getAsBoolean())
          return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
       else
          return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
@@ -202,13 +170,13 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    private void updateWiggleParameters()
    {
-      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
-      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
-      wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
+      wiggleParameters.deltaInside = wiggleInsideDelta.getAsDouble();
+      wiggleParameters.maxX = maximumXYWiggleDistance.getAsDouble();
+      wiggleParameters.minX = -maximumXYWiggleDistance.getAsDouble();
+      wiggleParameters.maxY = maximumXYWiggleDistance.getAsDouble();
+      wiggleParameters.minY = -maximumXYWiggleDistance.getAsDouble();
+      wiggleParameters.maxYaw = maximumYawWiggle.getAsDouble();
+      wiggleParameters.minYaw = -maximumYawWiggle.getAsDouble();
    }
 
    private RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal)
@@ -254,7 +222,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   double zPenetration = vertex3dInWorld.getZ() - planeZGivenXY;
 
-                  if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
+                  if (zPenetration > maximumZPenetrationOnValleyRegions.getAsDouble())
                   {
                      rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;

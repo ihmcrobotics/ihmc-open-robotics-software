@@ -1,3 +1,5 @@
+# This message is part of the IHMC humanoid behavior module.
+
 int8 WALK_TO_GOAL_ACTION_FIND_PATH=0
 
 int8 WALK_TO_GOAL_ACTION_EXECUTE=1

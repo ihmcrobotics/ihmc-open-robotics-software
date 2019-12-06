@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,14 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import com.jme3.math.Transform;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -34,13 +29,20 @@ import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -56,6 +58,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -78,10 +81,11 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -91,6 +95,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -130,9 +135,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private static final String robotName = "testBot";
    private MultiStageFootstepPlanningModule toolboxModule;
-   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
    private RealtimeRos2Node ros2Node;
 
@@ -156,20 +158,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       tryToStartModule(() -> setupFootstepPlanningToolboxModule());
 
-      messager.registerTopicListener(FootstepPlanResponseTopic, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResultTopic, request -> uiReceivedResult.set(true));
+      messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
+      messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
 
-      uiFootstepPlanReference = messager.createInput(FootstepPlanResponseTopic);
-      uiPlanningResultReference = messager.createInput(PlanningResultTopic);
+      uiFootstepPlanReference = messager.createInput(FootstepPlanResponse);
+      uiPlanningResultReference = messager.createInput(PlanningResult);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
-
-      footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      footstepPlannerParametersPublisher = ROS2Tools
-            .createPublisher(ros2Node, FootstepPlannerParametersPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      toolboxStatePublisher = ROS2Tools
-            .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
 
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
@@ -241,7 +236,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       uiPlanningResultReference = null;
 
       ros2Node = null;
-      footstepPlanningRequestPublisher = null;
       toolboxModule = null;
 
       messageConverter = null;
@@ -373,24 +367,25 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private void packPlanningRequest(DataSet dataset, Messager messager)
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, dataset.getPlannerInput().getStartPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, dataset.getPlannerInput().getGoalPosition());
-      messager.submitMessage(PlannerTypeTopic, getPlannerType());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, dataset.getPlannerInput().getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, dataset.getPlannerInput().getGoalPosition());
+      messager.submitMessage(PlannerType, getPlannerType());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeMultiplier * timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeMultiplier * timeout);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.MAX_VALUE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, getRobotModel().getFootstepPlannerParameters());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, getRobotModel().getFootstepPlannerParameters());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PostProcessingParametersTopic, new DefaultFootstepPostProcessingParameters());
 
       if(dataset.getPlannerInput().hasStartOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
       if(dataset.getPlannerInput().hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
       if (DEBUG)
          LogTools.info("Sending out planning request packet.");
@@ -717,7 +712,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       boolean checkCondition();
    }
 
-   private class TestRobotModel implements DRCRobotModel
+   public class TestRobotModel implements DRCRobotModel
    {
       @Override
       public DRCRobotJointMap getJointMap()
@@ -738,12 +733,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       @Override
-      public Transform getJmeTransformWristToHand(RobotSide side)
-      {
-         return null;
-      }
-
-      @Override
       public double getSimulateDT()
       {
          return 0;
@@ -751,12 +740,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       @Override
       public double getEstimatorDT()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getStandPrepAngle(String jointName)
       {
          return 0;
       }
@@ -830,13 +813,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
       @Override
       public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
-         return null;
+         return new SmoothCMPPlannerParameters();
       }
 
       @Override
       public WalkingControllerParameters getWalkingControllerParameters()
       {
-         return null;
+         return new TestWalkingControllerParameters();
       }
 
       @Override
@@ -868,7 +851,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
       @Override
       public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
       {
-         return new DefaultVisibilityGraphParameters();
+         DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
+         return visibilityGraphParameters;
       }
    }
 
@@ -1101,6 +1085,353 @@ public abstract class FootstepPlannerToolboxDataSetTest
       public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return null;
+      }
+   }
+
+   public class TestWalkingControllerParameters extends WalkingControllerParameters
+   {
+
+      @Override
+      public double getOmega0()
+      {
+         return 0;
+      }
+
+      @Override
+      public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
+      {
+         return false;
+      }
+
+      @Override
+      public double getMinimumSwingTimeForDisturbanceRecovery()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getICPErrorThresholdToSpeedUpSwing()
+      {
+         return 0;
+      }
+
+      @Override
+      public boolean allowAutomaticManipulationAbort()
+      {
+         return false;
+      }
+
+      @Override
+      public ICPControlGains createICPControlGains()
+      {
+         return null;
+      }
+
+      @Override
+      public PDGains getCoMHeightControlGains()
+      {
+         return null;
+      }
+
+      @Override
+      public PIDSE3Configuration getSwingFootControlGains()
+      {
+         return null;
+      }
+
+      @Override
+      public PIDSE3Configuration getHoldPositionFootControlGains()
+      {
+         return null;
+      }
+
+      @Override
+      public PIDSE3Configuration getToeOffFootControlGains()
+      {
+         return null;
+      }
+
+      @Override
+      public double getDefaultTransferTime()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDefaultSwingTime()
+      {
+         return 0;
+      }
+
+      @Override
+      public FootSwitchFactory getFootSwitchFactory()
+      {
+         return null;
+      }
+
+      @Override
+      public String[] getJointsToIgnoreInController()
+      {
+         return new String[0];
+      }
+
+      @Override
+      public MomentumOptimizationSettings getMomentumOptimizationSettings()
+      {
+         return null;
+      }
+
+      @Override
+      public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public double getMaxICPErrorBeforeSingleSupportForwardX()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxICPErrorBeforeSingleSupportInnerY()
+      {
+         return 0;
+      }
+
+      @Override
+      public ToeOffParameters getToeOffParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public SwingTrajectoryParameters getSwingTrajectoryParameters()
+      {
+         return new TestSwingTrajectoryParameters();
+      }
+
+      @Override
+      public ICPOptimizationParameters getICPOptimizationParameters()
+      {
+         return null;
+      }
+
+      @Override
+      public double getMaximumLegLengthForSingularityAvoidance()
+      {
+         return 0;
+      }
+
+      @Override
+      public double minimumHeightAboveAnkle()
+      {
+         return 0;
+      }
+
+      @Override
+      public double nominalHeightAboveAnkle()
+      {
+         return 0;
+      }
+
+      @Override
+      public double maximumHeightAboveAnkle()
+      {
+         return 0;
+      }
+
+      @Override
+      public double defaultOffsetHeightAboveAnkle()
+      {
+         return 0;
+      }
+
+      @Override
+      public SteppingParameters getSteppingParameters()
+      {
+         return new TestSteppingParameters();
+      }
+   }
+
+   public class TestSteppingParameters implements SteppingParameters
+   {
+      @Override
+      public double getMaxStepLength()
+      {
+         return 0.5;
+      }
+
+      @Override
+      public double getDefaultStepLength()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxStepWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMinStepWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getInPlaceWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDesiredStepForward()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getStepPitch()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxStepUp()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxStepDown()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxSwingHeightFromStanceFoot()
+      {
+         return 0.5;
+      }
+
+      @Override
+      public double getMaxAngleTurnOutwards()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMaxAngleTurnInwards()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getMinAreaPercentForValidFootstep()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDangerAreaPercentForValidFootstep()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootForwardOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootBackwardOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getToeWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getFootLength()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getActualFootWidth()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getActualFootLength()
+      {
+         return 0;
+      }
+   }
+
+   public class TestSwingTrajectoryParameters extends SwingTrajectoryParameters
+   {
+
+      @Override
+      public boolean doToeTouchdownIfPossible()
+      {
+         return false;
+      }
+
+      @Override
+      public double getToeTouchdownAngle()
+      {
+         return 0;
+      }
+
+      @Override
+      public boolean doHeelTouchdownIfPossible()
+      {
+         return false;
+      }
+
+      @Override
+      public double getHeelTouchdownAngle()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDesiredTouchdownHeightOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getDesiredTouchdownVelocity()
+      {
+         return 0.3;
+      }
+
+      @Override
+      public double getDesiredTouchdownAcceleration()
+      {
+         return 2.0;
+      }
+
+      @Override
+      public double getMinMechanicalLegLength()
+      {
+         return 0;
       }
    }
 }

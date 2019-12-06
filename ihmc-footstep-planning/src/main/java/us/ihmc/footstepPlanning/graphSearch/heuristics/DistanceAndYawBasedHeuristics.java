@@ -10,14 +10,55 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.function.DoubleSupplier;
+
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DoubleSupplier stepUpWeight;
+   private final DoubleSupplier stepDownWeight;
+   private final DoubleSupplier maximumStepReach;
+   private final DoubleSupplier maximumStepYaw;
+   private final DoubleSupplier yawWeight;
+   private final DoubleSupplier costPerStep;
+   private final DoubleSupplier finalTurnProximity;
+   private final DoubleSupplier finalTurnProximityBlendFactor;
 
    public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
    {
-      super(weight, parameters, snapper);
-      this.parameters = parameters;
+      this(parameters::getStepUpWeight,
+           parameters::getStepDownWeight,
+           parameters::getMaximumStepReach,
+           parameters::getMaximumStepYaw,
+           parameters::getYawWeight,
+           parameters::getCostPerStep,
+           parameters::getFinalTurnProximity,
+           parameters::getFinalTurnProximityBlendFactor,
+           parameters::getIdealFootstepWidth,
+           weight::getValue,
+           snapper);
+   }
+
+   public DistanceAndYawBasedHeuristics(DoubleSupplier stepUpWeight,
+                                        DoubleSupplier stepDownWeight,
+                                        DoubleSupplier maximumStepReach,
+                                        DoubleSupplier maximumStepYaw,
+                                        DoubleSupplier yawWeight,
+                                        DoubleSupplier costPerStep,
+                                        DoubleSupplier finalTurnProximity,
+                                        DoubleSupplier finalTurnProximityBlendFactor,
+                                        DoubleSupplier idealFootstepWidth,
+                                        DoubleSupplier weight,
+                                        FootstepNodeSnapperReadOnly snapper)
+   {
+      super(weight, idealFootstepWidth, snapper);
+      this.stepUpWeight = stepUpWeight;
+      this.stepDownWeight = stepDownWeight;
+      this.maximumStepReach = maximumStepReach;
+      this.maximumStepYaw = maximumStepYaw;
+      this.yawWeight = yawWeight;
+      this.costPerStep = costPerStep;
+      this.finalTurnProximity = finalTurnProximity;
+      this.finalTurnProximityBlendFactor = finalTurnProximityBlendFactor;
    }
 
    @Override
@@ -33,21 +74,21 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       // add a two times multiplier because both feet have to move
       double heightChange = goalPose.getZ() - pose.getZ();
       if (heightChange > 0)
-         heightCost = parameters.getStepUpWeight() * 2.0 * heightChange;
+         heightCost = stepUpWeight.getAsDouble() * 2.0 * heightChange;
       else
-         heightCost = -parameters.getStepDownWeight() * 2.0 * heightChange;
+         heightCost = -stepDownWeight.getAsDouble() * 2.0 * heightChange;
 
-      double minSteps = euclideanDistance / parameters.getMaximumStepReach() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
-      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + heightCost + parameters.getCostPerStep() * minSteps;
+      double minSteps = euclideanDistance / maximumStepReach.getAsDouble() + Math.abs(yaw) / (0.5 * maximumStepYaw.getAsDouble());
+      return euclideanDistance + yawWeight.getAsDouble() * Math.abs(yaw) + heightCost + costPerStep.getAsDouble() * minSteps;
    }
 
    private double computeReferenceYaw(FramePose3DReadOnly pose, FramePose3D goalPose)
    {
       double distanceToGoal = pose.getPosition().distanceXY(goalPose.getPosition());
-      double finalTurnProximity = parameters.getFinalTurnProximity();
+      double finalTurnProximity = this.finalTurnProximity.getAsDouble();
 
-      double minimumBlendDistance = (1.0 - parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
-      double maximumBlendDistance = (1.0 + parameters.getFinalTurnProximityBlendFactor()) * finalTurnProximity;
+      double minimumBlendDistance = (1.0 - finalTurnProximityBlendFactor.getAsDouble()) * finalTurnProximity;
+      double maximumBlendDistance = (1.0 + finalTurnProximityBlendFactor.getAsDouble()) * finalTurnProximity;
 
       double pathHeading = BodyPathPlannerTools.calculateHeading(goalPose.getX() - pose.getX(), goalPose.getY() - pose.getY());
 

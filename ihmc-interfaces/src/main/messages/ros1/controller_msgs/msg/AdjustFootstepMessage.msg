@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# The intent of this message is to adjust a footstep when the robot is executing it
+# (a foot is currently swinging to reach the footstep to be adjusted).
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

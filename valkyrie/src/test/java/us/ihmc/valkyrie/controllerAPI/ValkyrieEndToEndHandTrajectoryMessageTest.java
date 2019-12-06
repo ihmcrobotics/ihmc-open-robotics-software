@@ -34,12 +34,11 @@ import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTable
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       @Override
       public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
@@ -189,19 +188,19 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   public DRCRobotModel getRobotModel()
+   public ValkyrieRobotModel getRobotModel()
    {
       return robotModel;
    }
 
    public DRCRobotModel getRobotModelWithHandContacts()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      return new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public RobotContactPointParameters<RobotSide> getContactPointParameters()
          {
-            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), null);
+            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), robotModel.getRobotPhysicalProperties(), null);
             contactPointParameters.createAdditionalHandContactPoints();
             return contactPointParameters;
          }
@@ -223,6 +222,6 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    @Override
    public double getLegLength()
    {
-      return ValkyriePhysicalProperties.getLegLength();
+      return robotModel.getRobotPhysicalProperties().getLegLength();
    }
 }
