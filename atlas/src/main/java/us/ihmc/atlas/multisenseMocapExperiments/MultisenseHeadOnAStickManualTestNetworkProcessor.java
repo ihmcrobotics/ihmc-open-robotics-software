@@ -14,6 +14,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 /**
  * Network Processor to run large scale multisense manual testing
@@ -30,11 +31,9 @@ public class MultisenseHeadOnAStickManualTestNetworkProcessor
       DRCNetworkModuleParameters params = new DRCNetworkModuleParameters();
       params.setRosUri(rosUri);
       params.enableRosModule(true);
-      params.enableMultisenseManualTestModule(true);
       params.enableSensorModule(true);
-      params.enableUiModule(true);
       
-      new DRCNetworkProcessor(robotModel, params );
+      new DRCNetworkProcessor(robotModel, params, PubSubImplementation.FAST_RTPS);
    }
    
    public static void main(String[] args) throws JSAPException, IOException
