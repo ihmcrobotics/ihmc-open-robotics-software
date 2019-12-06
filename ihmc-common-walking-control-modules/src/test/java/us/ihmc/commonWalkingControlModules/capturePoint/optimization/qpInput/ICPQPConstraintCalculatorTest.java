@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import static us.ihmc.robotics.Assert.*;
-
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ICPQPConstraintCalculatorTest
@@ -1471,8 +1469,8 @@ public class ICPQPConstraintCalculatorTest
    {
       assertEquals(prefix + " the number of constraints are not equal.", expected.getNumberOfConstraints(), actual.getNumberOfConstraints());
       assertEquals(prefix + " the number of variables are not equal.", expected.getNumberOfVariables(), actual.getNumberOfVariables());
-      JUnitTools.assertMatrixEquals(prefix + " Aineq is not equal.", expected.Aineq, actual.Aineq, epsilon);
-      JUnitTools.assertMatrixEquals(prefix + " bineq is not equal.", expected.bineq, actual.bineq, epsilon);
+      MatrixTestTools.assertMatrixEquals(prefix + " Aineq is not equal.", expected.Aineq, actual.Aineq, epsilon);
+      MatrixTestTools.assertMatrixEquals(prefix + " bineq is not equal.", expected.bineq, actual.bineq, epsilon);
    }
 
    private static void assertInequalityHolds(ICPInequalityInput inequalityToTest, DenseMatrix64F variables)

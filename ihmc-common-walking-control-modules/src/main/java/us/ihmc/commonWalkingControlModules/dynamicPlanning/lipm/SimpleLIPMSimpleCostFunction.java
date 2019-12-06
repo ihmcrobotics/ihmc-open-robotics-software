@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
-import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
-
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.SimpleLIPMDynamics.controlVectorSize;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.SimpleLIPMDynamics.stateVectorSize;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.matrixlib.DiagonalMatrixTools;
+import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 public class SimpleLIPMSimpleCostFunction implements LQTrackingCostFunction<DefaultDiscreteState>
 {

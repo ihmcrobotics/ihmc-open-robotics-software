@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ContinuousSLIPDynamicsTest
 {
@@ -80,13 +79,13 @@ public class ContinuousSLIPDynamicsTest
       functionExpected.set(thetaY, reactionTorque.getY() / inertia.getY());
       functionExpected.set(thetaZ, reactionTorque.getZ() / inertia.getZ());
 
-      JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
+      MatrixTestTools.assertMatrixEquals(functionExpected, function, 1e-7);
 
       dynamics.getDynamics(FLIGHT, currentState, currentControl, constants, function);
 
       functionExpected.zero();
       functionExpected.set(z, 0, -gravity);
-      JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
+      MatrixTestTools.assertMatrixEquals(functionExpected, function, 1e-7);
    }
 
    @Test
@@ -180,13 +179,13 @@ public class ContinuousSLIPDynamicsTest
       gradientExpected.set(tauZ, z, 1.0 / inertia.getZ() * tau3z);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
 
 
       dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
       gradientExpected.zero();
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -263,7 +262,7 @@ public class ContinuousSLIPDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -340,7 +339,7 @@ public class ContinuousSLIPDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -427,13 +426,13 @@ public class ContinuousSLIPDynamicsTest
       gradientExpected.set(tauZ, yF, 1.0 / inertia.getZ() * fx_k);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
 
 
       dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, gradient);
       gradientExpected.zero();
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -539,7 +538,7 @@ public class ContinuousSLIPDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -645,6 +644,6 @@ public class ContinuousSLIPDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 }

@@ -1,5 +1,0 @@
-null: ~
-true: y
-false: n
-string: '12345'
-foo: [] # see http://code.google.com/p/yamlmatlab/issues/detail?id=5
