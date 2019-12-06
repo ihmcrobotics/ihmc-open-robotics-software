@@ -48,6 +48,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
    private final String robotName;
 
+   private CameraDataReceiver cameraDataReceiver;
+
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
                                      RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
                                      RobotTarget target)
@@ -79,13 +81,19 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
-      CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(), fullRobotModelFactory,
-                                                                        multisenseLeftEyeCameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer,
-                                                                        scsSensorsCommunicator, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
+      cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(),
+                                                     fullRobotModelFactory,
+                                                     multisenseLeftEyeCameraParameters.getSensorNameInSdf(),
+                                                     robotConfigurationDataBuffer,
+                                                     scsSensorsCommunicator,
+                                                     ros2Node,
+                                                     rosClockCalculator::computeRobotMonotonicTime);
       cameraDataReceiver.start();
 
       lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
@@ -100,7 +108,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       {
          throw new IllegalArgumentException("The ros uri was null, val's physical sensors require a ros uri to be set! Check your Network Parameters.ini file");
       }
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       RosMainNode rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");
@@ -110,9 +120,14 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
       boolean shouldUseRosParameterSetters = sensorInformation.setupROSParameterSetters();
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
-                                                                                    rosClockCalculator, multisenseLeftEyeCameraParameters,
-                                                                                    multisenseLidarParameters, multisenseStereoParameters,
+      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory,
+                                                                                    robotConfigurationDataBuffer,
+                                                                                    rosMainNode,
+                                                                                    ros2Node,
+                                                                                    rosClockCalculator,
+                                                                                    multisenseLeftEyeCameraParameters,
+                                                                                    multisenseLidarParameters,
+                                                                                    multisenseStereoParameters,
                                                                                     shouldUseRosParameterSetters);
 
       lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
@@ -153,5 +168,15 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
             sensorPoseToPack.set(transformToWorldToPack);
          }
       };
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      lidarScanPublisher.shutdown();
+      if (ENABLE_STEREO_PUBLISHER)
+         stereoVisionPointCloudPublisher.shutdown();
+      if (cameraDataReceiver != null)
+         cameraDataReceiver.closeAndDispose();
    }
 }
