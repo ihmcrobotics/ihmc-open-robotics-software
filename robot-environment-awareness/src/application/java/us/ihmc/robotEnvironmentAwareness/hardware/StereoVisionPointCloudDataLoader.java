@@ -12,10 +12,26 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 
 public class StereoVisionPointCloudDataLoader
 {
+   static final RigidBodyTransform transformer = new RigidBodyTransform();
+   static
+   {
+      Vector3D rotatingAxis = new Vector3D(3.0, 1.0, 0.0);
+      rotatingAxis.normalize();
+      double angle = Math.toRadians(4.0);
+      AxisAngle rotator = new AxisAngle();
+      rotator.setAxisAngle(rotatingAxis.getX(), rotatingAxis.getY(), rotatingAxis.getZ(), angle);
+      transformer.setRotation(rotator);
+   }
+
    public static StereoVisionPointCloudMessage getMessageFromFile(File dataFile)
    {
       if (!dataFile.canRead())
@@ -55,9 +71,14 @@ public class StereoVisionPointCloudDataLoader
          {
             idxyzcolorArray = lineJustFetched.split("\t");
             Integer.parseInt(idxyzcolorArray[0]);
-            pointCloudBuffer[3 * lineIndex + 0] = Double.parseDouble(idxyzcolorArray[1]);
-            pointCloudBuffer[3 * lineIndex + 1] = Double.parseDouble(idxyzcolorArray[2]);
-            pointCloudBuffer[3 * lineIndex + 2] = Double.parseDouble(idxyzcolorArray[3]);
+            Point3D point = new Point3D(Double.parseDouble(idxyzcolorArray[1]), Double.parseDouble(idxyzcolorArray[2]), Double.parseDouble(idxyzcolorArray[3]));
+            transformer.transform(point);
+            pointCloudBuffer[3 * lineIndex + 0] = point.getX();
+            pointCloudBuffer[3 * lineIndex + 1] = point.getY();
+            pointCloudBuffer[3 * lineIndex + 2] = point.getZ();
+            //            pointCloudBuffer[3 * lineIndex + 0] = Double.parseDouble(idxyzcolorArray[1]);
+            //            pointCloudBuffer[3 * lineIndex + 1] = Double.parseDouble(idxyzcolorArray[2]);
+            //            pointCloudBuffer[3 * lineIndex + 2] = Double.parseDouble(idxyzcolorArray[3]);
             colorBuffer[lineIndex] = Integer.parseInt(idxyzcolorArray[4]);
 
             lineIndex++;
@@ -117,8 +138,15 @@ public class StereoVisionPointCloudDataLoader
          double os = Double.parseDouble(positionQuaternianArray[6]);
 
          StereoVisionPointCloudMessage message = getMessageFromFile(pointCloudFile);
-         message.getSensorPosition().set(px, py, pz);
-         message.getSensorOrientation().set(ox, oy, oz, os);
+         Pose3D sensorPose = new Pose3D();
+         sensorPose.setPosition(px, py, pz);
+         sensorPose.setOrientation(ox, oy, oz, os);
+         transformer.transform(sensorPose.getPosition());
+         transformer.transform(sensorPose.getOrientation());
+         message.getSensorPosition().set(sensorPose.getPosition());
+         message.getSensorOrientation().set(sensorPose.getOrientation());
+         //         message.getSensorPosition().set(px, py, pz);
+         //         message.getSensorOrientation().set(ox, oy, oz, os);
          return message;
       }
    }
@@ -189,7 +217,7 @@ public class StereoVisionPointCloudDataLoader
 
       return messagesInTimeOrder;
    }
-   
+
    public static List<Long> extractTimestamps(File selectedDataFolder)
    {
       File[] listOfFiles = selectedDataFolder.listFiles();

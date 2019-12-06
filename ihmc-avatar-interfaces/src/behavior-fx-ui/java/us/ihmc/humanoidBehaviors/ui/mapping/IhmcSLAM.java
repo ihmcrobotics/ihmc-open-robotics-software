@@ -5,7 +5,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -25,10 +24,10 @@ public class IhmcSLAM
 
    public static final double OCTREE_RESOLUTION = 0.02;
 
-   public static final double VALID_PLANES_RATIO_THRESHOLD = 0.3;
+   public static final double VALID_PLANES_RATIO_THRESHOLD = 0.1;
 
-   public static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
-   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(30.0);
+   public static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.05;
+   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(5.0);
 
    private final List<Point3DReadOnly[]> originalPointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> originalSensorPoses = new ArrayList<>();
@@ -65,6 +64,11 @@ public class IhmcSLAM
       }
    }
 
+   public IhmcSLAM()
+   {
+      this.naiveSLAM = false;
+   }
+
    public IhmcSLAM(boolean naiveSLAM)
    {
       this.naiveSLAM = naiveSLAM;
@@ -75,6 +79,8 @@ public class IhmcSLAM
    {
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frame.getPointCloud(), frame.getSensorPose().getTranslation(),
                                                                                                OCTREE_RESOLUTION);
+
+      System.out.println("rawData " + rawData.size());
 
       planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
                                                              polygonizerParameters);
@@ -94,8 +100,8 @@ public class IhmcSLAM
    public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(pointCloudMessage);
-      originalPointCloudMap.add(frame.getPointCloud());
-      originalSensorPoses.add(frame.getSensorPose());
+      originalPointCloudMap.add(frame.getOriginalPointCloud());
+      originalSensorPoses.add(frame.getOriginalSensorPose());
 
       slamFrames.add(frame);
       pointCloudMap.add(frame.getPointCloud());
@@ -104,50 +110,44 @@ public class IhmcSLAM
       updatePlanarRegionsMap();
    }
 
+   public List<List<IhmcSurfaceElement>> allSurfaceElements = new ArrayList<>();
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
-      originalPointCloudMap.add(frame.getPointCloud());
-      originalSensorPoses.add(frame.getSensorPose());
+      originalPointCloudMap.add(frame.getOriginalPointCloud());
+      originalSensorPoses.add(frame.getOriginalSensorPose());
 
-      RigidBodyTransform optimizedMultiplier;
-      boolean mergeable = true;
-      if (naiveSLAM)
+      RigidBodyTransform optimizedMultiplier = new RigidBodyTransform();
+      if (!naiveSLAM)
       {
-         optimizedMultiplier = new RigidBodyTransform();
-      }
-      else
-      {
-         List<IhmcSurfaceElement> validPlanes = IhmcSLAMTools.computeMergeableSurfaceElements(planarRegionsMap, frame, OCTREE_RESOLUTION,
+         System.out.println("planarRegionsMap.getNumberOfPlanarRegions() " + planarRegionsMap.getNumberOfPlanarRegions());
+         List<IhmcSurfaceElement> surfaceElements = IhmcSLAMTools.computeMergeableSurfaceElements(planarRegionsMap, frame, OCTREE_RESOLUTION,
                                                                                               VALID_PLANES_RATIO_THRESHOLD, MAXIMUM_DISTANCE_OF_SIMILARITY,
                                                                                               MAXIMUM_ANGLE_OF_SIMILARITY);
-         if (validPlanes == null)
+         if (surfaceElements == null)
          {
-            mergeable = false;
-            return mergeable;
+            optimizedMultiplier = new RigidBodyTransform();
          }
-
-         optimizedMultiplier = computeOptimizedMultiplier(validPlanes, frame.getInitialSensorPoseToWorld());
-         frame.updateSLAM(optimizedMultiplier);
-
-         System.out.println("optimizedMultiplier");
-         System.out.println(optimizedMultiplier);
+         else
+         {
+            allSurfaceElements.add(surfaceElements);
+            optimizedMultiplier = computeOptimizedMultiplier(surfaceElements, frame.getInitialSensorPoseToWorld());
+         }
       }
 
-      if (mergeable)
-      {
-         slamFrames.add(frame);
-         pointCloudMap.add(frame.getPointCloud());
-         sensorPoses.add(frame.getSensorPose());
+      frame.updateSLAM(optimizedMultiplier);
 
-         updatePlanarRegionsMap();
-         //updatePlanarRegionsMap(frame);
-      }
+      //      System.out.println("optimizedMultiplier");
+      //      System.out.println(optimizedMultiplier);
 
-      if (DEBUG)
-         System.out.println("mergeable " + mergeable);
+      slamFrames.add(frame);
+      pointCloudMap.add(frame.getPointCloud());
+      sensorPoses.add(frame.getSensorPose());
 
-      return mergeable;
+//            updatePlanarRegionsMap();
+      updatePlanarRegionsMap(frame);
+
+      return true;
    }
 
    private RigidBodyTransform computeOptimizedMultiplier(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
@@ -174,7 +174,6 @@ public class IhmcSLAM
       RigidBodyTransform transformer = new RigidBodyTransform();
       function.convertToSensorPoseMultiplier(optimalInput, transformer);
 
-      System.out.println(optimalInput.get(0) + " " + optimalInput.get(1));
       return transformer;
    }
 
