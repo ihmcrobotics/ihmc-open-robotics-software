@@ -41,6 +41,7 @@ public class RobotAndMapViewer
          view3dFactory.addDefaultLighting();
 
          view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAPPING_MODULE, false));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
