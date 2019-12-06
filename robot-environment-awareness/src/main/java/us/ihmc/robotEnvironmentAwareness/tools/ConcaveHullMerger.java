@@ -314,32 +314,7 @@ public class ConcaveHullMerger
 
       if (!exitedWithoutALoop)
       {
-//         double smallestGapSize = Double.POSITIVE_INFINITY;
-//         for (Point2D a : hullOneList)
-//         {
-//            for (Point2D b : hullTwoList)
-//            {
-//               if (a != b)
-//               {
-//                  double distance = a.distance(b);
-//                  if (distance < smallestGapSize)
-//                  {
-//                     smallestGapSize = distance;
-//                  }
-//               }
-//            }
-//         }
          LogTools.error("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!");
-////         for (Point2D point2D : hullOneIn)
-////         {
-////            System.out.println("hullOneIn.add(new Point2D(" + point2D.getX() + ", " + point2D.getY() + "));");
-////         }
-////         for (Point2D point2D : hullTwoIn)
-////         {
-////            System.out.println("hullTwoIn.add(new Point2D(" + point2D.getX() + ", " + point2D.getY() + "));");
-////         }
-//
-//         throw new UncheckedExecutionException("mergedVertices.size() > hullOne.length + hullTwo.length. Something got looped!", new Exception());
          if (listener != null)
          {
             listener.hullGotLooped(originalHullOne, originalHullTwo, mergedVertices);
