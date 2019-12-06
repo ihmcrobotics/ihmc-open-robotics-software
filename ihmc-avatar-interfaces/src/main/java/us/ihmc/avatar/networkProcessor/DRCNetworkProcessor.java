@@ -127,7 +127,6 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
 
       modules.add(new FootstepPlanPostProcessingToolboxModule(robotModel,
                                                               null,
-                                                              robotModel.getFootstepPostProcessingParameters(),
                                                               params.isFootstepPostProcessingToolboxVisualizerEnabled(),
                                                               pubSubImplementation));
    }
