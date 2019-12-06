@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -10,9 +9,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -22,10 +18,11 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Acts as REA, reporting currently visible area as planar regions.
+ */
 public class SimulatedREAModule
 {
-   private static final boolean USE_POLYGONIZER = true;
-
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
@@ -35,11 +32,6 @@ public class SimulatedREAModule
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
-
-   private PlanarRegionsList slamMap = new PlanarRegionsList();
-   private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
-
-   private Notification slamUpdated = new Notification();
 
    public SimulatedREAModule(PlanarRegionsList map, PubSubImplementation pubSubImplementation)
    {
@@ -87,39 +79,15 @@ public class SimulatedREAModule
       this.map = map;
    }
 
-   int i = 0;
-
    private void process()
    {
       remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
-      boolean slamUpdatedTemp = false;
       if (remoteSyncedHumanoidRobotState != null)
       {
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
          {
-            PlanarRegionsList visibleRegions = simulatedDepthCamera.filterMapToVisible(map);
-            if (i++ % 10 == 0)
-            {
-               if (slamMap.isEmpty())
-               {
-                  slamMap = visibleRegions;
-               }
-               else
-               {
-                  try
-                  {
-                     slamMap = PlanarRegionSLAM.slam(slamMap, visibleRegions, planarRegionSLAMParameters, (ConcaveHullMergerListener) null).getMergedMap();
-                     slamUpdatedTemp = true;
-                  }
-                  catch (Exception e)
-                  {
-                     // do nothing but need to fix these crashes
-                  }
-               }
-            }
-
-            combinedRegionsList.addAll(slamMap.getPlanarRegionsAsList());
+            combinedRegionsList.addAll(simulatedDepthCamera.filterMapToVisible(map).getPlanarRegionsAsList());
          }
          else
          {
@@ -137,7 +105,6 @@ public class SimulatedREAModule
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
-         if (slamUpdatedTemp) slamUpdated.set();
       }
    }
 
@@ -164,10 +131,5 @@ public class SimulatedREAModule
             }
          }
       }
-   }
-
-   public Notification getSlamUpdated()
-   {
-      return slamUpdated;
    }
 }

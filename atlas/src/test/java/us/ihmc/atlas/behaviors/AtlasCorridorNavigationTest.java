@@ -48,6 +48,7 @@ import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
@@ -128,10 +129,15 @@ public class AtlasCorridorNavigationTest
    private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal)
    {
       new Thread(() -> {
-         LogTools.info("Creating simulate REA module");
+         LogTools.info("Creating simulated REA module");
          SimulatedREAModule simulatedREAModule = new SimulatedREAModule(map, createRobotModel(), pubSubMode);
-         slamUpdated = simulatedREAModule.getSlamUpdated();
          simulatedREAModule.start();
+      }).start();
+
+      new Thread(() -> {
+         LogTools.info("Creating planar regions mapping module");
+         PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
+         slamUpdated = planarRegionsMappingModule.getSlamUpdated();
       }).start();
 
       new Thread(() -> {
@@ -154,7 +160,7 @@ public class AtlasCorridorNavigationTest
       ThreadTools.sleepSeconds(5.0); // wait a bit for other threads to start
 
       // create map subscriber
-      ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.MAPPING_MODULE);
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());

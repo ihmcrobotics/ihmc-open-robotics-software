@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -39,7 +40,7 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAPPING_MODULE, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
