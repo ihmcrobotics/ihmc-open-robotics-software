@@ -134,6 +134,7 @@ public class IhmcSLAMTools
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
       referenceOctree.setNormalEstimationParameters(normalEstimationParameters);
 
       referenceOctree.updateNormals();
@@ -168,6 +169,10 @@ public class IhmcSLAMTools
 
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      planarRegionSegmentationParameters.setMinRegionSize(200);
+      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
+      
+      
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
 
@@ -183,7 +188,7 @@ public class IhmcSLAMTools
    }
 
    public static List<IhmcSurfaceElement> computeMergeableSurfaceElements(PlanarRegionsList planarRegionsMap, IhmcSLAMFrame frame, double octreeResolution,
-                                                                      double validRatio, double maximumDistance, double maximumAngle)
+                                                                          double validRatio, double maximumDistance, double maximumAngle)
    {
       NormalOcTree octree = frame.computeOctreeInPreviousView(octreeResolution);
 
@@ -192,6 +197,7 @@ public class IhmcSLAMTools
       NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
       UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
       int numberOfNodes = 0;
+
       for (UIOcTreeNode uiOcTreeNode : octreeForViz)
       {
          if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
@@ -205,34 +211,33 @@ public class IhmcSLAMTools
          uiOcTreeNode.getHitLocation(pointOnPlane);
          Plane3D octreePlane = new Plane3D(pointOnPlane, planeNormal);
 
-         int indexClosestPlanarRegion = -1;
-         double minimumDistance = Double.MAX_VALUE;
+         int indexBestPlanarRegion = -1;
+         double minimumScore = Double.MAX_VALUE;
          for (int j = 0; j < numberOfPlanarRegions; j++)
          {
             PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
             Plane3D plane = planarRegion.getPlane();
-            double distance = plane.distance(octreePlane.getPoint());
-            if (distance < minimumDistance)
+            double positionDistance = plane.distance(octreePlane.getPoint());
+            double angleDistance = Math.acos(Math.abs(planarRegion.getPlane().getNormal().dot(octreePlane.getNormal())));
+            double score = positionDistance / maximumDistance + angleDistance / maximumAngle;
+            if (score < minimumScore)
             {
-               minimumDistance = distance;
-               indexClosestPlanarRegion = j;
+               minimumScore = score;
+               indexBestPlanarRegion = j;
             }
          }
-         PlanarRegion closestPlanarRegion = planarRegionsMap.getPlanarRegion(indexClosestPlanarRegion);
-         double angleDistance = Math.abs(closestPlanarRegion.getPlane().getNormal().dot(octreePlane.getNormal()));
 
-         if (minimumDistance < maximumDistance && angleDistance > Math.cos(maximumAngle))
+         if (minimumScore < 1.0)
          {
             IhmcSurfaceElement surfaceElement = new IhmcSurfaceElement(octreeResolution);
             surfaceElement.setPlane(octreePlane);
-            surfaceElement.setMergeablePlanarRegion(closestPlanarRegion);
+            surfaceElement.setMergeablePlanarRegion(planarRegionsMap.getPlanarRegion(indexBestPlanarRegion));
             surfaceElements.add(surfaceElement);
          }
       }
 
       double ratio = (double) surfaceElements.size() / numberOfNodes;
-      System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " validPlanes are " + surfaceElements.size() + " ratio "
-            + ratio);
+      // System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " elements are " + surfaceElements.size() + " ratio " + ratio);
 
       if (ratio < validRatio || surfaceElements.size() == 0)
          return null;

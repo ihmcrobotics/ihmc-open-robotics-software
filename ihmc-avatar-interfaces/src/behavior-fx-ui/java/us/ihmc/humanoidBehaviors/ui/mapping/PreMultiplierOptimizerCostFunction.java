@@ -21,12 +21,19 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
    private static final double LEAST_SQUARE_WEIGHT = 0.1;
 
    private RigidBodyTransformReadOnly transformWorldToSensorPose;
+   private boolean assumeFlatGround = true;
 
-   public PreMultiplierOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements,
-                                             RigidBodyTransformReadOnly transformWorldToSensorPose)
+   public PreMultiplierOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
       this.surfaceElements = surfaceElements;
       this.transformWorldToSensorPose = transformWorldToSensorPose;
+
+      int firstPlanarRegionId = surfaceElements.get(0).getMergeablePlanarRegionId();
+      for (IhmcSurfaceElement surfaceElement : surfaceElements)
+      {
+         if (firstPlanarRegionId != surfaceElement.getMergeablePlanarRegionId())
+            assumeFlatGround = false;
+      }
    }
 
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
@@ -87,8 +94,12 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
          if (convertedElement.isInPlanarRegion())
             cnt++;
       }
-
-      double snappingScore = 1 - (double) cnt / convertedElements.size();
+      
+      double snappingScore;
+      if (assumeFlatGround)
+         snappingScore = 0.0;
+      else
+         snappingScore = 1 - (double) cnt / convertedElements.size();
       cost = cost + snappingScore * SNAPPING_PARALLEL_WEIGHT;
 
       return cost;
