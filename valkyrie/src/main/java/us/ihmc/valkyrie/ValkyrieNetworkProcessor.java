@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class ValkyrieNetworkProcessor
 {
@@ -20,8 +21,6 @@ public class ValkyrieNetworkProcessor
    {
       DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
       
-      networkModuleParams.enableControllerCommunicator(true);
-      networkModuleParams.enableLocalControllerCommunicator(false);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableKinematicsStreamingToolbox(true, ValkyrieKinematicsStreamingToolboxModule.class);
@@ -43,6 +42,6 @@ public class ValkyrieNetworkProcessor
          System.out.println("ROS_MASTER_URI="+rosuri);
       }
       
-      new DRCNetworkProcessor(model, networkModuleParams);
+      new DRCNetworkProcessor(model, networkModuleParams, PubSubImplementation.FAST_RTPS);
    }
 }

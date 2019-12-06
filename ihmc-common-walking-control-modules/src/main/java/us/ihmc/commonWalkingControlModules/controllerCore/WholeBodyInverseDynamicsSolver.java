@@ -42,7 +42,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -324,8 +323,8 @@ public class WholeBodyInverseDynamicsSolver
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
-      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
-      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
+      yoDesiredMomentumRateAngular.set(0, momentumRate);
+      yoDesiredMomentumRateLinear.set(3, momentumRate);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()

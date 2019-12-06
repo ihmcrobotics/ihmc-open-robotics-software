@@ -1,6 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -24,10 +25,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class StateSpaceSystemDiscretizerTest
 {
@@ -90,7 +89,7 @@ public class StateSpaceSystemDiscretizerTest
 
       stateSpaceSystemDiscretizer.discretize(discreteA, discreteB, discreteQ, discretizationTimeStep);
 
-      JUnitTools.assertMatrixEquals(discreteR, continuousR, 1e-7);
+      MatrixTestTools.assertMatrixEquals(discreteR, continuousR, 1e-7);
 
       printSystemMatrices("Discrete: ", discreteA, discreteB, discreteQ, discreteR, discretizationTimeStep);
 

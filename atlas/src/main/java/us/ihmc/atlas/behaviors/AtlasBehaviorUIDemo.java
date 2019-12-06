@@ -1,5 +1,7 @@
 package us.ihmc.atlas.behaviors;
 
+import java.util.function.Supplier;
+
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -27,8 +29,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
-
-import java.util.function.Supplier;
 
 /**
  * Runs self contained behavior demo.
@@ -71,7 +71,7 @@ public class AtlasBehaviorUIDemo
 
          new Thread(() -> {
             LogTools.info("Creating bipedal support region publisher");
-            new BipedalSupportPlanarRegionPublisher(createRobotModel()).start();
+            new BipedalSupportPlanarRegionPublisher(createRobotModel(), PubSubImplementation.FAST_RTPS).start();
          }).start();
       }
 

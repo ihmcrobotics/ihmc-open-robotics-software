@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
-
 import java.util.Random;
 
-public abstract class TrackingCostFunctionTest<E extends Enum>
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
+
+public abstract class TrackingCostFunctionTest<E extends Enum<E>>
 {
    public abstract int getNumberOfStates();
    public abstract int getStateVectorSize();
@@ -54,7 +55,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          }
 
          double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
+         MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
       }
    }
 
@@ -94,7 +95,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          }
 
          double value = Math.max(1.0e-10, 1e-3 * Math.abs(CommonOps.elementSum(expectedCostGradient)));
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, value);
+         MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, value);
       }
    }
 
@@ -134,7 +135,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          }
 
          double trace = Math.abs(CommonOps.trace(expectedCostHessian));
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 
@@ -176,7 +177,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          }
 
          double trace = Math.abs(CommonOps.trace(expectedCostHessian));
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 
@@ -216,7 +217,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
          }
 
          double trace = Math.abs(CommonOps.trace(expectedCostHessian));
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
 }

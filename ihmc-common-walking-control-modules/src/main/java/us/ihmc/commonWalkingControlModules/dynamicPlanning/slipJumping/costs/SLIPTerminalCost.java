@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
+import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
 {
