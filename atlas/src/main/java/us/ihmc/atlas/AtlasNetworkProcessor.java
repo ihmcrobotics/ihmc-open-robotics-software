@@ -2,17 +2,14 @@ package us.ihmc.atlas;
 
 import java.net.URI;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.*;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasNetworkProcessor
 {
@@ -56,7 +53,6 @@ public class AtlasNetworkProcessor
          networkModuleParams.enableKinematicsToolbox(true);
          networkModuleParams.enableKinematicsToolboxVisualizer(false);
          networkModuleParams.enableKinematicsStreamingToolbox(true, AtlasKinematicsStreamingToolboxModule.class);
-         networkModuleParams.setFilterControllerInputMessages(true);
          networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
          networkModuleParams.enableAutoREAStateUpdater(true);
          networkModuleParams.enableWalkingPreviewToolbox(true);
@@ -87,8 +83,6 @@ public class AtlasNetworkProcessor
                target = RobotTarget.SCS;
             }
             model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
-            if (model.getHandModel() != null)
-               networkModuleParams.enableHandModule(true);
          }
          catch (IllegalArgumentException e)
          {
@@ -103,9 +97,7 @@ public class AtlasNetworkProcessor
          URI rosMasterURI = NetworkParameters.getROSURI();
          networkModuleParams.setRosUri(rosMasterURI);
 
-         networkModuleParams.enableLocalControllerCommunicator(false);
-
-         new DRCNetworkProcessor(args, model, networkModuleParams);
+         new DRCNetworkProcessor(args, model, networkModuleParams, PubSubImplementation.FAST_RTPS);
       }
       else
       {

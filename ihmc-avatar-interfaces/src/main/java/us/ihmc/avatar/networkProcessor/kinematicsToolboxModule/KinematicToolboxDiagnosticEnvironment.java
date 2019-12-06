@@ -65,12 +65,9 @@ public class KinematicToolboxDiagnosticEnvironment
 
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableNetworkProcessor(true);
-      parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
-      parameters.enableLocalControllerCommunicator(true);
-      parameters.setEnableJoystickBasedStepping(true);
-      new DRCNetworkProcessor(drcRobotModel, parameters);
+      new DRCNetworkProcessor(drcRobotModel, parameters, PubSubImplementation.INTRAPROCESS);
    }
 
    private long timestamp = 0L;

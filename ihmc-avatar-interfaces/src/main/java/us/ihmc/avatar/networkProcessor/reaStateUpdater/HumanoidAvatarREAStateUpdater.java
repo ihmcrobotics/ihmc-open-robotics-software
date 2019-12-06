@@ -17,8 +17,9 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class HumanoidAvatarREAStateUpdater
+public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 {
    private final RealtimeRos2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
@@ -104,5 +105,11 @@ public class HumanoidAvatarREAStateUpdater
    {
       executorService.shutdownNow();
       ros2Node.destroy();
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      shutdown();
    }
 }
