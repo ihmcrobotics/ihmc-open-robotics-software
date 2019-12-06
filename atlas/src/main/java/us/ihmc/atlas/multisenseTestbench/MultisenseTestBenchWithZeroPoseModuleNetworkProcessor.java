@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -69,10 +70,9 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
       params.setRosUri(rosUri);
       params.enableRosModule(true);
       params.enableSensorModule(true);
-      params.enableUiModule(true);
       params.enableZeroPoseRobotConfigurationPublisherModule(true);
 
-      DRCNetworkProcessor drcNetworkProcessor = new DRCNetworkProcessor(robotModel, params);
+      DRCNetworkProcessor drcNetworkProcessor = new DRCNetworkProcessor(robotModel, params, PubSubImplementation.FAST_RTPS);
 
       if (rosNamespace == null || rosNamespace.isEmpty())
       {
