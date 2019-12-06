@@ -26,7 +26,7 @@ public class PlanarRegionsMappingModule
    private Notification slamUpdated = new Notification();
 
    private long i = 0; // to slow down trying to SLAM for now
-   private static final int SLAM_EVERY = 10;
+   private static final int SLAM_EVERY = 1;
 
    public PlanarRegionsMappingModule(DomainFactory.PubSubImplementation pubSubImplementation)
    {
