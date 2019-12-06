@@ -42,8 +42,19 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
          public FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
          {
             FootstepPostProcessingParametersBasics parametersBasics = new DefaultFootstepPostProcessingParameters();
-            parametersBasics.setSwingOverRegionsProcessingEnabled(true);
             parametersBasics.setPositionSplitFractionProcessingEnabled(true);
+            parametersBasics.setStepHeightForLargeStepDown(0.05);
+            parametersBasics.setLargestStepDownHeight(0.3);
+            parametersBasics.setTransferSplitFractionAtFullDepth(0.15);
+            parametersBasics.setTransferWeightDistributionAtFullDepth(0.8);
+            parametersBasics.setSwingOverRegionsProcessingEnabled(true);
+            parametersBasics.setDoInitialFastApproximation(true);
+            parametersBasics.setMinimumSwingFootClearance(0.0);
+            parametersBasics.setNumberOfChecksPerSwing(100);
+            parametersBasics.setMaximumNumberOfAdjustmentAttempts(50);
+            parametersBasics.setMaximumWaypointAdjustmentDistance(0.2);
+            parametersBasics.setIncrementalWaypointAdjustmentDistance(0.03);
+            parametersBasics.setMinimumHeightAboveFloorForCollision(0.03);
 
             return parametersBasics;
          }
