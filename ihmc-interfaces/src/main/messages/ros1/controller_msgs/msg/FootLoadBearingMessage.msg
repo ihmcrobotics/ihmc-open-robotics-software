@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message commands the controller to start loading a foot that was unloaded to support the robot weight.
+# When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

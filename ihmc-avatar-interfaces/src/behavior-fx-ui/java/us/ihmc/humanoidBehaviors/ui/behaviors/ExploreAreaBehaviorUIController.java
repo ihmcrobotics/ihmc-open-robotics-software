@@ -6,7 +6,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,18 +36,9 @@ public class ExploreAreaBehaviorUIController extends Group
 {
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
-   @FXML
-   private CheckBox exploreAreaCheckBox;
-   @FXML
-   private Button randomPoseUpdateButton;
-   @FXML
-   private Button doSlamButton;
-   @FXML
-   private Button clearMapButton;
-   @FXML
-   private TextField stateTextField;
-   @FXML
-   private TableView parameterTable;
+   @FXML private CheckBox exploreAreaCheckBox;
+   @FXML private TextField stateTextField;
+   @FXML private TableView parameterTable;
 
    private final ObservableList<JavaFXParameterTableEntry> parameterTableItems = FXCollections.observableArrayList();
 

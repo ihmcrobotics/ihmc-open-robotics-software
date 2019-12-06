@@ -40,7 +40,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Corridor);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlannerParameters()
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, new DefaultFootstepPlannerParameters()
       {
          @Override public boolean checkForBodyBoxCollisions()
          {
@@ -56,7 +56,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Bollards);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlannerParameters()
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, new DefaultFootstepPlannerParameters()
       {
          @Override public boolean checkForBodyBoxCollisions()
          {

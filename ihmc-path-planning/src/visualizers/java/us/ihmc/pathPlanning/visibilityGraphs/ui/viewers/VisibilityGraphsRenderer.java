@@ -6,12 +6,14 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.InterRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowNavigableRegionVisibilityMaps;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInnerRegionVisibilityMapEdges;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.StartVisibilityMap;
 
@@ -72,7 +74,8 @@ public class VisibilityGraphsRenderer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+                                  ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
       startMapViewer.setCustomColor(Color.YELLOW);
@@ -83,7 +86,7 @@ public class VisibilityGraphsRenderer
       goalMapViewer.setTopics(ShowGoalVisibilityMap, GoalVisibilityMap);
 
       navigableRegionViewer = new NavigableRegionViewer(messager, executorService);
-      navigableRegionViewer.setTopics(GlobalReset, ShowNavigableRegionVisibilityMaps, NavigableRegionVisibilityMap);
+      navigableRegionViewer.setTopics(GlobalReset, ShowInnerRegionVisibilityMapEdges, NavigableRegionVisibilityMap);
 
       interRegionConnectionsViewer = new VisibilityMapHolderViewer(messager, executorService);
       interRegionConnectionsViewer.setCustomColor(Color.CRIMSON);

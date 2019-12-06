@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.19.7"
    id("us.ihmc.ihmc-ci") version "5.3"
-   id("us.ihmc.ihmc-cd") version "1.8"
+   id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools") version "0.3.1"
 }
@@ -23,7 +23,7 @@ mainDependencies {
    api("us.ihmc:joctomap:1.6.13")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-yovariables:0.3.11")
-   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.10")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("org.bytedeco:javacv-platform:1.5")
@@ -33,8 +33,8 @@ applicationDependencies {
    compile ihmc.sourceSetProject("main")
 
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.8")
-   api("us.ihmc:simulation-construction-set:0.12.15")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.12.9")
+   api("us.ihmc:simulation-construction-set:0.12.16")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

@@ -1,3 +1,6 @@
+# This message is part of the IHMC robot environment awareness module (REA).
+# It is destined to gather complementary information related to the current state REA is in.
+
 # Informs if REA is currently collecting sensor data and estimating planar regions.
 # Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
 bool is_running

@@ -36,15 +36,15 @@ public class FootstepPlannerDataExporter
 
    public FootstepPlannerDataExporter(Messager messager)
    {
-      planarRegionsState = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
-      startPosition = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      startOrientation = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic);
-      goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
-      goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationTopic);
-      timeout = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
-      plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerTypeTopic);
-      dataDirectoryPath = messager.createInput(FootstepPlannerMessagerAPI.exportUnitTestPath, null);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.exportUnitTestDataFile, this::exportFootstepPlannerData);
+      planarRegionsState = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      startPosition = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
+      startOrientation = messager.createInput(FootstepPlannerMessagerAPI.StartOrientation);
+      goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientation);
+      timeout = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout);
+      plannerType = messager.createInput(FootstepPlannerMessagerAPI.PlannerType);
+      dataDirectoryPath = messager.createInput(FootstepPlannerMessagerAPI.ExportUnitTestPath, null);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ExportUnitTestDataFile, this::exportFootstepPlannerData);
    }
 
    private void exportFootstepPlannerData(boolean export)

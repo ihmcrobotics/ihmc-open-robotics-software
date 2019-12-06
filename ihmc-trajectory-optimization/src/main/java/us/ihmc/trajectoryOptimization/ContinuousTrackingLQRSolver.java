@@ -2,8 +2,9 @@ package us.ihmc.trajectoryOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
+
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
 
 public class ContinuousTrackingLQRSolver<E extends Enum> implements LQRSolverInterface<E>
 {

@@ -56,10 +56,10 @@ public class NodeCheckerRenderer extends AnimationTimer
    public NodeCheckerRenderer(Messager messager, RobotContactPointParameters<RobotSide> robotContactPointParameters)
    {
       nodeCheckerEnabled = messager.createInput(EnableNodeChecking, false);
-      planarRegionsReference = messager.createInput(PlanarRegionDataTopic);
+      planarRegionsReference = messager.createInput(PlanarRegionData);
       footPositionReference = messager.createInput(NodeCheckingPosition);
       footOrientationReference = messager.createInput(NodeCheckingOrientation, new Quaternion());
-      initialSupportSideReference = messager.createInput(InitialSupportSideTopic, RobotSide.LEFT);
+      initialSupportSideReference = messager.createInput(InitialSupportSide, RobotSide.LEFT);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
@@ -92,7 +92,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters::set);
    }
 
    @Override

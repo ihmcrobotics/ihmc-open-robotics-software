@@ -1,18 +1,17 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 
 public class LIPMDynamicsTest
 {
@@ -74,7 +73,7 @@ public class LIPMDynamicsTest
       expectedNextState.set(5, nextZDot);
 
 
-      JUnitTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -138,7 +137,7 @@ public class LIPMDynamicsTest
          expectedNextState.set(4, nextYDot);
          expectedNextState.set(5, nextZDot);
 
-         JUnitTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
       }
    }
 
@@ -217,7 +216,7 @@ public class LIPMDynamicsTest
       expectedDynamicsStateGradient.set(4, 4, f44);
       expectedDynamicsStateGradient.set(5, 5, f55);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateGradient, dynamicsStateGradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateGradient, dynamicsStateGradient, 1e-10);
 
       DenseMatrix64F finiteDifferenceExpectedGradient = new DenseMatrix64F(6, 6);
 
@@ -280,7 +279,7 @@ public class LIPMDynamicsTest
       CommonOps.scale(1.0 / size, tempMatrix);
       MatrixTools.setMatrixBlock(finiteDifferenceExpectedGradient, 0, 5, tempMatrix, 0, 0, 6, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateGradient, finiteDifferenceExpectedGradient, 1e-5);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateGradient, finiteDifferenceExpectedGradient, 1e-5);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -429,7 +428,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlGradient.set(4, 2, f42);
       expectedDynamicsControlGradient.set(5, 2, f52);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
 
 
       DenseMatrix64F finiteDifferenceExpectedGradient = new DenseMatrix64F(6, 3);
@@ -466,7 +465,7 @@ public class LIPMDynamicsTest
       CommonOps.scale(1.0 / size, tempMatrix);
       MatrixTools.setMatrixBlock(finiteDifferenceExpectedGradient, 0, 2, tempMatrix, 0, 0, 6, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, finiteDifferenceExpectedGradient, 1e-5);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlGradient, finiteDifferenceExpectedGradient, 1e-5);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -538,7 +537,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlGradient.set(4, 2, f42);
          expectedDynamicsControlGradient.set(5, 2, f52);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
       }
    }
 
@@ -600,7 +599,7 @@ public class LIPMDynamicsTest
       expectedDynamicsStateHessian.set(0, 2, f02);
       expectedDynamicsStateHessian.set(3, 2, f32);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
 
 
@@ -612,7 +611,7 @@ public class LIPMDynamicsTest
       expectedDynamicsStateHessian.set(1, 2, f12);
       expectedDynamicsStateHessian.set(4, 2, f42);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
 
 
@@ -637,19 +636,19 @@ public class LIPMDynamicsTest
       expectedDynamicsStateHessian.set(4, 1, f41);
       expectedDynamicsStateHessian.set(4, 2, f42);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
       dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 3, currentState, currentControl, constants, dynamicsStateHessian);
       expectedDynamicsStateHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
       dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 4, currentState, currentControl, constants, dynamicsStateHessian);
       expectedDynamicsStateHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
       dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 5, currentState, currentControl, constants, dynamicsStateHessian);
       expectedDynamicsStateHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
 
       assertEquals(x, currentState.get(0), 1e-10);
@@ -711,7 +710,7 @@ public class LIPMDynamicsTest
          expectedDynamicsStateHessian.set(0, 2, f02);
          expectedDynamicsStateHessian.set(3, 2, f32);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
 
 
@@ -723,7 +722,7 @@ public class LIPMDynamicsTest
          expectedDynamicsStateHessian.set(1, 2, f12);
          expectedDynamicsStateHessian.set(4, 2, f42);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
 
 
@@ -748,19 +747,19 @@ public class LIPMDynamicsTest
          expectedDynamicsStateHessian.set(4, 1, f41);
          expectedDynamicsStateHessian.set(4, 2, f42);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
          dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 3, currentState, currentControl, constants, dynamicsStateHessian);
          expectedDynamicsStateHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
          dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 4, currentState, currentControl, constants, dynamicsStateHessian);
          expectedDynamicsStateHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
 
          dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 5, currentState, currentControl, constants, dynamicsStateHessian);
          expectedDynamicsStateHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsStateHessian, dynamicsStateHessian, 1e-10);
       }
    }
 
@@ -824,7 +823,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(0, 2, f02);
       expectedDynamicsControlHessian.set(3, 2, f32);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 1, currentState, currentControl, constants, dynamicsControlHessian);
 
@@ -835,7 +834,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(1, 2, f12);
       expectedDynamicsControlHessian.set(4, 2, f42);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 2, currentState, currentControl, constants, dynamicsControlHessian);
 
@@ -850,7 +849,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(3, 0, f30);
       expectedDynamicsControlHessian.set(4, 1, f41);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -914,7 +913,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(0, 2, f02);
          expectedDynamicsControlHessian.set(3, 2, f32);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
          dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 1, currentState, currentControl, constants, dynamicsControlHessian);
 
@@ -925,7 +924,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(1, 2, f12);
          expectedDynamicsControlHessian.set(4, 2, f42);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
          dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 2, currentState, currentControl, constants, dynamicsControlHessian);
 
@@ -940,7 +939,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(3, 0, f30);
          expectedDynamicsControlHessian.set(4, 1, f41);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
       }
    }
 
@@ -1004,7 +1003,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(0, 2, f02);
       expectedDynamicsControlHessian.set(3, 2, f32);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1017,7 +1016,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(1, 2, f12);
       expectedDynamicsControlHessian.set(4, 2, f42);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1042,7 +1041,7 @@ public class LIPMDynamicsTest
       expectedDynamicsControlHessian.set(4, 1, f41);
       expectedDynamicsControlHessian.set(4, 2, f42);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1050,15 +1049,15 @@ public class LIPMDynamicsTest
 
       dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 3, currentState, currentControl, constants, dynamicsControlHessian);
       expectedDynamicsControlHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 4, currentState, currentControl, constants, dynamicsControlHessian);
       expectedDynamicsControlHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 5, currentState, currentControl, constants, dynamicsControlHessian);
       expectedDynamicsControlHessian.zero();
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -1122,7 +1121,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(0, 2, f02);
          expectedDynamicsControlHessian.set(3, 2, f32);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1135,7 +1134,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(1, 2, f12);
          expectedDynamicsControlHessian.set(4, 2, f42);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1160,7 +1159,7 @@ public class LIPMDynamicsTest
          expectedDynamicsControlHessian.set(4, 1, f41);
          expectedDynamicsControlHessian.set(4, 2, f42);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
 
 
@@ -1168,15 +1167,15 @@ public class LIPMDynamicsTest
 
          dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 3, currentState, currentControl, constants, dynamicsControlHessian);
          expectedDynamicsControlHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
          dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 4, currentState, currentControl, constants, dynamicsControlHessian);
          expectedDynamicsControlHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
 
          dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 5, currentState, currentControl, constants, dynamicsControlHessian);
          expectedDynamicsControlHessian.zero();
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlHessian, dynamicsControlHessian, 1e-10);
       }
    }
 }

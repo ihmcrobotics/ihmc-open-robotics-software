@@ -23,6 +23,10 @@ public class VisibilityGraphsAnchorPaneController
    @FXML
    private ToggleButton showClusterRawPointsToggleButton;
    @FXML
+   private ToggleButton showClusterPreferredNavigableExtrusionsToggleButton;
+   @FXML
+   private ToggleButton showClusterPreferredNonNavigableExtrusionsToggleButton;
+   @FXML
    private ToggleButton showClusterNavigableExtrusionsToggleButton;
    @FXML
    private ToggleButton showClusterNonNavigableExtrusionsToggleButton;
@@ -40,7 +44,7 @@ public class VisibilityGraphsAnchorPaneController
    {
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
 
-      messager.bindBidirectional(ShowNavigableRegionVisibilityMaps, showInnerRegionMapsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowInnerRegionVisibilityMapEdges, showInnerRegionMapsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowInterRegionVisibilityMap, showInterRegionMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
@@ -48,6 +52,8 @@ public class VisibilityGraphsAnchorPaneController
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
 
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(EnableWalkerAnimation, showWalkerToggleButton.selectedProperty(), true);

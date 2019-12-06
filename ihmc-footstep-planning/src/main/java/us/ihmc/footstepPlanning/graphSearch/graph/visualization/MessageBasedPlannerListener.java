@@ -1,67 +1,86 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
-import controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
-import us.ihmc.idl.IDLSequence.Object;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public abstract class MessageBasedPlannerListener implements BipedalFootstepPlannerListener
 {
-   private final FootstepNodeSnapperReadOnly snapper;
-   private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
-   private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final HashSet<PlannerCell> exploredCells = new HashSet<>();
-   private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
+   private final FootstepNodeSnapper snapper;
 
-   private final long occupancyMapBroadcastDt;
+   private final PlannerNodeDataList lowestNodeDataList = new PlannerNodeDataList();
+   private final PlannerOccupancyMap occupancyMapSinceLastReport = new PlannerOccupancyMap();
+
+   private final long broadcastDt;
    private long lastBroadcastTime = -1;
+   private final HashMap<FootstepNode, List<PlannerNodeData>> rejectedNodeData = new HashMap<>();
 
-   public MessageBasedPlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapBroadcastDt)
+   private int totalNodeCount = 0;
+
+
+   public MessageBasedPlannerListener(FootstepNodeSnapper snapper, long broadcastDt)
    {
       this.snapper = snapper;
-      this.occupancyMapBroadcastDt = occupancyMapBroadcastDt;
+      this.broadcastDt = broadcastDt;
    }
 
    @Override
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
       if (previousNode == null)
-      {
-         rejectionReasons.clear();
-         childMap.clear();
-         exploredCells.clear();
-         lowestCostPlan.clear();
-      }
-      else
-      {
-         childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         exploredCells.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
-      }
+         reset();
+
+      node.setNodeIndex(totalNodeCount);
+
+      occupancyMapSinceLastReport.addOccupiedCell(new PlannerCell(node.getXIndex(), node.getYIndex()));
+      totalNodeCount++;
+   }
+
+   private void reset()
+   {
+      lowestNodeDataList.clear();
+      rejectedNodeData.clear();
+
+      totalNodeCount = 0;
    }
 
    @Override
    public void reportLowestCostNodeList(List<FootstepNode> plan)
    {
-      lowestCostPlan.clear();
-      lowestCostPlan.addAll(plan);
+      lowestNodeDataList.clear();
+      for (int i = 0; i < plan.size(); i++)
+      {
+         FootstepNode node = plan.get(i);
+         int parentNodeIndex = i > 0 ? plan.get(i - 1).getNodeIndex() : -1;
+         RigidBodyTransform nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
+         lowestNodeDataList.addNode(parentNodeIndex, node, nodePose, null);
+      }
    }
 
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      rejectionReasons.put(rejectedNode, reason);
+      RigidBodyTransform nodePose;
+      if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP && snapper != null)
+      {
+         nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      }
+      else
+      {
+         nodePose = new RigidBodyTransform();
+         nodePose.setTranslation(rejectedNode.getX(), rejectedNode.getY(), 0.0);
+         nodePose.setRotationYaw(rejectedNode.getYaw());
+      }
+      PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
+
+      if (rejectedNodeData.get(parentNode) == null)
+         rejectedNodeData.put(parentNode, new ArrayList<>());
+      rejectedNodeData.get(parentNode).add(nodeData);
    }
 
    @Override
@@ -72,14 +91,12 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       if (lastBroadcastTime == -1)
          lastBroadcastTime = currentTime;
 
-      if (currentTime - lastBroadcastTime > occupancyMapBroadcastDt)
+      if (currentTime - lastBroadcastTime > broadcastDt)
       {
-         FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
-         broadcastOccupancyMap(occupancyMapMessage);
+         broadcastOccupancyMap(occupancyMapSinceLastReport);
+         occupancyMapSinceLastReport.clear();
 
-         FootstepNodeDataListMessage nodeDataListMessage = packLowestCostPlanMessage();
-         if (nodeDataListMessage != null)
-            broadcastNodeData(nodeDataListMessage);
+         broadcastLowestCostNodeData(lowestNodeDataList);
 
          lastBroadcastTime = currentTime;
       }
@@ -88,66 +105,16 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
    @Override
    public void plannerFinished(List<FootstepNode> plan)
    {
-      FootstepPlannerOccupancyMapMessage occupancyMapMessage = packOccupancyMapMessage();
-      broadcastOccupancyMap(occupancyMapMessage);
+      broadcastOccupancyMap(occupancyMapSinceLastReport);
    }
 
-   abstract void broadcastOccupancyMap(FootstepPlannerOccupancyMapMessage occupancyMapMessage);
-
-   abstract void broadcastNodeData(FootstepNodeDataListMessage nodeDataListMessage);
-
-   FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
+   @Override
+   public HashMap<FootstepNode, List<PlannerNodeData>> getRejectedNodeData()
    {
-      PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
-      FootstepPlannerOccupancyMapMessage message = new FootstepPlannerOccupancyMapMessage();
-      Object<FootstepPlannerCellMessage> occupiedCells = message.getOccupiedCells();
-      for (int i = 0; i < plannerCells.length; i++)
-      {
-         FootstepPlannerCellMessage plannerCell = occupiedCells.add();
-         plannerCell.setXIndex(plannerCells[i].xIndex);
-         plannerCell.setYIndex(plannerCells[i].yIndex);
-      }
-
-      return message;
+      return rejectedNodeData;
    }
 
-   FootstepNodeDataListMessage packLowestCostPlanMessage()
-   {
-      if (lowestCostPlan.isEmpty())
-         return null;
+   abstract void broadcastOccupancyMap(PlannerOccupancyMap occupancyMap);
 
-      FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
-      Object<FootstepNodeDataMessage> nodeDataList = nodeDataListMessage.getNodeData();
-      nodeDataList.clear();
-      for (int i = 0; i < lowestCostPlan.size(); i++)
-      {
-         FootstepNode node = lowestCostPlan.get(i);
-         FootstepNodeDataMessage nodeDataMessage = nodeDataList.add();
-         setNodeDataMessage(nodeDataMessage, node, -1);
-      }
-
-      nodeDataListMessage.setIsFootstepGraph(false);
-      lowestCostPlan.clear();
-
-      return nodeDataListMessage;
-   }
-
-   private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
-   {
-      nodeDataMessage.setParentNodeId(parentNodeIndex);
-
-      byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
-      nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
-
-      nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
-      nodeDataMessage.setXIndex(node.getXIndex());
-      nodeDataMessage.setYIndex(node.getYIndex());
-      nodeDataMessage.setYawIndex(node.getYawIndex());
-
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
-      Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-      Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-      snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
-   }
-
+   abstract void broadcastLowestCostNodeData(PlannerNodeDataList nodeDataList);
 }

@@ -16,7 +16,7 @@ public class ValkyrieWalkingPreviewLauncher
 {
    public static void main(String[] args) throws IOException
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       WalkingControllerPreviewToolboxModule toolboxModule = new WalkingControllerPreviewToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       WalkingControllerPreviewToolboxController toolboxController = toolboxModule.getToolboxController();
 

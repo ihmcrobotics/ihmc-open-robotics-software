@@ -56,7 +56,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
    private static final boolean RESET_FUNCTIONS_ON_JOINT_CHANGE = false;
 
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
    private final FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();

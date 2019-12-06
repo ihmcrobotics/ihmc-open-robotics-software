@@ -19,13 +19,13 @@ public class ValkyrieSliderBoardParameters extends SliderBoardParameters
    {
       for (RobotSide side : RobotSide.values())
       {
-         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
+         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double, Double>>());
          // FIXME 
-//         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
-//         {
-//            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
-//                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
-//         }
+         //         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
+         //         {
+         //            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForStartOfExpression() + fingerJoint.toString(),
+         //                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
+         //         }
       }
 
       NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
@@ -34,10 +34,9 @@ public class ValkyrieSliderBoardParameters extends SliderBoardParameters
       {
          NeckJointName joint = sliderBoardControlledNeckJointNames[i];
 
-         sliderBoardControlledNeckJointNamesWithLimits.put(
-               joint,
-               new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
-                     .getFullyFlexedPositionLimit(joint)));
+         sliderBoardControlledNeckJointNamesWithLimits.put(joint,
+                                                           new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint),
+                                                                                             ValkyrieSliderBoardControlledNeckJoints.getFullyFlexedPositionLimit(joint)));
       }
    }
 

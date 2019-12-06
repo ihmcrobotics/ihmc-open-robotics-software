@@ -1,19 +1,17 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -51,7 +49,7 @@ public class DynamicsMatrixCalculator
       this(new ArrayList<>(), toolbox, wrenchMatrixCalculator);
    }
 
-   public DynamicsMatrixCalculator(ArrayList<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
+   public DynamicsMatrixCalculator(List<JointBasics> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
       FloatingJointBasics rootJoint = toolbox.getRootJoint();
       RigidBodyBasics rootBody = toolbox.getRootBody();
@@ -165,6 +163,18 @@ public class DynamicsMatrixCalculator
    public void getBodyContactForceJacobian(DenseMatrix64F bodyContactForceJacobianToPack)
    {
       bodyContactForceJacobianToPack.set(bodyContactForceJacobian);
+   }
+
+   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   {
+      MatrixTools.setMatrixBlock(massMatrixToPack, 0, 0, floatingBaseMassMatrix, 0, 0, floatingBaseMassMatrix.getNumRows(), floatingBaseMassMatrix.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(massMatrixToPack, floatingBaseMassMatrix.getNumRows(), 0, bodyMassMatrix, 0, 0, bodyMassMatrix.getNumRows(), bodyMassMatrix.getNumCols(), 1.0);
+   }
+
+   public void getCoriolisMatrix(DenseMatrix64F coriolisMatrixToPack)
+   {
+      MatrixTools.setMatrixBlock(coriolisMatrixToPack, 0, 0, floatingBaseCoriolisMatrix, 0, 0, floatingBaseCoriolisMatrix.getNumRows(), floatingBaseCoriolisMatrix.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(coriolisMatrixToPack, floatingBaseCoriolisMatrix.getNumRows(), 0, bodyCoriolisMatrix, 0, 0, bodyCoriolisMatrix.getNumRows(), bodyCoriolisMatrix.getNumCols(), 1.0);
    }
 
    public DenseMatrix64F computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
@@ -351,6 +361,10 @@ public class DynamicsMatrixCalculator
       return true;
    }
 
+   public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
+   {
+      return massMatrixCalculator;
+   }
 
    public boolean checkFloatingBaseRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F tau,
          DenseMatrix64F rho)

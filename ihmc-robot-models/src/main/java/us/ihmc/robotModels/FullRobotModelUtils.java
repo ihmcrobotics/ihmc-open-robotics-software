@@ -1,22 +1,23 @@
 package us.ihmc.robotModels;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
-
 public class FullRobotModelUtils
 {
    public static OneDoFJointBasics[] getAllJointsExcludingHands(FullHumanoidRobotModel model)
    {
-      ArrayList<OneDoFJointBasics> joints = new ArrayList<>();
+      List<OneDoFJointBasics> joints = new ArrayList<>();
       getAllJointsExcludingHands(joints, model);
       return joints.toArray(new OneDoFJointBasics[joints.size()]);
    }
 
-   public static void getAllJointsExcludingHands(ArrayList<OneDoFJointBasics> jointsToPack, FullHumanoidRobotModel model)
+   public static void getAllJointsExcludingHands(List<OneDoFJointBasics> jointsToPack, FullHumanoidRobotModel model)
    {
       model.getOneDoFJoints(jointsToPack);
       for (RobotSide robotSide : RobotSide.values)

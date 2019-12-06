@@ -58,9 +58,11 @@ public class PawStepPlannerMessageTools
       packet.setNormalZThresholdForAccessibleRegions(parameters.getNormalZThresholdForAccessibleRegions());
       packet.setNavigableExtrusionDistance(parameters.getNavigableExtrusionDistance());
       packet.setObstacleExtrusionDistance(parameters.getObstacleExtrusionDistance());
+      packet.setPreferredNavigableExtrusionDistance(parameters.getPreferredNavigableExtrusionDistance());
       packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
+      packet.setHeightForMaxAvoidance(parameters.getHeightForMaxAvoidance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
       packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
@@ -79,5 +81,8 @@ public class PawStepPlannerMessageTools
       packet.setReturnBestEffortSolution(parameters.returnBestEffortSolution());
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
+      packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
+      packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
+      packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

@@ -1,3 +1,5 @@
+# Message used to report the current joint angles for the fingers of a hand.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

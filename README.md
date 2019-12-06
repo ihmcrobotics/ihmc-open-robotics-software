@@ -34,10 +34,10 @@ At a minimum, you will need to have the following repositories declared in your 
 ```gradle
 repositories {
    maven {
-      url  "http://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
+      url  "https://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
    }
    maven {
-      url  "http://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
+      url  "https://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
    }
 
    /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */

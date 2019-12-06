@@ -1,0 +1,47 @@
+#ifndef __controller_msgs__msg__RobotDesiredConfigurationData__idl__
+#define __controller_msgs__msg__RobotDesiredConfigurationData__idl__
+
+#include "controller_msgs/msg/./JointDesiredOutputMessage_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message contains a list of joint-level desired values that are output from the whole-body controller
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RobotDesiredConfigurationData_")
+      struct RobotDesiredConfigurationData
+      {
+        /**
+         * Wall-time in nanoseconds
+         */
+        long long wall_time;
+        /**
+         * Hash of the joint names included in joint_desired_output_list
+         */
+        long joint_name_hash;
+        /**
+         * Contains list of joint desireds, ordered according
+         */
+        sequence<controller_msgs::msg::dds::JointDesiredOutputMessage, 50> joint_desired_output_list;
+        boolean has_desired_root_joint_position_data;
+        geometry_msgs::msg::dds::Vector3 desired_root_joint_translation;
+        geometry_msgs::msg::dds::Quaternion desired_root_joint_orientation;
+        boolean has_desired_root_joint_velocity_data;
+        geometry_msgs::msg::dds::Vector3 desired_root_joint_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 desired_root_joint_angular_velocity;
+        boolean has_desired_root_joint_acceleration_data;
+        geometry_msgs::msg::dds::Vector3 desired_root_joint_linear_acceleration;
+        geometry_msgs::msg::dds::Vector3 desired_root_joint_angular_acceleration;
+      };
+    };
+  };
+};
+
+#endif

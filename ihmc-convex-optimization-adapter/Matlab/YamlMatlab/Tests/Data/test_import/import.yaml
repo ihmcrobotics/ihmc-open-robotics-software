@@ -1,7 +1,0 @@
- - import:
-    - ../test_primitives/time.yaml
-    - ../test_inheritance/inheritance.yaml
-    #- ..\test_primitives\time_variants.yaml    
- - import: [../test_primitives/matrices.yaml, ../test_primitives/sequence_mapping.yaml]
-
-

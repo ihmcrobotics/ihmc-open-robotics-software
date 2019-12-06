@@ -21,7 +21,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
 
    public static void main(String[] args)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
       new ValkyrieKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);

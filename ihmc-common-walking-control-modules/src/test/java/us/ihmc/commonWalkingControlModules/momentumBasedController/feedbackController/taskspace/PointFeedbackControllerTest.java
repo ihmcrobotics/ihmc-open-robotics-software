@@ -32,6 +32,8 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -45,8 +47,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -274,7 +274,7 @@ public final class PointFeedbackControllerTest
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
       SimpleEfficientActiveSetQPSolver jerryQPSolver = new SimpleEfficientActiveSetQPSolver();
-      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver(registry);
+      OASESConstrainedQPSolver oasesQPSolver = new OASESConstrainedQPSolver();
 
       DenseMatrix64F solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
       DenseMatrix64F solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);

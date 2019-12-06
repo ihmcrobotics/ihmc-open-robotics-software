@@ -14,7 +14,7 @@ public interface InterRegionConnectionFilter
     *  Maximum possible 3D inter regions connection distance. Used to speed things up by using bounding boxes.
     *  If two points are further apart than this, then isConnectionValid should return false;
     */
-   double getMaximumInterRegionConnetionDistance();
+   double getMaximumInterRegionConnectionDistance();
 
    boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target);
 }

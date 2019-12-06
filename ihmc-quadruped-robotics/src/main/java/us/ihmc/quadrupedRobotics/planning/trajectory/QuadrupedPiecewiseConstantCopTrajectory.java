@@ -113,7 +113,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
     * compute piecewise constant center of pressure plan given the upcoming contact states
     * @param timedContactSequence contact sequence (input)
     */
-   public void initializeTrajectory(double currentTime, QuadrupedTimedContactSequence timedContactSequence, List<QuadrupedTimedStep> stepSequence)
+   public void initializeTrajectory(double currentTime, QuadrupedTimedContactSequence timedContactSequence,
+                                    List<? extends QuadrupedTimedStep> stepSequence)
    {
       if (timedContactSequence.size() < 1)
       {
@@ -301,7 +302,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
 
    private void computeCoPOffsetFromSteps(double currentTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
-                                          List<QuadrupedTimedStep> stepSequence, FrameVector3D copOffsetToPack)
+                                          List<? extends QuadrupedTimedStep> stepSequence, FrameVector3D copOffsetToPack)
    {
       int numberOfFeetInContact = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

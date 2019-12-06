@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools.isPointInsideConvexPolygon2D;
+import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConvexPolygon2D;
 
 public class NavigableRegionTools
 {
@@ -188,7 +188,7 @@ public class NavigableRegionTools
 
    public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
    {
-      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal(), test);
+      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
    }
 
    public static boolean isPointInsideClosedConcaveHull(List<Point2DReadOnly> vertices, Point2DReadOnly test)

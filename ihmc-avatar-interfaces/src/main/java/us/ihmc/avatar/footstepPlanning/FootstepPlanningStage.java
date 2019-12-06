@@ -64,6 +64,7 @@ public class FootstepPlanningStage implements FootstepPlanner
    private final IntegerProvider planId;
 
    private final AtomicDouble timeout = new AtomicDouble();
+   private final AtomicDouble bestEffortTimeout = new AtomicDouble();
    private final AtomicDouble horizonLength = new AtomicDouble();
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerGoal> goal = new AtomicReference<>();
@@ -133,8 +134,13 @@ public class FootstepPlanningStage implements FootstepPlanner
                                                                      MultiStagePlannerListener multiStageListener,
                                                                      SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame)
    {
-      StagePlannerListener plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
-      multiStageListener.addStagePlannerListener(plannerListener);
+      // TODO add the snapper in
+      StagePlannerListener plannerListener = null;
+      if (multiStageListener != null)
+      {
+         plannerListener = new StagePlannerListener(null, multiStageListener.getBroadcastDt());
+         multiStageListener.addStagePlannerListener(plannerListener);
+      }
       return new BodyPathBasedAStarPlanner("visGraph_",
                                            bodyPathPlanner,
                                            footstepPlannerParameters,
@@ -160,7 +166,7 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlanningParameters);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters, collisionDetector);
+      FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlanningParameters);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlanningParameters, footPolygons, snapper);
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlanningParameters, snapper);
@@ -169,10 +175,14 @@ public class FootstepPlanningStage implements FootstepPlanner
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlanningParameters.getAStarHeuristicsWeight(),
                                                                                    footstepPlanningParameters);
 
-      StagePlannerListener plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
+      StagePlannerListener plannerListener = null;
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-      nodeChecker.addPlannerListener(plannerListener);
-      multiStageListener.addStagePlannerListener(plannerListener);
+      if (multiStageListener != null)
+      {
+         plannerListener = new StagePlannerListener(snapper, multiStageListener.getBroadcastDt());
+         nodeChecker.addPlannerListener(plannerListener);
+         multiStageListener.addStagePlannerListener(plannerListener);
+      }
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(footstepPlanningParameters);
@@ -235,6 +245,12 @@ public class FootstepPlanningStage implements FootstepPlanner
    public void setTimeout(double timeout)
    {
       this.timeout.set(timeout);
+   }
+
+   @Override
+   public void setBestEffortTimeout(double bestEffortTimeout)
+   {
+      this.bestEffortTimeout.set(bestEffortTimeout);
    }
 
    @Override
@@ -334,10 +350,11 @@ public class FootstepPlanningStage implements FootstepPlanner
 
       stepPlanResult = null;
 
+      getPlanner().setPlanarRegions(planarRegionsList.get());
       getPlanner().setInitialStanceFoot(stanceFootPose.get(), stanceFootSide.get());
       getPlanner().setGoal(goal.get());
       getPlanner().setTimeout(timeout.get());
-      getPlanner().setPlanarRegions(planarRegionsList.get());
+      getPlanner().setBestEffortTimeout(bestEffortTimeout.get());
       getPlanner().setPlanningHorizonLength(horizonLength.get());
 
       return true;
@@ -370,7 +387,7 @@ public class FootstepPlanningStage implements FootstepPlanner
                   + " on stage " + stageId);
 
       if (debug)
-         LogTools.error("Stage " + stageId + " planning steps.");
+         LogTools.info("Stage " + stageId + " planning steps.");
 
       stepPlanResult = plan();
 

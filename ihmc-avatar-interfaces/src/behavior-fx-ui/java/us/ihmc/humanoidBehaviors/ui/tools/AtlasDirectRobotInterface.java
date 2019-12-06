@@ -1,12 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.tools;
 
-import controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
@@ -17,18 +16,39 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
    private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
    private final IHMCROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
    private final IHMCROS2Publisher<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public AtlasDirectRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                        AtlasLowLevelControlModeMessage.class,
-                                                        ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      bdiBehaviorPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                       BDIBehaviorCommandPacket.class,
-                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      desiredPumpPSIPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                          AtlasDesiredPumpPSIPacket.class,
-                                                          ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
+      lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
+      bdiBehaviorPublisher = ROS2Tools.createPublisher(ros2Node, BDIBehaviorCommandPacket.class, subscriberTopicNameGenerator);
+      desiredPumpPSIPublisher = ROS2Tools.createPublisher(ros2Node, AtlasDesiredPumpPSIPacket.class, subscriberTopicNameGenerator);
+      abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
+   }
+
+   @Override
+   public void sendAbortWalkingRequest()
+   {
+      abortWalkingPublisher.publish(new AbortWalkingMessage());
+   }
+
+   @Override
+   public void sendPauseWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(true);
+      pauseWalkingPublisher.publish(message);
+   }
+
+   @Override
+   public void sendContinueWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(false);
+      pauseWalkingPublisher.publish(message);
    }
 
    @Override

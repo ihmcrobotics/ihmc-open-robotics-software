@@ -18,6 +18,18 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public long timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D sensor_position_;
    public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public double sensor_pose_confidence_ = 1.0;
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public double point_cloud_confidence_ = 1.0;
    public us.ihmc.idl.IDLSequence.Float  point_cloud_;
    public us.ihmc.idl.IDLSequence.Integer  colors_;
 
@@ -45,6 +57,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.sensor_position_, sensor_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.sensor_orientation_, sensor_orientation_);
+      sensor_pose_confidence_ = other.sensor_pose_confidence_;
+
+      point_cloud_confidence_ = other.point_cloud_confidence_;
+
       point_cloud_.set(other.point_cloud_);
       colors_.set(other.colors_);
    }
@@ -85,6 +101,44 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       return sensor_orientation_;
    }
 
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public void setSensorPoseConfidence(double sensor_pose_confidence)
+   {
+      sensor_pose_confidence_ = sensor_pose_confidence;
+   }
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public double getSensorPoseConfidence()
+   {
+      return sensor_pose_confidence_;
+   }
+
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public void setPointCloudConfidence(double point_cloud_confidence)
+   {
+      point_cloud_confidence_ = point_cloud_confidence;
+   }
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public double getPointCloudConfidence()
+   {
+      return point_cloud_confidence_;
+   }
+
 
    public us.ihmc.idl.IDLSequence.Float  getPointCloud()
    {
@@ -121,6 +175,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!this.sensor_position_.epsilonEquals(other.sensor_position_, epsilon)) return false;
       if (!this.sensor_orientation_.epsilonEquals(other.sensor_orientation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_pose_confidence_, other.sensor_pose_confidence_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.point_cloud_confidence_, other.point_cloud_confidence_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.point_cloud_, other.point_cloud_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.colors_, other.colors_, epsilon)) return false;
@@ -144,6 +202,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!this.sensor_position_.equals(otherMyClass.sensor_position_)) return false;
       if (!this.sensor_orientation_.equals(otherMyClass.sensor_orientation_)) return false;
+      if(this.sensor_pose_confidence_ != otherMyClass.sensor_pose_confidence_) return false;
+
+      if(this.point_cloud_confidence_ != otherMyClass.point_cloud_confidence_) return false;
+
       if (!this.point_cloud_.equals(otherMyClass.point_cloud_)) return false;
       if (!this.colors_.equals(otherMyClass.colors_)) return false;
 
@@ -164,6 +226,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       builder.append(this.sensor_position_);      builder.append(", ");
       builder.append("sensor_orientation=");
       builder.append(this.sensor_orientation_);      builder.append(", ");
+      builder.append("sensor_pose_confidence=");
+      builder.append(this.sensor_pose_confidence_);      builder.append(", ");
+      builder.append("point_cloud_confidence=");
+      builder.append(this.point_cloud_confidence_);      builder.append(", ");
       builder.append("point_cloud=");
       builder.append(this.point_cloud_);      builder.append(", ");
       builder.append("colors=");

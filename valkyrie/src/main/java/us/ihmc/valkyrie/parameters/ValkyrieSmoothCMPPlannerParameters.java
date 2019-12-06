@@ -10,11 +10,13 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
 {
    public final boolean createAngularMomentumPredictionModule;
    private final RobotTarget robotTarget;
+   private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieSmoothCMPPlannerParameters(RobotTarget robotTarget)
+   public ValkyrieSmoothCMPPlannerParameters(ValkyriePhysicalProperties physicalProperties, RobotTarget robotTarget)
    {
       super(1.0);
       this.robotTarget = robotTarget;
+      this.physicalProperties = physicalProperties;
 
       createAngularMomentumPredictionModule = (robotTarget != RobotTarget.SCS) ? false : true;
 
@@ -77,7 +79,7 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    @Override
    public double getStepLengthThresholdForExitCoPOnToesWhenSteppingDown()
    {
-      return ValkyriePhysicalProperties.footLength;
+      return physicalProperties.getFootLength();
    }
 
    @Override

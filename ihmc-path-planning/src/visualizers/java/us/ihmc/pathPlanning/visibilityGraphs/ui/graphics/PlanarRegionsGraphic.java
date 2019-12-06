@@ -15,9 +15,9 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.javafx.graphics.LabelGraphic;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;

@@ -8,7 +8,7 @@ import java.io.IOException;
 import us.ihmc.commons.Conversions;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;

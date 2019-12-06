@@ -7,8 +7,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 //TODO: +++JerryPratt: Either remove this class or add more helper methods here. Right now it does not do enough worth keeping it around.
@@ -35,7 +36,7 @@ public class NavigableRegions
    {
       if (regions != null)
       {
-         regions = PlanarRegionTools.ensureClockwiseOrder(regions);
+         regions = REAPlanarRegionTools.ensureClockwiseOrder(regions);
          this.regions = regions.stream().filter(parameters.getPlanarRegionFilter()::isPlanarRegionRelevant).collect(Collectors.toList());
       }
       else

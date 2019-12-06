@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -23,7 +23,7 @@ public class QuadrupedSimulationController implements RobotController
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
    private StateEstimatorController stateEstimator; //not implemented yet
-   private final DRCPoseCommunicator poseCommunicator;
+   private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private boolean firstTick = true;
 
    private final RobotVisualizer robotVisualizer;
@@ -31,16 +31,16 @@ public class QuadrupedSimulationController implements RobotController
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
-                                        DRCPoseCommunicator poseCommunicator)
+                                        RobotConfigurationDataPublisher robotConfigurationDataPublisher)
    {
-      this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, poseCommunicator, null);
+      this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, robotConfigurationDataPublisher, null);
    }
 
    public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
-                                        DRCPoseCommunicator poseCommunicator, RobotVisualizer robotVisualizer)
+                                        RobotConfigurationDataPublisher robotConfigurationDataPublisher, RobotVisualizer robotVisualizer)
    {
       this.sdfRobot = simulationRobot;
-      this.poseCommunicator = poseCommunicator;
+      this.robotConfigurationDataPublisher = robotConfigurationDataPublisher;
       this.sensorReader = sensorReader;
       this.outputWriter = outputWriter;
       this.gaitControlManager = gaitControlManager;
@@ -93,9 +93,9 @@ public class QuadrupedSimulationController implements RobotController
          stateEstimator.doControl();
       }
       gaitControlManager.doControl();
-      if(poseCommunicator != null)
+      if(robotConfigurationDataPublisher != null)
       {
-         poseCommunicator.write();
+         robotConfigurationDataPublisher.write();
       }
 
       outputWriter.write();

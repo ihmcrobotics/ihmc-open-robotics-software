@@ -1232,7 +1232,7 @@
         <limit>
           <lower>-1.519</lower>
           <upper>1.266</upper>
-          <effort>190</effort>
+          <effort>350</effort>
           <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -1.47 ~ 5.31 (rad/sec)-->
         </limit>
         <dynamics>
@@ -2937,7 +2937,7 @@
         <limit>
           <lower>-1.266</lower>
           <upper>1.519</upper>
-          <effort>190</effort>
+          <effort>350</effort>
           <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -5.31 ~ 1.47 (rad/sec)-->
         </limit>
         <dynamics>

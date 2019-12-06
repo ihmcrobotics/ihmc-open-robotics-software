@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.19.7"
    id("us.ihmc.ihmc-ci") version "5.3"
-   id("us.ihmc.ihmc-cd") version "1.8"
+   id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -28,8 +28,8 @@ mainDependencies {
    api("org.javassist:javassist:3.18.1-GA")
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
-   api("us.ihmc:log-tools:0.3.1")
 
+   api("us.ihmc:log-tools:0.3.1")
    api("us.ihmc:euclid:0.12.1")
    api("us.ihmc:euclid-frame:0.12.1")
    api("us.ihmc:euclid-shape:0.12.1")
@@ -37,8 +37,9 @@ mainDependencies {
    api("us.ihmc:mecano-yovariables:0.0.21")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-yovariables:0.3.11")
-   api("us.ihmc:ihmc-graphics-description:0.12.12")
-   api("us.ihmc:simulation-construction-set-utilities:0.12.15")
+   api("us.ihmc:ihmc-matrix-library:0.12.1")
+   api("us.ihmc:ihmc-graphics-description:0.12.13")
+   api("us.ihmc:simulation-construction-set-utilities:0.12.16")
    api("us.ihmc:ihmc-native-library-loader:1.1")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
@@ -48,4 +49,5 @@ testDependencies {
    api("org.jfree:jcommon:1.0.21")
 
    api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-matrix-library-test:0.12.1")
 }
