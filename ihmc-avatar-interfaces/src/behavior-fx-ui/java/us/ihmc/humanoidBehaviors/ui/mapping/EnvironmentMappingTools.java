@@ -285,28 +285,13 @@ public class EnvironmentMappingTools
                                                CustomRegionMergeParameters customRegionMergeParameters,
                                                ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters)
    {
-      TIntObjectHashMap<PlanarRegion> customPlanarRegions = new TIntObjectHashMap<>();
-
-      for (int i = 0; i < oldMap.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion planarRegion = oldMap.getPlanarRegion(i).copy();
-         CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(planarRegion);
-         customPlanarRegions.put(planarRegion.getRegionId(), planarRegion);
-      }
-
-      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(customPlanarRegions.valueCollection(),
-                                                                                                                      newRawData, customRegionMergeParameters);
+      List<PlanarRegion> oldMapCopy = new ArrayList<>(oldMap.getPlanarRegionsAsList());
+      //oldMap.clear();
+      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(oldMapCopy, newRawData,
+                                                                                                                      customRegionMergeParameters);
 
       PlanarRegionsList newMap = PlanarRegionPolygonizer.createPlanarRegionsList(newRawData, concaveHullFactoryParameters, polygonizerParameters);
       unmergedCustomPlanarRegions.forEach(newMap::addPlanarRegion);
-
-      //      List<PlanarRegion> oldMapCopy = new ArrayList<>(oldMap.getPlanarRegionsAsList());
-      //      //oldMap.clear();
-      //      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(oldMapCopy, newRawData,
-      //                                                                                                                      customRegionMergeParameters);
-      //
-      //      PlanarRegionsList newMap = PlanarRegionPolygonizer.createPlanarRegionsList(newRawData, concaveHullFactoryParameters, polygonizerParameters);
-      //      unmergedCustomPlanarRegions.forEach(newMap::addPlanarRegion);
 
       return newMap;
    }

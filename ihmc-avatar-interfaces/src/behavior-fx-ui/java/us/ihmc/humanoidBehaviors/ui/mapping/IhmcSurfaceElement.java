@@ -1,6 +1,9 @@
 package us.ihmc.humanoidBehaviors.ui.mapping;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -22,6 +25,20 @@ public class IhmcSurfaceElement
       resolution = other.resolution;
       plane.set(other.plane);
       mergeablePlanarRegion.set(other.mergeablePlanarRegion);
+   }
+
+   public void transform(RigidBodyTransformReadOnly transform)
+   {
+      Point3D centerCopy = plane.getPointCopy();
+      Vector3D normalCopy = plane.getNormalCopy();
+
+      transform.inverseTransform(centerCopy);   //TODO:?????
+      transform.inverseTransform(normalCopy);
+      
+//      transform.transform(centerCopy);
+//      transform.transform(normalCopy);
+
+      setPlane(centerCopy, normalCopy);
    }
 
    public void setPlane(Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
@@ -50,6 +67,11 @@ public class IhmcSurfaceElement
       return plane;
    }
 
+   public PlanarRegion getMergeablePlanarRegion()
+   {
+      return mergeablePlanarRegion;
+   }
+
    public int getMergeablePlanarRegionId()
    {
       return mergeablePlanarRegion.getRegionId();
@@ -64,8 +86,8 @@ public class IhmcSurfaceElement
    {
       Plane3D planarRegionPlane = mergeablePlanarRegion.getPlane();
       double positionDistance = planarRegionPlane.distance(plane.getPoint());
-      double angleDistance = 1 - Math.abs(mergeablePlanarRegion.getNormal().dot(plane.getNormal()));
-
+      double angleDistance = Math.abs(Math.acos(Math.abs(mergeablePlanarRegion.getNormal().dot(plane.getNormal()))));
+      
       return positionWeight * positionDistance + angleWeight * angleDistance;
    }
 

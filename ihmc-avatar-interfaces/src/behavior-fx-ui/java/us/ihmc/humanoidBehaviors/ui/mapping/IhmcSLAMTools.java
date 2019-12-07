@@ -142,12 +142,13 @@ public class IhmcSLAMTools
    }
 
    public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(List<Point3DReadOnly[]> pointCloudMap,
-                                                                                  List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution)
+                                                                                  List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution,
+                                                                                  PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
    {
       NormalOcTree referenceOctree = computeOctreeData(pointCloudMap, sensorPoses, octreeResolution);
 
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(false);
 
@@ -163,16 +164,13 @@ public class IhmcSLAMTools
    }
 
    public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition,
-                                                                                  double octreeResolution)
+                                                                                  double octreeResolution,
+                                                                                  PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
    {
       NormalOcTree referenceOctree = computeOctreeData(pointCloud, sensorPosition, octreeResolution);
 
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
-      planarRegionSegmentationParameters.setMinRegionSize(200);
-      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
-      
-      
+
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
 
@@ -185,63 +183,5 @@ public class IhmcSLAMTools
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
 
       return rawData;
-   }
-
-   public static List<IhmcSurfaceElement> computeMergeableSurfaceElements(PlanarRegionsList planarRegionsMap, IhmcSLAMFrame frame, double octreeResolution,
-                                                                          double validRatio, double maximumDistance, double maximumAngle)
-   {
-      NormalOcTree octree = frame.computeOctreeInPreviousView(octreeResolution);
-
-      int numberOfPlanarRegions = planarRegionsMap.getNumberOfPlanarRegions();
-      List<IhmcSurfaceElement> surfaceElements = new ArrayList<>();
-      NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
-      UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
-      int numberOfNodes = 0;
-
-      for (UIOcTreeNode uiOcTreeNode : octreeForViz)
-      {
-         if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
-            continue;
-
-         numberOfNodes++;
-         Vector3D planeNormal = new Vector3D();
-         Point3D pointOnPlane = new Point3D();
-
-         uiOcTreeNode.getNormal(planeNormal);
-         uiOcTreeNode.getHitLocation(pointOnPlane);
-         Plane3D octreePlane = new Plane3D(pointOnPlane, planeNormal);
-
-         int indexBestPlanarRegion = -1;
-         double minimumScore = Double.MAX_VALUE;
-         for (int j = 0; j < numberOfPlanarRegions; j++)
-         {
-            PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
-            Plane3D plane = planarRegion.getPlane();
-            double positionDistance = plane.distance(octreePlane.getPoint());
-            double angleDistance = Math.acos(Math.abs(planarRegion.getPlane().getNormal().dot(octreePlane.getNormal())));
-            double score = positionDistance / maximumDistance + angleDistance / maximumAngle;
-            if (score < minimumScore)
-            {
-               minimumScore = score;
-               indexBestPlanarRegion = j;
-            }
-         }
-
-         if (minimumScore < 1.0)
-         {
-            IhmcSurfaceElement surfaceElement = new IhmcSurfaceElement(octreeResolution);
-            surfaceElement.setPlane(octreePlane);
-            surfaceElement.setMergeablePlanarRegion(planarRegionsMap.getPlanarRegion(indexBestPlanarRegion));
-            surfaceElements.add(surfaceElement);
-         }
-      }
-
-      double ratio = (double) surfaceElements.size() / numberOfNodes;
-      // System.out.println("octreeForViz.getNumberOfNodes() " + octreeForViz.getNumberOfNodes() + " elements are " + surfaceElements.size() + " ratio " + ratio);
-
-      if (ratio < validRatio || surfaceElements.size() == 0)
-         return null;
-
-      return surfaceElements;
    }
 }

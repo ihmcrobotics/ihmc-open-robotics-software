@@ -13,7 +13,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
 {
    private List<IhmcSurfaceElement> surfaceElements;
-   private static final double POSITION_WEIGHT = 1.0;
+   private static final double POSITION_WEIGHT = 5.0;
    private static final double ANGLE_SCALER = 1.0;
    private static final double ANGLE_WEIGHT = 5.0;
    private static final double SNAPPING_PARALLEL_WEIGHT = 5.0;
