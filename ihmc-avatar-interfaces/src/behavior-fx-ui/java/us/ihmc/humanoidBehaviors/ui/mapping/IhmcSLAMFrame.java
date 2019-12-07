@@ -1,13 +1,25 @@
 package us.ihmc.humanoidBehaviors.ui.mapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
+import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMFrame
 {
@@ -117,11 +129,30 @@ public class IhmcSLAMFrame
       return optimizedSensorPoseToWorld;
    }
 
-   public NormalOcTree computeOctreeInPreviousView(double octreeResolution)
+   private NormalOcTree octreeNodesInPreviousView;
+   private List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
+   private boolean mergeable = false;
+
+   public NormalOcTree getOctreeNodesInPreviousView()
    {
-      if(previousFrame == null)
-         return null;
-      
+      return octreeNodesInPreviousView;
+   }
+
+   public List<IhmcSurfaceElement> getMergeableSurfaceElements()
+   {
+      return mergeableSurfaceElements;
+   }
+
+   public boolean isMergeableFrame()
+   {
+      return mergeable;
+   }
+
+   public void computeOctreeInPreviousView(double octreeResolution)
+   {
+      if (previousFrame == null)
+         octreeNodesInPreviousView = null;
+
       double[][] vertex = new double[pointCloudToSensorFrame.length][2];
 
       for (int i = 0; i < pointCloudToSensorFrame.length; i++)
@@ -175,7 +206,86 @@ public class IhmcSLAMFrame
          }
       }
 
-      NormalOcTree octree = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
-      return octree;
+      octreeNodesInPreviousView = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), octreeResolution);
+   }
+
+   public void computeMergeableSurfaceElements(PlanarRegionsList planarRegionsMap, double octreeResolution, double validRatio, double maximumDistance,
+                                               double maximumAngle)
+   {
+      //TDOO: check.
+      boolean useSufficientScoreDecision = true;
+      double allowableDistanceIn2D = 0.05;
+
+      NormalOcTree octree = octreeNodesInPreviousView;
+      if (octree == null)
+         return;
+
+      mergeableSurfaceElements.clear();
+
+      int numberOfPlanarRegions = planarRegionsMap.getNumberOfPlanarRegions();
+      NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
+      UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
+      int numberOfNodes = 0;
+
+      for (UIOcTreeNode uiOcTreeNode : octreeForViz)
+      {
+         if (!uiOcTreeNode.isNormalSet() || !uiOcTreeNode.isHitLocationSet())
+            continue;
+
+         numberOfNodes++;
+         Vector3D planeNormal = new Vector3D();
+         Point3D pointOnPlane = new Point3D();
+
+         uiOcTreeNode.getNormal(planeNormal);
+         uiOcTreeNode.getHitLocation(pointOnPlane);
+         Plane3D octreePlane = new Plane3D(pointOnPlane, planeNormal);
+
+         int indexBestPlanarRegion = -1;
+         double minimumScore = Double.MAX_VALUE;
+         double minimumPositionScore = Double.MAX_VALUE;
+         double minimumAngleScore = Double.MAX_VALUE;
+         for (int j = 0; j < numberOfPlanarRegions; j++)
+         {
+            PlanarRegion planarRegion = planarRegionsMap.getPlanarRegion(j);
+            Plane3D plane = planarRegion.getPlane();
+            double positionDistance = plane.distance(octreePlane.getPoint());
+            double angleDistance = Math.abs(Math.acos(Math.abs(planarRegion.getPlane().getNormal().dot(octreePlane.getNormal()))));
+            double score = positionDistance / maximumDistance + angleDistance / maximumAngle;
+            if (score < minimumScore)
+            {
+               minimumScore = score;
+               minimumPositionScore = positionDistance;
+               minimumAngleScore = angleDistance;
+               indexBestPlanarRegion = j;
+            }
+         }
+
+         PlanarRegion closestPlanarRegion = planarRegionsMap.getPlanarRegion(indexBestPlanarRegion);
+         ConvexPolygon2D convexHull = closestPlanarRegion.getConvexHull();
+
+         RigidBodyTransformReadOnly transformToLocal = closestPlanarRegion.getTransformToLocal();
+         Point3D localPoint = new Point3D();
+         transformToLocal.transform(octreePlane.getPointCopy(), localPoint);
+         double distanceToPlanarRegionIn2D = convexHull.distance(new Point2D(localPoint.getX(), localPoint.getY()));
+         boolean isAllowable = distanceToPlanarRegionIn2D < allowableDistanceIn2D;
+
+         double sufficientRatio = 1.0;
+         if (useSufficientScoreDecision)
+            sufficientRatio = 0.5;
+         if (isAllowable && minimumScore < 1.0 && minimumPositionScore < sufficientRatio && minimumAngleScore < sufficientRatio)
+         {
+            IhmcSurfaceElement surfaceElement = new IhmcSurfaceElement(octreeResolution);
+            surfaceElement.setPlane(octreePlane);
+            surfaceElement.setMergeablePlanarRegion(closestPlanarRegion);
+            mergeableSurfaceElements.add(surfaceElement);
+         }
+      }
+
+      double ratio = (double) mergeableSurfaceElements.size() / (numberOfNodes + 1);
+
+      if (ratio < validRatio || mergeableSurfaceElements.size() == 0)
+         mergeable = false;
+      else
+         mergeable = true;
    }
 }

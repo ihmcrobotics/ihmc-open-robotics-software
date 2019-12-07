@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -18,16 +19,14 @@ import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class IhmcSLAM
 {
-   private static final boolean DEBUG = true;
-
    private final boolean naiveSLAM;
 
    public static final double OCTREE_RESOLUTION = 0.02;
 
    public static final double VALID_PLANES_RATIO_THRESHOLD = 0.1;
 
-   public static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.05;
-   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(5.0);
+   public static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
+   public static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
 
    private final List<Point3DReadOnly[]> originalPointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> originalSensorPoses = new ArrayList<>();
@@ -40,9 +39,10 @@ public class IhmcSLAM
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
+   private final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
-   private static final double OPTIMIZER_POSITION_LIMIT = 0.05;
-   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(8.0);
+   private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
 
    public static final TDoubleArrayList initialQuery = new TDoubleArrayList();
    public static final TDoubleArrayList lowerLimit = new TDoubleArrayList();
@@ -66,21 +66,25 @@ public class IhmcSLAM
 
    public IhmcSLAM()
    {
-      this.naiveSLAM = false;
+      this(false);
    }
 
    public IhmcSLAM(boolean naiveSLAM)
    {
       this.naiveSLAM = naiveSLAM;
+      planarRegionSegmentationParameters.setMinRegionSize(200);
+      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setSearchRadius(0.05);
+
+      customRegionMergeParameters.setMaxDistanceFromPlane(0.03);
+      customRegionMergeParameters.setSearchRadius(0.05);
    }
 
-   //TODO: fix this.
    private void updatePlanarRegionsMap(IhmcSLAMFrame frame)
    {
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frame.getPointCloud(), frame.getSensorPose().getTranslation(),
-                                                                                               OCTREE_RESOLUTION);
-
-      System.out.println("rawData " + rawData.size());
+                                                                                               OCTREE_RESOLUTION, planarRegionSegmentationParameters);
 
       planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
                                                              polygonizerParameters);
@@ -88,7 +92,8 @@ public class IhmcSLAM
 
    private void updatePlanarRegionsMap()
    {
-      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, OCTREE_RESOLUTION);
+      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, OCTREE_RESOLUTION,
+                                                                                               planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
@@ -107,10 +112,15 @@ public class IhmcSLAM
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
 
-      updatePlanarRegionsMap();
+      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frame.getOriginalPointCloud(),
+                                                                                               frame.getInitialSensorPoseToWorld().getTranslation(),
+                                                                                               OCTREE_RESOLUTION, planarRegionSegmentationParameters);
+      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      // updatePlanarRegionsMap();
    }
 
    public List<List<IhmcSurfaceElement>> allSurfaceElements = new ArrayList<>();
+
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
@@ -120,34 +130,43 @@ public class IhmcSLAM
       RigidBodyTransform optimizedMultiplier = new RigidBodyTransform();
       if (!naiveSLAM)
       {
-         System.out.println("planarRegionsMap.getNumberOfPlanarRegions() " + planarRegionsMap.getNumberOfPlanarRegions());
-         List<IhmcSurfaceElement> surfaceElements = IhmcSLAMTools.computeMergeableSurfaceElements(planarRegionsMap, frame, OCTREE_RESOLUTION,
-                                                                                              VALID_PLANES_RATIO_THRESHOLD, MAXIMUM_DISTANCE_OF_SIMILARITY,
-                                                                                              MAXIMUM_ANGLE_OF_SIMILARITY);
-         if (surfaceElements == null)
+         frame.computeOctreeInPreviousView(OCTREE_RESOLUTION);
+         frame.computeMergeableSurfaceElements(planarRegionsMap, OCTREE_RESOLUTION, VALID_PLANES_RATIO_THRESHOLD, MAXIMUM_DISTANCE_OF_SIMILARITY,
+                                               MAXIMUM_ANGLE_OF_SIMILARITY);
+         List<IhmcSurfaceElement> surfaceElements = frame.getMergeableSurfaceElements();
+         System.out.println("number of surfaceElements " + surfaceElements.size());
+         if (frame.isMergeableFrame())
          {
-            optimizedMultiplier = new RigidBodyTransform();
+            optimizedMultiplier = computeOptimizedMultiplier(surfaceElements, frame.getInitialSensorPoseToWorld());
          }
          else
          {
-            allSurfaceElements.add(surfaceElements);
-            optimizedMultiplier = computeOptimizedMultiplier(surfaceElements, frame.getInitialSensorPoseToWorld());
+            optimizedMultiplier = new RigidBodyTransform();
          }
+
+         System.out.println();
+         System.out.println(optimizedMultiplier);
+         for (IhmcSurfaceElement surfaceElement : surfaceElements)
+            surfaceElement.transform(optimizedMultiplier);
+
+         allSurfaceElements.add(surfaceElements);
       }
 
       frame.updateSLAM(optimizedMultiplier);
-
-      //      System.out.println("optimizedMultiplier");
-      //      System.out.println(optimizedMultiplier);
 
       slamFrames.add(frame);
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
 
-//            updatePlanarRegionsMap();
-      updatePlanarRegionsMap(frame);
+      if (!naiveSLAM)
+         updatePlanarRegionsMap(frame);
 
       return true;
+   }
+
+   public void doNaiveSLAM()
+   {
+      updatePlanarRegionsMap();
    }
 
    private RigidBodyTransform computeOptimizedMultiplier(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
@@ -157,7 +176,7 @@ public class IhmcSLAM
 
       int maxIterations = 100;
       double convergenceThreshold = 10E-5;
-      double optimizerStepSize = -0.5;
+      double optimizerStepSize = -0.1;
       double optimizerPerturbationSize = 0.0001;
 
       optimizer.setInputLowerLimit(lowerLimit);
@@ -166,6 +185,7 @@ public class IhmcSLAM
       optimizer.setConvergenceThreshold(convergenceThreshold);
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
+      optimizer.setReducingStepSizeRatio(2);
 
       int run = optimizer.run();
       System.out.println("optimizer Query() " + run + " " + function.getQuery(initialQuery) + " " + optimizer.getOptimalQuery());
@@ -202,4 +222,8 @@ public class IhmcSLAM
       return planarRegionsMap;
    }
 
+   public IhmcSLAMFrame getSLAMFrame(int i)
+   {
+      return slamFrames.get(i);
+   }
 }
