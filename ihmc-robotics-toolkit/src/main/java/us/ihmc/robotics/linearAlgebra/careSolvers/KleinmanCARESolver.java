@@ -36,6 +36,11 @@ public class KleinmanCARESolver implements CARESolver
    /** The computed K. */
    private DenseMatrix64F K;
 
+   private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F B = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F R = new DenseMatrix64F(0, 0);
+
    private final HamiltonianCARESolver hamiltonianCARESolver = new HamiltonianCARESolver();
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
 
@@ -66,12 +71,19 @@ public class KleinmanCARESolver implements CARESolver
       if (MathTools.min(svd.getSingularValues()) == 0.0)
          throw new IllegalArgumentException("R Matrix is singular.");
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(R.getNumRows(), R.getNumCols());
-      solver.setA(R);
+      this.A.set(A);
+      this.B.set(B);
+      this.Q.set(Q);
+      this.R.set(R);
+   }
+
+   public void computeP()
+   {
       DenseMatrix64F R_inv = new DenseMatrix64F(R.getNumRows(), R.getNumCols());
-      solver.invert(R_inv);
+      NativeCommonOps.invert(R, R_inv);
 
       hamiltonianCARESolver.setMatrices(A, B, Q, R);
+      hamiltonianCARESolver.computeP();
 
       P = approximateP(A, B, Q, R, R_inv, hamiltonianCARESolver.getP(), MAX_ITERATIONS, EPSILON);
 
@@ -82,9 +94,6 @@ public class KleinmanCARESolver implements CARESolver
       CommonOps.multTransA(B, P, tempMatrix);
       CommonOps.mult(R_inv, tempMatrix, K);
    }
-
-   public void computeP()
-   {}
 
 
    /**
@@ -122,9 +131,7 @@ public class KleinmanCARESolver implements CARESolver
          CommonOps.addEquals(X, A);
 
          // Y = -K_i*R*K_i' - Q;
-         DenseMatrix64F kTranspose = new DenseMatrix64F(K.getNumCols(), K.getNumRows());
          DenseMatrix64F Y = new DenseMatrix64F(Q.getNumRows(), Q.getNumCols());
-         CommonOps.transpose(K, kTranspose);
          NativeCommonOps.multQuad(K, R, Y);
          CommonOps.addEquals(Y, Q);
          CommonOps.scale(-1.0, Q);
