@@ -393,9 +393,6 @@ public class IhmcSLAMTest
       sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
 
       RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.05, 5.0);
-      //      RigidBodyTransform randomTransformer = new RigidBodyTransform();
-      //      randomTransformer.setTranslation(0.02, 0.05, 0.03);
-      //      randomTransformer.appendRollRotation(Math.toRadians(3.0));
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
 
@@ -517,7 +514,7 @@ public class IhmcSLAMTest
       RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.05, 5.0);
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
-
+      
       StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
                                                                                                                                  stairHeight, stairWidth,
                                                                                                                                  stairLength - movingForward,
@@ -545,13 +542,13 @@ public class IhmcSLAMTest
       viewer.addPointCloud(frameOne.getPointCloud(), Color.BLUE);
       viewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       viewer.addOctree(surfaceElements, Color.CORAL);
+      viewer.addPlanarRegions(planarRegionsMap);
       viewer.start("testOptimization");
 
       IhmcSLAMViewer localViewer = new IhmcSLAMViewer();
       localViewer.addPointCloud(frameOne.getPointCloud(), Color.RED);
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       localViewer.addOctree(surfaceElements, Color.CORAL);
-      localViewer.addPlanarRegions(planarRegionsMap);
       PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
       GradientDescentModule optimizer = new GradientDescentModule(function, IhmcSLAM.initialQuery);
 
@@ -593,70 +590,42 @@ public class IhmcSLAMTest
       for(IhmcSurfaceElement element:surfaceElements)
          element.transform(slamTransformer);
       localViewer.addOctree(surfaceElements, Color.BEIGE);
+      
+      //localViewer.addPlanarRegions(planarRegionsMap);
       localViewer.start("iteration ");
 
       ThreadTools.sleepForever();
    }
-   
-//   @Test
-//   public void testNewPlanarRegionComingOutDoNotUseIhmcSLAM()
-//   {
-//      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
-//      String planarRegionsPath = "E:\\Data\\SimpleArea3\\20191127_222138_PlanarRegion\\";
-//
-//      boolean showLidarPlanarRegions = false;
-//
-//      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(new File(stereoPath));
-//      System.out.println("number of messages " + messages.size());
-//
-//      IhmcSLAMFrame firstFrame = new IhmcSLAMFrame(messages.get(0));
-//      IhmcSLAMFrame frameTwo = new IhmcSLAMFrame(firstFrame, messages.get(35));
-//      IhmcSLAMFrame frameThr = new IhmcSLAMFrame(frameTwo, messages.get(40));
-//
-//      double octreeResolution = 0.02;
-//      ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-//      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-//      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
-//      planarRegionSegmentationParameters.setMinRegionSize(200);
-//      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
-//      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.02);
-//      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(firstFrame.getPointCloud(),
-//                                                                                               firstFrame.getSensorPose().getTranslation(), octreeResolution,
-//                                                                                               planarRegionSegmentationParameters);
-//      PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
-//      
-//      
-//      
-//      
-//      
-//      
-//      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
-//      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
-//      if (showLidarPlanarRegions)
-//      {
-//         PlanarRegionsList importPlanarRegionData = PlanarRegionFileTools.importPlanarRegionData(new File(planarRegionsPath));
-//         for (int i = 0; i < importPlanarRegionData.getNumberOfPlanarRegions(); i++)
-//         {
-//            importPlanarRegionData.getPlanarRegion(i).setRegionId(0xFF0000);
-//         }
-//         slamViewer.addPlanarRegions(importPlanarRegionData);
-//      }
-//
-//      List<List<IhmcSurfaceElement>> allSurfaceElements = slam.allSurfaceElements;
-//      int size = allSurfaceElements.size();
-//      for (int i = 0; i < size; i++)
-//      {
-//         int redScaler = (int) (0xFF * (1 - (double) i / size));
-//         int blueScaler = (int) (0xFF * ((double) i / size));
-//         Color color = Color.rgb(redScaler, 0, blueScaler);
-//         slamViewer.addOctree(allSurfaceElements.get(i), color);
-//      }
-//
-//      slamViewer.start("testNewPlanarRegionComingOutDoNotUseIhmcSLAM");
-//
-//      ThreadTools.sleepForever();
-//   }
+   @Test
+   public void testTransformer()
+   {
+      RigidBodyTransform transformer = new RigidBodyTransform();
+      transformer.setTranslation(0.1, 0.0, 0.0);
+      transformer.appendYawRotation(Math.toRadians(30.0));
+      
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+      RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
+      sensorPoseOne.setTranslation(1.0, 0.0, 1.0);
+      sensorPoseOne.appendPitchRotation(Math.toRadians(70.0 + 90.0));
+      
+      slamViewer.addSensorPose(sensorPoseOne, Color.RED);
+      
+      RigidBodyTransform pointToSensorPose = new RigidBodyTransform();
+      pointToSensorPose.setTranslation(0.1, 0.1, 1.0);
+      pointToSensorPose.preMultiply(sensorPoseOne);
+      slamViewer.addSensorPose(pointToSensorPose, Color.ORANGE);
+      
+      
+      sensorPoseOne.preMultiply(transformer);
+      pointToSensorPose.preMultiply(transformer);
+      slamViewer.addSensorPose(sensorPoseOne, Color.BLACK);
+      slamViewer.addSensorPose(pointToSensorPose, Color.DARKORANGE);
+      
+      slamViewer.start("testTransformer");
 
+      ThreadTools.sleepForever();
+   }
+   
    @Test
    public void testNewPlanarRegionComingOut()
    {
@@ -677,19 +646,17 @@ public class IhmcSLAMTest
       slam.addFrame(messages.get(38));
       slam.addFrame(messages.get(39));
       slam.addFrame(messages.get(40));
-//      slam.addFrame(messages.get(42));
-//      slam.addFrame(messages.get(43));
-//      slam.addFrame(messages.get(44));
-//      slam.addFrame(messages.get(45));
-//      slam.addFrame(messages.get(46));
-//      slam.addFrame(messages.get(47));
-//      slam.addFrame(messages.get(48));
-//      slam.addFrame(messages.get(49));
-//      slam.addFrame(messages.get(50));
-//      slam.addFrame(messages.get(51));
-//      slam.addFrame(messages.get(54));
-//            for (int i = 1; i < messages.size(); i=i+2)
-//               slam.addFrame(messages.get(i));
+      slam.addFrame(messages.get(42));
+      slam.addFrame(messages.get(43));
+      slam.addFrame(messages.get(44));
+      slam.addFrame(messages.get(45));
+      slam.addFrame(messages.get(46));
+      slam.addFrame(messages.get(47));
+      slam.addFrame(messages.get(48));
+      slam.addFrame(messages.get(49));
+      slam.addFrame(messages.get(50));
+      slam.addFrame(messages.get(51));
+      slam.addFrame(messages.get(54));
 
       if (doNaiveSLAM)
          slam.doNaiveSLAM();
@@ -725,7 +692,8 @@ public class IhmcSLAMTest
          int redScaler = (int) (0xFF * (1 - (double) i / size));
          int blueScaler = (int) (0xFF * ((double) i / size));
          Color color = Color.rgb(redScaler, 0, blueScaler);
-         slamViewer.addOctree(allSurfaceElements.get(i), color);
+         List<IhmcSurfaceElement> surfaceElements = allSurfaceElements.get(i);
+         slamViewer.addOctree(surfaceElements, color);
       }
 
       slamViewer.start("EndToEnd");

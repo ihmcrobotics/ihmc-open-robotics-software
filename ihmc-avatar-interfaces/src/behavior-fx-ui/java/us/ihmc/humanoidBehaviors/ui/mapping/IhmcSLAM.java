@@ -116,7 +116,6 @@ public class IhmcSLAM
                                                                                                frame.getInitialSensorPoseToWorld().getTranslation(),
                                                                                                OCTREE_RESOLUTION, planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
-      // updatePlanarRegionsMap();
    }
 
    public List<List<IhmcSurfaceElement>> allSurfaceElements = new ArrayList<>();

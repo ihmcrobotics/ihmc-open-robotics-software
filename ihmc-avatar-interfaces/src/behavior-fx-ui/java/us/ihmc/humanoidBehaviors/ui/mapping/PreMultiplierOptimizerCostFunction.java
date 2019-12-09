@@ -59,7 +59,8 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
        * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
        */
       RigidBodyTransform transformer = new RigidBodyTransform();
-      convertToPointCloudTransformer(values, transformer);
+      //convertToPointCloudTransformer(values, transformer);
+      convertToSensorPoseMultiplier(values, transformer);
 
       List<IhmcSurfaceElement> convertedElements = new ArrayList<>();
       for (int i = 0; i < surfaceElements.size(); i++)
@@ -70,7 +71,7 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
          transformer.transform(convertedNormal);
          transformer.transform(convertedCenter);
          IhmcSurfaceElement convertedElement = new IhmcSurfaceElement(surfaceElements.get(i));
-         convertedElement.setPlane(convertedCenter, convertedNormal);
+         convertedElement.transform(transformer);
          convertedElements.add(convertedElement);
       }
 
