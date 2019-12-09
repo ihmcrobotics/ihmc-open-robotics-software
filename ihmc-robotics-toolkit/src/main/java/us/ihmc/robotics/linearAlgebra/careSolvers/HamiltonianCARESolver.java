@@ -77,22 +77,21 @@ public class HamiltonianCARESolver implements CARESolver
     * @param Q state cost matrix
     * @param R control cost matrix
     */
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R)
+   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices)
    {
-      // checking A
-      if (!MatrixChecking.isSquare(A))
-         throw new IllegalArgumentException("A is not square : " + A.getNumRows() + " x " + A.getNumCols());
-      if (A.getNumCols() != B.getNumRows())
+      if (checkMatrices)
       {
-         throw new IllegalArgumentException("Dimensions do not match : " + A.getNumRows() + ", " + B.getNumCols());
-      }
-      MatrixChecking.assertMultiplicationCompatible(B, R);
-      MatrixChecking.assertMultiplicationCompatible(A, Q);
+         // checking A
+         MatrixChecking.assertIsSquare(A);
+         MatrixChecking.assertMultiplicationCompatible(A, B);
+         MatrixChecking.assertMultiplicationCompatible(B, R);
+         MatrixChecking.assertMultiplicationCompatible(A, Q);
 
-      // checking R
-      svd.decompose(R);
-      if (MathTools.min(svd.getSingularValues()) == 0.0)
-         throw new IllegalArgumentException("R Matrix is singular.");
+         // checking R
+         svd.decompose(R);
+         if (MathTools.min(svd.getSingularValues()) == 0.0)
+            throw new IllegalArgumentException("R Matrix is singular.");
+      }
 
       this.A.set(A);
       this.B.set(B);

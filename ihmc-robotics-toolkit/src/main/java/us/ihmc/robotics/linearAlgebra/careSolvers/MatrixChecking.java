@@ -22,8 +22,9 @@ public class MatrixChecking
          throw new IllegalArgumentException("Number of cols do not match : " + a.getNumCols() + ", " + b.getNumCols());
    }
 
-   static boolean isSquare(DenseMatrix64F matrix64F)
+   static void assertIsSquare(DenseMatrix64F matrix64F)
    {
-      return matrix64F.getNumRows() == matrix64F.getNumRows();
+      if (matrix64F.getNumRows() != matrix64F.getNumRows())
+         throw new IllegalArgumentException("Matrix is not square.");
    }
 }
