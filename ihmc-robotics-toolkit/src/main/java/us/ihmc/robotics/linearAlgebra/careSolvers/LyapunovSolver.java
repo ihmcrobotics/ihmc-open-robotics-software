@@ -32,7 +32,7 @@ public class LyapunovSolver
 
    private int n;
 
-   public void setMatices(DenseMatrix64F A, DenseMatrix64F Q)
+   public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q)
    {
       MatrixChecking.isSquare(A);
 
