@@ -29,7 +29,7 @@ public class IhmcSLAMEndToEndTest
    //private final String planarRegionsPath = "E:\\Data\\Walking7-fixedframe\\PlanarRegions\\";
    //private final String planarRegionsPath = "E:\\Data\\Walking11-kinematic\\20191125_164741_PlanarRegion\\";
 
-   private final boolean doNaiveSLAM = false;
+   private final boolean doNaiveSLAM = true;
 
    public IhmcSLAMEndToEndTest()
    {
@@ -39,8 +39,8 @@ public class IhmcSLAMEndToEndTest
 
       IhmcSLAM slam = new IhmcSLAM(doNaiveSLAM);
       slam.addFirstFrame(messages.get(0));
-//      for (int i = 1; i < messages.size(); i++)
-      for (int i = 20; i < 60; i++)
+      for (int i = 1; i < messages.size(); i++)
+//      for (int i = 20; i < 60; i++)
          slam.addFrame(messages.get(i));
       if (doNaiveSLAM)
          slam.doNaiveSLAM();

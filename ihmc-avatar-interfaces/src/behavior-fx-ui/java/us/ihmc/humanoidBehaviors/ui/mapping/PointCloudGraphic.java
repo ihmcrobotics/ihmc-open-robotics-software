@@ -23,7 +23,7 @@ public class PointCloudGraphic extends Group
    private static final float LENGTH_SENSOR_FRAME_AXIS = 0.1f;
    private static final float WIDTH_SENSOR_FRAME_AXIS = 0.01f;
    private static final float SCAN_POINT_SIZE = 0.005f;
-   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 2500;
+   private static final int NUMBER_OF_POINTS_PER_MESSAGE = 5000;
 
    private static final int palleteSizeForMeshBuilder = 2048;
 

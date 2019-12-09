@@ -95,7 +95,7 @@ public class IhmcSLAMFrame
    private void update()
    {
       optimizedSensorPoseToWorld.set(sensorPoseToWorld);
-      optimizedSensorPoseToWorld.multiply(slamTransformer);
+      optimizedSensorPoseToWorld.preMultiply(slamTransformer);
 
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
       {
