@@ -34,7 +34,16 @@ public class LyapunovSolver
 
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q)
    {
-      MatrixChecking.isSquare(A);
+      setMatrices(A, Q, true);
+   }
+
+   public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q, boolean checkMatrices)
+   {
+      if (checkMatrices)
+      {
+         MatrixChecking.assertIsSquare(A);
+         MatrixChecking.assertIsSquare(Q);
+      }
 
       this.A.set(A);
       this.Q.set(Q);
