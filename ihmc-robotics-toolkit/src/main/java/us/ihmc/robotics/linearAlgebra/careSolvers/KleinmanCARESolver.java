@@ -74,12 +74,12 @@ public class KleinmanCARESolver
 
       P = computeP(A, B, Q, R, R_inv, MAX_ITERATIONS, EPSILON);
 
-      // K = P B^T R^-1
-      K = new DenseMatrix64F(P.getNumRows(), R_inv.getNumCols());
+      // K = R^-1 B^T P
+      K = new DenseMatrix64F(R_inv.getNumRows(), P.getNumCols());
       DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
-      tempMatrix.reshape(B.getNumRows(), P.getNumCols());
-      CommonOps.mult(B, P, tempMatrix);
-      CommonOps.mult(-1.0, R_inv, tempMatrix, K);
+      tempMatrix.reshape(B.getNumCols(), P.getNumCols());
+      CommonOps.multTransA(B, P, tempMatrix);
+      CommonOps.mult(R_inv, tempMatrix, K);
    }
 
    /**
@@ -98,8 +98,8 @@ public class KleinmanCARESolver
    private DenseMatrix64F computeP(final DenseMatrix64F A, final DenseMatrix64F B, final DenseMatrix64F Q, final DenseMatrix64F R, final DenseMatrix64F R_inv,
                                    final int maxIterations, final double epsilon)
    {
-      final DenseMatrix64F P_ = computeInitialP(A, B, Q, R_inv);
-      return approximateP(A, B, Q, R, R_inv, P_, maxIterations, epsilon);
+      final DenseMatrix64F initialP = computeInitialP(A, B, Q, R_inv);
+      return approximateP(A, B, Q, R, R_inv, initialP, maxIterations, epsilon);
    }
 
    private final DenseMatrix64F BTranspose = new DenseMatrix64F(0, 0);
@@ -194,29 +194,29 @@ public class KleinmanCARESolver
    private DenseMatrix64F approximateP(final DenseMatrix64F A, final DenseMatrix64F B, final DenseMatrix64F Q, final DenseMatrix64F R,
                                        final DenseMatrix64F R_inv, final DenseMatrix64F initialP, final int maxIterations, final double epsilon)
    {
-      DenseMatrix64F K = new DenseMatrix64F(R_inv.getNumRows(), P.getNumCols());
+      DenseMatrix64F K = new DenseMatrix64F(R_inv.getNumRows(), initialP.getNumCols());
       DenseMatrix64F P = new DenseMatrix64F(initialP);
 
       double error = 1;
       int i = 1;
       while (error > epsilon)
       {
-         // K_i = -R_inv B P_i-1
+         // K_i = -R_inv B' P_i-1
          DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
-         tempMatrix.reshape(B.getNumRows(), P.getNumCols());
-         CommonOps.mult(B, P, tempMatrix);
+         tempMatrix.reshape(B.getNumCols(), P.getNumCols());
+         CommonOps.multTransA(B, P, tempMatrix);
          CommonOps.mult(-1.0, R_inv, tempMatrix, K);
 
-         // X = A+B*K_i';
+         // X = A+B*K_i;
          DenseMatrix64F X = new DenseMatrix64F(A.getNumRows(), A.getNumCols());
-         CommonOps.multTransB(B, K, X);
+         CommonOps.mult(B, K, X);
          CommonOps.addEquals(X, A);
 
          // Y = -K_i*R*K_i' - Q;
          DenseMatrix64F kTranspose = new DenseMatrix64F(K.getNumCols(), K.getNumRows());
          DenseMatrix64F Y = new DenseMatrix64F(Q.getNumRows(), Q.getNumCols());
          CommonOps.transpose(K, kTranspose);
-         NativeCommonOps.multQuad(kTranspose, R, Y);
+         NativeCommonOps.multQuad(K, R, Y);
          CommonOps.addEquals(Y, Q);
          CommonOps.scale(-1.0, Q);
 
