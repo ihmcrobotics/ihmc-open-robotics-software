@@ -11,7 +11,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -174,9 +173,13 @@ public class AtlasCorridorNavigationTest
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       List<Point3DReadOnly> pathPoints = null;
       List<? extends Pose3DReadOnly> path = null;
+      //         FootstepPlannerParametersBasics footstepPlannerParameters = new AtlasFootstepPlannerParameters();
+      FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
       while (robotPose.getPosition().distance(goal) > 0.5)
       {
+         LogTools.info("Waiting for SLAM update");
          ThreadTools.sleep(300); // try to get a little more perception data TODO wait for a SLAM update
          slamUpdated.poll(); // throw away a poll. Make sure to get a new scan here
          while (!slamUpdated.poll())
@@ -186,12 +189,12 @@ public class AtlasCorridorNavigationTest
          mapRegionsInput.getMessageNotification().blockingPoll();
          ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
+         LogTools.info("Planning with occlusions");
          latestHumanoidRobotState = robot.pollHumanoidRobotState();
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
 
-         VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
          visibilityGraphParameters.setNavigableExtrusionDistance(0.3);
          visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
 //         visibilityGraphParameters.setPreferredNavigableExtrusionDistance(0.60);
@@ -209,7 +212,6 @@ public class AtlasCorridorNavigationTest
          }
 
          manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
-         LogTools.info("Planning with occlusions");
          pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
          if (pathPoints == null || pathPoints.size() < 2)
          {
@@ -217,7 +219,10 @@ public class AtlasCorridorNavigationTest
             ThreadTools.sleepSeconds(1.0);
             continue;
          }
-         robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
+         if (VISUALIZE)
+         {
+            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
+         }
 
          LogTools.info("Computing poses from path");
          // find last two path points
@@ -231,7 +236,6 @@ public class AtlasCorridorNavigationTest
          path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), robotPose.getOrientation(), finalOrientation);
 
          // request footstep plan
-         LogTools.info("Preparing footstep planner request 1");
          WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
          bodyPath.setPoseWaypoints(path);
@@ -270,9 +274,6 @@ public class AtlasCorridorNavigationTest
          // Use BodyPathBasedAStarPlanner instead of manual?
 
          boolean useFastFlatInvalidFootsteps = true;
-         LogTools.info("Preparing footstep planner request 2");
-//         FootstepPlannerParametersBasics footstepPlannerParameters = new AtlasFootstepPlannerParameters();
-         FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
          footstepPlannerParameters.setReturnBestEffortPlan(true);
          footstepPlannerParameters.setMaximumStepYaw(1.5);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
@@ -355,7 +356,10 @@ public class AtlasCorridorNavigationTest
          LogTools.info("Got {} footsteps", footstepPlan.getNumberOfSteps());
 
          // make robot walk a little of the path
-         if (VISUALIZE) robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
+         if (VISUALIZE)
+         {
+            robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
+         }
 
          FootstepPlan shortenedFootstepPlan = new FootstepPlan();
 
