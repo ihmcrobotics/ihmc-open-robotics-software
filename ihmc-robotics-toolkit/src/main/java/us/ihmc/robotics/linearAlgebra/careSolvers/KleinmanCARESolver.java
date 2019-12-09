@@ -25,44 +25,49 @@ import us.ihmc.matrixlib.NativeCommonOps;
 public class KleinmanCARESolver implements CARESolver
 {
    /** Internally used maximum iterations. */
-   private static final int MAX_ITERATIONS = 100;
+   private int maxIterations = 100;
 
    /** Internally used epsilon criteria. */
-   private static final double EPSILON = 1e-8;
+   private double convergenceEpsilon = 1e-8;
 
    /** The solution of the algebraic Riccati equation. */
-   private DenseMatrix64F P;
+   private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
 
    /** The computed K. */
-   private DenseMatrix64F K;
+   private final DenseMatrix64F K = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F B = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F R = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F Rinv = new DenseMatrix64F(0, 0);
+
+   private final DenseMatrix64F Ak = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F Qk = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
+
+   private final LyapunovSolver lyapunovSolver = new LyapunovSolver();
 
    private final HamiltonianCARESolver hamiltonianCARESolver = new HamiltonianCARESolver();
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
 
-
-         /**
-          * Constructor of the solver. A and B should be compatible. B and R must be
-          * multiplicative compatible. A and Q must be multiplicative compatible. R
-          * must be invertible.
-          *
-          * @param A state transition matrix
-          * @param B control multipliers matrix
-          * @param Q state cost matrix
-          * @param R control cost matrix
-          */
+   /**
+    * Constructor of the solver. A and B should be compatible. B and R must be
+    * multiplicative compatible. A and Q must be multiplicative compatible. R
+    * must be invertible.
+    *
+    * @param A state transition matrix
+    * @param B control multipliers matrix
+    * @param Q state cost matrix
+    * @param R control cost matrix
+    */
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R)
    {
       // checking A
       if (!MatrixChecking.isSquare(A))
          throw new IllegalArgumentException("A is not square : " + A.getNumRows() + " x " + A.getNumCols());
-      if (A.getNumCols() != B.getNumRows()) {
+      if (A.getNumCols() != B.getNumRows())
          throw new IllegalArgumentException("Dimensions do not match : " + A.getNumRows() + ", " + B.getNumCols());
-      }
       MatrixChecking.assertMultiplicationCompatible(B, R);
       MatrixChecking.assertMultiplicationCompatible(A, Q);
 
@@ -77,24 +82,27 @@ public class KleinmanCARESolver implements CARESolver
       this.R.set(R);
    }
 
+   private int n;
+   private int m;
+
    public void computeP()
    {
-      DenseMatrix64F R_inv = new DenseMatrix64F(R.getNumRows(), R.getNumCols());
-      NativeCommonOps.invert(R, R_inv);
+      n = A.getNumRows();
+      m = R.getNumRows();
+
+      Rinv.reshape(m, m);
+      NativeCommonOps.invert(R, Rinv);
 
       hamiltonianCARESolver.setMatrices(A, B, Q, R);
       hamiltonianCARESolver.computeP();
 
-      P = approximateP(A, B, Q, R, R_inv, hamiltonianCARESolver.getP(), MAX_ITERATIONS, EPSILON);
+      approximatePAlt(hamiltonianCARESolver.getP(), maxIterations, convergenceEpsilon);
 
       // K = R^-1 B^T P
-      K = new DenseMatrix64F(R_inv.getNumRows(), P.getNumCols());
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
       tempMatrix.reshape(B.getNumCols(), P.getNumCols());
       CommonOps.multTransA(B, P, tempMatrix);
-      CommonOps.mult(R_inv, tempMatrix, K);
+      CommonOps.mult(Rinv, tempMatrix, K);
    }
-
 
    /**
     * Applies the Kleinman's algorithm.
@@ -168,12 +176,62 @@ public class KleinmanCARESolver implements CARESolver
 
          P.set(nextP);
          i++;
-         if (i > maxIterations) {
+         if (i > maxIterations)
+         {
             throw new RuntimeException("Convergence failed.");
          }
       }
 
       return P;
+   }
+
+   /**
+    * Applies the Newton algorithm.
+    *
+    * @param initialP initial solution
+    * @param maxIterations maximum number of iterations allowed
+    * @param epsilon convergence threshold
+    */
+   private void approximatePAlt(DenseMatrix64F initialP, int maxIterations, double epsilon)
+   {
+      n = A.getNumRows();
+      m = Rinv.getNumRows();
+      K.reshape(m, n);
+      P.set(initialP);
+
+      double error = 1.0;
+      int i = 1;
+      while (error > epsilon)
+      {
+         // K_i = R_inv B' P_i-1
+         tempMatrix.reshape(B.getNumCols(), P.getNumCols());
+         CommonOps.multTransA(B, P, tempMatrix);
+         CommonOps.mult(Rinv, tempMatrix, K);
+
+         // Ak = A - B K
+         Ak.set(A);
+         CommonOps.multAdd(-1.0, B, K, Ak);
+
+         // Qk = Q + K' R K
+         Qk.reshape(n, n);
+         NativeCommonOps.multQuad(K, R, Qk);
+         CommonOps.addEquals(Qk, Q);
+         CommonOps.scale(-1.0, Q);
+
+         // FIXME this is returning a negative version of the correct value.
+         lyapunovSolver.setMatrices(Ak, Qk);
+         lyapunovSolver.solve();
+         DenseMatrix64F Pk = lyapunovSolver.getX();
+         CommonOps.scale(-1.0, Pk);
+
+         // error = norm(P - P1);
+         error = distance(P, Pk);
+
+         P.set(Pk);
+         i++;
+         if (i > maxIterations)
+            throw new RuntimeException("Convergence failed.");
+      }
    }
 
    private static DenseMatrix64F stack(DenseMatrix64F y)
@@ -205,6 +263,25 @@ public class KleinmanCARESolver implements CARESolver
          for (int row = 0; row < matrix.getNumRows(); row++)
          {
             rowSum += MathTools.square(matrix.get(row, col));
+         }
+         norm += MathTools.square(rowSum);
+      }
+
+      return norm;
+   }
+
+   private static double distance(DenseMatrix64F A, DenseMatrix64F B)
+   {
+      MatrixChecking.assertRowDimensionsMatch(A, B);
+      MatrixChecking.assertColDimensionsMatch(A, B);
+
+      double norm = 0.0;
+      for (int col = 0; col < A.getNumCols(); col++)
+      {
+         double rowSum = 0.0;
+         for (int row = 0; row < A.getNumRows(); row++)
+         {
+            rowSum += MathTools.square(A.get(row, col) - B.get(row, col));
          }
          norm += MathTools.square(rowSum);
       }
