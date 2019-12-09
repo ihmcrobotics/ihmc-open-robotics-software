@@ -1,4 +1,4 @@
-package us.ihmc.robotics.linearAlgebra;
+package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
