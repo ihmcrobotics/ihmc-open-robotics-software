@@ -1,13 +1,13 @@
 package us.ihmc.robotics.linearAlgebra.careSolver;
 
 import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.KleinmanCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianCARESolver;
 
-public class KleinmanCARESolverTest extends CARESolverTest
+public class HamiltonianCARESolverTest extends CARESolverTest
 {
    @Override
    protected CARESolver getSolver()
    {
-      return new KleinmanCARESolver();
+      return new HamiltonianCARESolver();
    }
 }
