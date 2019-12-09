@@ -7,7 +7,6 @@ package us.ihmc.robotics.linearAlgebra.careSolvers;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
@@ -23,7 +22,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
  * 3. Approximate the initial solution given by 2 using the Kleinman algorithm
  * (an iterative method)
  */
-public class KleinmanCARESolver
+public class KleinmanCARESolver implements CARESolver
 {
    /** Internally used maximum iterations. */
    private static final int MAX_ITERATIONS = 100;
@@ -32,28 +31,27 @@ public class KleinmanCARESolver
    private static final double EPSILON = 1e-8;
 
    /** The solution of the algebraic Riccati equation. */
-   private final DenseMatrix64F P;
+   private DenseMatrix64F P;
 
    /** The computed K. */
-   private final DenseMatrix64F K;
+   private DenseMatrix64F K;
 
-   private final HessianCARESolver hessianCARESolver;
+   private final HamiltonianCARESolver hamiltonianCARESolver = new HamiltonianCARESolver();
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
-   private final EigenDecomposition<DenseMatrix64F> eigen = DecompositionFactory.eig(0, true);
 
-   /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
-    * multiplicative compatible. A and Q must be multiplicative compatible. R
-    * must be invertible.
-    *
-    * @param A state transition matrix
-    * @param B control multipliers matrix
-    * @param Q state cost matrix
-    * @param R control cost matrix
-    */
-   public KleinmanCARESolver(final DenseMatrix64F A, final DenseMatrix64F B,
-                             final DenseMatrix64F Q, final DenseMatrix64F R) {
 
+         /**
+          * Constructor of the solver. A and B should be compatible. B and R must be
+          * multiplicative compatible. A and Q must be multiplicative compatible. R
+          * must be invertible.
+          *
+          * @param A state transition matrix
+          * @param B control multipliers matrix
+          * @param Q state cost matrix
+          * @param R control cost matrix
+          */
+   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R)
+   {
       // checking A
       if (!MatrixChecking.isSquare(A))
          throw new IllegalArgumentException("A is not square : " + A.getNumRows() + " x " + A.getNumCols());
@@ -73,9 +71,9 @@ public class KleinmanCARESolver
       DenseMatrix64F R_inv = new DenseMatrix64F(R.getNumRows(), R.getNumCols());
       solver.invert(R_inv);
 
-      hessianCARESolver = new HessianCARESolver(A, B, Q, R);
+      hamiltonianCARESolver.setMatrices(A, B, Q, R);
 
-      P = approximateP(A, B, Q, R, R_inv, hessianCARESolver.getP(), MAX_ITERATIONS, EPSILON);
+      P = approximateP(A, B, Q, R, R_inv, hamiltonianCARESolver.getP(), MAX_ITERATIONS, EPSILON);
 
       // K = R^-1 B^T P
       K = new DenseMatrix64F(R_inv.getNumRows(), P.getNumCols());
@@ -84,6 +82,9 @@ public class KleinmanCARESolver
       CommonOps.multTransA(B, P, tempMatrix);
       CommonOps.mult(R_inv, tempMatrix, K);
    }
+
+   public void computeP()
+   {}
 
 
    /**
