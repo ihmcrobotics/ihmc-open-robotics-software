@@ -9,7 +9,7 @@ import us.ihmc.matrixlib.MatrixTools;
 /**
  * Solves the Equation
  *
- * A X + X A' = Q
+ * A' X + X A + Q = 0
  *
  * for P
  */
@@ -66,6 +66,7 @@ public class LyapunovSolver
 
       // stack all of Q into a vector
       stack(Q, qVector);
+      CommonOps.scale(-1.0, qVector);
 
       xVector.reshape(X1.getNumRows(), 1);
       solver.setA(X1);
@@ -79,14 +80,12 @@ public class LyapunovSolver
       return X;
    }
 
-   static DenseMatrix64F stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
+   static void stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
    {
       int rows = QMatrix.getNumRows();
       qVector.reshape(rows * rows, 1);
       for (int i = 0; i < rows; i++)
          MatrixTools.setMatrixBlock(qVector, i * rows, 0, QMatrix, 0, i, rows, 1, 1.0);
-
-      return qVector;
    }
 
    static void toSquareMatrix(DenseMatrix64F xVector, DenseMatrix64F xMatrix)

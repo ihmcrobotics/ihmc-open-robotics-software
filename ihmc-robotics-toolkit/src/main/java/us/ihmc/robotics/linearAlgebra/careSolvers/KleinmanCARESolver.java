@@ -218,11 +218,9 @@ public class KleinmanCARESolver implements CARESolver
          CommonOps.addEquals(Qk, Q);
          CommonOps.scale(-1.0, Q);
 
-         // FIXME this is returning a negative version of the correct value.
          lyapunovSolver.setMatrices(Ak, Qk);
          lyapunovSolver.solve();
          DenseMatrix64F Pk = lyapunovSolver.getX();
-         CommonOps.scale(-1.0, Pk);
 
          // error = norm(P - P1);
          error = distance(P, Pk);

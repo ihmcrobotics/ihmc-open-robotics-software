@@ -34,5 +34,4 @@ public interface CARESolver
    void computeP();
 
    DenseMatrix64F getP();
-   DenseMatrix64F getK();
 }
