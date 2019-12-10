@@ -107,7 +107,13 @@ public class Cluster
       preferredNonNavigableExtrusionsInLocal.clear();
    }
 
+   /** Returns true if it's on an edge.    */
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
+   {
+      return isInsideNonNavigableZone(query, 1e-7);
+   }
+
+   private boolean isInsideNonNavigableZone(Point2DReadOnly query, double epsilon)
    {
       if (nonNavigableExtrusionInLocal.isEmpty())
          return false;
@@ -116,15 +122,15 @@ public class Cluster
 
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
-         if (!boundingBox.isInsideEpsilon(query, 1e-7))
+         if (!boundingBox.isInsideEpsilon(query, epsilon))
             return true;
-         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
+         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query, epsilon);
       }
       else
       {
-         if (!boundingBox.isInsideEpsilon(query, 1e-7))
+         if (!boundingBox.isInsideEpsilon(query, epsilon))
             return false;
-         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
+         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query, epsilon);
       }
    }
 

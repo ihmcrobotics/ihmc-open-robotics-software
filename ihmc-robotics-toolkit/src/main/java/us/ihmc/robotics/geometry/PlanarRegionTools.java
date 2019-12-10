@@ -103,6 +103,10 @@ public class PlanarRegionTools
       return isPointInsideConcaveHull(polygon, pointToCheckX, pointToCheckY);
    }
 
+   public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck, double epsilon)
+   {
+      return isPointInsideConcaveHull(polygon, pointToCheck.getX(), pointToCheck.getY(), epsilon);
+   }
 
 
    /**
@@ -135,8 +139,7 @@ public class PlanarRegionTools
       return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
    }
 
-   // FIXME this is currently private, because the epsilon feature is untested.
-   private static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY, double epsilon)
+   public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY, double epsilon)
    {
       int numberOfVertices = polygon.size();
 
