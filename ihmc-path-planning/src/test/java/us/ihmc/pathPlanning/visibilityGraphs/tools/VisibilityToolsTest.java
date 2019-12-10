@@ -224,15 +224,15 @@ public class VisibilityToolsTest
       preferredNavigableExtrusion2.addPoint(new Point2D(0.5 + navEpsilon, -3.5 + navEpsilon));
       preferredNavigableExtrusion2.addPoint(new Point2D(0.5 + navEpsilon, 3.5 - navEpsilon));
 
-      preferredNonNavigableExtrusion2.addPoint(new Point2D(9.5, 3.5));
-      preferredNonNavigableExtrusion2.addPoint(new Point2D(9.5, -3.5));
-      preferredNonNavigableExtrusion2.addPoint(new Point2D(5.5, -3.5));
-      preferredNonNavigableExtrusion2.addPoint(new Point2D(5.5, 3.5));
+      preferredNonNavigableExtrusion3.addPoint(new Point2D(9.5, 3.5));
+      preferredNonNavigableExtrusion3.addPoint(new Point2D(9.5, -3.5));
+      preferredNonNavigableExtrusion3.addPoint(new Point2D(5.5, -3.5));
+      preferredNonNavigableExtrusion3.addPoint(new Point2D(5.5, 3.5));
 
-      preferredNavigableExtrusion2.addPoint(new Point2D(9.5 - navEpsilon, 3.5 - navEpsilon));
-      preferredNavigableExtrusion2.addPoint(new Point2D(9.5 - navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.addPoint(new Point2D(5.5 + navEpsilon, -3.5 + navEpsilon));
-      preferredNavigableExtrusion2.addPoint(new Point2D(5.5 + navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion3.addPoint(new Point2D(9.5 - navEpsilon, 3.5 - navEpsilon));
+      preferredNavigableExtrusion3.addPoint(new Point2D(9.5 - navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion3.addPoint(new Point2D(5.5 + navEpsilon, -3.5 + navEpsilon));
+      preferredNavigableExtrusion3.addPoint(new Point2D(5.5 + navEpsilon, 3.5 - navEpsilon));
 
       navigableExtrusions = PointCloudTools.addPointsAlongExtrusionHull(navigableExtrusions, 0.2);
       preferredNavigableExtrusion0 = PointCloudTools.addPointsAlongExtrusionHull(preferredNavigableExtrusion0, 0.2);
