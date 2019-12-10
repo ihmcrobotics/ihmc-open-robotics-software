@@ -7,14 +7,18 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
- * Solves the Equation
+ * This solver is a solver fo the continuous Lyapunov equation, which is defined as
  *
- * A' X + X A + Q = 0
- *
- * for X
+ * <p>A' X + X A + Q = 0,</p>
+ * <p>where X is an unknown quantity, Q is a Hermitian matrix, and A' is the conjugate transpose of A.</p>
+ * <p>Note that this implementation assumes only real values, making Q symmetric and A' a simple transpose.</p>
+ * <p>This solver implements the Kronecker product notation, as found in https://en.wikipedia.org/wiki/Lyapunov_equation</p>
+ *<p>The matrix equation of this problem is </p>
+ * <p> I<sub>n</sub>&otimes; A + A'&otimes;I<sub>n</sub> vec X = -vec Q</p>
+ * which is a simple linear system.
  */
-public class LyapunovSolver
-{
+public class LyapunovEquationSolver
+      {
    private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aTranspose = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
@@ -32,6 +36,8 @@ public class LyapunovSolver
 
    private int n;
 
+   private boolean isUpToDate = false;
+
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q)
    {
       setMatrices(A, Q, true);
@@ -39,6 +45,7 @@ public class LyapunovSolver
 
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q, boolean checkMatrices)
    {
+      isUpToDate = false;
       if (checkMatrices)
       {
          MatrixChecking.assertIsSquare(A);
@@ -51,7 +58,7 @@ public class LyapunovSolver
       n = this.A.getNumRows();
    }
 
-   public void solve()
+   public DenseMatrix64F solve()
    {
       aTranspose.reshape(n, n);
       eyeX.reshape(n, n);
@@ -73,14 +80,20 @@ public class LyapunovSolver
       solver.solve(qVector, xVector);
 
       toSquareMatrix(xVector, X);
+
+      isUpToDate = true;
+      return X;
    }
 
    public DenseMatrix64F getX()
    {
+      if (!isUpToDate)
+         throw new RuntimeException("You must call solve before trying to retrieve X.");
+
       return X;
    }
 
-   static void stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
+   private static void stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
    {
       int rows = QMatrix.getNumRows();
       qVector.reshape(rows * rows, 1);
@@ -88,7 +101,7 @@ public class LyapunovSolver
          MatrixTools.setMatrixBlock(qVector, i * rows, 0, QMatrix, 0, i, rows, 1, 1.0);
    }
 
-   static void toSquareMatrix(DenseMatrix64F xVector, DenseMatrix64F xMatrix)
+   private static void toSquareMatrix(DenseMatrix64F xVector, DenseMatrix64F xMatrix)
    {
       int rows = (int) Math.sqrt(xVector.getNumRows());
       xMatrix.reshape(rows, rows);

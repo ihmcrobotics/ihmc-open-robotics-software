@@ -1,7 +1,3 @@
-/**
- * This is a rework of the hipparchus project solver found in
- * https://github.com/Hipparchus-Math/hipparchus/blob/master/hipparchus-core/src/main/java/org/hipparchus/linear/RiccatiEquationSolverImpl.java
- */
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
@@ -9,24 +5,37 @@ import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-/**
- * This solver computes the solution using the following approach:
+ /**
+ * This solver computes the solution to the algebraic Riccati equation
  *
- * 1. Compute the Hamiltonian matrix 2. Extract its complex eigen vectors (not
- * the best solution, a better solution would be ordered Schur transformation)
- * 3. Approximate the initial solution given by 2 using the Kleinman algorithm
- * (an iterative method)
+ * <p>
+ * A' P + P A - P B R^-1 B' P + Q = 0
+ * </p>
+ * <p> which can also be written as</p>
+ * <p>A' P + P A - P M P + Q = 0</p>*
+ * <p>where P is the unknown to be solved for, R is symmetric positive definite, Q is symmetric positive semi-definite, A is the state transition matrix,
+ * and B is the control matrix.</p>
+ *
+ * <p>
+ *    The solution is found by first finding a solution using the Hamiltonian using the solver {@link us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianCARESolver}.
+ *    This is then used as initial guess for the Newton iterative algorithm outlined here: http://et.engr.iupui.edu//~skoskie/ECE684/Riccati_algorithms.pdf.
+ * </p>
+  * <p>
+  *    The maximum number of iterations can be set using the maxIterations value in the constructor. The convergence epsilon, which says when the value of P
+  *    stops changing, can be set in the constructor as well.
+  * </p>
  */
-public class KleinmanCARESolver implements CARESolver
+public class NewtonCARESolver implements CARESolver
 {
    /** Internally used maximum iterations. */
-   private int maxIterations = 100;
+   private static final int defaultMaxIterations = 100;
+   private final int maxIterations;
 
    /** Internally used epsilon criteria. */
-   private double convergenceEpsilon = 1e-8;
+   private static final double defaultConvergenceEpsilon = 1e-8;
+   private final double convergenceEpsilon;
 
    /** The solution of the algebraic Riccati equation. */
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
@@ -44,7 +53,7 @@ public class KleinmanCARESolver implements CARESolver
    private final DenseMatrix64F Qk = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
 
-   private final LyapunovSolver lyapunovSolver = new LyapunovSolver();
+   private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
    private final HamiltonianCARESolver hamiltonianCARESolver = new HamiltonianCARESolver();
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
@@ -52,18 +61,33 @@ public class KleinmanCARESolver implements CARESolver
    private int n;
    private int m;
 
-   /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
-    * multiplicative compatible. A and Q must be multiplicative compatible. R
-    * must be invertible.
-    *
-    * @param A state transition matrix
-    * @param B control multipliers matrix
-    * @param Q state cost matrix
-    * @param R control cost matrix
-    */
+   private boolean isUpToDate = false;
+
+   public NewtonCARESolver()
+   {
+      this(defaultMaxIterations, defaultConvergenceEpsilon);
+   }
+
+   public NewtonCARESolver(int maxIterations)
+   {
+      this(maxIterations, defaultConvergenceEpsilon);
+   }
+
+   public NewtonCARESolver(double convergenceEpsilon)
+   {
+      this(defaultMaxIterations, convergenceEpsilon);
+   }
+
+   public NewtonCARESolver(int maxIterations, double convergenceEpsilon)
+   {
+      this.maxIterations = maxIterations;
+      this.convergenceEpsilon = convergenceEpsilon;
+   }
+
+   /** {@inheritDoc} */
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices)
    {
+      isUpToDate = false;
       if (checkMatrices)
       {
          MatrixChecking.assertIsSquare(A);
@@ -83,7 +107,8 @@ public class KleinmanCARESolver implements CARESolver
       this.R.set(R);
    }
 
-   public void computeP()
+   /** {@inheritDoc} */
+   public DenseMatrix64F computeP()
    {
       n = A.getNumRows();
       m = R.getNumRows();
@@ -96,15 +121,16 @@ public class KleinmanCARESolver implements CARESolver
 
       approximateP(hamiltonianCARESolver.getP(), maxIterations, convergenceEpsilon);
 
-      // K = R^-1 B^T P
-      tempMatrix.reshape(B.getNumCols(), P.getNumCols());
-      CommonOps.multTransA(B, P, tempMatrix);
-      CommonOps.mult(Rinv, tempMatrix, K);
+      isUpToDate = true;
+      return P;
    }
 
    /** {inheritDoc} */
    public DenseMatrix64F getP()
    {
+      if (!isUpToDate)
+         throw new RuntimeException("You must call computeP before trying to retrieve it.");
+
       return P;
    }
 
@@ -121,13 +147,13 @@ public class KleinmanCARESolver implements CARESolver
       m = Rinv.getNumRows();
       K.reshape(m, n);
       P.set(initialP);
+      tempMatrix.reshape(m, n);
 
       double error = 1.0;
       int i = 1;
       while (error > epsilon)
       {
          // K_i = R_inv B' P_i-1
-         tempMatrix.reshape(B.getNumCols(), P.getNumCols());
          CommonOps.multTransA(B, P, tempMatrix);
          CommonOps.mult(Rinv, tempMatrix, K);
 
@@ -155,6 +181,7 @@ public class KleinmanCARESolver implements CARESolver
       }
    }
 
+   /** Computes the distance between two matrices, which is defined as the L2 norm of their difference. */
    private static double distance(DenseMatrix64F A, DenseMatrix64F B)
    {
       MatrixChecking.assertRowDimensionsMatch(A, B);

@@ -2,7 +2,7 @@ package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
 
-public class MatrixChecking
+class MatrixChecking
 {
    static void assertMultiplicationCompatible(DenseMatrix64F a, DenseMatrix64F b)
    {

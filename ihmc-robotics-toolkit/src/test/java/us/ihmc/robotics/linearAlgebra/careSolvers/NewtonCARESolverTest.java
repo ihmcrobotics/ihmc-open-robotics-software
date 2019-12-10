@@ -1,10 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-public class KleinmanCARESolverTest extends CARESolverTest
+public class NewtonCARESolverTest extends CARESolverTest
 {
    @Override
    protected CARESolver getSolver()
    {
-      return new KleinmanCARESolver();
+      return new NewtonCARESolver();
    }
 }

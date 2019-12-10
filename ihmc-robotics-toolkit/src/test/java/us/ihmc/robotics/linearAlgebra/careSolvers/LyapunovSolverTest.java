@@ -16,7 +16,7 @@ public class LyapunovSolverTest
    @Test
    public void testRandom()
    {
-      LyapunovSolver solver = new LyapunovSolver();
+      LyapunovEquationSolver solver = new LyapunovEquationSolver();
       Random random = new Random(1738L);
 
       for (int iter = 0; iter < iters; iter++)

@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 public interface CARESolver
 {
    /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
+    * Setter of the solver. A and B should be compatible. B and R must be
     * multiplicative compatible. A and Q must be multiplicative compatible. R
     * must be invertible.
     *
@@ -20,7 +20,7 @@ public interface CARESolver
    }
 
    /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
+    * Setter of the solver. A and B should be compatible. B and R must be
     * multiplicative compatible. A and Q must be multiplicative compatible. R
     * must be invertible.
     *
@@ -31,7 +31,13 @@ public interface CARESolver
     */
    void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices);
 
-   void computeP();
+   /**
+    * Computes and returns the P matrix.
+    */
+   DenseMatrix64F computeP();
 
+   /**
+    * Returns the P matrix.
+    */
    DenseMatrix64F getP();
 }
