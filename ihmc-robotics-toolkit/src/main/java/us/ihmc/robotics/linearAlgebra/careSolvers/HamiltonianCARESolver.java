@@ -18,21 +18,19 @@ import us.ihmc.matrixlib.NativeCommonOps;
 /**
  * This solver computes the solution to the algebraic Riccati equation
  *
+ * <p>
  * A' P + P A - P B R^-1 B' P + Q = 0
- * or
- * A' P + P A - P M P + Q = 0
+ * </p>
+ * <p> which can also be written as</p>
+ * <p>A' P + P A - P M P + Q = 0</p>*
+ * <p>where P is the unknown to be solved for, R is symmetric positive definite, Q is symmetric positive semi-definite, A is the state transition matrix,
+ * and B is the control matrix.</p>
  *
- * where P is unknown.
- *
- * The solution using the following approach:
- *
- * Compute P using the Hamiltonian and the ordered eigen values decomposition, as shown here:
- *
- * https://en.wikipedia.org/wiki/Algebraic_Riccati_equation
- *
- * A good set of notes to follow are
- *
- * https://stanford.edu/class/ee363/lectures/clqr.pdf
+ * <p>
+ *    The solution is found by computing the Hamiltonian and performing an ordered eigen value decomposition, as outlined in
+ *    https://en.wikipedia.org/wiki/Algebraic_Riccati_equation and https://stanford.edu/class/ee363/lectures/clqr.pdf. This assumes that the Hamiltonian
+ *    has only real eigenvalues, with no complex conjugate pairs.
+ * </p>
  */
 public class HamiltonianCARESolver implements CARESolver
 {
@@ -58,20 +56,14 @@ public class HamiltonianCARESolver implements CARESolver
    private final DenseMatrix64F u2 = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F u1Inv = new DenseMatrix64F(0, 0);
 
+   private boolean isUpToDate = false;
    private int n;
 
-   /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
-    * multiplicative compatible. A and Q must be multiplicative compatible. R
-    * must be invertible.
-    *
-    * @param A state transition matrix
-    * @param B control multipliers matrix
-    * @param Q state cost matrix
-    * @param R control cost matrix
-    */
+   /** {@inheritDoc} */
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices)
    {
+      isUpToDate = false;
+
       if (checkMatrices)
       {
          // checking A
@@ -104,13 +96,12 @@ public class HamiltonianCARESolver implements CARESolver
    }
 
    /** {@inheritDoc} */
-   public void computeP()
+   public DenseMatrix64F computeP()
    {
       // defining Hamiltonian
       assembleHamiltonian(H);
 
-      // eigen decomposition
-      // it must be ordered in order to work with submatrices
+      // Eigen decomposition
       eigen.decompose(H);
       u.reshape(2 * n, n);
       u1.reshape(n, n);
@@ -140,9 +131,22 @@ public class HamiltonianCARESolver implements CARESolver
 
       P.reshape(n, n);
       CommonOps.mult(u2, u1Inv, P);
+
+      isUpToDate = true;
+
+      return P;
    }
 
-   void assembleHamiltonian(DenseMatrix64F hamiltonianToPack)
+   /** {inheritDoc} */
+   public DenseMatrix64F getP()
+   {
+      if (!isUpToDate)
+         throw new RuntimeException("You must call computeP before trying to retrieve it.");
+
+      return P;
+   }
+
+   private void assembleHamiltonian(DenseMatrix64F hamiltonianToPack)
    {
       ATranspose.reshape(n, n);
       CommonOps.transpose(A, ATranspose);
@@ -153,12 +157,6 @@ public class HamiltonianCARESolver implements CARESolver
       MatrixTools.setMatrixBlock(hamiltonianToPack, n, 0, Q, 0, 0, n, n, -1.0);
       MatrixTools.setMatrixBlock(hamiltonianToPack, 0, n, M, 0, 0, n, n, -1.0);
       MatrixTools.setMatrixBlock(hamiltonianToPack, n, n, ATranspose, 0, 0, n, n, -1.0);
-   }
-
-   /** {inheritDoc} */
-   public DenseMatrix64F getP()
-   {
-      return P;
    }
 
 
