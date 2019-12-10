@@ -429,62 +429,32 @@
                   <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
                   <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5" />
                   <parameter name="NoLoadhipYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.08" />
-                  <parameter name="NoLoadhipYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadhipPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
-                  <parameter name="NoLoadhipPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadhipRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
                   <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadhipRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadkneePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadkneePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadkneePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadanklePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
                   <parameter name="NoLoadanklePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadanklePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadanklePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadankleRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
                   <parameter name="NoLoadankleRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadankleRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadankleRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspineYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspineYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspineYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspinePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspinePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspinePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspinePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspineRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspineRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspineRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadelbowRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.00795854300889478" />
                   <parameter name="NoLoadelbowRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.919780134430234" />
-                  <parameter name="NoLoadelbowRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadelbowRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadfirstWristPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
                   <parameter name="NoLoadfirstWristPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadfirstWristPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadfirstWristPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadwristRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
                   <parameter name="NoLoadwristRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadwristRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadwristRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadproximalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadproximalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoadproximalNeckPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadproximalNeckPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoaddistalNeckYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoaddistalNeckYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoaddistalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoaddistalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadHipYawControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
                   <parameter name="NoLoadHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
