@@ -135,22 +135,6 @@ public abstract class CARESolverTest
       solver.computeP();
 
       assertSolutionIsValid(A, B, Q, R, solver.getP());
-
-
-      /*
-      DenseMatrix64F PExpected = new DenseMatrix64F(3, 3);
-      PExpected.set(0, 0, 15.3201);
-      PExpected.set(0, 1, 4.2369);
-      PExpected.set(0, 2, 17.0090);
-      PExpected.set(1, 0, 4.2369);
-      PExpected.set(1, 1, 2.6252);
-      PExpected.set(1, 2, 4.4123);
-      PExpected.set(2, 0, 17.0090);
-      PExpected.set(2, 1, 4.4123);
-      PExpected.set(2, 2, 19.0374);
-
-      EjmlUnitTests.assertEquals(PExpected, solver.getP(), 1e-4);
-      */
    }
 
    private static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P)
