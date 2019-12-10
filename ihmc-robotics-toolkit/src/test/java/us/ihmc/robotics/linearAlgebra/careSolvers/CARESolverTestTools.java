@@ -17,7 +17,6 @@ public class CARESolverTestTools
       return matrix;
    }
 
-
    public static DenseMatrix64F generateRandomSymmetricMatrix(Random random, int size)
    {
       DenseMatrix64F a = new DenseMatrix64F(size, size);
@@ -30,16 +29,5 @@ public class CARESolverTestTools
       CommonOps.scale(0.5, a);
 
       return matrix;
-   }
-   public static DenseMatrix64F generateRandomDiagonalMatrix(Random random, int size, boolean positiveSemiDefinite)
-   {
-      DenseMatrix64F a = new DenseMatrix64F(size, size);
-      double lowerBound = positiveSemiDefinite ? 0.0 : 1e-3;
-      double[] aValues = RandomNumbers.nextDoubleArray(random, size, lowerBound, 100.0);
-      for (int i = 0; i < size; i++)
-      {
-         a.set(i, i, aValues[i]);
-      }
-      return a;
    }
 }
