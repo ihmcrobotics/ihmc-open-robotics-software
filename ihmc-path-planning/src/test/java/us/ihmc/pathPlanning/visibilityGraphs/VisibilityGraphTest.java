@@ -357,34 +357,34 @@ public class VisibilityGraphTest
       InterRegionVisibilityMap interRegionVisibilityMap = visibilityMapSolution.getInterRegionVisibilityMap();
       VisibilityMap interRegionVisibilityMapInWorld = interRegionVisibilityMap.getVisibilityMapInWorld();
 
-      Set<Connection> connections = interRegionVisibilityMapInWorld.getConnections();
-      Set<ConnectionPoint3D> vertices = interRegionVisibilityMapInWorld.getVertices();
+      Set<Connection> interRegionConnections = interRegionVisibilityMapInWorld.getConnections();
+      Set<ConnectionPoint3D> interRegionVertices = interRegionVisibilityMapInWorld.getVertices();
 
-      assertEquals(0, vertices.size());
+      assertEquals(0, interRegionVertices.size());
 
       if (VisibilityGraph.ONLY_USE_SHORTEST_INTER_CONNECTING_EDGE)
       {
          assertEquals(3, crossRegionEdges.size());
 
-         assertTrue(connectionsContain(connections, connectionC, connectionF));
-         assertFalse(connectionsContain(connections, connectionC, connectionEF));
-         assertFalse(connectionsContain(connections, connectionCD, connectionF));
-         assertTrue(connectionsContain(connections, connectionCD, connectionEF));
-         assertFalse(connectionsContain(connections, connectionCD, connectionE));
-         assertFalse(connectionsContain(connections, connectionD, connectionEF));
-         assertTrue(connectionsContain(connections, connectionD, connectionE));
+         assertTrue(connectionsContain(interRegionConnections, connectionC, connectionF));
+         assertFalse(connectionsContain(interRegionConnections, connectionC, connectionEF));
+         assertFalse(connectionsContain(interRegionConnections, connectionCD, connectionF));
+         assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionEF));
+         assertFalse(connectionsContain(interRegionConnections, connectionCD, connectionE));
+         assertFalse(connectionsContain(interRegionConnections, connectionD, connectionEF));
+         assertTrue(connectionsContain(interRegionConnections, connectionD, connectionE));
       }
       else
       {
          assertEquals(7, crossRegionEdges.size());
 
-         assertTrue(connectionsContain(connections, connectionC, connectionF));
-         assertTrue(connectionsContain(connections, connectionC, connectionEF));
-         assertTrue(connectionsContain(connections, connectionCD, connectionF));
-         assertTrue(connectionsContain(connections, connectionCD, connectionEF));
-         assertTrue(connectionsContain(connections, connectionCD, connectionE));
-         assertTrue(connectionsContain(connections, connectionD, connectionEF));
-         assertTrue(connectionsContain(connections, connectionD, connectionE));
+         assertTrue(connectionsContain(interRegionConnections, connectionC, connectionF));
+         assertTrue(connectionsContain(interRegionConnections, connectionC, connectionEF));
+         assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionF));
+         assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionEF));
+         assertTrue(connectionsContain(interRegionConnections, connectionCD, connectionE));
+         assertTrue(connectionsContain(interRegionConnections, connectionD, connectionEF));
+         assertTrue(connectionsContain(interRegionConnections, connectionD, connectionE));
       }
 
       double searchHostEpsilon = 0.01;
@@ -415,8 +415,9 @@ public class VisibilityGraphTest
       assertTrue(goalInLocal.epsilonEquals(new Point2D(7.0 - 1.1 + 1.5, 3.0 + 0.55), EPSILON));
       assertTrue(goalInWorld.epsilonEquals(new Point3D(1.5, 0.55, 0.0), EPSILON));
 
-      assertEquals(8, goalEdges.size());
       assertEquals(8, startEdges.size());
+      // RJG 121019 Upped the number of edges because one of the inter region edges can reach it, which is a feature that just got added.
+      assertEquals(9, goalEdges.size());
    }
 
    //TODO: +++JerryPratt: Get this test to pass and clean it up and make it better.
@@ -550,7 +551,7 @@ public class VisibilityGraphTest
    @Test
    public void testVisibilityGraphSquareInSquare()
    {
-      VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
+      VisibilityGraphsParametersBasics parameters = createVisibilityGraphParametersForTest();
       List<PlanarRegion> planarRegions = new ArrayList<>();
 
       Point2D pointA = new Point2D(-0.01, -0.01);
@@ -845,8 +846,6 @@ public class VisibilityGraphTest
       assertTrue(startInLocal.epsilonEquals(new Point2D(0.1, 0.5), EPSILON));
       assertTrue(startInWorld.epsilonEquals(new Point3D(0.1, 0.5, 0.0), EPSILON));
 
-      assertEquals(6, startEdges.size());
-
       assertTrue(edgeListContains(startEdges, startInWorld, connectionA));
       assertTrue(edgeListContains(startEdges, startInWorld, connectionAB));
       assertTrue(edgeListContains(startEdges, startInWorld, connectionB));
@@ -867,8 +866,10 @@ public class VisibilityGraphTest
       assertTrue(goalInLocal.epsilonEquals(new Point2D(0.5, 0.5), EPSILON));
       assertTrue(goalInWorld.epsilonEquals(new Point3D(0.5, 0.5, height), EPSILON));
 
-      assertEquals(8, goalEdges.size());
-      assertEquals(6, startEdges.size());
+      // RJG 121019 Upped the number of edges because one of the inter region edges can reach it, which is a feature that just got added.
+      assertEquals(9, goalEdges.size());
+      // RJG 121019 Upped the number of edges because one of the inter region edges can reach it, which is a feature that just got added.
+      assertEquals(7, startEdges.size());
    }
 
    private void printNodes(List<VisibilityGraphNode> nodes)
@@ -966,7 +967,7 @@ public class VisibilityGraphTest
 
    }
 
-   private VisibilityGraphsParametersReadOnly createVisibilityGraphParametersForTest()
+   private VisibilityGraphsParametersBasics createVisibilityGraphParametersForTest()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters()
       {
