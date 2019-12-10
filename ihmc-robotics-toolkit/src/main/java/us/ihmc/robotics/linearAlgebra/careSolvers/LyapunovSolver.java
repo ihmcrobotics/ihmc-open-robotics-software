@@ -11,7 +11,7 @@ import us.ihmc.matrixlib.MatrixTools;
  *
  * A' X + X A + Q = 0
  *
- * for P
+ * for X
  */
 public class LyapunovSolver
 {

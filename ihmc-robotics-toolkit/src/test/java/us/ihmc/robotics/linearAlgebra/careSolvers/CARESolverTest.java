@@ -16,7 +16,7 @@ import java.util.Random;
 
 public abstract class CARESolverTest
 {
-   private static final double epsilon = 1e-7;
+   private static final double epsilon = 1e-5;
 
    protected abstract CARESolver getSolver();
 
@@ -62,109 +62,121 @@ public abstract class CARESolverTest
       EjmlUnitTests.assertEquals(QInput, Q, epsilon);
       EjmlUnitTests.assertEquals(RInput, R, epsilon);
 
-      EjmlUnitTests.assertEquals(Q, assembledQ, epsilon);
+      assertSolutionIsValid(AInput, BInput, QInput, RInput, solver.getP());
    }
 
    @Test
-   public void testRandom()
+   public void testMatlabCare()
    {
+      int n = 2;
+      int m = 1;
+      DenseMatrix64F A = new DenseMatrix64F(n, n);
+      DenseMatrix64F B = new DenseMatrix64F(n, m);
+      DenseMatrix64F C = new DenseMatrix64F(1, 2);
+      DenseMatrix64F Q = new DenseMatrix64F(2, 2);
+      DenseMatrix64F R = new DenseMatrix64F(1, 1);
+      A.set(0, 0, -3);
+      A.set(0, 1, 2);
+      A.set(1, 0, 1);
+      A.set(1, 1, 1);
+      B.set(1, 0, 1);
+      C.set(0, 0, 1);
+      C.set(0, 1, -1);
+      R.set(0, 0, 3);
+
+      CommonOps.multInner(C, Q);
+
       CARESolver solver = getSolver();
-      Random random = new Random(1738L);
-      for (int iter = 0; iter < 1000; iter++)
-      {
-         int size = RandomNumbers.nextInt(random, 1, 10);
+      solver.setMatrices(A, B, Q, R);
+      solver.computeP();
 
-         // FIXME need to guarantee A and B are controllable
+      DenseMatrix64F PExpected = new DenseMatrix64F(2, 2);
+      PExpected.set(0, 0, 0.5895);
+      PExpected.set(0, 1, 1.8216);
+      PExpected.set(1, 0, 1.8216);
+      PExpected.set(1, 1, 8.8188);
 
-         DenseMatrix64F A = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
-         DenseMatrix64F B = CARESolverTestTools.generateRandomSymmetricPDMatrix(random, size);
-         DenseMatrix64F Q = CARESolverTestTools.generateRandomDiagonalMatrix(random, size, true);
-         DenseMatrix64F R = CARESolverTestTools.generateRandomDiagonalMatrix(random, size, false);
-
-         EigenDecomposition<DenseMatrix64F> eigenDecomposition = DecompositionFactory.eig(size, false);
-         eigenDecomposition.decompose(A);
-         for (int i = 0; i < size; i++)
-         {
-            if (eigenDecomposition.getEigenvalue(i).getReal() <= 0.0)
-               throw new RuntimeException("BOOO");
-         }
-
-         assertIsControllable(A, B);
-
-         DenseMatrix64F ATranspose = new DenseMatrix64F(A);
-         DenseMatrix64F BTranspose = new DenseMatrix64F(B);
-         CommonOps.transpose(ATranspose);
-         CommonOps.transpose(BTranspose);
-         DenseMatrix64F M = new DenseMatrix64F(size, size);
-         DenseMatrix64F RinvBTranspose = new DenseMatrix64F(size, size);
-         DenseMatrix64F Rinv = new DenseMatrix64F(size, size);
-         NativeCommonOps.invert(R, Rinv);
-         CommonOps.mult(Rinv, BTranspose, RinvBTranspose);
-         CommonOps.mult(B, RinvBTranspose, M);
-
-         DenseMatrix64F hamiltonianExpected = new DenseMatrix64F(2 * size, 2 * size);
-         DenseMatrix64F hamiltonian = new DenseMatrix64F(2 * size, 2 * size);
-         MatrixTools.setMatrixBlock(hamiltonianExpected, 0, 0, A, 0, 0, size, size, 1.0);
-         MatrixTools.setMatrixBlock(hamiltonianExpected, 0, size, M, 0, 0, size, size, -1.0);
-         MatrixTools.setMatrixBlock(hamiltonianExpected, size, 0, Q, 0, 0, size, size, -1.0);
-         MatrixTools.setMatrixBlock(hamiltonianExpected, size, size, ATranspose, 0, 0, size, size, -1.0);
-
-         solver.setMatrices(A, B, Q, R);
-
-         if (solver instanceof HamiltonianCARESolver)
-         {
-            ((HamiltonianCARESolver) solver).assembleHamiltonian(hamiltonian);
-            EjmlUnitTests.assertEquals(hamiltonianExpected, hamiltonian, epsilon);
-         }
-
-         solver.computeP();
-
-         DenseMatrix64F assembledQ = new DenseMatrix64F(size, size);
-         CommonOps.multTransA(A, solver.getP(), assembledQ);
-         CommonOps.multAdd(solver.getP(), A, assembledQ);
-
-         DenseMatrix64F RInv = new DenseMatrix64F(size, size);
-         NativeCommonOps.invert(R, RInv);
-         DenseMatrix64F BTransposeP = new DenseMatrix64F(size, size);
-         CommonOps.multTransA(B, solver.getP(), BTransposeP);
-         DenseMatrix64F BRInv = new DenseMatrix64F(size, size);
-         CommonOps.mult(B, RInv, BRInv);
-         DenseMatrix64F PBRInv = new DenseMatrix64F(size, size);
-         CommonOps.mult(solver.getP(), BRInv, PBRInv);
-
-         DenseMatrix64F PBRInvBTransposeP = new DenseMatrix64F(size, size);
-         CommonOps.mult(PBRInv, BTransposeP, PBRInvBTransposeP);
-
-         CommonOps.addEquals(assembledQ, -1.0, PBRInvBTransposeP);
-
-         CommonOps.scale(-1.0, assembledQ);
-
-         EjmlUnitTests.assertEquals(Q, assembledQ, epsilon);
-      }
+      EjmlUnitTests.assertEquals(PExpected, solver.getP(), 1e-4);
+      assertSolutionIsValid(A, B, Q, R, solver.getP());
    }
 
-   private static void assertIsControllable(DenseMatrix64F A, DenseMatrix64F B)
+   @Test
+   public void testMatlabCare2()
+   {
+      int n = 3;
+      int m = 1;
+      DenseMatrix64F A = new DenseMatrix64F(n, n);
+      DenseMatrix64F B = new DenseMatrix64F(n, m);
+      DenseMatrix64F C = new DenseMatrix64F(1, n);
+      DenseMatrix64F Q = new DenseMatrix64F(n, n);
+      DenseMatrix64F R = new DenseMatrix64F(1, 1);
+      A.set(0, 0, 1);
+      A.set(0, 1, -2);
+      A.set(0, 2, 3);
+      A.set(1, 0, -4);
+      A.set(1, 1, 5);
+      A.set(1, 2, 6);
+      A.set(2, 0, 7);
+      A.set(2, 1, 8);
+      A.set(2, 2, 9);
+
+      B.set(0, 0, 5);
+      B.set(1, 0, 6);
+      B.set(2, 0, -7);
+      C.set(0, 0, 7);
+      C.set(0, 1, -8);
+      C.set(0, 2, 9);
+      R.set(0, 0, 1);
+
+      CommonOps.multInner(C, Q);
+
+      CARESolver solver = getSolver();
+      solver.setMatrices(A, B, Q, R);
+      solver.computeP();
+
+      assertSolutionIsValid(A, B, Q, R, solver.getP());
+
+
+      /*
+      DenseMatrix64F PExpected = new DenseMatrix64F(3, 3);
+      PExpected.set(0, 0, 15.3201);
+      PExpected.set(0, 1, 4.2369);
+      PExpected.set(0, 2, 17.0090);
+      PExpected.set(1, 0, 4.2369);
+      PExpected.set(1, 1, 2.6252);
+      PExpected.set(1, 2, 4.4123);
+      PExpected.set(2, 0, 17.0090);
+      PExpected.set(2, 1, 4.4123);
+      PExpected.set(2, 2, 19.0374);
+
+      EjmlUnitTests.assertEquals(PExpected, solver.getP(), 1e-4);
+      */
+   }
+
+   private static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P)
    {
       int n = A.getNumRows();
-      int r = B.getNumCols();
+      int m = B.getNumCols();
+      DenseMatrix64F assembledQ = new DenseMatrix64F(n, n);
+      CommonOps.multTransA(A, P, assembledQ);
+      CommonOps.multAdd(P, A, assembledQ);
 
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(B);
-      DenseMatrix64F R = new DenseMatrix64F(n, n * r);
-      MatrixTools.setMatrixBlock(R, 0, 0, tempMatrix, 0, 0, n, r, 1.0);
-      for (int i = 1; i < n - 1; i++)
-      {
-         DenseMatrix64F tempMatrix2 = new DenseMatrix64F(n, r);
-         CommonOps.mult(A, tempMatrix, tempMatrix2);
+      DenseMatrix64F RInv = new DenseMatrix64F(2, 2);
+      NativeCommonOps.invert(R, RInv);
+      DenseMatrix64F BTransposeP = new DenseMatrix64F(m, n);
+      CommonOps.multTransA(B, P, BTransposeP);
+      DenseMatrix64F BRInv = new DenseMatrix64F(n, m);
+      CommonOps.mult(B, RInv, BRInv);
+      DenseMatrix64F PBRInv = new DenseMatrix64F(n, m);
+      CommonOps.mult(P, BRInv, PBRInv);
 
-         MatrixTools.setMatrixBlock(R, 0, i * r, tempMatrix2, 0, 0, n, r, 1.0);
+      DenseMatrix64F PBRInvBTransposeP = new DenseMatrix64F(n, n);
+      CommonOps.mult(PBRInv, BTransposeP, PBRInvBTransposeP);
 
-         tempMatrix.set(tempMatrix2);
+      CommonOps.addEquals(assembledQ, -1.0, PBRInvBTransposeP);
 
-      }
+      CommonOps.scale(-1.0, assembledQ);
 
-      SingularValueDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.svd(n, n * r, false, false, false);
-      decomposer.decompose(R);
-      if (MathTools.min(decomposer.getSingularValues()) < 1e-12)
-         throw new RuntimeException("System is not controllable.");
+      EjmlUnitTests.assertEquals(Q, assembledQ, epsilon);
    }
 }
