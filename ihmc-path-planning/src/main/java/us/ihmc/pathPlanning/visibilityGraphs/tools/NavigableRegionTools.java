@@ -88,6 +88,9 @@ public class NavigableRegionTools
       if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon))
          return false;
 
-      return navigableRegion.getObstacleClusters().stream().noneMatch(obstacleCluster -> obstacleCluster.isInsideNonNavigableZone(pointInLocalToCheck));
+      if (navigableRegion.getObstacleClusters().stream().anyMatch(obstacleCluster -> obstacleCluster.isInsideNonNavigableZone(pointInLocalToCheck)))
+         return false;
+
+      return PlanarRegionTools.isPointInsidePolygon(navigableRegion.getHomeRegionCluster().getNavigableExtrusionsInLocal().getPoints(), pointInLocalToCheck);
    }
 }
