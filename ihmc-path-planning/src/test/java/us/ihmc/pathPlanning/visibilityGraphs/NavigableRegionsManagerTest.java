@@ -760,10 +760,10 @@ public class NavigableRegionsManagerTest
 
       if (visualize)
       {
-         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution());
+         visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution(), 1.0);
       }
 
-      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
+      checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList(), 1.0);
    }
 
 
@@ -1033,7 +1033,7 @@ public class NavigableRegionsManagerTest
 
          distanceToObstacles += parameters.getObstacleExtrusionDistance();
 
-         if (visualize && distanceToObstacles < preferredObstacleExtrusionDistance + proximityEpsilon)
+         if (visualize && distanceToObstacles < preferredObstacleExtrusionDistance - proximityEpsilon)
          {
             Point3DReadOnly collision = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(closestPointOverall), planarRegionsList);
             collisions.add(new Point3D(collision));
@@ -1041,7 +1041,7 @@ public class NavigableRegionsManagerTest
 
          }
 
-         if (distanceToObstacles < preferredObstacleExtrusionDistance + proximityEpsilon)
+         if (distanceToObstacles < preferredObstacleExtrusionDistance - proximityEpsilon)
             errorMessages += fail("Was too close to an obstacle.");
       }
 
@@ -1128,6 +1128,13 @@ public class NavigableRegionsManagerTest
    private static void visualize(List<? extends Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList,
                                  Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions, VisibilityMapSolution mapSolution)
    {
+      visualize(path, parameters, planarRegionsList, start, goal, navigableRegions, mapSolution, proximityEpsilon);
+   }
+
+   private static void visualize(List<? extends Pose3DReadOnly> path, VisibilityGraphsParametersReadOnly parameters, PlanarRegionsList planarRegionsList,
+                                 Point3D start, Point3D goal, List<VisibilityMapWithNavigableRegion> navigableRegions, VisibilityMapSolution mapSolution,
+                                 double proximityEpsilon)
+   {
       Random random = new Random(324);
       planarRegionsList.getPlanarRegionsAsList().forEach(region -> region.setRegionId(random.nextInt()));
 
@@ -1141,7 +1148,7 @@ public class NavigableRegionsManagerTest
 
       while (true)
       {
-         checkPath(path, start, goal, parameters, planarRegionsList, navigableRegions);
+         checkPath(path, start, goal, parameters, planarRegionsList, navigableRegions, proximityEpsilon);
       }
    }
 
