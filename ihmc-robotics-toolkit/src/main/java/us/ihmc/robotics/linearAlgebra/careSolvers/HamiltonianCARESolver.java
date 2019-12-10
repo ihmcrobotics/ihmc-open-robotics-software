@@ -96,36 +96,12 @@ public class HamiltonianCARESolver implements CARESolver
       M.reshape(n, n);
       NativeCommonOps.multQuad(BTranspose, Rinv, M);
 
-      setMatrices(A, Q, M, false);
-   }
-
-   /**
-    * Constructor of the solver. A and B should be compatible. B and R must be
-    * multiplicative compatible. A and Q must be multiplicative compatible. R
-    * must be invertible.
-    *
-    * @param A state transition matrix
-    * @param B control multipliers matrix
-    * @param Q state cost matrix
-    * @param R control cost matrix
-    */
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q, DenseMatrix64F M, boolean checkMatrices)
-   {
-      if (checkMatrices)
-      {
-         // checking A
-         MatrixChecking.assertIsSquare(A);
-         MatrixChecking.assertMultiplicationCompatible(A, Q);
-
-      }
-
       this.n = A.getNumRows();
 
       this.A.set(A);
       this.Q.set(Q);
       this.M.set(M);
    }
-
 
    /** {@inheritDoc} */
    public void computeP()
