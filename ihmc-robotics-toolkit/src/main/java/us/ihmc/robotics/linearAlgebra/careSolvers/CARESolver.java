@@ -2,6 +2,17 @@ package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
 
+/**
+ * This solver computes the solution to the algebraic Riccati equation
+ *
+ * <p>
+ * A' P + P A - P B R^-1 B' P + Q = 0
+ * </p>
+ * <p> which can also be written as</p>
+ * <p>A' P + P A - P M P + Q = 0</p>*
+ * <p>where P is the unknown to be solved for, R is symmetric positive definite, Q is symmetric positive semi-definite, A is the state transition matrix,
+ * and B is the control matrix.</p>
+ */
 public interface CARESolver
 {
    /**
