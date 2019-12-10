@@ -212,9 +212,11 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
 
    private void shutdown()
    {
-      loggerTaskScheduled.cancel(true);
-
-      loggerTaskScheduled = null;
+      if (loggerTaskScheduled != null)
+      {
+         loggerTaskScheduled.cancel(true);
+         loggerTaskScheduled = null;
+      }
       loggerRunnable = null;
       printStream = null;
       outputStream = null;
@@ -237,6 +239,8 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
    public void closeAndDispose()
    {
       shutdown();
+      ros2Node.destroy();
+      executorService.shutdownNow();
    }
 
    public static void main(String[] args)
