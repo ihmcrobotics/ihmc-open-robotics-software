@@ -1,13 +1,21 @@
 package us.ihmc.javaFXVisualizers;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToDoubleFunction;
 import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -130,6 +138,17 @@ public class JavaFXRobotVisualizer
 
       newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation()));
       newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
+   }
+
+   public void submitNewConfiguration(QuaternionReadOnly rootJointOrientation, Tuple3DReadOnly rootJointTranslation, ToDoubleFunction<String> jointAngles)
+   {
+      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
+      float[] jointAngleArray = new float[allJoints.length];
+      for (int i = 0; i < allJoints.length; i++)
+      {
+         jointAngleArray[i] = (float) jointAngles.applyAsDouble(allJoints[i].getName());
+      }
+      newJointConfigurationReference.set(jointAngleArray);
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
