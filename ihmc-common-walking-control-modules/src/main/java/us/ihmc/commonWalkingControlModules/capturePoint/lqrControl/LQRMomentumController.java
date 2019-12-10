@@ -9,8 +9,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
@@ -67,6 +68,8 @@ public class LQRMomentumController
    private List<Trajectory3D> vrpTrajectory;
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
+
+   private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
 
    public LQRMomentumController()
    {
@@ -191,6 +194,7 @@ public class LQRMomentumController
             DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(A2);
             CommonOps.scale(duration, timeScaledDynamics);
             LQRTools.matrixExponential(timeScaledDynamics, exponential, 10);
+            matrixExponentialCalculator.compute(exponential, A);
             DenseMatrix64F summedBetas = new DenseMatrix64F(3, 1);
             for (int i = 0; i < order; i++)
             {
