@@ -177,6 +177,8 @@ public class AtlasCorridorNavigationTest
       FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
+      robotAndMapViewer.setGoalLocation(goal);
+
       while (robotPose.getPosition().distance(goal) > 0.5)
       {
          LogTools.info("Waiting for SLAM update");
@@ -194,7 +196,7 @@ public class AtlasCorridorNavigationTest
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
-         LogTools.info("Robot position: {}", robotPose.getPosition());
+         LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
 
          visibilityGraphParameters.setNavigableExtrusionDistance(0.3);
          visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -28,6 +30,7 @@ public class RobotAndMapViewer
 {
    private FootstepPlanGraphic footstepPlanGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
+   private PositionGraphic goalGraphic;
 
    public RobotAndMapViewer(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
@@ -41,7 +44,7 @@ public class RobotAndMapViewer
          view3dFactory.addDefaultLighting();
 
          view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAPPING_MODULE, false));
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
+//         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
@@ -50,14 +53,22 @@ public class RobotAndMapViewer
          bodyPathPlanGraphic = new BodyPathPlanGraphic();
          view3dFactory.addNodeToView(bodyPathPlanGraphic);
 
+         goalGraphic = new PositionGraphic(Color.RED, 0.07);
+         Platform.runLater(() -> goalGraphic.clear());
+         view3dFactory.addNodeToView(goalGraphic.getNode());
+
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          primaryStage.setScene(view3dFactory.getScene());
 
          primaryStage.show();
-         primaryStage.toFront();
       });
+   }
+
+   public void setGoalLocation(Point3DReadOnly goalLocation)
+   {
+      Platform.runLater(() -> goalGraphic.setPosition(goalLocation));
    }
 
    public void setFootstepsToVisualize(FootstepPlan footstepPlan)
