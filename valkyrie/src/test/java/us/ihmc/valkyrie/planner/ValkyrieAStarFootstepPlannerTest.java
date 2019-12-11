@@ -69,7 +69,10 @@ public class ValkyrieAStarFootstepPlannerTest
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
       ValkyrieFootstepPlanningRequestPacket requestPacket = createPlanningRequest(dataSet, timeout, planner.getParameters());
-      ValkyrieFootstepPlanningResult planningResult = planner.handleRequestPacket(requestPacket);
+      ValkyrieFootstepPlanningResult planningResult = new ValkyrieFootstepPlanningResult();
+      planner.addResultCallback(planningResult::set);
+
+      planner.handleRequestPacket(requestPacket);
 
       // Check that plan returned isn't empty
       assertTrue(!planningResult.getFootstepDataList().getFootstepDataList().isEmpty());
@@ -104,7 +107,7 @@ public class ValkyrieAStarFootstepPlannerTest
       Pose3D footPose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Pose3D desiredPose = RobotSide.LEFT.toByte() == footstepDataMessage.getRobotSide() ? requestPacket.getGoalLeftFootPose() : requestPacket.getGoalRightFootPose();
       assertTrue(footPose.getPosition().epsilonEquals(desiredPose.getPosition(), goalPositionEpsilon));
-      MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon);
+      assertTrue(MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon));
    }
 
    public ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)
