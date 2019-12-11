@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.planner.ui;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningResult;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
@@ -97,16 +97,16 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       // TODO
    }
 
-   public void processResult(ValkyrieFootstepPlanningResult planningResult)
+   public void processPlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
    {
-      if (planningResult.getFootstepDataList().getFootstepDataList().isEmpty())
+      if (planningStatus.getFootstepDataList().getFootstepDataList().isEmpty())
          return;
 
       meshBuilder.clear();
 
-      for (int i = 0; i < planningResult.getFootstepDataList().getFootstepDataList().size(); i++)
+      for (int i = 0; i < planningStatus.getFootstepDataList().getFootstepDataList().size(); i++)
       {
-         FootstepDataMessage footstepDataMessage = planningResult.getFootstepDataList().getFootstepDataList().get(i);
+         FootstepDataMessage footstepDataMessage = planningStatus.getFootstepDataList().getFootstepDataList().get(i);
          addFootstep(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation(), Color.GREEN);
       }
 
