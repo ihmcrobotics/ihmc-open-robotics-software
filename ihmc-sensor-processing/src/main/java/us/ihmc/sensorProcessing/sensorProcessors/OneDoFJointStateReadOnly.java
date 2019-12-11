@@ -53,6 +53,54 @@ public interface OneDoFJointStateReadOnly
    boolean isJointEnabled();
 
    /**
+    * Creates a dummy state that returns {@code 0.0} for any field.
+    * 
+    * @param jointName the name of the joint.
+    * @return the dummy state.
+    */
+   public static OneDoFJointStateReadOnly dummyOneDoFJointState(String jointName)
+   {
+      return new OneDoFJointStateReadOnly()
+      {
+         @Override
+         public String getJointName()
+         {
+            return jointName;
+         }
+
+         @Override
+         public boolean isJointEnabled()
+         {
+            return false;
+         }
+
+         @Override
+         public double getPosition()
+         {
+            return 0;
+         }
+
+         @Override
+         public double getVelocity()
+         {
+            return 0;
+         }
+
+         @Override
+         public double getAcceleration()
+         {
+            return 0;
+         }
+
+         @Override
+         public double getEffort()
+         {
+            return 0;
+         }
+      };
+   }
+
+   /**
     * Creates a new state that will reflect the internal state of the given {@code joint} while the
     * {@code isEnabled} state is fixed.
     * 
