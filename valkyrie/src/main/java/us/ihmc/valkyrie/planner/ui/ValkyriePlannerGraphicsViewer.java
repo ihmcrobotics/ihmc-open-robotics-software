@@ -21,7 +21,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -29,11 +28,9 @@ import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ValkyriePlannerGraphicsViewer extends AnimationTimer
@@ -90,8 +87,8 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       reset.set(true);
 
       meshBuilder.clear();
-      addFootstep(planningRequestPacket.getLeftFootPose().getPosition(), planningRequestPacket.getLeftFootPose().getOrientation(), Color.DARKGREEN);
-      addFootstep(planningRequestPacket.getRightFootPose().getPosition(), planningRequestPacket.getRightFootPose().getOrientation(), Color.DARKGREEN);
+      addFootstep(planningRequestPacket.getStartLeftFootPose().getPosition(), planningRequestPacket.getStartLeftFootPose().getOrientation(), Color.DARKGREEN);
+      addFootstep(planningRequestPacket.getStartRightFootPose().getPosition(), planningRequestPacket.getStartRightFootPose().getOrientation(), Color.DARKGREEN);
       startSteps.meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 

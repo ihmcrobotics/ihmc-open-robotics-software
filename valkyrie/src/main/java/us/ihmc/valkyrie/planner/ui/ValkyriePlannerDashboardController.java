@@ -9,6 +9,7 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
@@ -368,6 +369,11 @@ public class ValkyriePlannerDashboardController
       }
    }
 
+   public Pose3D getGoalPose()
+   {
+      return new Pose3D(goalX.getValue(), goalY.getValue(), goalZ.getValue(), goalYaw.getValue(), 0.0, 0.0);
+   }
+
    public Spinner<Double> getGoalX()
    {
       return goalX;
@@ -386,6 +392,14 @@ public class ValkyriePlannerDashboardController
    public Spinner<Double> getGoalYaw()
    {
       return goalYaw;
+   }
+
+   public void setGoalPose(double x, double y, double z, double yaw)
+   {
+      goalX.getValueFactory().setValue(x);
+      goalY.getValueFactory().setValue(y);
+      goalZ.getValueFactory().setValue(z);
+      goalYaw.getValueFactory().setValue(yaw);
    }
 
    public double getTimeout()

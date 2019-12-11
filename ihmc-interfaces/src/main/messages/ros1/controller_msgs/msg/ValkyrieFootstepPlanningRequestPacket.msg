@@ -3,14 +3,20 @@
 # Field default value -1
 int32 planner_request_id
 
-# Left foot pose
-geometry_msgs/Pose left_foot_pose
+# Starting left foot pose
+geometry_msgs/Pose start_left_foot_pose
 
-# Right foot pose
-geometry_msgs/Pose right_foot_pose
+# Starting right foot pose
+geometry_msgs/Pose start_right_foot_pose
 
-# Goal poses
-geometry_msgs/Pose[] goal_poses
+# Goal left foot pose
+geometry_msgs/Pose goal_left_foot_pose
+
+# Goal right foot pose
+geometry_msgs/Pose goal_right_foot_pose
+
+# Intermediate waypoints (optional)
+geometry_msgs/Pose[] waypoints
 
 # Parameters for the planner to use
 controller_msgs/ValkyrieFootstepPlannerParametersPacket parameters

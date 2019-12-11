@@ -1,12 +1,17 @@
 # Set this id to keep track of your request
 int32 planner_request_id -1
 
-# Left foot pose
-geometry_msgs/Pose left_foot_pose
-# Right foot pose
-geometry_msgs/Pose right_foot_pose
-# Goal poses
-geometry_msgs/Pose[] goal_poses
+# Starting left foot pose
+geometry_msgs/Pose start_left_foot_pose
+# Starting right foot pose
+geometry_msgs/Pose start_right_foot_pose
+# Goal left foot pose
+geometry_msgs/Pose goal_left_foot_pose
+# Goal right foot pose
+geometry_msgs/Pose goal_right_foot_pose
+
+# Intermediate waypoints (optional)
+geometry_msgs/Pose[] waypoints
 
 # Parameters for the planner to use
 ValkyrieFootstepPlannerParametersPacket parameters
