@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.planner.ui;
 
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -11,6 +12,8 @@ import javafx.scene.control.TextField;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
 import java.util.function.Consumer;
@@ -117,6 +120,8 @@ public class ValkyriePlannerDashboardController
    private Spinner<Double> astarHeuristicsWeight;
 
    @FXML
+   private TextField planningStatus;
+   @FXML
    private TextField timeElapsed;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
@@ -167,11 +172,6 @@ public class ValkyriePlannerDashboardController
       this.doPlanningCallback = doPlanningCallback;
    }
 
-   public void onPlannerCompleted()
-   {
-      timeElapsedManager.stop();
-   }
-
    public void setHaltPlanningCallback(Runnable haltPlanningCallback)
    {
       this.haltPlanningCallback = haltPlanningCallback;
@@ -195,6 +195,14 @@ public class ValkyriePlannerDashboardController
    public void setPlaceGoalCallback(Runnable placeGoalCallback)
    {
       this.placeGoalCallback = placeGoalCallback;
+   }
+
+   public void updatePlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
+   {
+      Status status = Status.fromByte(planningStatus.getPlannerStatus());
+      this.planningStatus.setText(status.toString());
+      if (status != Status.PLANNING)
+         timeElapsedManager.stop();
    }
 
    public void setParameters(ValkyrieAStarFootstepPlannerParameters parameters)

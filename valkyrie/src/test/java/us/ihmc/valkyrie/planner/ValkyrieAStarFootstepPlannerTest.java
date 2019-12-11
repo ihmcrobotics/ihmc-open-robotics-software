@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.planner;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningResult;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.MathTools;
@@ -69,7 +69,7 @@ public class ValkyrieAStarFootstepPlannerTest
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
       ValkyrieFootstepPlanningRequestPacket requestPacket = createPlanningRequest(dataSet, timeout, planner.getParameters());
-      ValkyrieFootstepPlanningResult planningResult = new ValkyrieFootstepPlanningResult();
+      ValkyrieFootstepPlanningStatus planningResult = new ValkyrieFootstepPlanningStatus();
       planner.addResultCallback(planningResult::set);
 
       planner.handleRequestPacket(requestPacket);

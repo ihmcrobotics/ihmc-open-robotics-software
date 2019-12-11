@@ -40,7 +40,7 @@ public class ValkyrieFootstepPlannerUI extends Application
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRosControlController.VERSION);
    private final ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
-   private final AtomicReference<ValkyrieFootstepPlanningResult> planningResult = new AtomicReference<>();
+   private final AtomicReference<ValkyrieFootstepPlanningStatus> planningResult = new AtomicReference<>();
 
    public static final String MODULE_NAME = "valkyrie_footstep_planner";
    private final Ros2Node rosNode = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
@@ -115,9 +115,9 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       planner.addRequestCallback(graphicsViewer::initialize);
       planner.addIterationCallback(graphicsViewer::processIterationData);
-      planner.addResultCallback(graphicsViewer::processResult);
+      planner.addResultCallback(graphicsViewer::processPlanningStatus);
       planner.addResultCallback(planningResult::set);
-      planner.addResultCallback(result -> valkyriePlannerDashboardController.onPlannerCompleted());
+      planner.addResultCallback(valkyriePlannerDashboardController::updatePlanningStatus);
    }
 
    private void setupWithDataSet(DataSetName dataSetName)
