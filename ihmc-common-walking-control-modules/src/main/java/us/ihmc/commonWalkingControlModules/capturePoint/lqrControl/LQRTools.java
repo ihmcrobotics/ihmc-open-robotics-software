@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Arrays;
 
