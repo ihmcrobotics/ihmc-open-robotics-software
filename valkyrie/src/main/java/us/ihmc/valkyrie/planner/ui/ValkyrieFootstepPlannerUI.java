@@ -52,7 +52,7 @@ public class ValkyrieFootstepPlannerUI extends Application
 
    private final PlanarRegionViewer planarRegionViewer = new PlanarRegionViewer();
    private JavaFXRobotVisualizer robotVisualizer = new JavaFXRobotVisualizer(robotModel);
-   private ValkyriePlannerGraphicsViewer graphicsViewer = planner.createGraphicsViewer();
+   private ValkyriePlannerGraphicsViewer graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters());
    private GoalPoseEditor goalPoseEditor;
 
    @FXML
@@ -112,6 +112,12 @@ public class ValkyrieFootstepPlannerUI extends Application
                                           valkyriePlannerDashboardController.getGoalYaw().getValueFactory().valueProperty());
       goalPoseEditor.start();
       valkyriePlannerDashboardController.setPlaceGoalCallback(goalPoseEditor::enable);
+
+      planner.addRequestCallback(graphicsViewer::initialize);
+      planner.addIterationCallback(graphicsViewer::processIterationData);
+      planner.addResultCallback(graphicsViewer::processResult);
+      planner.addResultCallback(planningResult::set);
+      planner.addResultCallback(result -> valkyriePlannerDashboardController.onPlannerCompleted());
    }
 
    private void setupWithDataSet(DataSetName dataSetName)
@@ -190,8 +196,7 @@ public class ValkyrieFootstepPlannerUI extends Application
       requestPacket.getGoalRightFootPose().set(valkyriePlannerDashboardController.getGoalPose());
       requestPacket.getGoalRightFootPose().appendTranslation(0.0, - 0.5 * planner.getParameters().getIdealFootstepWidth(), 0.0);
 
-      planningResult.set(planner.handleRequestPacket(requestPacket));
-      valkyriePlannerDashboardController.onPlannerCompleted();
+      planner.handleRequestPacket(requestPacket);
    }
 
    public static void main(String[] args)
