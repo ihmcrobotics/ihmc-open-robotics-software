@@ -1,14 +1,9 @@
-package us.ihmc.exampleSimulations.sphereICPControl.model;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -24,6 +19,10 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class SphereRobotModel implements FullRobotModel
 {
