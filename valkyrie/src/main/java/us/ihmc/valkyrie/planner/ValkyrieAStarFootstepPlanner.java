@@ -43,6 +43,7 @@ public class ValkyrieAStarFootstepPlanner
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final ValkyrieRobotModel robotModel;
    private final ValkyrieAStarFootstepPlannerParameters parameters = new ValkyrieAStarFootstepPlannerParameters(registry);
    private final AStarPathPlanner<FootstepNode> planner;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
@@ -58,6 +59,7 @@ public class ValkyrieAStarFootstepPlanner
 
    public ValkyrieAStarFootstepPlanner(ValkyrieRobotModel robotModel)
    {
+      this.robotModel = robotModel;
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapAndWiggler  = new FootstepNodeSnapAndWiggler(footPolygons, () -> true, parameters::getWiggleInsideDelta, parameters::getMaximumXYWiggle, parameters::getMaximumYawWiggle, () -> Double.POSITIVE_INFINITY);
@@ -114,7 +116,9 @@ public class ValkyrieAStarFootstepPlanner
       haltRequested.set(false);
       endNode = null;
 
-      heuristics.setGoalPose(new FramePose3D(requestPacket.getGoalPoses().get(0)));
+      FramePose3D goalMidFootPose = new FramePose3D();
+      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      heuristics.setGoalPose(goalMidFootPose);
 
       if(graphicsViewer != null)
          graphicsViewer.initialize(requestPacket);
@@ -230,7 +234,7 @@ public class ValkyrieAStarFootstepPlanner
 
    private FootstepNode createStartNode(ValkyrieFootstepPlanningRequestPacket requestPacket)
    {
-      Pose3D leftFootPose = requestPacket.getLeftFootPose();
+      Pose3D leftFootPose = requestPacket.getStartLeftFootPose();
       return new FootstepNode(leftFootPose.getPosition().getX(), leftFootPose.getPosition().getY(), leftFootPose.getOrientation().getYaw(), RobotSide.LEFT);
    }
 
@@ -238,8 +242,7 @@ public class ValkyrieAStarFootstepPlanner
    {
       return new SideDependentList<>(side ->
                                      {
-                                        Pose3D goalPose = new Pose3D(requestPacket.getGoalPoses().get(0));
-                                        goalPose.appendTranslation(0.0, side.negateIfRightSide(0.5 * parameters.getIdealFootstepWidth()), 0.0);
+                                        Pose3D goalPose = new Pose3D(side.equals(RobotSide.LEFT) ? requestPacket.getGoalLeftFootPose() : requestPacket.getGoalRightFootPose());
                                         return new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), side);
                                      });
    }
@@ -262,6 +265,11 @@ public class ValkyrieAStarFootstepPlanner
    public ValkyrieAStarFootstepPlannerParameters getParameters()
    {
       return parameters;
+   }
+
+   public ValkyrieRobotModel getRobotModel()
+   {
+      return robotModel;
    }
 
    public static void main(String[] args)

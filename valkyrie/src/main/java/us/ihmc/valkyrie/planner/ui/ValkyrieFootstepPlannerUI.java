@@ -32,7 +32,6 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieStandPrepParameters;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
-import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -137,10 +136,10 @@ public class ValkyrieFootstepPlannerUI extends Application
       ValkyrieStandPrepParameters standPrepParameters = new ValkyrieStandPrepParameters(robotModel.getJointMap());
       robotVisualizer.submitNewConfiguration(rootJointOrientation, rootJointPosition, standPrepParameters::getSetpoint);
 
-      valkyriePlannerDashboardController.getGoalX().getValueFactory().setValue(plannerInput.getGoalPosition().getX());
-      valkyriePlannerDashboardController.getGoalY().getValueFactory().setValue(plannerInput.getGoalPosition().getY());
-      valkyriePlannerDashboardController.getGoalZ().getValueFactory().setValue(plannerInput.getGoalPosition().getZ());
-      valkyriePlannerDashboardController.getGoalYaw().getValueFactory().setValue(plannerInput.getGoalYaw());
+      valkyriePlannerDashboardController.setGoalPose(plannerInput.getGoalPosition().getX(),
+                                                     plannerInput.getGoalPosition().getY(),
+                                                     plannerInput.getGoalPosition().getZ(),
+                                                     plannerInput.getGoalYaw());
    }
 
    private void setupPubSubs()
@@ -183,16 +182,14 @@ public class ValkyrieFootstepPlannerUI extends Application
       planner.getParameters().setPacket(requestPacket.getParameters());
 
       robotVisualizer.getFullRobotModel().updateFrames();
-      requestPacket.getLeftFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      requestPacket.getRightFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-      requestPacket.getGoalPoses()
-                   .add()
-                   .set(valkyriePlannerDashboardController.getGoalX().getValue(),
-                        valkyriePlannerDashboardController.getGoalY().getValue(),
-                        valkyriePlannerDashboardController.getGoalZ().getValue(),
-                        valkyriePlannerDashboardController.getGoalYaw().getValue(),
-                        0.0,
-                        0.0);
+      requestPacket.getStartLeftFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      requestPacket.getStartRightFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+
+      requestPacket.getGoalLeftFootPose().set(valkyriePlannerDashboardController.getGoalPose());
+      requestPacket.getGoalLeftFootPose().appendTranslation(0.0, 0.5 * planner.getParameters().getIdealFootstepWidth(), 0.0);
+      requestPacket.getGoalRightFootPose().set(valkyriePlannerDashboardController.getGoalPose());
+      requestPacket.getGoalRightFootPose().appendTranslation(0.0, - 0.5 * planner.getParameters().getIdealFootstepWidth(), 0.0);
+
       planningResult.set(planner.handleRequestPacket(requestPacket));
       valkyriePlannerDashboardController.onPlannerCompleted();
    }
