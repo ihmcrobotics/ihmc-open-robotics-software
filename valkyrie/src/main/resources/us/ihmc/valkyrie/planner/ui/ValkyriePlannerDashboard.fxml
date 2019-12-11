@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TextField?>
+<SplitPane dividerPositions="0.2" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="us.ihmc.valkyrie.planner.ui.ValkyriePlannerDashboardController">
+    <items>
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
+            <children>
+                <Region prefHeight="5"/>
+                <Label alignment="CENTER" contentDisplay="CENTER" text="Planner Control" textAlignment="CENTER">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </Label>
+
+                <Region prefHeight="10"/>
+
+                <GridPane alignment="CENTER" hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
+                        <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
+                        <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
+                        <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
+                    </rowConstraints>
+
+                    <Button onAction="#doPlanning" text="Plan" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="130.0"/>
+                    <Button onAction="#haltPlanning" text="Halt Planning" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="130.0"/>
+                    <Button onAction="#sendPlanningResult" text="Send Plan" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="130.0"/>
+                    <Button onAction="#stopWalking" text="Stop Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="130.0"/>
+                    <Button onAction="#placeGoal" text="Place Goal" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.halignment="CENTER" prefWidth="130.0"/>
+
+                    <Label mnemonicParsing="false" text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                    <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="100.0"/>
+                    <Label mnemonicParsing="false" text="Time elapsed" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.halignment="RIGHT" />
+                    <TextField fx:id="timeElapsed" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="100.0"/>
+
+                    <Label mnemonicParsing="false" text="Goal X" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                    <Spinner fx:id="goalX" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.halignment="CENTER" prefWidth="100.0"/>
+                    <Label mnemonicParsing="false" text="Goal Y" GridPane.columnIndex="2" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                    <Spinner fx:id="goalY" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" GridPane.halignment="CENTER" prefWidth="100.0"/>
+                    <Label mnemonicParsing="false" text="Goal Z" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                    <Spinner fx:id="goalZ" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" GridPane.halignment="CENTER" prefWidth="100.0"/>
+                    <Label mnemonicParsing="false" text="Goal Yaw" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                    <Spinner fx:id="goalYaw" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" GridPane.halignment="CENTER" prefWidth="100.0"/>
+                </GridPane>
+
+                <Region prefHeight="10"/>
+
+                <Label text="Load data set:"/>
+                <ComboBox fx:id="dataSetSelector" GridPane.halignment="CENTER" prefWidth="400.0"/>
+
+            </children>
+        </VBox>
+
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="500.0" prefHeight="340">
+            <children>
+                <Region prefHeight="5"/>
+                <Label alignment="CENTER" contentDisplay="CENTER" text="Parameters" textAlignment="CENTER">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </Label>
+                <Region prefHeight="5"/>
+                <GridPane alignment="CENTER" prefWidth="600">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="50.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="50.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="50.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="50.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="50.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    </rowConstraints>
+
+                    <children>
+
+                        <Label mnemonicParsing="false" text="idealFootstepWidth" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="idealFootstepWidth" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label mnemonicParsing="false" text="minimumFootstepLength" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumFootstepLength" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                        <Label mnemonicParsing="false" text="idealFootstepLength" GridPane.columnIndex="4" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="idealFootstepLength" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+                        <Label mnemonicParsing="false" text="minimumStepWidth" GridPane.columnIndex="6" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumStepWidth" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="0" />
+                        <Label mnemonicParsing="false" text="maximumStepWidth" GridPane.columnIndex="8" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepWidth" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="0" />
+
+                        <Label mnemonicParsing="false" text="maximumStepReach" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepReach" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label mnemonicParsing="false" text="minimumXClearanceFromStance" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumXClearanceFromStance" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        <Label mnemonicParsing="false" text="minimumYClearanceFromStance" GridPane.columnIndex="4" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumYClearanceFromStance" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                        <Label mnemonicParsing="false" text="minimumStepYaw" GridPane.columnIndex="6" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumStepYaw" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+                        <Label mnemonicParsing="false" text="maximumStepYaw" GridPane.columnIndex="8" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepYaw" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="1" />
+
+                        <Label mnemonicParsing="false" text="stepYawReductionFactorAtMaxReach" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="stepYawReductionFactorAtMaxReach" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label mnemonicParsing="false" text="maximumStepZ" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepZ" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <Label mnemonicParsing="false" text="minimumFootholdPercent" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumFootholdPercent" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                        <Label mnemonicParsing="false" text="maximumSurfanceInclineRadians" GridPane.columnIndex="6" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumSurfanceInclineRadians" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                        <Label mnemonicParsing="false" text="wiggleInsideDelta" GridPane.columnIndex="8" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="wiggleInsideDelta" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="2" />
+
+                        <Label mnemonicParsing="false" text="maximumXYWiggle" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumXYWiggle" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label mnemonicParsing="false" text="maximumYawWiggle" GridPane.columnIndex="2" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumYawWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <Label mnemonicParsing="false" text="cliffHeightToAvoid" GridPane.columnIndex="4" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="cliffHeightToAvoid" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                        <Label mnemonicParsing="false" text="minimumDistanceFromCliffBottoms" GridPane.columnIndex="6" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="minimumDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="3" />
+                        <Label mnemonicParsing="false" text="flatGroundLowerThreshold" GridPane.columnIndex="8" GridPane.rowIndex="3" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="flatGroundLowerThreshold" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="3" />
+
+                        <Label mnemonicParsing="false" text="flatGroundUpperThreshold" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="flatGroundUpperThreshold" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label mnemonicParsing="false" text="maximumStepWidthWhenSteppingDown" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepWidthWhenSteppingDown" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                        <Label mnemonicParsing="false" text="maximumStepReachWhenSteppingDown" GridPane.columnIndex="4" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepReachWhenSteppingDown" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                        <Label mnemonicParsing="false" text="maximumStepWidthWhenSteppingUp" GridPane.columnIndex="6" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepWidthWhenSteppingUp" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="4" />
+                        <Label mnemonicParsing="false" text="maximumStepReachWhenSteppingUp" GridPane.columnIndex="8" GridPane.rowIndex="4" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="maximumStepReachWhenSteppingUp" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="4" />
+
+                        <Label mnemonicParsing="false" text="translationScaleFromGrandparentNode" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="translationScaleFromGrandparentNode" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label mnemonicParsing="false" text="finalTurnProximity" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="finalTurnProximity" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                        <Label mnemonicParsing="false" text="checkForPathCollisions" GridPane.columnIndex="4" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                        <CheckBox fx:id="checkForPathCollisions" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+                        <Label mnemonicParsing="false" text="checkForBodyBoxCollisions" GridPane.columnIndex="6" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                        <CheckBox fx:id="checkForBodyBoxCollisions" GridPane.columnIndex="7" GridPane.rowIndex="5" />
+                        <Label mnemonicParsing="false" text="bodyBoxDimensionX" GridPane.columnIndex="8" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxDimensionX" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="5" />
+
+                        <Label mnemonicParsing="false" text="bodyBoxDimensionY" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxDimensionY" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <Label mnemonicParsing="false" text="bodyBoxDimensionZ" GridPane.columnIndex="2" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxDimensionZ" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                        <Label mnemonicParsing="false" text="bodyBoxOffsetX" GridPane.columnIndex="4" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxOffsetX" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+                        <Label mnemonicParsing="false" text="bodyBoxOffsetY" GridPane.columnIndex="6" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxOffsetY" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="6" />
+                        <Label mnemonicParsing="false" text="bodyBoxOffsetZ" GridPane.columnIndex="8" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="bodyBoxOffsetZ" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="6" />
+
+                        <Label mnemonicParsing="false" text="numberOfBoundingBoxChecks" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="numberOfBoundingBoxChecks" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <Label mnemonicParsing="false" text="translationWeightX" GridPane.columnIndex="2" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="translationWeightX" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                        <Label mnemonicParsing="false" text="translationWeightY" GridPane.columnIndex="4" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="translationWeightY" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="7" />
+                        <Label mnemonicParsing="false" text="translationWeightZ" GridPane.columnIndex="6" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="translationWeightZ" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="7" />
+                        <Label mnemonicParsing="false" text="orientationWeightYaw" GridPane.columnIndex="8" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="orientationWeightYaw" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="7" />
+
+                        <Label mnemonicParsing="false" text="orientationWeightPitch" GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="orientationWeightPitch" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <Label mnemonicParsing="false" text="orientationWeightRoll" GridPane.columnIndex="2" GridPane.rowIndex="8" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="orientationWeightRoll" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                        <Label mnemonicParsing="false" text="costPerStep" GridPane.columnIndex="4" GridPane.rowIndex="8" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="costPerStep" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="8" />
+                        <Label mnemonicParsing="false" text="footholdAreaWeight" GridPane.columnIndex="6" GridPane.rowIndex="8" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="footholdAreaWeight" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="8" />
+                        <Label mnemonicParsing="false" text="astarHeuristicsWeight" GridPane.columnIndex="8" GridPane.rowIndex="8" GridPane.halignment="RIGHT"/>
+                        <Spinner fx:id="astarHeuristicsWeight" editable="true" GridPane.columnIndex="9" GridPane.rowIndex="8" />
+
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+    </items>
+</SplitPane>
