@@ -6,16 +6,11 @@ import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningResult;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -25,25 +20,18 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.*;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.planner.ui.ValkyriePlannerGraphicsViewer;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,21 +39,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ValkyrieAStarFootstepPlanner
 {
-   public static final String MODULE_NAME = "valkyrie_footstep_planner";
-   public static final boolean sendCroppedFootholds = false;
+   private static final boolean sendCroppedFootholds = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFramePose3D footPose = new YoFramePose3D("footPose", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicPolygon footPolygon = new YoGraphicPolygon("footPolygon", footPose, 4, registry, 1.0, YoAppearance.Green());
-   private final YoGraphicPosition[] candidateSteps = new YoGraphicPosition[300];
-   private final YoGraphicPolygon[] solutionSteps = new YoGraphicPolygon[100];
-   private final SideDependentList<YoGraphicPolygon> startSteps = new SideDependentList<>(side -> new YoGraphicPolygon(side.getLowerCaseName() + "StartStep", 4, registry, true, 1.0, YoAppearance.ForestGreen()));
-   private final SideDependentList<YoGraphicPolygon> goalSteps = new SideDependentList<>(side -> new YoGraphicPolygon(side.getLowerCaseName() + "GoalStep", 4, registry, true, 1.0, YoAppearance.DarkRed()));
-
-   private final Ros2Node rosNode = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
-   private final MessageTopicNameGenerator inputTopicNameGenerator;
-   private final MessageTopicNameGenerator outputTopicNameGenerator;
-   private final IHMCROS2Publisher<ValkyrieFootstepPlanningResult> resultPublisher;
 
    private final ValkyrieAStarFootstepPlannerParameters parameters = new ValkyrieAStarFootstepPlannerParameters(registry);
    private final AStarPathPlanner<FootstepNode> planner;
@@ -74,15 +50,14 @@ public class ValkyrieAStarFootstepPlanner
    private final ValkyrieFootstepValidityChecker stepValidityChecker;
    private final DistanceAndYawBasedHeuristics heuristics;
    private FootstepNode endNode = null;
+   private ValkyriePlannerGraphicsViewer graphicsViewer = null;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
+   private final AtomicBoolean haltRequested = new AtomicBoolean();
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public ValkyrieAStarFootstepPlanner(ValkyrieRobotModel robotModel, YoGraphicsListRegistry graphicsListRegistry)
+   public ValkyrieAStarFootstepPlanner(ValkyrieRobotModel robotModel)
    {
-      this.inputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.INPUT);
-      this.outputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.OUTPUT);
-
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapAndWiggler  = new FootstepNodeSnapAndWiggler(footPolygons, () -> true, parameters::getWiggleInsideDelta, parameters::getMaximumXYWiggle, parameters::getMaximumYawWiggle, () -> Double.POSITIVE_INFINITY);
@@ -125,49 +100,6 @@ public class ValkyrieAStarFootstepPlanner
                                                      snapper);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
-
-      ROS2Tools.createCallbackSubscription(rosNode,
-                                           ValkyrieFootstepPlanningRequestPacket.class,
-                                           inputTopicNameGenerator,
-                                           s -> handleRequestPacket(s.takeNextData()));
-      resultPublisher = ROS2Tools.createPublisher(rosNode, ValkyrieFootstepPlanningResult.class, outputTopicNameGenerator);
-
-      if (graphicsListRegistry != null)
-      {
-         footPolygon.updateConvexPolygon2d(footPolygons.get(RobotSide.LEFT));
-         YoGraphicsList graphicsList = new YoGraphicsList(MODULE_NAME);
-         graphicsList.add(footPolygon);
-
-         for (int i = 0; i < candidateSteps.length; i++)
-         {
-            candidateSteps[i] = new YoGraphicPosition("candidateStep" + i, "", registry, 0.01, YoAppearance.White());
-            graphicsList.add(candidateSteps[i]);
-         }
-
-         for (int i = 0; i < solutionSteps.length; i++)
-         {
-            solutionSteps[i] = new YoGraphicPolygon("solutionStep" + i, 4, registry, true, 1.0, YoAppearance.Green());
-            solutionSteps[i].updateConvexPolygon2d(footPolygons.get(RobotSide.LEFT));
-            solutionSteps[i].setPoseToNaN();
-            graphicsList.add(solutionSteps[i]);
-         }
-
-         startSteps.forEach((side, step) ->
-                            {
-                               graphicsList.add(step);
-                               step.updateConvexPolygon2d(footPolygons.get(side));
-                               step.setPoseToNaN();
-                            });
-
-         goalSteps.forEach((side, step) ->
-                            {
-                               graphicsList.add(step);
-                               step.updateConvexPolygon2d(footPolygons.get(side));
-                               step.setPoseToNaN();
-                            });
-
-         graphicsListRegistry.registerYoGraphicsList(graphicsList);
-      }
    }
 
    public ValkyrieFootstepPlanningResult handleRequestPacket(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -179,10 +111,13 @@ public class ValkyrieAStarFootstepPlanner
       }
 
       isPlanning.set(true);
+      haltRequested.set(false);
       endNode = null;
 
-      initializeGraphics(requestPacket);
       heuristics.setGoalPose(new FramePose3D(requestPacket.getGoalPoses().get(0)));
+
+      if(graphicsViewer != null)
+         graphicsViewer.initialize(requestPacket);
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());
@@ -209,16 +144,17 @@ public class ValkyrieAStarFootstepPlanner
 
       // Do planning
       stopwatch.start();
-      while (stopwatch.totalElapsed() < requestPacket.getTimeout())
+      while (stopwatch.totalElapsed() < requestPacket.getTimeout() && !haltRequested.get())
       {
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
+
+         if(graphicsViewer != null)
+            graphicsViewer.processIterationData(iterationData);
 
          if (iterationData.getParentNode() == null)
             break;
          if (checkIfGoalIsReached(goalNodes, iterationData))
             break;
-
-         updateGraphics(iterationData);
       }
 
       // Send result
@@ -261,49 +197,10 @@ public class ValkyrieAStarFootstepPlanner
          }
       }
 
-      setSolutionGraphics(planningResult);
-      resultPublisher.publish(planningResult);
+      if(graphicsViewer != null)
+         graphicsViewer.processResult(planningResult);
+      isPlanning.set(false);
       return planningResult;
-   }
-
-   private void initializeGraphics(ValkyrieFootstepPlanningRequestPacket requestPacket)
-   {
-      startSteps.get(RobotSide.LEFT).setPose(new FramePose3D(requestPacket.getLeftFootPose()));
-      startSteps.get(RobotSide.RIGHT).setPose(new FramePose3D(requestPacket.getRightFootPose()));
-      FramePose3D goalStep = new FramePose3D(requestPacket.getGoalPoses().get(0));
-      goalStep.appendTranslation(0.0, 0.5 * parameters.getIdealFootstepWidth(), 0.0);
-      goalSteps.get(RobotSide.LEFT).setPose(goalStep);
-      goalStep.appendTranslation(0.0, -parameters.getIdealFootstepWidth(), 0.0);
-      goalSteps.get(RobotSide.RIGHT).setPose(goalStep);
-   }
-
-   private void updateGraphics(AStarIterationData<FootstepNode> iterationData)
-   {
-      footPose.set(iterationData.getParentNode().getX(), iterationData.getParentNode().getY(), 0.0, iterationData.getParentNode().getYaw(), 0.0, 0.0);
-
-      for (int i = 0; i < candidateSteps.length; i++)
-      {
-         if (i < iterationData.getValidChildNodes().size())
-            candidateSteps[i].setPosition(iterationData.getValidChildNodes().get(i).getX(), iterationData.getValidChildNodes().get(i).getY(), 0.0);
-         else
-            candidateSteps[i].setPositionToNaN();
-      }
-   }
-
-   private void setSolutionGraphics(ValkyrieFootstepPlanningResult planningResult)
-   {
-      for (int i = 0; i < planningResult.getFootstepDataList().getFootstepDataList().size(); i++)
-      {
-         FootstepDataMessage footstepDataMessage = planningResult.getFootstepDataList().getFootstepDataList().get(i);
-         solutionSteps[i].setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), footstepDataMessage.getLocation(), footstepDataMessage.getOrientation()));
-      }
-
-      for (int i = 0; i < candidateSteps.length; i++)
-      {
-         candidateSteps[i].setPositionToNaN();
-      }
-
-      footPose.setToNaN();
    }
 
    private boolean checkIfGoalIsReached(SideDependentList<FootstepNode> goalNodes, AStarIterationData<FootstepNode> iterationData)
@@ -319,6 +216,16 @@ public class ValkyrieAStarFootstepPlanner
          }
       }
       return false;
+   }
+
+   public ValkyriePlannerGraphicsViewer createGraphicsViewer()
+   {
+      if(graphicsViewer == null)
+      {
+         graphicsViewer = new ValkyriePlannerGraphicsViewer(snapper, parameters);
+      }
+
+      return graphicsViewer;
    }
 
    private FootstepNode createStartNode(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -337,7 +244,7 @@ public class ValkyrieAStarFootstepPlanner
                                      });
    }
 
-   private static SideDependentList<ConvexPolygon2D> createFootPolygons(ValkyrieRobotModel robotModel)
+   public static SideDependentList<ConvexPolygon2D> createFootPolygons(ValkyrieRobotModel robotModel)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       return new SideDependentList<>(side ->
@@ -347,12 +254,22 @@ public class ValkyrieAStarFootstepPlanner
                                      });
    }
 
+   public void halt()
+   {
+      haltRequested.set(true);
+   }
+
+   public ValkyrieAStarFootstepPlannerParameters getParameters()
+   {
+      return parameters;
+   }
+
    public static void main(String[] args)
    {
       // match controller version by default
       ValkyrieRobotVersion version = ValkyrieRosControlController.VERSION;
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, version);
-      new ValkyrieAStarFootstepPlanner(robotModel, null);
+      new ValkyrieAStarFootstepPlanner(robotModel);
    }
 }
