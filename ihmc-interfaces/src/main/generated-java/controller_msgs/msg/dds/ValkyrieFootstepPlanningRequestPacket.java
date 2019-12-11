@@ -13,17 +13,25 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
             */
    public int planner_request_id_ = -1;
    /**
-            * Left foot pose
+            * Starting left foot pose
             */
-   public us.ihmc.euclid.geometry.Pose3D left_foot_pose_;
+   public us.ihmc.euclid.geometry.Pose3D start_left_foot_pose_;
    /**
-            * Right foot pose
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.geometry.Pose3D right_foot_pose_;
+   public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
    /**
-            * Goal poses
+            * Goal left foot pose
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  goal_poses_;
+   public us.ihmc.euclid.geometry.Pose3D goal_left_foot_pose_;
+   /**
+            * Goal right foot pose
+            */
+   public us.ihmc.euclid.geometry.Pose3D goal_right_foot_pose_;
+   /**
+            * Intermediate waypoints (optional)
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  waypoints_;
    /**
             * Parameters for the planner to use
             */
@@ -55,9 +63,11 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
 
    public ValkyrieFootstepPlanningRequestPacket()
    {
-      left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      goal_poses_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
+      start_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      start_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       parameters_ = new controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket();
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
 
@@ -73,9 +83,11 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
    {
       planner_request_id_ = other.planner_request_id_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.left_foot_pose_, left_foot_pose_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.right_foot_pose_, right_foot_pose_);
-      goal_poses_.set(other.goal_poses_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_left_foot_pose_, start_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_right_foot_pose_, start_right_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_left_foot_pose_, goal_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
+      waypoints_.set(other.waypoints_);
       controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType.staticCopy(other.parameters_, parameters_);
       goal_distance_proximity_ = other.goal_distance_proximity_;
 
@@ -107,29 +119,47 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
 
 
    /**
-            * Left foot pose
+            * Starting left foot pose
             */
-   public us.ihmc.euclid.geometry.Pose3D getLeftFootPose()
+   public us.ihmc.euclid.geometry.Pose3D getStartLeftFootPose()
    {
-      return left_foot_pose_;
+      return start_left_foot_pose_;
    }
 
 
    /**
-            * Right foot pose
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.geometry.Pose3D getRightFootPose()
+   public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
-      return right_foot_pose_;
+      return start_right_foot_pose_;
    }
 
 
    /**
-            * Goal poses
+            * Goal left foot pose
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getGoalPoses()
+   public us.ihmc.euclid.geometry.Pose3D getGoalLeftFootPose()
    {
-      return goal_poses_;
+      return goal_left_foot_pose_;
+   }
+
+
+   /**
+            * Goal right foot pose
+            */
+   public us.ihmc.euclid.geometry.Pose3D getGoalRightFootPose()
+   {
+      return goal_right_foot_pose_;
+   }
+
+
+   /**
+            * Intermediate waypoints (optional)
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getWaypoints()
+   {
+      return waypoints_;
    }
 
 
@@ -245,13 +275,15 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
-      if (!this.left_foot_pose_.epsilonEquals(other.left_foot_pose_, epsilon)) return false;
-      if (!this.right_foot_pose_.epsilonEquals(other.right_foot_pose_, epsilon)) return false;
-      if (this.goal_poses_.size() != other.goal_poses_.size()) { return false; }
+      if (!this.start_left_foot_pose_.epsilonEquals(other.start_left_foot_pose_, epsilon)) return false;
+      if (!this.start_right_foot_pose_.epsilonEquals(other.start_right_foot_pose_, epsilon)) return false;
+      if (!this.goal_left_foot_pose_.epsilonEquals(other.goal_left_foot_pose_, epsilon)) return false;
+      if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
+      if (this.waypoints_.size() != other.waypoints_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.goal_poses_.size(); i++)
-         {  if (!this.goal_poses_.get(i).epsilonEquals(other.goal_poses_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.waypoints_.size(); i++)
+         {  if (!this.waypoints_.get(i).epsilonEquals(other.waypoints_.get(i), epsilon)) return false; }
       }
 
       if (!this.parameters_.epsilonEquals(other.parameters_, epsilon)) return false;
@@ -281,9 +313,11 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
-      if (!this.left_foot_pose_.equals(otherMyClass.left_foot_pose_)) return false;
-      if (!this.right_foot_pose_.equals(otherMyClass.right_foot_pose_)) return false;
-      if (!this.goal_poses_.equals(otherMyClass.goal_poses_)) return false;
+      if (!this.start_left_foot_pose_.equals(otherMyClass.start_left_foot_pose_)) return false;
+      if (!this.start_right_foot_pose_.equals(otherMyClass.start_right_foot_pose_)) return false;
+      if (!this.goal_left_foot_pose_.equals(otherMyClass.goal_left_foot_pose_)) return false;
+      if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
+      if (!this.waypoints_.equals(otherMyClass.waypoints_)) return false;
       if (!this.parameters_.equals(otherMyClass.parameters_)) return false;
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
 
@@ -308,12 +342,16 @@ public class ValkyrieFootstepPlanningRequestPacket extends Packet<ValkyrieFootst
       builder.append("ValkyrieFootstepPlanningRequestPacket {");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
-      builder.append("left_foot_pose=");
-      builder.append(this.left_foot_pose_);      builder.append(", ");
-      builder.append("right_foot_pose=");
-      builder.append(this.right_foot_pose_);      builder.append(", ");
-      builder.append("goal_poses=");
-      builder.append(this.goal_poses_);      builder.append(", ");
+      builder.append("start_left_foot_pose=");
+      builder.append(this.start_left_foot_pose_);      builder.append(", ");
+      builder.append("start_right_foot_pose=");
+      builder.append(this.start_right_foot_pose_);      builder.append(", ");
+      builder.append("goal_left_foot_pose=");
+      builder.append(this.goal_left_foot_pose_);      builder.append(", ");
+      builder.append("goal_right_foot_pose=");
+      builder.append(this.goal_right_foot_pose_);      builder.append(", ");
+      builder.append("waypoints=");
+      builder.append(this.waypoints_);      builder.append(", ");
       builder.append("parameters=");
       builder.append(this.parameters_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
