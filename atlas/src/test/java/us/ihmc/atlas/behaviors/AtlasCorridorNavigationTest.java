@@ -194,6 +194,7 @@ public class AtlasCorridorNavigationTest
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
+         LogTools.info("Robot position: {}", robotPose.getPosition());
 
          visibilityGraphParameters.setNavigableExtrusionDistance(0.3);
          visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
