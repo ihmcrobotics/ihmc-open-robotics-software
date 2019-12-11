@@ -30,9 +30,6 @@ public class PatrolWorldPlanarRegionViewer extends Application
       primaryStage.setScene(view3dFactory.getScene());
 
       primaryStage.show();
-      primaryStage.setAlwaysOnTop(true);
-      primaryStage.toBack();
-      primaryStage.toFront();
    }
 
    public static void main(String[] args)
