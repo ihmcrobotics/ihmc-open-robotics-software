@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
@@ -357,7 +358,7 @@ public class Trajectory3D
    /**
     * Returns the number of coefficients for the trajectory if it is the same for all axes. If not
     * then returns -1
-    * 
+    *
     * @return
     */
    public int getNumberOfCoefficients()
@@ -377,6 +378,14 @@ public class Trajectory3D
    public int getNumberOfCoefficients(int index)
    {
       return getTrajectory(index).getNumberOfCoefficients();
+   }
+
+   public void getCoefficients(int i, DenseMatrix64F coefficientsToPack)
+   {
+      for (int ordinal = 0; ordinal < 3; ordinal++)
+      {
+         coefficientsToPack.set(ordinal, 0, getTrajectory(ordinal).getCoefficient(i));
+      }
    }
 
    public void reset()
