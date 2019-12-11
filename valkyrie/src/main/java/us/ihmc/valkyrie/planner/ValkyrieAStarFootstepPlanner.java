@@ -15,6 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
@@ -28,7 +29,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.planner.ui.ValkyriePlannerGraphicsViewer;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -36,6 +36,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class ValkyrieAStarFootstepPlanner
 {
@@ -51,7 +52,10 @@ public class ValkyrieAStarFootstepPlanner
    private final ValkyrieFootstepValidityChecker stepValidityChecker;
    private final DistanceAndYawBasedHeuristics heuristics;
    private FootstepNode endNode = null;
-   private ValkyriePlannerGraphicsViewer graphicsViewer = null;
+
+   private Consumer<ValkyrieFootstepPlanningRequestPacket> requestCallback = request -> {};
+   private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
+   private Consumer<ValkyrieFootstepPlanningResult> resultCallback = result -> {};
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -104,12 +108,12 @@ public class ValkyrieAStarFootstepPlanner
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
    }
 
-   public ValkyrieFootstepPlanningResult handleRequestPacket(ValkyrieFootstepPlanningRequestPacket requestPacket)
+   public void handleRequestPacket(ValkyrieFootstepPlanningRequestPacket requestPacket)
    {
       if (isPlanning.get())
       {
          LogTools.info("Received planning request packet but planner is currently running");
-         return null;
+         return;
       }
 
       isPlanning.set(true);
@@ -120,8 +124,7 @@ public class ValkyrieAStarFootstepPlanner
       goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
       heuristics.setGoalPose(goalMidFootPose);
 
-      if(graphicsViewer != null)
-         graphicsViewer.initialize(requestPacket);
+      requestCallback.accept(requestPacket);
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());
@@ -151,9 +154,7 @@ public class ValkyrieAStarFootstepPlanner
       while (stopwatch.totalElapsed() < requestPacket.getTimeout() && !haltRequested.get())
       {
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
-
-         if(graphicsViewer != null)
-            graphicsViewer.processIterationData(iterationData);
+         iterationCallback.accept(iterationData);
 
          if (iterationData.getParentNode() == null)
             break;
@@ -201,10 +202,8 @@ public class ValkyrieAStarFootstepPlanner
          }
       }
 
-      if(graphicsViewer != null)
-         graphicsViewer.processResult(planningResult);
+      resultCallback.accept(planningResult);
       isPlanning.set(false);
-      return planningResult;
    }
 
    private boolean checkIfGoalIsReached(SideDependentList<FootstepNode> goalNodes, AStarIterationData<FootstepNode> iterationData)
@@ -220,16 +219,6 @@ public class ValkyrieAStarFootstepPlanner
          }
       }
       return false;
-   }
-
-   public ValkyriePlannerGraphicsViewer createGraphicsViewer()
-   {
-      if(graphicsViewer == null)
-      {
-         graphicsViewer = new ValkyriePlannerGraphicsViewer(snapper, parameters);
-      }
-
-      return graphicsViewer;
    }
 
    private FootstepNode createStartNode(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -267,9 +256,29 @@ public class ValkyrieAStarFootstepPlanner
       return parameters;
    }
 
+   public FootstepNodeSnapperReadOnly getSnapper()
+   {
+      return snapper;
+   }
+
    public ValkyrieRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   public void addRequestCallback(Consumer<ValkyrieFootstepPlanningRequestPacket> callback)
+   {
+      requestCallback = requestCallback.andThen(callback);
+   }
+
+   public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
+   {
+      iterationCallback = iterationCallback.andThen(callback);
+   }
+
+   public void addResultCallback(Consumer<ValkyrieFootstepPlanningResult> callback)
+   {
+      resultCallback = resultCallback.andThen(callback);
    }
 
    public static void main(String[] args)
