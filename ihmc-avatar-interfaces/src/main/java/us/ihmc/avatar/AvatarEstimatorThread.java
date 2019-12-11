@@ -76,6 +76,7 @@ public class AvatarEstimatorThread extends ModularRobotController
       }
 
       firstTick = new YoBoolean("firstTick", estimatorRegistry);
+      firstTick.set(true);
    }
 
    public void run()

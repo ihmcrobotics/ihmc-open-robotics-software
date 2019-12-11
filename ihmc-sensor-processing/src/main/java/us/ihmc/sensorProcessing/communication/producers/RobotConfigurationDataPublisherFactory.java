@@ -11,11 +11,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
@@ -220,9 +222,14 @@ public class RobotConfigurationDataPublisherFactory
                                                                                         .findFirst();
 
          if (sensorDataOptional.isPresent())
+         {
             sensorDataToPublish.add(sensorDataOptional.get());
+         }
          else
+         {
+            sensorDataToPublish.add(OneDoFJointStateReadOnly.dummyOneDoFJointState(joint.getName()));
             LogTools.warn("Could not find sensor data for joint: " + joint.getName());
+         }
       }
       return sensorDataToPublish;
    }
@@ -241,9 +248,14 @@ public class RobotConfigurationDataPublisherFactory
                                                                                  .findFirst();
 
          if (sensorDataOptional.isPresent())
+         {
             sensorDataToPublish.add(sensorDataOptional.get());
+         }
          else
+         {
+            sensorDataToPublish.add(new IMUSensor(imu, null));
             LogTools.warn("Could not find sensor data for the IMU: " + imu.getName());
+         }
       }
       return sensorDataToPublish;
    }
@@ -260,9 +272,16 @@ public class RobotConfigurationDataPublisherFactory
          ForceSensorDataReadOnly sensorData = allSensorData.get(forceSensor);
 
          if (sensorData != null)
+         {
             sensorDataToPublish.add(sensorData);
+         }
          else
-            LogTools.warn("Could not find sensor data for the IMU: " + forceSensor.getSensorName());
+         {
+            ForceSensorData dummySensor = new ForceSensorData();
+            dummySensor.setDefinition(forceSensor);
+            sensorDataToPublish.add(dummySensor);
+            LogTools.warn("Could not find sensor data for the F/T sensor: " + forceSensor.getSensorName());
+         }
       }
       return sensorDataToPublish;
    }
