@@ -2,14 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixToolsTest;
 
 import java.util.Random;
 
