@@ -15,12 +15,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -45,7 +43,7 @@ public class ValkyrieFootstepPlannerUI extends Application
    private final ValkyrieAStarFootstepPlanner planner;
    private final AtomicReference<ValkyrieFootstepPlanningStatus> planningResult = new AtomicReference<>();
 
-   public static final String MODULE_NAME = "valkyrie_footstep_planner";
+   public static final String MODULE_NAME = "valkyrie_footstep_planner_ui";
    private final Ros2Node rosNode = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
    private final MessageTopicNameGenerator controllerSubNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
    private final MessageTopicNameGenerator controllerPubNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName());
@@ -132,10 +130,10 @@ public class ValkyrieFootstepPlannerUI extends Application
       planner.addRequestCallback(graphicsViewer::initialize);
       planner.addRequestCallback(result -> valkyriePlannerDashboardController.setTimerEnabled(true));
       planner.addIterationCallback(graphicsViewer::processIterationData);
-      planner.addResultCallback(graphicsViewer::processPlanningStatus);
-      planner.addResultCallback(planningResult::set);
-      planner.addResultCallback(valkyriePlannerDashboardController::updatePlanningStatus);
-      planner.addResultCallback(result ->
+      planner.addStatusCallback(graphicsViewer::processPlanningStatus);
+      planner.addStatusCallback(planningResult::set);
+      planner.addStatusCallback(valkyriePlannerDashboardController::updatePlanningStatus);
+      planner.addStatusCallback(result ->
                                 {
                                    if (result.getPlannerStatus() != Status.PLANNING.toByte())
                                       valkyriePlannerDashboardController.setTimerEnabled(false);
@@ -217,15 +215,19 @@ public class ValkyrieFootstepPlannerUI extends Application
       planarRegionViewer.stop();
       robotVisualizer.stop();
       graphicsViewer.stop();
+      planner.closeAndDispose();
+      rosNode.destroy();
    }
 
    private void submitPlanningRequest()
    {
       ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
-      requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList.get()));
+
       requestPacket.setTimeout(valkyriePlannerDashboardController.getTimeout());
       requestPacket.setAssumeFlatGround(false);
       planner.getParameters().setPacket(requestPacket.getParameters());
+      if(planarRegionsList.get() != null)
+         requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList.get()));
 
       robotVisualizer.getFullRobotModel().updateFrames();
       requestPacket.getStartLeftFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());

@@ -1,12 +1,12 @@
 package us.ihmc.valkyrie.planner;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import javafx.application.Application;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,9 +26,11 @@ import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
@@ -39,6 +41,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ValkyrieAStarFootstepPlanner
@@ -57,14 +60,19 @@ public class ValkyrieAStarFootstepPlanner
 
    private Status status = null;
    private FootstepNode endNode = null;
+   private double endNodeCost;
 
    private Consumer<ValkyrieFootstepPlanningRequestPacket> requestCallback = request -> {};
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
-   private Consumer<ValkyrieFootstepPlanningStatus> resultCallback = result -> {};
+   private Consumer<ValkyrieFootstepPlanningStatus> statusCallback = result -> {};
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
+   private final AtomicInteger planID = new AtomicInteger();
    private final Stopwatch stopwatch = new Stopwatch();
+
+   public static final String MODULE_NAME = "valkyrie_footstep_planner";
+   private Ros2Node ros2Node;
 
    public ValkyrieAStarFootstepPlanner(ValkyrieRobotModel robotModel)
    {
@@ -123,7 +131,7 @@ public class ValkyrieAStarFootstepPlanner
 
       isPlanning.set(true);
       haltRequested.set(false);
-      endNode = null;
+      planID.set(requestPacket.getPlannerRequestId());
       status = Status.PLANNING;
 
       FramePose3D goalMidFootPose = new FramePose3D();
@@ -151,13 +159,24 @@ public class ValkyrieAStarFootstepPlanner
 
       // Set up planner
       FootstepNode startNode = createStartNode(requestPacket);
+      endNode = startNode;
+      endNodeCost = heuristics.compute(endNode);
       SideDependentList<FootstepNode> goalNodes = createGoalNodes(requestPacket);
       planner.initialize(startNode);
       stepValidityChecker.setParentNodeSupplier(planner.getGraph()::getParentNode);
 
+      // Check valid goal
+      if (!validGoal(requestPacket))
+      {
+         status = Status.INVALID_GOAL;
+         isPlanning.set(false);
+         reportStatus();
+         return;
+      }
+
       // Do planning
       stopwatch.start();
-      reportStatus(requestPacket);
+      reportStatus();
       while (true)
       {
          if(stopwatch.totalElapsed() >= requestPacket.getTimeout() || haltRequested.get())
@@ -179,59 +198,57 @@ public class ValkyrieAStarFootstepPlanner
             status = Status.FOUND_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > 2.0)
+         if (stopwatch.lapElapsed() > 0.5)
          {
-            reportStatus(requestPacket);
+            reportStatus();
             stopwatch.lap();
          }
       }
 
-      reportStatus(requestPacket);
+      reportStatus();
       isPlanning.set(false);
    }
 
-   private void reportStatus(ValkyrieFootstepPlanningRequestPacket requestPacket)
+   private void reportStatus()
    {
       ValkyrieFootstepPlanningStatus planningStatus = new ValkyrieFootstepPlanningStatus();
-      planningStatus.setPlanId(requestPacket.getPlannerRequestId());
+      planningStatus.setPlanId(planID.get());
       planningStatus.setPlannerStatus(status.toByte());
 
-      if (endNode != null)
+      // Pack solution path
+      FootstepDataListMessage footstepDataList = planningStatus.getFootstepDataList();
+      List<FootstepNode> path = planner.getGraph().getPathFromStart(endNode);
+      for (int i = 1; i < path.size(); i++)
       {
-         FootstepDataListMessage footstepDataList = planningStatus.getFootstepDataList();
-         List<FootstepNode> path = planner.getGraph().getPathFromStart(endNode);
-         for (int i = 1; i < path.size(); i++)
+         FootstepDataMessage footstepDataMessage = footstepDataList.getFootstepDataList().add();
+
+         footstepDataMessage.setRobotSide(path.get(i).getRobotSide().toByte());
+
+         RigidBodyTransform footstepPose = new RigidBodyTransform();
+         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+         footstepPose.setTranslationX(path.get(i).getX());
+         footstepPose.setTranslationY(path.get(i).getY());
+
+         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(path.get(i));
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+         snapTransform.transform(footstepPose);
+         footstepDataMessage.getLocation().set(footstepPose.getTranslation());
+         footstepDataMessage.getOrientation().set(footstepPose.getRotation());
+
+         if (sendCroppedFootholds)
          {
-            FootstepDataMessage footstepDataMessage = footstepDataList.getFootstepDataList().add();
-
-            footstepDataMessage.setRobotSide(path.get(i).getRobotSide().toByte());
-
-            RigidBodyTransform footstepPose = new RigidBodyTransform();
-            footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
-            footstepPose.setTranslationX(path.get(i).getX());
-            footstepPose.setTranslationY(path.get(i).getY());
-
-            FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(path.get(i));
-            RigidBodyTransform snapTransform = snapData.getSnapTransform();
-            snapTransform.transform(footstepPose);
-            footstepDataMessage.getLocation().set(footstepPose.getTranslation());
-            footstepDataMessage.getOrientation().set(footstepPose.getRotation());
-
-            if(sendCroppedFootholds)
+            ConvexPolygon2D foothold = snapData.getCroppedFoothold();
+            if (!foothold.isEmpty())
             {
-               ConvexPolygon2D foothold = snapData.getCroppedFoothold();
-               if (!foothold.isEmpty())
+               for (int j = 0; j < foothold.getNumberOfVertices(); j++)
                {
-                  for (int j = 0; j < foothold.getNumberOfVertices(); j++)
-                  {
-                     footstepDataMessage.getPredictedContactPoints2d().add().set(foothold.getVertex(i));
-                  }
+                  footstepDataMessage.getPredictedContactPoints2d().add().set(foothold.getVertex(i));
                }
             }
          }
       }
 
-      resultCallback.accept(planningStatus);
+      statusCallback.accept(planningStatus);
    }
 
    private boolean checkIfGoalIsReached(SideDependentList<FootstepNode> goalNodes, AStarIterationData<FootstepNode> iterationData)
@@ -245,8 +262,28 @@ public class ValkyrieAStarFootstepPlanner
             planner.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
             return true;
          }
+
+         double cost = planner.getGraph().getCostFromStart(childNode) + heuristics.compute(childNode);
+         if(cost < endNodeCost)
+         {
+            endNode = childNode;
+            endNodeCost = cost;
+         }
       }
       return false;
+   }
+
+   private boolean validGoal(ValkyrieFootstepPlanningRequestPacket requestPacket)
+   {
+      boolean validLeftGoalStep = stepValidityChecker.checkFootstep(new FootstepNode(requestPacket.getGoalLeftFootPose().getX(),
+                                                                                     requestPacket.getGoalLeftFootPose().getY(),
+                                                                                     requestPacket.getGoalLeftFootPose().getYaw(),
+                                                                                     RobotSide.LEFT), null);
+      boolean validRightGoalStep = stepValidityChecker.checkFootstep(new FootstepNode(requestPacket.getGoalRightFootPose().getX(),
+                                                                                      requestPacket.getGoalRightFootPose().getY(),
+                                                                                      requestPacket.getGoalRightFootPose().getYaw(),
+                                                                                      RobotSide.RIGHT), null);
+      return validLeftGoalStep && validRightGoalStep;
    }
 
    private FootstepNode createStartNode(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -304,9 +341,9 @@ public class ValkyrieAStarFootstepPlanner
       iterationCallback = iterationCallback.andThen(callback);
    }
 
-   public void addResultCallback(Consumer<ValkyrieFootstepPlanningStatus> callback)
+   public void addStatusCallback(Consumer<ValkyrieFootstepPlanningStatus> callback)
    {
-      resultCallback = resultCallback.andThen(callback);
+      statusCallback = statusCallback.andThen(callback);
    }
 
    public void launchVisualizer()
@@ -314,11 +351,72 @@ public class ValkyrieAStarFootstepPlanner
       ApplicationRunner.runApplication(new ValkyrieFootstepPlannerUI(this));
    }
 
+   public void setupWithRos()
+   {
+      if(ros2Node != null)
+         return;
+
+      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
+      MessageTopicNameGenerator inputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator outputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+
+      IHMCROS2Publisher<ValkyrieFootstepPlanningStatus> statusPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                                                                    ValkyrieFootstepPlanningStatus.class,
+                                                                                                    outputTopicNameGenerator);
+      IHMCROS2Publisher<ValkyrieFootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                                                                                 ValkyrieFootstepPlannerParametersPacket.class,
+                                                                                                                 outputTopicNameGenerator);
+      addStatusCallback(statusPublisher::publish);
+
+      ROS2Tools.createCallbackSubscription(ros2Node, ValkyrieFootstepPlanningRequestPacket.class, inputTopicNameGenerator, s ->
+      {
+         ValkyrieFootstepPlanningRequestPacket requestPacket = s.takeNextData();
+         new Thread(() -> handleRequestPacket(requestPacket)).start();
+      });
+
+      ROS2Tools.createCallbackSubscription(ros2Node, ValkyrieFootstepPlanningActionPacket.class, inputTopicNameGenerator, s ->
+      {
+         ValkyrieFootstepPlanningActionPacket packet = s.takeNextData();
+         switch(Action.fromByte(packet.getPlannerAction()))
+         {
+            case HALT:
+               halt();
+               break;
+            case REQUEST_PARAMETERS:
+               ValkyrieFootstepPlannerParametersPacket parametersPacket = new ValkyrieFootstepPlannerParametersPacket();
+               parameters.setPacket(parametersPacket);
+               parametersPublisher.publish(parametersPacket);
+               break;
+         }
+      });
+   }
+
+   public void closeAndDispose()
+   {
+      ros2Node.destroy();
+      ros2Node = null;
+   }
+
    public enum Status
    {
       PLANNING, FOUND_SOLUTION, TIMED_OUT, NO_SOLUTION_EXISTS, INVALID_GOAL;
 
       public static Status fromByte(byte value)
+      {
+         return values()[(int) value];
+      }
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+   }
+
+   public enum Action
+   {
+      HALT, REQUEST_PARAMETERS;
+
+      public static Action fromByte(byte value)
       {
          return values()[(int) value];
       }
