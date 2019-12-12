@@ -26,7 +26,7 @@ public class NavigableRegionsFactory
    private static final double DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION = 0.05;
    private static final boolean AUTO_POPULATE_CLUSTERS = false;
 
-   public static List<NavigableRegion> createNavigableRegion(List<PlanarRegion> allRegions, VisibilityGraphsParametersReadOnly parameters)
+   public static List<NavigableRegion> createNavigableRegions(List<PlanarRegion> allRegions, VisibilityGraphsParametersReadOnly parameters)
    {
       List<NavigableRegion> navigableRegions = new ArrayList<>(allRegions.size());
 

@@ -225,7 +225,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
       DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
 
-      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegion(planarRegions, parameters);
+      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegions, parameters);
 
 
       double extrusionDistance = parameters.getNavigableExtrusionDistance();
@@ -304,7 +304,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
       DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
 
-      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegion(planarRegions, parameters);
+      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegions, parameters);
 
 
       double extrusionDistance = parameters.getNavigableExtrusionDistance();
@@ -367,7 +367,7 @@ public class ObstacleAndCliffAvoidanceProcessorTest
 
       DefaultVisibilityGraphParameters parameters = new DefaultVisibilityGraphParameters();
 
-      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegion(planarRegions, parameters);
+      List<NavigableRegion> navigableRegions = NavigableRegionsFactory.createNavigableRegions(planarRegions, parameters);
 
 
       double extrusionDistance = parameters.getNavigableExtrusionDistance();
