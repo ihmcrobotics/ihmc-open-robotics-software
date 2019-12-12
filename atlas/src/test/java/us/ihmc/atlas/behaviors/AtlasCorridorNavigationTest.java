@@ -100,24 +100,40 @@ public class AtlasCorridorNavigationTest
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
    {
-      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getTrickCorridor(), new Point3D(6.0, 0.0, 0.0), 60);
+      ArrayDeque<Pose3D> waypointsToHit = new ArrayDeque<>();
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.8 * MAZE_CORRIDOR_SQUARE_SIZE, -0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(-0.7 * MAZE_CORRIDOR_SQUARE_SIZE, -1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.0 * MAZE_CORRIDOR_SQUARE_SIZE, -1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(2.3 * MAZE_CORRIDOR_SQUARE_SIZE, -1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getTrickCorridorWidened(),
+                                          new Point3D(2.3 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0, 0.0),
+                                          60,
+                                          waypointsToHit);
    }
 
    @Test
    public void testAtlasMakesItToGoalInMazeCorridor()
    {
+      ArrayDeque<Pose3D> waypointsToHit = new ArrayDeque<>();
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 3.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(4.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
       performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(),
                                           new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0),
-                                          300);
+                                          300, waypointsToHit);
    }
 
-   private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout)
+   private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout, ArrayDeque<Pose3D> waypointsToHit)
    {
       assertTimeoutPreemptively(Duration.ofSeconds(timeout), () ->
       {
          try
          {
-            runAtlasToGoalUsingBodyPathWithOcclusions(map, goal);
+            runAtlasToGoalUsingBodyPathWithOcclusions(map, goal, waypointsToHit);
          }
          catch (Exception e)
          {
@@ -126,7 +142,7 @@ public class AtlasCorridorNavigationTest
       });
    }
 
-   private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal)
+   private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal, ArrayDeque<Pose3D> waypointsToHit)
    {
       new Thread(() ->
       {
@@ -181,15 +197,7 @@ public class AtlasCorridorNavigationTest
       FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
-      ArrayDeque<Pose3D> waypointsToHit = new ArrayDeque<>();
-      waypointsToHit.addLast(new Pose3D());
-      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 3.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(4.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
-      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addFirst(new Pose3D());
       waypointsToHit.addLast(new Pose3D(goal, new Quaternion()));
       int waypointOriginalSize = waypointsToHit.size();
 
