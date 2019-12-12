@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.planner;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
-import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -18,13 +17,11 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -86,7 +83,7 @@ public class ValkyrieAStarFootstepPlannerTest
 
       ValkyrieFootstepPlanningRequestPacket requestPacket = createPlanningRequest(dataSet, timeout, planner.getParameters());
       ValkyrieFootstepPlanningStatus planningResult = new ValkyrieFootstepPlanningStatus();
-      planner.addResultCallback(planningResult::set);
+      planner.addStatusCallback(planningResult::set);
 
       planner.handleRequestPacket(requestPacket);
 
