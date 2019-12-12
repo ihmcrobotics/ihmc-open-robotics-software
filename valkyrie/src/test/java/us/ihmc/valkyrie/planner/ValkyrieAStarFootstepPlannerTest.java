@@ -3,9 +3,12 @@ package us.ihmc.valkyrie.planner;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,16 +18,21 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ValkyrieAStarFootstepPlannerTest
 {
+   // visualize is blocking on each test
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
    @Test
    public void testEODCinders()
    {
@@ -66,6 +74,14 @@ public class ValkyrieAStarFootstepPlannerTest
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
 
+      if (visualize)
+      {
+         planner.launchVisualizer();
+
+         // give planner some time to startup
+         ThreadTools.sleep(3000);
+      }
+
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
       ValkyrieFootstepPlanningRequestPacket requestPacket = createPlanningRequest(dataSet, timeout, planner.getParameters());
@@ -97,6 +113,11 @@ public class ValkyrieAStarFootstepPlannerTest
       int numberOfSteps = planningResult.getFootstepDataList().getFootstepDataList().size();
       assertFootAtGoal(requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 1), goalPositionEpsilon, goalYawEpsilon);
       assertFootAtGoal(requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 2), goalPositionEpsilon, goalYawEpsilon);
+
+      if(visualize)
+      {
+         ThreadTools.sleepForever();
+      }
    }
 
    private void assertFootAtGoal(ValkyrieFootstepPlanningRequestPacket requestPacket,
