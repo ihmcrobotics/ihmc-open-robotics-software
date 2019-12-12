@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -31,6 +33,7 @@ public class RobotAndMapViewer
    private FootstepPlanGraphic footstepPlanGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PositionGraphic goalGraphic;
+   private Group markers = new Group();
 
    public RobotAndMapViewer(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
@@ -57,6 +60,8 @@ public class RobotAndMapViewer
          Platform.runLater(() -> goalGraphic.clear());
          view3dFactory.addNodeToView(goalGraphic.getNode());
 
+         view3dFactory.addNodeToView(markers);
+
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
@@ -69,6 +74,16 @@ public class RobotAndMapViewer
    public void setGoalLocation(Point3DReadOnly goalLocation)
    {
       Platform.runLater(() -> goalGraphic.setPosition(goalLocation));
+   }
+
+   public void addMarker(Point3DReadOnly position)
+   {
+      Platform.runLater(() ->
+      {
+         PositionGraphic graphic = new PositionGraphic(Color.GRAY, 0.06);
+         graphic.setPosition(position);
+         markers.getChildren().add(graphic.getNode());
+      });
    }
 
    public void setFootstepsToVisualize(FootstepPlan footstepPlan)

@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -29,6 +30,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -73,10 +75,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class AtlasCorridorNavigationTest
 {
@@ -107,7 +106,9 @@ public class AtlasCorridorNavigationTest
    @Test
    public void testAtlasMakesItToGoalInMazeCorridor()
    {
-      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(), new Point3D(2.3 * 4.0, 2.3, 0.0), 200);
+      performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(),
+                                          new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0),
+                                          300);
    }
 
    private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout)
@@ -127,19 +128,22 @@ public class AtlasCorridorNavigationTest
 
    private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal)
    {
-      new Thread(() -> {
+      new Thread(() ->
+      {
          LogTools.info("Creating simulated REA module");
          SimulatedREAModule simulatedREAModule = new SimulatedREAModule(map, createRobotModel(), pubSubMode);
          simulatedREAModule.start();
       }).start();
 
-      new Thread(() -> {
+      new Thread(() ->
+      {
          LogTools.info("Creating planar regions mapping module");
          PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
          slamUpdated = planarRegionsMappingModule.getSlamUpdated();
       }).start();
 
-      new Thread(() -> {
+      new Thread(() ->
+      {
          LogTools.info("Creating simulation");
          boolean createYoVariableServer = false;
          AtlasKinematicSimulation.create(createRobotModel(), createYoVariableServer, pubSubMode);
@@ -164,7 +168,7 @@ public class AtlasCorridorNavigationTest
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons();
-//      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+      //      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       boolean fullyExpandVisibilityGraph = false;
       FramePose3D robotPose = new FramePose3D();
@@ -177,9 +181,28 @@ public class AtlasCorridorNavigationTest
       FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
-      robotAndMapViewer.setGoalLocation(goal);
+      ArrayDeque<Pose3D> waypointsToHit = new ArrayDeque<>();
+      waypointsToHit.addLast(new Pose3D());
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.5 * MAZE_CORRIDOR_SQUARE_SIZE, 1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(0.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 3.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(4.0 * MAZE_CORRIDOR_SQUARE_SIZE, 2.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
+      waypointsToHit.addLast(new Pose3D(goal, new Quaternion()));
+      int waypointOriginalSize = waypointsToHit.size();
 
-      while (robotPose.getPosition().distance(goal) > 0.5)
+      if (VISUALIZE)
+      {
+         for (Pose3D waypoint : waypointsToHit)
+         {
+            robotAndMapViewer.addMarker(waypoint.getPosition());
+         }
+         robotAndMapViewer.setGoalLocation(goal);
+      }
+
+      while (!waypointsToHit.isEmpty())
       {
          LogTools.info("Waiting for SLAM update");
          ThreadTools.sleep(300); // try to get a little more perception data TODO wait for a SLAM update
@@ -196,7 +219,6 @@ public class AtlasCorridorNavigationTest
          robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
-         LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
 
          visibilityGraphParameters.setNavigableExtrusionDistance(0.3);
          visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
@@ -390,12 +412,26 @@ public class AtlasCorridorNavigationTest
          double timeout = 3.0;
          while (!walkingStatusNotification.poll() && stopwatch.lapElapsed() < timeout)
          {
+            latestHumanoidRobotState = robot.pollHumanoidRobotState();
+            robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+            robotPose.changeFrame(ReferenceFrame.getWorldFrame());
+            if (!waypointsToHit.isEmpty() && robotPose.getPositionDistance(waypointsToHit.peekFirst()) < 1.0)
+            {
+               LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
+               LogTools.info("Waypoint {} reached: x: {}, y: {}",
+                             waypointOriginalSize - waypointsToHit.size(),
+                             waypointsToHit.peekFirst().getX(),
+                             waypointsToHit.peekFirst().getY());
+               waypointsToHit.pollFirst();
+            }
             ThreadTools.sleep(100);
          }
          if (stopwatch.lapElapsed() >= timeout)
          {
             LogTools.info("Walking timed out.");
          }
+
+         LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
       }
    }
 
