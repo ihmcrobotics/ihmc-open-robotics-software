@@ -766,11 +766,13 @@ public class PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
+   public static double MAZE_CORRIDOR_SQUARE_SIZE = 2.3;
+
    public static PlanarRegionsList getMazeCorridor()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      double squareSize = 2.3;
+      double squareSize = MAZE_CORRIDOR_SQUARE_SIZE;
       double halfSquareSize = squareSize / 2.0;
       double courseWidth = 4.0 * squareSize;
       double halfCourseWidth = courseWidth / 2.0;
