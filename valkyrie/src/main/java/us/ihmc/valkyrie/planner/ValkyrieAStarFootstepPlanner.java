@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
+import javafx.application.Application;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -21,6 +22,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.*;
+import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
@@ -29,6 +31,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -304,6 +307,11 @@ public class ValkyrieAStarFootstepPlanner
    public void addResultCallback(Consumer<ValkyrieFootstepPlanningStatus> callback)
    {
       resultCallback = resultCallback.andThen(callback);
+   }
+
+   public void launchVisualizer()
+   {
+      ApplicationRunner.runApplication(new ValkyrieFootstepPlannerUI(this));
    }
 
    public enum Status
