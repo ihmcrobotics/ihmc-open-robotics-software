@@ -306,7 +306,6 @@ public class ValkyrieAStarFootstepPlanner
       resultCallback = resultCallback.andThen(callback);
    }
 
-   /* package private */
    public enum Status
    {
       PLANNING, FOUND_SOLUTION, TIMED_OUT, NO_SOLUTION_EXISTS, INVALID_GOAL;
