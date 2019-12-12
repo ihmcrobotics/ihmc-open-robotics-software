@@ -21,13 +21,18 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -178,13 +183,19 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
    {
       final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
       final MeshView meshView = new MeshView();
+      boolean addedFlag = false;
 
       void update()
       {
          Pair<Mesh, Material> mesh = meshReference.getAndSet(null);
          if (mesh != null)
          {
-            root.getChildren().add(meshView);
+            if(!addedFlag)
+            {
+               root.getChildren().add(meshView);
+               addedFlag = true;
+            }
+
             meshView.setMesh(mesh.getKey());
             meshView.setMaterial(mesh.getValue());
          }
@@ -194,6 +205,7 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       {
          meshView.setMesh(null);
          meshView.setMaterial(null);
+         addedFlag = false;
       }
    }
 
