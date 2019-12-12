@@ -11,6 +11,7 @@ import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
@@ -140,7 +141,6 @@ public class ValkyriePlannerDashboardController
    public void doPlanning()
    {
       new Thread(doPlanningCallback).start();
-      timeElapsedManager.start();
    }
 
    @FXML
@@ -201,7 +201,13 @@ public class ValkyriePlannerDashboardController
    {
       Status status = Status.fromByte(planningStatus.getPlannerStatus());
       this.planningStatus.setText(status.toString());
-      if (status != Status.PLANNING)
+   }
+
+   public void setTimerEnabled(boolean enabled)
+   {
+      if(enabled)
+         timeElapsedManager.start();
+      else
          timeElapsedManager.stop();
    }
 
@@ -369,12 +375,6 @@ public class ValkyriePlannerDashboardController
       {
          timeElapsed.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
-
-      @Override
-      public void stop()
-      {
-         stopwatch.suspend();
-      }
    }
 
    public Pose3D getGoalPose()
@@ -402,12 +402,12 @@ public class ValkyriePlannerDashboardController
       return goalYaw;
    }
 
-   public void setGoalPose(double x, double y, double z, double yaw)
+   public void setGoalPose(Tuple3DReadOnly startPosition, double startYaw)
    {
-      goalX.getValueFactory().setValue(x);
-      goalY.getValueFactory().setValue(y);
-      goalZ.getValueFactory().setValue(z);
-      goalYaw.getValueFactory().setValue(yaw);
+      goalX.getValueFactory().setValue(startPosition.getX());
+      goalY.getValueFactory().setValue(startPosition.getY());
+      goalZ.getValueFactory().setValue(startPosition.getZ());
+      goalYaw.getValueFactory().setValue(startYaw);
    }
 
    public double getTimeout()
