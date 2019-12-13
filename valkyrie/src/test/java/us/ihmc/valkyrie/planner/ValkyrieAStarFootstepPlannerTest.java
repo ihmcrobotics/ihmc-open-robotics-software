@@ -128,7 +128,7 @@ public class ValkyrieAStarFootstepPlannerTest
       assertTrue(MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon));
    }
 
-   public ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)
+   public static ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)
    {
       ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
       requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataSet.getPlanarRegionsList()));
