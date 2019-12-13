@@ -41,6 +41,8 @@ public class BasicPlanarController
    private final YoDouble yKd = new YoDouble("planarYKd", registry);
    private final YoDouble yMaxIntegralError = new YoDouble("yMaxIntegralError", registry);
 
+
+
    private final PIDController xController;
    private final PIDController yController;
 

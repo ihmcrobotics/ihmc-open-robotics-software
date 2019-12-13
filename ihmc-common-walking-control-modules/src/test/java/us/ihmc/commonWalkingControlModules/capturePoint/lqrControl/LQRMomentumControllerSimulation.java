@@ -20,7 +20,7 @@ public class LQRMomentumControllerSimulation
    public LQRMomentumControllerSimulation()
    {
       Vector3D initialPosition = new Vector3D(0.0, 0.0, 1.0);
-      SphereRobotModel sphereRobotModel = new SphereRobotModel();
+      SphereRobot sphereRobotModel = new SphereRobot();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       RobotTools.SCSRobotFromInverseDynamicsRobotModel sphereRobot = SphereRobot.createSphereRobot("SphereRobot", initialPosition,
                                                                                                    sphereRobotModel.getElevator(), yoGraphicsListRegistry, gravity);
@@ -29,7 +29,7 @@ public class LQRMomentumControllerSimulation
 
       SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobotModel.getElevator(), controlDT, desiredHeight, gravity, sphereRobot.getYoTime(),
                                                                            sphereRobot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
-      SphereController controller = new SphereController(sphereRobot, sphereControlToolbox, externalForcePoint);
+      BasicSphereController controller = new BasicSphereController(sphereRobot, sphereControlToolbox, externalForcePoint);
       sphereRobot.setController(controller);
 
       setupGroundContactModel(sphereRobot);

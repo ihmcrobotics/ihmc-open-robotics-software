@@ -1,12 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -14,12 +22,66 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class SphereRobot
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private static final double mass = 1.0;
+   private static final double Ixx1 = 0.1, Iyy1 = 0.1, Izz1 = 0.1;
+
+   private final RigidBodyBasics elevator;
+   private final RigidBodyBasics body;
+
+   private final SixDoFJoint floatingJoint;
+   private final OneDoFJointBasics[] oneDoFJoints;
+
+   private final ReferenceFrame centerOfMassFrame;
+
+   private final double totalMass;
+
+   public SphereRobot()
+   {
+      elevator = new RigidBody("elevator", worldFrame);
+
+      floatingJoint = new SixDoFJoint("floatingJoint", elevator);
+
+      Matrix3D inertia = new Matrix3D(Ixx1, 0.0, 0.0, 0.0, Iyy1, 0.0, 0.0, 0.0, Izz1);
+      body = new RigidBody("body", floatingJoint, inertia, mass, new Vector3D());
+
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
+
+      oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, body);
+      totalMass = TotalMassCalculator.computeSubTreeMass(body);
+   }
+
+   public double getTotalMass()
+   {
+      return totalMass;
+   }
+
+   public RigidBodyBasics getElevator()
+   {
+      return elevator;
+   }
+
+   public SixDoFJoint getRootJoint()
+   {
+      return floatingJoint;
+   }
+
+   public void updateFrames()
+   {
+      elevator.updateFramesRecursively();
+      centerOfMassFrame.update();
+   }
+
    private static final double radius = 0.1;
 
    public static RobotTools.SCSRobotFromInverseDynamicsRobotModel createSphereRobot(String name, Vector3D initialPosition, RigidBodyBasics elevator,
-         YoGraphicsListRegistry yoGraphicsListRegistry, double gravity)
+                                                                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravity)
    {
       RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot = new RobotTools.SCSRobotFromInverseDynamicsRobotModel(name, elevator.getChildrenJoints().get(0));
 
