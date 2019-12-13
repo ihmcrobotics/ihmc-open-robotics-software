@@ -351,12 +351,12 @@ public class ValkyrieAStarFootstepPlanner
       ApplicationRunner.runApplication(new ValkyrieFootstepPlannerUI(this));
    }
 
-   public void setupWithRos()
+   public void setupWithRos(PubSubImplementation pubSubImplementation)
    {
       if(ros2Node != null)
          return;
 
-      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
       MessageTopicNameGenerator inputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator outputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(), MODULE_NAME, ROS2TopicQualifier.OUTPUT);
 
@@ -393,8 +393,11 @@ public class ValkyrieAStarFootstepPlanner
 
    public void closeAndDispose()
    {
-      ros2Node.destroy();
-      ros2Node = null;
+      if(ros2Node != null)
+      {
+         ros2Node.destroy();
+         ros2Node = null;
+      }
    }
 
    public enum Status
