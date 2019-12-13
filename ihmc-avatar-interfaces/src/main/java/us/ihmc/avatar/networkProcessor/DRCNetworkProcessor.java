@@ -22,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -74,10 +75,13 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
       tryToStartModule(() -> setupHumanoidAvatarREAStateUpdater(robotModel, params));
 
+      LogTools.info("All modules in network processor are up and running!");
+
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
          LogTools.info("Shutting down network processor modules.");
          closeAndDispose();
+         ThreadTools.sleep(10);
       }));
    }
 
