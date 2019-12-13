@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -77,6 +78,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.time.Duration;
 import java.util.*;
 
+@Tag("humanoid-behaviors")
 public class AtlasCorridorNavigationTest
 {
    private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
@@ -107,7 +109,7 @@ public class AtlasCorridorNavigationTest
       waypointsToHit.addLast(new Pose3D(new Point3D(2.3 * MAZE_CORRIDOR_SQUARE_SIZE, -1.0 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
       performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getTrickCorridorWidened(),
                                           new Point3D(2.3 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0, 0.0),
-                                          60,
+                                          5,
                                           waypointsToHit);
    }
 
@@ -124,12 +126,12 @@ public class AtlasCorridorNavigationTest
       waypointsToHit.addLast(new Pose3D(new Point3D(2.0 * MAZE_CORRIDOR_SQUARE_SIZE, 1.5 * MAZE_CORRIDOR_SQUARE_SIZE, 0.0), new Quaternion()));
       performTestWithTimeoutAndExceptions(PlannerTestEnvironments.getMazeCorridor(),
                                           new Point3D(MAZE_CORRIDOR_SQUARE_SIZE * 4.0, MAZE_CORRIDOR_SQUARE_SIZE, 0.0),
-                                          300, waypointsToHit);
+                                          10, waypointsToHit);
    }
 
    private void performTestWithTimeoutAndExceptions(PlanarRegionsList map, Point3D goal, int timeout, ArrayDeque<Pose3D> waypointsToHit)
    {
-      assertTimeoutPreemptively(Duration.ofSeconds(timeout), () ->
+      assertTimeoutPreemptively(Duration.ofMinutes(timeout), () ->
       {
          try
          {
