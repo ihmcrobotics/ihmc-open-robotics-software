@@ -56,7 +56,11 @@ public abstract class SimpleConcaveHullFactory
       if (pointCloud2d.size() <= 3)
          return new ConcaveHullCollection(pointCloud2d);
 
-      return createConcaveHull(pointCloud2d, lineConstraints, parameters).getConcaveHullCollection();
+      ConcaveHullFactoryResult concaveHull = createConcaveHull(pointCloud2d, lineConstraints, parameters);
+      if (concaveHull == null)
+         return new ConcaveHullCollection();
+      else
+         return concaveHull.getConcaveHullCollection();
    }
 
    public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d, ConcaveHullFactoryParameters parameters)
@@ -75,6 +79,16 @@ public abstract class SimpleConcaveHullFactory
       MultiLineString constraintSegments = JTSTools.createMultiLineString(lineConstraints);
       ConcaveHullFactoryResult result = new ConcaveHullFactoryResult();
       ConcaveHullVariables initialVariables = initializeTriangulation(sites, constraintSegments, triangulationTolerance, result);
+
+      /*
+       * This can happen for instance when the pointcloud forms a line 3D. In such case, could return a
+       * convex polygon, but it's unclear if there is other shapes of pointcloud that could result in the
+       * triangulation failing and in such case wheter the shape of the pointcloud would be convex or not.
+       * So returning null seems to be safer.
+       */
+      if (initialVariables == null)
+         return null;
+
       List<ConcaveHullVariables> variablesList = computeConcaveHullBorderEdges(parameters, initialVariables);
       result.intermediateVariables.addAll(variablesList);
 
@@ -167,6 +181,10 @@ public abstract class SimpleConcaveHullFactory
       // All the triangles resulting from the triangulation.
       List<QuadEdgeTriangle> allTriangles = concaveHullFactoryResult.allTriangles;
       allTriangles.addAll(QuadEdgeTriangle.createOn(subdivision));
+
+      // Triangulation failed, can happen for instance when all the points are on the same line 3D.
+      if (allTriangles.isEmpty())
+         return null;
 
       if (REPORT_TIME)
       {
