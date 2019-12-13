@@ -45,7 +45,7 @@ public class ValkyrieNetworkProcessor
          System.out.println("ROS_MASTER_URI="+rosuri);
       }
 
-      new ValkyrieAStarFootstepPlanner(model).setupWithRos();
+      new ValkyrieAStarFootstepPlanner(model).setupWithRos(PubSubImplementation.FAST_RTPS);
 
       new DRCNetworkProcessor(model, networkModuleParams, PubSubImplementation.FAST_RTPS);
    }
