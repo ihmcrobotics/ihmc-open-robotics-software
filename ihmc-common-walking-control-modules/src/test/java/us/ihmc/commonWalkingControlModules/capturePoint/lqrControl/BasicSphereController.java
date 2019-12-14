@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,6 +15,8 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+
+import java.util.List;
 
 public class BasicSphereController implements RobotController
 {
@@ -86,6 +89,11 @@ public class BasicSphereController implements RobotController
    @Override
    public void initialize()
    {
+   }
+
+   public void solveForTrajectory(List<? extends ContactStateProvider> stateProviders)
+   {
+      dcmPlan.solveForTrajectory(stateProviders);
    }
 
    @Override
