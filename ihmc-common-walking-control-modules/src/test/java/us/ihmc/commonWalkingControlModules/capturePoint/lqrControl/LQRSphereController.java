@@ -25,14 +25,14 @@ public class LQRSphereController implements RobotController
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleDCMPlan dcmPlan = new SimpleDCMPlan();
+   private final SimpleDCMPlan dcmPlan;
 
    public LQRSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox, ExternalForcePoint externalForcePoint)
    {
       this.scsRobot = scsRobot;
       this.controlToolbox = controlToolbox;
       this.externalForcePoint = externalForcePoint;
-
+      dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
       lqrMomentumController = new LQRMomentumController();
    }
 
