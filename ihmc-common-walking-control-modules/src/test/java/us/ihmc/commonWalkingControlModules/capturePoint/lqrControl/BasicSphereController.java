@@ -31,7 +31,7 @@ public class BasicSphereController implements RobotController
    private final ICPProportionalController icpProportionalController;
    private final YoFramePoint3D desiredCMP = new YoFramePoint3D("tempDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleDCMPlan dcmPlan = new SimpleDCMPlan();
+   private final SimpleDCMPlan dcmPlan;
 
    public BasicSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox,
                                 ExternalForcePoint externalForcePoint, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -39,6 +39,7 @@ public class BasicSphereController implements RobotController
       this.scsRobot = scsRobot;
       this.controlToolbox = controlToolbox;
       this.externalForcePoint = externalForcePoint;
+      dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
 
       YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
