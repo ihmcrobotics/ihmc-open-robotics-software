@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class BasicSphereController implements RobotController
 
    private final ICPProportionalController icpProportionalController;
    private final YoFramePoint3D desiredCMP = new YoFramePoint3D("tempDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D vrpForces = new YoFrameVector3D("vrpForces", ReferenceFrame.getWorldFrame(), registry);
 
    private final SimpleDCMPlan dcmPlan;
 
@@ -40,6 +42,7 @@ public class BasicSphereController implements RobotController
       this.controlToolbox = controlToolbox;
       this.externalForcePoint = externalForcePoint;
       dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
+      dcmPlan.setNominalCoMHeight(controlToolbox.getDesiredHeight());
 
       YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
@@ -71,6 +74,7 @@ public class BasicSphereController implements RobotController
 
       tempDesiredCMP.set(icpProportionalController.doProportionalControl(controlToolbox.getICP(), dcmPlan.getDesiredDCMPosition(),
                                                                          dcmPlan.getDesiredDCMVelocity(), controlToolbox.getOmega0()));
+      tempDesiredCMP.subZ(controlToolbox.getDesiredHeight());
       desiredCMP.set(tempDesiredCMP);
 
       heightController.doControl();
@@ -80,6 +84,7 @@ public class BasicSphereController implements RobotController
                                                 controlToolbox.getTotalMass(), controlToolbox.getOmega0());
       WrenchDistributorTools.computeForce(forces, controlToolbox.getCenterOfMass(), tempDesiredCMP, fZ);
 
+      vrpForces.setMatchingFrame(forces);
       externalForcePoint.setForce(forces);
 
       scsRobot.updateJointPositions_ID_to_SCS();

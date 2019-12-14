@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -122,7 +123,7 @@ public class ICPProportionalController
 
    private class Vector2dZUpFrame extends ReferenceFrame
    {
-      private final FrameVector3D xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -131,7 +132,7 @@ public class ICPProportionalController
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector3D(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
       public void setXAxis(FrameTuple3DReadOnly xAxis)
