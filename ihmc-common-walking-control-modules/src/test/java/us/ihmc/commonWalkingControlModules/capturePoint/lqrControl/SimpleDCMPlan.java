@@ -152,6 +152,7 @@ public class SimpleDCMPlan implements CoMTrajectoryPlannerInterface
 
    private void recursivelyComputeDCMPlan()
    {
+      throw new RuntimeException("Not yet done.");
    }
 
    private int getSegmentIndex(double time)
