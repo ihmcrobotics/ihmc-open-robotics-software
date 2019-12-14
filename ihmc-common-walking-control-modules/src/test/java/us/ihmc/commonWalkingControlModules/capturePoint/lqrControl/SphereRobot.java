@@ -11,9 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -21,9 +19,6 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class SphereRobot
 {
@@ -36,7 +31,6 @@ public class SphereRobot
    private final RigidBodyBasics body;
 
    private final SixDoFJoint floatingJoint;
-   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -53,7 +47,6 @@ public class SphereRobot
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
-      oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, body);
       totalMass = TotalMassCalculator.computeSubTreeMass(body);
    }
 

@@ -1,20 +1,22 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class BasicSphereController implements RobotController
 {
-   private enum SphereControllerEnum {BASIC}
-
-   private static final SphereControllerEnum controllerType = SphereControllerEnum.BASIC;
-
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 
    private final RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot;
@@ -22,32 +24,33 @@ public class BasicSphereController implements RobotController
    private final ExternalForcePoint externalForcePoint;
 
    private final BasicHeightController heightController;
-   private final BasicPlanarController planarController;
 
    private final ICPProportionalController icpProportionalController;
+   private final YoFramePoint3D desiredCMP = new YoFramePoint3D("tempDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
    private final SimpleDCMPlan dcmPlan = new SimpleDCMPlan();
 
-   public BasicSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox, ExternalForcePoint externalForcePoint)
+   public BasicSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox,
+                                ExternalForcePoint externalForcePoint, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scsRobot = scsRobot;
       this.controlToolbox = controlToolbox;
       this.externalForcePoint = externalForcePoint;
 
-      ICPControlGains gains = new ICPControlGains();
+      YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
       gains.setKpParallelToMotion(2.0);
 
       icpProportionalController = new ICPProportionalController(gains, controlToolbox.getControlDT(), registry);
 
-      heightController = new BasicHeightController(controlToolbox, registry);
-      planarController = new BasicPlanarController(controlToolbox, registry);
+      YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      yoGraphicsListRegistry.registerArtifact("Proportional", desiredCMPViz.createArtifact());
 
+      heightController = new BasicHeightController(controlToolbox, registry);
    }
 
-   private final Point2D planarForces = new Point2D();
-   private final Vector3D forces = new Vector3D();
-
+   private final FrameVector3D forces = new FrameVector3D();
+   private final FramePoint3D tempDesiredCMP = new FramePoint3D();
 
    @Override
    public void doControl()
@@ -59,13 +62,19 @@ public class BasicSphereController implements RobotController
 
       dcmPlan.compute(controlToolbox.getYoTime().getDoubleValue());
 
-      FramePoint2DReadOnly desiredCMP = icpProportionalController.doProportionalControl(null, controlToolbox.getCapturePoint2d(), dcmPlan.getDesiredDCMPosition(), null,
-                                                                           dcmPlan.getDesiredDCMVelocity(), dcmPlan.getDesiredVRPPosition(), controlToolbox.getOmega0())
-      heightController.doControl();
-      planarController.doControl();
-      planarController.getPlanarForces(planarForces);
+      controlToolbox.getDesiredICP().set(dcmPlan.getDesiredDCMPosition());
+      controlToolbox.getDesiredICPVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
-      forces.set(planarForces.getX(), planarForces.getY(), heightController.getVerticalForce());
+      tempDesiredCMP.set(icpProportionalController.doProportionalControl(controlToolbox.getICP(), dcmPlan.getDesiredDCMPosition(),
+                                                                         dcmPlan.getDesiredDCMVelocity(), controlToolbox.getOmega0()));
+      desiredCMP.set(tempDesiredCMP);
+
+      heightController.doControl();
+
+      double fZ = heightController.getVerticalForce();
+      WrenchDistributorTools.computePseudoCMP3d(tempDesiredCMP, controlToolbox.getCenterOfMass(), new FramePoint2D(tempDesiredCMP), fZ,
+                                                controlToolbox.getTotalMass(), controlToolbox.getOmega0());
+      WrenchDistributorTools.computeForce(forces, controlToolbox.getCenterOfMass(), tempDesiredCMP, fZ);
 
       externalForcePoint.setForce(forces);
 

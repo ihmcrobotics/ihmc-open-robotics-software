@@ -307,6 +307,11 @@ public class LQRMomentumController
        */
    }
 
+   public DenseMatrix64F getU()
+   {
+      return u;
+   }
+
    private int getSegmentNumber(double time)
    {
       for (int i = 0; i < vrpTrajectory.size(); i++)
