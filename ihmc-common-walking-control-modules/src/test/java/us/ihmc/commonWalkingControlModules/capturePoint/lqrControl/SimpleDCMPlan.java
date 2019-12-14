@@ -163,22 +163,26 @@ public class SimpleDCMPlan implements CoMTrajectoryPlannerInterface
       return vrpPlan;
    }
 
+   private final FramePoint3D endDCM = new FramePoint3D();
    private void recursivelyComputeDCMPlan(List<? extends ContactStateProvider> contactStates)
    {
-      FramePoint3DReadOnly endDCMPosition = contactStates.get(vrpPlan.size() - 1).getCopEndPosition();
+      endDCM.set(contactStates.get(vrpPlan.size() - 1).getCopEndPosition());
+      endDCM.addZ(nominalHeight);
 
       endDCMPositions.clear();
       for (int i = vrpPlan.size() - 1; i >= 0; i--)
       {
-         endDCMPositions.add(endDCMPosition);
+         endDCMPositions.add(new FramePoint3D(endDCM));
          ContactStateProvider contactStateProvider = contactStates.get(i);
          double startTime = contactStateProvider.getTimeInterval().getStartTime();
          double endTime = contactStateProvider.getTimeInterval().getEndTime();
-         FramePoint3DReadOnly endCoPPosition = contactStateProvider.getCopEndPosition();
-         FramePoint3DReadOnly startCoPPosition = contactStateProvider.getCopStartPosition();
+         endCoP.set(contactStateProvider.getCopEndPosition());
+         startCoP.set(contactStateProvider.getCopStartPosition());
+         endCoP.addZ(nominalHeight);
+         startCoP.addZ(nominalHeight);
 
          double duration = endTime - startTime;
-         endDCMPosition = integrateBackwards(duration, duration, startCoPPosition, endCoPPosition, endDCMPosition, omega);
+         endDCM.set(integrateBackwards(duration, duration, startCoP, endCoP, endDCM, omega));
       }
    }
 

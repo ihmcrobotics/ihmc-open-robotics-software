@@ -32,7 +32,10 @@ public class LQRSphereController implements RobotController
       this.scsRobot = scsRobot;
       this.controlToolbox = controlToolbox;
       this.externalForcePoint = externalForcePoint;
+      
       dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
+      dcmPlan.setNominalCoMHeight(controlToolbox.getDesiredHeight());
+
       lqrMomentumController = new LQRMomentumController();
    }
 
