@@ -1,14 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
-import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class BasicHeightController
 {
@@ -16,59 +13,42 @@ public class BasicHeightController
    private static final double ki = 0.0;
    private static final double kd = 10.0;
 
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ReferenceFrame centerOfMassFrame;
-
-   private final FramePoint3D centerOfMass = new FramePoint3D();
-   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
-
-   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoDouble yoDesiredHeight = new YoDouble("desiredHeight", registry);
-
-   private final YoDouble heightKp = new YoDouble("heightKp", registry);
-   private final YoDouble heightKi = new YoDouble("heightKi", registry);
-   private final YoDouble heightKd = new YoDouble("heightKd", registry);
-   private final YoDouble maxIntegralError = new YoDouble("heightMaxIntegralError", registry);
 
    private final PIDController heightController;
 
    private final YoDouble verticalForce = new YoDouble("verticalForce", registry);
    private final double controlDT;
-   private final CenterOfMassJacobian centerOfMassJacobian;
+
+   private final FramePoint3DReadOnly centerOfMass;
+   private final FrameVector3DReadOnly centerOfMassVelocity;
 
    public BasicHeightController(SphereControlToolbox controlToolbox, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlToolbox.getControlDT();
 
-      centerOfMassFrame = controlToolbox.getCenterOfMassFrame();
-      centerOfMassJacobian = controlToolbox.getCenterOfMassJacobian();
-
       yoDesiredHeight.set(controlToolbox.getDesiredHeight());
 
-      heightKp.set(kp);
-      heightKd.set(kd);
-      heightKi.set(ki);
-      maxIntegralError.set(Double.POSITIVE_INFINITY);
+      centerOfMass = controlToolbox.getCenterOfMass();
+      centerOfMassVelocity = controlToolbox.getCenterOfMassVelocity();
 
-      heightController = new PIDController(heightKp, heightKi, heightKd, maxIntegralError, "heightController", registry);
+      YoPIDGains pidGains = new YoPIDGains("height", registry);
+      pidGains.setKp(kp);
+      pidGains.setKd(kd);
+      pidGains.setKi(ki);
+
+      heightController = new PIDController(pidGains, "heightController", registry);
 
       parentRegistry.addChild(registry);
    }
 
    public void doControl()
    {
-      centerOfMass.setToZero(centerOfMassFrame);
-      centerOfMass.changeFrame(worldFrame);
+      double z = centerOfMass.getZ();
 
-      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
-      centerOfMassVelocity.changeFrame(worldFrame);
-
-      yoCenterOfMass.set(centerOfMass);
-
-      verticalForce.set(heightController.compute(centerOfMass.getZ(), yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
+      verticalForce.set(heightController.compute(z, yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
    }
 
    public double getVerticalForce()

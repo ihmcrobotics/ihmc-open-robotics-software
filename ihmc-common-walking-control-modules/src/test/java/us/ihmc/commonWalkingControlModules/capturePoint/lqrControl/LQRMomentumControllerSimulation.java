@@ -22,12 +22,13 @@ public class LQRMomentumControllerSimulation
       Vector3D initialPosition = new Vector3D(0.0, 0.0, 1.0);
       SphereRobot sphereRobotModel = new SphereRobot();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      RobotTools.SCSRobotFromInverseDynamicsRobotModel sphereRobot = SphereRobot.createSphereRobot("SphereRobot", initialPosition,
-                                                                                                   sphereRobotModel.getElevator(), yoGraphicsListRegistry, gravity);
+      RobotTools.SCSRobotFromInverseDynamicsRobotModel sphereRobot = SphereRobot
+            .createSphereRobot("SphereRobot", initialPosition, sphereRobotModel.getElevator(), yoGraphicsListRegistry, gravity);
 
       ExternalForcePoint externalForcePoint = sphereRobot.getAllExternalForcePoints().get(0);
 
-      SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobotModel.getElevator(), controlDT, desiredHeight, gravity, sphereRobot.getYoTime(),
+      SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobotModel.getElevator(), controlDT, desiredHeight, gravity,
+                                                                           sphereRobot.getYoTime(), sphereRobotModel.getTotalMass(),
                                                                            sphereRobot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
       BasicSphereController controller = new BasicSphereController(sphereRobot, sphereControlToolbox, externalForcePoint);
       sphereRobot.setController(controller);
@@ -50,7 +51,6 @@ public class LQRMomentumControllerSimulation
 
       scs.setCameraTracking(false, true, true, false);
       scs.setCameraDolly(false, true, true, false);
-
 
       scs.startOnAThread();
 
