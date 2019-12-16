@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class NavigableRegionsManager
 {
-   private final static boolean debug = true;
+   private final static boolean debug = false;
    private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
