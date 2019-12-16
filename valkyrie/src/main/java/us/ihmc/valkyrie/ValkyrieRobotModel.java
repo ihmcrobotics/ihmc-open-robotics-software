@@ -87,7 +87,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
-   private ValkyrieContactPointParameters contactPointParameters;
+   private RobotContactPointParameters<RobotSide> contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
@@ -579,6 +579,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
    {
       this.walkingControllerParameters = walkingControllerParameters;
+   }
+
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      this.contactPointParameters = contactPointParameters;
    }
 
    @Override
