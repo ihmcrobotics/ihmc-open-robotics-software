@@ -1,5 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -30,13 +31,20 @@ public class MovingZUpFrame extends MovingReferenceFrame
 
       // Compute the yaw rotation matrix while avoiding the computation of the actual yaw-pitch-roll angles.
       double sinPitch = -transformToParent.getM20();
-      cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
-      cosRoll = transformToParent.getM22() / cosPitch;
-      sinRoll = transformToParent.getM21() / cosPitch;
-      double cosYaw = transformToParent.getM00() / cosPitch;
-      double sinYaw = transformToParent.getM10() / cosPitch;
-
-      transformToParent.getRotation().setUnsafe(cosYaw, -sinYaw, 0.0, sinYaw, cosYaw, 0.0, 0.0, 0.0, 1.0);
+      if (MathTools.epsilonEquals(1.0, Math.abs(sinPitch), 1.0e-12))
+      { // pitch = Pi/2 best thing to do is to set the rotation to identity.
+         transformToParent.getRotation().setIdentity();
+      }
+      else
+      {
+         cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
+         cosRoll = transformToParent.getM22() / cosPitch;
+         sinRoll = transformToParent.getM21() / cosPitch;
+         double cosYaw = transformToParent.getM00() / cosPitch;
+         double sinYaw = transformToParent.getM10() / cosPitch;
+         
+         transformToParent.getRotation().setUnsafe(cosYaw, -sinYaw, 0.0, sinYaw, cosYaw, 0.0, 0.0, 0.0, 1.0);
+      }
    }
 
    /**
