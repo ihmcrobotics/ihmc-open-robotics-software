@@ -576,6 +576,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return capturePointPlannerParameters;
    }
 
+   public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
+   {
+      this.walkingControllerParameters = walkingControllerParameters;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
