@@ -60,14 +60,14 @@ public class HamiltonianCARESolver implements CARESolver
    {
       isUpToDate = false;
 
+      // checking A
+      MatrixChecking.assertIsSquare(A);
+      MatrixChecking.assertMultiplicationCompatible(A, B);
+      MatrixChecking.assertMultiplicationCompatible(B, R);
+      MatrixChecking.assertMultiplicationCompatible(A, Q);
+
       if (checkMatrices)
       {
-         // checking A
-         MatrixChecking.assertIsSquare(A);
-         MatrixChecking.assertMultiplicationCompatible(A, B);
-         MatrixChecking.assertMultiplicationCompatible(B, R);
-         MatrixChecking.assertMultiplicationCompatible(A, Q);
-
          // checking R
          svd.decompose(R);
          if (MathTools.min(svd.getSingularValues()) == 0.0)
@@ -136,10 +136,7 @@ public class HamiltonianCARESolver implements CARESolver
    /** {inheritDoc} */
    public DenseMatrix64F getP()
    {
-      if (!isUpToDate)
-         throw new RuntimeException("You must call computeP before trying to retrieve it.");
-
-      return P;
+      return isUpToDate ? P : computeP();
    }
 
    private void assembleHamiltonian(DenseMatrix64F hamiltonianToPack)
