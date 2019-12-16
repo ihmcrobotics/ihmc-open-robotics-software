@@ -232,6 +232,15 @@ public class HumanoidKinematicsSimulation
                                                                                                 publisherTopicNameGenerator,
                                                                                                 walkingOutputManager,
                                                                                                 realtimeRos2Node);
+      controllerNetworkSubscriber.addMessageFilter(message ->
+      {
+         if (message instanceof FootstepDataListMessage)
+         {
+            FootstepDataListMessage footstepDataListMessage = (FootstepDataListMessage) message;
+            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(false); // fixes +Z drift for each step
+         }
+         return true;
+      });
       walkingInputManager.registerConversionHelper(new FrameMessageCommandConverter(controllerToolbox.getReferenceFrameHashCodeResolver()));
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
                                                                        9,
