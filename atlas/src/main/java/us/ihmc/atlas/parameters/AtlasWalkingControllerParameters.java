@@ -48,6 +48,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
+   private boolean doPrepareManipulationForLocomotion = true;
    private double nominalHeightAboveGround;// = 0.705;
    private final double maximumHeightAboveGround;// = 0.765 + 0.08;
 
@@ -368,6 +369,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public PIDSE3Configuration getToeOffFootControlGains()
    {
       return new PIDSE3Configuration(GainCoupling.XY, false);
+   }
+
+   @Override
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return doPrepareManipulationForLocomotion;
+   }
+
+   public void setDoPrepareManipulationForLocomotion(boolean doPrepareManipulationForLocomotion)
+   {
+      this.doPrepareManipulationForLocomotion = doPrepareManipulationForLocomotion;
    }
 
    @Override
