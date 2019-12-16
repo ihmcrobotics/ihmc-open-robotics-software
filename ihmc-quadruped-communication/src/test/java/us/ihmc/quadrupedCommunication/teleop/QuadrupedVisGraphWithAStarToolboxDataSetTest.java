@@ -45,8 +45,8 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends PawStepPlanner
       QuadrupedVisGraphWithAStarToolboxDataSetTest test = new QuadrupedVisGraphWithAStarToolboxDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
-//      test.runAssertions(DataSetName._20171216_111326_CrossoverPlatforms);
+//      test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      test.runAssertions(DataSetName._20171216_111326_CrossoverPlatforms);
       ThreadTools.sleepForever();
       test.tearDown();
 
