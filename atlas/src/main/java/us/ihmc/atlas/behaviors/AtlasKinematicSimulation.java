@@ -16,6 +16,7 @@ public class AtlasKinematicSimulation
    public static void create(AtlasRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       AtlasWalkingControllerParameters walkingControllerParameters = (AtlasWalkingControllerParameters) robotModel.getWalkingControllerParameters();
+      walkingControllerParameters.setDoPrepareManipulationForLocomotion(false);
       walkingControllerParameters.setSteppingParameters(new AtlasKinematicSteppingParameters(robotModel.getJointMap()));
       walkingControllerParameters.setSwingTrajectoryParameters(
             new AtlasKinematicSwingTrajectoryParameters(robotModel.getTarget(), robotModel.getJointMap().getModelScale()));
