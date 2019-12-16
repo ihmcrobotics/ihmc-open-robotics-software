@@ -564,7 +564,7 @@ public class ValkyrieAStarFootstepPlannerParameters
 
    public void setToDefault()
    {
-      idealFootstepWidth.set(0.2);
+      idealFootstepWidth.set(0.25);
       minimumFootstepLength.set(-0.4);
       idealFootstepLength.set(0.2);
       minimumStepWidth.set(0.18);
@@ -576,7 +576,7 @@ public class ValkyrieAStarFootstepPlannerParameters
       maximumStepYaw.set(0.6);
       stepYawReductionFactorAtMaxReach.set(0.5);
       maximumStepZ.set(0.15);
-      minimumFootholdPercent.set(0.5);
+      minimumFootholdPercent.set(0.9);
       maximumSurfanceInclineRadians.set(Math.toRadians(45.0));
       wiggleWhilePlanning.set(false);
       wiggleInsideDelta.set(0.03);
