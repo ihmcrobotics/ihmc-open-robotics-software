@@ -48,7 +48,7 @@ public class ValkyrieFootstepPlannerUI extends Application
    private final MessageTopicNameGenerator controllerSubNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
    private final MessageTopicNameGenerator controllerPubNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName());
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher = ROS2Tools.createPublisher(rosNode, FootstepDataListMessage.class, controllerSubNameGenerator);
-   private final IHMCROS2Publisher<AbortWalkingMessage> abortPublisher = ROS2Tools.createPublisher(rosNode, AbortWalkingMessage.class, controllerSubNameGenerator);
+   private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher = ROS2Tools.createPublisher(rosNode, PauseWalkingMessage.class, controllerSubNameGenerator);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
 
    private final PlanarRegionViewer planarRegionViewer = new PlanarRegionViewer();
@@ -202,12 +202,12 @@ public class ValkyrieFootstepPlannerUI extends Application
       ROS2Tools.createCallbackSubscription(rosNode, WalkingStatusMessage.class, controllerPubNameGenerator, s ->
       {
          WalkingStatus walkingStatus = WalkingStatus.fromByte(s.takeNextData().getWalkingStatus());
-         if(walkingStatus == WalkingStatus.COMPLETED || walkingStatus == WalkingStatus.ABORT_REQUESTED || walkingStatus == WalkingStatus.PAUSED)
+         if(walkingStatus == WalkingStatus.COMPLETED || walkingStatus == WalkingStatus.PAUSED || walkingStatus == WalkingStatus.PAUSED)
             graphicsViewer.reset();
       });
 
       valkyriePlannerDashboardController.setSendPlanningResultCallback(() -> footstepPublisher.publish(planningResult.get().getFootstepDataList()));
-      valkyriePlannerDashboardController.setStopWalkingCallback(() -> abortPublisher.publish(new AbortWalkingMessage()));
+      valkyriePlannerDashboardController.setStopWalkingCallback(() -> pausePublisher.publish(new PauseWalkingMessage()));
    }
 
    public void stop()
