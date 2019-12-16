@@ -246,7 +246,13 @@ public class ValkyrieAStarFootstepPlanner
          snapTransform.transform(footstepPose);
          footstepDataMessage.getLocation().set(footstepPose.getTranslation());
          footstepDataMessage.getOrientation().set(footstepPose.getRotation());
-
+         
+         if (requestPacket.getAssumeFlatGround() || requestPacket.getPlanarRegionsListMessage().getRegionId().isEmpty())
+         {
+            double flatGroundHeight = requestPacket.getStartLeftFootPose().getPosition().getZ();
+            footstepDataMessage.getLocation().setZ(flatGroundHeight);            
+         }
+         
          if (sendCroppedFootholds)
          {
             ConvexPolygon2D foothold = snapData.getCroppedFoothold();
