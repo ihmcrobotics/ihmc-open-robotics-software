@@ -57,7 +57,30 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot);
       SimulationConstructionSet scs = setupSCS(robotModel, robot, yoGraphicsListRegistry);
 
-      setRobotToCrawlConfiguration(robot, robotModel.getJointMap());
+      setRobotToCrawl1Configuration(robot, robotModel.getJointMap());
+      scs.startOnAThread();
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testCrawl2()
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
+                                                                                                           robotModel.getRobotPhysicalProperties());
+      addLowerKneeContactPoints(robotModel.getJointMap(), contactPointParameters);
+      addToeFrontContactPoints(robotModel.getJointMap(), contactPointParameters);
+      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
+      robotModel.setContactPointParameters(contactPointParameters);
+
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot);
+      SimulationConstructionSet scs = setupSCS(robotModel, robot, yoGraphicsListRegistry);
+
+      setRobotToCrawl2Configuration(robot, robotModel.getJointMap());
       scs.startOnAThread();
 
       ThreadTools.sleepForever();
@@ -234,7 +257,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       return contactablePlaneBodies;
    }
 
-   private static void setRobotToCrawlConfiguration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   private static void setRobotToCrawl1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -251,6 +274,29 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       RigidBodyTransform rootJointPose = new RigidBodyTransform();
       rootJointPose.setRotationPitch(0.5 * Math.PI);
       rootJointPose.setTranslation(0.0, 0.0, 0.39);
+      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+   }
+
+   private static void setRobotToCrawl2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.25);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.75);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.8);
+
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(-1.5);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(0.65));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(1.5);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.4));
+      }
+
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.1);
+
+      RigidBodyTransform rootJointPose = new RigidBodyTransform();
+      rootJointPose.setRotation(new Quaternion(0.0, 0.4, 0.0, 0.5));
+      rootJointPose.setTranslation(0.0, 0.0, 0.56);
       robot.getRootJoint().setRotationAndTranslation(rootJointPose);
    }
 
@@ -361,6 +407,20 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
          String parentJointName = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
          String bodyName = parentJointName + "Link";
          String contactName = robotSide.getCamelCaseName() + "ElbowCP";
+         contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
+      }
+   }
+
+   private static void addHandFist1ContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Point3D position = new Point3D(-0.025, robotSide.negateIfRightSide(0.10), -0.01);
+         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+         rigidBodyTransform.setTranslation(position);
+         String parentJointName = jointMap.getJointBeforeHandName(robotSide);
+         String bodyName = jointMap.getHandName(robotSide);
+         String contactName = robotSide.getCamelCaseName() + "FistCP";
          contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
       }
    }
