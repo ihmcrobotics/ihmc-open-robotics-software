@@ -8,6 +8,12 @@ module controller_msgs
   {
     module dds
     {
+      /**
+       * Default float64 field to represent uninitialized value
+       */
+      const double DEFAULT_NO_VALUE =
+      -11.1;
+
 
       @TypeCode(type="controller_msgs::msg::dds_::ValkyrieFootstepPlannerParametersPacket_")
       struct ValkyrieFootstepPlannerParametersPacket
@@ -15,60 +21,74 @@ module controller_msgs
         /**
          * Returns the ideal step width (i.e. lateral distance) for walking
          */
+        @defaultValue(value=-11.1)
         double ideal_footstep_width;
         /**
          * Returns the farthest backward step length allowed, should be a negative number
          */
+        @defaultValue(value=-11.1)
         double minimum_step_length;
         /**
          * Returns the ideal step length (i.e. forward distance) for walking on flat ground.
          */
+        @defaultValue(value=-11.1)
         double ideal_footstep_length;
         /**
          * Minimum step width allowed.
          * Step width is the magnitude of the y-position of a footstep expressed in its parent's (i.e. opposite side) frame.
          */
+        @defaultValue(value=-11.1)
         double minimum_step_width;
         /**
          * Maximum step width allowed.
          * Step width is the magnitude of the y-position of a footstep expressed in its parent's (i.e. opposite side) frame.
          */
+        @defaultValue(value=-11.1)
         double maximum_step_width;
         /**
          * Maximum xy distance from the default squared-up stance as specified by ideal_footstep_width
          */
+        @defaultValue(value=-11.1)
         double maximum_step_reach;
         /**
          * Minimum allowed x distance when y distance is less than min_y_clearance_from_stance
          */
+        @defaultValue(value=-11.1)
         double min_x_clearance_from_stance;
         /**
          * Minimum allowed y distance when x distance is less than min_x_clearance_from_stance
          */
+        @defaultValue(value=-11.1)
         double min_y_clearance_from_stance;
         /**
          * Minimum step yaw, i.e. the farthest angle that steps can point towards each other
          */
+        @defaultValue(value=-11.1)
         double minimum_step_yaw;
         /**
          * Maximum step yaw, i.e. the farthest angle that steps can point away from each other
          */
+        @defaultValue(value=-11.1)
         double maximum_step_yaw;
         /**
          * Reduction factor in yaw depending on step reach. At full reach the yaw constraints are scaled by this factor.
          */
+        @defaultValue(value=-11.1)
         double step_yaw_reduction_factor_at_max_reach;
         /**
          * Maximum step height delta allowed, for both step up and step downs
          */
+        @defaultValue(value=-11.1)
         double maximum_step_z;
         /**
          * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
          */
+        @defaultValue(value=-11.1)
         double minimum_foothold_percent;
         /**
          * Maximum allowed surface incline to place steps
          */
+        @defaultValue(value=-11.1)
         double maximum_surface_incline_radians;
         /**
          * If true, will wiggle each step while planning. If false, only wiggles the final plan.
@@ -79,46 +99,57 @@ module controller_msgs
          * Amount that the planner will attempt to shift footsteps inside of planar regions.
          * For example, for a value of 0.01 each footstep will be shifted so that its edge is at least 1cm from the planar region's edge
          */
+        @defaultValue(value=-11.1)
         double wiggle_inside_delta;
         /**
          * Maximum xy distance that steps can be shifted to move into planar regions.
          */
+        @defaultValue(value=-11.1)
         double maximum_xy_wiggle_distance;
         /**
          * Maximum yaw distance that steps can be rotated to move into planar regions.
          */
+        @defaultValue(value=-11.1)
         double maximum_yaw_wiggle;
         /**
          * Height threshold to consider an obstacle a "cliff". Steps will not be closer to cliffs than minimum_distance_from_cliff_bottoms
          */
+        @defaultValue(value=-11.1)
         double cliff_height_to_avoid;
         /**
          * Minimum allowed distance to "cliffs"
          */
+        @defaultValue(value=-11.1)
         double minimum_distance_from_cliff_bottoms;
         /**
          * Steps with height changes below this value will be considered step downs. This value should be negative.
          */
+        @defaultValue(value=-11.1)
         double flat_ground_lower_threshold;
         /**
          * Steps with height changes above this value will be considered step ups
          */
+        @defaultValue(value=-11.1)
         double flat_ground_upper_threshold;
         /**
          * Maximum step with if step height change is lower than flat_ground_lower_threshold
          */
+        @defaultValue(value=-11.1)
         double maximum_step_width_when_stepping_down;
         /**
          * Maximum step reach, i.e. xy distance from nominal stance, when stepping down.
          */
+        @defaultValue(value=-11.1)
         double maximum_step_reach_when_stepping_down;
         /**
          * Maximum step with if the step height exceeds flat_ground_upper_threshold
          */
+        @defaultValue(value=-11.1)
         double maximum_step_width_when_stepping_up;
         /**
          * Maximum step reach, i.e. xy distance from nominal stance, when stepping up.
          */
+        @defaultValue(value=-11.1)
         double maximum_step_reach_when_stepping_up;
         /**
          * Scale factor for checking grandparent node (i.e. previous step on same side).
@@ -126,10 +157,12 @@ module controller_msgs
          * This value represents how much to scale the corresponding step up/down width/reach restrictions.
          * This value should be in the range 1.0 - 2.0, recommended to be 1.5.
          */
+        @defaultValue(value=-11.1)
         double translation_scale_from_grandparent_node;
         /**
          * Radius around the goal inside which the planner should start to turn to match the goal's orientation
          */
+        @defaultValue(value=-11.1)
         double final_turn_proximity;
         /**
          * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
@@ -165,15 +198,18 @@ module controller_msgs
         /**
          * Contact cost associated with each step. Increase this value if planner is returning extra steps
          */
+        @defaultValue(value=-11.1)
         double cost_per_step;
         /**
          * Weight for partial foothold cost term
          */
+        @defaultValue(value=-11.1)
         double foothold_area_weight;
         /**
          * Heuristic weight for A* search. Higher heuristic weights will result in quicker plan times,
          * but plans might be less optimal.
          */
+        @defaultValue(value=-11.1)
         double a_star_heuristics_weight;
       };
     };

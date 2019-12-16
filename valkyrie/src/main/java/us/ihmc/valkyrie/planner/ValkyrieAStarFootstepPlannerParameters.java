@@ -2,10 +2,16 @@ package us.ihmc.valkyrie.planner;
 
 import controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
+
+import java.util.function.*;
 
 public class ValkyrieAStarFootstepPlannerParameters
 {
@@ -480,44 +486,57 @@ public class ValkyrieAStarFootstepPlannerParameters
 
    public void setFromPacket(ValkyrieFootstepPlannerParametersPacket packet)
    {
-      idealFootstepWidth.set(packet.getIdealFootstepWidth());
-      minimumFootstepLength.set(packet.getMinimumStepLength());
-      idealFootstepLength.set(packet.getIdealFootstepLength());
-      minimumStepWidth.set(packet.getMinimumStepWidth());
-      maximumStepWidth.set(packet.getMaximumStepWidth());
-      maximumStepReach.set(packet.getMaximumStepReach());
-      minimumXClearanceFromStance.set(packet.getMinXClearanceFromStance());
-      minimumYClearanceFromStance.set(packet.getMinYClearanceFromStance());
-      minimumStepYaw.set(packet.getMinimumStepYaw());
-      maximumStepYaw.set(packet.getMaximumStepYaw());
-      stepYawReductionFactorAtMaxReach.set(packet.getStepYawReductionFactorAtMaxReach());
-      maximumStepZ.set(packet.getMaximumStepZ());
-      minimumFootholdPercent.set(packet.getMinimumFootholdPercent());
-      maximumSurfanceInclineRadians.set(packet.getMaximumSurfaceInclineRadians());
+      BiConsumer<DoubleSupplier, DoubleConsumer> doubleParamSetter = (supplier, setter) ->
+      {
+         if(supplier.getAsDouble() != ValkyrieFootstepPlannerParametersPacket.DEFAULT_NO_VALUE)
+            setter.accept(supplier.getAsDouble());
+      };
+      BiConsumer<Supplier<Vector3D>, Consumer<Vector3D>> vectorParamSetter = (supplier, setter) ->
+      {
+         if(!TupleTools.isTupleZero(supplier.get(), 1e-10))
+            setter.accept(supplier.get());
+      };
+
+      doubleParamSetter.accept(packet::getIdealFootstepWidth, idealFootstepWidth::set);
+      doubleParamSetter.accept(packet::getMinimumStepLength, minimumFootstepLength::set);
+      doubleParamSetter.accept(packet::getIdealFootstepLength, idealFootstepLength::set);
+      doubleParamSetter.accept(packet::getMinimumStepWidth, minimumStepWidth::set);
+      doubleParamSetter.accept(packet::getMaximumStepWidth, maximumStepWidth::set);
+      doubleParamSetter.accept(packet::getMaximumStepReach, maximumStepReach::set);
+      doubleParamSetter.accept(packet::getMinXClearanceFromStance, minimumXClearanceFromStance::set);
+      doubleParamSetter.accept(packet::getMinYClearanceFromStance, minimumYClearanceFromStance::set);
+      doubleParamSetter.accept(packet::getMinimumStepYaw, minimumStepYaw::set);
+      doubleParamSetter.accept(packet::getMaximumStepYaw, maximumStepYaw::set);
+      doubleParamSetter.accept(packet::getStepYawReductionFactorAtMaxReach, stepYawReductionFactorAtMaxReach::set);
+      doubleParamSetter.accept(packet::getMaximumStepZ, maximumStepZ::set);
+      doubleParamSetter.accept(packet::getMinimumFootholdPercent, minimumFootholdPercent::set);
+      doubleParamSetter.accept(packet::getMaximumSurfaceInclineRadians, maximumSurfanceInclineRadians::set);
+      doubleParamSetter.accept(packet::getWiggleInsideDelta, wiggleInsideDelta::set);
+      doubleParamSetter.accept(packet::getMaximumXyWiggleDistance, maximumXYWiggle::set);
+      doubleParamSetter.accept(packet::getMaximumYawWiggle, maximumYawWiggle::set);
+      doubleParamSetter.accept(packet::getCliffHeightToAvoid, cliffHeightToAvoid::set);
+      doubleParamSetter.accept(packet::getMinimumDistanceFromCliffBottoms, minimumDistanceFromCliffBottoms::set);
+      doubleParamSetter.accept(packet::getFlatGroundLowerThreshold, flatGroundLowerThreshold::set);
+      doubleParamSetter.accept(packet::getFlatGroundUpperThreshold, flatGroundUpperThreshold::set);
+      doubleParamSetter.accept(packet::getMaximumStepWidthWhenSteppingDown, maximumStepWidthWhenSteppingDown::set);
+      doubleParamSetter.accept(packet::getMaximumStepReachWhenSteppingDown, maximumStepReachWhenSteppingDown::set);
+      doubleParamSetter.accept(packet::getMaximumStepWidthWhenSteppingUp, maximumStepWidthWhenSteppingUp::set);
+      doubleParamSetter.accept(packet::getMaximumStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp::set);
+      doubleParamSetter.accept(packet::getTranslationScaleFromGrandparentNode, translationScaleFromGrandparentNode::set);
+      doubleParamSetter.accept(packet::getFinalTurnProximity, finalTurnProximity::set);
+      doubleParamSetter.accept(packet::getCostPerStep, costPerStep::set);
+      doubleParamSetter.accept(packet::getFootholdAreaWeight, footholdAreaWeight::set);
+      doubleParamSetter.accept(packet::getAStarHeuristicsWeight, astarHeuristicsWeight::set);
+
+      vectorParamSetter.accept(packet::getBodyBoxDimensions, bodyBoxDimensions::set);
+      vectorParamSetter.accept(packet::getBodyBoxOffset, bodyBoxOffset::set);
+      vectorParamSetter.accept(packet::getTranslationWeight, translationWeight::set);
+      vectorParamSetter.accept(packet::getOrientationWeight, orientationWeight::setEuler);
+
       wiggleWhilePlanning.set(packet.getWiggleWhilePlanning());
-      wiggleInsideDelta.set(packet.getWiggleInsideDelta());
-      maximumXYWiggle.set(packet.getMaximumXyWiggleDistance());
-      maximumYawWiggle.set(packet.getMaximumYawWiggle());
-      cliffHeightToAvoid.set(packet.getCliffHeightToAvoid());
-      minimumDistanceFromCliffBottoms.set(packet.getMinimumDistanceFromCliffBottoms());
-      flatGroundLowerThreshold.set(packet.getFlatGroundLowerThreshold());
-      flatGroundUpperThreshold.set(packet.getFlatGroundUpperThreshold());
-      maximumStepWidthWhenSteppingDown.set(packet.getMaximumStepWidthWhenSteppingDown());
-      maximumStepReachWhenSteppingDown.set(packet.getMaximumStepReachWhenSteppingDown());
-      maximumStepWidthWhenSteppingUp.set(packet.getMaximumStepWidthWhenSteppingUp());
-      maximumStepReachWhenSteppingUp.set(packet.getMaximumStepReachWhenSteppingUp());
-      translationScaleFromGrandparentNode.set(packet.getTranslationScaleFromGrandparentNode());
-      finalTurnProximity.set(packet.getFinalTurnProximity());
       checkForPathCollisions.set(packet.getCheckForPathCollisions());
       checkForBodyBoxCollisions.set(packet.getCheckForBodyBoxCollisions());
-      bodyBoxDimensions.set(packet.getBodyBoxDimensions());
-      bodyBoxOffset.set(packet.getBodyBoxOffset());
       numberOfBoundingBoxChecks.set((int) packet.getNumberOfBoundingBoxChecks());
-      translationWeight.set(packet.getTranslationWeight());
-      orientationWeight.setEuler(packet.getOrientationWeight());
-      costPerStep.set(packet.getCostPerStep());
-      footholdAreaWeight.set(packet.getFootholdAreaWeight());
-      astarHeuristicsWeight.set(packet.getAStarHeuristicsWeight());
    }
 
    public void setPacket(ValkyrieFootstepPlannerParametersPacket packet)
