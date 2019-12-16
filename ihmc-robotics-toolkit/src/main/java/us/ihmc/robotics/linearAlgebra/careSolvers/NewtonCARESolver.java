@@ -88,13 +88,13 @@ public class NewtonCARESolver implements CARESolver
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices)
    {
       isUpToDate = false;
+      MatrixChecking.assertIsSquare(A);
+      MatrixChecking.assertMultiplicationCompatible(A, B);
+      MatrixChecking.assertMultiplicationCompatible(B, R);
+      MatrixChecking.assertMultiplicationCompatible(A, Q);
+
       if (checkMatrices)
       {
-         MatrixChecking.assertIsSquare(A);
-         MatrixChecking.assertMultiplicationCompatible(A, B);
-         MatrixChecking.assertMultiplicationCompatible(B, R);
-         MatrixChecking.assertMultiplicationCompatible(A, Q);
-
          // checking R
          svd.decompose(R);
          if (MathTools.min(svd.getSingularValues()) == 0.0)
@@ -128,13 +128,10 @@ public class NewtonCARESolver implements CARESolver
    /** {inheritDoc} */
    public DenseMatrix64F getP()
    {
-      if (!isUpToDate)
-         throw new RuntimeException("You must call computeP before trying to retrieve it.");
-
-      return P;
+      return isUpToDate ? P : computeP();
    }
 
-   /**
+   /**\
     * Applies the Newton algorithm.
     *
     * @param initialP initial solution

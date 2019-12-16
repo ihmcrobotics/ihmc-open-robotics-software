@@ -40,17 +40,10 @@ public class LyapunovEquationSolver
 
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q)
    {
-      setMatrices(A, Q, true);
-   }
-
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q, boolean checkMatrices)
-   {
       isUpToDate = false;
-      if (checkMatrices)
-      {
-         MatrixChecking.assertIsSquare(A);
-         MatrixChecking.assertIsSquare(Q);
-      }
+
+      MatrixChecking.assertIsSquare(A);
+      MatrixChecking.assertIsSquare(Q);
 
       this.A.set(A);
       this.Q.set(Q);
@@ -87,10 +80,7 @@ public class LyapunovEquationSolver
 
    public DenseMatrix64F getX()
    {
-      if (!isUpToDate)
-         throw new RuntimeException("You must call solve before trying to retrieve X.");
-
-      return X;
+      return isUpToDate ? X : solve();
    }
 
    private static void stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
