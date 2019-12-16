@@ -9,63 +9,67 @@ import us.ihmc.pubsub.TopicDataType;
 public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFootstepPlannerParametersPacket> implements Settable<ValkyrieFootstepPlannerParametersPacket>, EpsilonComparable<ValkyrieFootstepPlannerParametersPacket>
 {
    /**
+          * Default float64 field to represent uninitialized value
+          */
+   public static final double DEFAULT_NO_VALUE = -11.1;
+   /**
             * Returns the ideal step width (i.e. lateral distance) for walking
             */
-   public double ideal_footstep_width_;
+   public double ideal_footstep_width_ = -11.1;
    /**
             * Returns the farthest backward step length allowed, should be a negative number
             */
-   public double minimum_step_length_;
+   public double minimum_step_length_ = -11.1;
    /**
             * Returns the ideal step length (i.e. forward distance) for walking on flat ground.
             */
-   public double ideal_footstep_length_;
+   public double ideal_footstep_length_ = -11.1;
    /**
             * Minimum step width allowed.
             * Step width is the magnitude of the y-position of a footstep expressed in its parent's (i.e. opposite side) frame.
             */
-   public double minimum_step_width_;
+   public double minimum_step_width_ = -11.1;
    /**
             * Maximum step width allowed.
             * Step width is the magnitude of the y-position of a footstep expressed in its parent's (i.e. opposite side) frame.
             */
-   public double maximum_step_width_;
+   public double maximum_step_width_ = -11.1;
    /**
             * Maximum xy distance from the default squared-up stance as specified by ideal_footstep_width
             */
-   public double maximum_step_reach_;
+   public double maximum_step_reach_ = -11.1;
    /**
             * Minimum allowed x distance when y distance is less than min_y_clearance_from_stance
             */
-   public double min_x_clearance_from_stance_;
+   public double min_x_clearance_from_stance_ = -11.1;
    /**
             * Minimum allowed y distance when x distance is less than min_x_clearance_from_stance
             */
-   public double min_y_clearance_from_stance_;
+   public double min_y_clearance_from_stance_ = -11.1;
    /**
             * Minimum step yaw, i.e. the farthest angle that steps can point towards each other
             */
-   public double minimum_step_yaw_;
+   public double minimum_step_yaw_ = -11.1;
    /**
             * Maximum step yaw, i.e. the farthest angle that steps can point away from each other
             */
-   public double maximum_step_yaw_;
+   public double maximum_step_yaw_ = -11.1;
    /**
             * Reduction factor in yaw depending on step reach. At full reach the yaw constraints are scaled by this factor.
             */
-   public double step_yaw_reduction_factor_at_max_reach_;
+   public double step_yaw_reduction_factor_at_max_reach_ = -11.1;
    /**
             * Maximum step height delta allowed, for both step up and step downs
             */
-   public double maximum_step_z_;
+   public double maximum_step_z_ = -11.1;
    /**
             * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
             */
-   public double minimum_foothold_percent_;
+   public double minimum_foothold_percent_ = -11.1;
    /**
             * Maximum allowed surface incline to place steps
             */
-   public double maximum_surface_incline_radians_;
+   public double maximum_surface_incline_radians_ = -11.1;
    /**
             * If true, will wiggle each step while planning. If false, only wiggles the final plan.
             * Wiggling while planning slows planner speed by about 50% but is useful when precise foot placements are needed.
@@ -75,58 +79,58 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
             * Amount that the planner will attempt to shift footsteps inside of planar regions.
             * For example, for a value of 0.01 each footstep will be shifted so that its edge is at least 1cm from the planar region's edge
             */
-   public double wiggle_inside_delta_;
+   public double wiggle_inside_delta_ = -11.1;
    /**
             * Maximum xy distance that steps can be shifted to move into planar regions.
             */
-   public double maximum_xy_wiggle_distance_;
+   public double maximum_xy_wiggle_distance_ = -11.1;
    /**
             * Maximum yaw distance that steps can be rotated to move into planar regions.
             */
-   public double maximum_yaw_wiggle_;
+   public double maximum_yaw_wiggle_ = -11.1;
    /**
             * Height threshold to consider an obstacle a "cliff". Steps will not be closer to cliffs than minimum_distance_from_cliff_bottoms
             */
-   public double cliff_height_to_avoid_;
+   public double cliff_height_to_avoid_ = -11.1;
    /**
             * Minimum allowed distance to "cliffs"
             */
-   public double minimum_distance_from_cliff_bottoms_;
+   public double minimum_distance_from_cliff_bottoms_ = -11.1;
    /**
             * Steps with height changes below this value will be considered step downs. This value should be negative.
             */
-   public double flat_ground_lower_threshold_;
+   public double flat_ground_lower_threshold_ = -11.1;
    /**
             * Steps with height changes above this value will be considered step ups
             */
-   public double flat_ground_upper_threshold_;
+   public double flat_ground_upper_threshold_ = -11.1;
    /**
             * Maximum step with if step height change is lower than flat_ground_lower_threshold
             */
-   public double maximum_step_width_when_stepping_down_;
+   public double maximum_step_width_when_stepping_down_ = -11.1;
    /**
             * Maximum step reach, i.e. xy distance from nominal stance, when stepping down.
             */
-   public double maximum_step_reach_when_stepping_down_;
+   public double maximum_step_reach_when_stepping_down_ = -11.1;
    /**
             * Maximum step with if the step height exceeds flat_ground_upper_threshold
             */
-   public double maximum_step_width_when_stepping_up_;
+   public double maximum_step_width_when_stepping_up_ = -11.1;
    /**
             * Maximum step reach, i.e. xy distance from nominal stance, when stepping up.
             */
-   public double maximum_step_reach_when_stepping_up_;
+   public double maximum_step_reach_when_stepping_up_ = -11.1;
    /**
             * Scale factor for checking grandparent node (i.e. previous step on same side).
             * If this value is non-zero, if will check the grandparent node on step ups and step downs
             * This value represents how much to scale the corresponding step up/down width/reach restrictions.
             * This value should be in the range 1.0 - 2.0, recommended to be 1.5.
             */
-   public double translation_scale_from_grandparent_node_;
+   public double translation_scale_from_grandparent_node_ = -11.1;
    /**
             * Radius around the goal inside which the planner should start to turn to match the goal's orientation
             */
-   public double final_turn_proximity_;
+   public double final_turn_proximity_ = -11.1;
    /**
             * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
             * between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
@@ -160,16 +164,16 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
    /**
             * Contact cost associated with each step. Increase this value if planner is returning extra steps
             */
-   public double cost_per_step_;
+   public double cost_per_step_ = -11.1;
    /**
             * Weight for partial foothold cost term
             */
-   public double foothold_area_weight_;
+   public double foothold_area_weight_ = -11.1;
    /**
             * Heuristic weight for A* search. Higher heuristic weights will result in quicker plan times,
             * but plans might be less optimal.
             */
-   public double a_star_heuristics_weight_;
+   public double a_star_heuristics_weight_ = -11.1;
 
    public ValkyrieFootstepPlannerParametersPacket()
    {
