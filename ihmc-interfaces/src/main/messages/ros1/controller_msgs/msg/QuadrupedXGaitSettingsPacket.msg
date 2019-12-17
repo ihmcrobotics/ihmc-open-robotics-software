@@ -1,3 +1,6 @@
+# This message is part of the IHMC quadruped controller API.
+# This message sends the x gait settings used for determining gait.
+
 int8 SLOW=0
 
 int8 MEDIUM=1

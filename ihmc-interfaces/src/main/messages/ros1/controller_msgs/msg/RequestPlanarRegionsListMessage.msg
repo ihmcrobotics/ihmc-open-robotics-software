@@ -1,3 +1,8 @@
+# This message is obsolete and will be removed in the near future.
+# This message is part of the IHMC robot environment awareness (REA) module.
+# Use this message to request new planar regions
+# @deprecated REA always publishes planar regions when running. To request REA to clear its internal state, see REAStateRequestMessage.
+
 int8 SINGLE_UPDATE=0
 
 int8 CONTINUOUS_UPDATE=1

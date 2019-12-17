@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__FootstepNodeDataMessage__idl__
 #define __controller_msgs__msg__FootstepNodeDataMessage__idl__
 
+#include "controller_msgs/msg/./FootstepPlannerLatticeNodeMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
@@ -9,62 +10,65 @@ module controller_msgs
   {
     module dds
     {
-      const octet ROBOT_SIDE_LEFT =
-      0;
-
-      const octet ROBOT_SIDE_RIGHT =
-      1;
-
       /**
        * Node rejection reasons. See BipedalFootstepPlannerNodeRejectionReason
        */
-      const octet STEP_TOO_HIGH_OR_LOW =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_HIGH_OR_LOW =
       0;
 
-      const octet STEP_TOO_FORWARD_AND_DOWN =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED =
       1;
 
-      const octet STEP_TOO_FAR =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FORWARD_AND_DOWN =
       2;
 
-      const octet STEP_TOO_FAR_AND_HIGH =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE_AND_DOWN =
       3;
 
-      const octet STEP_NOT_WIDE_ENOUGH =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR =
       4;
 
-      const octet STEP_IN_PLACE =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_FAR_AND_HIGH =
       5;
 
-      const octet NOT_ENOUGH_AREA =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE_AND_HIGH =
       6;
 
-      const octet COULD_NOT_SNAP =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_WIDE_ENOUGH =
       7;
 
-      const octet COULD_NOT_WIGGLE_INSIDE =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_IN_PLACE =
       8;
 
-      const octet SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_NOT_ENOUGH_AREA =
       9;
 
-      const octet TOO_MUCH_PENETRATION_AFTER_WIGGLE =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_COULD_NOT_SNAP =
       10;
 
-      const octet STEP_NOT_LONG_ENOUGH =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_SURFACE_NORMAL_TOO_STEEP_TO_SNAP =
       11;
 
-      const octet STEP_TOO_WIDE =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_TOO_MUCH_PENETRATION_AFTER_WIGGLE =
       12;
 
-      const octet OBSTACLE_BLOCKING_BODY =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_NOT_LONG_ENOUGH =
       13;
 
-      const octet OBSTACLE_HITTING_BODY =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_TOO_WIDE =
       14;
 
-      const octet AT_CLIFF_BOTTOM =
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_BLOCKING_BODY =
       15;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_OBSTACLE_HITTING_BODY =
+      16;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_AT_CLIFF_BOTTOM =
+      17;
+
+      const octet BIPEDAL_FOOTSTEP_PLANNER_NODE_REJECTION_REASON_STEP_YAWS_TOO_MUCH =
+      18;
 
 
       /**
@@ -75,26 +79,19 @@ module controller_msgs
       struct FootstepNodeDataMessage
       {
         /**
-         * Footstep node side
-         */
-        @defaultValue(value=255)
-        octet robot_side;
-        long x_index;
-        long y_index;
-        long yaw_index;
-        /**
          * Specifies snap transform translation. NaN if snap was unsuccessful
          */
-        geometry_msgs::msg::dds::Point snap_translation;
+        geometry_msgs::msg::dds::Point position;
         /**
          * Specifies the snap rotation. NaN if snap unsuccessful.
          */
-        geometry_msgs::msg::dds::Quaternion snap_rotation;
+        geometry_msgs::msg::dds::Quaternion orientation;
         /**
-         * ID of parent node. This should reference the index of this node's parent in a FootstepNodeDataList
+         * ID of parent node. This should reference the index of this node in a FootstepNodeDataList
          */
         @defaultValue(value=-1)
         long parent_node_id;
+        controller_msgs::msg::dds::FootstepPlannerLatticeNodeMessage footstep_node;
         /**
          * Node rejection reason. 255 if node was accepted
          */

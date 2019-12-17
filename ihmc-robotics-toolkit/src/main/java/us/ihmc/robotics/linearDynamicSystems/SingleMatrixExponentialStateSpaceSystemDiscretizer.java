@@ -3,8 +3,8 @@ package us.ihmc.robotics.linearDynamicSystems;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
  * Discretizes a continuous time system using Matrix Exponentials.

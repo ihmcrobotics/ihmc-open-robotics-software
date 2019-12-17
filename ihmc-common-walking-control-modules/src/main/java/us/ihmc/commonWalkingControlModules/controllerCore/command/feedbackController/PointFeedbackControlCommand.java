@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -58,7 +59,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    private final FrameVector3D referenceForce = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final DefaultPID3DGains gains = new DefaultPID3DGains();
+   private final ZeroablePID3DGains gains = new ZeroablePID3DGains();
    /**
     * This is the reference frame in which the linear part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.

@@ -94,7 +94,7 @@ public class AtlasBehaviorSimulation
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
       if (scs.getGUI() != null )
-         scs.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
 
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()
@@ -111,7 +111,8 @@ public class AtlasBehaviorSimulation
    {
       int recordTicksPerControllerTick = 1;
       SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                          new FlatGroundEnvironment(), recordTicksPerControllerTick);
+                                                          new FlatGroundEnvironment(),
+                                                          recordTicksPerControllerTick);
       scs.simulate();
    }
 }

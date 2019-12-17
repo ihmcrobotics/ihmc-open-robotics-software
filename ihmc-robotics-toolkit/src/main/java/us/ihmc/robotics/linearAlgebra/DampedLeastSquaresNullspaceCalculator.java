@@ -1,17 +1,10 @@
 package us.ihmc.robotics.linearAlgebra;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.linearAlgebra.DampedNullspaceCalculator;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import javax.management.monitor.CounterMonitor;
 
 public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCalculator
 {

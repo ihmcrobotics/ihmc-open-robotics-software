@@ -1,9 +1,0 @@
-module us{
-module ihmc{
-module robotDataLogger{
-	struct ClearLogRequest{
-		string guid; 
-	};
-};
-};
-};

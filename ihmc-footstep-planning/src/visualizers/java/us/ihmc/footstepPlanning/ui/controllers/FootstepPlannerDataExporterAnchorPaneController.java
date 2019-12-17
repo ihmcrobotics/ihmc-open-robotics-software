@@ -45,14 +45,14 @@ public class FootstepPlannerDataExporterAnchorPaneController
       if (result == null)
          return;
       String newPath = result.getAbsolutePath();
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, newPath);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ExportUnitTestPath, newPath);
       Platform.runLater(() -> currentPlanarRegionDataFolderTextField.setText(newPath));
    }
 
    @FXML
    private void exportPlanarRegion()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
-      messager.submitMessage(FootstepPlannerMessagerAPI.exportUnitTestDataFile, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ExportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
+      messager.submitMessage(FootstepPlannerMessagerAPI.ExportUnitTestDataFile, true);
    }
 }

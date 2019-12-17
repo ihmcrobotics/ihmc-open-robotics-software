@@ -39,8 +39,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class BipedalSupportPlanarRegionPublisher
+public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposable
 {
    public static final double defaultScaleFactor = 2.0;
 
@@ -48,7 +49,7 @@ public class BipedalSupportPlanarRegionPublisher
    private static final int RIGHT_FOOT_INDEX = 1;
    private static final int CONVEX_HULL_INDEX = 2;
 
-   private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "supporting_planar_region_publisher");
+   private final RealtimeRos2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);
@@ -65,7 +66,7 @@ public class BipedalSupportPlanarRegionPublisher
    private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
-   public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel)
+   public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -76,6 +77,8 @@ public class BipedalSupportPlanarRegionPublisher
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
+
+      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            CapturabilityBasedStatus.class,
@@ -230,5 +233,11 @@ public class BipedalSupportPlanarRegionPublisher
       stop();
       executorService.shutdownNow();
       ros2Node.destroy();
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      destroy();
    }
 }

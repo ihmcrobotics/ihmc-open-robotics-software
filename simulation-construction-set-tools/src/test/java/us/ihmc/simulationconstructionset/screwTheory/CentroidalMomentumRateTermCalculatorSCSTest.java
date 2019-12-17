@@ -5,14 +5,12 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -24,11 +22,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
@@ -49,12 +43,6 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
 	@Test
    public void chainTest() throws UnreasonableAccelerationException
@@ -128,8 +116,6 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       aDot.reshape(6, numberOfDoFs);
       aTermCalculator.reshape(6,numberOfDoFs);
 
-      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-      
       CentroidalMomentumRateCalculator centroidalMomentumRateTermCalculator = new CentroidalMomentumRateCalculator(elevator, centerOfMassFrame);
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
@@ -169,8 +155,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
          smartPrintOutADotV(EPSILON);
 
-         JUnitTools.assertMatrixEquals(aDotVNumerical, aDotVAnalytical, EPSILON);
-         JUnitTools.assertMatrixEquals(a,aTermCalculator,EPSILON);
+         MatrixTestTools.assertMatrixEquals(aDotVNumerical, aDotVAnalytical, EPSILON);
+         MatrixTestTools.assertMatrixEquals(a,aTermCalculator,EPSILON);
       }
    }
 

@@ -8,22 +8,18 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
-import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.eventHandlers.PlanarRegionSelector;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class StartGoalPositionEditor extends AnimationTimer
 {
-   private final EventHandler<MouseEvent> rayCastInterceptor;
+   private final PlanarRegionSelector planarRegionSelector = new PlanarRegionSelector();
    private boolean isRayCastInterceptorAttached = false;
-   private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegion> selectedRegion = new AtomicReference<>(null);
 
    private final EventHandler<MouseEvent> leftClickInterceptor;
    private boolean isLeftClickInterceptorAttached = false;
@@ -34,7 +30,6 @@ public class StartGoalPositionEditor extends AnimationTimer
 
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
-   private final AtomicReference<PlanarRegionsList> planarRegionsList;
 
    private final Topic<Boolean> startEditModeEnabledTopic;
    private final Topic<Boolean> goalEditModeEnabledTopic;
@@ -72,67 +67,17 @@ public class StartGoalPositionEditor extends AnimationTimer
 
       if (planarRegionDataTopic != null)
       {
-         planarRegionsList = messager.createInput(planarRegionDataTopic);
-      }
-      else
-      {
-         planarRegionsList = null;
+         messager.registerTopicListener(planarRegionDataTopic, planarRegionSelector::setPlanarRegionsList);
       }
 
-      rayCastInterceptor = new EventHandler<MouseEvent>()
+      leftClickInterceptor = mouseEvent ->
       {
-         @Override
-         public void handle(MouseEvent event)
-         {
-            PickResult pickResult = event.getPickResult();
-            Node intersectedNode = pickResult.getIntersectedNode();
-            if (intersectedNode == null || !(intersectedNode instanceof MeshView))
-               return;
-            javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
-            javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
+         if (mouseEvent.getButton() != MouseButton.PRIMARY)
+            return;
 
-            Point3D interception = new Point3D();
-            interception.setX(scenePoint.getX());
-            interception.setY(scenePoint.getY());
-            interception.setZ(scenePoint.getZ());
-
-            latestInterception.set(interception);
-
-            if (planarRegionsList != null)
-            {
-               PlanarRegion region = findRegion(planarRegionsList.get(), interception);
-               if (region == null)
-                  return;
-
-               selectedRegion.set(region);
-            }
-         }
+         if (mouseEvent.isStillSincePress() && mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED)
+            positionValidated.set(true);
       };
-
-      leftClickInterceptor = new EventHandler<MouseEvent>()
-      {
-         @Override
-         public void handle(MouseEvent event)
-         {
-            if (event.getButton() != MouseButton.PRIMARY)
-               return;
-
-            if (event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
-               positionValidated.set(true);
-         }
-      };
-   }
-
-   private static PlanarRegion findRegion(PlanarRegionsList planarRegionsList, Point3D point)
-   {
-      for (PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
-      {
-         if (PlanarRegionTools.isPointOnRegion(region, point, 1.0e-5))
-         {
-            return region;
-         }
-      }
-      return null;
    }
 
    @Override
@@ -153,12 +98,12 @@ public class StartGoalPositionEditor extends AnimationTimer
 
       if (startEditModeEnabled.get())
       {
-         Point3D interception = latestInterception.getAndSet(null);
+         Point3D interception = planarRegionSelector.pollSelectedPoint();
          if (interception != null)
          {
             if (selectedRegionTopic != null)
             {
-               messager.submitMessage(selectedRegionTopic, selectedRegion.get());
+               messager.submitMessage(selectedRegionTopic, planarRegionSelector.getSelectedRegion());
             }
             messager.submitMessage(startPositionTopic, interception);
          }
@@ -178,12 +123,12 @@ public class StartGoalPositionEditor extends AnimationTimer
 
       if (goalEditModeEnabled.get())
       {
-         Point3D interception = latestInterception.getAndSet(null);
+         Point3D interception = planarRegionSelector.pollSelectedPoint();
          if (interception != null)
          {
             if (selectedRegionTopic != null)
             {
-               messager.submitMessage(selectedRegionTopic, selectedRegion.get());
+               messager.submitMessage(selectedRegionTopic, planarRegionSelector.getSelectedRegion());
             }
             messager.submitMessage(goalPositionTopic, interception);
          }
@@ -205,7 +150,7 @@ public class StartGoalPositionEditor extends AnimationTimer
       if (!isRayCastInterceptorAttached)
       {
          LogTools.debug("Attaching ray cast event handler.", this);
-         sceneNode.addEventHandler(MouseEvent.ANY, rayCastInterceptor);
+         sceneNode.addEventHandler(MouseEvent.ANY, planarRegionSelector);
          isRayCastInterceptorAttached = true;
       }
       if (!isLeftClickInterceptorAttached)
@@ -220,7 +165,7 @@ public class StartGoalPositionEditor extends AnimationTimer
    {
       if (isRayCastInterceptorAttached)
       {
-         sceneNode.removeEventHandler(MouseEvent.ANY, rayCastInterceptor);
+         sceneNode.removeEventHandler(MouseEvent.ANY, planarRegionSelector);
          isRayCastInterceptorAttached = false;
       }
       if (isLeftClickInterceptorAttached)

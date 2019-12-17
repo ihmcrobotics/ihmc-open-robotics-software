@@ -87,7 +87,7 @@ public class BodyCollisionCheckingUIController
       javaFXStoredPropertyMap.put(boundingBoxCost, FootstepPlannerParameterKeys.boundingBoxCost);
       javaFXStoredPropertyMap.put(maximum2dDistanceFromBoundingBoxToPenalize, FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, v ->
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, v ->
       {
          planningParameters.set(v);
 
@@ -100,6 +100,6 @@ public class BodyCollisionCheckingUIController
 
    private void publishParameters()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, planningParameters);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
    }
 }

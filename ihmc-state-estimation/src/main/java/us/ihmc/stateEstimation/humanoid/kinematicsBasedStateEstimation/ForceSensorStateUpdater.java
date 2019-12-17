@@ -87,7 +87,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
                                   YoVariableRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
-      inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
+      inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorOutputs();
       this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
 
       outputForceSensorDataHolder = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());

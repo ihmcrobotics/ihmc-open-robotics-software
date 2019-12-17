@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -12,7 +11,6 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -20,12 +18,10 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
-import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -49,95 +45,29 @@ public class KinematicToolboxDiagnosticEnvironment
 
       ForceSensorDefinition[] forceSensorDefinitionArray = humanoidFullRobotModel.getForceSensorDefinitions();
       List<ForceSensorDefinition> forceSensorDefinitionList = Arrays.asList(forceSensorDefinitionArray);
-      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitionList);
-      JointConfigurationGatherer jointConfigurationGatherer = new JointConfigurationGatherer(humanoidFullRobotModel, forceSensorDataHolder);
 
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
-      SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
-      RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
-      HumanoidRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
-      final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, publisherTopicNameGenerator,
-                                                                           realtimeRos2Node, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
-                                                                           robotMotionStatusFromController, sensorInformation);
+      RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
+      factory.setDefinitionsToPublish(humanoidFullRobotModel);
+      factory.setSensorSource(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
+      factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName()));
+      RobotConfigurationDataPublisher robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
+
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
       scheduler2.schedule(new Runnable()
       {
          @Override
          public void run()
          {
-            poseCommunicator.write();
+            robotConfigurationDataPublisher.write();
          }
       }, 1, TimeUnit.MILLISECONDS);
 
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableNetworkProcessor(true);
-      parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
-      parameters.enableLocalControllerCommunicator(true);
-      parameters.setEnableJoystickBasedStepping(true);
-      new DRCNetworkProcessor(drcRobotModel, parameters);
-   }
-
-   private SensorRawOutputMapReadOnly initializeSensorRawOutputMapReadOnly()
-   {
-      return new SensorRawOutputMapReadOnly()
-      {
-         @Override
-         public long getWallTime()
-         {
-            return 0;
-         }
-
-         @Override
-         public long getMonotonicTime()
-         {
-            return 0;
-         }
-
-         @Override
-         public long getSyncTimestamp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointTauRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointAccelerationRawOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public List<? extends IMUSensorReadOnly> getIMURawOutputs()
-         {
-            return Collections.<IMUSensorReadOnly> emptyList();
-         }
-
-         @Override
-         public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
-         {
-            return null;
-         }
-      };
+      new DRCNetworkProcessor(drcRobotModel, parameters, PubSubImplementation.INTRAPROCESS);
    }
 
    private long timestamp = 0L;
@@ -166,43 +96,25 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-         {
-            return false;
-         }
-
-         @Override
-         public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
-         {
-            return 0;
-         }
-
-         @Override
-         public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+         public OneDoFJointStateReadOnly getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
          {
             return null;
          }
 
          @Override
-         public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+         public List<? extends OneDoFJointStateReadOnly> getOneDoFJointOutputs()
+         {
+            return null;
+         }
+
+         @Override
+         public List<? extends IMUSensorReadOnly> getIMUOutputs()
+         {
+            return null;
+         }
+
+         @Override
+         public ForceSensorDataHolderReadOnly getForceSensorOutputs()
          {
             return null;
          }

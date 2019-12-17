@@ -23,8 +23,6 @@ module controller_msgs
          * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
          */
         long y_index;
-        @defaultValue(value=True)
-        boolean node_is_valid;
       };
     };
   };

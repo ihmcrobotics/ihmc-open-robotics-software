@@ -10,7 +10,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 
 public class RobotJointVelocityAccelerationIntegrator
@@ -103,7 +102,7 @@ public class RobotJointVelocityAccelerationIntegrator
             previousOrientation.set(joint.getJointPose().getOrientation());
             previousTranslation.set(joint.getJointPose().getPosition());
 
-            MatrixTools.extractTuple3dFromEJMLVector(angularVelocity, jointVelocitiesToIntegrate, jointStartIndex);
+            angularVelocity.set(jointStartIndex, jointVelocitiesToIntegrate);
             double angularVelocityMagnitude = angularVelocity.length();
             if (angularVelocityMagnitude > maximumSixDoFJointAngularVelocity)
                angularVelocity.scale(maximumSixDoFJointAngularVelocity / angularVelocityMagnitude);
@@ -113,7 +112,7 @@ public class RobotJointVelocityAccelerationIntegrator
             rotation.set(previousOrientation);
             rotation.multiply(rotationIntegrated);
 
-            MatrixTools.extractTuple3dFromEJMLVector(linearVelocity, jointVelocitiesToIntegrate, jointStartIndex + 3);
+            linearVelocity.set(jointStartIndex + 3, jointVelocitiesToIntegrate);
             double linearVelocityMagnitude = linearVelocity.length();
             if (linearVelocityMagnitude > maximumSixDoFJointLinearVelocity)
                linearVelocity.scale(maximumSixDoFJointLinearVelocity / linearVelocityMagnitude);
@@ -172,13 +171,13 @@ public class RobotJointVelocityAccelerationIntegrator
             previousLinearVelocity.set(joint.getJointTwist().getLinearPart());
             previousAngularVelocity.set(joint.getJointTwist().getAngularPart());
 
-            MatrixTools.extractTuple3dFromEJMLVector(angularAcceleration, jointAccelerationsToIntegrate, jointStartIndex);
+            angularAcceleration.set(jointStartIndex, jointAccelerationsToIntegrate);
             double angularAccelerationMagnitude = angularAcceleration.length();
             if (angularAccelerationMagnitude > maximumSixDoFJointAngularAcceleration)
                angularAcceleration.scale(maximumSixDoFJointAngularAcceleration / angularAccelerationMagnitude);
             angularAccelerationIntegrated.setAndScale(controlDT, angularAcceleration);
 
-            MatrixTools.extractTuple3dFromEJMLVector(linearAcceleration, jointAccelerationsToIntegrate, jointStartIndex + 3);
+            linearAcceleration.set(jointStartIndex + 3, jointAccelerationsToIntegrate);
             double linearAccelerationMagnitude = linearAcceleration.length();
             if (linearAccelerationMagnitude > maximumSixDoFJointLinearAcceleration)
                linearAcceleration.scale(maximumSixDoFJointLinearAcceleration / linearAccelerationMagnitude);

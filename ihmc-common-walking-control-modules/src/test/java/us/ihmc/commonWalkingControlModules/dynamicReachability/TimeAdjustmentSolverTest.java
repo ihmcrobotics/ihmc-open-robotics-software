@@ -1,17 +1,18 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNotEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import static us.ihmc.robotics.Assert.*;
-
-import org.junit.jupiter.api.AfterEach;
 
 public class TimeAdjustmentSolverTest
 {

@@ -1,18 +1,18 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
 
 public class YoMatrixTest
 {
@@ -29,7 +29,7 @@ public class YoMatrixTest
       DenseMatrix64F denseMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(denseMatrix);
 
-      JUnitTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
+      MatrixTestTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
 
       Random random = new Random(1984L);
 
@@ -39,7 +39,7 @@ public class YoMatrixTest
       DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(checkMatrix);
 
-      JUnitTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
+      MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
       assertEquals(registry.getVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
@@ -68,7 +68,7 @@ public class YoMatrixTest
       }
 
       yoMatrix.getAndReshape(denseMatrix);
-      JUnitTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
+      MatrixTestTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
       assertEquals(maxNumberOfRows, denseMatrix.getNumRows());
       assertEquals(maxNumberOfColumns, denseMatrix.getNumCols());
 
@@ -83,7 +83,7 @@ public class YoMatrixTest
       DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(checkMatrix);
 
-      JUnitTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
+      MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
       DenseMatrix64F smallerMatrix = RandomGeometry.nextDenseMatrix64F(random, smallerRows, smallerColumns);
       yoMatrix.set(smallerMatrix);
@@ -97,7 +97,7 @@ public class YoMatrixTest
       DenseMatrix64F checkMatrix2 = new DenseMatrix64F(1, 1);
       yoMatrix.getAndReshape(checkMatrix2);
 
-      JUnitTools.assertMatrixEquals(smallerMatrix, checkMatrix2, 1e-10);
+      MatrixTestTools.assertMatrixEquals(smallerMatrix, checkMatrix2, 1e-10);
 
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, checkMatrix2, registry);
    }

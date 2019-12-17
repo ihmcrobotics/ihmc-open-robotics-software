@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1350.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1554.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <bottom>
-      <BorderPane prefHeight="240.0" prefWidth="1163.0" BorderPane.alignment="CENTER">
+      <BorderPane prefWidth="1163.0" BorderPane.alignment="CENTER">
          <right>
             <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="TOP_LEFT">
               <tabs>
@@ -25,7 +27,7 @@
             </TabPane>
          </right>
          <center>
-              <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+              <TabPane prefHeight="250.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                   <tabs>
       
                       <Tab text="Patrol">
@@ -81,6 +83,13 @@
                   </tabs>
               </TabPane>
          </center>
+         <top>
+            <FlowPane BorderPane.alignment="CENTER">
+               <children>
+                  <ChoiceBox fx:id="behaviorSelector" prefWidth="150.0" />
+               </children>
+            </FlowPane>
+         </top>
       </BorderPane>
    </bottom>
 </BorderPane>

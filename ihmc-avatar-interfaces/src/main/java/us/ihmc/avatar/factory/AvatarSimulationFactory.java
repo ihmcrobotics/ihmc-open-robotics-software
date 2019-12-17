@@ -3,17 +3,13 @@ package us.ihmc.avatar.factory;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.BarrierSchedulerTools;
-import us.ihmc.avatar.ControllerTask;
-import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.SimulationRobotVisualizer;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
@@ -53,16 +49,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderF
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
-import us.ihmc.simulationToolkit.controllers.JointLowLevelJointControlSimulator;
-import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
-import us.ihmc.simulationToolkit.controllers.PassiveJointController;
-import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationToolkit.controllers.*;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
@@ -177,18 +165,13 @@ public class AvatarSimulationFactory
       simulationConstructionSet.setDT(robotModel.get().getSimulateDT(), 1);
       try
       {
-         if (!isWindows())
-            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+         if (!SystemUtils.IS_OS_WINDOWS)
+            simulationConstructionSet.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
       }
       catch (NullPointerException npe)
       {
          // do nothing
       }
-   }
-
-   private static boolean isWindows()
-   {
-      return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
    }
 
    private void setupSensorReaderFactory()
@@ -235,9 +218,15 @@ public class AvatarSimulationFactory
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      estimatorThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                  robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, contextDataFactory,
-                                                  realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter, gravity.get());
+      AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
+      avatarEstimatorThreadFactory.setROS2Info(realtimeRos2Node.get(), robotName);
+      avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get());
+      avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
+      avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
+      avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
+      avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
+      avatarEstimatorThreadFactory.setGravity(gravity.get());
+      estimatorThread = avatarEstimatorThreadFactory.createAvatarEstimatorThread();
    }
 
    private void setupControllerThread()
@@ -389,7 +378,7 @@ public class AvatarSimulationFactory
          jointPositions.put(joint.getName(), joint.getQ());
       }
 
-      estimatorThread.initializeEstimator(rootJointTransform, jointPositions);
+      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
    }
 
    private void setupThreadedRobotController()

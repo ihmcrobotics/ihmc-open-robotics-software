@@ -36,8 +36,8 @@ public class FootstepPlannerMenuUIController
       {
          if (VERBOSE)
             PrintTools.info(this, "Loaded planar regions, broadcasting data.");
-         messager.submitMessage(FootstepPlannerMessagerAPI.GlobalResetTopic, true);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, loadedPlanarRegions);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GlobalReset, true);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, loadedPlanarRegions);
       }
       else
       {

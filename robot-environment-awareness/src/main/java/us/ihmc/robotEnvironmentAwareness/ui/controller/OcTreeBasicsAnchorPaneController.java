@@ -4,14 +4,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceNormalFilterParametersProperty;
@@ -48,7 +45,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    @FXML
    private ToggleButton enableStereoBufferButton;
    @FXML
-   private ToggleButton showInputStereoPointCloudButton;
+   private ToggleButton enableDepthCloudBufferButton;
    @FXML
    private Slider surfaceNormalLowerBoundSlider;
    @FXML
@@ -124,6 +121,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferOcTreeCapacity, lidarBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferEnable, enableStereoBufferButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.DepthCloudBufferEnable, enableDepthCloudBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(),
                                          numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
@@ -140,17 +138,12 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeColoringMode, coloringTypeComboBox.valueProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
-      uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, showInputStereoPointCloudButton.selectedProperty(), true);
 
       showInputLidarScanButton.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
          if (oldValue != newValue && !newValue)
             uiMessager.submitMessageInternal(REAModuleAPI.UILidarScanClear, true);
       });
 
-      showInputStereoPointCloudButton.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-         if (oldValue != newValue && !newValue)
-            uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionClear, true);
-      });
    }
 
    @FXML
@@ -183,14 +176,37 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    
    public void setParametersForStereo()
    {
-      uiMessager.submitMessageToModule(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.StereoVisionBufferEnable, true);
-      uiMessager.submitMessageToModule(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageToModule(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
       
-      uiMessager.submitMessageInternal(REAModuleAPI.LidarBufferEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.StereoVisionBufferEnable, true);
-      uiMessager.submitMessageInternal(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      uiMessager.submitMessageInternal(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+   }
+   
+   public void setParametersForDepth()
+   {
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
+      
+      uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }
 }

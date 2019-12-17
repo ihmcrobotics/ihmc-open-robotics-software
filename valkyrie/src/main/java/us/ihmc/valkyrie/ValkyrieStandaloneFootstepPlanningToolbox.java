@@ -7,7 +7,7 @@ public class ValkyrieStandaloneFootstepPlanningToolbox
 {
    public static void main(String[] args)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, true);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       new MultiStageFootstepPlanningModule(robotModel, null, false);
    }
 }

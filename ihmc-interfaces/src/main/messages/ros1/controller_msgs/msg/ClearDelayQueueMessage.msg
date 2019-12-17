@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message is used to clear the delay buffers on the controller, if you sent a message with a
+# delay and now you do not want them executed, use this command.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

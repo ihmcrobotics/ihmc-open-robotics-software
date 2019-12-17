@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -63,6 +66,20 @@ public class FootstepNodeTools
       snapTransform.transform(nodeInWorld);
    }
 
+   public static Pose3DReadOnly getNodePoseInWorld(FootstepNode node, RigidBodyTransform snapTransform)
+   {
+      Pose3D nodeInWorld = new Pose3D();
+      getNodePoseInWorld(node, nodeInWorld, snapTransform);
+
+      return nodeInWorld;
+   }
+
+   public static void getNodePoseInWorld(FootstepNode node, Pose3DBasics nodeInWorld, RigidBodyTransform snapTransform)
+   {
+      RigidBodyTransform snappedTransform = new RigidBodyTransform();
+      getSnappedNodeTransform(node, snapTransform, snappedTransform);
+      nodeInWorld.set(snappedTransform);
+   }
    /**
     * Computes the foot polygon in world frame that corresponds to the give footstep node
     *

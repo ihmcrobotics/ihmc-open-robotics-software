@@ -2,13 +2,11 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 
 import javafx.util.Pair;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -29,15 +27,16 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
@@ -46,6 +45,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
@@ -61,14 +61,22 @@ public class VisibilityGraphsFrameworkTest
    private static final double START_GOAL_EPSILON = 1.0e-1;
 
    // Whether to start the UI or not.
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
+   private static boolean ENABLE_TIMERS = true;
+   private static boolean DYNAMIC_WAIT_FOR_CLICK = false;
 
    // Whether to fully expand the visibility graph or have it do efficient lazy evaluation.
    private static boolean fullyExpandVisibilityGraph = false;
 
-   private static final int maxPointsInRegion = 25000;
-   private static final double walkerTotalTime = 60.0;
+   private static int maxPointsInRegion = 25000;
+   private static final double walkerTotalTime = 300.0;
 
+
+   private static final List<DataSetName> fastDatasets = Arrays.asList(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment,
+                                                                       DataSetName._20190514_163532_QuadrupedPlatformEnvironment,
+                                                                       DataSetName._20171114_135559_PartialShallowMaze,
+                                                                       DataSetName._20171115_171243_SimplePlaneAndWall,
+                                                                       DataSetName._20171215_201810_RampSteppingStones_Sim);
 
    // For enabling helpful prints.
    private static boolean DEBUG = true;
@@ -80,7 +88,7 @@ public class VisibilityGraphsFrameworkTest
    // The following are used for collision checks.
    private static final double walkerOffsetHeight = 0.75;
    private static final Vector3D walkerRadii = new Vector3D(0.25, 0.25, 0.5);
-   protected static final double walkerMarchingSpeed = 0.2;
+   protected static double walkerMarchingSpeed = 0.25;
    private static final double lidarObserverHeight = 1.25;
 
    // For the occlusion test
@@ -89,13 +97,17 @@ public class VisibilityGraphsFrameworkTest
 
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private static Notification nextStepDynamicNotification = new Notification();
 
    private static VisibilityGraphsParametersReadOnly createTestParameters()
    {
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
-      parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
+//      parameters.setNormalZThresholdForAccessibleRegions(Math.cos(Math.toRadians(30.0)));
 //      parameters.setPerformPostProcessingNodeShifting(true);
 //      parameters.setIntroduceMidpointsInPostProcessing(true);
+//      parameters.setObstacleExtrusionDistance(0.3);
+//      parameters.setPreferredObstacleExtrusionDistance(0.6);
+//      parameters.setNavigableExtrusionDistance(0.02);
 
       return parameters;
    }
@@ -135,10 +147,56 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsWithoutOcclusion(dataset), false);
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+
+         return dataSet.getPlannerInput().getVisGraphIsTestable();
+      };
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+      runAssertionsOnAllDatasets(dataSets, dataset -> runAssertionsWithoutOcclusion(dataset));
    }
 
    @Test
+   @Tag("fast")
+   public void testFewDataSetsNoOcclussionsSimulateDynamicReplanning()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
+      }
+
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
+            return false;
+
+         for (DataSetName namesToTest : fastDatasets)
+         {
+            if (dataSet.getName().equals(namesToTest.name().substring(1)))
+               return true;
+         }
+
+         return false;
+      };
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+      runAssertionsOnAllDatasets(dataSets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false));
+   }
+
+   @Test
+   @Tag("path-planning-slow")
    public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
       if (VISUALIZE)
@@ -148,7 +206,28 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
          messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), false);
+
+      boolean testWithOcclusions = false;
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+         else if (testWithOcclusions && dataSet.getPlannerInput().getVisGraphCanRunWithOcclusion())
+            return false;
+         else if (!dataSet.getPlannerInput().getVisGraphIsTestable())
+            return false;
+
+         for (DataSetName nameToIgnore : fastDatasets)
+         {
+            if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
+               return false;
+         }
+
+         return true;
+      };
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 10000, false));
    }
 
    //TODO: Fix and make this pass.
@@ -162,11 +241,8 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
       }
-      runAssertionsOnAllDatasets(dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true), true);
-   }
 
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, boolean testWithOcclusions)
-   {
+      boolean testWithOcclusions = true;
       Predicate<DataSet> dataSetFilter = dataSet ->
       {
          if(!dataSet.hasPlannerInput())
@@ -178,6 +254,54 @@ public class VisibilityGraphsFrameworkTest
       };
       List<DataSet> allDatasets = DataSetIOTools.loadDataSets(dataSetFilter);
 
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
+   @Test
+   public void testSimulateOcclusionAndDynamicReplanningOnTrickyCorridor()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+
+      boolean testWithOcclusions = true;
+      ENABLE_TIMERS = false;
+      DYNAMIC_WAIT_FOR_CLICK = false;
+      maxPointsInRegion = Integer.MAX_VALUE;
+      walkerMarchingSpeed = 0.7;
+      List<DataSet> allDatasets = new ArrayList<>();
+      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191008_153543_TrickCorridor));
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
+   @Disabled("Not working yet. Need to cancel out the bordering home/free/escape/frontier nodes.")
+   @Test
+   public void testSimulateOcclusionAndDynamicReplanningOnTrickyCorridorWCutFloor()
+   {
+      if (VISUALIZE)
+      {
+         messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, true);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
+         messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
+      }
+
+      boolean testWithOcclusions = true;
+      ENABLE_TIMERS = true;
+      DYNAMIC_WAIT_FOR_CLICK = false;
+      maxPointsInRegion = Integer.MAX_VALUE;
+      walkerMarchingSpeed = 0.7;
+      List<DataSet> allDatasets = new ArrayList<>();
+      allDatasets.add(DataSetIOTools.loadDataSet(DataSetName._20191107_110432_TrickCorridorWCutFloor));
+
+      runAssertionsOnAllDatasets(allDatasets, dataset -> runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 1000000000, true));
+   }
+
+   private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, Function<DataSet, String> dataSetTester)
+   {
       if (DEBUG)
       {
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -199,6 +323,7 @@ public class VisibilityGraphsFrameworkTest
          reloadDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.ReloadDatasetRequest, false);
          previousDatasetRequested = messager.createInput(UIVisibilityGraphsTopics.PreviousDatasetRequest, false);
          requestedDatasetPathReference = messager.createInput(UIVisibilityGraphsTopics.CurrentDatasetPath, null);
+         messager.registerTopicListener(UIVisibilityGraphsTopics.NextStepDynamic, obj -> nextStepDynamicNotification.set());
       }
 
       int numberOfFailingDatasets = 0;
@@ -207,11 +332,6 @@ public class VisibilityGraphsFrameworkTest
       int currentDatasetIndex = 0;
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
-
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
 
       DataSet dataset = allDatasets.get(currentDatasetIndex);
 
@@ -232,7 +352,6 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
-
 
          if (DEBUG)
          {
@@ -305,46 +424,32 @@ public class VisibilityGraphsFrameworkTest
                         errorMessages.isEmpty());
    }
 
-   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetname)
+   private void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, DataSetName datasetname)
    {
-      List<DataSet> allDatasets = DataSetIOTools.loadDataSets();
+      List<DataSet> allDataSets = DataSetIOTools.loadDataSets();
+      DataSet dataSetToTest = DataSetIOTools.loadDataSet(datasetname);
 
-      if (DEBUG)
-      {
-         LogTools.info("Unit test files found: " + allDatasets.size());
-      }
-
+      // load all datasets in UI, only test one though
       if (VISUALIZE)
       {
-         List<String> allDatasetNames = allDatasets.stream().map(DataSet::getName).collect(Collectors.toList());
+         List<String> allDatasetNames = allDataSets.stream().map(DataSet::getName).collect(Collectors.toList());
          messager.submitMessage(UIVisibilityGraphsTopics.AllDatasetPaths, allDatasetNames);
-
       }
-
-      if (allDatasets.isEmpty())
-         Assert.fail("Did not find any datasets to test.");
-
-      // Randomizing the regionIds so the viz is better
-      Random random = new Random(324);
-      allDatasets.stream().map(DataSet::getPlanarRegionsList).map(PlanarRegionsList::getPlanarRegionsAsList)
-                 .forEach(regionsList -> regionsList.forEach(region -> region.setRegionId(random.nextInt())));
-
-      DataSet dataset = allDatasets.stream().filter(d -> d.getName().equals(datasetname)).findFirst().orElse(null);
 
       if (VISUALIZE)
       {
          messager.submitMessage(UIVisibilityGraphsTopics.GlobalReset, true);
-         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataset.getName());
+         messager.submitMessage(UIVisibilityGraphsTopics.CurrentDatasetPath, dataSetToTest.getName());
       }
 
       if (DEBUG)
       {
-         LogTools.info("Processing file: " + dataset.getName());
+         LogTools.info("Processing file: " + dataSetToTest.getName());
       }
 
-      String errorMessages = dataSetTester.apply(dataset);
+      String errorMessages = dataSetTester.apply(dataSetToTest);
 
-      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
+//      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       LogTools.info("Finished testing.");
       ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
@@ -464,17 +569,21 @@ public class VisibilityGraphsFrameworkTest
          long startTime = System.currentTimeMillis();
          errorMessages += calculateAndTestVizGraphsBodyPath(datasetName, walkerPosition, goal, visibleRegions, latestBodyPath, simulateOcclusions);
          long endTime = System.currentTimeMillis();
-         if (endTime - startTime > maxSolveTimeInMilliseconds)
-            errorMessages += fail(datasetName, "Took too long to compute a new body path.");
+         if (ENABLE_TIMERS)
+         {
+            if (endTime - startTime > maxSolveTimeInMilliseconds)
+               errorMessages += fail(datasetName, "Took too long to compute a new body path.");
 
-         if (endTime - totalStartTime > Conversions.secondsToMilliseconds(walkerTotalTime))
-            errorMessages += fail(datasetName, "Took too long to make it through the body path. Made it to " + walkerPosition + ", while the goal was " + goal);
+            if (endTime - totalStartTime > Conversions.secondsToMilliseconds(walkerTotalTime))
+               errorMessages += fail(datasetName, "Took too long to make it through the body path. Made it to " + walkerPosition + ", while the goal was " + goal);
+         }
 
          if (!errorMessages.isEmpty())
             return addPrefixToErrorMessages(datasetName, errorMessages);
 
          if (VISUALIZE)
          {
+            messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, !simulateOcclusions);
             messager.submitMessage(UIVisibilityGraphsTopics.WalkerPosition, walkerPosition);
          }
 
@@ -490,6 +599,15 @@ public class VisibilityGraphsFrameworkTest
          {
             if (!messager.isMessagerOpen())
                return addPrefixToErrorMessages(datasetName, errorMessages); // The ui has been closed
+
+            if (DYNAMIC_WAIT_FOR_CLICK)
+            {
+               // next step listener
+               while (!nextStepDynamicNotification.poll())
+               {// wait for button click in UI
+                  Thread.yield();
+               }
+            }
          }
       }
 
@@ -498,6 +616,7 @@ public class VisibilityGraphsFrameworkTest
 
    private static Point3DReadOnly travelAlongBodyPath(double distanceToTravel, List<Pose3DReadOnly> bodyPath)
    {
+      double totalDesiredDistance = distanceToTravel;
       Point3D initialPosition = new Point3D(bodyPath.get(0).getPosition());
 
       Point3D positionWithShift = new Point3D();
@@ -513,14 +632,15 @@ public class VisibilityGraphsFrameworkTest
             Vector3DBasics segmentDirection = segment.getDirection(true);
             positionWithShift.scaleAdd(distanceToTravel, segmentDirection, initialPosition);
 
-            if (xyDistance(segment, positionWithShift) < 1.0e-2)
+            double distanceFromStart = bodyPath.get(0).getPosition().distanceXY(positionWithShift);
+            if (xyDistance(segment, positionWithShift) < 1.0e-2 && distanceFromStart >= totalDesiredDistance)
             {
                initialPosition = new Point3D(positionWithShift);
                break;
             }
             else
             {
-               distanceToTravel -= initialPosition.distanceXY(segment.getSecondEndpoint());
+               distanceToTravel = Math.max(distanceToTravel - initialPosition.distanceXY(segment.getSecondEndpoint()), 0.1);
                initialPosition = new Point3D(segment.getSecondEndpoint());
             }
          }
@@ -554,7 +674,8 @@ public class VisibilityGraphsFrameworkTest
                                                     List<Pose3DReadOnly> bodyPathToPack, boolean simulateOcclusions)
    {
       VisibilityGraphsParametersReadOnly parameters = createTestParameters();
-      NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAndCliffAvoidanceProcessor(parameters));
+      NavigableRegionsManager manager = new NavigableRegionsManager(parameters, null, new ObstacleAvoidanceProcessor(parameters));
+      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(manager);
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       manager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
@@ -563,7 +684,14 @@ public class VisibilityGraphsFrameworkTest
 
       try
       {
-         pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         if (simulateOcclusions)
+         {
+            pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         }
+         else
+         {
+            pathPoints = manager.calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
+         }
          path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
 //         path = manager.calculateBodyPathWithOcclusions(start, goal,);
       }
@@ -581,6 +709,7 @@ public class VisibilityGraphsFrameworkTest
          }
 
          visualizerApplication.submitVisibilityGraphSolutionToVisualizer(manager.getVisibilityMapSolution());
+         visualizerApplication.submitVisibilityGraphToVisualizer(manager.getVisibilityGraph());
       }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path, !simulateOcclusions);
@@ -753,7 +882,8 @@ public class VisibilityGraphsFrameworkTest
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(observer, 1.0, rays);
 
 
-      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
+      List<PlanarRegion> filteredRegions = PlanarRegionTools
+            .filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
 
       for (int rayIndex = 0; rayIndex < rays; rayIndex++)
       {
@@ -828,14 +958,22 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-//      String dataSetName = "20171215_211034_DoorwayNoCeiling";
-//      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
-//      String dataSetName = "20171215_220523_SteppingStones";
-      String dataSetName = "20171218_204917_FlatGround";
-//      String dataSetName = "20171215_214730_CinderBlockField";
-//      String dataSetName = "20001201_205050_TwoSquaresOneObstacle";
-//      String dataSetName = "20171215_210811_DoorwayWithCeiling";
+
+//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
+//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
+//      DataSetName dataSetName = DataSetName._20191008_153543_TrickCorridor;
+//      DataSetName dataSetName = DataSetName._20171216_111326_CrossoverPlatforms;
+//      DataSetName dataSetName = DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest;
+//      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
+//      DataSetName dataSetName = DataSetName._20171215_220523_SteppingStones;
+//      DataSetName dataSetName = DataSetName._20171218_204917_FlatGround;
+//      DataSetName dataSetName = DataSetName._20171215_201810_RampSteppingStones_Si"
+      DataSetName dataSetName = DataSetName._20171115_171243_SimplePlaneAndWall;
+//      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
+//      DataSetName dataSetName = DataSetName._20001201_205050_TwoSquaresOneObstacle;
+//      DataSetName dataSetName = DataSetName._20171215_210811_DoorwayWithCeiling;
+//      DataSetName dataSetName = DataSetName._20191007_185913_SimpleCorridor;
+//      DataSetName dataSetName = DataSetName._20191007_200400_Corridor1Wall;
 
       VISUALIZE = true;
       test.setup();
@@ -844,11 +982,11 @@ public class VisibilityGraphsFrameworkTest
          messager.submitMessage(UIVisibilityGraphsTopics.EnableWalkerAnimation, false);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerOffsetHeight, walkerOffsetHeight);
          messager.submitMessage(UIVisibilityGraphsTopics.WalkerSize, walkerRadii);
-         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
+//         messager.submitMessage(UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap, true);
 
       }
-//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 100000000, true), dataSetName);
-      test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
+//      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
+      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
       test.tearDown();
 
    }

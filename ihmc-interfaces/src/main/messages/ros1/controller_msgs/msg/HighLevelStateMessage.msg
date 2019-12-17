@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message is used to switch the control scheme between different control mode.
+
 int8 DO_NOTHING_BEHAVIOR=0
 
 int8 STAND_PREP_STATE=1

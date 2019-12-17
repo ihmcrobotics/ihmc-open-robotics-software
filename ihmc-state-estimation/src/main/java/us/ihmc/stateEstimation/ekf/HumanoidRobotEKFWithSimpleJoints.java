@@ -27,8 +27,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -55,7 +55,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    private final LeggedRobotEKF leggedRobotEKF;
 
    public HumanoidRobotEKFWithSimpleJoints(FullHumanoidRobotModel estimatorFullRobotModel, String primaryImuName, Collection<String> imuNames,
-                                           SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly rawSensorOutput, double dt,
+                                           SideDependentList<String> footForceSensorNames, SensorOutputMapReadOnly rawSensorOutput, double dt,
                                            double gravity, SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
                                            FullHumanoidRobotModel referenceModel)
    {
@@ -123,8 +123,9 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       {
          OneDoFJoint simpleJoint = simpleJoints.get(jointIdx);
          OneDoFJoint referenceJoint = referenceJoints.get(jointIdx);
-         simpleJoint.setQ(processedSensorOutput.getJointPositionProcessedOutput(referenceJoint));
-         simpleJoint.setQd(processedSensorOutput.getJointVelocityProcessedOutput(referenceJoint));
+         OneDoFJointStateReadOnly processedJointOutput = processedSensorOutput.getOneDoFJointOutput(referenceJoint);
+         simpleJoint.setQ(processedJointOutput.getPosition());
+         simpleJoint.setQd(processedJointOutput.getVelocity());
       }
 
       leggedRobotEKF.doControl();

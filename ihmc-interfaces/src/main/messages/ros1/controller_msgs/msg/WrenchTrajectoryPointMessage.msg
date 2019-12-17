@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This class is used to build a wrench (force & moment) profile over time.
+# It holds the necessary information for one trajectory point.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

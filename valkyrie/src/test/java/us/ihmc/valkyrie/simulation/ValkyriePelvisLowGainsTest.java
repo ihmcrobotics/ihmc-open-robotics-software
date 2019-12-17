@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 @Tag("fast")
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       // Disable joint damping to make sure that damping isn't causing the problem.
       private static final boolean enableJointDamping = false;

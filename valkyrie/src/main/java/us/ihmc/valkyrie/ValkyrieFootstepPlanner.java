@@ -15,7 +15,7 @@ public class ValkyrieFootstepPlanner
 {
    public ValkyrieFootstepPlanner()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       
       
       tryToStartModule(() -> startFootstepModule(robotModel)); 

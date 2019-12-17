@@ -42,7 +42,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200000; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepNodeDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -77,9 +77,9 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.FootstepNodeDataListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_4(data.getPlanId());
 
-      if(data.getNodeData().size() <= 100)
+      if(data.getNodeData().size() <= 200000)
       cdr.write_type_e(data.getNodeData());else
           throw new RuntimeException("node_data field exceeds the maximum length");
 
@@ -89,7 +89,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.FootstepNodeDataListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setPlanId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getNodeData());	
       data.setIsFootstepGraph(cdr.read_type_7());
@@ -100,7 +100,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepNodeDataListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_4("plan_id", data.getPlanId());
       ser.write_type_e("node_data", data.getNodeData());
       ser.write_type_7("is_footstep_graph", data.getIsFootstepGraph());
    }
@@ -108,7 +108,7 @@ public class FootstepNodeDataListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepNodeDataListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPlanId(ser.read_type_4("plan_id"));
       ser.read_type_e("node_data", data.getNodeData());
       data.setIsFootstepGraph(ser.read_type_7("is_footstep_graph"));
    }

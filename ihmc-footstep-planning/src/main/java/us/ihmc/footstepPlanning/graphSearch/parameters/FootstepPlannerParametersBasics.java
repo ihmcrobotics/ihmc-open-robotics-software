@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
@@ -64,6 +65,21 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
    }
 
+   default void setMinimumStepZWhenFullyPitched(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.minStepZWhenFullyPitched, stepZ);
+   }
+
+   default void setMaximumStepXWhenFullyPitched(double stepX)
+   {
+      set(FootstepPlannerParameterKeys.maxStepXWhenFullyPitched, stepX);
+   }
+
+   default void setStepYawReductionFactorAtMaxReach(double factor)
+   {
+      set(FootstepPlannerParameterKeys.stepYawReductionFactorAtMaxReach, factor);
+   }
+
    default void setMaximumXYWiggleDistance(double wiggleDistance)
    {
       set(FootstepPlannerParameterKeys.maximumXYWiggleDistance, wiggleDistance);
@@ -114,19 +130,34 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp, maxStepZ);
    }
 
-   default void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
-   {
-      set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
-   }
-
    default void setMaximumStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
    {
       set(FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp);
    }
 
+   default void setMaximumStepWidthWhenSteppingUp(double maximumStepWidthWhenSteppingUp)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepWidthWhenSteppingUp, maximumStepWidthWhenSteppingUp);
+   }
+
+   default void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
+   }
+
    default void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
    {
       set(FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
+   }
+
+   default void setMaximumStepYWhenForwardAndDown(double maximumStepYWhenForwardAndDown)
+   {
+      set(FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown, maximumStepYWhenForwardAndDown);
+   }
+
+   default void setTranslationScaleFromGrandparentNode(double translationScaleFromGrandparentNode)
+   {
+      set(FootstepPlannerParameterKeys.translationScaleFromGrandparentNode, translationScaleFromGrandparentNode);
    }
 
    default void setIdealFootstepWidth(double idealFootstepWidth)
@@ -142,11 +173,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
    {
       set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
-   }
-
-   default void setRejectIfCannotFullyWiggleInside(boolean rejectIfCannotFullyWiggleInside)
-   {
-      set(FootstepPlannerParameterKeys.rejectIfCannotFullyWiggleInside, rejectIfCannotFullyWiggleInside);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
@@ -322,122 +348,134 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
+      double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
       setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
       setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
-      if (parametersPacket.getIdealFootstepWidth() != -1.0)
+      if (parametersPacket.getIdealFootstepWidth() != noValue)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
-      if (parametersPacket.getIdealFootstepLength() != -1.0)
+      if (parametersPacket.getIdealFootstepLength() != noValue)
          setIdealFootstepLength(parametersPacket.getIdealFootstepLength());
-      if (parametersPacket.getWiggleInsideDelta() != -1.0)
+      if (parametersPacket.getWiggleInsideDelta() != noValue)
          setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
-      if (parametersPacket.getMaximumStepReach() != -1.0)
+      if (parametersPacket.getMaximumStepReach() != noValue)
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
-      if (parametersPacket.getMaximumStepYaw() != 1.0)
+      if (parametersPacket.getMaximumStepYaw() != noValue)
          setMaximumStepYaw(parametersPacket.getMaximumStepYaw());
-      if (parametersPacket.getMinimumStepWidth() != 1.0)
+      if (parametersPacket.getMinimumStepWidth() != noValue)
          setMinimumStepWidth(parametersPacket.getMinimumStepWidth());
-      if (parametersPacket.getMinimumStepLength() != -1.0)
+      if (parametersPacket.getMinimumStepLength() != noValue)
          setMinimumStepLength(parametersPacket.getMinimumStepLength());
-      if (parametersPacket.getMinimumStepYaw() != -1.0)
+      if (parametersPacket.getMinimumStepYaw() != noValue)
          setMinimumStepYaw(parametersPacket.getMinimumStepYaw());
-      if (parametersPacket.getMaximumStepReachWhenSteppingUp() != -1.0)
+      if (parametersPacket.getMaximumStepReachWhenSteppingUp() != noValue)
          setMaximumStepReachWhenSteppingUp(parametersPacket.getMaximumStepReachWhenSteppingUp());
-      if (parametersPacket.getMaximumStepZWhenSteppingUp() != -1.0)
+      if (parametersPacket.getMaximumStepWidthWhenSteppingUp() != noValue)
+         setMaximumStepWidthWhenSteppingUp(parametersPacket.getMaximumStepWidthWhenSteppingUp());
+      if (parametersPacket.getMaximumStepZWhenSteppingUp() != noValue)
          setMaximumStepZWhenSteppingUp(parametersPacket.getMaximumStepZWhenSteppingUp());
-      if (parametersPacket.getMaximumStepXWhenForwardAndDown() != -1.0)
+      if (parametersPacket.getMaximumStepXWhenForwardAndDown() != noValue)
          setMaximumStepXWhenForwardAndDown(parametersPacket.getMaximumStepXWhenForwardAndDown());
-      if (parametersPacket.getMaximumStepZWhenForwardAndDown() != -1.0)
+      if (parametersPacket.getMaximumStepYWhenForwardAndDown() != noValue)
+         setMaximumStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
+      if (parametersPacket.getMaximumStepZWhenForwardAndDown() != noValue)
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
-      if (parametersPacket.getMaximumStepZ() != -1.0)
+      if (parametersPacket.getTranslationScaleFromGrandparentNode() != noValue)
+         setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
+      if (parametersPacket.getMaximumStepZ() != noValue)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
-      if (parametersPacket.getMinimumFootholdPercent() != -1.0)
+      if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
+         setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
+      if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
+         setMaximumStepXWhenFullyPitched(parametersPacket.getMaximumStepXWhenFullyPitched());
+      if (parametersPacket.getStepYawReductionFactorAtMaxReach() != noValue)
+         setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
+      if (parametersPacket.getMinimumFootholdPercent() != noValue)
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
-      if (parametersPacket.getMinimumSurfaceInclineRadians() != -1.0)
+      if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
       setWiggleIntoConvexHullOfPlanarRegions(parametersPacket.getWiggleIntoConvexHullOfPlanarRegions());
-      setRejectIfCannotFullyWiggleInside(parametersPacket.getRejectIfCannotFullyWiggleInside());
-      if (parametersPacket.getMaximumXyWiggleDistance() != -1.0)
+      if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
-      if (parametersPacket.getMaximumYawWiggle() != -1.0)
+      if (parametersPacket.getMaximumYawWiggle() != noValue)
          setMaximumYawWiggle(parametersPacket.getMaximumYawWiggle());
-      if (parametersPacket.getMaximumZPenetrationOnValleyRegions() != -1.0)
+      if (parametersPacket.getMaximumZPenetrationOnValleyRegions() != noValue)
          setMaximumZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
-      if (parametersPacket.getMaximumStepWidth() != -1.0)
+      if (parametersPacket.getMaximumStepWidth() != noValue)
          setMaximumStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffHeightToAvoid() != -1.0)
+      if (parametersPacket.getCliffHeightToAvoid() != noValue)
          setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
-      if (parametersPacket.getMinimumDistanceFromCliffBottoms() != -1.0)
+      if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
       setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
       if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
          setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
-      if (parametersPacket.getBodyBoxHeight() != -1.0)
+      if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
-      if (parametersPacket.getBodyBoxDepth() != -1.0)
+      if (parametersPacket.getBodyBoxDepth() != noValue)
          setBodyBoxDepth(parametersPacket.getBodyBoxDepth());
-      if (parametersPacket.getBodyBoxWidth() != -1.0)
+      if (parametersPacket.getBodyBoxWidth() != noValue)
          setBodyBoxWidth(parametersPacket.getBodyBoxWidth());
-      if (parametersPacket.getBodyBoxBaseX() != -1.0)
+      if (parametersPacket.getBodyBoxBaseX() != noValue)
          setBodyBoxBaseX(parametersPacket.getBodyBoxBaseX());
-      if (parametersPacket.getBodyBoxBaseY() != -1.0)
+      if (parametersPacket.getBodyBoxBaseY() != noValue)
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
-      if (parametersPacket.getBodyBoxBaseZ() != -1.0)
+      if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
-      if (parametersPacket.getMinXClearanceFromStance() != -1.0)
+      if (parametersPacket.getMinXClearanceFromStance() != noValue)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
-      if (parametersPacket.getMinYClearanceFromStance() != -1.0)
+      if (parametersPacket.getMinYClearanceFromStance() != noValue)
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
-      if (parametersPacket.getFinalTurnProximity() != -1.0)
+      if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
-      if (parametersPacket.getFinalTurnBodyPathProximity() != -1.0)
+      if (parametersPacket.getFinalTurnBodyPathProximity() != noValue)
          setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
-      if (parametersPacket.getFinalTurnProximityBlendFactor() != -1.0)
+      if (parametersPacket.getFinalTurnProximityBlendFactor() != noValue)
          setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
 
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
       setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
 
-      if (parametersPacket.getAStarHeuristicsWeight() != -1.0)
+      if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
-      if (parametersPacket.getVisGraphWithAStarHeuristicsWeight() != -1.0)
+      if (parametersPacket.getVisGraphWithAStarHeuristicsWeight() != noValue)
          setVisGraphWithAStarHeuristicsWeight(parametersPacket.getVisGraphWithAStarHeuristicsWeight());
-      if (parametersPacket.getDepthFirstHeuristicsWeight() != -1.0)
+      if (parametersPacket.getDepthFirstHeuristicsWeight() != noValue)
          setDepthFirstHeuristicsWeight(parametersPacket.getDepthFirstHeuristicsWeight());
-      if (parametersPacket.getBodyPathBasedHeuristicsWeight() != -1.0)
+      if (parametersPacket.getBodyPathBasedHeuristicsWeight() != noValue)
          setBodyPathBasedHeuristicWeight(parametersPacket.getBodyPathBasedHeuristicsWeight());
 
-      if (parametersPacket.getYawWeight() != -1.0)
+      if (parametersPacket.getYawWeight() != noValue)
          setYawWeight(parametersPacket.getYawWeight());
-      if (parametersPacket.getPitchWeight() != -1.0)
+      if (parametersPacket.getPitchWeight() != noValue)
          setPitchWeight(parametersPacket.getPitchWeight());
-      if (parametersPacket.getRollWeight() != -1.0)
+      if (parametersPacket.getRollWeight() != noValue)
          setRollWeight(parametersPacket.getRollWeight());
-      if (parametersPacket.getForwardWeight() != -1.0)
+      if (parametersPacket.getForwardWeight() != noValue)
          setForwardWeight(parametersPacket.getForwardWeight());
-      if (parametersPacket.getLateralWeight() != -1.0)
+      if (parametersPacket.getLateralWeight() != noValue)
          setLateralWeight(parametersPacket.getLateralWeight());
-      if (parametersPacket.getStepUpWeight() != -1.0)
+      if (parametersPacket.getStepUpWeight() != noValue)
          setStepUpWeight(parametersPacket.getStepUpWeight());
-      if (parametersPacket.getStepDownWeight() != -1.0)
+      if (parametersPacket.getStepDownWeight() != noValue)
          setStepDownWeight(parametersPacket.getStepDownWeight());
-      if (parametersPacket.getCostPerStep() != -1.0)
+      if (parametersPacket.getCostPerStep() != noValue)
          setCostPerStep(parametersPacket.getCostPerStep());
-      if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != -1.0)
+      if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != noValue)
          setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
-      if (parametersPacket.getBoundingBoxCost() != -1.0)
+      if (parametersPacket.getBoundingBoxCost() != noValue)
          setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
 
-      if (parametersPacket.getFootholdAreaWeight() != -1.0)
+      if (parametersPacket.getFootholdAreaWeight() != noValue)
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
-      if (parametersPacket.getLongStepWeight() != -1.0)
+      if (parametersPacket.getLongStepWeight() != noValue)
          setLongStepWeight(parametersPacket.getLongStepWeight());
-      if (parametersPacket.getBodyPathViolationWeight() != -1.0)
+      if (parametersPacket.getBodyPathViolationWeight() != noValue)
          setBodyPathViolationWeight(parametersPacket.getBodyPathViolationWeight());
-      if (parametersPacket.getDistanceFromPathTolerance() != -1.0)
+      if (parametersPacket.getDistanceFromPathTolerance() != noValue)
          setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
-      if (parametersPacket.getDeltaYawFromReferenceTolerance() != -1.0)
+      if (parametersPacket.getDeltaYawFromReferenceTolerance() != noValue)
          setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
    }
 }

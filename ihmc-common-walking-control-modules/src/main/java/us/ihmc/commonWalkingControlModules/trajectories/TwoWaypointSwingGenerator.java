@@ -446,7 +446,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    @Override
    public void getWaypointData(int waypointIndex, FrameEuclideanTrajectoryPoint waypointDataToPack)
    {
-      double waypointTime = stepTime.getDoubleValue() * trajectory.getWaypointTime(waypointIndex);
+      double waypointTime = getWaypointTime(waypointIndex);
       trajectory.getWaypointVelocity(waypointIndex, tempWaypointVelocity);
       tempWaypointVelocity.scale(1.0 / stepTime.getDoubleValue());
 
@@ -460,5 +460,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    {
       trajectory.computeMaxSpeed();
       return trajectory.getMaxSpeed() / stepTime.getDoubleValue();
+   }
+
+   public double getWaypointTime(int waypointIndex)
+   {
+      return stepTime.getDoubleValue() * trajectory.getWaypointTime(waypointIndex);
    }
 }
