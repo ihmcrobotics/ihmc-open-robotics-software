@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.planner.ui;
 
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -9,7 +10,11 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
 import java.util.function.Consumer;
@@ -116,6 +121,8 @@ public class ValkyriePlannerDashboardController
    private Spinner<Double> astarHeuristicsWeight;
 
    @FXML
+   private TextField planningStatus;
+   @FXML
    private TextField timeElapsed;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
@@ -134,7 +141,6 @@ public class ValkyriePlannerDashboardController
    public void doPlanning()
    {
       new Thread(doPlanningCallback).start();
-      timeElapsedManager.start();
    }
 
    @FXML
@@ -166,11 +172,6 @@ public class ValkyriePlannerDashboardController
       this.doPlanningCallback = doPlanningCallback;
    }
 
-   public void onPlannerCompleted()
-   {
-      timeElapsedManager.stop();
-   }
-
    public void setHaltPlanningCallback(Runnable haltPlanningCallback)
    {
       this.haltPlanningCallback = haltPlanningCallback;
@@ -194,6 +195,20 @@ public class ValkyriePlannerDashboardController
    public void setPlaceGoalCallback(Runnable placeGoalCallback)
    {
       this.placeGoalCallback = placeGoalCallback;
+   }
+
+   public void updatePlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
+   {
+      Status status = Status.fromByte(planningStatus.getPlannerStatus());
+      this.planningStatus.setText(status.toString());
+   }
+
+   public void setTimerEnabled(boolean enabled)
+   {
+      if(enabled)
+         timeElapsedManager.start();
+      else
+         timeElapsedManager.stop();
    }
 
    public void setParameters(ValkyrieAStarFootstepPlannerParameters parameters)
@@ -360,12 +375,11 @@ public class ValkyriePlannerDashboardController
       {
          timeElapsed.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
+   }
 
-      @Override
-      public void stop()
-      {
-         stopwatch.suspend();
-      }
+   public Pose3D getGoalPose()
+   {
+      return new Pose3D(goalX.getValue(), goalY.getValue(), goalZ.getValue(), goalYaw.getValue(), 0.0, 0.0);
    }
 
    public Spinner<Double> getGoalX()
@@ -386,6 +400,14 @@ public class ValkyriePlannerDashboardController
    public Spinner<Double> getGoalYaw()
    {
       return goalYaw;
+   }
+
+   public void setGoalPose(Tuple3DReadOnly startPosition, double startYaw)
+   {
+      goalX.getValueFactory().setValue(startPosition.getX());
+      goalY.getValueFactory().setValue(startPosition.getY());
+      goalZ.getValueFactory().setValue(startPosition.getZ());
+      goalYaw.getValueFactory().setValue(startYaw);
    }
 
    public double getTimeout()

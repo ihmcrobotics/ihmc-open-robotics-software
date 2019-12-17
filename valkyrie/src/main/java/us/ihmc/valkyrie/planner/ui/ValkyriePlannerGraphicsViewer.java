@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.planner.ui;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningResult;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
@@ -26,14 +26,16 @@ import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ValkyriePlannerGraphicsViewer extends AnimationTimer
@@ -90,8 +92,8 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       reset.set(true);
 
       meshBuilder.clear();
-      addFootstep(planningRequestPacket.getLeftFootPose().getPosition(), planningRequestPacket.getLeftFootPose().getOrientation(), Color.DARKGREEN);
-      addFootstep(planningRequestPacket.getRightFootPose().getPosition(), planningRequestPacket.getRightFootPose().getOrientation(), Color.DARKGREEN);
+      addFootstep(planningRequestPacket.getStartLeftFootPose().getPosition(), planningRequestPacket.getStartLeftFootPose().getOrientation(), Color.DARKGREEN);
+      addFootstep(planningRequestPacket.getStartRightFootPose().getPosition(), planningRequestPacket.getStartRightFootPose().getOrientation(), Color.DARKGREEN);
       startSteps.meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 
@@ -100,16 +102,16 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       // TODO
    }
 
-   public void processResult(ValkyrieFootstepPlanningResult planningResult)
+   public void processPlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
    {
-      if (planningResult.getFootstepDataList().getFootstepDataList().isEmpty())
+      if (planningStatus.getFootstepDataList().getFootstepDataList().isEmpty())
          return;
 
       meshBuilder.clear();
 
-      for (int i = 0; i < planningResult.getFootstepDataList().getFootstepDataList().size(); i++)
+      for (int i = 0; i < planningStatus.getFootstepDataList().getFootstepDataList().size(); i++)
       {
-         FootstepDataMessage footstepDataMessage = planningResult.getFootstepDataList().getFootstepDataList().get(i);
+         FootstepDataMessage footstepDataMessage = planningStatus.getFootstepDataList().getFootstepDataList().get(i);
          addFootstep(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation(), Color.GREEN);
       }
 
@@ -181,13 +183,19 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
    {
       final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
       final MeshView meshView = new MeshView();
+      boolean addedFlag = false;
 
       void update()
       {
          Pair<Mesh, Material> mesh = meshReference.getAndSet(null);
          if (mesh != null)
          {
-            root.getChildren().add(meshView);
+            if(!addedFlag)
+            {
+               root.getChildren().add(meshView);
+               addedFlag = true;
+            }
+
             meshView.setMesh(mesh.getKey());
             meshView.setMaterial(mesh.getValue());
          }
@@ -197,6 +205,7 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       {
          meshView.setMesh(null);
          meshView.setMaterial(null);
+         addedFlag = false;
       }
    }
 
