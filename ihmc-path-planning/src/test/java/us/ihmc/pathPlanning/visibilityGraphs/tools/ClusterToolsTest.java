@@ -40,6 +40,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygon2dTestHelpers;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.tools.lists.PairList;
 
 public class ClusterToolsTest
 {
@@ -98,8 +99,8 @@ public class ClusterToolsTest
       boolean extrudeToTheLeft = false;
       int numberOfExtrusions = 3;
       double extrusionDistance = 0.5;
-      List<Point2D> extrusions = ClusterTools.extrudeMultiplePointsAtOutsideCorner(cornerPointToExtrude, previousEdge, nextEdge, extrudeToTheLeft,
-                                                                                   numberOfExtrusions, extrusionDistance);
+      List<Point2DReadOnly> extrusions = ClusterTools.extrudeMultiplePointsAtOutsideCorner(cornerPointToExtrude, previousEdge, nextEdge, extrudeToTheLeft,
+                                                                                           numberOfExtrusions, extrusionDistance);
 
       assertEquals(numberOfExtrusions, extrusions.size());
 
@@ -323,7 +324,7 @@ public class ClusterToolsTest
       extrusionDistance = 0.1;
       extrudeToTheLeft = true;
 
-      Point2D pointD = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
+      Point2DReadOnly pointD = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
 
       Line2D lineAB = new Line2D(pointA, pointB);
       Vector2DBasics vectorAB = lineAB.getDirection();
@@ -349,25 +350,25 @@ public class ClusterToolsTest
       assertEquals(1.0, vectorBC.dot(vectorDF), EPSILON);
    }
 
-   private Point2D evaluateExtrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft,
-                                                            Point2D expectedAnswer)
+   private Point2DReadOnly evaluateExtrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance,
+                                                                    boolean extrudeToTheLeft, Point2D expectedAnswer)
    {
-      Point2D extrudedPoint = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
+      Point2DReadOnly extrudedPoint = extrudeSinglePointAtInsideCorner(pointA, pointB, pointC, extrusionDistance, extrudeToTheLeft);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedAnswer, extrudedPoint, EPSILON);
 
       return extrudedPoint;
    }
 
-   private Point2D extrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft)
+   private Point2DReadOnly extrudeSinglePointAtInsideCorner(Point2D pointA, Point2D pointB, Point2D pointC, double extrusionDistance, boolean extrudeToTheLeft)
    {
       LineSegment2D edgePrev = new LineSegment2D(pointA, pointB);
       LineSegment2D edgeNext = new LineSegment2D(pointB, pointC);
 
-      List<Point2D> extrudedPointList = new ArrayList<>();
+      List<Point2DReadOnly> extrudedPointList = new ArrayList<>();
       extrudedPointList.add(ClusterTools.extrudeSinglePointAtInsideCorner(pointB, edgePrev, edgeNext, extrudeToTheLeft, extrusionDistance));
 
       assertEquals(1, extrudedPointList.size());
-      Point2D extrudedPoint = extrudedPointList.get(0);
+      Point2DReadOnly extrudedPoint = extrudedPointList.get(0);
       return extrudedPoint;
    }
 
@@ -449,11 +450,11 @@ public class ClusterToolsTest
          }
       };
 
-      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredExtrusionDistanceCalculator,
-                                                                           extrusionDistanceCalculator, true);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredExtrusionDistanceCalculator,
+                                                                                             extrusionDistanceCalculator, true);
 
       assertEquals(1, obstacleClusters.size());
-      Cluster obstacleCluster = obstacleClusters.get(0);
+      Cluster obstacleCluster = obstacleClusters.get(0).getLeft();
       List<Point3DReadOnly> navigableExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
 
       assertEquals(12, navigableExtrusionsInWorld.size());
@@ -525,7 +526,7 @@ public class ClusterToolsTest
       obstacleRegions.add(region1_1);
       PlanarRegion homeRegion = region2_1;
 
-      List<Cluster> obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
+      PairList<Cluster, PlanarRegion> obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(0, obstacleClusters.size());
 
       obstacleRegions.clear();
@@ -542,7 +543,7 @@ public class ClusterToolsTest
 
       obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(1, obstacleClusters.size());
-      Cluster cluster = obstacleClusters.get(0);
+      Cluster cluster = obstacleClusters.get(0).getLeft();
       ExtrusionHull nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
 
@@ -553,7 +554,7 @@ public class ClusterToolsTest
 
       obstacleClusters = createObstacleClustersForTests(obstacleRegions, homeRegion);
       assertEquals(1, obstacleClusters.size());
-      cluster = obstacleClusters.get(0);
+      cluster = obstacleClusters.get(0).getLeft();
       nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, nonNavigableExtrusionsInLocal.size());
    }
@@ -604,11 +605,11 @@ public class ClusterToolsTest
 
       List<PlanarRegion> obstacleRegions = new ArrayList<>();
       obstacleRegions.add(planarRegion0);
-      List<Cluster> obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle,
-                                                                              preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
+      PairList<Cluster, PlanarRegion> obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle,
+                                                                                                preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
 
       assertEquals(1, obstacleClustersOn1.size());
-      Cluster obstacleCluster = obstacleClustersOn1.get(0);
+      Cluster obstacleCluster = obstacleClustersOn1.get(0).getLeft();
 
       List<Point3DReadOnly> obstacleExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
       assertEquals(10, obstacleExtrusionsInWorld.size());
@@ -631,7 +632,7 @@ public class ClusterToolsTest
                                                                 extrusionDistanceCalculator, true);
 
       assertEquals(1, obstacleClustersOn1.size());
-      obstacleCluster = obstacleClustersOn1.get(0);
+      obstacleCluster = obstacleClustersOn1.get(0).getLeft();
 
       obstacleExtrusionsInWorld = obstacleCluster.getNavigableExtrusionsInWorld();
       assertEquals(10, obstacleExtrusionsInWorld.size());
@@ -761,11 +762,11 @@ public class ClusterToolsTest
       };
 
 
-      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, extrusionDistanceCalculator,
-                                                                           extrusionDistanceCalculator, true);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle,
+                                                                                             extrusionDistanceCalculator, extrusionDistanceCalculator, true);
       assertEquals(1, obstacleClusters.size());
 
-      Cluster cluster = obstacleClusters.get(0);
+      Cluster cluster = obstacleClusters.get(0).getLeft();
       ExtrusionHull navigableExtrusionsInLocal = cluster.getNavigableExtrusionsInLocal();
       ExtrusionHull nonNavigableExtrusionsInLocal = cluster.getNonNavigableExtrusionsInLocal();
       assertEquals(12, navigableExtrusionsInLocal.size());
@@ -1037,7 +1038,7 @@ public class ClusterToolsTest
    }
 
 
-   private List<Cluster> createObstacleClustersForTests(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
+   private PairList<Cluster, PlanarRegion> createObstacleClustersForTests(List<PlanarRegion> obstacleRegions, PlanarRegion homeRegion)
    {
       double orthogonalAngle = 0.8;
 
@@ -1072,8 +1073,8 @@ public class ClusterToolsTest
                                                                                                         DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION,
                                                                                                         planarRegionFilter);
 
-      List<Cluster> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, filteredObstacleRegions, orthogonalAngle,
-                                                                           preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, filteredObstacleRegions, orthogonalAngle,
+                                                                                             preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
       return obstacleClusters;
    }
 

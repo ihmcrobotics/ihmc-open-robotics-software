@@ -56,7 +56,7 @@ public class NavigableRegions
       navigableRegions = NavigableRegionsFactory.createNavigableRegions(regions, parameters);
    }
 
-   public List<NavigableRegion> getNaviableRegionsList()
+   public List<NavigableRegion> getNavigableRegionsList()
    {
       return navigableRegions;
    }
