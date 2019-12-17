@@ -2,24 +2,24 @@ package us.ihmc.valkyrie.planner;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningResult;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -27,6 +27,9 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ValkyrieAStarFootstepPlannerTest
 {
+   // visualize is blocking on each test
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
    @Test
    public void testEODCinders()
    {
@@ -67,10 +70,22 @@ public class ValkyrieAStarFootstepPlannerTest
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
+
+      if (visualize)
+      {
+         planner.launchVisualizer();
+
+         // give planner some time to startup
+         ThreadTools.sleep(3000);
+      }
+
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
 
       ValkyrieFootstepPlanningRequestPacket requestPacket = createPlanningRequest(dataSet, timeout, planner.getParameters());
-      ValkyrieFootstepPlanningResult planningResult = planner.handleRequestPacket(requestPacket);
+      ValkyrieFootstepPlanningStatus planningResult = new ValkyrieFootstepPlanningStatus();
+      planner.addStatusCallback(planningResult::set);
+
+      planner.handleRequestPacket(requestPacket);
 
       // Check that plan returned isn't empty
       assertTrue(!planningResult.getFootstepDataList().getFootstepDataList().isEmpty());
@@ -90,23 +105,30 @@ public class ValkyrieAStarFootstepPlannerTest
       }
 
       // Check that final steps are squared up at the goal
-      double goalEpsilon = 0.1;
+      double goalPositionEpsilon = 0.01 + 0.5 * LatticeNode.gridSizeXY + planner.getParameters().getMaximumXYWiggle();
+      double goalYawEpsilon = 0.01 + 0.5 * LatticeNode.gridSizeYaw + planner.getParameters().getMaximumYawWiggle();
       int numberOfSteps = planningResult.getFootstepDataList().getFootstepDataList().size();
-      assertMidFootAtPose(planner.getParameters(), requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 1), goalEpsilon);
-      assertMidFootAtPose(planner.getParameters(), requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 2), goalEpsilon);
+      assertFootAtGoal(requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 1), goalPositionEpsilon, goalYawEpsilon);
+      assertFootAtGoal(requestPacket, planningResult.getFootstepDataList().getFootstepDataList().get(numberOfSteps - 2), goalPositionEpsilon, goalYawEpsilon);
+
+      if(visualize)
+      {
+         ThreadTools.sleepForever();
+      }
    }
 
-   private void assertMidFootAtPose(ValkyrieAStarFootstepPlannerParameters parameters,
-                                    ValkyrieFootstepPlanningRequestPacket requestPacket,
-                                    FootstepDataMessage footstepDataMessage,
-                                    double goalEpsilon)
+   private void assertFootAtGoal(ValkyrieFootstepPlanningRequestPacket requestPacket,
+                                 FootstepDataMessage footstepDataMessage,
+                                 double goalPositionEpsilon,
+                                 double goalYawEpsilon)
    {
-      Pose3D midFootPose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
-      midFootPose.appendTranslation(0.0, 0.5 * RobotSide.fromByte(footstepDataMessage.getRobotSide()).negateIfLeftSide(parameters.getIdealFootstepWidth()), 0.0);
-      assertTrue(midFootPose.epsilonEquals(requestPacket.getGoalPoses().get(0), goalEpsilon));
+      Pose3D footPose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+      Pose3D desiredPose = RobotSide.LEFT.toByte() == footstepDataMessage.getRobotSide() ? requestPacket.getGoalLeftFootPose() : requestPacket.getGoalRightFootPose();
+      assertTrue(footPose.getPosition().epsilonEquals(desiredPose.getPosition(), goalPositionEpsilon));
+      assertTrue(MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon));
    }
 
-   public ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)
+   public static ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)
    {
       ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
       requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(dataSet.getPlanarRegionsList()));
@@ -115,12 +137,16 @@ public class ValkyrieAStarFootstepPlannerTest
 
       RigidBodyTransform startPose = new RigidBodyTransform(new Quaternion(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0), new Vector3D(dataSet.getPlannerInput().getStartPosition()));
       startPose.appendTranslation(0.0, 0.5 * parameters.getIdealFootstepWidth(), 0.0);
-      requestPacket.getLeftFootPose().set(startPose);
+      requestPacket.getStartLeftFootPose().set(startPose);
       startPose.appendTranslation(0.0, - parameters.getIdealFootstepWidth(), 0.0);
-      requestPacket.getRightFootPose().set(startPose);
+      requestPacket.getStartRightFootPose().set(startPose);
 
       RigidBodyTransform goalPose = new RigidBodyTransform(new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0), dataSet.getPlannerInput().getGoalPosition());
-      requestPacket.getGoalPoses().add().set(goalPose);
+      goalPose.appendTranslation(0.0, 0.5 * parameters.getIdealFootstepWidth(), 0.0);
+      requestPacket.getGoalLeftFootPose().set(goalPose);
+      goalPose.appendTranslation(0.0, - parameters.getIdealFootstepWidth(), 0.0);
+      requestPacket.getGoalRightFootPose().set(goalPose);
+
       return requestPacket;
    }
 }

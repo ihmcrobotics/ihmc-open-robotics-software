@@ -11,10 +11,13 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieNetworkProcessor
 {
-   private static final DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
+   private static final ValkyrieRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
    public static final boolean launchFootstepPlannerModule = true;
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
@@ -41,7 +44,9 @@ public class ValkyrieNetworkProcessor
          networkModuleParams.enableSensorModule(true);
          System.out.println("ROS_MASTER_URI="+rosuri);
       }
-      
+
+      new ValkyrieAStarFootstepPlanner(model).setupWithRos(PubSubImplementation.FAST_RTPS);
+
       new DRCNetworkProcessor(model, networkModuleParams, PubSubImplementation.FAST_RTPS);
    }
 }

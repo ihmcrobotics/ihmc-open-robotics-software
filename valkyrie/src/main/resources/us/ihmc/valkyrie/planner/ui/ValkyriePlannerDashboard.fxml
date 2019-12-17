@@ -28,7 +28,7 @@
 
                 <Region prefHeight="10"/>
 
-                <GridPane alignment="CENTER" hgap="10" vgap="10">
+                <GridPane alignment="CENTER" hgap="5" vgap="10">
                     <columnConstraints>
                         <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
                         <ColumnConstraints hgrow="NEVER" minWidth="10.0"/>
@@ -44,15 +44,16 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
 
-                    <Button onAction="#doPlanning" text="Plan" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="130.0"/>
-                    <Button onAction="#haltPlanning" text="Halt Planning" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="130.0"/>
-                    <Button onAction="#sendPlanningResult" text="Send Plan" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="130.0"/>
-                    <Button onAction="#stopWalking" text="Stop Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="130.0"/>
-                    <Button onAction="#placeGoal" text="Place Goal" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.halignment="CENTER" prefWidth="130.0"/>
+                    <Button onAction="#doPlanning" text="Plan" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="150.0"/>
+                    <Button onAction="#haltPlanning" text="Halt Planning" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="150.0"/>
+                    <TextField fx:id="planningStatus" editable="false" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="CENTER" prefWidth="150.0"/>
+                    <Button onAction="#sendPlanningResult" text="Send Plan" GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="150.0"/>
+                    <Button onAction="#stopWalking" text="Stop Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="150.0"/>
+                    <Button onAction="#placeGoal" text="Place Goal" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.halignment="CENTER" prefWidth="150.0"/>
 
                     <Label mnemonicParsing="false" text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
                     <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0" GridPane.halignment="CENTER" prefWidth="100.0"/>
-                    <Label mnemonicParsing="false" text="Time elapsed" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.halignment="RIGHT" />
+                    <Label mnemonicParsing="false" text="Elapsed" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.halignment="RIGHT" />
                     <TextField fx:id="timeElapsed" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1" GridPane.halignment="CENTER" prefWidth="100.0"/>
 
                     <Label mnemonicParsing="false" text="Goal X" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
