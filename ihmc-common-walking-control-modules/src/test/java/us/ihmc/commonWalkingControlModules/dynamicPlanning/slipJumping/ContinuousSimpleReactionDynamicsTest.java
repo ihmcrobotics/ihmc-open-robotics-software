@@ -1,31 +1,22 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ContinuousSimpleReactionDynamicsTest
 {
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
-
    @Test
    public void testDynamics()
    {
@@ -67,13 +58,13 @@ public class ContinuousSimpleReactionDynamicsTest
       functionExpected.set(thetaY, desiredAngularAcceleration.getY());
       functionExpected.set(thetaZ, desiredAngularAcceleration.getZ());
 
-      JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
+      MatrixTestTools.assertMatrixEquals(functionExpected, function, 1e-7);
 
       dynamics.getDynamics(FLIGHT, currentState, currentControl, constants, function);
 
       functionExpected.zero();
       functionExpected.set(z, 0, -gravity);
-      JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
+      MatrixTestTools.assertMatrixEquals(functionExpected, function, 1e-7);
    }
 
    @Test
@@ -101,11 +92,11 @@ public class ContinuousSimpleReactionDynamicsTest
 
       dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, gradient);
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
       dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -141,7 +132,7 @@ public class ContinuousSimpleReactionDynamicsTest
             expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
       }
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
    @Test
@@ -177,7 +168,7 @@ public class ContinuousSimpleReactionDynamicsTest
             expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
       }
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
    @Test
@@ -213,7 +204,7 @@ public class ContinuousSimpleReactionDynamicsTest
             expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
       }
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
    @Test
@@ -249,7 +240,7 @@ public class ContinuousSimpleReactionDynamicsTest
             expectedGradient.set(stateIndex, modifiedStateIndex, (dynamicsModified.get(stateIndex) - dynamicsUnmodified.get(stateIndex)) / epsilon);
       }
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
    @Test
@@ -284,12 +275,12 @@ public class ContinuousSimpleReactionDynamicsTest
       gradientExpected.set(thetaY, tauY, 1.0 / inertia.getY());
       gradientExpected.set(thetaZ, tauZ, 1.0 / inertia.getZ());
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
 
       dynamics.getDynamicsControlGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -366,7 +357,7 @@ public class ContinuousSimpleReactionDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -443,7 +434,7 @@ public class ContinuousSimpleReactionDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, 5, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -549,7 +540,7 @@ public class ContinuousSimpleReactionDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
    @Test
@@ -655,6 +646,6 @@ public class ContinuousSimpleReactionDynamicsTest
       MatrixTools.setMatrixBlock(gradientExpected, 0, k, dynamicStateModified, 0, 0, stateVectorSize / 2, 1, 1.0 / epsilon);
 
 
-      JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 }

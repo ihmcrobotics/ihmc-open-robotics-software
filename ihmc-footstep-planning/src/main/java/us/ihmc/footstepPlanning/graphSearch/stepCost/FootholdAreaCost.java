@@ -8,15 +8,22 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.function.DoubleSupplier;
+
 public class FootholdAreaCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DoubleSupplier footholdAreaWeight;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
 
    public FootholdAreaCost(FootstepPlannerParametersReadOnly parameters, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons, FootstepNodeSnapperReadOnly snapper)
    {
-      this.parameters = parameters;
+      this(parameters::getFootholdAreaWeight, footPolygons, snapper);
+   }
+
+   public FootholdAreaCost(DoubleSupplier footholdAreaWeight, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons, FootstepNodeSnapperReadOnly snapper)
+   {
+      this.footholdAreaWeight = footholdAreaWeight;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
    }
@@ -35,7 +42,7 @@ public class FootholdAreaCost implements FootstepCost
             return 0.0;
 
          double percentAreaUnoccupied = 1.0 - area / footArea;
-         return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
+         return percentAreaUnoccupied * footholdAreaWeight.getAsDouble();
       }
       else
       {

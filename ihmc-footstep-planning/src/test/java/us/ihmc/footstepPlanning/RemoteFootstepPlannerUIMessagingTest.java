@@ -699,7 +699,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
       assertEquals("Wiggle into convex hull isn't equal.", parameters.getWiggleIntoConvexHullOfPlanarRegions(),
                    packet.getWiggleIntoConvexHullOfPlanarRegions());
-      assertEquals("Reject if cannot wiggle isn't equal.", parameters.getRejectIfCannotFullyWiggleInside(), packet.getRejectIfCannotFullyWiggleInside());
       assertEquals("Max XY wiggle distance isn't equal.", parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon);
       assertEquals("Max yaw wiggle isn't equal.", parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon);
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),

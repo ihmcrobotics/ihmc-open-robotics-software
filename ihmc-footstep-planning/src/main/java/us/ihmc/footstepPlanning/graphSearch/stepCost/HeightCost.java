@@ -4,25 +4,31 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 public class HeightCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly parameters;
-
+   private final BooleanSupplier useQuadraticHeightCost;
    private final LinearHeightCost linearHeightCost;
    private final QuadraticHeightCost quadraticHeightCost;
 
    public HeightCost(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
-      this.parameters = parameters;
+      this(parameters::useQuadraticHeightCost, parameters::getStepUpWeight, parameters::getStepDownWeight, snapper);
+   }
 
-      linearHeightCost = new LinearHeightCost(parameters, snapper);
-      quadraticHeightCost = new QuadraticHeightCost(parameters, snapper);
+   public HeightCost(BooleanSupplier useQuadraticHeightCost, DoubleSupplier stepUpWeight, DoubleSupplier stepDownWeight, FootstepNodeSnapperReadOnly snapper)
+   {
+      this.useQuadraticHeightCost = useQuadraticHeightCost;
+      linearHeightCost = new LinearHeightCost(stepUpWeight, stepDownWeight, snapper);
+      quadraticHeightCost = new QuadraticHeightCost(stepUpWeight, stepDownWeight, snapper);
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      if (parameters.useQuadraticHeightCost())
+      if (useQuadraticHeightCost.getAsBoolean())
          return quadraticHeightCost.compute(startNode, endNode);
       else
          return linearHeightCost.compute(startNode, endNode);

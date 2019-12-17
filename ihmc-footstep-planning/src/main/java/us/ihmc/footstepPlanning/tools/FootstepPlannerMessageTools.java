@@ -80,7 +80,6 @@ public class FootstepPlannerMessageTools
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleIntoConvexHullOfPlanarRegions(parameters.getWiggleIntoConvexHullOfPlanarRegions());
-      packet.setRejectIfCannotFullyWiggleInside(parameters.getRejectIfCannotFullyWiggleInside());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
       packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
@@ -162,7 +161,6 @@ public class FootstepPlannerMessageTools
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
-      packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
       packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

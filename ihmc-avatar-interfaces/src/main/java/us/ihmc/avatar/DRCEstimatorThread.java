@@ -45,12 +45,11 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -111,7 +110,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final SensorOutputMapReadOnly processedSensorOutputMap;
    private final SensorOutputMapReadOnly rawSensorOutputMap;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
-   private final DRCPoseCommunicator poseCommunicator;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
@@ -248,22 +246,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          else
             forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
 
-         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
-                                                                                                           forceSensorDataHolderToSend);
+         RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
+         factory.setDefinitionsToPublish(estimatorFullRobotModel);
+         factory.setSensorSource(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
+         factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
+         factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel,
-                                                    jointConfigurationGathererAndProducer,
-                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                                    realtimeRos2Node,
-                                                    processedSensorOutputMap,
-                                                    rawSensorOutputMap,
-                                                    robotMotionStatusFromController,
-                                                    sensorInformation);
-         estimatorController.setRawOutputWriter(poseCommunicator);
-      }
-      else
-      {
-         poseCommunicator = null;
+         estimatorController.setRawOutputWriter(factory.createRobotConfigurationDataPublisher());
       }
 
       firstTick.set(true);
@@ -285,62 +274,70 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
 
       // Create EKF Estimator:
-      if (sensorReaderFactory.useStateEstimator() && USE_EKF_ESTIMATOR)
+      if (sensorReaderFactory.useStateEstimator())
       {
-         reinitializeEKF = null;
-
-         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
-         String primaryImuName = sensorInformation.getPrimaryBodyImu();
-         Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel,
-                                                                  primaryImuName,
-                                                                  imuSensorNames,
-                                                                  footForceSensorNames,
-                                                                  rawSensorOutputMap,
-                                                                  estimatorDT,
-                                                                  gravity,
-                                                                  processedSensorOutputMap,
-                                                                  yoGraphicsListRegistry,
-                                                                  estimatorFullRobotModel);
-
-         InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
-         if (ekfParameterStream == null)
+         if (USE_EKF_ESTIMATOR)
          {
-            throw new RuntimeException("Did not find parameter file for EKF.");
+            reinitializeEKF = null;
+
+            double estimatorDT = stateEstimatorParameters.getEstimatorDT();
+            SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+            String primaryImuName = sensorInformation.getPrimaryBodyImu();
+            Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
+            ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel,
+                                                                     primaryImuName,
+                                                                     imuSensorNames,
+                                                                     footForceSensorNames,
+                                                                     rawSensorOutputMap,
+                                                                     estimatorDT,
+                                                                     gravity,
+                                                                     processedSensorOutputMap,
+                                                                     yoGraphicsListRegistry,
+                                                                     estimatorFullRobotModel);
+
+            InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
+            if (ekfParameterStream == null)
+            {
+               throw new RuntimeException("Did not find parameter file for EKF.");
+            }
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+
+            estimatorController.addRobotController(ekfStateEstimator);
          }
-         ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
-
-         estimatorController.addRobotController(ekfStateEstimator);
-      }
-      else if (sensorReaderFactory.useStateEstimator() && CREATE_EKF_ESTIMATOR)
-      {
-         reinitializeEKF = new YoBoolean("ReinitializeEKF", estimatorRegistry);
-
-         FullHumanoidRobotModel ekfFullRobotModel = robotModel.createFullRobotModel();
-         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
-         String primaryImuName = sensorInformation.getPrimaryBodyImu();
-         Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel,
-                                                                  primaryImuName,
-                                                                  imuSensorNames,
-                                                                  footForceSensorNames,
-                                                                  rawSensorOutputMap,
-                                                                  estimatorDT,
-                                                                  gravity,
-                                                                  processedSensorOutputMap,
-                                                                  yoGraphicsListRegistry,
-                                                                  estimatorFullRobotModel);
-
-         InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
-         if (ekfParameterStream == null)
+         else if (CREATE_EKF_ESTIMATOR)
          {
-            throw new RuntimeException("Did not find parameter file for EKF.");
-         }
-         ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+            reinitializeEKF = new YoBoolean("ReinitializeEKF", estimatorRegistry);
 
-         estimatorController.addRobotController(ekfStateEstimator);
+            FullHumanoidRobotModel ekfFullRobotModel = robotModel.createFullRobotModel();
+            double estimatorDT = stateEstimatorParameters.getEstimatorDT();
+            SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+            String primaryImuName = sensorInformation.getPrimaryBodyImu();
+            Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
+            ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel,
+                                                                     primaryImuName,
+                                                                     imuSensorNames,
+                                                                     footForceSensorNames,
+                                                                     rawSensorOutputMap,
+                                                                     estimatorDT,
+                                                                     gravity,
+                                                                     processedSensorOutputMap,
+                                                                     yoGraphicsListRegistry,
+                                                                     estimatorFullRobotModel);
+
+            InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
+            if (ekfParameterStream == null)
+            {
+               throw new RuntimeException("Did not find parameter file for EKF.");
+            }
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+
+            estimatorController.addRobotController(ekfStateEstimator);
+         }
+         else
+         {
+            reinitializeEKF = null;
+            ekfStateEstimator = null;
+         }
       }
       else
       {

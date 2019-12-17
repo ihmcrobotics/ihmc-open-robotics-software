@@ -6,7 +6,7 @@ import org.ejml.ops.MatrixDimensionException;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * The {@code SelectionMatrix3D} provides a simple way to define for a given application what are

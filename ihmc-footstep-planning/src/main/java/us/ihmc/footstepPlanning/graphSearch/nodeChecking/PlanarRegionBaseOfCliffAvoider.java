@@ -19,20 +19,31 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
 {
-   private final FootstepPlannerParametersReadOnly parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
+   private final DoubleSupplier minimumDistanceFromCliffBottoms;
+   private final DoubleSupplier cliffHeightToAvoid;
 
    private FootstepNode startNode;
 
    public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this.parameters = parameters;
+      this(snapper, footPolygons, parameters::getMinimumDistanceFromCliffBottoms, parameters::getCliffHeightToAvoid);
+   }
+
+   public PlanarRegionBaseOfCliffAvoider(FootstepNodeSnapperReadOnly snapper,
+                                         SideDependentList<ConvexPolygon2D> footPolygons,
+                                         DoubleSupplier minimumDistanceFromCliffBottoms,
+                                         DoubleSupplier cliffHeightToAvoid)
+   {
       this.footPolygons = footPolygons;
       this.snapper = snapper;
+      this.minimumDistanceFromCliffBottoms = minimumDistanceFromCliffBottoms;
+      this.cliffHeightToAvoid = cliffHeightToAvoid;
    }
 
    @Override
@@ -50,13 +61,10 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       if(!hasPlanarRegions())
          return true;
 
-      if(parameters.getMinimumDistanceFromCliffBottoms() <= 0.0 || Double.isInfinite(parameters.getCliffHeightToAvoid()))
-         return true;
+      double cliffHeightToAvoid = this.cliffHeightToAvoid.getAsDouble();
+      double minimumDistanceFromCliffBottoms = this.minimumDistanceFromCliffBottoms.getAsDouble();
 
-      double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
-
-      if ((cliffHeightToAvoid <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
+      if(minimumDistanceFromCliffBottoms <= 0.0 || Double.isInfinite(cliffHeightToAvoid) || (cliffHeightToAvoid <= 0.0))
          return true;
 
       RigidBodyTransformReadOnly soleTransform = snapper.getSnapData(node).getOrComputeSnappedNodeTransform(node);

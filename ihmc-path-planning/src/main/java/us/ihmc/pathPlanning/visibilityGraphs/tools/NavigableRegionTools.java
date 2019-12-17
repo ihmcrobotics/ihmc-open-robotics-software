@@ -13,11 +13,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegions;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static us.ihmc.robotics.geometry.PlanarRegionTools.isPointInsideConvexPolygon2D;
 
 public class NavigableRegionTools
 {
@@ -28,22 +29,15 @@ public class NavigableRegionTools
 
    public static NavigableRegion getNavigableRegionContainingThisPoint(Point3DReadOnly point, NavigableRegions navigableRegions, double ceilingHeight, double epsilon)
    {
-      List<NavigableRegion> containers = new ArrayList<>();
-
-      List<NavigableRegion> navigableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
       if (navigableRegionsList == null)
          return null;
 
-      for (NavigableRegion navigableRegion : navigableRegionsList)
-      {
+      List<NavigableRegion> containers = navigableRegionsList.stream().filter(navigableRegion -> {
          if (computeMinHeightOfNavigableRegionAbovePoint(navigableRegion, point) > ceilingHeight)
-            continue;
-
-         if (isPointInWorldInsideNavigableRegion(navigableRegion, point, epsilon))
-         {
-            containers.add(navigableRegion);
-         }
-      }
+            return false;
+         return isPointInWorldInsideNavigableRegion(navigableRegion, point, epsilon);
+      }).collect(Collectors.toList());
 
       if (containers.isEmpty())
          return null;
@@ -51,10 +45,9 @@ public class NavigableRegionTools
          return containers.get(0);
 
       Point3D pointOnRegion = new Point3D();
-      Vector3D regionNormal = new Vector3D();
 
       NavigableRegion closestContainer = containers.get(0);
-      closestContainer.getHomePlanarRegion().getNormal(regionNormal);
+      Vector3D regionNormal = closestContainer.getHomePlanarRegion().getNormal();
       closestContainer.getHomePlanarRegion().getPointInRegion(pointOnRegion);
       double minDistance = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, pointOnRegion, regionNormal);
 
@@ -77,139 +70,27 @@ public class NavigableRegionTools
 
    private static double computeMinHeightOfNavigableRegionAbovePoint(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck)
    {
-      double minHeight = Double.POSITIVE_INFINITY;
-      for (Point2DReadOnly convexHullVertex : navigableRegion.getHomePlanarRegion().getConvexHull().getPolygonVerticesView())
-      {
-         Point3D convexHullVertexInWorld = new Point3D(convexHullVertex);
-         navigableRegion.getHomePlanarRegion().transformFromLocalToWorld(convexHullVertexInWorld);
-         minHeight = Math.min(convexHullVertexInWorld.getZ() - pointInWorldToCheck.getZ(), minHeight);
-      }
-
-      return minHeight;
+      return navigableRegion.getHomePlanarRegion().getBoundingBox3dInWorld().getMinZ() - pointInWorldToCheck.getZ();
    }
 
-   public static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
+   private static boolean isPointInWorldInsideNavigableRegion(NavigableRegion navigableRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
       pointInLocalToCheck.applyTransform(navigableRegion.getTransformFromWorldToLocal(), false);
       return isPointInLocalInsideNavigableRegion(navigableRegion, pointInLocalToCheck, epsilon);
    }
 
-   public static boolean isPointInLocalInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
+   //TODO: Unit tests for all of this.
+   private static boolean isPointInLocalInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
    {
       PlanarRegion planarRegion = navigableRegion.getHomePlanarRegion();
-      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      BoundingBox2D boundingBox = convexHull.getBoundingBox();
 
-      if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
-         return false;
-      if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
+      if (!PlanarRegionTools.isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon))
          return false;
 
-      if (!isPointInsideNavigableRegion(navigableRegion, pointInLocalToCheck))
+      if (navigableRegion.getObstacleClusters().stream().anyMatch(obstacleCluster -> obstacleCluster.isInsideNonNavigableZone(pointInLocalToCheck)))
          return false;
 
-      for (Cluster obstacleCluster : navigableRegion.getObstacleClusters())
-      {
-         if (isPointInsideClosedConcaveHullOfCluster(obstacleCluster, pointInLocalToCheck))
-            return false;
-      }
-
-      List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
-      // If inside the convex hull at this point, then if there is only one polygon, you are also inside that too...
-      //TODO: Unit tests for all of this.
-      if (convexPolygons.size() == 1)
-      {
-         return true;
-      }
-
-      if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
-      {
-         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
-
-            if (isInsidePolygon)
-               return true;
-         }
-         return false;
-
-         //         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
-      }
-      else
-      {
-         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
-
-            if (isInsidePolygon)
-               return true;
-
-            //TODO: +++JerryPratt: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
-            // When ClusterTools.extrudePolygon() is buggy...
-            //
-            //            if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
-            //               throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
-            //
-            //         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
-            //         Arrays.fill(epsilons, epsilon);
-            //         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
-            //
-            //         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
-         }
-      }
-      return false;
-   }
-
-   /**
-    * Return true if the given point is contained inside the boundary.
-    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
-    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
-    *
-    * @param test The point to check
-    * @return true if the point is inside the boundary, false otherwise
-    *
-    */
-   public static boolean isPointInsideNavigableRegion(NavigableRegion navigableRegion, Point2DReadOnly test)
-   {
-      return isPointInsideClosedConcaveHullOfCluster(navigableRegion.getHomeRegionCluster(), test);
-   }
-
-   public static boolean isPointInsideClosedConcaveHullOfCluster(Cluster cluster, Point2DReadOnly test)
-   {
-      return isPointInsideClosedConcaveHull(cluster.getNonNavigableExtrusionsInLocal().getPoints(), test);
-   }
-
-   public static boolean isPointInsideClosedConcaveHull(List<Point2DReadOnly> vertices, Point2DReadOnly test)
-   {
-      int numberOfVertices = vertices.size();
-
-      int i;
-      int j;
-      boolean result = false;
-
-      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
-      {
-         Point2DReadOnly iVertex = vertices.get(i);
-         Point2DReadOnly jVertex = vertices.get(j);
-
-         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
-               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
-         {
-            result = !result;
-         }
-      }
-      return result;
+      return PlanarRegionTools.isPointInsidePolygon(navigableRegion.getHomeRegionCluster().getNavigableExtrusionsInLocal().getPoints(), pointInLocalToCheck);
    }
 }
