@@ -1,11 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.clusterManagement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -13,6 +9,11 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A Cluster typically represents an obstacle over a planar region.
@@ -106,24 +107,51 @@ public class Cluster
       preferredNonNavigableExtrusionsInLocal.clear();
    }
 
+   /** Returns true if it's on an edge.    */
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
+   {
+      return isInsideNonNavigableZone(query, 1e-7);
+   }
+
+   private boolean isInsideNonNavigableZone(Point2DReadOnly query, double epsilon)
    {
       if (nonNavigableExtrusionInLocal.isEmpty())
          return false;
 
-      BoundingBox2D boundingBox = getNonNavigableExtrusionsBoundingBox();
+      BoundingBox2DReadOnly boundingBox = getNonNavigableExtrusionsBoundingBox();
 
       if (extrusionSide == ExtrusionSide.INSIDE)
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, epsilon))
             return true;
-         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
+         return !PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query, epsilon);
       }
       else
       {
-         if (!boundingBox.isInsideInclusive(query))
+         if (!boundingBox.isInsideEpsilon(query, epsilon))
             return false;
-         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query);
+         return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query, epsilon);
+      }
+   }
+
+   public boolean isInsidePreferredNonNavigableZone(Point2DReadOnly query)
+   {
+      if (preferredNonNavigableExtrusionsInLocal.isEmpty())
+         return false;
+
+      BoundingBox2DReadOnly boundingBox = getPreferredNonNavigableExtrusionsBoundingBox();
+
+      if (extrusionSide == ExtrusionSide.INSIDE)
+      {
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
+            return true;
+         return preferredNonNavigableExtrusionsInLocal.stream().noneMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
+      }
+      else
+      {
+         if (!boundingBox.isInsideEpsilon(query, 1e-7))
+            return false;
+         return preferredNonNavigableExtrusionsInLocal.stream().anyMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
       }
    }
 
@@ -299,14 +327,13 @@ public class Cluster
       addPreferredNavigableExtrusionsInLocal(listsOfPoints);
    }
 
-
    public void setNonNavigableExtrusionsInLocal(ExtrusionHull points)
    {
       clearNonNavigableExtrusions();
       addNonNavigableExtrusionsInLocal(points);
    }
 
-   public void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
+   private void addNonNavigableExtrusionInLocal(Point2DReadOnly nonNavigableExtrusionInLocal)
    {
       nonNavigableExtrusionsBoundingBox.updateToIncludePoint(nonNavigableExtrusionInLocal);
       this.nonNavigableExtrusionInLocal.addPoint(nonNavigableExtrusionInLocal);
@@ -322,7 +349,7 @@ public class Cluster
       nonNavigableExtrusionInLocal.stream().forEach(this::addNonNavigableExtrusionInLocal);
    }
 
-   public BoundingBox2D getNonNavigableExtrusionsBoundingBox()
+   public BoundingBox2DReadOnly getNonNavigableExtrusionsBoundingBox()
    {
       return nonNavigableExtrusionsBoundingBox;
    }
@@ -375,7 +402,7 @@ public class Cluster
       nonNavigableExtrusionInLocal.forEach(this::addPreferredNonNavigableExtrusionInLocal);
    }
 
-   public BoundingBox2D getPreferredNonNavigableExtrusionsBoundingBox()
+   public BoundingBox2DReadOnly getPreferredNonNavigableExtrusionsBoundingBox()
    {
       return preferredNonNavigableExtrusionsBoundingBox;
    }
@@ -394,33 +421,33 @@ public class Cluster
 
 
 
-   private Point3D toWorld3D(Point2DReadOnly pointInLocal)
+   private Point3DReadOnly toWorld3D(Point2DReadOnly pointInLocal)
    {
       return toWorld3D(new Point3D(pointInLocal));
    }
 
-   private Point2D toWorld2D(Point3DReadOnly pointInLocal)
+   private Point2DReadOnly toWorld2D(Point3DReadOnly pointInLocal)
    {
       Point2D pointInWorld = new Point2D(pointInLocal);
       transformToWorld.transform(pointInWorld, false);
       return pointInWorld;
    }
 
-   private Point2D toWorld2D(Point2DReadOnly pointInLocal)
+   private Point2DReadOnly toWorld2D(Point2DReadOnly pointInLocal)
    {
       Point2D pointInWorld = new Point2D(pointInLocal);
       transformToWorld.transform(pointInWorld, false);
       return pointInWorld;
    }
 
-   private Point3D toWorld3D(Point3DReadOnly pointInLocal)
+   private Point3DReadOnly toWorld3D(Point3DReadOnly pointInLocal)
    {
       Point3D pointInWorld = new Point3D(pointInLocal);
       transformToWorld.transform(pointInWorld);
       return pointInWorld;
    }
 
-   private Point3D toLocal3D(Point3DReadOnly pointInWorld)
+   private Point3DReadOnly toLocal3D(Point3DReadOnly pointInWorld)
    {
       Point3D pointInLocal = new Point3D();
       transformToWorld.inverseTransform(pointInWorld, pointInLocal);

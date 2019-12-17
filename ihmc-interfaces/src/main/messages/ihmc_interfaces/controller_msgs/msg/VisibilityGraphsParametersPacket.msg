@@ -69,6 +69,4 @@ float64 weight_for_inter_region_edge -11.1
 
 float64 weight_for_non_preferred_edge -11.1
 
-float64 cost_for_non_preferred_node -11.1
-
 bool return_best_effort_solution false
