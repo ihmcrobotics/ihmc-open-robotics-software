@@ -62,6 +62,12 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
 
+      if (imuDefinitions != null)
+      {
+         for (IMUDefinition imuDefinition : imuDefinitions)
+            sdfPerfectSimulatedSensorReader.addIMUSensor(imuDefinition);
+      }
+
       createAndAddForceSensors(sdfPerfectSimulatedSensorReader, forceSensors);
    }
 

@@ -294,8 +294,8 @@ public class PlanarRegionTerrainObjectTest
                point.setZ(-point.getZ());
 
             point.applyTransform(transform);
-            terrainObject.checkIfInside(point.getX(), point.getY(), point.getZ(), new Point3D(), new Vector3D());
-            Assertions.assertFalse(terrainObject.checkIfInside(point.getX(), point.getY(), point.getZ(), new Point3D(), new Vector3D()));
+            boolean isInside = terrainObject.checkIfInside(point.getX(), point.getY(), point.getZ(), new Point3D(), new Vector3D());
+            Assertions.assertFalse(isInside);
          }
       }
    }

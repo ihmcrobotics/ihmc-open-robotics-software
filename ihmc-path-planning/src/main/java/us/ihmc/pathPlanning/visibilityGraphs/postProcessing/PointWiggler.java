@@ -1,17 +1,18 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * Uses QP to wiggle a point away from clusters of other points

@@ -157,11 +157,6 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(weightForNonPreferredEdge, weight);
    }
 
-   default void setCostForNonPreferredNode(double cost)
-   {
-      set(costForNonPreferredNode, cost);
-   }
-
    default void set(VisibilityGraphsParametersPacket packet)
    {
       double noValue = VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE;
@@ -214,8 +209,6 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
       if (packet.getWeightForNonPreferredEdge() != noValue)
          setWeightForNonPreferredEdge(packet.getWeightForNonPreferredEdge());
-      if (packet.getCostForNonPreferredNode() != noValue)
-         setCostForNonPreferredNode(packet.getCostForNonPreferredNode());
 
       setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());

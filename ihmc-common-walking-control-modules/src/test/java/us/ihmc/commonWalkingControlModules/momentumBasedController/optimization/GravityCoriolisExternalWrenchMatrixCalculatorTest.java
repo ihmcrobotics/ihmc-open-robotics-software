@@ -5,20 +5,17 @@ import java.util.HashMap;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -30,8 +27,6 @@ import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -54,12 +49,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
    int degreesOfFreedom;
    int floatingBaseDoFs;
    int bodyDoFs;
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    /**
     * This should return equivalence, as acceleration should not play a factor in the coriolis, centrifugal, and gravity force matrix.
@@ -112,7 +101,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
          for (int j = 0; j < allJoints.length; j++)
          {
             JointBasics joint = allJoints[j];
-            JUnitTools.assertMatrixEquals(noAccelCoriolisMatrices.get(joint), coriolisMatrices.get(joint), tolerance);
+            MatrixTestTools.assertMatrixEquals(noAccelCoriolisMatrices.get(joint), coriolisMatrices.get(joint), tolerance);
          }
       }
    }
@@ -134,8 +123,6 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       fullHumanoidRobotModel = new FullRobotModelTestTools.RandomFullHumanoidRobotModel(random);
       fullHumanoidRobotModel.updateFrames();
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
-
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullHumanoidRobotModel.getElevator());
 
       ControllerCoreOptimizationSettings momentumOptimizationSettings = new GeneralMomentumOptimizationSettings();
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();

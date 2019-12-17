@@ -28,17 +28,16 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 {
    private final KinematicsPlanningToolboxController kinematicsPlanningToolboxController;
 
-   public KinematicsPlanningToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer) throws IOException
-   {
-      this(drcRobotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-   }
-
    public KinematicsPlanningToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation) throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
             DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
-      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager,
-                                                                                    yoGraphicsListRegistry, registry);
+      kinematicsPlanningToolboxController = new KinematicsPlanningToolboxController(robotModel,
+                                                                                    fullRobotModel,
+                                                                                    commandInputManager,
+                                                                                    statusOutputManager,
+                                                                                    yoGraphicsListRegistry,
+                                                                                    registry);
       commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
@@ -48,11 +47,13 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
       });

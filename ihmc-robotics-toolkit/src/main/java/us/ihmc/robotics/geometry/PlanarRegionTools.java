@@ -8,8 +8,6 @@ import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -43,9 +41,15 @@ public class PlanarRegionTools
       double minBzInWorld = regionB.getBoundingBox3dInWorld().getMinZ();
       double maxBzInWorld = regionB.getBoundingBox3dInWorld().getMaxZ();
 
-      // TODO add an initial bounding box check
+      // check some of the bounding boxes first
+      double maxAzInWorld = regionA.getBoundingBox3dInWorld().getMaxZ();
+      if (maxAzInWorld > maxBzInWorld + epsilon)
+         return true;
+      // if this is true, none of the below true conditions can be satisfied.
+      if (maxAzInWorld <= minBzInWorld + epsilon)
+         return false;
 
-      ConvexPolygon2D convexHullA = regionA.getConvexHull();
+      ConvexPolygon2DReadOnly convexHullA = regionA.getConvexHull();
 
       RigidBodyTransformReadOnly transformToWorldA = regionA.getTransformToWorld();
       RigidBodyTransformReadOnly transformFromWorldToLocalB = regionB.getTransformToLocal();
@@ -64,9 +68,6 @@ public class PlanarRegionTools
          pointAInLocalB.set(pointAInWorld);
          transformFromWorldToLocalB.transform(pointAInLocalB);
 
-         if (pointAInWorld.getZ() > maxBzInWorld + epsilon)
-            return true;
-
          if ((pointAInWorld.getZ() > minBzInWorld + epsilon) && (pointAInLocalB.getZ() > epsilon))
             return true;
       }
@@ -74,37 +75,10 @@ public class PlanarRegionTools
       return false;
    }
 
-   private static double[] getMinAndMaxZInWorld(List<? extends Point2DReadOnly> pointsInLocal, RigidBodyTransformReadOnly transformToWorld)
-   {
-      double minZ = Double.POSITIVE_INFINITY;
-      double maxZ = Double.NEGATIVE_INFINITY;
-
-      Point3D pointInWorld = new Point3D();
-
-      for (Point2DReadOnly pointInLocal : pointsInLocal)
-      {
-         pointInWorld.set(pointInLocal);
-         pointInWorld.setZ(0.0);
-         transformToWorld.transform(pointInWorld);
-
-         double pointZInWorld = pointInWorld.getZ();
-         if (pointZInWorld < minZ)
-            minZ = pointZInWorld;
-
-         if (pointZInWorld > maxZ)
-            maxZ = pointZInWorld;
-      }
-
-      return new double[] {minZ, maxZ};
-   }
-
    public static boolean isPlanarRegionIntersectingWithCircle(Point2DReadOnly circleOriginInWorld, double circleRadius, PlanarRegion query)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      query.getTransformToWorld(transformToWorld);
-
       Point2D originInLocal = new Point2D(circleOriginInWorld);
-      originInLocal.applyInverseTransform(transformToWorld, false);
+      originInLocal.applyTransform(query.getTransformToLocal(), false);
 
       return query.getConvexHull().signedDistance(originInLocal) <= circleRadius;
    }
@@ -114,65 +88,40 @@ public class PlanarRegionTools
       return isPointInsidePolygon(Arrays.asList(polygon), pointToCheck);
    }
 
+   public static boolean isPointInsidePolygon(ConvexPolygon2DReadOnly polygon, Point2DReadOnly pointToCheck)
+   {
+      return isPointInsidePolygon(polygon.getPolygonVerticesView(), pointToCheck);
+   }
+
    public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck)
    {
-      if (polygon.size() < 3)
-      {
-         return false;
-      }
+      return isPointInsidePolygon(polygon, pointToCheck.getX(), pointToCheck.getY());
+   }
 
-      Point2DReadOnly rayOrigin = pointToCheck;
-      Vector2D rayDirection = new Vector2D();
+   public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, double pointToCheckX, double pointToCheckY)
+   {
+      return isPointInsideConcaveHull(polygon, pointToCheckX, pointToCheckY);
+   }
 
-      Point2D pointOnArbitraryEdge = new Point2D();
+   public static boolean isPointInsidePolygon(List<? extends Point2DReadOnly> polygon, Point2DReadOnly pointToCheck, double epsilon)
+   {
+      return isPointInsideConcaveHull(polygon, pointToCheck.getX(), pointToCheck.getY(), epsilon);
+   }
 
-      for (int i = 0; i < polygon.size(); i++)
-      { // Picking an edge that is not parallel to the ray.
-         Point2DReadOnly edgeStart = polygon.get(i);
-         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
-         Vector2D edgeDirection = new Vector2D();
-         edgeDirection.sub(edgeEnd, edgeStart);
 
-         pointOnArbitraryEdge.interpolate(edgeStart, edgeEnd, 0.5);
-         rayDirection.sub(pointOnArbitraryEdge, rayOrigin);
-
-         double cross = edgeDirection.cross(rayDirection);
-
-         if (Math.abs(cross) > 1.0e-3)
-            break;
-      }
-
-      int numberOfIntersections = 0;
-
-      Point2D previousIntersection = null;
-      Point2D currentIntersection = null;
-
-      for (int i = 0; i < polygon.size(); i++)
-      {
-         Point2DReadOnly edgeStart = polygon.get(i);
-         Point2DReadOnly edgeEnd = ListWrappingIndexTools.getNext(i, polygon);
-
-         currentIntersection = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(rayOrigin, rayDirection, edgeStart, edgeEnd);
-
-         if (currentIntersection != null)
-         { // There is an intersection
-            if (previousIntersection == null || !currentIntersection.epsilonEquals(previousIntersection, 1.0e-10))
-            { // Because the intersection is different from the previous, the intersection is not on a vertex.
-               numberOfIntersections++;
-            }
-         }
-
-         previousIntersection = currentIntersection;
-      }
-
-      if (numberOfIntersections == 0)
-      {
-         //Could be both outside or inside
-         return false;
-      }
-
-      // If the number of intersections is odd, the point is inside.
-      return numberOfIntersections % 2 != 0;
+   /**
+    * Return true if the given point is contained inside the boundary.
+    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    *
+    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
+    *
+    * @param test The point to check
+    * @return true if the point is inside the boundary, false otherwise
+    *
+    */
+   public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, Point2DReadOnly test)
+   {
+      return isPointInsideConcaveHull(polygon, test.getX(), test.getY());
    }
 
    /**
@@ -185,9 +134,14 @@ public class PlanarRegionTools
     * @return true if the point is inside the boundary, false otherwise
     *
     */
-   public static boolean isPointInsideConvexPolygon2D(ConvexPolygon2D polygon, Point2DReadOnly test)
+   public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY)
    {
-      int numberOfVertices = polygon.getNumberOfVertices();
+      return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
+   }
+
+   public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY, double epsilon)
+   {
+      int numberOfVertices = polygon.size();
 
       int i;
       int j;
@@ -195,35 +149,100 @@ public class PlanarRegionTools
 
       for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
       {
-         Point2DReadOnly iVertex = polygon.getVertex(i);
-         Point2DReadOnly jVertex = polygon.getVertex(j);
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly previousVertex = polygon.get(j);
 
-         if ((iVertex.getY() > test.getY()) != (jVertex.getY() > test.getY())
-               && (test.getX() < (jVertex.getX() - iVertex.getX()) * (test.getY() - iVertex.getY()) / (jVertex.getY() - iVertex.getY()) + iVertex.getX()))
+         if (rayIntersectsWithEdge(vertex, previousVertex, testX, testY))
          {
             result = !result;
          }
       }
-      return result;
+
+      if (result)
+         return true;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly previousVertex = polygon.get(j);
+
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(testX, testY, vertex, previousVertex) <= epsilon)
+            return true;
+      }
+
+      return false;
    }
+
+   /**
+    * Return true if the given point is contained inside the boundary.
+    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    *
+    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
+    *
+    * @param test The point to check
+    * @return true if the point is inside the boundary, false otherwise
+    *
+    */
+   public static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY)
+   {
+      return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
+   }
+
+   // FIXME this is currently private, because the epsilon feature is untested.
+   private static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY, double epsilon)
+   {
+      int numberOfVertices = polygon.length;
+
+      int i;
+      int j;
+      boolean result = false;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly vertex = polygon[i];
+         Point2DReadOnly previousVertex = polygon[j];
+
+         if (rayIntersectsWithEdge(vertex, previousVertex, testX, testY))
+         {
+            result = !result;
+         }
+      }
+
+      if (result)
+         return true;
+
+      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
+      {
+         Point2DReadOnly vertex = polygon[i];
+         Point2DReadOnly previousVertex = polygon[j];
+
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(testX, testY, vertex, previousVertex) <= epsilon)
+            return true;
+      }
+
+      return false;
+   }
+
+   /**
+    * Checks to see if a ray starting at {@param startOfRayX} and {@param startOfRayY} and casting in the positive X direction intersects with the edge
+    * going from {@param previousVertex} to {@param vertex}.
+    */
+   static boolean rayIntersectsWithEdge(Point2DReadOnly vertex, Point2DReadOnly previousVertex, double startOfRayX, double startOfRayY)
+   {
+      // if the Y position is to the left or right of both vertices, it definitely does not intersect with the edge, because its too high or too low
+      if (startOfRayY < vertex.getY() == startOfRayY < previousVertex.getY())
+         return false;
+      // checks to see if the line through the point actually intersects with a line segment.
+      return (startOfRayX < (previousVertex.getX() - vertex.getX()) / (previousVertex.getY() - vertex.getY()) * (startOfRayY - vertex.getY())  + vertex.getX());
+   }
+
+
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
       Point2D pointInLocalToCheck = new Point2D(pointInWorldToCheck);
-      pointInLocalToCheck.applyInverseTransform(transformToWorld, false);
+      pointInLocalToCheck.applyTransform(planarRegion.getTransformToLocal(), false);
       return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck, epsilon);
-   }
-
-   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck)
-   {
-      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck));
-   }
-
-   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInLocalToCheck, double epsilon)
-   {
-      return isPointInLocalInsidePlanarRegion(planarRegion, new Point2D(pointInLocalToCheck), epsilon);
    }
 
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck)
@@ -233,68 +252,38 @@ public class PlanarRegionTools
 
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, Point2DReadOnly pointInLocalToCheck, double epsilon)
    {
+      return isPointInLocalInsidePlanarRegion(planarRegion, pointInLocalToCheck.getX(), pointInLocalToCheck.getY(), epsilon);
+   }
+
+   public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, double pointInLocalToCheckX, double pointInLocalToCheckY, double epsilon)
+   {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
       BoundingBox2D boundingBox = convexHull.getBoundingBox();
 
-      if (!boundingBox.isInsideEpsilon(pointInLocalToCheck, epsilon))
+      if (!boundingBox.isInsideEpsilon(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
-      if (!convexHull.isPointInside(pointInLocalToCheck, epsilon))
+      if (!convexHull.isPointInside(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
-      List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
 
       // If inside the convex hull at this point, then if there is only one polygon, you are also inside that too...
-      //TODO: Unit tests for all of this.
-      if (convexPolygons.size() == 1)
+      if (planarRegion.getNumberOfConvexPolygons() == 1)
       {
          return true;
       }
 
       if (MathTools.epsilonEquals(0.0, epsilon, 1.0e-10))
       {
-         //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = isPointInsideConvexPolygon2D(convexPolygon, pointInLocalToCheck);
-
-            if (isInsidePolygon)
-               return true;
-         }
-         return false;
-
-         //         return isPointInsidePolygon(planarRegion.getConcaveHull(), pointInLocalToCheck);
+         return isPointInsideConcaveHull(planarRegion.getConcaveHull(), pointInLocalToCheckX, pointInLocalToCheckY);
       }
       else
       {
+         List<ConvexPolygon2D> convexPolygons = planarRegion.getConvexPolygons();
+
          //TODO: +++JerryPratt: Discuss this one with Sylvain. Do we want to check inside the concave hull, or check each planar region individually?
-
-         for (ConvexPolygon2D convexPolygon : convexPolygons)
-         {
-            //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
-            // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
-            //            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck);
-            boolean isInsidePolygon = convexPolygon.isPointInside(pointInLocalToCheck, epsilon);
-
-            if (isInsidePolygon)
-               return true;
-
-            //TODO: +++JerryPratt: Discuss using the concaveHull or not. It seems buggy when points cross over the other side..
-            // When ClusterTools.extrudePolygon() is buggy...
-            //
-            //            if (planarRegion.getConcaveHullSize() < convexHull.getNumberOfVertices())
-            //               throw new IllegalArgumentException("The concave hull of this polygon is not valid.");
-            //
-            //         double[] epsilons = new double[planarRegion.getConcaveHullSize()];
-            //         Arrays.fill(epsilons, epsilon);
-            //         List<Point2D> concaveHull = ClusterTools.extrudePolygon(true, Arrays.asList(planarRegion.getConcaveHull()), epsilons);
-            //
-            //         return isPointInsidePolygon(concaveHull, pointInLocalToCheck);
-         }
+         //+++JerryPratt: Not sure if this one is faster or not. Discuss with Sylvain best way to do point inside convex polygon check.
+         // Seems like you should be able to do a binary search on the distance to vertices, since it should be monotonic, right?
+         return convexPolygons.stream().anyMatch(convexPolygon2D -> convexPolygon2D.isPointInside(pointInLocalToCheckX, pointInLocalToCheckY, epsilon));
       }
-      return false;
    }
 
    public static double getDistanceFromLineSegment3DToPlanarRegion(LineSegment3DReadOnly lineSegmentInLocal,
@@ -455,6 +444,8 @@ public class PlanarRegionTools
                List<Point2DReadOnly> polygonIn2D = new ArrayList<>();
                Point2DReadOnly intersectionIn2D = new Point2D(intersectionWithPlane);
                convexPolygon3D.forEach(vertex -> polygonIn2D.add(new Point2D(vertex)));
+               // TODO look to see if PlanarRegionTools.isPointInsideConcaveHull is faster
+
                if (isPointInsidePolygon(polygonIn2D, intersectionIn2D))
                {
                   minDistanceToEdge = -minDistanceToEdge;
@@ -521,6 +512,7 @@ public class PlanarRegionTools
                List<Point2DReadOnly> polygonIn2D = new ArrayList<>();
                Point2DReadOnly intersectionIn2D = new Point2D(intersectionWithPlane);
                convexPolygon3D.forEach(vertex -> polygonIn2D.add(new Point2D(vertex)));
+               // TODO look to see if PlanarRegionTools.isPointInsideConcaveHull is faster
                if (isPointInsidePolygon(polygonIn2D, intersectionIn2D))
                {
                   minDistanceToEdge = -minDistanceToEdge;
@@ -534,13 +526,12 @@ public class PlanarRegionTools
 
    public static boolean isPlanarRegionIntersectingWithCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius, PlanarRegion query)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      query.getTransformToWorld(transformToWorld);
+      RigidBodyTransformReadOnly transformToLocal = query.getTransformToLocal();
 
       Point3D firstEndPointInLocal = new Point3D(capsuleSegmentInWorld.getFirstEndpoint());
       Point3D secondEndPointInLocal = new Point3D(capsuleSegmentInWorld.getSecondEndpoint());
-      firstEndPointInLocal.applyInverseTransform(transformToWorld);
-      secondEndPointInLocal.applyInverseTransform(transformToWorld);
+      firstEndPointInLocal.applyTransform(transformToLocal);
+      secondEndPointInLocal.applyTransform(transformToLocal);
 
       Point2D[] concaveHull = query.getConcaveHull();
 
@@ -651,32 +642,28 @@ public class PlanarRegionTools
       return area;
    }
 
-   public static Point2D getAverageCentroid2DInLocal(PlanarRegion planarRegion)
+   public static Point2DReadOnly getCentroid2DInLocal(PlanarRegion planarRegion)
    {
       Point2D centroid = new Point2D();
 
-      int count = 0;
-      double xSum = 0.0;
-      double ySum = 0.0;
+      double totalArea = 0.0;
       for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
+         double area = convexPolygon.getArea();
+         totalArea += area;
          Point2DReadOnly convexPolygonCentroid = convexPolygon.getCentroid();
-
-         xSum += convexPolygonCentroid.getX();
-         ySum += convexPolygonCentroid.getY();
-         ++count;
+         centroid.scaleAdd(area, convexPolygonCentroid, centroid);
       }
 
-      centroid.setX(xSum / count);
-      centroid.setY(ySum / count);
+      centroid.scale(1.0 / totalArea);
 
       return centroid;
    }
 
-   public static Point3D getAverageCentroid3DInWorld(PlanarRegion planarRegion)
+   public static Point3DReadOnly getCentroid3DInWorld(PlanarRegion planarRegion)
    {
-      Point2D averageCentroid2DInLocal = getAverageCentroid2DInLocal(planarRegion);
-      Point3D point3D = new Point3D(averageCentroid2DInLocal);
+      Point2DReadOnly centroidInLocal = getCentroid2DInLocal(planarRegion);
+      Point3D point3D = new Point3D(centroidInLocal);
       point3D.applyTransform(planarRegion.getTransformToWorld());
       return point3D;
    }
@@ -702,12 +689,9 @@ public class PlanarRegionTools
       {
          Point3D vertexOfAInWorld = new Point3D(convexHullInLocalA.getVertex(i));
          transformFromAToWorld.transform(vertexOfAInWorld);
-         Point3D vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
-         if (vertexOfAProjectedToBInWorld != null)
-         {
-            double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
-            minZOfAProjectedToB = Math.min(minZOfAProjectedToB, deltaZ);
-         }
+         Point3DReadOnly vertexOfAProjectedToBInWorld = projectInZToPlanarRegion(vertexOfAInWorld, regionB);
+         double deltaZ = vertexOfAInWorld.getZ() - vertexOfAProjectedToBInWorld.getZ();
+         minZOfAProjectedToB = Math.min(minZOfAProjectedToB, deltaZ);
       }
 
       RigidBodyTransformReadOnly transformFromBToWorld = regionB.getTransformToWorld();
@@ -720,11 +704,8 @@ public class PlanarRegionTools
          Point3D vertexOfBInWorld = new Point3D(convexHullInLocalB.getVertex(i));
          transformFromBToWorld.transform(vertexOfBInWorld);
          Point3D vertexOfBProjectedToAInWorld = projectInZToPlanarRegion(vertexOfBInWorld, regionA);
-         if (vertexOfBProjectedToAInWorld != null)
-         {
-            double deltaZ = vertexOfBProjectedToAInWorld.getZ() - vertexOfBInWorld.getZ();
-            minZOfBProjectedToA = Math.min(minZOfBProjectedToA, deltaZ);
-         }
+         double deltaZ = vertexOfBProjectedToAInWorld.getZ() - vertexOfBInWorld.getZ();
+         minZOfBProjectedToA = Math.min(minZOfBProjectedToA, deltaZ);
       }
 
       if (Double.isInfinite(minZOfAProjectedToB))
@@ -745,18 +726,9 @@ public class PlanarRegionTools
     */
    public static Point3D projectInZToPlanarRegion(Point3DReadOnly pointInWorldToProjectInZ, PlanarRegion planarRegion)
    {
-      Vector3D surfaceNormalInWorld = planarRegion.getNormal();
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
-
-      Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
-      transformToWorld.transform(planarRegionReferencePointInWorld);
-
-      Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
-
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld, pointInWorldToProjectInZ,
-                                                                     verticalLine);
+      Point3D projectedPoint = new Point3D(pointInWorldToProjectInZ);
+      projectedPoint.setZ(planarRegion.getPlaneZGivenXY(pointInWorldToProjectInZ.getX(), pointInWorldToProjectInZ.getY()));
+      return projectedPoint;
    }
 
    public static boolean allVerticesAreAbovePlane3D(Plane3D plane, PlanarRegion planarRegion)
@@ -953,7 +925,7 @@ public class PlanarRegionTools
       return projectPolygonVertically(planarRegion.getTransformToWorld(), planarRegion.getConvexHull());
    }
 
-   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2D polygonInLocalToProjectVertically)
+   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2DReadOnly polygonInLocalToProjectVertically)
    {
       List<? extends Point2DReadOnly> verticesToProject = polygonInLocalToProjectVertically.getPolygonVerticesView();
 
@@ -965,6 +937,7 @@ public class PlanarRegionTools
          transformToWorld.transform(pointToProjectInWorld);
          projectedPolygon.addVertex(pointToProjectInWorld.getX(), pointToProjectInWorld.getY());
       }
+      projectedPolygon.update();
 
       return projectedPolygon;
    }
@@ -1089,8 +1062,8 @@ public class PlanarRegionTools
     */
    public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
@@ -1106,7 +1079,7 @@ public class PlanarRegionTools
       }
 
       Point3D intersectionInPlaneFrame = new Point3D(intersectionWithPlane);
-      intersectionInPlaneFrame.applyInverseTransform(regionToWorld);
+      intersectionInPlaneFrame.applyTransform(regionToLocal);
       Point2D intersectionInPlaneFrame2D = new Point2D(intersectionInPlaneFrame);
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
@@ -1127,8 +1100,8 @@ public class PlanarRegionTools
     */
    public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLineInWorld)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
       Point3DReadOnly pointOnPlane = new Point3D(region.getConvexPolygon(0).getVertex(0));
@@ -1136,8 +1109,8 @@ public class PlanarRegionTools
       Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
       Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
 
-      pointOnLineInLocal.applyInverseTransform(regionToWorld);
-      directionOfLineInLocal.applyInverseTransform(regionToWorld);
+      pointOnLineInLocal.applyTransform(regionToLocal);
+      directionOfLineInLocal.applyTransform(regionToLocal);
 
       Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal,
                                                                                                      directionOfLineInLocal);
@@ -1185,8 +1158,8 @@ public class PlanarRegionTools
 
    public static Point3D intersectRegionWithRay(PlanarRegion region, Point3DReadOnly rayStart, Vector3D rayDirection)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      region.getTransformToWorld(regionToWorld);
+      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
@@ -1202,7 +1175,7 @@ public class PlanarRegionTools
       }
 
       Point3D intersectionInPlaneFrame = new Point3D(intersectionWithPlane);
-      intersectionInPlaneFrame.applyInverseTransform(regionToWorld);
+      intersectionInPlaneFrame.applyTransform(regionToLocal);
       // checking convex hull here - might be better to check all polygons to avoid false positive
       if (!region.getConvexHull().isPointInside(intersectionInPlaneFrame.getX(), intersectionInPlaneFrame.getY()))
       {

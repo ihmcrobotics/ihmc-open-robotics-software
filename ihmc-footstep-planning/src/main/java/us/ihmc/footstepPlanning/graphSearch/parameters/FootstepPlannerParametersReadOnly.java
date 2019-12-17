@@ -418,17 +418,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-    * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-    * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-    * candidate footstep will be rejected if this method returns {@code true}.
-    */
-   default boolean getRejectIfCannotFullyWiggleInside()
-   {
-      return get(rejectIfCannotFullyWiggleInside);
-   }
-
-   /**
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */

@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -31,7 +31,7 @@ public class FootstepPlannerStepUpTest
       FootstepNode node2 = new FootstepNode(1.2, -0.55, -0.349, RobotSide.RIGHT);
       FootstepNode node3 = new FootstepNode(1.6, -0.35, -0.349, RobotSide.LEFT);
 
-      FootstepGraph graph = new FootstepGraph();
+      DirectedGraph graph = new DirectedGraph();
       graph.initialize(node1);
       graph.checkAndSetEdge(node1, node2, 1.0);
       graph.checkAndSetEdge(node2, node3, 1.0);

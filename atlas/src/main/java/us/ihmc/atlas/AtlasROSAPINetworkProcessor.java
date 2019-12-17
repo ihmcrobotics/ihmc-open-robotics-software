@@ -20,6 +20,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasROSAPINetworkProcessor
@@ -42,11 +43,7 @@ public class AtlasROSAPINetworkProcessor
          rosAPICommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          
          DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.enableLocalControllerCommunicator(false);
-         networkProcessorParameters.enableUiModule(true);
-         networkProcessorParameters.enableROSAPICommunicator(true);
-         networkProcessorParameters.enableControllerCommunicator(true);
-         new DRCNetworkProcessor(robotModel, networkProcessorParameters);
+         new DRCNetworkProcessor(robotModel, networkProcessorParameters, PubSubImplementation.FAST_RTPS);
       }
       else 
       {

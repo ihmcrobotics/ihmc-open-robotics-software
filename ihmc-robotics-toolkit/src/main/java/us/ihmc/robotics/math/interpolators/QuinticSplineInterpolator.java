@@ -6,20 +6,17 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
 
 /**
  * Quintic spline interpolator This class calculates a spline through multiple waypoints, minimizing
- * the jerk and a finite 5th derivative of position.
- * 
- * Not realtime safe. 
- * 
- * Not rewindable. It will result in too many intermediate variables.
+ * the jerk and a finite 5th derivative of position. Not realtime safe. Not rewindable. It will
+ * result in too many intermediate variables.
  * 
  * @author Jesper Smith
  */
@@ -102,7 +99,6 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       f = new DenseMatrix64F(maximumNumberOfPoints - 1, 1);
 
       x = new double[maximumNumberOfPoints];
-      
 
       position = new YoDouble[numberOfSplines];
       velocity = new YoDouble[numberOfSplines];
@@ -274,7 +270,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       if (positionIn.length < numberOfPoints.getValue())
          throw new RuntimeException("Length of positionIn is less than the number of points");
 
-      MatrixTools.setMatrixColumnFromArray(a, 0, positionIn);
+      MatrixTools.setMatrixColumnFromArray(a, 0, positionIn, 0, a.getNumRows());
 
       MatrixTools.diff(positionIn, yd);
 
@@ -482,8 +478,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
          if (!coefficientsSet.getBooleanValue())
             throw new RuntimeException("Spline coefficients not set");
 
-         pos.set(a[index] + b[index] * h + c[index] * h2 + d[index] * h3
-               + e[index] * h4 + f[index] * h5);
+         pos.set(a[index] + b[index] * h + c[index] * h2 + d[index] * h3 + e[index] * h4 + f[index] * h5);
 
          if (crackle != null)
          {
@@ -494,10 +489,8 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
             snap.set(24.0 * e[index] + 120.0 * f[index] * h);
          }
          jerk.set(6.0 * d[index] + 24.0 * e[index] * h + 60 * f[index] * h2);
-         acc.set(2.0 * c[index] + 6.0 * d[index] * h + 12.0 * e[index] * h2
-               + 20.0 * f[index] * h3);
-         vel.set(b[index] + 2.0 * c[index] * h + 3.0 * d[index] * h2 + 4.0 * e[index] * h3
-               + 5.0 * f[index] * h4);
+         acc.set(2.0 * c[index] + 6.0 * d[index] * h + 12.0 * e[index] * h2 + 20.0 * f[index] * h3);
+         vel.set(b[index] + 2.0 * c[index] * h + 3.0 * d[index] * h2 + 4.0 * e[index] * h3 + 5.0 * f[index] * h4);
       }
 
    }

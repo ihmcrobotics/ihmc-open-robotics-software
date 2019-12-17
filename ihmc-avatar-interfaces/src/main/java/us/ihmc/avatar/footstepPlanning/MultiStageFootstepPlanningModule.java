@@ -1,23 +1,12 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.PlanningStatisticsRequestMessage;
-import controller_msgs.msg.dds.RequestFootstepPlannerParametersMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -26,15 +15,17 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class MultiStageFootstepPlanningModule
+public class MultiStageFootstepPlanningModule implements CloseableAndDisposable
 {
    private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
@@ -184,6 +175,12 @@ public class MultiStageFootstepPlanningModule
       realtimeRos2Node.destroy();
 
       if (DEBUG)
-         PrintTools.debug(this, "Destroyed");
+         LogTools.debug("Destroyed");
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      destroy();
    }
 }

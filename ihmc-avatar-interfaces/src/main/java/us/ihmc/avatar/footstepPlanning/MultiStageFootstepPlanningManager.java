@@ -1068,6 +1068,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       FramePose3D lastStepPose = new FramePose3D();
 
       int lastStepIndex = footstepPlan.getNumberOfSteps() - 1;
+      if (lastStepIndex < 0)
+         return;
       footstepPlan.getFootstep(lastStepIndex).getSoleFramePose(lastStepPose);
       if(lastStepPose.getPositionDistance(goalPosition) > safetyThresholdForFaultyStep)
          footstepPlan.remove(lastStepIndex);

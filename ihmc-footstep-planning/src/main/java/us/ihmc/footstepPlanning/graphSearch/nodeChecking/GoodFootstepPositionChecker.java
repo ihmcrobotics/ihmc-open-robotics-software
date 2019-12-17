@@ -7,17 +7,16 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -35,7 +34,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    private final FootstepNodeSnapper snapper;
 
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
-   private FootstepGraph graph;
+   private DirectedGraph<FootstepNode> graph;
 
    public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
    {
@@ -44,7 +43,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(FootstepGraph graph)
+   public void setFootstepGraph(DirectedGraph<FootstepNode> graph)
    {
       this.graph = graph;
    }
@@ -115,6 +114,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          return false;
       }
 
+      double maxReach = parameters.getMaximumStepReach();
       if (solePositionInParentZUpFrame.getZ() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
          if ((solePositionInParentZUpFrame.getX() > parameters.getMaximumStepXWhenForwardAndDown()))
@@ -128,6 +128,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
             return false;
          }
+         maxReach = EuclidCoreTools.norm(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepYWhenForwardAndDown() - parameters.getIdealFootstepWidth());
       }
 
       double widthRelativeToIdeal = solePositionInParentZUpFrame.getY() - robotSide.negateIfRightSide(parameters.getIdealFootstepWidth());
@@ -151,6 +152,21 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
             rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
             return false;
          }
+         maxReach = parameters.getMaximumStepReachWhenSteppingUp();
+      }
+
+      double stepReach3D = EuclidCoreTools.norm(stepReach, solePositionInParentZUpFrame.getZ());
+      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(solePositionInParentZUpFrame.getZ() / parameters.getMaximumStepZ()));
+      maxInterpolationFactor = Math.min(maxInterpolationFactor, 1.0);
+      double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw(),
+                                                           maxInterpolationFactor);
+      double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw(),
+                                                           maxInterpolationFactor);
+      double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(nodeToCheck.getYaw(), previousNode.getYaw());
+      if (!MathTools.intervalContains(robotSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
+      {
+         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
+         return false;
       }
 
       if (graph != null)

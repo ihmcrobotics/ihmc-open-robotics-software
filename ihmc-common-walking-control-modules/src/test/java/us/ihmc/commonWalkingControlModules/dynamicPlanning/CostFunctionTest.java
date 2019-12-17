@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.trajectoryOptimization.LQCostFunction;
-
 import java.util.Random;
 
-public abstract class CostFunctionTest<E extends Enum>
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.trajectoryOptimization.LQCostFunction;
+
+public abstract class CostFunctionTest<E extends Enum<E>>
 {
    public abstract int getNumberOfStates();
    public abstract int getStateVectorSize();
@@ -47,7 +48,7 @@ public abstract class CostFunctionTest<E extends Enum>
             expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
+         MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
       }
    }
 
@@ -80,7 +81,7 @@ public abstract class CostFunctionTest<E extends Enum>
             expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
+         MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-2);
       }
    }
 
@@ -117,7 +118,7 @@ public abstract class CostFunctionTest<E extends Enum>
                expectedCostHessian.set(state, partialState, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
       }
    }
 
@@ -154,7 +155,7 @@ public abstract class CostFunctionTest<E extends Enum>
                expectedCostHessian.set(control, partialControl, (modifiedGradient.get(control) - currentGradient.get(control)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
       }
    }
 
@@ -191,7 +192,7 @@ public abstract class CostFunctionTest<E extends Enum>
                expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         JUnitTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
+         MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-2);
       }
    }
 }

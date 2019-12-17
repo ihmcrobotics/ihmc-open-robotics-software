@@ -16,7 +16,6 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
       super(FootstepPlannerParameterKeys.keys, AtlasFootstepPlannerParameters.class, projectName, pathToResources);
 
       setWiggleIntoConvexHullOfPlanarRegions(true);
-      setRejectIfCannotFullyWiggleInside(false);
       setReturnBestEffortPlan(false);
       setCheckForBodyBoxCollisions(false);
       setCheckForPathCollisions(true);

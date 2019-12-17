@@ -1,18 +1,14 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.LowLevelState;
 

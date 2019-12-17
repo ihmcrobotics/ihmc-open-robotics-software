@@ -3,9 +3,10 @@ package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -16,14 +17,28 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegion
 {
    private final PlanarRegion homePlanarRegion;
+   private ClusterInfo clusterInfo;
+   private boolean haveClustersBeenPopulated = false;
 
    private Cluster homeRegionCluster = null;
    private List<Cluster> obstacleClusters = new ArrayList<>();
+   private List<PlanarRegion> obstacleRegions = new ArrayList<>();
    private List<Cluster> allClusters = new ArrayList<>();
 
-   public NavigableRegion(PlanarRegion homePlanarRegion)
+   public NavigableRegion(PlanarRegion homePlanarRegion, Cluster homeRegionCluster, List<Cluster> obstacleClusters)
    {
       this.homePlanarRegion = homePlanarRegion;
+      this.homeRegionCluster = homeRegionCluster;
+      this.obstacleClusters.addAll(obstacleClusters);
+      this.allClusters.addAll(obstacleClusters);
+      this.allClusters.add(homeRegionCluster);
+      haveClustersBeenPopulated = true;
+   }
+
+   public NavigableRegion(PlanarRegion homePlanarRegion, ClusterInfo clusterInfo)
+   {
+      this.homePlanarRegion = homePlanarRegion;
+      this.clusterInfo = clusterInfo;
    }
 
    public void setHomeRegionCluster(Cluster homeCluster)
@@ -32,14 +47,15 @@ public class NavigableRegion
       allClusters.add(homeCluster);
    }
 
-   public void addObstacleClusters(Iterable<Cluster> obstacleClusters)
+   public void addObstacleClusters(Iterable<ImmutablePair<Cluster, PlanarRegion>> obstacleClusters)
    {
-      obstacleClusters.forEach(this::addObstacleCluster);
+      obstacleClusters.forEach(pair -> addObstacleCluster(pair.getLeft(), pair.getRight()));
    }
 
-   public void addObstacleCluster(Cluster obstacleCluster)
+   public void addObstacleCluster(Cluster obstacleCluster, PlanarRegion associatedRegion)
    {
       obstacleClusters.add(obstacleCluster);
+      obstacleRegions.add(associatedRegion);
       allClusters.add(obstacleCluster);
    }
 
@@ -50,52 +66,73 @@ public class NavigableRegion
 
    public RigidBodyTransformReadOnly getTransformToWorld()
    {
-      return homePlanarRegion.getTransformToWorld();
+      return getHomePlanarRegion().getTransformToWorld();
    }
 
    public RigidBodyTransformReadOnly getTransformFromWorldToLocal()
    {
-      return homePlanarRegion.getTransformToLocal();
+      return getHomePlanarRegion().getTransformToLocal();
+   }
+
+   public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
+   {
+      getHomePlanarRegion().transformFromLocalToWorld(objectToTransformToWorld);
+   }
+
+   public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
+   {
+      getHomePlanarRegion().transformFromWorldToLocal(objectToTransformToWorld);
+   }
+
+   public double getPlaneZGivenXY(double xWorld, double yWorld)
+   {
+      return getHomePlanarRegion().getPlaneZGivenXY(xWorld, yWorld);
+   }
+
+   public int getMapId()
+   {
+      return getHomePlanarRegion().getRegionId();
    }
 
    public Cluster getHomeRegionCluster()
    {
+      populateClusters();
+
       return homeRegionCluster;
    }
 
    public List<Cluster> getObstacleClusters()
    {
+      populateClusters();
+
       return obstacleClusters;
    }
 
-   public List<Point3DReadOnly> getHomeRegionNavigableExtrusionsInWorld()
+   public List<PlanarRegion> getObstacleRegions()
    {
-      return homeRegionCluster.getNavigableExtrusionsInWorld();
+      populateClusters();
+
+      return obstacleRegions;
    }
 
    public List<Cluster> getAllClusters()
    {
+      populateClusters();
+
       return allClusters;
    }
 
-   public double getPlaneZGivenXY(double xWorld, double yWorld)
+   public void populateClusters()
    {
-      return homePlanarRegion.getPlaneZGivenXY(xWorld, yWorld);
-   }
+      if (haveClustersBeenPopulated)
+         return;
 
+      NavigableRegionsFactory.populateNavigableRegionCluster(this, clusterInfo.getOtherRegions(), clusterInfo.getOrthogonalAngle(),
+                                                             clusterInfo.getClusterResolution(), clusterInfo.getObstacleRegionFilter(),
+                                                             clusterInfo.getPlanarRegionFilter(), clusterInfo.getPreferredNavigableCalculator(),
+                                                             clusterInfo.getNavigableCalculator(), clusterInfo.getPreferredObstacleCalculator(),
+                                                             clusterInfo.getObstacleCalculator(), clusterInfo.getIncludePreferredExtrusions());
 
-   public void transformFromLocalToWorld(Transformable objectToTransformToWorld)
-   {
-      homePlanarRegion.transformFromLocalToWorld(objectToTransformToWorld);
-   }
-
-   public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
-   {
-      homePlanarRegion.transformFromWorldToLocal(objectToTransformToWorld);
-   }
-
-   public int getMapId()
-   {
-      return homePlanarRegion.getRegionId();
+      haveClustersBeenPopulated = true;
    }
 }

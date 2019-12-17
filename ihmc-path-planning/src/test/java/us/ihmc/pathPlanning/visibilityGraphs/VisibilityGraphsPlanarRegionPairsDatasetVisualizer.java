@@ -82,7 +82,7 @@ public class VisibilityGraphsPlanarRegionPairsDatasetVisualizer
          NavigableRegions navigableRegions = new NavigableRegions(parameters, listToVisualize);
          navigableRegions.createNavigableRegions();
 
-         List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+         List<NavigableRegion> naviableRegionsList = navigableRegions.getNavigableRegionsList();
 
          if (!naviableRegionsList.isEmpty())
          {
