@@ -1,0 +1,13 @@
+start_position 0.0 0.0 0.0
+goal_position 8.0 0.0 0.0
+vis_graph_status test
+step_planner_status dev
+a_star_timeout 10.0
+vis_graph_with_a_star_timeout 45.0
+requires_occlusion false
+
+
+quadruped_start_position 0.0 0.0 0.0
+quadruped_goal_position 0.0 0.0 0.0
+quadruped_planner_status dev
+quadruped_timeout 100.0

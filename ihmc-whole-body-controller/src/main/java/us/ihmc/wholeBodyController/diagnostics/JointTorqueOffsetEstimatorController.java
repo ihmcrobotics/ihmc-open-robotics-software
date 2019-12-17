@@ -50,8 +50,6 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
    private final YoBoolean transferTorqueOffsets = new YoBoolean("transferTorqueOffsets", registry);
    private final YoBoolean exportJointTorqueOffsetsToFile = new YoBoolean("recordTorqueOffsets", registry);
 
-   private final boolean useArms = true;
-
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -65,7 +63,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
    private final YoDouble currentTime;
 
    public JointTorqueOffsetEstimatorController(WholeBodySetpointParameters wholeBodySetpointParameters,
-                                               HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
+                                               HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter, boolean useArms)
    {
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
       this.footContactStates = highLevelControllerToolbox.getFootContactStates();
@@ -87,7 +85,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, JointDesiredControlMode.EFFORT);
 
-      createHelpers(true);
+      createHelpers(true, useArms);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -106,7 +104,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
       }
 
-      setDefaultPDControllerGains();
+      setDefaultPDControllerGains(useArms);
    }
 
    public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
@@ -203,7 +201,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       oneDoFJoint.setTau(tau + ditherTorque);
    }
 
-   private void createHelpers(boolean robotIsHanging)
+   private void createHelpers(boolean robotIsHanging, boolean useArms)
    {
       if (useArms)
       {
@@ -254,7 +252,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       helpers.put(legJoint, new DiagnosticsWhenHangingHelper(legJoint, preserveY, registry));
    }
 
-   private void setDefaultPDControllerGains()
+   private void setDefaultPDControllerGains(boolean useArms)
    {
       if (useArms)
       {

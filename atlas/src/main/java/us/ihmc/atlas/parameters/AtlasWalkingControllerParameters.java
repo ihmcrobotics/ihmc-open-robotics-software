@@ -417,13 +417,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportX()
+   public double getMaxICPErrorBeforeSingleSupportForwardX()
    {
       return 0.035 * jointMap.getModelScale();
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportY()
+   public double getMaxICPErrorBeforeSingleSupportInnerY()
    {
       return 0.015 * jointMap.getModelScale();
    }

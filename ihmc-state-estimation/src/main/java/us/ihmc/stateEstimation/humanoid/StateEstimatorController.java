@@ -19,7 +19,7 @@ public interface StateEstimatorController extends RobotController, StateEstimato
     * Initializes the root joint pose and joint positions in the estimator.
     *
     * @param rootJointTransform the transform of the floating root joint that is estimated.
-    * @param jointPositions a map from joint names to initial joint positions.
+    * @param jointPositions     a map from joint names to initial joint positions.
     */
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions);
 

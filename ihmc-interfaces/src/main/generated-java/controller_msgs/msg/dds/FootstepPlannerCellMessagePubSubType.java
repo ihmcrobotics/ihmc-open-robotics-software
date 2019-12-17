@@ -44,8 +44,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -65,9 +63,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -78,8 +73,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_2(data.getYIndex());
 
-      cdr.write_type_7(data.getNodeIsValid());
-
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCellMessage data, us.ihmc.idl.CDR cdr)
@@ -87,8 +80,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setXIndex(cdr.read_type_2());
       	
       data.setYIndex(cdr.read_type_2());
-      	
-      data.setNodeIsValid(cdr.read_type_7());
       	
 
    }
@@ -98,7 +89,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_2("x_index", data.getXIndex());
       ser.write_type_2("y_index", data.getYIndex());
-      ser.write_type_7("node_is_valid", data.getNodeIsValid());
    }
 
    @Override
@@ -106,7 +96,6 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setXIndex(ser.read_type_2("x_index"));
       data.setYIndex(ser.read_type_2("y_index"));
-      data.setNodeIsValid(ser.read_type_7("node_is_valid"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerCellMessage src, controller_msgs.msg.dds.FootstepPlannerCellMessage dest)

@@ -7,6 +7,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.Polynomial3DVariableHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -16,13 +17,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * meant to simplify the interaction with polynomials when dealing with 3D trajectories.
  * </p>
  * <p>
- * The output is given in the form of {@link Point3DReadOnly}, {@link Vector3DReadOnly}, or {@link Tuple3DReadOnly}.
+ * The output is given in the form of {@link Point3DReadOnly}, {@link Vector3DReadOnly}, or
+ * {@link Tuple3DReadOnly}.
  * </p>
- * 
- * @author Sylvain Bertrand
  *
+ * @author Sylvain Bertrand
  */
-public class YoPolynomial3D
+public class YoPolynomial3D implements Polynomial3DVariableHolder
 {
    protected final YoPolynomial xPolynomial;
    protected final YoPolynomial yPolynomial;
@@ -136,9 +137,9 @@ public class YoPolynomial3D
          throw new RuntimeException("Expected 3 YoPolynomials for representing the three axes X, Y, and Z, but had: " + yoPolynomials.length
                + " YoPolynomials.");
 
-      this.xPolynomial = yoPolynomials[0];
-      this.yPolynomial = yoPolynomials[1];
-      this.zPolynomial = yoPolynomials[2];
+      xPolynomial = yoPolynomials[0];
+      yPolynomial = yoPolynomials[1];
+      zPolynomial = yoPolynomials[2];
    }
 
    public YoPolynomial3D(List<YoPolynomial> yoPolynomials)
@@ -147,9 +148,9 @@ public class YoPolynomial3D
          throw new RuntimeException("Expected 3 YoPolynomials for representing the three axes X, Y, and Z, but had: " + yoPolynomials.size()
                + " YoPolynomials.");
 
-      this.xPolynomial = yoPolynomials.get(0);
-      this.yPolynomial = yoPolynomials.get(1);
-      this.zPolynomial = yoPolynomials.get(2);
+      xPolynomial = yoPolynomials.get(0);
+      yPolynomial = yoPolynomials.get(1);
+      zPolynomial = yoPolynomials.get(2);
    }
 
    public static YoPolynomial3D[] createYoPolynomial3DArray(YoPolynomial[] xPolynomial, YoPolynomial[] yPolynomial, YoPolynomial[] zPolynomial)
@@ -247,27 +248,30 @@ public class YoPolynomial3D
    {
       switch (index)
       {
-      case 0:
-         return getYoPolynomialX();
-      case 1:
-         return getYoPolynomialY();
-      case 2:
-         return getYoPolynomialZ();
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
+         case 0:
+            return getYoPolynomialX();
+         case 1:
+            return getYoPolynomialY();
+         case 2:
+            return getYoPolynomialZ();
+         default:
+            throw new IndexOutOfBoundsException(Integer.toString(index));
       }
    }
 
+   @Override
    public YoPolynomial getYoPolynomialX()
    {
       return xPolynomial;
    }
 
+   @Override
    public YoPolynomial getYoPolynomialY()
    {
       return yPolynomial;
    }
 
+   @Override
    public YoPolynomial getYoPolynomialZ()
    {
       return zPolynomial;
@@ -308,15 +312,23 @@ public class YoPolynomial3D
                                                            Vector3DReadOnly zddFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getElement(index), zFinal.getElement(index),
-                                                                            zdFinal.getElement(index), zddFinal.getElement(index));
+         getYoPolynomial(index).setCubicInitialPositionThreeFinalConditions(t0,
+                                                                            tFinal,
+                                                                            z0.getElement(index),
+                                                                            zFinal.getElement(index),
+                                                                            zdFinal.getElement(index),
+                                                                            zddFinal.getElement(index));
    }
 
    public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                                            Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicThreeInitialConditionsFinalPosition(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
+         getYoPolynomial(index).setCubicThreeInitialConditionsFinalPosition(t0,
+                                                                            tFinal,
+                                                                            z0.getElement(index),
+                                                                            zd0.getElement(index),
+                                                                            zdd0.getElement(index),
                                                                             zFinal.getElement(index));
    }
 
@@ -324,23 +336,37 @@ public class YoPolynomial3D
                                                                  Vector3DReadOnly zddFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                  zdFinal.getElement(index), zddFinal.getElement(index));
+         getYoPolynomial(index).setCubicUsingFinalAccelerationButNotFinalPosition(t0,
+                                                                                  tFinal,
+                                                                                  z0.getElement(index),
+                                                                                  zd0.getElement(index),
+                                                                                  zdFinal.getElement(index),
+                                                                                  zddFinal.getElement(index));
    }
 
    public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, Point3DReadOnly z0,
                                                Point3DReadOnly zIntermediate1, Point3DReadOnly zIntermediate2, Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicUsingIntermediatePoints(t0, tIntermediate1, tIntermediate2, tFinal, z0.getElement(index),
-                                                                zIntermediate1.getElement(index), zIntermediate2.getElement(index), zFinal.getElement(index));
+         getYoPolynomial(index).setCubicUsingIntermediatePoints(t0,
+                                                                tIntermediate1,
+                                                                tIntermediate2,
+                                                                tFinal,
+                                                                z0.getElement(index),
+                                                                zIntermediate1.getElement(index),
+                                                                zIntermediate2.getElement(index),
+                                                                zFinal.getElement(index));
    }
 
    public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Point3DReadOnly zIntermediate1,
                                               Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicUsingIntermediatePoint(t0, tIntermediate1, tFinal, z0.getElement(index), zIntermediate1.getElement(index),
+         getYoPolynomial(index).setCubicUsingIntermediatePoint(t0,
+                                                               tIntermediate1,
+                                                               tFinal,
+                                                               z0.getElement(index),
+                                                               zIntermediate1.getElement(index),
                                                                zFinal.getElement(index));
    }
 
@@ -348,8 +374,12 @@ public class YoPolynomial3D
                                                                           Point3DReadOnly zIntermediate, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicWithIntermediatePositionAndFinalVelocityConstraint(t0, tIntermediate, tFinal, z0.getElement(index),
-                                                                                           zIntermediate.getElement(index), zFinal.getElement(index),
+         getYoPolynomial(index).setCubicWithIntermediatePositionAndFinalVelocityConstraint(t0,
+                                                                                           tIntermediate,
+                                                                                           tFinal,
+                                                                                           z0.getElement(index),
+                                                                                           zIntermediate.getElement(index),
+                                                                                           zFinal.getElement(index),
                                                                                            zdFinal.getElement(index));
    }
 
@@ -357,8 +387,12 @@ public class YoPolynomial3D
                                                                             Vector3DReadOnly zd0, Point3DReadOnly zIntermediate, Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0, tIntermediate, tFinal, z0.getElement(index),
-                                                                                             zd0.getElement(index), zIntermediate.getElement(index),
+         getYoPolynomial(index).setCubicWithIntermediatePositionAndInitialVelocityConstraint(t0,
+                                                                                             tIntermediate,
+                                                                                             tFinal,
+                                                                                             z0.getElement(index),
+                                                                                             zd0.getElement(index),
+                                                                                             zIntermediate.getElement(index),
                                                                                              zFinal.getElement(index));
    }
 
@@ -372,8 +406,12 @@ public class YoPolynomial3D
                                                                        Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                        zFinal.getElement(index), zdFinal.getElement(index));
+         getYoPolynomial(index).setInitialPositionVelocityZeroFinalHighOrderDerivatives(t0,
+                                                                                        tFinal,
+                                                                                        z0.getElement(index),
+                                                                                        zd0.getElement(index),
+                                                                                        zFinal.getElement(index),
+                                                                                        zdFinal.getElement(index));
    }
 
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
@@ -387,9 +425,18 @@ public class YoPolynomial3D
                         Point3DReadOnly zf, Vector3DReadOnly zdf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setNonic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                         zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                         zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
+         getYoPolynomial(index).setNonic(t0,
+                                         tIntermediate0,
+                                         tIntermediate1,
+                                         tFinal,
+                                         z0.getElement(index),
+                                         zd0.getElement(index),
+                                         zIntermediate0.getElement(index),
+                                         zdIntermediate0.getElement(index),
+                                         zIntermediate1.getElement(index),
+                                         zdIntermediate1.getElement(index),
+                                         zf.getElement(index),
+                                         zdf.getElement(index));
 
    }
 
@@ -409,7 +456,11 @@ public class YoPolynomial3D
                                                   Point3DReadOnly zFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuadraticUsingIntermediatePoint(t0, tIntermediate, tFinal, z0.getElement(index), zIntermediate.getElement(index),
+         getYoPolynomial(index).setQuadraticUsingIntermediatePoint(t0,
+                                                                   tIntermediate,
+                                                                   tFinal,
+                                                                   z0.getElement(index),
+                                                                   zIntermediate.getElement(index),
                                                                    zFinal.getElement(index));
    }
 
@@ -423,7 +474,12 @@ public class YoPolynomial3D
                           Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuartic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
+         getYoPolynomial(index).setQuartic(t0,
+                                           tFinal,
+                                           z0.getElement(index),
+                                           zd0.getElement(index),
+                                           zdd0.getElement(index),
+                                           zFinal.getElement(index),
                                            zdFinal.getElement(index));
 
    }
@@ -432,16 +488,27 @@ public class YoPolynomial3D
                                                 Vector3DReadOnly zdFinal, Vector3DReadOnly zddFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuarticUsingFinalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
-                                                                 zdFinal.getElement(index), zddFinal.getElement(index));
+         getYoPolynomial(index).setQuarticUsingFinalAcceleration(t0,
+                                                                 tFinal,
+                                                                 z0.getElement(index),
+                                                                 zd0.getElement(index),
+                                                                 zFinal.getElement(index),
+                                                                 zdFinal.getElement(index),
+                                                                 zddFinal.getElement(index));
    }
 
    public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
                                                    Vector3DReadOnly zdIntermediate, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuarticUsingIntermediateVelocity(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                    zdIntermediate.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));
+         getYoPolynomial(index).setQuarticUsingIntermediateVelocity(t0,
+                                                                    tIntermediate,
+                                                                    tFinal,
+                                                                    z0.getElement(index),
+                                                                    zd0.getElement(index),
+                                                                    zdIntermediate.getElement(index),
+                                                                    zFinal.getElement(index),
+                                                                    zdFinal.getElement(index));
 
    }
 
@@ -449,8 +516,13 @@ public class YoPolynomial3D
                                        Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuarticUsingMidPoint(t0, tFinal, z0.getElement(index), zd0.getElement(index), zMid.getElement(index),
-                                                        zFinal.getElement(index), zdFinal.getElement(index));
+         getYoPolynomial(index).setQuarticUsingMidPoint(t0,
+                                                        tFinal,
+                                                        z0.getElement(index),
+                                                        zd0.getElement(index),
+                                                        zMid.getElement(index),
+                                                        zFinal.getElement(index),
+                                                        zdFinal.getElement(index));
 
    }
 
@@ -459,9 +531,15 @@ public class YoPolynomial3D
                                                       Vector3DReadOnly zdIntermediate1)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuarticUsingOneIntermediateVelocity(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index),
-                                                                       zIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                                                       zFinal.getElement(index), zdIntermediate1.getElement(index));
+         getYoPolynomial(index).setQuarticUsingOneIntermediateVelocity(t0,
+                                                                       tIntermediate0,
+                                                                       tIntermediate1,
+                                                                       tFinal,
+                                                                       z0.getElement(index),
+                                                                       zIntermediate0.getElement(index),
+                                                                       zIntermediate1.getElement(index),
+                                                                       zFinal.getElement(index),
+                                                                       zdIntermediate1.getElement(index));
 
    }
 
@@ -469,24 +547,43 @@ public class YoPolynomial3D
                                        Point3DReadOnly zf, Vector3DReadOnly zdf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zIntermediate.getElement(index),
-                                                        zf.getElement(index), zdf.getElement(index));
+         getYoPolynomial(index).setQuarticUsingWayPoint(t0,
+                                                        tIntermediate,
+                                                        tFinal,
+                                                        z0.getElement(index),
+                                                        zd0.getElement(index),
+                                                        zIntermediate.getElement(index),
+                                                        zf.getElement(index),
+                                                        zdf.getElement(index));
    }
 
    public void setQuintic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zf, Vector3DReadOnly zdf,
                           Vector3DReadOnly zddf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuintic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zf.getElement(index),
-                                           zdf.getElement(index), zddf.getElement(index));
+         getYoPolynomial(index).setQuintic(t0,
+                                           tFinal,
+                                           z0.getElement(index),
+                                           zd0.getElement(index),
+                                           zdd0.getElement(index),
+                                           zf.getElement(index),
+                                           zdf.getElement(index),
+                                           zddf.getElement(index));
    }
 
    public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
                                       Point3DReadOnly zIntermediate0, Point3DReadOnly zIntermediate1, Point3DReadOnly zf, Vector3DReadOnly zdf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuinticTwoWaypoints(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                       zIntermediate0.getElement(index), zIntermediate1.getElement(index), zf.getElement(index),
+         getYoPolynomial(index).setQuinticTwoWaypoints(t0,
+                                                       tIntermediate0,
+                                                       tIntermediate1,
+                                                       tFinal,
+                                                       z0.getElement(index),
+                                                       zd0.getElement(index),
+                                                       zIntermediate0.getElement(index),
+                                                       zIntermediate1.getElement(index),
+                                                       zf.getElement(index),
                                                        zdf.getElement(index));
    }
 
@@ -495,25 +592,45 @@ public class YoPolynomial3D
                                                                   Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuinticUsingIntermediateVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                                   zdIntermediate.getElement(index), zddIntermediate.getElement(index),
-                                                                                   zFinal.getElement(index), zdFinal.getElement(index));
+         getYoPolynomial(index).setQuinticUsingIntermediateVelocityAndAcceleration(t0,
+                                                                                   tIntermediate,
+                                                                                   tFinal,
+                                                                                   z0.getElement(index),
+                                                                                   zd0.getElement(index),
+                                                                                   zdIntermediate.getElement(index),
+                                                                                   zddIntermediate.getElement(index),
+                                                                                   zFinal.getElement(index),
+                                                                                   zdFinal.getElement(index));
    }
 
    public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                        Point3DReadOnly zIntermediate, Point3DReadOnly zf, Vector3DReadOnly zdf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuinticUsingWayPoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                        zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index));
+         getYoPolynomial(index).setQuinticUsingWayPoint(t0,
+                                                        tIntermediate,
+                                                        tFinal,
+                                                        z0.getElement(index),
+                                                        zd0.getElement(index),
+                                                        zdd0.getElement(index),
+                                                        zIntermediate.getElement(index),
+                                                        zf.getElement(index),
+                                                        zdf.getElement(index));
    }
 
    public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                         Point3DReadOnly zIntermediate, Vector3DReadOnly zdIntermediate, Point3DReadOnly zf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuinticUsingWayPoint2(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                         zIntermediate.getElement(index), zdIntermediate.getElement(index), zf.getElement(index));
+         getYoPolynomial(index).setQuinticUsingWayPoint2(t0,
+                                                         tIntermediate,
+                                                         tFinal,
+                                                         z0.getElement(index),
+                                                         zd0.getElement(index),
+                                                         zdd0.getElement(index),
+                                                         zIntermediate.getElement(index),
+                                                         zdIntermediate.getElement(index),
+                                                         zf.getElement(index));
    }
 
    public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -521,9 +638,18 @@ public class YoPolynomial3D
                          Point3DReadOnly zf, Vector3DReadOnly zdf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setSeptic(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                          zIntermediate0.getElement(index), zdIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                          zdIntermediate1.getElement(index), zf.getElement(index), zdf.getElement(index));
+         getYoPolynomial(index).setSeptic(t0,
+                                          tIntermediate0,
+                                          tIntermediate1,
+                                          tFinal,
+                                          z0.getElement(index),
+                                          zd0.getElement(index),
+                                          zIntermediate0.getElement(index),
+                                          zdIntermediate0.getElement(index),
+                                          zIntermediate1.getElement(index),
+                                          zdIntermediate1.getElement(index),
+                                          zf.getElement(index),
+                                          zdf.getElement(index));
 
    }
 
@@ -532,26 +658,49 @@ public class YoPolynomial3D
                                                     Point3DReadOnly zf, Vector3DReadOnly zdf, Vector3DReadOnly zddf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setSepticInitialAndFinalAcceleration(t0, tIntermediate0, tIntermediate1, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                     zdd0.getElement(index), zIntermediate0.getElement(index), zIntermediate1.getElement(index),
-                                                                     zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
+         getYoPolynomial(index).setSepticInitialAndFinalAcceleration(t0,
+                                                                     tIntermediate0,
+                                                                     tIntermediate1,
+                                                                     tFinal,
+                                                                     z0.getElement(index),
+                                                                     zd0.getElement(index),
+                                                                     zdd0.getElement(index),
+                                                                     zIntermediate0.getElement(index),
+                                                                     zIntermediate1.getElement(index),
+                                                                     zf.getElement(index),
+                                                                     zdf.getElement(index),
+                                                                     zddf.getElement(index));
 
    }
 
    public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
-                                                     Vector3DReadOnly zdFinal)
+                                                      Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setQuintic(t0, tFinal, z0.getElement(index), zd0.getElement(index), 0.0, zFinal.getElement(index),
-                                          zdFinal.getElement(index), 0.0);
+         getYoPolynomial(index).setQuintic(t0,
+                                           tFinal,
+                                           z0.getElement(index),
+                                           zd0.getElement(index),
+                                           0.0,
+                                           zFinal.getElement(index),
+                                           zdFinal.getElement(index),
+                                           0.0);
    }
-   
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0,
                                       Point3DReadOnly zIntermediate, Point3DReadOnly zf, Vector3DReadOnly zdf, Vector3DReadOnly zddf)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setSexticUsingWaypoint(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index),
-                                                       zIntermediate.getElement(index), zf.getElement(index), zdf.getElement(index), zddf.getElement(index));
+         getYoPolynomial(index).setSexticUsingWaypoint(t0,
+                                                       tIntermediate,
+                                                       tFinal,
+                                                       z0.getElement(index),
+                                                       zd0.getElement(index),
+                                                       zdd0.getElement(index),
+                                                       zIntermediate.getElement(index),
+                                                       zf.getElement(index),
+                                                       zdf.getElement(index),
+                                                       zddf.getElement(index));
 
    }
 
@@ -560,13 +709,20 @@ public class YoPolynomial3D
                                                              Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoPolynomial(index).setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
-                                                                              zdd0.getElement(index), zdIntermediate.getElement(index),
-                                                                              zddIntermediate.getElement(index), zFinal.getElement(index),
+         getYoPolynomial(index).setSexticUsingWaypointVelocityAndAcceleration(t0,
+                                                                              tIntermediate,
+                                                                              tFinal,
+                                                                              z0.getElement(index),
+                                                                              zd0.getElement(index),
+                                                                              zdd0.getElement(index),
+                                                                              zdIntermediate.getElement(index),
+                                                                              zddIntermediate.getElement(index),
+                                                                              zFinal.getElement(index),
                                                                               zdFinal.getElement(index));
 
    }
 
+   @Override
    public String toString()
    {
       return "X: " + xPolynomial.toString() + "\n" + "Y: " + yPolynomial.toString() + "\n" + "Z: " + zPolynomial.toString();

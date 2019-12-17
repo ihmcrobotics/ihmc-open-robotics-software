@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <top>
-        <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml"/>
+        <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />
     </top>
     <bottom>
-        <TabPane prefHeight="300" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <TabPane prefHeight="337.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Main">
                     <content>
-                        <fx:include fx:id="mainTab" source="MainTab.fxml"/>
+                        <fx:include fx:id="mainTab" source="MainTab.fxml" />
                     </content>
                 </Tab>
 
@@ -28,43 +29,49 @@
 
                 <Tab text="Visibility Graph Parameters">
                     <content>
-                        <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml"/>
+                        <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Body Collisions">
                     <content>
-                        <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml"/>
+                        <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Footstep Costs">
                     <content>
-                        <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml"/>
+                        <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml" />
+                    </content>
+                </Tab>
+
+                <Tab text="Footstep Post Processing">
+                    <content>
+                        <fx:include fx:id="footstepPostProcessingParametersUI" source="FootstepPostProcessingParametersUI.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Node checking">
                     <content>
-                        <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml"/>
+                        <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Visualization Control">
                     <content>
-                        <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml"/>
+                        <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Unit Test Exporter">
                     <content>
-                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml"/>
+                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
                     </content>
                 </Tab>
 
                 <Tab text="Robot Operation">
                     <content>
-                        <fx:include fx:id="uiRobot" source="UIRobot.fxml"/>
+                        <fx:include fx:id="uiRobot" source="UIRobot.fxml" />
                     </content>
                 </Tab>
 

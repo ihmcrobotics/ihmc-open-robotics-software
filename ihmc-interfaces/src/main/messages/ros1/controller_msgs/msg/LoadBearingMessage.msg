@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# Message carrying the information needed to enable load bearing for a end-effector.
+# A contact point will be used to enable this feature. This point is attached to the end-effector.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

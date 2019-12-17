@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.fail;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
@@ -9,9 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class SingularValueExplorationAndExamplesTest
 {
@@ -54,7 +52,7 @@ public class SingularValueExplorationAndExamplesTest
       DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
       System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
-      JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
+      MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
    }
 
 	@Test
@@ -102,7 +100,7 @@ public class SingularValueExplorationAndExamplesTest
       DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
       System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
-      JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
+      MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
       
       // Extract Nullspace:
 
@@ -186,7 +184,7 @@ public class SingularValueExplorationAndExamplesTest
          DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
          System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
-         JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
+         MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
          
          DenseMatrix64F matrixJTranspose = new DenseMatrix64F(matrixJ);
          CommonOps.transpose(matrixJTranspose);

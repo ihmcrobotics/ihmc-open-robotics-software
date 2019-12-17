@@ -1,17 +1,34 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-class PlannerCell
+import controller_msgs.msg.dds.FootstepPlannerCellMessage;
+
+public class PlannerCell
 {
-   int xIndex;
-   int yIndex;
+   private final int xIndex;
+   private final int yIndex;
 
-   int hashCode;
+   private final int hashCode;
 
-   PlannerCell(int xIndex, int yIndex)
+   public PlannerCell(int xIndex, int yIndex)
    {
       this.xIndex = xIndex;
       this.yIndex = yIndex;
-      hashCode = computeHashCode(xIndex, yIndex);
+      hashCode = computeHashCode(this);
+   }
+
+   public PlannerCell(FootstepPlannerCellMessage message)
+   {
+      this(message.getXIndex(), message.getYIndex());
+   }
+
+   public int getXIndex()
+   {
+      return xIndex;
+   }
+
+   public int getYIndex()
+   {
+      return yIndex;
    }
 
    @Override
@@ -20,24 +37,32 @@ class PlannerCell
       return hashCode;
    }
 
-   public static int computeHashCode(int xIndex, int yIndex)
+   private static int computeHashCode(PlannerCell cell)
    {
-      final int prime = 31;
       int result = 1;
-      result = prime * result + xIndex;
-      result = prime * result + yIndex;
-
+      int prime = 31;
+      result += prime * cell.xIndex;
+      result += prime * cell.yIndex;
       return result;
    }
 
-
    @Override
-   public boolean equals(Object other)
+   public boolean equals(Object obj)
    {
-      if (!(other instanceof PlannerCell))
+      if (obj == null)
          return false;
+      else if (obj == this)
+         return true;
 
-      PlannerCell otherCell = (PlannerCell) other;
-      return otherCell.xIndex == xIndex && otherCell.yIndex == yIndex;
+      if (getClass() != obj.getClass())
+         return false;
+      PlannerCell other = (PlannerCell) obj;
+      return xIndex == other.xIndex && yIndex == other.yIndex;
+   }
+
+   public void getAsMessage(FootstepPlannerCellMessage messageToPack)
+   {
+      messageToPack.setXIndex(xIndex);
+      messageToPack.setYIndex(yIndex);
    }
 }

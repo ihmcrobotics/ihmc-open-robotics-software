@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# The message commands the controller to bring the given part of the body back to a default configuration called 'home'.
+# It is useful to get back to a safe configuration before walking.
+
 int8 HUMANOID_BODY_PART_ARM=0
 
 int8 HUMANOID_BODY_PART_CHEST=1

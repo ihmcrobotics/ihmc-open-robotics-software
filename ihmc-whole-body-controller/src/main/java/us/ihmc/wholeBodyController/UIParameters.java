@@ -1,5 +1,9 @@
 package us.ihmc.wholeBodyController;
 
+import com.jme3.math.Transform;
+
+import us.ihmc.robotics.robotSide.RobotSide;
+
 public interface UIParameters
 {
    public abstract double getAnkleHeight();
@@ -22,4 +26,6 @@ public interface UIParameters
    {
       return 3.0;
    }
+
+   public Transform getJmeTransformWristToHand(RobotSide side);
 }

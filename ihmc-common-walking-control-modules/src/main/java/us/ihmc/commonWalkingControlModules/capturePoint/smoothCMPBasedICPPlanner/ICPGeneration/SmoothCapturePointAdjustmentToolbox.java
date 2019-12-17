@@ -8,8 +8,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 

@@ -146,6 +146,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
          {
             e1.printStackTrace();
          }
+
+         e.printStackTrace();
          isDone.set(true);
       }
    }

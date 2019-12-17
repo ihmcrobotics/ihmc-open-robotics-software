@@ -1,13 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT_VARIATION;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_SIZE;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_X;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_Y;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.*;
 
 import java.io.IOException;
 
@@ -71,7 +64,6 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableBehaviorModule(true);
       networkModuleParameters.enableFootstepPlanningToolbox(true);
       simulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);

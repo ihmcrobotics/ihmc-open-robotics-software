@@ -1,3 +1,6 @@
+# This message is part of the IHMC footstep planner API.
+# The footstep planner sends this message to notify the user of the status of planning.
+
 int8 FOOTSTEP_PLANNER_STATUS_IDLE=0
 
 int8 FOOTSTEP_PLANNER_STATUS_PLANNING_PATH=1

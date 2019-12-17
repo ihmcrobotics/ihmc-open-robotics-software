@@ -19,7 +19,7 @@ public class ValkyrieCTTSOSimulation
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DATA_SET_TO_USE);
 
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.02, true);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
@@ -30,22 +30,16 @@ public class ValkyrieCTTSOSimulation
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 
       // talk to controller and footstep planner
-      networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
       networkProcessorParameters.enableWalkingPreviewToolbox(true);
       networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
 
-      networkProcessorParameters.enablePerceptionModule(true);
-
       // disable everything else
-      networkProcessorParameters.enableUiModule(false);
       networkProcessorParameters.enableBehaviorModule(false);
       networkProcessorParameters.enableBehaviorVisualizer(false);
       networkProcessorParameters.enableSensorModule(true);
       networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(false);
-      networkProcessorParameters.setEnableJoystickBasedStepping(false);
       networkProcessorParameters.enableRosModule(false);
-      networkProcessorParameters.enableLocalControllerCommunicator(false);
       networkProcessorParameters.enableKinematicsToolbox(false);
       networkProcessorParameters.enableWholeBodyTrajectoryToolbox(false);
       networkProcessorParameters.enableKinematicsPlanningToolbox(false);

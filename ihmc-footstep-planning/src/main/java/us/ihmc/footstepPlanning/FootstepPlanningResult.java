@@ -9,6 +9,7 @@ public enum FootstepPlanningResult
 {
    OPTIMAL_SOLUTION,
    SUB_OPTIMAL_SOLUTION,
+   SOLUTION_DOES_NOT_REACH_GOAL,
    TIMED_OUT_BEFORE_SOLUTION,
    NO_PATH_EXISTS,
    SNAPPING_FAILED,
@@ -28,6 +29,7 @@ public enum FootstepPlanningResult
       {
       case OPTIMAL_SOLUTION:
       case SUB_OPTIMAL_SOLUTION:
+      case SOLUTION_DOES_NOT_REACH_GOAL:
          return true;
       default:
          return false;

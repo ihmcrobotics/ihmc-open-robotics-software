@@ -7,7 +7,9 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.QRDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.MatrixTools;
 
 public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
 {

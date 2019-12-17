@@ -9,11 +9,7 @@ import java.util.Map;
 
 import org.ros.internal.message.Message;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.*;
 
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -35,7 +31,6 @@ abstract public class ROSAPISimulator
 {
    private static final String DEFAULT_TF_PREFIX = null;
    private static final String DEFAULT_PREFIX = "/ihmc_ros";
-   private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
 
    protected final DRCRobotModel robotModel;
@@ -64,19 +59,12 @@ abstract public class ROSAPISimulator
 
       PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
-      networkProcessorParameters.enableROSAPICommunicator(true);
       networkProcessorParameters.enableBehaviorModule(true);
       networkProcessorParameters.enableBehaviorVisualizer(true);
 
       if (runAutomaticDiagnosticRoutine)
       {
          networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
-      }
-
-      if (START_UI)
-      {
-         networkProcessorParameters.enableUiModule(true);
-         System.err.println("Cannot start UI automatically from open source projects. Start UI Manually");
       }
 
       if(disableViz)

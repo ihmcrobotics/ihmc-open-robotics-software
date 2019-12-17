@@ -13,7 +13,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -84,15 +83,21 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    }
 
    @Override
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   public void initialize()
+   {
+      sensorProcessing.initialize();
+   }
+
+   @Override
+   public SensorOutputMapReadOnly getProcessedSensorOutputMap()
    {
       return sensorProcessing;
    }
 
    @Override
-   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
-      return sensorProcessing;
+      return sensorProcessing.getRawSensorOutputMap();
    }
 
    @Override

@@ -1,75 +1,105 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.HashSet;
+import java.util.function.DoubleSupplier;
+
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
-   private SideDependentList<FootstepNode> goalNodes;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final HashSet<FootstepNode> expansion = new HashSet<>();
+
+   private final DoubleSupplier minimumStepLength;
+   private final DoubleSupplier maximumStepReach;
+   private final DoubleSupplier stepYawReductionFactorAtMaxReach;
+   private final DoubleSupplier minimumStepYaw;
+   private final DoubleSupplier maximumStepYaw;
+   private final DoubleSupplier minimumStepWidth;
+   private final DoubleSupplier maximumStepWidth;
+   private final DoubleSupplier idealFootstepWidth;
+   private final DoubleSupplier minXClearanceFromStance;
+   private final DoubleSupplier minYClearanceFromStance;
 
    public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters)
    {
-      this.parameters = parameters;
+      this(parameters::getMinimumStepLength,
+           parameters::getMaximumStepReach,
+           parameters::getStepYawReductionFactorAtMaxReach,
+           parameters::getMinimumStepYaw,
+           parameters::getMaximumStepYaw,
+           parameters::getMinimumStepWidth,
+           parameters::getMaximumStepWidth,
+           parameters::getIdealFootstepWidth,
+           parameters::getMinXClearanceFromStance,
+           parameters::getMinYClearanceFromStance);
    }
 
-   public void setGoalNodes(SideDependentList<FootstepNode> goalNodes)
+   public ParameterBasedNodeExpansion(DoubleSupplier minimumStepLength,
+                                      DoubleSupplier maximumStepReach,
+                                      DoubleSupplier stepYawReductionFactorAtMaxReach,
+                                      DoubleSupplier minimumStepYaw,
+                                      DoubleSupplier maximumStepYaw,
+                                      DoubleSupplier minimumStepWidth,
+                                      DoubleSupplier maximumStepWidth,
+                                      DoubleSupplier idealFootstepWidth,
+                                      DoubleSupplier minXClearanceFromStance,
+                                      DoubleSupplier minYClearanceFromStance)
    {
-      this.goalNodes = goalNodes;
+      this.minimumStepLength = minimumStepLength;
+      this.maximumStepReach = maximumStepReach;
+      this.stepYawReductionFactorAtMaxReach = stepYawReductionFactorAtMaxReach;
+      this.minimumStepYaw = minimumStepYaw;
+      this.maximumStepYaw = maximumStepYaw;
+      this.minimumStepWidth = minimumStepWidth;
+      this.maximumStepWidth = maximumStepWidth;
+      this.idealFootstepWidth = idealFootstepWidth;
+      this.minXClearanceFromStance = minXClearanceFromStance;
+      this.minYClearanceFromStance = minYClearanceFromStance;
    }
 
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
-      HashSet<FootstepNode> expansion = new HashSet<>();
-      addDefaultFootsteps(node, expansion);
+      expansion.clear();
 
-      return expansion;
-   }
-
-   private void addGoalNodeIfReachable(FootstepNode node, HashSet<FootstepNode> expansion)
-   {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      FootstepNode goalNode = goalNodes.get(nextSide);
-      double distanceToGoal = node.euclideanDistance(goalNode);
-      if(distanceToGoal < parameters.getMaximumStepReach())
+      double maxReachSquared = MathTools.square(maximumStepReach.getAsDouble());
+      double minYawAtFullExtension = (1.0 - stepYawReductionFactorAtMaxReach.getAsDouble()) * minimumStepYaw.getAsDouble();
+      double maxYawAtFullExtension = (1.0 - stepYawReductionFactorAtMaxReach.getAsDouble()) * maximumStepYaw.getAsDouble();
+      for (double x = minimumStepLength.getAsDouble(); x <= maximumStepReach.getAsDouble(); x += LatticeNode.gridSizeXY)
       {
-         expansion.add(goalNode);
-      }
-   }
-
-   private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> expansion)
-   {
-      RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      double reachSquared = MathTools.square(parameters.getMaximumStepReach());
-      for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
-      {
-         for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
+         for (double y = minimumStepWidth.getAsDouble(); y <= maximumStepWidth.getAsDouble(); y += LatticeNode.gridSizeXY)
          {
-            if (MathTools.square(x) + MathTools.square(y) > reachSquared)
+            double relativeYToIdeal = y - idealFootstepWidth.getAsDouble();
+            double reachSquared = EuclidCoreTools.normSquared(x, relativeYToIdeal);
+            if (reachSquared > maxReachSquared)
                continue;
 
-            if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
-            {
+            if (Math.abs(x) <= minXClearanceFromStance.getAsDouble() && Math.abs(y) <= minYClearanceFromStance.getAsDouble())
                continue;
-            }
 
-            for (double yaw = parameters.getMinimumStepYaw(); yaw <= parameters.getMaximumStepYaw(); yaw += LatticeNode.gridSizeYaw)
+            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / maximumStepReach.getAsDouble();
+            double minYaw = InterpolationTools.linearInterpolate(minimumStepYaw.getAsDouble(), minYawAtFullExtension, reachFraction);
+            double maxYaw = InterpolationTools.linearInterpolate(maximumStepYaw.getAsDouble(), maxYawAtFullExtension, reachFraction);
+
+            for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticeNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);
             }
          }
       }
+
+      return expansion;
    }
 
    private static FootstepNode constructNodeInPreviousNodeFrame(double stepLength, double stepWidth, double stepYaw, FootstepNode node)
@@ -79,31 +109,5 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       rotation.transform(footstep);
 
       return new FootstepNode(node.getX() + footstep.getX(), node.getY() + footstep.getY(), stepYaw + node.getYaw(), node.getRobotSide().getOppositeSide());
-   }
-
-   private static FootstepNode constructNodeOffsetFromAnotherNode(double xOffset, double yOffset, double yawOffset, FootstepNode node)
-   {
-      Vector2D offset = new Vector2D(xOffset, yOffset);
-      double yaw = node.getYaw() + yawOffset;
-      AxisAngle rotation = new AxisAngle(node.getYaw(), 0.0, 0.0);
-      rotation.transform(offset);
-      return new FootstepNode(node.getX() + offset.getX(), node.getY() + offset.getY(), yaw, node.getRobotSide());
-   }
-
-   private static ArrayList<Double> constructArrayFromEndpointsAndSpacing(double minValue, double maxValue, double spacing)
-   {
-      if(maxValue < minValue)
-         throw new RuntimeException("Max value: " + maxValue + " should be less than min value: " + minValue);
-
-      ArrayList<Double> array = new ArrayList<>();
-      double value = minValue;
-
-      while(value < maxValue)
-      {
-         array.add(value);
-         value += spacing;
-      }
-
-      return array;
    }
 }

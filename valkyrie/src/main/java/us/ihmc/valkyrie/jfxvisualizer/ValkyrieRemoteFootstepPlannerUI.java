@@ -13,6 +13,8 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -29,16 +31,19 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
-      DRCRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false, "DEFAULT", null, false, true, 0.0);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
+      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT);
+      previewModel.setTransparency(0.0);
+      previewModel.setUseOBJGraphics(true);
 
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, model.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(), model,
-                                              previewModel, model.getContactPointParameters(), model.getWalkingControllerParameters());
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(),
+                                              new ValkyrieFootstepPostProcessorParameters(), model, previewModel, model.getContactPointParameters(),
+                                              model.getWalkingControllerParameters());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)

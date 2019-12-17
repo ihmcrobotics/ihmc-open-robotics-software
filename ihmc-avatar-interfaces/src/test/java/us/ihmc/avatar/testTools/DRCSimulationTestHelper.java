@@ -34,7 +34,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -44,7 +44,6 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -140,9 +139,7 @@ public class DRCSimulationTestHelper
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
 
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
-
       networkProcessorParameters.enableNetworkProcessor(false);
-      networkProcessorParameters.enableLocalControllerCommunicator(true);
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
@@ -178,6 +175,14 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         assertFalse(networkProcessorParameters.isBehaviorModuleEnabled());
+         assertFalse(networkProcessorParameters.isMocapModuleEnabled());
+         assertFalse(networkProcessorParameters.isRobotEnvironmentAwerenessModuleEnabled());
+      }
+
+      simulationStarter.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
       if (initialSetup != null)
@@ -192,7 +197,6 @@ public class DRCSimulationTestHelper
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
 
-      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
@@ -406,7 +410,6 @@ public class DRCSimulationTestHelper
       simulationStarter = null;
 
       ros2Node.destroy();
-      ReferenceFrameTools.clearWorldFrameTree();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
@@ -419,7 +422,7 @@ public class DRCSimulationTestHelper
       catch (Exception e)
       {
          this.caughtException = e;
-         PrintTools.error(this, e.getMessage());
+         LogTools.error(e.getMessage());
          return false;
       }
    }
@@ -434,7 +437,7 @@ public class DRCSimulationTestHelper
       catch (Exception e)
       {
          this.caughtException = e;
-         PrintTools.error(this, e.getMessage());
+         LogTools.error(e.getMessage());
          return false;
       }
    }
@@ -679,6 +682,9 @@ public class DRCSimulationTestHelper
    @SuppressWarnings("unchecked")
    public void publishToController(Object message)
    {
+      if (simulationStarter.getPubSubImplementation() != PubSubImplementation.INTRAPROCESS)
+         throw new IllegalArgumentException("The ROS2 node used to publish to controller uses INTRAPROCESS but FAST_RTPS is used.");
+
       defaultControllerPublishers.get(message.getClass()).publish(message);
    }
 
@@ -764,6 +770,5 @@ public class DRCSimulationTestHelper
          }
       });
    }
-
 
 }

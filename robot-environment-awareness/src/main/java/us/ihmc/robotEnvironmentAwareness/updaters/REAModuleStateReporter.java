@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -40,6 +42,11 @@ public class REAModuleStateReporter
          reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(ocTree.getBoundingBox()));
    }
 
+   public void reportSensorPose(Pose3DReadOnly sensorPose)
+   {
+      reaMessager.submitMessage(REAModuleAPI.SensorPose, new Pose3D(sensorPose));
+   }
+
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
    {
       PlanarRegionsList planarRegionsList = regionFeaturesProvider.getPlanarRegionsList();
@@ -62,5 +69,11 @@ public class REAModuleStateReporter
    {
       if (reaMessager.isMessagerOpen())
          reaMessager.submitMessage(REAModuleAPI.StereoVisionPointCloudState, new StereoVisionPointCloudMessage(message));
+   }
+   
+   public void registerDepthCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      if (reaMessager.isMessagerOpen())
+         reaMessager.submitMessage(REAModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 }

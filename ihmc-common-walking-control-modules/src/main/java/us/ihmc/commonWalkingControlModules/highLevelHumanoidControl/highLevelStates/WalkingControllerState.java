@@ -233,6 +233,7 @@ public class WalkingControllerState extends HighLevelControllerState
       return controllerCore.getOutputForLowLevelController();
    }
 
+   @Override
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return controllerCore.getOutputForRootJoint();

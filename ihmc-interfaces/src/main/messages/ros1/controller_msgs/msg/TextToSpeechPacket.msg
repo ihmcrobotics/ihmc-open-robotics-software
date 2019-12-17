@@ -1,3 +1,5 @@
+# Use this message for the robot to speak.
+
 string FOOTSTEP_COMPLETED="Finished Taking Footstep"
 
 string FINISHED_WALKING="Finished walking"

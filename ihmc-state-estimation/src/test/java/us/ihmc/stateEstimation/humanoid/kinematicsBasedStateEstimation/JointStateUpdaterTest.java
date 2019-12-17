@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,8 +9,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
@@ -102,7 +101,7 @@ public class JointStateUpdaterTest
    {
       for (OneDoFJointBasics joint : jointsWithVelocitySensor)
       {
-         double sensorValue = sensorMap.getJointVelocityProcessedOutput(joint);
+         double sensorValue = sensorMap.getOneDoFJointOutput(joint).getVelocity();
          double robotJointValue = joint.getQd();
          
          assertEquals(sensorValue, robotJointValue, EPS);
@@ -113,7 +112,7 @@ public class JointStateUpdaterTest
    {
       for (OneDoFJointBasics joint : jointsWithPositionSensor)
       {
-         double sensorValue = sensorMap.getJointPositionProcessedOutput(joint);
+         double sensorValue = sensorMap.getOneDoFJointOutput(joint).getPosition();
          double robotJointValue = joint.getQ();
          
          assertEquals(sensorValue, robotJointValue, EPS);

@@ -1,3 +1,8 @@
+# This message is part of the IHMC whole-body controller API.
+# This message is used to build trajectory messages in taskspace.
+# It holds the only the translational information for one trajectory point (position & linear velocity).
+# Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational).
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

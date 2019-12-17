@@ -23,7 +23,7 @@ module controller_msgs
         /**
          * List of cells that the planner has explored
          */
-        sequence<controller_msgs::msg::dds::FootstepPlannerCellMessage> occupied_cells;
+        sequence<controller_msgs::msg::dds::FootstepPlannerCellMessage, 10000> occupied_cells;
       };
     };
   };

@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -24,7 +24,7 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
       nodeCheckers.forEach(checker -> checker.setPlanarRegions(planarRegions));
    }
 
-   public void addFootstepGraph(FootstepGraph graph)
+   public void addFootstepGraph(DirectedGraph graph)
    {
       nodeCheckers.forEach(checker -> checker.addFootstepGraph(graph));
    }

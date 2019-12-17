@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -26,7 +27,6 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
@@ -135,7 +135,8 @@ public class TaskspaceToJointspaceCalculator
 
    private final double controlDT;
 
-   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBodyBasics base, RigidBodyBasics endEffector, double controlDT, YoVariableRegistry parentRegistry)
+   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBodyBasics base, RigidBodyBasics endEffector, double controlDT,
+                                          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.controlDT = controlDT;
@@ -145,10 +146,11 @@ public class TaskspaceToJointspaceCalculator
       localBaseParentJointFrame = new PoseReferenceFrame(base.getName() + "Local", worldFrame);
       String localBaseFrameName = originalBaseFrame.getName() + "Local";
       RigidBodyTransform transformToParent = originalBaseFrame.getTransformToDesiredFrame(originalBaseParentJointFrame);
-      localBaseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(localBaseFrameName, localBaseParentJointFrame, transformToParent);
+      localBaseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(localBaseFrameName, localBaseParentJointFrame, transformToParent);
 
       originalJoints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
-      localJoints = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(originalJoints, "Local", localBaseParentJointFrame), OneDoFJointBasics.class);
+      localJoints = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(originalJoints, "Local", localBaseParentJointFrame),
+                                                      OneDoFJointBasics.class);
       numberOfDoF = localJoints.length;
 
       originalEndEffectorFrame = endEffector.getBodyFixedFrame();
@@ -212,19 +214,19 @@ public class TaskspaceToJointspaceCalculator
       yoLinearVelocityFromError = new YoFrameVector3D(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
 
       alphaSpatialVelocityFromError = new YoDouble(namePrefix + "AlphaSpatialVelocityFromError", registry);
-      filteredAngularVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredAngularVelocityFromError", "",
-            registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
-      filteredLinearVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredLinearVelocityFromError", "",
-            registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
+      filteredAngularVelocityFromError = new AlphaFilteredYoFrameVector(namePrefix
+            + "FilteredAngularVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
+      filteredLinearVelocityFromError = new AlphaFilteredYoFrameVector(namePrefix
+            + "FilteredLinearVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
 
       yoBaseParentJointFramePosition = new YoFramePoint3D(namePrefix + "BaseParentJointFrame", worldFrame, registry);
       yoBaseParentJointFrameOrientation = new YoFrameQuaternion(namePrefix + "BaseParentJointFrame", worldFrame, registry);
 
       alphaBaseParentJointPose = new YoDouble(namePrefix + "AlphaBaseParentJointPose", registry);
-      yoBaseParentJointFramePositionFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "BaseParentJointFramePositionFiltered", "",
-            registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
-      yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix + "BaseParentJointFrameOrientationFiltered", "",
-            yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
+      yoBaseParentJointFramePositionFiltered = new AlphaFilteredYoFramePoint(namePrefix
+            + "BaseParentJointFramePositionFiltered", "", registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
+      yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix
+            + "BaseParentJointFrameOrientationFiltered", "", yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
 
       enableFeedbackControl = new YoBoolean(namePrefix + "EnableFeedBackControl", registry);
       kpTaskspaceAngularError = new YoDouble(namePrefix + "KpTaskspaceAngularError", registry);
@@ -388,10 +390,15 @@ public class TaskspaceToJointspaceCalculator
       kpTaskspaceLinearError.set(kPLinearError);
    }
 
-   public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
+   public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity,
+                       FrameVector3D desiredAngularVelocity)
    {
       desiredControlFramePose.setIncludingFrame(desiredPosition, desiredOrientation);
-      desiredControlFrameTwist.setIncludingFrame(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredAngularVelocity, desiredLinearVelocity);
+      desiredControlFrameTwist.setIncludingFrame(originalEndEffectorFrame,
+                                                 originalBaseFrame,
+                                                 originalControlFrame,
+                                                 desiredAngularVelocity,
+                                                 desiredLinearVelocity);
 
       compute(desiredControlFramePose, desiredControlFrameTwist);
    }
@@ -404,30 +411,30 @@ public class TaskspaceToJointspaceCalculator
       desiredControlFrameTwist.setIncludingFrame(desiredTwist);
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
    }
-   
+
    private final AxisAngle tempAxisAngle = new AxisAngle();
-   
+
    public boolean computeIteratively(FramePose3D desiredPose, TwistReadOnly desiredTwist, double maxIterations, double epsilon)
    {
-      for(int i = 0; i < maxIterations; i++)
+      for (int i = 0; i < maxIterations; i++)
       {
          compute(desiredPose, desiredTwist);
-         
+
          tempPoint.setIncludingFrame(desiredPose.getPosition());
          tempPoint.changeFrame(localControlFrame);
          double translationDistance = tempPoint.distanceFromOrigin();
-         
+
          tempOrientation.setIncludingFrame(desiredPose.getOrientation());
          tempOrientation.changeFrame(localControlFrame);
          tempAxisAngle.set(tempOrientation);
          double angle = Math.abs(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
-         
-         if(translationDistance < epsilon && angle < epsilon)
+
+         if (translationDistance < epsilon && angle < epsilon)
          {
             return true;
          }
       }
-      
+
       return false;
    }
 
@@ -540,12 +547,14 @@ public class TaskspaceToJointspaceCalculator
    }
 
    private void computeDesiredSpatialVelocityToSolveFor(DenseMatrix64F spatialDesiredVelocityToPack, DenseMatrix64F spatialVelocityFromError,
-         TwistReadOnly desiredControlFrameTwist)
+                                                        TwistReadOnly desiredControlFrameTwist)
    {
       DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
       // Clip to maximum velocity
-      clipSpatialVector(spatialVelocityFromError, selectionMatrix, maximumTaskspaceAngularVelocityMagnitude.getDoubleValue(),
-            maximumTaskspaceLinearVelocityMagnitude.getDoubleValue());
+      clipSpatialVector(spatialVelocityFromError,
+                        selectionMatrix,
+                        maximumTaskspaceAngularVelocityMagnitude.getDoubleValue(),
+                        maximumTaskspaceLinearVelocityMagnitude.getDoubleValue());
 
       // Update YoVariables for the velocity
       getAngularAndLinearPartsFromSpatialVector(yoAngularVelocityFromError, yoLinearVelocityFromError, spatialVelocityFromError);
@@ -565,14 +574,14 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F tempSpatialVector = new DenseMatrix64F(1, 1);
 
    private void clipSpatialVector(DenseMatrix64F spatialVectorToClip, DenseMatrix64F selectionMatrix, double maximumAngularMagnitude,
-         double maximumLinearMagnitude)
+                                  double maximumLinearMagnitude)
    {
       getAngularAndLinearPartsFromSpatialVector(angularPart, linearPart, spatialVectorToClip);
 
       // Clip the angular part of the spatialVectorToClip
       subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
       tempSpatialVector.reshape(SpatialVector.SIZE, 1);
-      MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, tempSpatialVector, 0);
+      angularPart.get(0, tempSpatialVector);
       CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
 
       double angularPartmagnitude = NormOps.normP2(subspaceSpatialVector);
@@ -582,7 +591,7 @@ public class TaskspaceToJointspaceCalculator
       // Clip the linear part of the spatialVectorToClip
       subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
       tempSpatialVector.reshape(SpatialVector.SIZE, 1);
-      MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, tempSpatialVector, 3);
+      linearPart.get(3, tempSpatialVector);
       CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
 
       double linearPartMagnitude = NormOps.normP2(subspaceSpatialVector);
@@ -614,22 +623,22 @@ public class TaskspaceToJointspaceCalculator
 
    private void getAngularAndLinearPartsFromSpatialVector(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack, DenseMatrix64F spatialVector)
    {
-      MatrixTools.extractFrameTupleFromEJMLVector(angularPartToPack, spatialVector, localControlFrame, 0);
-      MatrixTools.extractFrameTupleFromEJMLVector(linearPartToPack, spatialVector, localControlFrame, 3);
+      angularPartToPack.setIncludingFrame(localControlFrame, 0, spatialVector);
+      linearPartToPack.setIncludingFrame(localControlFrame, 3, spatialVector);
    }
 
    private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector3D yoAngularPart, YoFrameVector3D yoLinearPart)
    {
       angularPart.setIncludingFrame(yoAngularPart);
       linearPart.setIncludingFrame(yoLinearPart);
-      MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
-      MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
+      angularPart.get(0, spatialVectorToPack);
+      linearPart.get(3, spatialVectorToPack);
    }
 
    private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, FrameVector3D angularPart, FrameVector3D linearPart)
    {
-      MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
-      MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
+      angularPart.get(0, spatialVectorToPack);
+      linearPart.get(3, spatialVectorToPack);
    }
 
    private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight)
@@ -637,13 +646,16 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          yoPrivilegedJointPositionsFiltered[i].update();
-         privilegedJointVelocitiesToPack.set(i, 0,
-               -2.0 * weight * (localJoints[i].getQ() - yoPrivilegedJointPositionsFiltered[i].getDoubleValue()) / jointSquaredRangeOfMotions.get(i, 0));
+         privilegedJointVelocitiesToPack.set(i,
+                                             0,
+                                             -2.0 * weight * (localJoints[i].getQ() - yoPrivilegedJointPositionsFiltered[i].getDoubleValue())
+                                                   / jointSquaredRangeOfMotions.get(i, 0));
       }
    }
 
    /**
     * Compute the gradient of q times the p-norm |q - q_midRange|_p
+    * 
     * @param privilegedJointVelocitiesToPack
     * @param weight
     */
@@ -704,7 +716,7 @@ public class TaskspaceToJointspaceCalculator
       tempSpatialError.reshape(SpatialVector.SIZE, 1);
       tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
 
-      MatrixTools.insertFrameTupleIntoEJMLVector(tempPositionError, tempSpatialError, 3);
+      tempPositionError.get(3, tempSpatialError);
       CommonOps.mult(selectionMatrix, tempSpatialError, tempSubspaceError);
 
       return NormOps.normP2(tempSubspaceError);

@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.19.7"
    id("us.ihmc.ihmc-ci") version "5.3"
-   id("us.ihmc.ihmc-cd") version "1.8"
+   id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools") version "0.3.1"
 }
 
@@ -18,8 +18,8 @@ mainDependencies {
    api("org.apache.commons:commons-math3:3.3")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-yovariables:0.3.11")
-   api("us.ihmc:ihmc-javafx-toolkit:0.12.9")
-   api("us.ihmc:ihmc-robot-data-logger:source")
+   api("us.ihmc:ihmc-javafx-toolkit:0.12.10")
+   api("us.ihmc:ihmc-robot-data-logger:0.12.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

@@ -95,7 +95,7 @@ public class ContinuousPlanningToolboxDataSetTest
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 1.0;
 
-   private static final double dt = 0.01;
+   private static final double dt = 0.05;
    private static double timeScaleFactor;
 
    private final DecimalFormat numberFormat = new DecimalFormat("#.00");
@@ -119,7 +119,7 @@ public class ContinuousPlanningToolboxDataSetTest
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
-   protected static boolean VERBOSE = true;
+   protected static boolean VERBOSE = false;
 
    private PawStepPlannerUI ui = null;
    protected Messager messager = null;
@@ -325,6 +325,7 @@ public class ContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    @Tag("fast")
    public void testFewDataSets()
@@ -344,6 +345,7 @@ public class ContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets);
    }
 
+   @Disabled
    @Test
    @Tag("quad-comm-slow")
    public void testAllDataSets()
@@ -353,6 +355,11 @@ public class ContinuousPlanningToolboxDataSetTest
          if (!dataSet.hasPlannerInput())
             return false;
          for (DataSetName nameToIgnore : datasetsToIgnore)
+         {
+            if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
+               return false;
+         }
+         for (DataSetName nameToIgnore : fastDatasets)
          {
             if (dataSet.getName().equals(nameToIgnore.name().substring(1)))
                return false;
@@ -599,11 +606,18 @@ public class ContinuousPlanningToolboxDataSetTest
       double expectedDuration = (dataSet.getPlannerInput().getStartPosition().distanceXY(dataSet.getPlannerInput().getGoalPosition()))
             / xGaitSettings.getMaxSpeed();
       double maxDuration = 4.0 * expectedDuration;
+      double absoluteMaxDuration = 10.0 * expectedDuration;
       boolean timedOut = false;
       String message = "";
+      double startTime = Conversions.nanosecondsToSeconds(System.nanoTime());
       while (!continuousPlanningModule.getToolboxController().isDone() && !planningFailed.getBooleanValue() && !timedOut)
       {
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         if (currentTime - startTime > absoluteMaxDuration)
+         {
+            message += "Hit an absolute timeout.";
+            break;
+         }
 
          if (!firstTick && ((currentTime - tickStartTime) < (dt / timeScaleFactor)))
          {
@@ -847,7 +861,7 @@ public class ContinuousPlanningToolboxDataSetTest
       VISUALIZE = true;
       test.setup();
 
-      String errorMessage = test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
+      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
       LogTools.info("Done!");
 

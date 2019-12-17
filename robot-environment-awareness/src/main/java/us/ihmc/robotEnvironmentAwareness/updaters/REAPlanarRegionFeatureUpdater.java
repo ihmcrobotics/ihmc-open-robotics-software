@@ -1,21 +1,32 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionIntersectionCalculator;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationNodeData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 {
@@ -52,7 +63,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
    private final AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
-   
+
    public REAPlanarRegionFeatureUpdater(Messager reaMessager)
    {
       this.reaMessager = reaMessager;
@@ -142,7 +153,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(REAModuleAPI.PlanarRegionsIntersectionParameters.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update(NormalOcTree octree)
+   public void update(NormalOcTree octree, Pose3DReadOnly sensorPose)
    {
       if (!isOcTreeEnabled.get())
          return;
@@ -162,11 +173,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
-      
+      segmentationCalculator.setSensorPosition(sensorPose.getPosition());
+
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      
+
       List<PlanarRegion> unmergedCustomPlanarRegions;
 
       if (clearCustomRegions.getAndSet(false))
@@ -201,12 +213,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    public void registerCustomPlanarRegion(PlanarRegion planarRegion)
    {
-      if(planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
+      if (planarRegion.getRegionId() == PlanarRegion.NO_REGION_ID)
       {
          // ignore if region id isn't set
          return;
       }
-      else if(planarRegion.isEmpty())
+      else if (planarRegion.isEmpty())
       {
          customPlanarRegions.remove(planarRegion.getRegionId());
       }

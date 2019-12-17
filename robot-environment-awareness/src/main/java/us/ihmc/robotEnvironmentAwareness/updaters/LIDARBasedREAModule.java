@@ -18,11 +18,13 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -34,6 +36,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
+import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -60,6 +64,7 @@ public class LIDARBasedREAModule
 
    private final REAOcTreeBuffer lidarBufferUpdater;
    private final REAOcTreeBuffer stereoVisionBufferUpdater;
+   private final REAOcTreeBuffer depthCloudBufferUpdater;
    private final REAOcTreeUpdater mainUpdater;
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
@@ -86,13 +91,21 @@ public class LIDARBasedREAModule
       stereoVisionBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.StereoVisionBufferEnable, false,
                                                       REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
                                                       REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState);
-      REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater};
+      depthCloudBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION, reaMessager, REAModuleAPI.DepthCloudBufferEnable, false,
+                                                    REAModuleAPI.StereoVisionBufferOcTreeCapacity, 1000000, REAModuleAPI.StereoVisionBufferMessageCapacity, 1,
+                                                    REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.DepthCloudBufferState);
+      REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater, depthCloudBufferUpdater};
       mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
-                                           this::dispatchStereoVisionPointCloudMessage);
+      new REAModuleROS2Subscription<LidarScanMessage>(ros2Node, reaMessager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage);
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node, reaMessager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class,
+                                                                   this::dispatchStereoVisionPointCloudMessage);
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node, reaMessager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class,
+                                                                   this::dispatchDepthPointCloudMessage);
+      new REAModuleROS2Subscription<StampedPosePacket>(ros2Node, reaMessager, "/ihmc/stamped_pose_T265", StampedPosePacket.class,
+                                                       this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable);
+
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
                                            this::dispatchCustomPlanarRegion);
       ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
@@ -106,6 +119,7 @@ public class LIDARBasedREAModule
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> stereoVisionBufferUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> depthCloudBufferUpdater.saveConfiguration(filePropertyHelper));
       reaMessager.registerTopicListener(REAModuleAPI.SaveMainUpdaterConfiguration, (content) -> mainUpdater.saveConfiguration(filePropertyHelper));
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
@@ -135,7 +149,19 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
-      mainUpdater.handleStereoVisionPointCloudMessage(message);
+   }
+
+   private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
+   {
+      StereoVisionPointCloudMessage message = subscriber.takeNextData();
+      moduleStateReporter.registerDepthCloudMessage(message);
+      depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
+   }
+   
+   private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
+   {
+      StampedPosePacket message = subscriber.takeNextData();
+      reaMessager.submitMessage(REAModuleAPI.TrackingCameraMessageState, new StampedPosePacket(message));
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -186,6 +212,7 @@ public class LIDARBasedREAModule
    {
       lidarBufferUpdater.loadConfiguration(filePropertyHelper);
       stereoVisionBufferUpdater.loadConfiguration(filePropertyHelper);
+      depthCloudBufferUpdater.loadConfiguration(filePropertyHelper);
       mainUpdater.loadConfiguration(filePropertyHelper);
       planarRegionFeatureUpdater.loadConfiguration(filePropertyHelper);
    }
@@ -204,17 +231,22 @@ public class LIDARBasedREAModule
       try
       {
          NormalOcTree mainOctree = mainUpdater.getMainOctree();
+         Pose3DReadOnly sensorPose = mainUpdater.getSensorPose();
          if (clearOcTree.getAndSet(false))
          {
             lidarBufferUpdater.clearBuffer();
             stereoVisionBufferUpdater.clearBuffer();
+            depthCloudBufferUpdater.clearBuffer();
             mainUpdater.clearOcTree();
             planarRegionFeatureUpdater.clearOcTree();
-            if (mainOctree.getResolution() != octreeResolution.get())
+
+            Double latestOctreeResolution = octreeResolution.get();
+            if (mainOctree.getResolution() != latestOctreeResolution)
             {
-               lidarBufferUpdater.setOctreeResolution(octreeResolution.get());
-               stereoVisionBufferUpdater.setOctreeResolution(octreeResolution.get());
-               mainUpdater.initializeReferenceOctree(octreeResolution.get());
+               lidarBufferUpdater.setOctreeResolution(latestOctreeResolution);
+               stereoVisionBufferUpdater.setOctreeResolution(latestOctreeResolution);
+               depthCloudBufferUpdater.setOctreeResolution(latestOctreeResolution);
+               mainUpdater.initializeReferenceOctree(latestOctreeResolution);
             }
          }
          else
@@ -224,11 +256,12 @@ public class LIDARBasedREAModule
 
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
+            moduleStateReporter.reportSensorPose(sensorPose);
 
             if (isThreadInterrupted())
                return;
 
-            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree), planarRegionsTimeReport);
+            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
             planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
@@ -268,6 +301,7 @@ public class LIDARBasedREAModule
          scheduled = executorService.scheduleAtFixedRate(this::mainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(lidarBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+         executorService.scheduleAtFixedRate(depthCloudBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
    }
 

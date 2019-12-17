@@ -1,7 +1,9 @@
 package us.ihmc.valkyrie.joystick;
 
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -17,13 +19,18 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Robo
 {
    private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
    private final IHMCROS2Publisher<HighLevelStateMessage> highLevelStatePublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public ValkyriePunchMessenger(String robotName, Ros2Node ros2Node)
    {
       MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       armTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
       highLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, subscriberTopicNameGenerator);
+      abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
    }
+
 
    @Override
    public void sendArmHomeConfiguration(double trajectoryDuration, RobotSide... robotSides)
@@ -63,5 +70,27 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Robo
       HighLevelStateMessage message = new HighLevelStateMessage();
       message.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
       highLevelStatePublisher.publish(message);
+   }
+
+   @Override
+   public void sendAbortWalkingRequest()
+   {
+      abortWalkingPublisher.publish(new AbortWalkingMessage());
+   }
+
+   @Override
+   public void sendPauseWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(true);
+      pauseWalkingPublisher.publish(message);
+   }
+
+   @Override
+   public void sendContinueWalkingRequest()
+   {
+      PauseWalkingMessage message = new PauseWalkingMessage();
+      message.setPause(false);
+      pauseWalkingPublisher.publish(message);
    }
 }

@@ -3,8 +3,15 @@ package us.ihmc.robotics.geometry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -612,5 +619,68 @@ public class ConvexPolygonScalerTest
       boolean success = scaler.scaleConvexPolygonToContainInteriorPolygon(exteriorPolygon, interiorPolygon, 0.0, scaledPolygon);
       assertTrue(scaledPolygonExpected.epsilonEquals(scaledPolygon, 1e-7));
       assertTrue(success);
+   }
+
+   @Disabled
+   @Test
+   public void testCaseScalingRedundantPolygon()
+   {
+      // This has extra, collinear points added along the edges of the points. However, these aren't removed when generating the polygon. This then causes
+      // the scaler to fail.
+      List<Point3D> fewerPoints = new ArrayList<>();
+      fewerPoints.add(new Point3D(0.2, 0.2, 0.0));
+      fewerPoints.add(new Point3D(0.2, 0.1, 0.0));
+      fewerPoints.add(new Point3D(0.2, 0.0, 0.0));
+      fewerPoints.add(new Point3D(0.2, -0.1, 0.0));
+      fewerPoints.add(new Point3D(0.2, -0.2, 0.0));
+      fewerPoints.add(new Point3D(0.1, -0.2, 0.0));
+      fewerPoints.add(new Point3D(0.0, -0.2, 0.0));
+      fewerPoints.add(new Point3D(-0.1, -0.2, 0.0));
+      fewerPoints.add(new Point3D(-0.2, -0.2, 0.0));
+      fewerPoints.add(new Point3D(-0.2, -0.1, 0.0));
+      fewerPoints.add(new Point3D(-0.2, 0.0, 0.0));
+      fewerPoints.add(new Point3D(-0.2, 0.1, 0.0));
+      fewerPoints.add(new Point3D(-0.2, 0.2, 0.0));
+      fewerPoints.add(new Point3D(-0.1, 0.2, 0.0));
+      fewerPoints.add(new Point3D(0.0, 0.2, 0.0));
+      fewerPoints.add(new Point3D(0.1, 0.2, 0.0));
+
+      List<Point3D> essentialPoints = new ArrayList<>();
+      essentialPoints.add(new Point3D(0.2, 0.2, 0.0));
+      essentialPoints.add(new Point3D(0.2, -0.2, 0.0));
+      essentialPoints.add(new Point3D(-0.2, -0.2, 0.0));
+      essentialPoints.add(new Point3D(-0.2, 0.2, 0.0));
+
+
+
+
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+      fewerPoints.forEach(polygon::addVertex);
+      polygon.update();
+
+      ConvexPolygon2D essentialPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D scaledEssentialPolygon = new ConvexPolygon2D();
+      essentialPoints.forEach(essentialPolygon::addVertex);
+      essentialPolygon.update();
+
+      List<? extends Point2DReadOnly> polygonVertices = polygon.getPolygonVerticesView();
+
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(polygonVertices.get(i), polygon.getVertex(i), 1e-8);
+         int nextIndex = ListWrappingIndexTools.next(i, polygonVertices);
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals(polygonVertices.get(nextIndex), polygon.getNextVertex(i), 1e-8);
+      }
+
+
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      scaler.scaleConvexPolygon(polygon, 0.15, scaledPolygon);
+      scaler.scaleConvexPolygon(essentialPolygon, 0.15, scaledEssentialPolygon);
+
+      for (int i = 0; i < scaledPolygon.getNumberOfVertices(); i++)
+      {
+         assertTrue("Point " + scaledPolygon.getVertex(i) + " is outside.", scaledEssentialPolygon.isPointInside(scaledPolygon.getVertex(i)));
+      }
    }
 }

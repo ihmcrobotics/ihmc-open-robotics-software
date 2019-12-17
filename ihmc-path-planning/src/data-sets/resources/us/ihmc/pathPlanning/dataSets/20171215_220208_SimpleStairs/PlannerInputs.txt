@@ -7,6 +7,7 @@ plan_then_snap_timeout 5.0
 a_star_timeout 5.0
 vis_graph_with_a_star_timeout 5.0
 
+quadruped_start_position -0.44 0.121 0.001
 quadruped_goal_position 2.4 0.039 0.5
 quadruped_planner_status test
 quadruped_timeout 5.0

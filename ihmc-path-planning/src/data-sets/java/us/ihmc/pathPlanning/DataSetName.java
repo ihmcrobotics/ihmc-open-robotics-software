@@ -2,6 +2,15 @@ package us.ihmc.pathPlanning;
 
 public enum DataSetName
 {
+	_20191213_134839_Cinders,
+	_20191122_122216_MultiRegionFlatGround,
+	_20191119_135944_RobotPlatform,
+	_20191114_155310_SimplePlatform,
+	_20191107_110432_TrickCorridorWCutFloor,
+	_20191008_153543_TrickCorridor,
+	_20191007_200400_Corridor1Wall,
+	_20191007_185913_SimpleCorridor,
+	_20190710_SLAM_PlanarRegionFittingExamples,
 	_20190603_224047_PlanarRegionWigglerViolateDeltaInside,
 	_20190514_163532_QuadrupedShortPlatformEnvironment,
 	_20190514_163532_QuadrupedPlatformEnvironment,
