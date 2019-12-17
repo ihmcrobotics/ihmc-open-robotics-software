@@ -131,6 +131,31 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       ThreadTools.sleepForever();
    }
 
+   @Test
+   public void testSit1()
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
+                                                                                                           robotModel.getRobotPhysicalProperties());
+      addButt1ContactPoint(robotModel.getJointMap(), contactPointParameters);
+      addHeelBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
+//      addToeBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
+      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
+      robotModel.setContactPointParameters(contactPointParameters);
+
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+
+      double simulationDT = 2.0e-4;
+      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
+      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+
+      setRobotToSit1Configuration(robot, robotModel.getJointMap());
+      scs.startOnAThread();
+
+      ThreadTools.sleepForever();
+   }
+
    private SimulationConstructionSet setupSCS(ValkyrieRobotModel robotModel, HumanoidFloatingRootJointRobot robot,
                                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -341,6 +366,40 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       robot.getRootJoint().setRotationAndTranslation(rootJointPose);
    }
 
+   private static void setRobotToSit1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.9);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.525);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.775);
+
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(1.1);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.0));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(1.1);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(0.9));
+      }
+
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(-0.1);
+
+      RigidBodyTransform rootJointPose = new RigidBodyTransform();
+      rootJointPose.setRotation(new Quaternion(0.0, -0.2, 0.0, 1.0));
+      rootJointPose.setTranslation(0.0, 0.0, 0.33);
+      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+   }
+
+   private static void addButt1ContactPoint(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      Point3D position = new Point3D(-0.06, 0.0, -0.335);
+      RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+      rigidBodyTransform.setTranslation(position);
+      String parentJointName = jointMap.getPelvisName();
+      String bodyName = parentJointName;
+      String contactName = "ButtCP";
+      contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
+   }
+
    private static void addUpperKneeContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -393,6 +452,34 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
          String parentJointName = jointMap.getJointBeforeFootName(robotSide);
          String bodyName = jointMap.getFootName(robotSide);
          String contactName = robotSide.getCamelCaseName() + "ToeCP";
+         contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
+      }
+   }
+
+   private static void addToeBottomContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Point3D position = new Point3D(0.18, 0.0, -0.085);
+         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+         rigidBodyTransform.setTranslation(position);
+         String parentJointName = jointMap.getJointBeforeFootName(robotSide);
+         String bodyName = jointMap.getFootName(robotSide);
+         String contactName = robotSide.getCamelCaseName() + "ToeCP";
+         contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
+      }
+   }
+
+   private static void addHeelBottomContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Point3D position = new Point3D(-0.085, 0.0, -0.085);
+         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+         rigidBodyTransform.setTranslation(position);
+         String parentJointName = jointMap.getJointBeforeFootName(robotSide);
+         String bodyName = jointMap.getFootName(robotSide);
+         String contactName = robotSide.getCamelCaseName() + "HeelCP";
          contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, rigidBodyTransform);
       }
    }
