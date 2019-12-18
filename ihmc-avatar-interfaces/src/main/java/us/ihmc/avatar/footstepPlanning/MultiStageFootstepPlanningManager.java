@@ -768,7 +768,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                                                                                         plannerTime.getDoubleValue());
 
                if(adaptiveSwingTrajectoryCalculator != null)
-                  setSwingTrajectories(footstepPlanMessage.getFootstepDataList());
+                  setSwingParameters(footstepPlanMessage.getFootstepDataList());
 
                statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
@@ -800,8 +800,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.isDone.set(isDone);
    }
 
-   private void setSwingTrajectories(FootstepDataListMessage footstepDataListMessage)
+   private void setSwingParameters(FootstepDataListMessage footstepDataListMessage)
    {
+      adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList.get());
       FramePose3D firstStepStancePose = new FramePose3D();
       FramePose3D secondStepStancePose = new FramePose3D();
 
@@ -838,9 +839,12 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          footstepDataMessage.setSwingHeight(adaptiveSwingTrajectoryCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
          footstepDataMessage.setSwingDuration(adaptiveSwingTrajectoryCalculator.calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
 
-         double[] waypointProportions = new double[2];
-         adaptiveSwingTrajectoryCalculator.getWaypointProportions(startPose, endPose, planarRegionsList.get(), waypointProportions);
-         footstepDataMessage.getCustomWaypointProportions().add(waypointProportions);
+         if(!adaptiveSwingTrajectoryCalculator.checkForFootCollision(startPose, footstepDataMessage))
+         {
+            footstepDataMessage.setSwingHeight(adaptiveSwingTrajectoryCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));            
+         }
+         
+         footstepDataMessage.setSwingDuration(adaptiveSwingTrajectoryCalculator.calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
       }
    }
 

@@ -54,6 +54,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    private RosMainNode rosMainNode;
 
+   private MultiSenseSensorManager multiSenseSensorManager;
+
    public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
                                   RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
                                   RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
@@ -128,7 +130,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (ENABLE_DEPTH_PUBLISHER)
          pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory,
+      multiSenseSensorManager = new MultiSenseSensorManager(modelFactory,
                                                                                     robotConfigurationDataBuffer,
                                                                                     rosMainNode,
                                                                                     ros2Node,
@@ -191,7 +193,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          pointCloudSensorManager.shutdown();
       if (cameraDataReceiver != null)
          cameraDataReceiver.closeAndDispose();
+      if (multiSenseSensorManager != null)
+         multiSenseSensorManager.closeAndDispose();
       if (rosMainNode != null)
          rosMainNode.shutdown();
+      ros2Node.destroy();
    }
 }
