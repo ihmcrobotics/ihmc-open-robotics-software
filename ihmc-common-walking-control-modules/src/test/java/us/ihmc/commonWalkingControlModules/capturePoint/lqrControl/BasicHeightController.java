@@ -23,20 +23,19 @@ public class BasicHeightController
    private final YoDouble verticalForce = new YoDouble("verticalForce", registry);
    private final double controlDT;
 
+   private final SphereRobot sphereRobot;
    private final FramePoint3DReadOnly centerOfMass;
    private final FrameVector3DReadOnly centerOfMassVelocity;
 
-   private final SphereControlToolbox controlToolbox;
-
-   public BasicHeightController(SphereControlToolbox controlToolbox, YoVariableRegistry parentRegistry)
+   public BasicHeightController(SphereRobot sphereRobot, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = controlToolbox.getControlDT();
-      this.controlToolbox = controlToolbox;
+      this.controlDT = sphereRobot.getControlDT();
+      this.sphereRobot = sphereRobot;
 
-      yoDesiredHeight.set(controlToolbox.getDesiredHeight());
+      yoDesiredHeight.set(sphereRobot.getDesiredHeight());
 
-      centerOfMass = controlToolbox.getCenterOfMass();
-      centerOfMassVelocity = controlToolbox.getCenterOfMassVelocity();
+      centerOfMass = sphereRobot.getCenterOfMass();
+      centerOfMassVelocity = sphereRobot.getCenterOfMassVelocity();
 
       YoPIDGains pidGains = new YoPIDGains("height", registry);
       pidGains.setKp(kp);
@@ -52,7 +51,7 @@ public class BasicHeightController
    {
       double z = centerOfMass.getZ();
 
-      weight.set(controlToolbox.getGravityZ() * controlToolbox.getTotalMass());
+      weight.set(sphereRobot.getGravityZ() * sphereRobot.getTotalMass());
       verticalForce.set(heightController.compute(z, yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
       verticalForce.add(Math.abs(weight.getDoubleValue()));
    }

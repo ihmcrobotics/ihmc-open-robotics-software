@@ -2,13 +2,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
@@ -30,13 +27,12 @@ public class LQRMomentumControllerSimulation
    {
       Vector3D initialPosition = new Vector3D(0.0, 0.0, desiredHeight);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      SphereRobot sphereRobot = new SphereRobot("SphereRobot", gravity, yoGraphicsListRegistry);
+      SphereRobot sphereRobot = new SphereRobot("SphereRobot", gravity, controlDT, desiredHeight, yoGraphicsListRegistry);
       sphereRobot.initRobot(initialPosition, new Vector3D());
 
       ExternalForcePoint externalForcePoint = sphereRobot.getAllExternalForcePoints().get(0);
 
-      SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobot, controlDT, desiredHeight, gravity, yoGraphicsListRegistry);
-      controller = new BasicSphereController(sphereRobot, sphereControlToolbox, externalForcePoint, yoGraphicsListRegistry);
+      controller = new BasicSphereController(sphereRobot, externalForcePoint, yoGraphicsListRegistry);
       sphereRobot.setController(controller);
 
       Joint joint = sphereRobot.getJoint(sphereRobot.getRootJoint().getName());
