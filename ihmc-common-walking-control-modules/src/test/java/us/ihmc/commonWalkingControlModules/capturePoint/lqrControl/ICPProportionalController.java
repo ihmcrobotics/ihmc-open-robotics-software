@@ -22,14 +22,13 @@ public class ICPProportionalController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector3D tempControl = new FrameVector3D(worldFrame);
-   private final YoFrameVector3D icpError = new YoFrameVector3D("icpError", "", worldFrame, registry);
-   private final YoFrameVector3D icpErrorIntegrated = new YoFrameVector3D("icpErrorIntegrated", "", worldFrame, registry);
+   private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
+   private final YoFrameVector3D dcmErrorIntegrated = new YoFrameVector3D("dcmErrorIntegrated", "", worldFrame, registry);
 
-   private final YoFrameVector3D feedbackPart = new YoFrameVector3D("feedbackPart", worldFrame, registry);
+   private final YoFrameVector3D feedbackPart = new YoFrameVector3D("dcmControlCMPFeedback", worldFrame, registry);
+   private final YoFrameVector3D feedForwardPart = new YoFrameVector3D("dcmControlCMPFeedForward", worldFrame, registry);
 
-   private final YoFramePoint3D cmpOutput = new YoFramePoint3D("icpControlCMPOutput", worldFrame, registry);
-
-   private final FramePoint3D icpPosition = new FramePoint3D();
+   private final YoFramePoint3D cmpOutput = new YoFramePoint3D("dcmControlCMPOutput", worldFrame, registry);
 
    private final double controlDT;
    private final DoubleProvider captureKpParallelToMotion;
@@ -58,30 +57,25 @@ public class ICPProportionalController
 
    public void reset()
    {
-      icpErrorIntegrated.setToZero();
+      dcmErrorIntegrated.setToZero();
    }
 
-   public FramePoint3DReadOnly doProportionalControl(FramePoint3DReadOnly capturePoint, FramePoint3DReadOnly desiredCapturePoint,
-                                                     FrameVector3DReadOnly desiredCapturePointVelocity, double omega0)
+   public FramePoint3DReadOnly doProportionalControl(FramePoint3DReadOnly measuredDCMPosition, FramePoint3DReadOnly desiredDCMPosition,
+                                                     FrameVector3DReadOnly desiredDCMVelocity, double omega0)
    {
-      cmpOutput.setMatchingFrame(capturePoint);
+      cmpOutput.setMatchingFrame(measuredDCMPosition);
 
-      icpPosition.setIncludingFrame(capturePoint);
-      icpPosition.changeFrame(worldFrame);
       // feed forward part
-      tempControl.setIncludingFrame(desiredCapturePointVelocity);
-      tempControl.scale(1.0 / omega0);
-      tempControl.changeFrame(worldFrame);
+      feedForwardPart.scaleAdd(-1.0 / omega0, desiredDCMVelocity, desiredDCMPosition);
 
-      cmpOutput.sub(tempControl);
+      cmpOutput.sub(feedForwardPart);
 
       // feedback part
-      icpError.set(icpPosition);
-      icpError.sub(desiredCapturePoint);
+      dcmError.sub(measuredDCMPosition, desiredDCMPosition);
 
-      tempControl.set(icpError);
+      tempControl.set(dcmError);
       double epsilonZeroICPVelocity = 1e-5;
-      if (desiredCapturePointVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
+      if (desiredDCMVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
       {
          icpVelocityDirectionFrame.setXAxis(tempControl);
          tempControl.changeFrame(icpVelocityDirectionFrame);
@@ -94,29 +88,30 @@ public class ICPProportionalController
          tempControl.scale(captureKpOrthogonalToMotion.getValue());
       }
 
-      tempICPErrorIntegrated.set(icpError);
+      feedbackPart.set(tempControl);
+
+      tempICPErrorIntegrated.set(dcmError);
       tempICPErrorIntegrated.scale(controlDT);
       tempICPErrorIntegrated.scale(captureKi.getValue());
 
-      icpErrorIntegrated.scale(captureKiBleedoff.getValue());
-      icpErrorIntegrated.add(tempICPErrorIntegrated);
+      dcmErrorIntegrated.scale(captureKiBleedoff.getValue());
+      dcmErrorIntegrated.add(tempICPErrorIntegrated);
 
-      double length = icpErrorIntegrated.length();
+      double length = dcmErrorIntegrated.length();
       double maxLength = 0.02;
       if (length > maxLength)
       {
-         icpErrorIntegrated.scale(maxLength / length);
+         dcmErrorIntegrated.scale(maxLength / length);
       }
 
       if (Math.abs(captureKi.getValue()) < 1e-10)
       {
-         icpErrorIntegrated.setToZero();
+         dcmErrorIntegrated.setToZero();
       }
 
-      tempControl.add(icpErrorIntegrated);
+      feedbackPart.add(dcmErrorIntegrated);
 
-      feedbackPart.set(tempControl);
-      cmpOutput.add(tempControl);
+      cmpOutput.add(feedForwardPart, feedbackPart);
 
       return cmpOutput;
    }

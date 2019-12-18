@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
@@ -27,24 +28,28 @@ public class LQRMomentumControllerSimulation
 
    public LQRMomentumControllerSimulation()
    {
-      Vector3D initialPosition = new Vector3D(0.0, 0.0, 1.0);
-      SphereRobot sphereRobotModel = new SphereRobot();
+      Vector3D initialPosition = new Vector3D(0.0, 0.0, desiredHeight);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      RobotTools.SCSRobotFromInverseDynamicsRobotModel sphereRobot = SphereRobot
-            .createSphereRobot("SphereRobot", initialPosition, sphereRobotModel.getElevator(), yoGraphicsListRegistry, gravity);
+      SphereRobot sphereRobot = new SphereRobot("SphereRobot", gravity, yoGraphicsListRegistry);
+      sphereRobot.initRobot(initialPosition, new Vector3D());
 
       ExternalForcePoint externalForcePoint = sphereRobot.getAllExternalForcePoints().get(0);
 
-      SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobotModel.getElevator(), controlDT, desiredHeight, gravity,
-                                                                           sphereRobot.getYoTime(), sphereRobotModel.getTotalMass(),
-                                                                           sphereRobot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobot, controlDT, desiredHeight, gravity, yoGraphicsListRegistry);
       controller = new BasicSphereController(sphereRobot, sphereControlToolbox, externalForcePoint, yoGraphicsListRegistry);
       sphereRobot.setController(controller);
+
+      Joint joint = sphereRobot.getJoint(sphereRobot.getRootJoint().getName());
+      PusherController pushController = new PusherController(sphereRobot, joint, new Vector3D(), 0.05);
+      pushController.setPushForceMagnitude(10.0);
+      pushController.setPushDuration(0.25);
+      pushController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
+      yoGraphicsListRegistry.registerYoGraphic("pusher", pushController.getForceVisualizer());
 
       setupGroundContactModel(sphereRobot);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(16000);
+      parameters.setDataBufferSize(160000);
       scs = new SimulationConstructionSet(sphereRobot, parameters);
       SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
       plotterFactory.setShowOnStart(true);
@@ -52,9 +57,11 @@ public class LQRMomentumControllerSimulation
       plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       plotterFactory.createOverheadPlotter();
 
+      pushController.addPushButtonToSCS(scs);
+
       scs.setDT(controlDT, 1);
 
-      scs.setCameraPosition(-1.5, -2.5, 0.5);
+      scs.setCameraPosition(-3.0, -5.0, 2.0);
       scs.setCameraFix(0.0, 0.0, 0.4);
 
       scs.setCameraTracking(false, true, true, false);
@@ -125,6 +132,14 @@ public class LQRMomentumControllerSimulation
       contactStateProviders.add(state4);
       contactStateProviders.add(state5);
 
+      SettableContactStateProvider fakeState = new SettableContactStateProvider();
+      fakeState.getTimeInterval().setInterval(0.0, 5.0);
+      fakeState.setStartCopPosition(new FramePoint2D());
+      fakeState.setEndCopPosition(new FramePoint2D());
+      List<ContactStateProvider> fakeProvider = new ArrayList<>();
+      fakeProvider.add(fakeState);
+
       simulation.setTrajectories(contactStateProviders);
+//      simulation.setTrajectories(fakeProvider);
    }
 }
