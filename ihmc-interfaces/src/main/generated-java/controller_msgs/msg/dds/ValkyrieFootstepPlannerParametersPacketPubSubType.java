@@ -116,6 +116,8 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -239,6 +241,9 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -317,6 +322,8 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
 
       cdr.write_type_6(data.getAStarHeuristicsWeight());
 
+      cdr.write_type_6(data.getWaypointCost());
+
    }
 
    public static void read(controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -393,6 +400,8 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
       	
       data.setAStarHeuristicsWeight(cdr.read_type_6());
       	
+      data.setWaypointCost(cdr.read_type_6());
+      	
 
    }
 
@@ -441,6 +450,7 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_6("foothold_area_weight", data.getFootholdAreaWeight());
       ser.write_type_6("a_star_heuristics_weight", data.getAStarHeuristicsWeight());
+      ser.write_type_6("waypoint_cost", data.getWaypointCost());
    }
 
    @Override
@@ -488,6 +498,7 @@ public class ValkyrieFootstepPlannerParametersPacketPubSubType implements us.ihm
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setFootholdAreaWeight(ser.read_type_6("foothold_area_weight"));
       data.setAStarHeuristicsWeight(ser.read_type_6("a_star_heuristics_weight"));
+      data.setWaypointCost(ser.read_type_6("waypoint_cost"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket src, controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket dest)
