@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.ToDoubleFunction;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -30,6 +31,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.CompositeFootstepCost;
@@ -40,6 +42,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -122,16 +125,16 @@ public class ValkyrieAStarFootstepPlanner
       stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper);
 
       heuristics = new DistanceAndYawBasedHeuristics(parameters.getTranslationWeight()::getZ,
-                                                     parameters.getTranslationWeight()::getZ,
-                                                     parameters::getMaximumStepReach,
-                                                     parameters::getMaximumStepYaw,
-                                                     parameters.getOrientationWeight()::getYaw,
-                                                     parameters::getCostPerStep,
-                                                     parameters::getFinalTurnProximity,
-                                                     () -> 0.25,
-                                                     parameters::getIdealFootstepWidth,
-                                                     parameters::getAstarHeuristicsWeight,
-                                                     snapper);
+                                                                   parameters.getTranslationWeight()::getZ,
+                                                                   parameters::getMaximumStepReach,
+                                                                   parameters::getMaximumStepYaw,
+                                                                   parameters.getOrientationWeight()::getYaw,
+                                                                   parameters::getCostPerStep,
+                                                                   parameters::getFinalTurnProximity,
+                                                                   () -> 0.25,
+                                                                   parameters::getIdealFootstepWidth,
+                                                                   parameters::getAstarHeuristicsWeight,
+                                                                   snapper);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
    }
@@ -159,21 +162,16 @@ public class ValkyrieAStarFootstepPlanner
       parameters.setFromPacket(requestPacket.getParameters());
 
       // update planar regions
-      if (requestPacket.getAssumeFlatGround() || requestPacket.getPlanarRegionsListMessage().getRegionId().isEmpty())
+      PlanarRegionsList planarRegionsList = null;
+      if (!requestPacket.getAssumeFlatGround() && !requestPacket.getPlanarRegionsListMessage().getRegionId().isEmpty())
       {
-         snapper.setPlanarRegions(null);
-         snapAndWiggler.setPlanarRegions(null);
-         stepValidityChecker.setPlanarRegionsList(null);
-         swingParameterCalculator.setPlanarRegionsList(null);
+         planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
       }
-      else
-      {
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
-         snapper.setPlanarRegions(planarRegionsList);
-         snapAndWiggler.setPlanarRegions(planarRegionsList);
-         stepValidityChecker.setPlanarRegionsList(planarRegionsList);
-         swingParameterCalculator.setPlanarRegionsList(planarRegionsList);
-      }
+
+      snapper.setPlanarRegions(planarRegionsList);
+      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      stepValidityChecker.setPlanarRegionsList(planarRegionsList);
+      swingParameterCalculator.setPlanarRegionsList(planarRegionsList);
 
       // Set up planner
       FootstepNode startNode = createStartNode(requestPacket);
