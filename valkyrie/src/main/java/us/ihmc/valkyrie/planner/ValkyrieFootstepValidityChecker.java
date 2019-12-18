@@ -203,7 +203,14 @@ public class ValkyrieFootstepValidityChecker
       if (parameters.getCheckForPathCollisions())
       {
          obstacleBetweenNodesChecker.setPlanarRegions(planarRegionsList);
-         if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+         try
+         {
+            if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+            {
+               return false;
+            }
+         }
+         catch(Exception e)
          {
             return false;
          }

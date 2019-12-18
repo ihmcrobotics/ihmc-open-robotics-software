@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class GoalPoseEditor extends AnimationTimer
+public class FootstepPoseEditor extends AnimationTimer
 {
    private final SubScene subScene;
    private final PlanarRegionSelector planarRegionSelector = new PlanarRegionSelector();
@@ -40,11 +40,11 @@ public class GoalPoseEditor extends AnimationTimer
    private final ObjectProperty<Double> zProperty;
    private final ObjectProperty<Double> yawProperty;
 
-   public GoalPoseEditor(SubScene subScene,
-                         ObjectProperty<Double> xProperty,
-                         ObjectProperty<Double> yProperty,
-                         ObjectProperty<Double> zProperty,
-                         ObjectProperty<Double> yawProperty)
+   public FootstepPoseEditor(SubScene subScene,
+                             ObjectProperty<Double> xProperty,
+                             ObjectProperty<Double> yProperty,
+                             ObjectProperty<Double> zProperty,
+                             ObjectProperty<Double> yawProperty)
    {
       this.subScene = subScene;
       this.xProperty = xProperty;
@@ -53,11 +53,6 @@ public class GoalPoseEditor extends AnimationTimer
       this.yawProperty = yawProperty;
 
       planeIntersectionCalculator = new PlaneIntersectionCalculator(subScene.getCamera());
-      subScene.setOnKeyPressed(keyEvent ->
-                               {
-                                  if (keyEvent.getCode() == KeyCode.G)
-                                     enable();
-                               });
    }
 
    @Override

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.ToDoubleFunction;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -31,7 +30,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.CompositeFootstepCost;
@@ -42,7 +40,6 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -145,6 +142,12 @@ public class ValkyrieAStarFootstepPlanner
       {
          LogTools.info("Received planning request packet but planner is currently running");
          return;
+      }
+
+      System.out.println("received " + requestPacket.getWaypoints().size() + " waypoints");
+      for (int i = 0; i < requestPacket.getWaypoints().size(); i++)
+      {
+         System.out.println(requestPacket.getWaypoints().get(i));
       }
 
       this.requestPacket.set(requestPacket);

@@ -610,7 +610,7 @@ public class ValkyrieAStarFootstepPlannerParameters
       maximumStepWidthWhenSteppingUp.set(0.25);
       maximumStepReachWhenSteppingUp.set(0.4);
       translationScaleFromGrandparentNode.set(1.5);
-      finalTurnProximity.set(0.75);
+      finalTurnProximity.set(0.25);
       checkForPathCollisions.set(true);
       checkForBodyBoxCollisions.set(false);
       bodyBoxDimensions.set(0.4, 0.85, 1.5);
