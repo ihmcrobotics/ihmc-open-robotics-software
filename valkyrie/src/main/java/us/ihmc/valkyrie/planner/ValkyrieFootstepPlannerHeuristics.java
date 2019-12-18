@@ -25,7 +25,6 @@ public class ValkyrieFootstepPlannerHeuristics
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private boolean waypointMode = false;
-   private double checkPointCost = 2.0;
 
    public ValkyrieFootstepPlannerHeuristics(ValkyrieAStarFootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper)
    {
@@ -93,7 +92,7 @@ public class ValkyrieFootstepPlannerHeuristics
          if(index < requestPacket.getWaypoints().size())
          {
             int remainingWaypoints = requestPacket.getWaypoints().size() - index;
-            heuristicCost += parameters.getAstarHeuristicsWeight() * checkPointCost * remainingWaypoints;
+            heuristicCost += parameters.getWaypointCost() * remainingWaypoints;
          }
 
          return heuristicCost;

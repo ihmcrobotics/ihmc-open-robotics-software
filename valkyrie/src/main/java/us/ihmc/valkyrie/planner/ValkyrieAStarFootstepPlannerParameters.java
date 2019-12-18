@@ -56,6 +56,7 @@ public class ValkyrieAStarFootstepPlannerParameters
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble footholdAreaWeight = new YoDouble("footholdAreaWeight", registry);
    private final YoDouble astarHeuristicsWeight = new YoDouble("astarHeuristicsWeight", registry);
+   private final YoDouble waypointCost = new YoDouble("waypointCost", registry);
 
    public ValkyrieAStarFootstepPlannerParameters()
    {
@@ -68,6 +69,10 @@ public class ValkyrieAStarFootstepPlannerParameters
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
    }
+
+   ///////////////////////////////////////////////////////////////////////////////
+   //////////////////////////          GETTERS          //////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////
 
    public double getIdealFootstepWidth()
    {
@@ -258,6 +263,15 @@ public class ValkyrieAStarFootstepPlannerParameters
    {
       return astarHeuristicsWeight.getDoubleValue();
    }
+
+   public double getWaypointCost()
+   {
+      return waypointCost.getDoubleValue();
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////
+   //////////////////////////          SETTERS          //////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////
 
    public void setIdealFootstepWidth(double idealFootstepWidth)
    {
@@ -484,6 +498,15 @@ public class ValkyrieAStarFootstepPlannerParameters
       this.astarHeuristicsWeight.set(astarHeuristicsWeight);
    }
 
+   public void setWaypointCost(double waypointCost)
+   {
+      this.waypointCost.set(waypointCost);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////
+   //////////////////////          PACKET METHODS          ///////////////////////
+   ///////////////////////////////////////////////////////////////////////////////
+
    public void setFromPacket(ValkyrieFootstepPlannerParametersPacket packet)
    {
       BiConsumer<DoubleSupplier, DoubleConsumer> doubleParamSetter = (supplier, setter) ->
@@ -527,6 +550,7 @@ public class ValkyrieAStarFootstepPlannerParameters
       doubleParamSetter.accept(packet::getCostPerStep, costPerStep::set);
       doubleParamSetter.accept(packet::getFootholdAreaWeight, footholdAreaWeight::set);
       doubleParamSetter.accept(packet::getAStarHeuristicsWeight, astarHeuristicsWeight::set);
+      doubleParamSetter.accept(packet::getWaypointCost, waypointCost::set);
 
       vectorParamSetter.accept(packet::getBodyBoxDimensions, bodyBoxDimensions::set);
       vectorParamSetter.accept(packet::getBodyBoxOffset, bodyBoxOffset::set);
@@ -579,6 +603,7 @@ public class ValkyrieAStarFootstepPlannerParameters
       packet.setCostPerStep(costPerStep.getDoubleValue());
       packet.setFootholdAreaWeight(footholdAreaWeight.getDoubleValue());
       packet.setAStarHeuristicsWeight(astarHeuristicsWeight.getDoubleValue());
+      packet.setWaypointCost(waypointCost.getDoubleValue());
    }
 
    public void setToDefault()
@@ -621,5 +646,6 @@ public class ValkyrieAStarFootstepPlannerParameters
       costPerStep.set(0.5);
       footholdAreaWeight.set(4.0);
       astarHeuristicsWeight.set(5.0);
+      waypointCost.set(2.0);
    }
 }

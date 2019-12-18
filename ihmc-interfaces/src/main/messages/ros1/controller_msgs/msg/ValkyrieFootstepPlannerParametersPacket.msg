@@ -157,4 +157,9 @@ float64 foothold_area_weight
 # Field default value -11.1
 float64 a_star_heuristics_weight
 
+# Only used when waypoints are requested. "Reward" cost for passing a waypoint, recommended in the range 0.5-5.0
+# At higher values the planner will plan quicker but might have less optimal plans.
+# Field default value -11.1
+float64 waypoint_cost
+
 

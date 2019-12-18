@@ -174,6 +174,11 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
             * but plans might be less optimal.
             */
    public double a_star_heuristics_weight_ = -11.1;
+   /**
+            * Only used when waypoints are requested. "Reward" cost for passing a waypoint, recommended in the range 0.5-5.0
+            * At higher values the planner will plan quicker but might have less optimal plans.
+            */
+   public double waypoint_cost_ = -11.1;
 
    public ValkyrieFootstepPlannerParametersPacket()
    {
@@ -262,6 +267,8 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
       foothold_area_weight_ = other.foothold_area_weight_;
 
       a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
+
+      waypoint_cost_ = other.waypoint_cost_;
 
    }
 
@@ -831,6 +838,23 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
       return a_star_heuristics_weight_;
    }
 
+   /**
+            * Only used when waypoints are requested. "Reward" cost for passing a waypoint, recommended in the range 0.5-5.0
+            * At higher values the planner will plan quicker but might have less optimal plans.
+            */
+   public void setWaypointCost(double waypoint_cost)
+   {
+      waypoint_cost_ = waypoint_cost;
+   }
+   /**
+            * Only used when waypoints are requested. "Reward" cost for passing a waypoint, recommended in the range 0.5-5.0
+            * At higher values the planner will plan quicker but might have less optimal plans.
+            */
+   public double getWaypointCost()
+   {
+      return waypoint_cost_;
+   }
+
 
    public static Supplier<ValkyrieFootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -921,6 +945,8 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.waypoint_cost_, other.waypoint_cost_, epsilon)) return false;
+
 
       return true;
    }
@@ -1005,6 +1031,8 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
       if(this.foothold_area_weight_ != otherMyClass.foothold_area_weight_) return false;
 
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
+
+      if(this.waypoint_cost_ != otherMyClass.waypoint_cost_) return false;
 
 
       return true;
@@ -1091,7 +1119,9 @@ public class ValkyrieFootstepPlannerParametersPacket extends Packet<ValkyrieFoot
       builder.append("foothold_area_weight=");
       builder.append(this.foothold_area_weight_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");
-      builder.append(this.a_star_heuristics_weight_);
+      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
+      builder.append("waypoint_cost=");
+      builder.append(this.waypoint_cost_);
       builder.append("}");
       return builder.toString();
    }
