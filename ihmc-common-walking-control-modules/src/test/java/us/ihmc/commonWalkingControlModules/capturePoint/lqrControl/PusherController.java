@@ -47,7 +47,7 @@ public class PusherController implements RobotController
 
    public PusherController(Robot pushableRobot, Joint joint, Vector3DReadOnly forcePointOffset, double visualScale)
    {
-      String name = joint.getName();
+      String name = pushableRobot.getName() + "_" + joint.getName();
       yoTime = pushableRobot.getYoTime();
       registry = new YoVariableRegistry(name + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(name + "_externalForcePoint", forcePointOffset, pushableRobot);
@@ -61,15 +61,14 @@ public class PusherController implements RobotController
       isBeingPushed = new YoBoolean(name + "_isBeingPushed", registry);
       pushDelay = new YoDouble(name + "_pushDelay", registry);
       applyPush = new YoBoolean(name + "_applyPush", registry);
-      applyPush.addVariableChangedListener(v ->
-                                           {
-                                              if (applyPush.getBooleanValue())
-                                              {
-                                                 pushCondition = null;
-                                                 applyForce();
-                                                 applyPush.set(false);
-                                              }
-                                           });
+      applyPush.addVariableChangedListener(v -> {
+         if (applyPush.getBooleanValue())
+         {
+            pushCondition = null;
+            applyForce();
+            applyPush.set(false);
+         }
+      });
 
       joint.addExternalForcePoint(forcePoint);
       pushableRobot.setController(this);
@@ -77,8 +76,7 @@ public class PusherController implements RobotController
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
 
-      forceVisualizer = new YoGraphicVector(name + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale,
-            YoAppearance.DarkBlue());
+      forceVisualizer = new YoGraphicVector(name + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale, YoAppearance.DarkBlue());
    }
 
    public YoGraphic getForceVisualizer()
@@ -111,18 +109,10 @@ public class PusherController implements RobotController
       pushDelay.set(delay);
    }
 
-   public void addPushButtonToSCS(final SimulationConstructionSet scs)
+   public void bindSCSPushButton(JButton button)
    {
-      if (scs != null)
-      {
-         JButton button = new JButton("PushRobot");
-         button.setToolTipText("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'");
-
-         ActionListener listener = v -> applyPush.set(true);
-
-         button.addActionListener(listener);
-         scs.addButton(button);
-      }
+      ActionListener listener = v -> applyPush.set(true);
+      button.addActionListener(listener);
    }
 
    public void applyForce(Vector3DReadOnly direction, double magnitude, double duration)
@@ -179,8 +169,8 @@ public class PusherController implements RobotController
          }
       }
 
-      if (yoTime.getDoubleValue() <= pushTimeSwitch.getDoubleValue() + pushDuration.getDoubleValue()
-            && yoTime.getDoubleValue() >= pushTimeSwitch.getDoubleValue())
+      if (yoTime.getDoubleValue() <= pushTimeSwitch.getDoubleValue() + pushDuration.getDoubleValue() && yoTime.getDoubleValue() >= pushTimeSwitch
+            .getDoubleValue())
       {
          isBeingPushed.set(true);
          forceVector.set(pushForce);

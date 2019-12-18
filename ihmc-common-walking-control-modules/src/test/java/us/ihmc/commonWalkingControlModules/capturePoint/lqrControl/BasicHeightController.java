@@ -51,7 +51,7 @@ public class BasicHeightController
    {
       double z = centerOfMass.getZ();
 
-      weight.set(sphereRobot.getGravityZ() * sphereRobot.getTotalMass());
+      weight.set(sphereRobot.getScsRobot().getGravityZ() * sphereRobot.getTotalMass());
       verticalForce.set(heightController.compute(z, yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
       verticalForce.add(Math.abs(weight.getDoubleValue()));
    }

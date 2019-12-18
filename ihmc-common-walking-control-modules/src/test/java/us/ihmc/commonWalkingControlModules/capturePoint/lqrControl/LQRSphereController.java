@@ -42,9 +42,9 @@ public class LQRSphereController implements RobotController
       scsRobot.updateJointPositions_SCS_to_ID();
       scsRobot.updateJointVelocities_SCS_to_ID();
 
-      sphereRobot.update();
+      sphereRobot.getScsRobot().update();
 
-      dcmPlan.compute(sphereRobot.getYoTime().getDoubleValue());
+      dcmPlan.compute(sphereRobot.getScsRobot().getYoTime().getDoubleValue());
 
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
@@ -52,7 +52,7 @@ public class LQRSphereController implements RobotController
       lqrMomentumController.setVrpTrajectory(dcmPlan.getVRPTrajectories());
       sphereRobot.getCenterOfMass().get(currentState);
       sphereRobot.getCenterOfMassVelocity().get(3, currentState);
-      lqrMomentumController.computeControlInput(currentState, sphereRobot.getYoTime().getDoubleValue());
+      lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
 
       lqrForce.set(lqrMomentumController.getU());
       lqrForce.scale(sphereRobot.getTotalMass());
