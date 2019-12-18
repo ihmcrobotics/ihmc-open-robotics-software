@@ -1,11 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -51,8 +46,8 @@ public class LQRSphereController implements RobotController
 
       dcmPlan.compute(controlToolbox.getYoTime().getDoubleValue());
 
-      controlToolbox.getDesiredICP().set(dcmPlan.getDesiredDCMPosition());
-      controlToolbox.getDesiredICPVelocity().set(dcmPlan.getDesiredDCMVelocity());
+      controlToolbox.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
+      controlToolbox.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
       lqrMomentumController.setVrpTrajectory(dcmPlan.getVRPTrajectories());
       controlToolbox.getCenterOfMass().get(currentState);

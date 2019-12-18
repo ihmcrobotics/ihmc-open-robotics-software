@@ -30,7 +30,8 @@ public class BasicSphereController implements RobotController
    private final BasicHeightController heightController;
 
    private final ICPProportionalController icpProportionalController;
-   private final YoFramePoint3D desiredCMP = new YoFramePoint3D("tempDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D desiredCMP = new YoFramePoint3D("desiredCMP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D perfectVRP = new YoFramePoint3D("perfectVRP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D vrpForces = new YoFrameVector3D("vrpForces", ReferenceFrame.getWorldFrame(), registry);
 
    private final SimpleDCMPlan dcmPlan;
@@ -56,6 +57,7 @@ public class BasicSphereController implements RobotController
       heightController = new BasicHeightController(controlToolbox, registry);
    }
 
+
    private final FrameVector3D forces = new FrameVector3D();
    private final FramePoint3D tempDesiredCMP = new FramePoint3D();
 
@@ -69,10 +71,11 @@ public class BasicSphereController implements RobotController
 
       dcmPlan.compute(controlToolbox.getYoTime().getDoubleValue());
 
-      controlToolbox.getDesiredICP().set(dcmPlan.getDesiredDCMPosition());
-      controlToolbox.getDesiredICPVelocity().set(dcmPlan.getDesiredDCMVelocity());
+      controlToolbox.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
+      controlToolbox.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
+      perfectVRP.set(dcmPlan.getDesiredVRPPosition());
 
-      tempDesiredCMP.set(icpProportionalController.doProportionalControl(controlToolbox.getICP(), dcmPlan.getDesiredDCMPosition(),
+      tempDesiredCMP.set(icpProportionalController.doProportionalControl(controlToolbox.getDCM(), dcmPlan.getDesiredDCMPosition(),
                                                                          dcmPlan.getDesiredDCMVelocity(), controlToolbox.getOmega0()));
       tempDesiredCMP.subZ(controlToolbox.getDesiredHeight());
       desiredCMP.set(tempDesiredCMP);
@@ -86,6 +89,9 @@ public class BasicSphereController implements RobotController
 
       vrpForces.setMatchingFrame(forces);
       externalForcePoint.setForce(forces);
+
+      if (forces.containsNaN())
+         throw new RuntimeException("Illegal forces.");
 
       scsRobot.updateJointPositions_ID_to_SCS();
       scsRobot.updateJointVelocities_ID_to_SCS();

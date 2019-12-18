@@ -16,6 +16,7 @@ public class BasicHeightController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble yoDesiredHeight = new YoDouble("desiredHeight", registry);
+   private final YoDouble weight = new YoDouble("weight", registry);
 
    private final PIDController heightController;
 
@@ -25,9 +26,12 @@ public class BasicHeightController
    private final FramePoint3DReadOnly centerOfMass;
    private final FrameVector3DReadOnly centerOfMassVelocity;
 
+   private final SphereControlToolbox controlToolbox;
+
    public BasicHeightController(SphereControlToolbox controlToolbox, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlToolbox.getControlDT();
+      this.controlToolbox = controlToolbox;
 
       yoDesiredHeight.set(controlToolbox.getDesiredHeight());
 
@@ -48,7 +52,9 @@ public class BasicHeightController
    {
       double z = centerOfMass.getZ();
 
+      weight.set(controlToolbox.getGravityZ() * controlToolbox.getTotalMass());
       verticalForce.set(heightController.compute(z, yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
+      verticalForce.add(Math.abs(weight.getDoubleValue()));
    }
 
    public double getVerticalForce()

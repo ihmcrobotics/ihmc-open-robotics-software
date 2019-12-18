@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -9,9 +11,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -23,11 +27,12 @@ public class SphereControlToolbox
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFramePoint3D desiredICP = new YoFramePoint3D("desiredICP", worldFrame, registry);
-   private final YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D desiredDCM = new YoFramePoint3D("desiredDCM", worldFrame, registry);
+   private final YoFrameVector3D desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
 
-   private final YoFramePoint3D icp = new YoFramePoint3D("icp", worldFrame, registry);
+   private final YoFramePoint3D dcm = new YoFramePoint3D("dcm", worldFrame, registry);
 
+   private final YoFramePoint3D body = new YoFramePoint3D("body", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
 
@@ -36,30 +41,35 @@ public class SphereControlToolbox
    private final ReferenceFrame centerOfMassFrame;
 
    private final CenterOfMassJacobian centerOfMassJacobian;
-
+   private final RigidBodyReadOnly elevator;
    private final double controlDT;
    private final double desiredHeight;
 
    private final double totalMass;
    private YoDouble yoTime;
 
-   public SphereControlToolbox(RigidBodyBasics elevator, double controlDT, double desiredHeight, double gravity, YoDouble yoTime, double totalMass,
-                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final SphereRobot sphereRobot;
+   private final double gravityZ;
+
+   public SphereControlToolbox(SphereRobot sphereRobot, double controlDT, double desiredHeight, double gravity, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.sphereRobot = sphereRobot;
       this.controlDT = controlDT;
       this.desiredHeight = desiredHeight;
-      this.totalMass = totalMass;
-      this.yoTime = yoTime;
+      this.totalMass = sphereRobot.getTotalMass();
+      this.yoTime = sphereRobot.getYoTime();
+      this.elevator = sphereRobot.getElevator();
+      this.gravityZ = gravity;
 
       double omega = Math.sqrt(gravity / desiredHeight);
       omega0.set(omega);
 
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
+      this.centerOfMassFrame = sphereRobot.getCenterOfMassFrame();
 
       String graphicListName = getClass().getSimpleName();
 
-      YoGraphicPosition desiredICPViz = new YoGraphicPosition("Desired Capture Point", desiredICP, 0.01, YoAppearance.Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition icpViz = new YoGraphicPosition("Capture Point", icp, 0.01, YoAppearance.Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredICPViz = new YoGraphicPosition("Desired DCM", desiredDCM, 0.01, YoAppearance.Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition icpViz = new YoGraphicPosition("DCM", dcm, 0.01, YoAppearance.Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("Center of Mass", yoCenterOfMass, 0.01, YoAppearance.Grey(), GraphicType.BALL_WITH_ROTATED_CROSS);
 
       yoGraphicsListRegistry.registerArtifact(graphicListName, desiredICPViz.createArtifact());
@@ -68,7 +78,12 @@ public class SphereControlToolbox
 
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
-      parentRegistry.addChild(registry);
+      sphereRobot.getRobotsYoVariableRegistry().addChild(registry);
+   }
+
+   public double getGravityZ()
+   {
+      return gravityZ;
    }
 
    public double getControlDT()
@@ -111,29 +126,39 @@ public class SphereControlToolbox
       return yoTime;
    }
 
-   public FixedFramePoint3DBasics getDesiredICP()
+   public FixedFramePoint3DBasics getDesiredDCM()
    {
-      return desiredICP;
+      return desiredDCM;
    }
 
-   public FixedFrameVector3DBasics getDesiredICPVelocity()
+   public FixedFrameVector3DBasics getDesiredDCMVelocity()
    {
-      return desiredICPVelocity;
+      return desiredDCMVelocity;
    }
 
-   public FramePoint3DReadOnly getICP()
+   public FramePoint3DReadOnly getDCM()
    {
-      return icp;
+      return dcm;
    }
+
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
 
    public void update()
    {
-      centerOfMassFrame.update();
+      sphereRobot.updateFrames();
+
       centerOfMassJacobian.reset();
 
-      yoCenterOfMass.set(centerOfMassJacobian.getCenterOfMass());
-      yoCenterOfMassVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
-      icp.scaleAdd(1.0 / omega0.getDoubleValue(), yoCenterOfMassVelocity, yoCenterOfMass);
+      yoCenterOfMass.setMatchingFrame(centerOfMassJacobian.getCenterOfMass());
+      yoCenterOfMassVelocity.setMatchingFrame(centerOfMassVelocity);
+
+      dcm.scaleAdd(1.0 / omega0.getDoubleValue(), yoCenterOfMassVelocity, yoCenterOfMass);
+
+      centerOfMassPosition.setToZero(elevator.getChildrenJoints().get(0).getFrameAfterJoint());
+      body.setMatchingFrame(centerOfMassPosition);
    }
 }
