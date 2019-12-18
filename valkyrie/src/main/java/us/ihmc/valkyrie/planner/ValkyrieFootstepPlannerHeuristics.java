@@ -8,6 +8,8 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,7 @@ public class ValkyrieFootstepPlannerHeuristics
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private boolean waypointMode = false;
-   private double dAlpha = 0.0;
+   private double checkPointCost = 2.0;
 
    public ValkyrieFootstepPlannerHeuristics(ValkyrieAStarFootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper)
    {
@@ -56,7 +58,6 @@ public class ValkyrieFootstepPlannerHeuristics
          bodyPath.addAll(requestPacket.getWaypoints());
          bodyPath.add(new Pose3D(goalMidFootPose));
          bodyPathPlanHolder.setPoseWaypoints(bodyPath);
-         dAlpha = 0.1 / bodyPathPlanHolder.computePathLength(0.0);
       }
       else
       {
@@ -73,7 +74,6 @@ public class ValkyrieFootstepPlannerHeuristics
       {
          Point2D midFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
          double alpha = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPoint);
-         alpha = Math.min(1.0, alpha + dAlpha);
 
          int index = bodyPathPlanHolder.getSegmentIndexFromAlpha(alpha);
          if (index >= requestPacket.getWaypoints().size())
@@ -86,10 +86,17 @@ public class ValkyrieFootstepPlannerHeuristics
          }
 
          distanceAndYawHeuristics.setGoalPose(goalPose);
-         double intermediateHeuristics = distanceAndYawHeuristics.compute(node);
+         double heuristicCost = distanceAndYawHeuristics.compute(node);
          double remainingDistance = bodyPathPlanHolder.computePathLength(bodyPathPlanHolder.getMaxAlphaFromSegmentIndex(index));
-         double remainingHeuristics = remainingDistance * parameters.getAstarHeuristicsWeight() * parameters.getCostPerStep() / parameters.getMaximumStepReach();
-         return intermediateHeuristics + remainingHeuristics;
+         heuristicCost += remainingDistance * parameters.getAstarHeuristicsWeight() * parameters.getCostPerStep() / parameters.getMaximumStepReach();
+
+         if(index < requestPacket.getWaypoints().size())
+         {
+            int remainingWaypoints = requestPacket.getWaypoints().size() - index;
+            heuristicCost += parameters.getAstarHeuristicsWeight() * checkPointCost * remainingWaypoints;
+         }
+
+         return heuristicCost;
       }
       else
       {

@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -69,7 +70,7 @@ public class ValkyrieAStarFootstepPlanner
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
    private final ValkyrieFootstepValidityChecker stepValidityChecker;
-   private final DistanceAndYawBasedHeuristics heuristics;
+   private final ValkyrieFootstepPlannerHeuristics heuristics;
    private final AdaptiveSwingTrajectoryCalculator swingParameterCalculator;
 
    private Status status = null;
@@ -120,18 +121,7 @@ public class ValkyrieAStarFootstepPlanner
                                                                parameters::getCostPerStep));
 
       stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper);
-
-      heuristics = new DistanceAndYawBasedHeuristics(parameters.getTranslationWeight()::getZ,
-                                                                   parameters.getTranslationWeight()::getZ,
-                                                                   parameters::getMaximumStepReach,
-                                                                   parameters::getMaximumStepYaw,
-                                                                   parameters.getOrientationWeight()::getYaw,
-                                                                   parameters::getCostPerStep,
-                                                                   parameters::getFinalTurnProximity,
-                                                                   () -> 0.25,
-                                                                   parameters::getIdealFootstepWidth,
-                                                                   parameters::getAstarHeuristicsWeight,
-                                                                   snapper);
+      heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, snapper);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
    }
@@ -144,22 +134,13 @@ public class ValkyrieAStarFootstepPlanner
          return;
       }
 
-      System.out.println("received " + requestPacket.getWaypoints().size() + " waypoints");
-      for (int i = 0; i < requestPacket.getWaypoints().size(); i++)
-      {
-         System.out.println(requestPacket.getWaypoints().get(i));
-      }
-
       this.requestPacket.set(requestPacket);
       isPlanning.set(true);
       haltRequested.set(false);
       status = Status.PLANNING;
 
-      FramePose3D goalMidFootPose = new FramePose3D();
-      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
-      heuristics.setGoalPose(goalMidFootPose);
-
       requestCallback.accept(requestPacket);
+      heuristics.setRequestPacket(requestPacket);
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());
@@ -217,7 +198,7 @@ public class ValkyrieAStarFootstepPlanner
             status = Status.FOUND_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > statusPublishPeriod)
+         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), requestPacket.getTimeout(), 0.1))
          {
             reportStatus();
             stopwatch.lap();
