@@ -13,7 +13,7 @@ public class LQRSphereController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 
    private final RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot;
-   private final SphereControlToolbox controlToolbox;
+   private final SphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
 
    private final LQRMomentumController lqrMomentumController;
@@ -22,14 +22,14 @@ public class LQRSphereController implements RobotController
 
    private final SimpleDCMPlan dcmPlan;
 
-   public LQRSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox, ExternalForcePoint externalForcePoint)
+   public LQRSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereRobot sphereRobot, ExternalForcePoint externalForcePoint)
    {
       this.scsRobot = scsRobot;
-      this.controlToolbox = controlToolbox;
+      this.sphereRobot = sphereRobot;
       this.externalForcePoint = externalForcePoint;
       
-      dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
-      dcmPlan.setNominalCoMHeight(controlToolbox.getDesiredHeight());
+      dcmPlan = new SimpleDCMPlan(sphereRobot.getOmega0());
+      dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
 
       lqrMomentumController = new LQRMomentumController();
    }
@@ -42,20 +42,20 @@ public class LQRSphereController implements RobotController
       scsRobot.updateJointPositions_SCS_to_ID();
       scsRobot.updateJointVelocities_SCS_to_ID();
 
-      controlToolbox.update();
+      sphereRobot.update();
 
-      dcmPlan.compute(controlToolbox.getYoTime().getDoubleValue());
+      dcmPlan.compute(sphereRobot.getYoTime().getDoubleValue());
 
-      controlToolbox.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
-      controlToolbox.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
+      sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
+      sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
       lqrMomentumController.setVrpTrajectory(dcmPlan.getVRPTrajectories());
-      controlToolbox.getCenterOfMass().get(currentState);
-      controlToolbox.getCenterOfMassVelocity().get(3, currentState);
-      lqrMomentumController.computeControlInput(currentState, controlToolbox.getYoTime().getDoubleValue());
+      sphereRobot.getCenterOfMass().get(currentState);
+      sphereRobot.getCenterOfMassVelocity().get(3, currentState);
+      lqrMomentumController.computeControlInput(currentState, sphereRobot.getYoTime().getDoubleValue());
 
       lqrForce.set(lqrMomentumController.getU());
-      lqrForce.scale(controlToolbox.getTotalMass());
+      lqrForce.scale(sphereRobot.getTotalMass());
 
       externalForcePoint.setForce(lqrForce);
 

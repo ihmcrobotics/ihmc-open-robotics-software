@@ -23,8 +23,7 @@ public class BasicSphereController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 
-   private final RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot;
-   private final SphereControlToolbox controlToolbox;
+   private final SphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
 
    private final BasicHeightController heightController;
@@ -36,25 +35,24 @@ public class BasicSphereController implements RobotController
 
    private final SimpleDCMPlan dcmPlan;
 
-   public BasicSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereControlToolbox controlToolbox,
+   public BasicSphereController(SphereRobot sphereRobot,
                                 ExternalForcePoint externalForcePoint, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.scsRobot = scsRobot;
-      this.controlToolbox = controlToolbox;
+      this.sphereRobot = sphereRobot;
       this.externalForcePoint = externalForcePoint;
-      dcmPlan = new SimpleDCMPlan(controlToolbox.getOmega0());
-      dcmPlan.setNominalCoMHeight(controlToolbox.getDesiredHeight());
+      dcmPlan = new SimpleDCMPlan(sphereRobot.getOmega0());
+      dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
 
       YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
       gains.setKpParallelToMotion(2.0);
 
-      icpProportionalController = new ICPProportionalController(gains, controlToolbox.getControlDT(), registry);
+      icpProportionalController = new ICPProportionalController(gains, sphereRobot.getControlDT(), registry);
 
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerArtifact("Proportional", desiredCMPViz.createArtifact());
 
-      heightController = new BasicHeightController(controlToolbox, registry);
+      heightController = new BasicHeightController(sphereRobot, registry);
    }
 
 
@@ -64,28 +62,28 @@ public class BasicSphereController implements RobotController
    @Override
    public void doControl()
    {
-      scsRobot.updateJointPositions_SCS_to_ID();
-      scsRobot.updateJointVelocities_SCS_to_ID();
+      sphereRobot.updateJointPositions_SCS_to_ID();
+      sphereRobot.updateJointVelocities_SCS_to_ID();
 
-      controlToolbox.update();
+      sphereRobot.update();
 
-      dcmPlan.compute(controlToolbox.getYoTime().getDoubleValue());
+      dcmPlan.compute(sphereRobot.getYoTime().getDoubleValue());
 
-      controlToolbox.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
-      controlToolbox.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
+      sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
+      sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
       perfectVRP.set(dcmPlan.getDesiredVRPPosition());
 
-      tempDesiredCMP.set(icpProportionalController.doProportionalControl(controlToolbox.getDCM(), dcmPlan.getDesiredDCMPosition(),
-                                                                         dcmPlan.getDesiredDCMVelocity(), controlToolbox.getOmega0()));
-      tempDesiredCMP.subZ(controlToolbox.getDesiredHeight());
+      tempDesiredCMP.set(icpProportionalController.doProportionalControl(sphereRobot.getDCM(), dcmPlan.getDesiredDCMPosition(),
+                                                                         dcmPlan.getDesiredDCMVelocity(), sphereRobot.getOmega0()));
+      tempDesiredCMP.subZ(sphereRobot.getDesiredHeight());
       desiredCMP.set(tempDesiredCMP);
 
       heightController.doControl();
 
       double fZ = heightController.getVerticalForce();
-      WrenchDistributorTools.computePseudoCMP3d(tempDesiredCMP, controlToolbox.getCenterOfMass(), new FramePoint2D(tempDesiredCMP), fZ,
-                                                controlToolbox.getTotalMass(), controlToolbox.getOmega0());
-      WrenchDistributorTools.computeForce(forces, controlToolbox.getCenterOfMass(), tempDesiredCMP, fZ);
+      WrenchDistributorTools.computePseudoCMP3d(tempDesiredCMP, sphereRobot.getCenterOfMass(), new FramePoint2D(tempDesiredCMP), fZ,
+                                                sphereRobot.getTotalMass(), sphereRobot.getOmega0());
+      WrenchDistributorTools.computeForce(forces, sphereRobot.getCenterOfMass(), tempDesiredCMP, fZ);
 
       vrpForces.setMatchingFrame(forces);
       externalForcePoint.setForce(forces);
@@ -93,9 +91,9 @@ public class BasicSphereController implements RobotController
       if (forces.containsNaN())
          throw new RuntimeException("Illegal forces.");
 
-      scsRobot.updateJointPositions_ID_to_SCS();
-      scsRobot.updateJointVelocities_ID_to_SCS();
-      scsRobot.updateJointTorques_ID_to_SCS();
+      sphereRobot.updateJointPositions_ID_to_SCS();
+      sphereRobot.updateJointVelocities_ID_to_SCS();
+      sphereRobot.updateJointTorques_ID_to_SCS();
    }
 
    @Override
