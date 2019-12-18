@@ -22,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -43,6 +44,7 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    private final String[] programArgs;
    private final PubSubImplementation pubSubImplementation;
    private final List<CloseableAndDisposable> modules = new ArrayList<>();
+   private final Ros2Node ros2Node;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params, PubSubImplementation pubSubImplementation)
    {
@@ -53,6 +55,7 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    {
       this.programArgs = programArgs;
       this.pubSubImplementation = pubSubImplementation;
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "network_processor");
 
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
@@ -71,6 +74,15 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
       tryToStartModule(() -> setupHumanoidAvatarREAStateUpdater(robotModel, params));
+
+      LogTools.info("All modules in network processor are up and running!");
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         LogTools.info("Shutting down network processor modules.");
+         closeAndDispose();
+         ThreadTools.sleep(10);
+      }));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -137,7 +149,6 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_mocap_localization_node");
          ROS2Tools.createCallbackSubscription(ros2Node,
                                               PlanarRegionsListMessage.class,
                                               REACommunicationProperties.publisherTopicNameGenerator,
@@ -155,28 +166,30 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+         IHMCHumanoidBehaviorManager behaviorManager;
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
-                                                                                   robotModel.getFootstepPlannerParameters(),
-                                                                                   robotModel,
-                                                                                   robotModel,
-                                                                                   logModelProvider,
-                                                                                   params.isBehaviorVisualizerEnabled(),
-                                                                                   sensorInformation,
-                                                                                   params.getTimeToWaitBeforeStartingDiagnostics());
+            behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
+                                                                                                     robotModel.getFootstepPlannerParameters(),
+                                                                                                     robotModel,
+                                                                                                     robotModel,
+                                                                                                     logModelProvider,
+                                                                                                     params.isBehaviorVisualizerEnabled(),
+                                                                                                     sensorInformation,
+                                                                                                     params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
-                                            robotModel.getFootstepPlannerParameters(),
-                                            robotModel,
-                                            robotModel,
-                                            logModelProvider,
-                                            params.isBehaviorVisualizerEnabled(),
-                                            sensorInformation);
+            behaviorManager = new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
+                                                              robotModel.getFootstepPlannerParameters(),
+                                                              robotModel,
+                                                              robotModel,
+                                                              logModelProvider,
+                                                              params.isBehaviorVisualizerEnabled(),
+                                                              sensorInformation);
          }
+         modules.add(behaviorManager);
 
          String methodName = "setupBehaviorModule ";
          printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
