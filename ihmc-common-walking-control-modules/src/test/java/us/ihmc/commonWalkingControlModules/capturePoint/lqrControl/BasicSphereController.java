@@ -35,11 +35,10 @@ public class BasicSphereController implements RobotController
 
    private final SimpleDCMPlan dcmPlan;
 
-   public BasicSphereController(SphereRobot sphereRobot,
-                                ExternalForcePoint externalForcePoint, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BasicSphereController(SphereRobot sphereRobot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.sphereRobot = sphereRobot;
-      this.externalForcePoint = externalForcePoint;
+      externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
       dcmPlan = new SimpleDCMPlan(sphereRobot.getOmega0());
       dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
 
@@ -49,10 +48,13 @@ public class BasicSphereController implements RobotController
 
       icpProportionalController = new ICPProportionalController(gains, sphereRobot.getControlDT(), registry);
 
-      YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      String name = sphereRobot.getScsRobot().getName();
+      YoGraphicPosition desiredCMPViz = new YoGraphicPosition(name + "Desired CMP", desiredCMP, 0.012, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerArtifact("Proportional", desiredCMPViz.createArtifact());
 
       heightController = new BasicHeightController(sphereRobot, registry);
+
+      sphereRobot.getScsRobot().setController(this);
    }
 
 
@@ -65,9 +67,9 @@ public class BasicSphereController implements RobotController
       sphereRobot.updateJointPositions_SCS_to_ID();
       sphereRobot.updateJointVelocities_SCS_to_ID();
 
-      sphereRobot.update();
+      sphereRobot.updateFrames();
 
-      dcmPlan.compute(sphereRobot.getYoTime().getDoubleValue());
+      dcmPlan.compute(sphereRobot.getScsRobot().getYoTime().getDoubleValue());
 
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
