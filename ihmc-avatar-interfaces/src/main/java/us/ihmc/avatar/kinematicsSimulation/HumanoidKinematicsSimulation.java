@@ -112,6 +112,7 @@ public class HumanoidKinematicsSimulation
    private AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
    private SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
+   private YoVariableServer yoVariableServer = null;
 
    public static void create(DRCRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -288,17 +289,9 @@ public class HumanoidKinematicsSimulation
 
       if (createYoVariableServer)
       {
-         YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
-         yoVariableServer.setMainRegistry(registry, robotModel.createFullRobotModel().getElevator(), yoGraphicsListRegistry);
-         ThreadTools.startAThread(() -> yoVariableServer.start(), getClass().getSimpleName() + "YoVariableServer");
-         yoVariableServerScheduled = yoVariableScheduler.schedule(() ->
-         {
-            if (!Thread.interrupted())
-            {
-               yoVariableServerTime += Conversions.millisecondsToSeconds(1);
-               yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
-            }
-         }, 1, TimeUnit.MILLISECONDS);
+         yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
+         yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+         yoVariableServer.start();
       }
 
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
@@ -382,6 +375,12 @@ public class HumanoidKinematicsSimulation
 
       integrator.setIntegrationDT(DT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
+
+      if (yoVariableServer != null)
+      {
+         yoVariableServerTime += Conversions.millisecondsToSeconds(1);
+         yoVariableServer.update(Conversions.secondsToNanoseconds(yoVariableServerTime));
+      }
    }
 
    private void zeroMotion()
