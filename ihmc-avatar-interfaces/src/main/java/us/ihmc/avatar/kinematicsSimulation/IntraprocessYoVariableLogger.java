@@ -15,6 +15,7 @@ import us.ihmc.robotDataLogger.*;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
+import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -22,17 +23,16 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -46,11 +46,12 @@ public class IntraprocessYoVariableLogger
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
    private final String timestamp;
-   private String logFolder;
+   private final Path ihmcFolder = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
+   private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private List<YoVariable<?>> variables;
-   private List<JointState> jointStates;
+   private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
    private FileChannel dataChannel;
@@ -70,7 +71,7 @@ public class IntraprocessYoVariableLogger
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
-      logFolder = timestamp + "_Log";
+      logFolder = ihmcFolder.resolve(timestamp + "_Log");
 
       RegistrySendBufferBuilder registrySendBufferBuilder = new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry);
 
@@ -151,7 +152,7 @@ public class IntraprocessYoVariableLogger
          numberOfJointStates += JointState.getNumberOfVariables(joint.getType());
       }
 
-      int stateVariables = 1 + 9876 + numberOfJointStates;
+      int stateVariables = 1 + 9876 + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
       LogTools.info("Buffer size: {}", bufferSize);
       LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
@@ -161,12 +162,7 @@ public class IntraprocessYoVariableLogger
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
       variables = registry.getAllVariables();
-      jointStates = new ArrayList<>();
-      for (int i = 0; i < handshake.getJoints().size(); i++)
-      {
-         JointDefinition joint = handshake.getJoints().get(i);
-         jointStates.add(JointState.createJointState(joint.getNameAsString(), joint.getType()));
-      }
+      jointHolders = handshakeBuilder.getJointHolders();
 
       try
       {
@@ -207,13 +203,19 @@ public class IntraprocessYoVariableLogger
          }
          catch (BufferOverflowException e)
          {
-            LogTools.error("yoVar # {}:  size: {}  {}", i, variables.size(), e.getMessage());
+            LogTools.error("Increase buffer size! yoVar # {}:  size: {}  {}", i, variables.size(), e.getMessage());
          }
       }
 
-      for (int i = 0; i < jointStates.size(); i++)
+      double[] jointData = new double[13];
+      for (JointHolder jointHolder : jointHolders)
       {
-         jointStates.get(i).get(dataBufferAsLong);
+         jointHolder.get(jointData, 0);
+
+         for (int i = 0; i < jointHolder.getNumberOfStateVariables(); i++)
+         {
+            dataBufferAsLong.put(Double.doubleToLongBits(jointData[i]));
+         }
       }
 
       dataBufferAsLong.flip();
@@ -242,7 +244,7 @@ public class IntraprocessYoVariableLogger
 
    private File createFileInLogFolder(String filename)
    {
-      FileTools.ensureDirectoryExists(Paths.get(logFolder), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      return new File(logFolder + "/" + filename);
+      FileTools.ensureDirectoryExists(logFolder, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      return logFolder.resolve(filename).toFile();
    }
 }
