@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -22,7 +21,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ContinuousDCMPlanner implements DCMPlannerInterface
@@ -390,7 +388,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          }
       }
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), desiredVRPPosition);
+      CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), desiredVRPPosition);
       desiredECMPPosition.set(desiredVRPPosition);
       desiredECMPPosition.subZ(comHeight.getDoubleValue());
 

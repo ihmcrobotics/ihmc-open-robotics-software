@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCentroidalMomentumPivot;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCentroidalMomentumPivot;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
@@ -146,7 +146,7 @@ public class PrecomputedICPPlanner
       filteredPrecomputedIcpVelocity.set(desiredICPVelocity);
       filteredDesiredICPVelocity.set(filteredPrecomputedIcpVelocity);
 
-      computeDesiredCentroidalMomentumPivot(desiredICPPosition, filteredDesiredICPVelocity, omega0, desiredCMPPosition);
+      computeCentroidalMomentumPivot(desiredICPPosition, filteredDesiredICPVelocity, omega0, desiredCMPPosition);
 
       desiredCoPPosition.set(desiredCMPPosition);
       // Can compute CoP if we have a momentum rate of change otherwise set it to match the CMP.
