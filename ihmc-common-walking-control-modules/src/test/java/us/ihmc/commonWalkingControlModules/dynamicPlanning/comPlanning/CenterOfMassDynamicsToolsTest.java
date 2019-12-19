@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -30,6 +31,7 @@ public class CenterOfMassDynamicsToolsTest
       double omega = 3.0;
 
       FramePoint3DReadOnly startDCM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
+      FramePoint3DReadOnly startCoM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
       FramePoint3D startVRP = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
       double time = RandomNumbers.nextDouble(random, 1.0);
 
@@ -60,22 +62,39 @@ public class CenterOfMassDynamicsToolsTest
          CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, time, startDCM, startVRP, dcmToTest);
          CenterOfMassDynamicsTools.computeDesiredDCMPosition(omega, -time, dcmToTest, startVRP, backwardDcmToTest);
 
+         FramePoint3D comToTest = new FramePoint3D();
+         FramePoint3D backwardCoMToTest = new FramePoint3D();
+         CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, time, startCoM, startDCM, startVRP, comToTest);
+         CenterOfMassDynamicsTools.computeDesiredCoMPositionBackwardTime(omega, time, comToTest, dcmToTest, startVRP, backwardCoMToTest);
+
          FramePoint3D dcmExpected = new FramePoint3D();
          dcmExpected.sub(startDCM, startVRP);
          dcmExpected.scale(Math.exp(omega * time));
          dcmExpected.add(startVRP);
 
+         FramePoint3D comExpected = new FramePoint3D();
+         comExpected.set(startDCM);
+         comExpected.scale(0.5 * (Math.exp(omega * time) - Math.exp(-omega * time)));
+         comExpected.scaleAdd(Math.exp(-omega * time), startCoM, comExpected);
+         comExpected.scaleAdd(1.0 - 0.5 * (Math.exp(omega * time) + Math.exp(-omega * time)), startVRP, comExpected);
+
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(comExpected, comToTest, epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoMToTest, epsilon);
 
          if (time >= 0.0)
          {
             FramePoint3DReadOnly integratedDCM = integrateDCMForwardInTimeWithConstantVRP(time, omega, startDCM, startVRP);
             EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
+
+            FramePoint3DReadOnly integratedCoM = integrateCoMForwardInTimeWithConstantVRP(time, omega, startCoM, startDCM, startVRP);
+            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedCoM, comToTest, 1e-3);
          }
          else
          { // FIXME
-//            FramePoint3DReadOnly integratedDCM = integrateDCMBackwardInTimeWithConstantVRP(-time, omega, startDCM, startVRP);
+//            FramePoint3DReadOnly integratedDCM = integrateDCMBackwardInTimeWithConstantVRP(time, omega, startDCM, startVRP);
 //            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
          }
       }
@@ -99,17 +118,36 @@ public class CenterOfMassDynamicsToolsTest
       return finalDCM;
    }
 
+   private static FramePoint3DReadOnly integrateCoMForwardInTimeWithConstantVRP(double integrationDuration, double omega, FramePoint3DReadOnly startCoM,
+                                                                                FramePoint3DReadOnly startDCM, FramePoint3DReadOnly startVRP)
+   {
+      FramePoint3D finalDCM = new FramePoint3D(startDCM);
+      FramePoint3D finalCoM = new FramePoint3D(startCoM);
+      FrameVector3D dcmVelocity = new FrameVector3D();
+      FrameVector3D comVelocity = new FrameVector3D();
+      for (double time = 0.0; time <= integrationDuration; time += integrationDt)
+      {
+         CapturePointTools.computeCapturePointVelocity(finalDCM, startVRP, omega, dcmVelocity);
+         CenterOfMassDynamicsTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
+
+         finalDCM.scaleAdd(integrationDt, dcmVelocity, finalDCM);
+         finalCoM.scaleAdd(integrationDt, comVelocity, finalCoM);
+      }
+
+      return finalCoM;
+   }
+
    private static FramePoint3DReadOnly integrateDCMBackwardInTimeWithConstantVRP(double integrationDuration, double omega, FramePoint3DReadOnly finalDCM,
                                                                                  FramePoint3DReadOnly vrp)
    {
       FramePoint3D startDCM = new FramePoint3D(finalDCM);
       FrameVector3D dcmVelocity = new FrameVector3D();
-      for (double time = 0.0; time <= integrationDuration; time += integrationDt)
+      for (double time = integrationDuration; time >= 0.0; time -= integrationDt)
       {
          dcmVelocity.sub(startDCM, vrp);
-         dcmVelocity.scale(-omega);
+         dcmVelocity.scale(omega);
 
-         startDCM.scaleAdd(integrationDt, dcmVelocity, finalDCM);
+         startDCM.scaleAdd(-integrationDt, dcmVelocity, finalDCM);
       }
 
       return startDCM;
@@ -123,6 +161,7 @@ public class CenterOfMassDynamicsToolsTest
       double omega = 3.0;
 
       FramePoint3DReadOnly startDCM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
+      FramePoint3DReadOnly startCoM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
       FramePoint3D startVRP = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
       FramePoint3D endVRP = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
       double duration = RandomNumbers.nextDouble(random, 0.0, 1.0);
@@ -138,14 +177,28 @@ public class CenterOfMassDynamicsToolsTest
 
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDCM, epsilon);
 
+      FramePoint3D forwardCoM = new FramePoint3D();
+      FramePoint3D backwardCoM = new FramePoint3D();
+      CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, time, duration, startCoM, startDCM, startVRP, endVRP, forwardCoM);
+      CenterOfMassDynamicsTools.computeDesiredCoMPositionBackwardTime(omega, time, duration, forwardCoM, forwardDCM, startVRP, endVRP, backwardCoM);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoM, epsilon);
+
       CenterOfMassDynamicsTools.computeDesiredDCMPositionForwardTime(omega, duration, duration, startDCM, startVRP, endVRP, forwardDCM);
       CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega, duration, duration, forwardDCM, startVRP, endVRP, backwardDCM);
 
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDCM, epsilon);
 
+      CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, duration, duration, startCoM, startDCM, startVRP, endVRP, forwardCoM);
+      CenterOfMassDynamicsTools.computeDesiredCoMPositionBackwardTime(omega, duration, duration, forwardCoM, forwardDCM, startVRP, endVRP, backwardCoM);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoM, backwardCoM, epsilon);
+
+
       for (int i = 0; i < iters; i++)
       {
          startDCM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
+         startCoM = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
          startVRP = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
          endVRP = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 10.0);
          duration = RandomNumbers.nextDouble(random, 0.0, 1.0);
@@ -153,8 +206,10 @@ public class CenterOfMassDynamicsToolsTest
 
          FramePoint3D dcmToTest = new FramePoint3D();
          FramePoint3D dcmToTestAlt = new FramePoint3D();
+         FramePoint3D comToTest = new FramePoint3D();
          FramePoint3D backwardDcmToTest = new FramePoint3D();
          FramePoint3D backwardDcmToTestAlt = new FramePoint3D();
+         CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, time, duration, startCoM, startDCM, startVRP, endVRP, comToTest);
          CenterOfMassDynamicsTools.computeDesiredDCMPositionForwardTime(omega, time, duration, startDCM, startVRP, endVRP, dcmToTest);
          computeDesiredDCMPositionForwardTime(omega, time, duration, startDCM, startVRP, endVRP, dcmToTestAlt);
          CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega, time, duration, dcmToTestAlt, startVRP, endVRP, backwardDcmToTest);
@@ -172,18 +227,31 @@ public class CenterOfMassDynamicsToolsTest
          dcmExpected.scaleAdd(beta, endVRP, dcmExpected);
          dcmExpected.scaleAdd(gamma, startDCM, dcmExpected);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmExpected, dcmToTestAlt, epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDcmToTestAlt, epsilon);
+         FramePoint3D comExpected = new FramePoint3D(startCoM);
+         comExpected.scale(Math.exp(-omega * time));
+         comExpected.scaleAdd(0.5 * (Math.exp(omega * time) - Math.exp(-omega * time)), startDCM, comExpected);
+         double startVRPCoefficient = (1 / (2 * omega * duration) * (Math.exp(omega * time) - Math.exp(-omega * time)) - 0.5 * (Math.exp(omega * time ) + Math.exp(-omega * time)) - time / duration + 1);
+         double endVRPCoefficient = time / duration - 1 / (2 * omega * duration) * (Math.exp(omega * time) - Math.exp(-omega * time));
+         comExpected.scaleAdd(startVRPCoefficient, startVRP, comExpected);
+         comExpected.scaleAdd(endVRPCoefficient, endVRP, comExpected);
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmExpected, dcmToTest, epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startDCM, backwardDcmToTest, epsilon);
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(comExpected, comToTest, epsilon);
 
          FramePoint3DReadOnly integratedDCM = integrateDCMForwardInTimeWithLinearVRP(time, duration, omega, startDCM, startVRP, endVRP);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTestAlt, 1e-3);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedDCM, dcmToTest, 1e-3);
+
+         FramePoint3DReadOnly integratedCoM = integrateCoMForwardInTimeWithLinearVRP(time, duration, omega, startCoM, startDCM, startVRP, endVRP);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(integratedCoM, comToTest, 1e-3);
 
          FramePoint3DReadOnly backwardIntegratedDCM = integrateDCMBackwardInTimeWithLinearVRP(time, duration, omega, integratedDCM, startVRP, endVRP);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(backwardIntegratedDCM, backwardDcmToTestAlt, 1e-3);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(backwardIntegratedDCM, backwardDcmToTest, 1e-3);
       }
    }
 
-   public static void computeDesiredDCMPositionForwardTime(double omega0, double time, double duration, FramePoint3DReadOnly initialDCM,
+   private static void computeDesiredDCMPositionForwardTime(double omega0, double time, double duration, FramePoint3DReadOnly initialDCM,
                                                            FramePoint3DReadOnly initialVRP, FramePoint3DReadOnly finalVRP,
                                                            FixedFramePoint3DBasics desiredDCMToPack)
    {
@@ -195,7 +263,7 @@ public class CenterOfMassDynamicsToolsTest
       desiredDCMToPack.scaleAdd(-linearFactor, initialVRP, desiredDCMToPack);
    }
 
-   public static void computeDesiredDCMPositionBackwardTime(double omega0, double time, double duration, FramePoint3DReadOnly finalDCM,
+   private static void computeDesiredDCMPositionBackwardTime(double omega0, double time, double duration, FramePoint3DReadOnly finalDCM,
                                                             FramePoint3DReadOnly initialVRP, FramePoint3DReadOnly finalVRP, FixedFramePoint3DBasics desiredDCMToPack)
    {
       double exponential = Math.exp(-omega0 * time);
@@ -224,6 +292,29 @@ public class CenterOfMassDynamicsToolsTest
       }
 
       return finalDCM;
+   }
+
+   private static FramePoint3DReadOnly integrateCoMForwardInTimeWithLinearVRP(double integrationDuration, double totalDuration, double omega,
+                                                                              FramePoint3DReadOnly startCoM, FramePoint3DReadOnly startDCM,
+                                                                              FramePoint3DReadOnly startVRP, FramePoint3DReadOnly endVRP)
+   {
+      FramePoint3D finalDCM = new FramePoint3D(startDCM);
+      FramePoint3D finalCoM = new FramePoint3D(startCoM);
+      FramePoint3D desiredVRP = new FramePoint3D();
+      FrameVector3D dcmVelocity = new FrameVector3D();
+      FrameVector3D comVelocity = new FrameVector3D();
+      for (double time = 0.0; time <= integrationDuration; time += integrationDt)
+      {
+         desiredVRP.interpolate(startVRP, endVRP, time / totalDuration);
+
+         CapturePointTools.computeCapturePointVelocity(finalDCM, desiredVRP, omega, dcmVelocity);
+         CenterOfMassDynamicsTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
+
+         finalDCM.scaleAdd(integrationDt, dcmVelocity, finalDCM);
+         finalCoM.scaleAdd(integrationDt, comVelocity, finalCoM);
+      }
+
+      return finalCoM;
    }
 
    private static FramePoint3DReadOnly integrateDCMBackwardInTimeWithLinearVRP(double integrationDuration, double totalDuration, double omega,
