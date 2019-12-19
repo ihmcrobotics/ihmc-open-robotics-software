@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -129,7 +130,7 @@ public class LQRMomentumControllerSimulation
 
       pushController.setPushForceMagnitude(10.0);
       pushController.setPushDuration(0.25);
-      pushController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
+      pushController.setPushForceDirection(new Vector3D(0.0, 1.0, 0.0));
       yoGraphicsListRegistry.registerYoGraphic(sphereRobot.getScsRobot().getName() + "Pusher", pushController.getForceVisualizer());
 
       return pushController;
@@ -183,49 +184,68 @@ public class LQRMomentumControllerSimulation
       return newContacts;
    }
 
+   private static final double initialTransferDuration = 1.0;
+   private static final double finalTransferDuration = 1.0;
+   private static final double settlingTime = 1.0;
+   private static final double stepDuration = 0.7;
+   private static final double stepLength = 0.5;
+   private static final double stepWidth = 0.15;
+   private static final int numberOfSteps = 10;
+
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private static List<ContactStateProvider> createContacts()
+   {
+      List<ContactStateProvider> contacts = new ArrayList<>();
+
+      double contactPosition = 0.0;
+
+
+      double width = stepWidth;
+      us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider initialContactStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
+      initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
+      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
+
+      contacts.add(initialContactStateProvider);
+
+      double currentTime = initialTransferDuration;
+
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider contactStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
+
+         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
+         contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         contactStateProvider.setContactState(ContactState.IN_CONTACT);
+
+         contacts.add(contactStateProvider);
+
+         width = -width;
+         currentTime += stepDuration;
+
+         contactPosition += stepLength;
+      }
+
+      us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider finalStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
+      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setContactState(ContactState.IN_CONTACT);
+
+      contacts.add(finalStateProvider);
+
+      return contacts;
+
+   }
+
    public static void main(String[] args)
    {
       LQRMomentumControllerSimulation simulation = new LQRMomentumControllerSimulation();
 
-      SettableContactStateProvider state1 = new SettableContactStateProvider();
-      SettableContactStateProvider state2 = new SettableContactStateProvider();
-      SettableContactStateProvider state3 = new SettableContactStateProvider();
-      SettableContactStateProvider state4 = new SettableContactStateProvider();
-      SettableContactStateProvider state5 = new SettableContactStateProvider();
-
-      FramePoint2D contact1 = new FramePoint2D();
-      FramePoint2D contact2 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.15);
-      FramePoint2D contact3 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, -0.15);
-      FramePoint2D contact4 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 2.0, 0.15);
-      FramePoint2D contact5 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 2.0, 0.0);
-
-      state1.getTimeInterval().setInterval(0.0, 0.5);
-      state2.getTimeInterval().setInterval(0.5, 1.0);
-      state3.getTimeInterval().setInterval(1.0, 1.5);
-      state4.getTimeInterval().setInterval(1.5, 2.0);
-      state5.getTimeInterval().setInterval(2.0, 2.5);
-
-      state1.setStartCopPosition(contact1);
-      state1.setEndCopPosition(contact2);
-
-      state2.setStartCopPosition(contact2);
-      state2.setEndCopPosition(contact3);
-
-      state3.setStartCopPosition(contact3);
-      state3.setEndCopPosition(contact4);
-
-      state4.setStartCopPosition(contact4);
-      state4.setEndCopPosition(contact5);
-
-      state5.setStartCopPosition(contact5);
-      state5.setEndCopPosition(contact5);
-
-      List<ContactStateProvider> contactStateProviders = new ArrayList<>();
-      contactStateProviders.add(state1);
-      contactStateProviders.add(state2);
-      contactStateProviders.add(state3);
-      contactStateProviders.add(state4);
-      contactStateProviders.add(state5);
 
       SettableContactStateProvider fakeState = new SettableContactStateProvider();
       fakeState.getTimeInterval().setInterval(0.0, 5.0);
@@ -234,7 +254,7 @@ public class LQRMomentumControllerSimulation
       List<ContactStateProvider> fakeProvider = new ArrayList<>();
       fakeProvider.add(fakeState);
 
-      //      simulation.setTrajectories(contactStateProviders);
-      simulation.setTrajectories(fakeProvider);
+            simulation.setTrajectories(createContacts());
+//      simulation.setTrajectories(fakeProvider);
    }
 }
