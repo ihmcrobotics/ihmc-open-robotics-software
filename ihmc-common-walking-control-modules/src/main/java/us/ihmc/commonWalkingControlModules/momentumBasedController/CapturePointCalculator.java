@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -39,43 +40,7 @@ public class CapturePointCalculator
       centerOfMassPosition2d.setIncludingFrame(centerOfMassPosition);
       centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
-      CapturePointCalculator.computeCapturePoint(capturePointToPack, centerOfMassPosition2d, centerOfMassVelocity2d, omega0);
-   }
-
-   public static void computeCapturePoint(FramePoint2DBasics capturePointToPack, FramePoint2DReadOnly centerOfMassInWorld,
-                                          FrameVector2DReadOnly centerOfMassVelocityInWorld, double omega0)
-   {
-      centerOfMassInWorld.checkReferenceFrameMatch(worldFrame);
-      centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
-
-      capturePointToPack.setToZero(worldFrame);
-      capturePointToPack.set(centerOfMassVelocityInWorld);
-      capturePointToPack.scale(1.0 / omega0);
-      capturePointToPack.add(centerOfMassInWorld);
-   }
-
-   public static void computeCapturePointVelocity(FrameVector2DBasics capturePointVelocityToPack, FrameVector2DReadOnly centerOfMassVelocityInWorld,
-                                                  FrameVector2DReadOnly centerOfMassAccelerationInWorld, double omega0)
-   {
-      centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
-      centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);
-
-      capturePointVelocityToPack.setToZero(worldFrame);
-      capturePointVelocityToPack.set(centerOfMassAccelerationInWorld);
-      capturePointVelocityToPack.scale(1.0 / omega0);
-      capturePointVelocityToPack.add(centerOfMassVelocityInWorld);
-   }
-
-   public static void computeDCMVelocity(FrameVector3DBasics capturePointVelocityToPack, FrameVector3DReadOnly centerOfMassVelocityInWorld,
-                                                  FrameVector3DReadOnly centerOfMassAccelerationInWorld, double omega0)
-   {
-      centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
-      centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);
-
-      capturePointVelocityToPack.setToZero(worldFrame);
-      capturePointVelocityToPack.set(centerOfMassAccelerationInWorld);
-      capturePointVelocityToPack.scale(1.0 / omega0);
-      capturePointVelocityToPack.add(centerOfMassVelocityInWorld);
+      CapturePointTools.computeCapturePointPosition(centerOfMassPosition2d, centerOfMassVelocity2d, omega0, capturePointToPack);
    }
 
    public static double computeOmega0ConstantHeight(double g, double z)
