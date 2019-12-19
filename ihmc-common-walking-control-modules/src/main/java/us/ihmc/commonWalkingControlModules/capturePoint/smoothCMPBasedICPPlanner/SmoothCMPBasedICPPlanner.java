@@ -1148,8 +1148,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
             checkCoMDynamics(desiredCoMVelocity, desiredICPPosition, desiredCoMPosition);
 
          // done to account for the delayed velocity
-         //computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
-         //computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
+         //computeCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
+         //computeCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
 
       }
       else
