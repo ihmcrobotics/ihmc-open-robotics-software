@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -31,15 +32,17 @@ public class SimpleCoMTrajectoryPlannerVisualizer
    private static final double initialTransferDuration = 1.0;
    private static final double finalTransferDuration = 1.0;
    private static final double settlingTime = 1.0;
-   private static final double stepDuration = 0.4;
-   private static final double flightDuration = 0.1;
+   private static final double stepDuration = 0.7;
    private static final double stepLength = 0.5;
-   private static final int numberOfSteps = 5;
+   private static final double stepWidth = 0.15;
+   private static final int numberOfSteps = 10;
 
    private static final double finalVerticalOffsetBound = 0.0;
    private static final double verticalOffset = 0.0;
 
-   private static final double simDt = 1e-3;
+   private static final double simDt = 1e-2;
+
+   private static final int numberOfBalls = 500;
 
    private double simDuration;
 
@@ -48,7 +51,6 @@ public class SimpleCoMTrajectoryPlannerVisualizer
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SimulationConstructionSet scs;
-   private final YoDouble yoTime;
    private final YoDouble timeInPhase;
 
    private final SimpleCoMTrajectoryPlanner planner;
@@ -87,11 +89,10 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
-      dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, graphicsListRegistry);
-      comTrajectory = new BagOfBalls(50, 0.02, "comTrajectory", YoAppearance.Black(), registry, graphicsListRegistry);
-      vrpTrajectory = new BagOfBalls(50, 0.02, "vrpTrajectory", YoAppearance.Green(), registry, graphicsListRegistry);
+      dcmTrajectory = new BagOfBalls(numberOfBalls, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, graphicsListRegistry);
+      comTrajectory = new BagOfBalls(numberOfBalls, 0.02, "comTrajectory", YoAppearance.Black(), registry, graphicsListRegistry);
+      vrpTrajectory = new BagOfBalls(numberOfBalls, 0.02, "vrpTrajectory", YoAppearance.Green(), registry, graphicsListRegistry);
 
-      yoTime = new YoDouble("timeToCheck", registry);
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
@@ -123,7 +124,6 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       scs.setDT(simDt, 1);
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
-      scs.setPlaybackRealTimeRate(0.75);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
@@ -145,34 +145,38 @@ public class SimpleCoMTrajectoryPlannerVisualizer
 
       double contactPosition = 0.0;
 
+
+      double width = stepWidth;
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
-      initialContactStateProvider.getTimeInterval().setInterval(0.0, 0.5);
+      initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
 
       double currentTime = initialTransferDuration;
 
+
       for (int i = 0; i < numberOfSteps; i++)
       {
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
-         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, -verticalOffset));
+         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, -verticalOffset));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
          contacts.add(contactStateProvider);
 
+         width = -width;
          currentTime += stepDuration;
 
          contactPosition += stepLength;
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, -finalVerticalOffsetBound));
       finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
@@ -192,7 +196,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
       planner.solveForTrajectory(contactStates);
 
-      while (simDuration > yoTime.getDoubleValue())
+      while (simDuration > scs.getTime())
       {
          int segment = getActiveSegment();
          timeInPhase.set(getTimeInPhase(segment));
@@ -213,8 +217,6 @@ public class SimpleCoMTrajectoryPlannerVisualizer
          comTrajectory.setBallLoop(desiredCoMPosition);
          vrpTrajectory.setBallLoop(desiredVRPPosition);
 
-         yoTime.add(simDt);
-
          scs.tickAndUpdate();
       }
    }
@@ -223,7 +225,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
    {
       for (int i = 0; i < contactStates.size(); i++)
       {
-         if (yoTime.getDoubleValue() >= contactStates.get(i).getTimeInterval().getStartTime())
+         if (contactStates.get(i).getTimeInterval().intervalContains(scs.getTime()))
             return i;
       }
 
@@ -232,7 +234,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
 
    private double getTimeInPhase(int segment)
    {
-      return yoTime.getDoubleValue() - contactStates.get(segment).getTimeInterval().getStartTime();
+      return scs.getTime() - contactStates.get(segment).getTimeInterval().getStartTime();
    }
 
 
