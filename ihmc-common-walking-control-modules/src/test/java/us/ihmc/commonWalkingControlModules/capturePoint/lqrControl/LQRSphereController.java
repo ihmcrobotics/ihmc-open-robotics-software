@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -20,15 +21,15 @@ public class LQRSphereController implements RobotController
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleDCMPlan dcmPlan;
+   private final SimpleCoMTrajectoryPlanner dcmPlan;
 
    public LQRSphereController(RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot, SphereRobot sphereRobot, ExternalForcePoint externalForcePoint)
    {
       this.scsRobot = scsRobot;
       this.sphereRobot = sphereRobot;
       this.externalForcePoint = externalForcePoint;
-      
-      dcmPlan = new SimpleDCMPlan(sphereRobot.getOmega0());
+
+      dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot.getOmega0Provider());
       dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
 
       lqrMomentumController = new LQRMomentumController();

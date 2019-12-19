@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -10,13 +12,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BasicSphereController implements RobotController
@@ -33,14 +35,17 @@ public class BasicSphereController implements RobotController
    private final YoFramePoint3D perfectVRP = new YoFramePoint3D("perfectVRP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D vrpForces = new YoFrameVector3D("vrpForces", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleDCMPlan dcmPlan;
+   private final SimpleCoMTrajectoryPlanner dcmPlan;
+
+   private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
 
    public BasicSphereController(SphereRobot sphereRobot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.sphereRobot = sphereRobot;
       externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
-      dcmPlan = new SimpleDCMPlan(sphereRobot.getOmega0());
+      dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot.getOmega0Provider());
       dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
+      dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
       YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
@@ -69,7 +74,8 @@ public class BasicSphereController implements RobotController
 
       sphereRobot.updateFrames();
 
-      dcmPlan.compute(sphereRobot.getScsRobot().getYoTime().getDoubleValue());
+      int segmentNumber = getSegmentNumber();
+      dcmPlan.compute(segmentNumber, getTimeInPhase(segmentNumber));
 
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
@@ -105,7 +111,26 @@ public class BasicSphereController implements RobotController
 
    public void solveForTrajectory(List<? extends ContactStateProvider> stateProviders)
    {
+      contactStateProviders.clear();
+      contactStateProviders.addAll(stateProviders);
+
       dcmPlan.solveForTrajectory(stateProviders);
+   }
+
+   private int getSegmentNumber()
+   {
+      for (int i = 0; i < contactStateProviders.size(); i++)
+      {
+         if (contactStateProviders.get(i).getTimeInterval().intervalContains(sphereRobot.getScsRobot().getYoTime().getDoubleValue()))
+            return i;
+      }
+
+      return contactStateProviders.size() - 1;
+   }
+
+   private double getTimeInPhase(int phase)
+   {
+      return sphereRobot.getScsRobot().getYoTime().getDoubleValue() - contactStateProviders.get(phase).getTimeInterval().getStartTime();
    }
 
    @Override

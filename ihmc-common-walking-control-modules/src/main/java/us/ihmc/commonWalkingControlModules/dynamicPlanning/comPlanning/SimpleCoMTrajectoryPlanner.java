@@ -240,4 +240,9 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    {
       return desiredECMPPosition;
    }
+
+   public List<Trajectory3D> getVRPTrajectories()
+   {
+      return vrpTrajectories;
+   }
 }

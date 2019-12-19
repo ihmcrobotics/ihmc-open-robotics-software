@@ -29,6 +29,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -142,6 +143,11 @@ public class SphereRobot
    public double getDesiredHeight()
    {
       return desiredHeight;
+   }
+
+   public DoubleProvider getOmega0Provider()
+   {
+      return omega0;
    }
 
    public double getOmega0()
