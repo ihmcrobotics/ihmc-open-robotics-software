@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -141,16 +142,16 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          FramePoint3D initialDCMPosition = dcmCornerPoints.get(i);
 
          double duration = vrpTrajectories.get(i).getDuration();
-         vrpTrajectories.get(i).getStartPoint(startVRP);
-         vrpTrajectories.get(i).getEndPoint(finalVRP);
+         startVRP.set(vrpWaypoints.get(i).getFirstEndpoint());
+         finalVRP.set(vrpWaypoints.get(i).getSecondEndpoint());
 
          FramePoint3D finalCoMPosition = comCornerPoints.add();
 
-         CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega0.getValue(), duration, duration, initialCoMPosition, initialDCMPosition, startVRP, finalVRP,
-                                                                        finalCoMPosition);
+         CenterOfMassDynamicsTools
+               .computeDesiredCoMPositionForwardTime(omega0.getValue(), duration, duration, initialCoMPosition, initialDCMPosition, startVRP, finalVRP,
+                                                     finalCoMPosition);
       }
    }
-
 
    @Override
    public void compute(int segmentId, double timeInPhase)
@@ -165,8 +166,9 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
                        FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
    {
       Trajectory3D vrpTrajectory = vrpTrajectories.get(segmentId);
-      vrpTrajectory.getStartPoint(startVRP);
-      vrpTrajectory.getEndPoint(finalVRP);
+      LineSegment3DReadOnly vrpSegment = vrpWaypoints.get(segmentId);
+      startVRP.set(vrpSegment.getFirstEndpoint());
+      finalVRP.set(vrpSegment.getSecondEndpoint());
 
       double omega = omega0.getValue();
 
@@ -185,7 +187,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       CapturePointTools.computeCapturePointVelocity(dcmPositionToPack, vrpPositionToPack, omega, dcmVelocityToPack);
 
-      CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, timeInPhase, duration, initialCoM, initialDCM, startVRP, finalVRP, comPositionToPack);
+      CenterOfMassDynamicsTools
+            .computeDesiredCoMPositionForwardTime(omega, timeInPhase, duration, initialCoM, initialDCM, startVRP, finalVRP, comPositionToPack);
       CapturePointTools.computeCenterOfMassVelocity(comPositionToPack, dcmPositionToPack, omega, comVelocityToPack);
       CapturePointTools.computeCenterOfMassAcceleration(comVelocityToPack, dcmVelocityToPack, omega, comAccelerationToPack);
    }
