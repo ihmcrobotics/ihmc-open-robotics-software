@@ -186,8 +186,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       CapturePointTools.computeCapturePointVelocity(dcmPositionToPack, vrpPositionToPack, omega, dcmVelocityToPack);
 
       CenterOfMassDynamicsTools.computeDesiredCoMPositionForwardTime(omega, timeInPhase, duration, initialCoM, initialDCM, startVRP, finalVRP, comPositionToPack);
-      CenterOfMassDynamicsTools.computeCenterOfMassVelocity(comPositionToPack, dcmPositionToPack, omega, comVelocityToPack);
-      CenterOfMassDynamicsTools.computeCenterOfMassAcceleration(comVelocityToPack, dcmVelocityToPack, omega, comAccelerationToPack);
+      CapturePointTools.computeCenterOfMassVelocity(comPositionToPack, dcmPositionToPack, omega, comVelocityToPack);
+      CapturePointTools.computeCenterOfMassAcceleration(comVelocityToPack, dcmVelocityToPack, omega, comAccelerationToPack);
    }
 
    @Override
