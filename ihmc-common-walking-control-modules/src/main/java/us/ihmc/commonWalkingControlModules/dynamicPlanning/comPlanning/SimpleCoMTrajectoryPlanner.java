@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -7,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +22,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<Trajectory3D> vrpTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
    private final double omega0;
 
@@ -62,6 +66,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private void computeDCMCornerPoints(List<? extends ContactStateProvider> contactSequence)
    {
       dcmCornerPoints.clear();
+      vrpTrajectories.clear();
 
       FramePoint3DReadOnly finalCoP = contactSequence.get(contactSequence.size() - 1).getCopEndPosition();
       FramePoint3D finalDCM = dcmCornerPoints.add();
@@ -71,6 +76,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       for (int i = contactSequence.size() - 1; i >= 0; i--)
       {
          ContactStateProvider contact = contactSequence.get(i);
+         double initialTime = contact.getTimeInterval().getStartTime();
+         double finalTime = contact.getTimeInterval().getEndTime();
          double duration = contact.getTimeInterval().getDuration();
 
          finalVRP.set(contact.getCopEndPosition());
@@ -81,10 +88,14 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          FramePoint3D nextCornerPoint = dcmCornerPoints.add();
          CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega0, duration, duration, finalDCM, startVRP, finalVRP, nextCornerPoint);
 
+         Trajectory3D vrpTrajectory = vrpTrajectories.add();
+         vrpTrajectory.setLinear(initialTime, finalTime, startVRP, finalVRP);
+
          finalDCM = nextCornerPoint;
       }
 
       Collections.reverse(dcmCornerPoints);
+      Collections.reverse(vrpTrajectories);
    }
 
    private void computeCoMCornerPoints(List<? extends ContactStateProvider> contactSequence)
@@ -105,7 +116,25 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
                        FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
    {
-      // TODO
+      Trajectory3D vrpTrajectory = vrpTrajectories.get(segmentId);
+      vrpTrajectory.getStartPoint(startVRP);
+      vrpTrajectory.getEndPoint(finalVRP);
+
+      double duration = vrpTrajectory.getDuration();
+      double globalTime = MathTools.clamp(timeInPhase + vrpTrajectory.getInitialTime(), vrpTrajectory.getInitialTime(), vrpTrajectory.getFinalTime());
+
+      vrpTrajectory.compute(globalTime);
+
+      FramePoint3DReadOnly initialDCM = dcmCornerPoints.get(segmentId);
+
+      CenterOfMassDynamicsTools.computeDesiredDCMPositionForwardTime(omega0, timeInPhase, duration, initialDCM, startVRP, finalVRP, dcmPositionToPack);
+      vrpPositionToPack.set(vrpTrajectory.getPosition());
+      ecmpPositionToPack.set(vrpPositionToPack);
+      ecmpPositionToPack.subZ(nominalCoMHeight);
+
+      CapturePointTools.computeCapturePointVelocity(dcmPositionToPack, vrpPositionToPack, omega0, dcmVelocityToPack);
+
+      // TODO all the center of mass stuff.
    }
 
    @Override
