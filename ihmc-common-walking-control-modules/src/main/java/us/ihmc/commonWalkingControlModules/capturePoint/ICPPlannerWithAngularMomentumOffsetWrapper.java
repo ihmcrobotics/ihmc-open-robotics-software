@@ -152,7 +152,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
          modifiedICPVelocity.sub(modifiedCMPPosition);
          modifiedICPVelocity.scale(omega0);
 
-         CapturePointTools.computeDesiredCapturePointAcceleration(omega0, modifiedICPVelocity, modifiedICPAcceleration);
+         CapturePointTools.computeCapturePointAcceleration(omega0, modifiedICPVelocity, modifiedICPAcceleration);
          CapturePointTools.computeCentroidalMomentumPivotVelocity(modifiedICPVelocity, modifiedICPAcceleration, omega0, modifiedCMPVelocity);
       }
    }

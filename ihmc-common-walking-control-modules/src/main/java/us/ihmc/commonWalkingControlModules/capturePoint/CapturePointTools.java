@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 
 /**
@@ -15,7 +12,7 @@ public class CapturePointTools
    private static final double EPSILON = 1.0e-15;
 
    /**
-    * Computes the desired Instantaneous Capture Point position by
+    * Computes the Instantaneous Capture Point position by
     * <p>
     *    x<sup>ICP</sup> = x<sup>CoM</sup> + 1&frasl;&omega;  x&#775;<sup>CoM</sup>
     * </p>
@@ -27,49 +24,50 @@ public class CapturePointTools
     *           biped.
     * @param icpToPack
     */
-   public static void computeDesiredCapturePointPosition(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity,
-                                                         double omega0, FixedFramePoint3DBasics icpToPack)
+   public static void computeCapturePointPosition(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity, double omega0,
+                                                  FixedFramePoint3DBasics icpToPack)
    {
       icpToPack.scaleAdd(1.0 / omega0, centerOfMassVelocity, centerOfMassPosition);
    }
 
    /**
-    * Computes the Instantaneous Capture Point position by
+    * Computes the Instantaneous Capture Point velocity by
     * <p>
     *    x&#775;<sup>ICP</sup> = x&#775;<sup>CoM</sup> + 1&frasl;&omega;  x&#776;<sup>CoM</sup>
     * </p>
     *
-    * @param centerOfMassAcceleration
+    * @param centerOfMassVelocity
     * @param centerOfMassAcceleration
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
     * @param icpVelocityToPack
     */
-   public static void computeDesiredCapturePointVelocity(FrameVector3DReadOnly centerOfMassVelocity, FrameVector3DReadOnly centerOfMassAcceleration,
-                                                         double omega0, FixedFrameVector3DBasics icpVelocityToPack)
+   public static void computeCapturePointVelocity(FrameVector3DReadOnly centerOfMassVelocity, FrameVector3DReadOnly centerOfMassAcceleration,
+                                                  double omega0, FixedFrameVector3DBasics icpVelocityToPack)
    {
       icpVelocityToPack.scaleAdd(1.0 / omega0, centerOfMassAcceleration, centerOfMassVelocity);
    }
 
    /**
-    * Compute the desired capture point acceleration given the desired capture point velocity
+    * FIXME this method is probably wrong.
+    * Compute the capture point acceleration given the desired capture point velocity
     *
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
-    * @param desiredCapturePointVelocity
-    * @param desiredCapturePointAccelerationToPack
+    * @param capturePointVelocity
+    * @param icpAccelerationAccelerationToPack
     */
-   public static void computeDesiredCapturePointAcceleration(double omega0, FrameVector3DReadOnly desiredCapturePointVelocity,
-                                                             FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
+   public static void computeCapturePointAcceleration(double omega0, FrameVector3DReadOnly capturePointVelocity,
+                                                      FixedFrameVector3DBasics icpAccelerationAccelerationToPack)
    {
-      desiredCapturePointAccelerationToPack.setMatchingFrame(desiredCapturePointVelocity);
-      desiredCapturePointAccelerationToPack.scale(omega0);
+      icpAccelerationAccelerationToPack.setMatchingFrame(capturePointVelocity);
+      icpAccelerationAccelerationToPack.scale(omega0);
    }
 
    /**
-    * Computes the desired centroidal momentum pivot by
+    * Computes the centroidal momentum pivot by
     * <p>
     *    x<sup>CMP</sup> = x<sup>ICP</sup> - 1&frasl;&omega;  x&#775;<sup>ICP</sup>
     * </p>
@@ -81,14 +79,14 @@ public class CapturePointTools
     *           biped.
     * @param cmpPositionToPack
     */
-   public static void computeCentroidalMomentumPivot(FramePoint2DReadOnly capturePointPosition, FrameVector2DReadOnly capturePointVelocity,
-                                                     double omega0, FixedFramePoint2DBasics cmpPositionToPack)
+   public static void computeCentroidalMomentumPivot(FramePoint2DReadOnly capturePointPosition, FrameVector2DReadOnly capturePointVelocity, double omega0,
+                                                     FixedFramePoint2DBasics cmpPositionToPack)
    {
       cmpPositionToPack.scaleAdd(-1.0 / omega0, capturePointVelocity, capturePointPosition);
    }
 
    /**
-    * Computes the desired centroidal momentum pivot by
+    * Computes the centroidal momentum pivot by
     * <p>
     *    x<sup>CMP</sup> = x<sup>ICP</sup> - 1&frasl;&omega;  x&#775;<sup>ICP</sup>
     * </p>
@@ -100,14 +98,14 @@ public class CapturePointTools
     *           biped.
     * @param cmpPositionToPack
     */
-   public static void computeCentroidalMomentumPivot(FramePoint3DReadOnly capturePointPosition, FrameVector3DReadOnly capturePointVelocity,
-                                                     double omega0, FixedFramePoint3DBasics cmpPositionToPack)
+   public static void computeCentroidalMomentumPivot(FramePoint3DReadOnly capturePointPosition, FrameVector3DReadOnly capturePointVelocity, double omega0,
+                                                     FixedFramePoint3DBasics cmpPositionToPack)
    {
       cmpPositionToPack.scaleAdd(-1.0 / omega0, capturePointVelocity, capturePointPosition);
    }
 
    /**
-    * Computes the desired centroidal momentum pivot velocity by, \dot{CMP}_{d} = \dot{ICP}_{d} -
+    * Computes the centroidal momentum pivot velocity by, \dot{CMP}_{d} = \dot{ICP}_{d} -
     * \ddot{ICP}_{d}/omega0
     *
     * @param capturePointVelocity
@@ -146,17 +144,20 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the capture point position at a given time. x<sup>ICP<sub>des</sub></sup> =
+    * Compute the desired capture point position at a given time.
+    * <p>
+    *    x<sup>ICP<sub>des</sub></sup> =
     * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0
     * t</sup>)x<sup>CMP<sub>0</sub></sup>
+    * </p>
     *
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialDesiredCapturePoint
-    * @param initialDesiredCMP
-    * @param desiredCapturePointToPack
+    *           robot.
+    * @param time forward time to integrate. t in the above equation.
+    * @param initialDesiredCapturePoint capture point position at t = 0. x<sup>ICP<sub>0</sub></sup> in the above equation
+    * @param initialDesiredCMP CMP position at t = 0. x<sup>CMP<sub>0</sub></sup> in the above equation
+    * @param desiredCapturePointToPack Desired Capture Point position at time t given the initial ICP and CMP states. Ix<sup>ICP<sub>des</sub></sup> in the above equation.
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint2DReadOnly initialDesiredCapturePoint,
                                                          FramePoint2DReadOnly initialDesiredCMP, FixedFramePoint2DBasics desiredCapturePointToPack)
@@ -169,18 +170,17 @@ public class CapturePointTools
 
    /**
     * Compute the desired capture point velocity at a given time.
-    * ICPv_d = w * e^{w*t} * ICP0 - p0 * w * e^{w*t}
     * <p>
-    *    ICPv_d = &omega; * e<sup>&omega; t</sup> * ICP<sub>d</sub> - p<sub>0</sub> * &omega; * e<sup>&omega; t</sup>
+    *    ICPv<sub>d</sub> = &omega; e<sup>&omega; t</sup> (ICP<sub>0</sub> - p<sub>0</sub>)
     * </p>
     *
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialDesiredCapturePoint
-    * @param initialDesiredCMP
-    * @param desiredCapturePointVelocityToPack
+    *           robot.
+    * @param time forward time to integrate. t in the above equation.
+    * @param initialDesiredCapturePoint capture point position at t = 0. ICP<sub>0</sub> in the above equation.
+    * @param initialDesiredCMP CMP position at t = 0. p<sub>0</sub> in the above equation
+    * @param desiredCapturePointVelocityToPack Desired Capture Point velocity at time t given the initial ICP and CMP states. ICPv<sub>d</sub> in the above equation.
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3DReadOnly initialDesiredCapturePoint,
                                                          FramePoint3DReadOnly initialDesiredCMP, FixedFrameVector3DBasics desiredCapturePointVelocityToPack)
@@ -207,7 +207,8 @@ public class CapturePointTools
     * @param desiredCapturePointAccelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3DReadOnly initialDesiredCapturePoint,
-                                                             FramePoint3DReadOnly initialDesiredCMP, FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
+                                                             FramePoint3DReadOnly initialDesiredCMP,
+                                                             FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
    {
       if (initialDesiredCapturePoint.distance(initialDesiredCMP) > EPSILON)
       {
@@ -234,8 +235,8 @@ public class CapturePointTools
       currentCapturePointPosition.checkReferenceFrameMatch(desiredCapturePointPosition);
       desiredCapturePointVelocity.checkReferenceFrameMatch(desiredCapturePointPosition);
 
-      double desiredCapturePointVelocityMagnitude = Math.sqrt(MathTools.square(desiredCapturePointVelocity.getX())
-            + MathTools.square(desiredCapturePointVelocity.getY()));
+      double desiredCapturePointVelocityMagnitude = Math
+            .sqrt(MathTools.square(desiredCapturePointVelocity.getX()) + MathTools.square(desiredCapturePointVelocity.getY()));
 
       if (desiredCapturePointVelocityMagnitude == 0.0)
       {
