@@ -15,6 +15,17 @@ import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.List;
 
+/**
+ * This LQR controller tracks the DCM dynamics of the robot, using a VRP output. The equations of motion are as follows:
+ *
+ * <p> x = [x<sub>com</sub>; xDot<sub>com</sub>]</p>
+ * <p> u = [xDdot<sub>com</sub>] </p>
+ * <p> y = [x<sub>vrp</sub>] </p>
+ *
+ * <p> A = [0 I; 0 0]</p>
+ * <p> B = [0; I]</p>
+ * <p> C = </p>
+ */
 public class LQRMomentumController
 {
    private static final double omega = 3.0;
@@ -24,10 +35,10 @@ public class LQRMomentumController
    private final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F R = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F A = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F AInverse = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F B = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F C = new DenseMatrix64F(3, 6);
+   final DenseMatrix64F A = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F AInverse = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F B = new DenseMatrix64F(6, 3);
+   final DenseMatrix64F C = new DenseMatrix64F(3, 6);
    private final DenseMatrix64F D = new DenseMatrix64F(3, 3);
 
    private final DenseMatrix64F A2 = new DenseMatrix64F(3, 3);
@@ -42,7 +53,8 @@ public class LQRMomentumController
    private final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F r2 = new DenseMatrix64F(3, 1);
 
-   private final DenseMatrix64F N = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F N = new DenseMatrix64F(6, 3);
+   private final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
 
    private final DenseMatrix64F NB = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F rs = new DenseMatrix64F(3, 1);
@@ -91,6 +103,7 @@ public class LQRMomentumController
       tempMatrix.reshape(3, 3);
       CommonOps.mult(Q, D, tempMatrix);
       CommonOps.multTransA(C, tempMatrix, N);
+      CommonOps.transpose(N, NTranspose);
    }
 
    public void setVrpTrajectory(List<Trajectory3D> vrpTrajectory)
@@ -121,7 +134,7 @@ public class LQRMomentumController
       */
       DenseMatrix64F Qalt = new DenseMatrix64F(Q1);
       tempMatrix.reshape(6, 6);
-      NativeCommonOps.multQuad(N, R1Inverse, tempMatrix);
+      NativeCommonOps.multQuad(NTranspose, R1Inverse, tempMatrix);
       CommonOps.addEquals(Qalt, -1.0, tempMatrix);
 
       careSolver.setMatrices(A, B, Qalt, R);
