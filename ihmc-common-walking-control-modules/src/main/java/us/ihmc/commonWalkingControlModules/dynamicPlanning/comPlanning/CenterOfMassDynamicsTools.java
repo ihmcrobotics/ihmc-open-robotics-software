@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public class CenterOfMassDynamicsTools
 {
@@ -47,23 +48,75 @@ public class CenterOfMassDynamicsTools
                                                            FramePoint3DReadOnly initialVRP, FramePoint3DReadOnly finalVRP,
                                                            FixedFramePoint3DBasics desiredDCMToPack)
    {
+      double sigmaT = computeLinearSigma(omega0, time, duration);
+      double sigma0 = computeLinearSigma(omega0, 0.0, duration);
       double exponential = Math.exp(omega0 * time);
-      desiredDCMToPack.interpolate(initialVRP, initialDCM, exponential);
 
-      double linearFactor = (time / duration + 1.0 / (omega0 * duration) * (1.0 - exponential));
-      desiredDCMToPack.scaleAdd(linearFactor, finalVRP, desiredDCMToPack);
-      desiredDCMToPack.scaleAdd(-linearFactor, initialVRP, desiredDCMToPack);
+      double alpha = 1.0 - sigmaT - exponential * (1.0 - sigma0);
+      double beta = sigmaT - exponential * sigma0;
+
+      desiredDCMToPack.set(initialVRP);
+      desiredDCMToPack.scale(alpha);
+      desiredDCMToPack.scaleAdd(beta, finalVRP, desiredDCMToPack);
+      desiredDCMToPack.scaleAdd(exponential, initialDCM, desiredDCMToPack);
    }
 
    public static void computeDesiredDCMPositionBackwardTime(double omega0, double time, double duration, FramePoint3DReadOnly finalDCM,
                                                             FramePoint3DReadOnly initialVRP, FramePoint3DReadOnly finalVRP, FixedFramePoint3DBasics desiredDCMToPack)
    {
+      /*
+      double sigmaT = computeLinearSigma(omega0, time, duration);
+      double sigmaF = computeLinearSigma(omega0, duration, duration);
+      double exponential = Math.exp(omega0 * (time - duration));
+
+      double alpha = 1.0 - sigmaT - exponential * (1.0 - sigmaF);
+      double beta = sigmaT - exponential * sigmaF;
+
+      desiredDCMToPack.set(initialVRP);
+      desiredDCMToPack.scale(alpha);
+      desiredDCMToPack.scaleAdd(beta, finalVRP, desiredDCMToPack);
+      desiredDCMToPack.scaleAdd(exponential, finalDCM, desiredDCMToPack);
+      */
+
       double exponential = Math.exp(-omega0 * time);
       desiredDCMToPack.interpolate(initialVRP, finalDCM, exponential);
 
       double linearFactor = (-time / duration * exponential + 1.0 / (omega0 * duration) * (1.0 - exponential));
       desiredDCMToPack.scaleAdd(linearFactor, finalVRP, desiredDCMToPack);
       desiredDCMToPack.scaleAdd(-linearFactor, initialVRP, desiredDCMToPack);
+   }
+
+   public static void computeDesiredDCMPositionForwardTime(double omega0, double time, double duration, FramePoint3DReadOnly initialDCM,
+                                                           FramePoint3DReadOnly initialVRPPosition, FrameVector3DReadOnly initialVRPVelocity,
+                                                           FramePoint3DReadOnly finalVRPPosition, FrameVector3DReadOnly finalVRPVelocity,
+                                                           FixedFramePoint3DBasics desiredDCMToPack)
+   {
+      double sigmaT = computeCubicSigma(omega0, time, duration);
+      double sigma0 = computeCubicSigma(omega0, 0.0, duration);
+      double exponential = Math.exp(omega0 * time);
+
+//      desiredDCMToPack.interpolate(initialVRP, initialDCM, exponential);
+//
+//      double linearFactor = (time / duration + 1.0 / (omega0 * duration) * (1.0 - exponential));
+//      desiredDCMToPack.scaleAdd(linearFactor, finalVRP, desiredDCMToPack);
+//      desiredDCMToPack.scaleAdd(-linearFactor, initialVRP, desiredDCMToPack);
+   }
+
+   private static double computeLinearSigma(double omega0, double time, double duration)
+   {
+      return time / duration + 1.0 / (omega0 * duration);
+   }
+
+   private static double computeCubicSigma(double omega0, double time, double duration)
+   {
+      double t2 = time * time;
+      double T2 = duration * duration;
+      double T3 = duration * T2;
+      double w2 = omega0 * omega0;
+      double w3 = omega0 * w2;
+
+      return t2 / T2 * (3 - 2 * time / duration) + 6.0 / omega0 * (time / T2) * (1.0 - time / duration) + 6.0 / (w2 * T2) * (1.0  - 2.0 * time / duration)
+            - 12.0 / (w3 * T3);
    }
 
 }
