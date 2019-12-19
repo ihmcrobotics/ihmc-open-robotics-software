@@ -1,28 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTrajectoryTools;
-import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -96,13 +83,13 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeDesiredCapturePointVelocity(omega0, time, initialCapturePointPosition, initialCenterOfPressure, computedCapturePointVelocity);
          CapturePointTools.computeDesiredCapturePointAcceleration(omega0, time, initialCapturePointPosition, initialCenterOfPressure,
-               desiredCapturePointAcceleration);
+                                                                  desiredCapturePointAcceleration);
          computedCapturePointVelocity.scale(omega0);
 
          EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, desiredCapturePointAcceleration, 1e-10);
 
          computedCapturePointVelocity.scale(1 / omega0);
-         CapturePointTools.computeDesiredCapturePointAcceleration(omega0, computedCapturePointVelocity, desiredCapturePointAcceleration);
+         CapturePointTools.computeCapturePointAcceleration(omega0, computedCapturePointVelocity, desiredCapturePointAcceleration);
          computedCapturePointVelocity.scale(omega0);
 
          EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, desiredCapturePointAcceleration, 1e-10);
@@ -162,7 +149,7 @@ public class CapturePointToolsTest
 
          double omega0 = 0.5;
 
-         CapturePointTools.computeDesiredCapturePointPosition(centerOfMassPosition, centerOfMassVelocity, omega0, capturePointPosition);
+         CapturePointTools.computeCapturePointPosition(centerOfMassPosition, centerOfMassVelocity, omega0, capturePointPosition);
 
          computedCapturePointPosition.set(centerOfMassVelocity);
          computedCapturePointPosition.scale(1.0 / omega0);
@@ -188,7 +175,7 @@ public class CapturePointToolsTest
 
          double omega0 = 0.5;
 
-         CapturePointTools.computeDesiredCapturePointVelocity(centerOfMassVelocity, centerOfMassAcceleration, omega0, capturePointVelocity);
+         CapturePointTools.computeCapturePointVelocity(centerOfMassVelocity, centerOfMassAcceleration, omega0, capturePointVelocity);
 
          computedCapturePointVelocity.set(centerOfMassAcceleration);
          computedCapturePointVelocity.scale(1.0 / omega0);
