@@ -31,6 +31,25 @@ public class CapturePointTools
    }
 
    /**
+    * Computes the Instantaneous Capture Point position by
+    * <p>
+    *    x<sup>ICP</sup> = x<sup>CoM</sup> + 1&frasl;&omega;  x&#775;<sup>CoM</sup>
+    * </p>
+    *
+    * @param centerOfMassPosition
+    * @param centerOfMassVelocity
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param icpToPack
+    */
+   public static void computeCapturePointPosition(FramePoint2DReadOnly centerOfMassPosition, FrameVector2DReadOnly centerOfMassVelocity, double omega0,
+                                                  FixedFramePoint2DBasics icpToPack)
+   {
+      icpToPack.scaleAdd(1.0 / omega0, centerOfMassVelocity, centerOfMassPosition);
+   }
+
+   /**
     * Computes the Instantaneous Capture Point velocity by
     * <p>
     *    x&#775;<sup>ICP</sup> = x&#775;<sup>CoM</sup> + 1&frasl;&omega;  x&#776;<sup>CoM</sup>
