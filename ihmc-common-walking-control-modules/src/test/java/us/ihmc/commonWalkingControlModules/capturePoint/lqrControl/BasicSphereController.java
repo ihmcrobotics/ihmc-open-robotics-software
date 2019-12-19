@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicSphereController implements RobotController
+public class BasicSphereController implements SphereControllerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 

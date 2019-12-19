@@ -32,10 +32,10 @@ public class LQRMomentumControllerSimulation
 
    private final SimulationConstructionSet scs;
 
-   private final BasicSphereController controller1;
-   private final BasicSphereController controller2;
+   private final SphereControllerInterface controller1;
+   private final SphereControllerInterface controller2;
 
-   private final HashMap<BasicSphereController, Vector3DReadOnly> shift = new HashMap<>();
+   private final HashMap<SphereControllerInterface, Vector3DReadOnly> shift = new HashMap<>();
 
    public LQRMomentumControllerSimulation()
    {
@@ -72,7 +72,7 @@ public class LQRMomentumControllerSimulation
 
          robots.add(sphereRobot2.getScsRobot());
 
-         controller2 = new BasicSphereController(sphereRobot2, yoGraphicsListRegistry2);
+         controller2 = new LQRSphereController(sphereRobot2, yoGraphicsListRegistry2);
 
          pushController2 = createPusher(sphereRobot2, yoGraphicsListRegistry2);
          setupGroundContactModel(sphereRobot2.getScsRobot());
