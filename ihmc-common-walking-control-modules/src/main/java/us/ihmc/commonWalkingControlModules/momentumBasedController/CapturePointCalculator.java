@@ -5,10 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
@@ -59,6 +56,18 @@ public class CapturePointCalculator
 
    public static void computeCapturePointVelocity(FrameVector2DBasics capturePointVelocityToPack, FrameVector2DReadOnly centerOfMassVelocityInWorld,
                                                   FrameVector2DReadOnly centerOfMassAccelerationInWorld, double omega0)
+   {
+      centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
+      centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);
+
+      capturePointVelocityToPack.setToZero(worldFrame);
+      capturePointVelocityToPack.set(centerOfMassAccelerationInWorld);
+      capturePointVelocityToPack.scale(1.0 / omega0);
+      capturePointVelocityToPack.add(centerOfMassVelocityInWorld);
+   }
+
+   public static void computeDCMVelocity(FrameVector3DBasics capturePointVelocityToPack, FrameVector3DReadOnly centerOfMassVelocityInWorld,
+                                                  FrameVector3DReadOnly centerOfMassAccelerationInWorld, double omega0)
    {
       centerOfMassVelocityInWorld.checkReferenceFrameMatch(worldFrame);
       centerOfMassAccelerationInWorld.checkReferenceFrameMatch(worldFrame);

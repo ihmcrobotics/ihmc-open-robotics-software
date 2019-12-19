@@ -9,8 +9,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -441,7 +439,7 @@ public class CapturePointToolsTest
          {
             double timeIntoStep = random.nextDouble() * time;
             CapturePointTools.computeDesiredCapturePointPosition(omega0, timeIntoStep, capturePointsToPack.get(i), constantCentersOfPressures.get(i),
-                  desiredICP);
+                                                                 desiredICP);
 
             p1.set(constantCentersOfPressures.get(i));
             p2.set(capturePointsToPack.get(i));
@@ -474,14 +472,14 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeDesiredCapturePointPosition(omega0, time, initialCapturePointPosition, initialCenterOfPressure, computedCapturePoint1);
          CapturePointTools.computeDesiredCapturePointPosition(omega0, time + deltaT, initialCapturePointPosition, initialCenterOfPressure,
-               computedCapturePoint2);
+                                                              computedCapturePoint2);
 
          differentiatedCapturePointPosition.set(computedCapturePoint2);
          differentiatedCapturePointPosition.sub(computedCapturePoint1);
          differentiatedCapturePointPosition.scale(1 / deltaT);
 
          CapturePointTools.computeDesiredCapturePointVelocity(omega0, time + deltaT, initialCapturePointPosition, initialCenterOfPressure,
-               computedCapturePointVelocity);
+                                                              computedCapturePointVelocity);
 
          EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, differentiatedCapturePointPosition, 1e-3);
       }
@@ -540,8 +538,8 @@ public class CapturePointToolsTest
 
          double omega0 = 0.5;
 
-         CapturePointTools.computeDesiredCentroidalMomentumPivot(capturePointPosition, capturePointVelocity, omega0, centroidalMomentumPivot);
-         CapturePointTools.computeDesiredCentroidalMomentumPivot(capturePointPosition2D, capturePointVelocity2D, omega0, centroidalMomentumPivot2D);
+         CapturePointTools.computeCentroidalMomentumPivot(capturePointPosition, capturePointVelocity, omega0, centroidalMomentumPivot);
+         CapturePointTools.computeCentroidalMomentumPivot(capturePointPosition2D, capturePointVelocity2D, omega0, centroidalMomentumPivot2D);
 
          computedCentroidalMomentumPivot.set(capturePointVelocity);
          computedCentroidalMomentumPivot2D.set(capturePointVelocity2D);
