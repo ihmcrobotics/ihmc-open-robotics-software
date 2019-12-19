@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,9 +23,14 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private final FramePoint3D initialCoMPosition = new FramePoint3D();
 
-   private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> dcmCornerPointPool = new RecyclingArrayList<>(FramePoint3D::new);
+   private final List<FramePoint3D> dcmCornerPoints = new ArrayList<>();
+   private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final RecyclingArrayList<LineSegment3D> vrpWaypointPools = new RecyclingArrayList<>(LineSegment3D::new);
+   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final List<LineSegment3D> vrpWaypoints = new ArrayList<>();
+
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
-   private final RecyclingArrayList<Trajectory3D> vrpTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
    private final DoubleProvider omega0;
 
@@ -37,9 +44,16 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FramePoint3D desiredVRPPosition = new FramePoint3D();
    private final FramePoint3D desiredECMPPosition = new FramePoint3D();
 
+   private CornerPointViewer viewer = null;
+
    public SimpleCoMTrajectoryPlanner(DoubleProvider omega0)
    {
       this.omega0 = omega0;
+   }
+
+   public void setCornerPointViewer(CornerPointViewer viewer)
+   {
+      this.viewer = viewer;
    }
 
    @Override
@@ -59,6 +73,13 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    {
       computeDCMCornerPoints(contactSequence);
       computeCoMCornerPoints();
+
+      if (viewer != null)
+      {
+         viewer.updateDCMCornerPoints(dcmCornerPoints);
+         viewer.updateCoMCornerPoints(comCornerPoints);
+         viewer.updateVRPWaypoints(vrpWaypoints);
+      }
    }
 
    private final FramePoint3D finalVRP = new FramePoint3D();
@@ -66,13 +87,17 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private void computeDCMCornerPoints(List<? extends ContactStateProvider> contactSequence)
    {
+      dcmCornerPointPool.clear();
       dcmCornerPoints.clear();
+      vrpTrajectoryPool.clear();
       vrpTrajectories.clear();
 
       FramePoint3DReadOnly finalCoP = contactSequence.get(contactSequence.size() - 1).getCopEndPosition();
-      FramePoint3D finalDCM = dcmCornerPoints.add();
+      FramePoint3D finalDCM = dcmCornerPointPool.add();
       finalDCM.set(finalCoP);
       finalDCM.addZ(nominalCoMHeight);
+
+      dcmCornerPoints.add(finalDCM);
 
       for (int i = contactSequence.size() - 1; i >= 0; i--)
       {
@@ -86,17 +111,23 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          finalVRP.addZ(nominalCoMHeight);
          startVRP.addZ(nominalCoMHeight);
 
-         FramePoint3D nextCornerPoint = dcmCornerPoints.add();
+         FramePoint3D nextCornerPoint = dcmCornerPointPool.add();
+         dcmCornerPoints.add(nextCornerPoint);
          CenterOfMassDynamicsTools.computeDesiredDCMPositionBackwardTime(omega0.getValue(), duration, duration, finalDCM, startVRP, finalVRP, nextCornerPoint);
 
-         Trajectory3D vrpTrajectory = vrpTrajectories.add();
+         LineSegment3D vrpSegment = vrpWaypointPools.add();
+         Trajectory3D vrpTrajectory = vrpTrajectoryPool.add();
+         vrpTrajectories.add(vrpTrajectory);
+         vrpWaypoints.add(vrpSegment);
          vrpTrajectory.setLinear(initialTime, finalTime, startVRP, finalVRP);
+         vrpSegment.set(startVRP, finalVRP);
 
          finalDCM = nextCornerPoint;
       }
 
       Collections.reverse(dcmCornerPoints);
       Collections.reverse(vrpTrajectories);
+      Collections.reverse(vrpWaypoints);
    }
 
    private void computeCoMCornerPoints()
@@ -104,7 +135,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       comCornerPoints.clear();
       comCornerPoints.add().set(initialCoMPosition);
 
-      for (int i = 0; i < dcmCornerPoints.size(); i++)
+      for (int i = 0; i < dcmCornerPoints.size() - 1; i++)
       {
          FramePoint3D initialCoMPosition = comCornerPoints.get(i);
          FramePoint3D initialDCMPosition = dcmCornerPoints.get(i);

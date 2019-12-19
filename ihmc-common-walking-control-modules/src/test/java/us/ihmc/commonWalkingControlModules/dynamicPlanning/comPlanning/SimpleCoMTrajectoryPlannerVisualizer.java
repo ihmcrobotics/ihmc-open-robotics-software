@@ -51,7 +51,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
    private final YoDouble yoTime;
    private final YoDouble timeInPhase;
 
-   private final CoMTrajectoryPlannerInterface planner;
+   private final SimpleCoMTrajectoryPlanner planner;
 
    private List<ContactStateProvider> contactStates;
 
@@ -101,6 +101,8 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       planner = new SimpleCoMTrajectoryPlanner(omega);
       planner.setNominalCoMHeight(nominalHeight);
 
+      planner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
@@ -149,6 +151,7 @@ public class SimpleCoMTrajectoryPlannerVisualizer
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
+      contacts.add(initialContactStateProvider);
 
       double currentTime = initialTransferDuration;
 
