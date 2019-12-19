@@ -41,6 +41,8 @@ public class LQRSphereController implements SphereControllerInterface
       dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
       dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
+      sphereRobot.getScsRobot().setController(this);
+
       lqrMomentumController = new LQRMomentumController();
    }
 
