@@ -8,21 +8,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public class CenterOfMassDynamicsTools
 {
-
-   public static void computeCenterOfMassVelocity(FramePoint3DReadOnly comPosition, FramePoint3DReadOnly dcmPosition, double omega0,
-                                                  FixedFrameVector3DBasics comVelocityToPack)
-   {
-      comVelocityToPack.sub(dcmPosition, comPosition);
-      comVelocityToPack.scale(omega0);
-   }
-
-   public static void computeCenterOfMassAcceleration(FrameVector3DReadOnly comVelocity, FrameVector3DReadOnly dcmVelocity, double omega0,
-                                                      FixedFrameVector3DBasics comAccelerationToPack)
-   {
-      comAccelerationToPack.sub(dcmVelocity, comVelocity);
-      comAccelerationToPack.scale(omega0);
-   }
-
    /**
     * Compute the desired DCM position at a given time, assuming a constant VRP.
     * &xi; (t<sub>1</sub>) = e<sup>&omega; (t<sub>1</sub> - t<sub>0</sub>)</sup>
@@ -192,22 +177,6 @@ public class CenterOfMassDynamicsTools
       double finalCoefficient = time / duration * exponential + sinh * (1.0 / (omega0 * duration) + time / duration - 2.0 / (omega0 * duration) * exponential);
       desiredCoMToPack.scaleAdd(initialCoefficient, initialVRP, desiredCoMToPack);
       desiredCoMToPack.scaleAdd(finalCoefficient, finalVRP, desiredCoMToPack);
-   }
-
-   public static void computeDesiredDCMPositionForwardTime(double omega0, double time, double duration, FramePoint3DReadOnly initialDCM,
-                                                           FramePoint3DReadOnly initialVRPPosition, FrameVector3DReadOnly initialVRPVelocity,
-                                                           FramePoint3DReadOnly finalVRPPosition, FrameVector3DReadOnly finalVRPVelocity,
-                                                           FixedFramePoint3DBasics desiredDCMToPack)
-   {
-      double sigmaT = computeCubicSigma(omega0, time, duration);
-      double sigma0 = computeCubicSigma(omega0, 0.0, duration);
-      double exponential = Math.exp(omega0 * time);
-
-//      desiredDCMToPack.interpolate(initialVRP, initialDCM, exponential);
-//
-//      double linearFactor = (time / duration + 1.0 / (omega0 * duration) * (1.0 - exponential));
-//      desiredDCMToPack.scaleAdd(linearFactor, finalVRP, desiredDCMToPack);
-//      desiredDCMToPack.scaleAdd(-linearFactor, initialVRP, desiredDCMToPack);
    }
 
    private static double computeLinearSigma(double omega0, double time, double duration)

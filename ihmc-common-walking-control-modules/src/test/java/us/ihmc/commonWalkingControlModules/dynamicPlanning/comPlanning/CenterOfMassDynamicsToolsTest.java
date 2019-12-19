@@ -128,7 +128,7 @@ public class CenterOfMassDynamicsToolsTest
       for (double time = 0.0; time <= integrationDuration; time += integrationDt)
       {
          CapturePointTools.computeCapturePointVelocity(finalDCM, startVRP, omega, dcmVelocity);
-         CenterOfMassDynamicsTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
+         CapturePointTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
 
          finalDCM.scaleAdd(integrationDt, dcmVelocity, finalDCM);
          finalCoM.scaleAdd(integrationDt, comVelocity, finalCoM);
@@ -308,7 +308,7 @@ public class CenterOfMassDynamicsToolsTest
          desiredVRP.interpolate(startVRP, endVRP, time / totalDuration);
 
          CapturePointTools.computeCapturePointVelocity(finalDCM, desiredVRP, omega, dcmVelocity);
-         CenterOfMassDynamicsTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
+         CapturePointTools.computeCenterOfMassVelocity(finalCoM, finalDCM, omega, comVelocity);
 
          finalDCM.scaleAdd(integrationDt, dcmVelocity, finalDCM);
          finalCoM.scaleAdd(integrationDt, comVelocity, finalCoM);

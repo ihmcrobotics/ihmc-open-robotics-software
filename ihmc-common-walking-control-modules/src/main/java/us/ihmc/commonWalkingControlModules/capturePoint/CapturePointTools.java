@@ -312,4 +312,18 @@ public class CapturePointTools
          return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY);
       }
    }
+
+   public static void computeCenterOfMassVelocity(FramePoint3DReadOnly comPosition, FramePoint3DReadOnly dcmPosition, double omega0,
+                                                  FixedFrameVector3DBasics comVelocityToPack)
+   {
+      comVelocityToPack.sub(dcmPosition, comPosition);
+      comVelocityToPack.scale(omega0);
+   }
+
+   public static void computeCenterOfMassAcceleration(FrameVector3DReadOnly comVelocity, FrameVector3DReadOnly dcmVelocity, double omega0,
+                                                      FixedFrameVector3DBasics comAccelerationToPack)
+   {
+      comAccelerationToPack.sub(dcmVelocity, comVelocity);
+      comAccelerationToPack.scale(omega0);
+   }
 }
