@@ -16,7 +16,10 @@ import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import java.util.List;
 
 /**
- * This LQR controller tracks the DCM dynamics of the robot, using a VRP output. The equations of motion are as follows:
+ * This LQR controller tracks the DCM dynamics of the robot, using a VRP output.
+ * A large part of this work is based on that seen in http://groups.csail.mit.edu/robotics-center/public_papers/Tedrake15.pdf
+ *
+ * The equations of motion are as follows:
  *
  * <p> x = [x<sub>com</sub>; xDot<sub>com</sub>]</p>
  * <p> u = [xDdot<sub>com</sub>] </p>
