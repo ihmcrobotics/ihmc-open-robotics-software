@@ -28,7 +28,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
  *    has only real eigenvalues, with no complex conjugate pairs.
  * </p>
  */
-public class HamiltonianCARESolver implements CARESolver
+public class HamiltonianEigenCARESolver implements CARESolver
 {
    /** The solution of the algebraic Riccati equation. */
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
@@ -106,7 +106,7 @@ public class HamiltonianCARESolver implements CARESolver
       for (int i = 0; i < 2 * n; i++)
       {
          if (eigen.getEigenvalue(i).getImaginary() != 0.0)
-            throw new RuntimeException("The imaginary part of the eigenvalue must be equal to zero.");
+            throw new IllegalArgumentException("The imaginary part of the eigenvalue must be equal to zero.");
 
          if (eigen.getEigenvalue(i).getReal() < 0.0)
          {
