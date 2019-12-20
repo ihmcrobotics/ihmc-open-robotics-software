@@ -10,6 +10,7 @@ import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
@@ -79,7 +80,10 @@ public class AtlasBehaviorUIDemo
          LogTools.info("Creating simulation");
          if (USE_KINEMATIC_SIMULATION)
          {
-            HumanoidKinematicsSimulation.create(createRobotModel(), CREATE_YO_VARIABLE_SERVER, PubSubImplementation.FAST_RTPS);
+            HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+            kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
+            kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YO_VARIABLE_SERVER);
+            HumanoidKinematicsSimulation.create(createRobotModel(), kinematicsSimulationParameters);
          }
          else
          {
