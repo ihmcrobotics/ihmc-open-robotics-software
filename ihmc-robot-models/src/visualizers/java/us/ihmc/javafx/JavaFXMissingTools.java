@@ -1,6 +1,10 @@
 package us.ihmc.javafx;
 
+import com.sun.javafx.application.PlatformImpl;
 import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 
 public class JavaFXMissingTools
 {
@@ -22,4 +26,31 @@ public class JavaFXMissingTools
       }.start();
    }
 
+   public static void runApplication(Application application)
+   {
+      runApplication(application, null);
+   }
+
+   public static void runApplication(Application application, Runnable initialize)
+   {
+      Runnable runnable = () ->
+      {
+         try
+         {
+            application.start(new Stage());
+            if (initialize != null)
+               initialize.run();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      };
+
+      PlatformImpl.startup(() ->
+                           {
+                              Platform.runLater(runnable);
+                           });
+      PlatformImpl.setImplicitExit(false);
+   }
 }
