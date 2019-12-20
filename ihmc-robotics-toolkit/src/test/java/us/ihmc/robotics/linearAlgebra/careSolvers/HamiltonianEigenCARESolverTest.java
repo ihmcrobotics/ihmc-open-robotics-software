@@ -1,10 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-public class HamiltonianCARESolverTest extends CARESolverTest
+public class HamiltonianEigenCARESolverTest extends CARESolverTest
 {
    @Override
    protected CARESolver getSolver()
    {
-      return new HamiltonianCARESolver();
+      return new HamiltonianEigenCARESolver();
    }
 }

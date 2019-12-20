@@ -10,13 +10,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianEigenCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianSchurCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.List;
 
 /**
- * This LQR controller tracks the DCM dynamics of the robot, using a VRP output.
+ * This LQR controller tracks the CoM dynamics of the robot, using a VRP output.
  * A large part of this work is based on that seen in http://groups.csail.mit.edu/robotics-center/public_papers/Tedrake15.pdf
  *
  * The equations of motion are as follows:
@@ -31,38 +33,38 @@ import java.util.List;
  */
 public class LQRMomentumController
 {
-   private static final double omega = 3.0;
-   private static final double defaultVrpTrackingWeight = 10.0;
-   private static final double defaultMomentumRateWeight = 1.0;
+   static final double omega = 1.0;
+   static final double defaultVrpTrackingWeight = 1.0;
+   static final double defaultMomentumRateWeight = 1.0;
 
-   private final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F R = new DenseMatrix64F(3, 3);
 
    final DenseMatrix64F A = new DenseMatrix64F(6, 6);
    final DenseMatrix64F AInverse = new DenseMatrix64F(6, 6);
    final DenseMatrix64F B = new DenseMatrix64F(6, 3);
    final DenseMatrix64F C = new DenseMatrix64F(3, 6);
-   private final DenseMatrix64F D = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F D = new DenseMatrix64F(3, 3);
 
    private final DenseMatrix64F A2 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F A2Inverse = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F B2 = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F q2 = new DenseMatrix64F(3, 1);
    private double q3;
 
-   private final DenseMatrix64F R1 = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F R1 = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F r2 = new DenseMatrix64F(3, 1);
 
-   private final DenseMatrix64F N = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
+   final DenseMatrix64F N = new DenseMatrix64F(6, 3);
+   final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
 
    private final DenseMatrix64F NB = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F rs = new DenseMatrix64F(3, 1);
 
-   private final DenseMatrix64F S1 = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F S1 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F s2 = new DenseMatrix64F(3, 1);
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
@@ -70,6 +72,10 @@ public class LQRMomentumController
    private final DenseMatrix64F K1 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F u = new DenseMatrix64F(3, 1);
+
+   final DenseMatrix64F QRiccati = new DenseMatrix64F(3, 3);
+   final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
+
 
    private final RecyclingArrayList<DenseMatrix64F> alpha = new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1));
    private final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
@@ -82,7 +88,7 @@ public class LQRMomentumController
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
-   private final HamiltonianCARESolver careSolver = new HamiltonianCARESolver();
+   private final CARESolver careSolver = new HamiltonianSchurCARESolver();
 
    public LQRMomentumController()
    {
@@ -94,7 +100,7 @@ public class LQRMomentumController
       MatrixTools.setMatrixBlock(A, 0, 3, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(B, 3, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(C, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, -MathTools.square(omega));
+      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega));
 
       CommonOps.invert(A, AInverse);
       NativeCommonOps.multQuad(C, Q, Q1);
@@ -121,7 +127,7 @@ public class LQRMomentumController
       gamma.clear();
    }
 
-   private void computeS1()
+   void computeS1()
    {
       /*
         A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
@@ -131,16 +137,21 @@ public class LQRMomentumController
         A' P + P A - P B R^-1 B' P + Q = 0
         then we can rewrite this as
                      S1 = P
-                      A = A
+         A - B R1inv N' = A
                       B = B
         Q1 - N R1inv N' = Q
       */
-      DenseMatrix64F Qalt = new DenseMatrix64F(Q1);
+      QRiccati.set(Q1);
       tempMatrix.reshape(6, 6);
       NativeCommonOps.multQuad(NTranspose, R1Inverse, tempMatrix);
-      CommonOps.addEquals(Qalt, -1.0, tempMatrix);
+      CommonOps.addEquals(QRiccati, -1.0, tempMatrix);
 
-      careSolver.setMatrices(A, B, Qalt, R);
+      ARiccati.set(A);
+      tempMatrix.reshape(3, 6);
+      CommonOps.mult(R1Inverse, NTranspose, tempMatrix);
+      CommonOps.multAdd(-1.0, B, tempMatrix, ARiccati);
+
+      careSolver.setMatrices(ARiccati, B, QRiccati, R);
       S1.set(careSolver.computeP());
    }
 

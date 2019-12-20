@@ -19,7 +19,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
  * and B is the control matrix.</p>
  *
  * <p>
- *    The solution is found by first finding a solution using the Hamiltonian using the solver {@link us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianCARESolver}.
+ *    The solution is found by first finding a solution using the Hamiltonian using the solver {@link HamiltonianEigenCARESolver}.
  *    This is then used as initial guess for the Newton iterative algorithm outlined here: http://et.engr.iupui.edu//~skoskie/ECE684/Riccati_algorithms.pdf.
  * </p>
   * <p>
@@ -55,7 +55,7 @@ public class NewtonCARESolver implements CARESolver
 
    private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
-   private final HamiltonianCARESolver hamiltonianCARESolver = new HamiltonianCARESolver();
+   private final HamiltonianEigenCARESolver hamiltonianCARESolver = new HamiltonianEigenCARESolver();
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
 
    private int n;
@@ -169,32 +169,12 @@ public class NewtonCARESolver implements CARESolver
          DenseMatrix64F Pk = lyapunovSolver.getX();
 
          // error = norm(P - P1);
-         error = distance(P, Pk);
+         error = MatrixToolsLocal.distance(P, Pk);
 
          P.set(Pk);
          i++;
          if (i > maxIterations)
             throw new RuntimeException("Convergence failed.");
       }
-   }
-
-   /** Computes the distance between two matrices, which is defined as the L2 norm of their difference. */
-   private static double distance(DenseMatrix64F A, DenseMatrix64F B)
-   {
-      MatrixChecking.assertRowDimensionsMatch(A, B);
-      MatrixChecking.assertColDimensionsMatch(A, B);
-
-      double norm = 0.0;
-      for (int col = 0; col < A.getNumCols(); col++)
-      {
-         double rowSum = 0.0;
-         for (int row = 0; row < A.getNumRows(); row++)
-         {
-            rowSum += MathTools.square(A.get(row, col) - B.get(row, col));
-         }
-         norm += MathTools.square(rowSum);
-      }
-
-      return norm;
    }
 }
