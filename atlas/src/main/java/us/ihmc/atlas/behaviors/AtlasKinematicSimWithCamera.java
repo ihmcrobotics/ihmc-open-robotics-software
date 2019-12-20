@@ -7,6 +7,7 @@ import us.ihmc.atlas.behaviors.scsSensorSimulation.SensorOnlySimulation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -26,7 +27,9 @@ public class AtlasKinematicSimWithCamera
 
    public AtlasKinematicSimWithCamera(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      HumanoidKinematicsSimulation.create(robotModel, false, PubSubImplementation.FAST_RTPS);
+      HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+      kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
+      HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
       scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);

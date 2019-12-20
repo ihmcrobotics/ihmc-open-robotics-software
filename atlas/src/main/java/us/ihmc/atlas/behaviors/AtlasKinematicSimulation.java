@@ -9,11 +9,12 @@ import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasKinematicSimulation
 {
-   public static void create(AtlasRobotModel robotModel, boolean createYoVariableServer, PubSubImplementation pubSubImplementation)
+   public static void create(AtlasRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
       AtlasWalkingControllerParameters walkingControllerParameters = (AtlasWalkingControllerParameters) robotModel.getWalkingControllerParameters();
       walkingControllerParameters.setDoPrepareManipulationForLocomotion(false);
@@ -22,7 +23,7 @@ public class AtlasKinematicSimulation
             new AtlasKinematicSwingTrajectoryParameters(robotModel.getTarget(), robotModel.getJointMap().getModelScale()));
       walkingControllerParameters.setJointPrivilegedConfigurationParameters(
             new AtlasKinematicJointPrivilegedConfigurationParameters(robotModel.getTarget() == RobotTarget.REAL_ROBOT));
-      HumanoidKinematicsSimulation.create(robotModel, createYoVariableServer, pubSubImplementation);
+      HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
    }
 
    static class AtlasKinematicSteppingParameters extends AtlasSteppingParameters
@@ -69,8 +70,9 @@ public class AtlasKinematicSimulation
 
    public static void main(String[] args)
    {
+      HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+      kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
       AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false),
-                                      false,
-                                      PubSubImplementation.FAST_RTPS);
+                                      kinematicsSimulationParameters);
    }
 }

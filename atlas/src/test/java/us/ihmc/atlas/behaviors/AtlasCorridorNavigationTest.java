@@ -13,6 +13,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -55,6 +56,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -82,6 +84,9 @@ import java.util.*;
 public class AtlasCorridorNavigationTest
 {
    private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
+   private static boolean KEEP_VISUALIZATION_UP = VISUALIZE && Boolean.parseBoolean(System.getProperty("keep.visualization.up"));
+   private static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
+   private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private RobotAndMapViewer robotAndMapViewer;
    private PubSubImplementation pubSubMode = PubSubImplementation.INTRAPROCESS;
@@ -96,7 +101,7 @@ public class AtlasCorridorNavigationTest
    @AfterEach
    public void afterEach()
    {
-      if (VISUALIZE) ThreadTools.sleepForever();
+      if (KEEP_VISUALIZATION_UP) ThreadTools.sleepForever();
    }
 
    @Test
@@ -163,14 +168,21 @@ public class AtlasCorridorNavigationTest
       new Thread(() ->
       {
          LogTools.info("Creating simulation");
-         boolean createYoVariableServer = false;
-         AtlasKinematicSimulation.create(createRobotModel(), createYoVariableServer, pubSubMode);
+         boolean createYoVariableServer = true;
+         HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+         kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
+         kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
+         kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
+         AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       }).start();
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
 
       if (VISUALIZE)
       {
+         // option to launch SCS 2
+//         new Thread(() -> JavaFXMissingTools.runApplication(new SessionV))
+
          new Thread(() ->
          {
             LogTools.info("Creating robot and map viewer");
