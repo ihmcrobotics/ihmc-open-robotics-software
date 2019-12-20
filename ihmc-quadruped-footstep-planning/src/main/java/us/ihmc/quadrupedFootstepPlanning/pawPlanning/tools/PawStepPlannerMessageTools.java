@@ -82,7 +82,6 @@ public class PawStepPlannerMessageTools
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
-      packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
       packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

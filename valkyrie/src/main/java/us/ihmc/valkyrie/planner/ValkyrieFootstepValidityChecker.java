@@ -73,7 +73,6 @@ public class ValkyrieFootstepValidityChecker
       }
 
       FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
-      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())
@@ -100,6 +99,12 @@ public class ValkyrieFootstepValidityChecker
          return false;
       }
 
+      if(stanceNode == null)
+      {
+         return true;
+      }
+
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
       candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getOrComputeSnappedNodeTransform(candidateNode));
       stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getOrComputeSnappedNodeTransform(stanceNode));
       stanceFootZUpFrame.update();
@@ -198,7 +203,14 @@ public class ValkyrieFootstepValidityChecker
       if (parameters.getCheckForPathCollisions())
       {
          obstacleBetweenNodesChecker.setPlanarRegions(planarRegionsList);
-         if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+         try
+         {
+            if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+            {
+               return false;
+            }
+         }
+         catch(Exception e)
          {
             return false;
          }

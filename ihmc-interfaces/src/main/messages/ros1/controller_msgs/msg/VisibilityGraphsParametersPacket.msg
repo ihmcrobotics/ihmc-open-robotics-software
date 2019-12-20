@@ -92,9 +92,6 @@ float64 weight_for_inter_region_edge
 # Field default value -11.1
 float64 weight_for_non_preferred_edge
 
-# Field default value -11.1
-float64 cost_for_non_preferred_node
-
 bool return_best_effort_solution
 
 

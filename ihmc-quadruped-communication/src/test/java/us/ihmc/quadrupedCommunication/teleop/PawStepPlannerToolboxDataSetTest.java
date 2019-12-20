@@ -110,7 +110,8 @@ public abstract class PawStepPlannerToolboxDataSetTest
          xGaitSettings = getXGaitSettings();
 
       VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
-      visibilityGraphsParameters.setIncludePreferredExtrusions(true);
+      visibilityGraphsParameters.setIncludePreferredExtrusions(false);
+      visibilityGraphsParameters.setObstacleExtrusionDistance(0.6);
 //      visibilityGraphsParameters.setPerformPostProcessingNodeShifting(true);
 //      visibilityGraphsParameters.setComputeOrientationsToAvoidObstacles(true);
 
@@ -120,6 +121,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
       parameters.setYawWeight(2.0);
       parameters.setMaximumStepYawOutward(0.5);
       parameters.setMaximumStepYawInward(-0.5);
+      parameters.setReturnBestEffortPlan(false);
 
       footstepPlanningModule = new PawPlanningModule(robotName, null, visibilityGraphsParameters, parameters, xGaitSettings,
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
@@ -528,7 +530,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
 
       Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
       double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
-      if (goalPosition.distanceXY(centerPoint) > 3.0 * PawNode.gridSizeXY)
+      if (goalPosition.distanceXY(centerPoint) > 4.0 * PawNode.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
       {

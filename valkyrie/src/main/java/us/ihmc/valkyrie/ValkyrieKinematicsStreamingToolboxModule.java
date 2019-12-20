@@ -24,6 +24,12 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      new ValkyrieKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
+      ValkyrieKinematicsStreamingToolboxModule module = new ValkyrieKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         System.out.println("Shutting down " + ValkyrieKinematicsStreamingToolboxModule.class.getSimpleName());
+         module.closeAndDispose();
+      }));
    }
 }

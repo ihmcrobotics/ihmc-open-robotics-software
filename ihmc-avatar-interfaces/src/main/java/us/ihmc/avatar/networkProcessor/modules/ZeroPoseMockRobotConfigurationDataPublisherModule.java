@@ -78,5 +78,6 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
    public void closeAndDispose()
    {
       running = false;
+      ros2Node.destroy();
    }
 }

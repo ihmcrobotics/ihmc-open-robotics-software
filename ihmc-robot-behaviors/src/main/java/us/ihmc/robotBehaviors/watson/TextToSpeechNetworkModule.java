@@ -29,7 +29,7 @@ public class TextToSpeechNetworkModule implements CloseableAndDisposable
    @Override
    public void closeAndDispose()
    {
-      
+      ros2Node.destroy();
    }
 
    public static void main(String[] args)

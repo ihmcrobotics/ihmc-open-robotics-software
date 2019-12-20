@@ -69,7 +69,7 @@ public class VisibilityGraphsOcclusionTest
    private static final double rayLengthSquared = MathTools.square(5.0);
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 100;
-   private static final double defaultMaxAllowedSolveTime = 2.0;
+   private static final double defaultMaxAllowedSolveTime = 3.0;
    private static final int bodyPathVisualizationResolution = 500;
    private static final double defaultMarchingSpeedInMetersPerTick = 0.50;
    private static final double maximumFlyingDistance = 0.05;

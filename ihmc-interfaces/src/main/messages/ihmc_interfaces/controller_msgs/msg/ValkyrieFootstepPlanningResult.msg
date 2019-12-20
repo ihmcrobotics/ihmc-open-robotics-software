@@ -1,4 +1,0 @@
-int32 plan_id -1
-
-FootstepDataListMessage footstep_data_list
-PlanarRegionsListMessage planar_regions_list

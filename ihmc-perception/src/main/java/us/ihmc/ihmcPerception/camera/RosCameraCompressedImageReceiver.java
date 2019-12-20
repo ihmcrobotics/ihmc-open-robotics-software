@@ -1,27 +1,33 @@
 package us.ihmc.ihmcPerception.camera;
 
+import java.awt.image.BufferedImage;
+
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
-import java.awt.image.BufferedImage;
-
 public class RosCameraCompressedImageReceiver extends RosCameraReceiver
 {
-   public RosCameraCompressedImageReceiver(AvatarRobotCameraParameters cameraParameters, RosMainNode rosMainNode, CameraLogger logger, CameraDataReceiver cameraDataReceiver)
+   private RosCompressedImageSubscriber imageSubscriber;
+   private RosMainNode rosMainNode;
+
+   public RosCameraCompressedImageReceiver(AvatarRobotCameraParameters cameraParameters, RosMainNode rosMainNode, CameraLogger logger,
+                                           CameraDataReceiver cameraDataReceiver)
    {
       super(cameraParameters, rosMainNode, logger, cameraDataReceiver);
    }
 
    @Override
    protected void createImageSubscriber(final RobotSide robotSide, final CameraLogger logger, final CameraDataReceiver cameraDataReceiver,
-         final RosCameraInfoSubscriber imageInfoSubscriber, RosMainNode rosMainNode, AvatarRobotCameraParameters cameraParameters)
+                                        final RosCameraInfoSubscriber imageInfoSubscriber, RosMainNode rosMainNode,
+                                        AvatarRobotCameraParameters cameraParameters)
    {
-      RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
+      this.rosMainNode = rosMainNode;
+      imageSubscriber = new RosCompressedImageSubscriber()
       {
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
@@ -33,13 +39,21 @@ public class RosCameraCompressedImageReceiver extends RosCameraReceiver
             IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
             if (DEBUG)
             {
-               PrintTools.debug(this, "Sending intrinsicParameters");
+               LogTools.debug("Sending intrinsicParameters");
                intrinsicParameters.print();
             }
             cameraDataReceiver.updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
-
          }
       };
-      rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
+      rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriber);
+   }
+
+   public void closeAndDispose()
+   {
+      if (imageSubscriber != null && rosMainNode != null)
+      {
+         rosMainNode.removeSubscriber(imageSubscriber);
+         imageSubscriber = null;
+      }
    }
 }

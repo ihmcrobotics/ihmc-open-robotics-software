@@ -49,10 +49,6 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingStatusMessage.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            this::handleWalkingStatusMessage);
 
-      Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-         shutdown();
-      }, "HumanoidAvatarREAStateUpdater-StopAll"));
-
       ros2Node.spin();
    }
 
