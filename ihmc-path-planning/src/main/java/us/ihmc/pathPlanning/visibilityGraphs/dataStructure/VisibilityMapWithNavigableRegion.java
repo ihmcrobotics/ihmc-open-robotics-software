@@ -4,7 +4,6 @@ import java.util.List;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -23,9 +22,9 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
       this.visibilityMapInWorld = visibilityMapWithNavigableRegion.visibilityMapInWorld;
    }
 
-   public VisibilityMapWithNavigableRegion(PlanarRegion homePlanarRegion)
+   public VisibilityMapWithNavigableRegion(PlanarRegion homePlanarRegion, ClusterInfo clusterInfo)
    {
-      this.navigableRegion = new NavigableRegion(homePlanarRegion);
+      this.navigableRegion = new NavigableRegion(homePlanarRegion, clusterInfo);
    }
 
    public VisibilityMapWithNavigableRegion(NavigableRegion navigableRegion)
@@ -36,21 +35,6 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
    public NavigableRegion getNavigableRegion()
    {
       return navigableRegion;
-   }
-
-   public void setHomeRegionCluster(Cluster homeCluster)
-   {
-      navigableRegion.setHomeRegionCluster(homeCluster);
-   }
-
-   public void addObstacleClusters(Iterable<Cluster> obstacleClusters)
-   {
-      navigableRegion.addObstacleClusters(obstacleClusters);
-   }
-
-   public void addObstacleCluster(Cluster obstacleCluster)
-   {
-      navigableRegion.addObstacleCluster(obstacleCluster);
    }
 
    public PlanarRegion getHomePlanarRegion()
@@ -86,11 +70,6 @@ public class VisibilityMapWithNavigableRegion implements VisibilityMapHolder
    public void transformFromWorldToLocal(Transformable objectToTransformToWorld)
    {
       navigableRegion.transformFromWorldToLocal(objectToTransformToWorld);
-   }
-
-   public List<Point3DReadOnly> getHomeRegionNavigableExtrusionsInWorld()
-   {
-      return navigableRegion.getHomeRegionNavigableExtrusionsInWorld();
    }
 
    @Override

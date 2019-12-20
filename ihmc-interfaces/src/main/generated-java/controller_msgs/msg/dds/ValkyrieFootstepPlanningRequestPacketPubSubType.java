@@ -46,6 +46,10 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -79,14 +83,18 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLeftFootPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartLeftFootPose(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getRightFootPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartRightFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalLeftFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalRightFootPose(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getGoalPoses().size(); ++i0)
+      for(int i0 = 0; i0 < data.getWaypoints().size(); ++i0)
       {
-          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalPoses().get(i0), current_alignment);}
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getWaypoints().get(i0), current_alignment);}
 
       current_alignment += controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType.getCdrSerializedSize(data.getParameters(), current_alignment);
 
@@ -115,11 +123,13 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
    {
       cdr.write_type_2(data.getPlannerRequestId());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getLeftFootPose(), cdr);
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getRightFootPose(), cdr);
-      if(data.getGoalPoses().size() <= 100)
-      cdr.write_type_e(data.getGoalPoses());else
-          throw new RuntimeException("goal_poses field exceeds the maximum length");
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getStartLeftFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getStartRightFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalLeftFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalRightFootPose(), cdr);
+      if(data.getWaypoints().size() <= 100)
+      cdr.write_type_e(data.getWaypoints());else
+          throw new RuntimeException("waypoints field exceeds the maximum length");
 
       controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType.write(data.getParameters(), cdr);
       cdr.write_type_6(data.getGoalDistanceProximity());
@@ -139,9 +149,11 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
    {
       data.setPlannerRequestId(cdr.read_type_2());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getLeftFootPose(), cdr);	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getRightFootPose(), cdr);	
-      cdr.read_type_e(data.getGoalPoses());	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getStartLeftFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getStartRightFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalLeftFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalRightFootPose(), cdr);	
+      cdr.read_type_e(data.getWaypoints());	
       controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType.read(data.getParameters(), cdr);	
       data.setGoalDistanceProximity(cdr.read_type_6());
       	
@@ -161,11 +173,15 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
    public final void serialize(controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
-      ser.write_type_a("left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootPose());
+      ser.write_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
-      ser.write_type_a("right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRightFootPose());
+      ser.write_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.write_type_e("goal_poses", data.getGoalPoses());
+      ser.write_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
+
+      ser.write_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
+
+      ser.write_type_e("waypoints", data.getWaypoints());
       ser.write_type_a("parameters", new controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType(), data.getParameters());
 
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
@@ -181,11 +197,15 @@ public class ValkyrieFootstepPlanningRequestPacketPubSubType implements us.ihmc.
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket data)
    {
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
-      ser.read_type_a("left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootPose());
+      ser.read_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
-      ser.read_type_a("right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRightFootPose());
+      ser.read_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.read_type_e("goal_poses", data.getGoalPoses());
+      ser.read_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
+
+      ser.read_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
+
+      ser.read_type_e("waypoints", data.getWaypoints());
       ser.read_type_a("parameters", new controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacketPubSubType(), data.getParameters());
 
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));

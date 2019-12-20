@@ -11,19 +11,23 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.*;
 
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.randomizeAxisAngle;
 import static us.ihmc.robotics.Assert.*;
 import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -32,6 +36,82 @@ public class PlanarRegionToolsTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
+
+   @Test
+   public void testProjectInZToPlanarRegion()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         Point3D randomPointToProject = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
+         PlanarRegion randomRegion = new PlanarRegion(EuclidCoreRandomTools.nextRigidBodyTransform(random), new ArrayList<>());
+
+         Point3DReadOnly projectedRandomPoint = PlanarRegionTools.projectInZToPlanarRegion(randomPointToProject, randomRegion);
+
+         Vector3D surfaceNormalInWorld = randomRegion.getNormal();
+
+         RigidBodyTransformReadOnly transformToWorld = randomRegion.getTransformToWorld();
+
+         Point3D planarRegionReferencePointInWorld = new Point3D(0.0, 0.0, 0.0);
+         transformToWorld.transform(planarRegionReferencePointInWorld);
+
+         Vector3DReadOnly verticalLine = new Vector3D(0.0, 0.0, 1.0);
+
+         Point3D expectedProjectedPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planarRegionReferencePointInWorld, surfaceNormalInWorld,
+                                                                                                  randomPointToProject, verticalLine);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedProjectedPoint, projectedRandomPoint, 1e-8);
+      }
+   }
+
+   @Test
+   public void testAverageCentroid2DInLocal()
+   {
+      ConvexPolygon2D bigSquare = new ConvexPolygon2D();
+      bigSquare.addVertex(10.0, 10.0);
+      bigSquare.addVertex(10.0, 0.0);
+      bigSquare.addVertex(-10.0, 0.0);
+      bigSquare.addVertex(-10.0, 10.0);
+      bigSquare.update();
+
+      ConvexPolygon2D smallSquare = new ConvexPolygon2D();
+      smallSquare.addVertex(5.0, -5.0);
+      smallSquare.addVertex(5.0, 0.0);
+      smallSquare.addVertex(-5.0, 0.0);
+      smallSquare.addVertex(-5.0, -5.0);
+      smallSquare.update();
+
+      List<ConvexPolygon2D> squares = new ArrayList<>();
+      squares.add(smallSquare);
+      squares.add(bigSquare);
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), squares);
+
+      double totalArea = bigSquare.getArea() + smallSquare.getArea();
+      assertEquals(totalArea, PlanarRegionTools.computePlanarRegionArea(planarRegion), EPSILON);
+
+      Point2D expectedCentroid = new Point2D(bigSquare.getCentroid());
+      expectedCentroid.scale(bigSquare.getArea() / totalArea);
+
+      expectedCentroid.scaleAdd(smallSquare.getArea() / totalArea, smallSquare.getCentroid(), expectedCentroid);
+
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(expectedCentroid, PlanarRegionTools.getCentroid2DInLocal(planarRegion), EPSILON);
+   }
+
+   @Test
+   public void isPointInsidePlanarRegion()
+   {
+      List<Point2DReadOnly> vertices = new ArrayList<>();
+      vertices.add(new Point2D(0.0, 0.0));
+      vertices.add(new Point2D(0.0, 1.0));
+      vertices.add(new Point2D(1.0, 1.0));
+      vertices.add(new Point2D(1.0, 0.0));
+      ConvexPolygon2D convexPolygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertices));
+      RigidBodyTransform transformB = new RigidBodyTransform();
+      PlanarRegion regionB = new PlanarRegion(transformB, convexPolygonB);
+
+      vertices.forEach(point -> assertTrue(regionB.isPointInside(point)));
+      vertices.forEach(point -> assertTrue(regionB.isPointInWorld2DInside(new Point3D(point))));
+   }
 
    @Test
    public void testComputeMinHeightOfRegionAAboveRegionB()
@@ -824,6 +904,218 @@ public class PlanarRegionToolsTest
       PlanarRegion regionA = new PlanarRegion(transformToWorld, polygonA);
       BoundingBox2D boundingBox2D = PlanarRegionTools.getLocalBoundingBox2DInLocal(regionA);
       assertEquals(boundingBox2D, new BoundingBox2D(2.0, 3.0, 4.1, 5.1));
+   }
+
+   @Test
+   public void testSimpleConcaveHull()
+   {
+      ConvexPolygon2D bigSquare = new ConvexPolygon2D();
+      bigSquare.addVertex(10.0, 10.0);
+      bigSquare.addVertex(10.0, 0.0);
+      bigSquare.addVertex(-10.0, 0.0);
+      bigSquare.addVertex(-10.0, 10.0);
+      bigSquare.update();
+
+      ConvexPolygon2D smallSquare = new ConvexPolygon2D();
+      smallSquare.addVertex(5.0, -5.0);
+      smallSquare.addVertex(5.0, 0.0);
+      smallSquare.addVertex(-5.0, 0.0);
+      smallSquare.addVertex(-5.0, -5.0);
+      smallSquare.update();
+
+      ConvexPolygon2D convexHull = new ConvexPolygon2D();
+      bigSquare.getPolygonVerticesView().forEach(convexHull::addVertex);
+      smallSquare.getPolygonVerticesView().forEach(convexHull::addVertex);
+      convexHull.update();
+
+      List<Point2D> concaveHull = new ArrayList<>();
+      concaveHull.add(new Point2D(10.0, 10.0));
+      concaveHull.add(new Point2D(10.0, 0.0));
+      concaveHull.add(new Point2D(5.0, 0.0));
+      concaveHull.add(new Point2D(5.0, -5.0));
+      concaveHull.add(new Point2D(-5.0, -5.0));
+      concaveHull.add(new Point2D(-5.0, 0.0));
+      concaveHull.add(new Point2D(-10.0, 0.0));
+      concaveHull.add(new Point2D(-10.0, 10.0));
+
+      List<Point2D> emptyZone1OfConvexHull = new ArrayList<>();
+      emptyZone1OfConvexHull.add(new Point2D(10.0, 0.0));
+      emptyZone1OfConvexHull.add(new Point2D(5.0, -5.0));
+      emptyZone1OfConvexHull.add(new Point2D(5.0, 0.0));
+
+      List<Point2D> emptyZone2OfConvexHull = new ArrayList<>();
+      emptyZone2OfConvexHull.add(new Point2D(-10.0, 0.0));
+      emptyZone2OfConvexHull.add(new Point2D(-5.0, 0.0));
+      emptyZone2OfConvexHull.add(new Point2D(-5.0, -5.0));
+      ConvexPolygon2D emptyZone2Hull = new ConvexPolygon2D();
+      emptyZone2OfConvexHull.forEach(emptyZone2Hull::addVertex);
+      emptyZone2Hull.update();
+
+
+      // test some easy points
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(5.0, 0.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(-2.5, 0.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D()));
+
+      // test some edge points, which are the vertices
+      concaveHull.forEach(point -> assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, point)));
+      // check the midpoints of each edge
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(0.0, 10.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(10.0, 5.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(7.5, 0.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(5.0, -2.5)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(0.0, -5.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(-5.0, -2.5)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(-7.5, 0.0)));
+      assertTrue(PlanarRegionTools.isPointInsideConcaveHull(concaveHull, new Point2D(-10.0, 5.0)));
+
+      // test a whole bunch of interior points
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < ITERATIONS; iter++)
+      {
+         String message = "Iter " + iter;
+         Point2DReadOnly pointInBigSquare = getRandomInteriorPoint(random, bigSquare);
+         Point2DReadOnly pointInSmallSquare = getRandomInteriorPoint(random, smallSquare);
+         Point2DReadOnly pointInEmptyZone1 = getRandomInteriorPoint(random, emptyZone1OfConvexHull);
+         Point2DReadOnly pointInEmptyZone2 = getRandomInteriorPoint(random, emptyZone2Hull.getPolygonVerticesView());
+
+         assertTrue(message, PlanarRegionTools.isPointInsidePolygon(bigSquare.getPolygonVerticesView(), pointInBigSquare));
+         assertTrue(PlanarRegionTools.isPointInsidePolygon(smallSquare.getPolygonVerticesView(), pointInSmallSquare));
+         assertTrue(PlanarRegionTools.isPointInsidePolygon(emptyZone1OfConvexHull, pointInEmptyZone1));
+         assertTrue(PlanarRegionTools.isPointInsidePolygon(emptyZone2OfConvexHull, pointInEmptyZone2));
+
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(bigSquare.getPolygonVerticesView(), pointInBigSquare));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(smallSquare.getPolygonVerticesView(), pointInSmallSquare));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(emptyZone1OfConvexHull, pointInEmptyZone1));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(emptyZone2OfConvexHull, pointInEmptyZone2));
+
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(convexHull.getPolygonVerticesView(), pointInBigSquare));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(convexHull.getPolygonVerticesView(), pointInSmallSquare));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(convexHull.getPolygonVerticesView(), pointInEmptyZone1));
+         assertTrue(PlanarRegionTools.isPointInsideConcaveHull(convexHull.getPolygonVerticesView(), pointInEmptyZone2));
+
+         assertTrue(message, PlanarRegionTools.isPointInsideConcaveHull(concaveHull, pointInBigSquare));
+         assertTrue(message, PlanarRegionTools.isPointInsideConcaveHull(concaveHull, pointInSmallSquare));
+         assertFalse(message, PlanarRegionTools.isPointInsideConcaveHull(concaveHull, pointInEmptyZone1));
+         assertFalse(message, PlanarRegionTools.isPointInsideConcaveHull(concaveHull, pointInEmptyZone2));
+      }
+   }
+
+   @Test
+   public void testRayIntersectsWithEdge()
+   {
+      // slope an intercept formula,
+      double slope = 4.0;
+      double intercept = -1.0;
+      Point2D firstPointOfSegment = new Point2D(0.5, 1.0);
+      Point2D secondPointOfSegment = new Point2D(1.0, 3.0);
+
+      assertEquals(firstPointOfSegment.getY(), firstPointOfSegment.getX() * slope + intercept);
+      assertEquals(secondPointOfSegment.getY(), secondPointOfSegment.getX() * slope + intercept);
+
+      Point2D startPoint = new Point2D(0.25, 0.5);
+      assertFalse(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+      startPoint = new Point2D(2.0, 1.0);
+      assertFalse(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+      startPoint = new Point2D(0.25, 2.0);
+      assertTrue(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+      startPoint = new Point2D(2.0, 2.0);
+      assertFalse(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+      startPoint = new Point2D(0.25, 3.5);
+      assertFalse(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+      startPoint = new Point2D(2.0, 3.5);
+      assertFalse(PlanarRegionTools.rayIntersectsWithEdge(firstPointOfSegment, secondPointOfSegment, startPoint.getX(), startPoint.getY()));
+
+
+
+   }
+
+
+   @Test
+   public void testIsPointInsideConcaveHull()
+   {
+      Random random = new Random(1738L);
+      for (int iterA = 0; iterA < ITERATIONS; iterA++)
+      {
+         ConvexPolygon2D randomPolygon = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 10.0, 20);
+         double perimeter = getPerimeter(randomPolygon);
+         for (int iterB = 0; iterB < ITERATIONS; iterB++)
+         {
+            Point2D randomPoint = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+            assertEquals(randomPolygon.isPointInside(randomPoint), PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), randomPoint));
+
+            Point2DReadOnly interiorPoint = getRandomInteriorPoint(random, randomPolygon);
+            assertTrue(PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), interiorPoint));
+
+            double distanceAlongEdge = ((double) iterB) / ITERATIONS * perimeter;
+            Point2DReadOnly pointAlongPerimeter = getPointAlongEdge(distanceAlongEdge, randomPolygon);
+            assertTrue(randomPolygon.pointIsOnPerimeter(pointAlongPerimeter));
+
+//            assertTrue(PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), pointAlongPerimeter));
+
+         }
+      }
+   }
+
+   private static Point2DReadOnly getRandomInteriorPoint(Random random, ConvexPolygon2DReadOnly polygon)
+   {
+      return getRandomInteriorPoint(random, polygon.getPolygonVerticesView());
+   }
+
+   private static Point2DReadOnly getRandomInteriorPoint(Random random, List<? extends Point2DReadOnly> points)
+   {
+      Point2D point = new Point2D();
+      double summedValue = 0.0;
+      double maxValue = 1.0;
+      for (int i = 0; i < points.size(); i++)
+      {
+         double ratio = RandomNumbers.nextDouble(random, 0.0, maxValue);
+         if (i == points.size() - 1)
+            ratio = maxValue;
+
+         point.scaleAdd(ratio, points.get(i), point);
+         summedValue += ratio;
+         maxValue -= ratio;
+      }
+
+      return point;
+   }
+
+   private static Point2DReadOnly getPointAlongEdge(double distanceAround, ConvexPolygon2DReadOnly polygon)
+   {
+      Point2D point = null;
+      double traveledDistance = 0;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         double length = polygon.getVertex(i).distance(polygon.getNextVertex(i));
+         if (distanceAround - traveledDistance >= length)
+            traveledDistance += length;
+         else
+         {
+            double alpha = (distanceAround - traveledDistance) / length;
+            point = new Point2D();
+            point.interpolate(polygon.getVertex(i), polygon.getNextVertex(i), alpha);
+            break;
+         }
+      }
+
+      return point;
+   }
+
+   private static double getPerimeter(ConvexPolygon2DReadOnly polygon2DReadOnly)
+   {
+      double distance = 0.0;
+      for (int i = 0; i < polygon2DReadOnly.getNumberOfVertices(); i++)
+      {
+         distance += polygon2DReadOnly.getVertex(i).distance(polygon2DReadOnly.getNextVertex(i));
+      }
+
+      return distance;
    }
 
    private static double findFurthestPointFromOrigin(ConvexPolygon2D polygon)

@@ -51,6 +51,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,7 +59,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
-public class IHMCHumanoidBehaviorManager
+public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.01;
 
@@ -71,6 +72,8 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
+
+   private final BehaviorDispatcher<HumanoidBehaviorType> dispatcher;
 
    public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
@@ -117,17 +120,17 @@ public class IHMCHumanoidBehaviorManager
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(robotName,
-                                                                                     yoTime,
-                                                                                     robotDataReceiver,
-                                                                                     desiredBehaviorControlSubscriber,
-                                                                                     desiredBehaviorSubscriber,
-                                                                                     ros2Node,
-                                                                                     yoVariableServer,
-                                                                                     HumanoidBehaviorType.class,
-                                                                                     HumanoidBehaviorType.STOP,
-                                                                                     registry,
-                                                                                     yoGraphicsListRegistry);
+      dispatcher = new BehaviorDispatcher<>(robotName,
+                                            yoTime,
+                                            robotDataReceiver,
+                                            desiredBehaviorControlSubscriber,
+                                            desiredBehaviorSubscriber,
+                                            ros2Node,
+                                            yoVariableServer,
+                                            HumanoidBehaviorType.class,
+                                            HumanoidBehaviorType.STOP,
+                                            registry,
+                                            yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscription(ros2Node,
@@ -520,5 +523,12 @@ public class IHMCHumanoidBehaviorManager
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      dispatcher.closeAndDispose();
+      ros2Node.destroy();
    }
 }

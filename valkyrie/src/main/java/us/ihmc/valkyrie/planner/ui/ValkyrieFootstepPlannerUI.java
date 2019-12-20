@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -14,7 +15,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -32,7 +33,7 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieStandPrepParameters;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
-import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,21 +41,35 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ValkyrieFootstepPlannerUI extends Application
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRosControlController.VERSION);
-   private final ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
-   private final AtomicReference<ValkyrieFootstepPlanningResult> planningResult = new AtomicReference<>();
+   private final ValkyrieAStarFootstepPlanner planner;
+   private final AtomicReference<ValkyrieFootstepPlanningStatus> planningResult = new AtomicReference<>();
 
-   public static final String MODULE_NAME = "valkyrie_footstep_planner";
+   public static final String MODULE_NAME = "valkyrie_footstep_planner_ui";
    private final Ros2Node rosNode = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, MODULE_NAME);
    private final MessageTopicNameGenerator controllerSubNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
    private final MessageTopicNameGenerator controllerPubNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName());
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher = ROS2Tools.createPublisher(rosNode, FootstepDataListMessage.class, controllerSubNameGenerator);
-   private final IHMCROS2Publisher<AbortWalkingMessage> abortPublisher = ROS2Tools.createPublisher(rosNode, AbortWalkingMessage.class, controllerSubNameGenerator);
+   private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher = ROS2Tools.createPublisher(rosNode, PauseWalkingMessage.class, controllerSubNameGenerator);
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
 
    private final PlanarRegionViewer planarRegionViewer = new PlanarRegionViewer();
    private JavaFXRobotVisualizer robotVisualizer = new JavaFXRobotVisualizer(robotModel);
-   private ValkyriePlannerGraphicsViewer graphicsViewer = planner.createGraphicsViewer();
-   private GoalPoseEditor goalPoseEditor;
+   private ValkyriePlannerGraphicsViewer graphicsViewer;
+   private FootstepPoseEditor goalPoseEditor;
+   private FootstepPoseEditor waypointPoseEditor;
+
+   public ValkyrieFootstepPlannerUI()
+   {
+      this.planner = new ValkyrieAStarFootstepPlanner(robotModel);
+      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters());
+   }
+
+   public ValkyrieFootstepPlannerUI(ValkyrieAStarFootstepPlanner planner)
+   {
+      this.planner = planner;
+      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters());
+      planner.addRequestCallback(this::handleRequest);
+   }
 
    @FXML
    private ValkyriePlannerDashboardController valkyriePlannerDashboardController;
@@ -102,17 +117,48 @@ public class ValkyrieFootstepPlannerUI extends Application
                                            valkyriePlannerDashboardController.getGoalY().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalZ().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalYaw().getValueFactory().valueProperty());
+      graphicsViewer.setWaypointPoseProperties(valkyriePlannerDashboardController.getWaypointX().getValueFactory().valueProperty(),
+                                               valkyriePlannerDashboardController.getWaypointY().getValueFactory().valueProperty(),
+                                               valkyriePlannerDashboardController.getWaypointZ().getValueFactory().valueProperty(),
+                                               valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
 
       setupPubSubs();
       primaryStage.setOnCloseRequest(event -> stop());
 
-      goalPoseEditor = new GoalPoseEditor(view3dFactory.getSubScene(),
-                                          valkyriePlannerDashboardController.getGoalX().getValueFactory().valueProperty(),
-                                          valkyriePlannerDashboardController.getGoalY().getValueFactory().valueProperty(),
-                                          valkyriePlannerDashboardController.getGoalZ().getValueFactory().valueProperty(),
-                                          valkyriePlannerDashboardController.getGoalYaw().getValueFactory().valueProperty());
+      goalPoseEditor = new FootstepPoseEditor(view3dFactory.getSubScene(),
+                                              valkyriePlannerDashboardController.getGoalX().getValueFactory().valueProperty(),
+                                              valkyriePlannerDashboardController.getGoalY().getValueFactory().valueProperty(),
+                                              valkyriePlannerDashboardController.getGoalZ().getValueFactory().valueProperty(),
+                                              valkyriePlannerDashboardController.getGoalYaw().getValueFactory().valueProperty());
       goalPoseEditor.start();
-      valkyriePlannerDashboardController.setPlaceGoalCallback(goalPoseEditor::enable);
+      waypointPoseEditor = new FootstepPoseEditor(view3dFactory.getSubScene(),
+                                                  valkyriePlannerDashboardController.getWaypointX().getValueFactory().valueProperty(),
+                                                  valkyriePlannerDashboardController.getWaypointY().getValueFactory().valueProperty(),
+                                                  valkyriePlannerDashboardController.getWaypointZ().getValueFactory().valueProperty(),
+                                                  valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
+      waypointPoseEditor.start();
+
+      valkyriePlannerDashboardController.setGoalPlacementCallback(goalPoseEditor::enable);
+      valkyriePlannerDashboardController.setAddWaypointCallback(() -> {graphicsViewer.addWaypoint(); waypointPoseEditor.enable();});
+      valkyriePlannerDashboardController.setClearWaypointsCallback(graphicsViewer::clearWaypoints);
+
+      planner.addRequestCallback(graphicsViewer::initialize);
+      planner.addRequestCallback(result -> valkyriePlannerDashboardController.setTimerEnabled(true));
+      planner.addIterationCallback(graphicsViewer::processIterationData);
+      planner.addStatusCallback(graphicsViewer::processPlanningStatus);
+      planner.addStatusCallback(planningResult::set);
+      planner.addStatusCallback(valkyriePlannerDashboardController::updatePlanningStatus);
+      planner.addStatusCallback(result ->
+                                {
+                                   if (result.getPlannerStatus() != Status.PLANNING.toByte())
+                                      valkyriePlannerDashboardController.setTimerEnabled(false);
+                                });
+
+      subScene.setOnKeyPressed(keyEvent ->
+                               {
+                                  if (keyEvent.getCode() == KeyCode.ESCAPE)
+                                     pausePublisher.publish(new PauseWalkingMessage());
+                               });
    }
 
    private void setupWithDataSet(DataSetName dataSetName)
@@ -122,25 +168,45 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
-      planarRegionViewer.buildMeshAndMaterialOnThread(planarRegionsList);
-      goalPoseEditor.setPlanarRegions(planarRegionsList);
-      this.planarRegionsList.set(planarRegionsList);
+      setRegions(planarRegionsList);
 
-      if (!dataSet.hasPlannerInput())
+      if (!dataSet.hasPlannerInput() || Double.isNaN(dataSet.getPlannerInput().getGoalYaw()))
          return;
 
-      double height = 0.995;
       PlannerInput plannerInput = dataSet.getPlannerInput();
-      Vector3D rootJointPosition = new Vector3D(plannerInput.getStartPosition());
-      rootJointPosition.addZ(height);
-      Quaternion rootJointOrientation = new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0);
-      ValkyrieStandPrepParameters standPrepParameters = new ValkyrieStandPrepParameters(robotModel.getJointMap());
-      robotVisualizer.submitNewConfiguration(rootJointOrientation, rootJointPosition, standPrepParameters::getSetpoint);
+      Pose3D startPose = new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      Pose3D goalPose = new Pose3D(plannerInput.getGoalPosition(), new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
 
-      valkyriePlannerDashboardController.getGoalX().getValueFactory().setValue(plannerInput.getGoalPosition().getX());
-      valkyriePlannerDashboardController.getGoalY().getValueFactory().setValue(plannerInput.getGoalPosition().getY());
-      valkyriePlannerDashboardController.getGoalZ().getValueFactory().setValue(plannerInput.getGoalPosition().getZ());
-      valkyriePlannerDashboardController.getGoalYaw().getValueFactory().setValue(plannerInput.getGoalYaw());
+      setStartAndGoal(startPose, goalPose);
+   }
+
+   private void handleRequest(ValkyrieFootstepPlanningRequestPacket request)
+   {
+      setRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(request.getPlanarRegionsListMessage()));
+      Pose3D startPose = new Pose3D();
+      Pose3D goalPose = new Pose3D();
+      startPose.interpolate(request.getStartLeftFootPose(), request.getStartRightFootPose(), 0.5);
+      goalPose.interpolate(request.getGoalLeftFootPose(), request.getGoalRightFootPose(), 0.5);
+      setStartAndGoal(startPose, goalPose);
+   }
+
+   private void setRegions(PlanarRegionsList planarRegionsList)
+   {
+      planarRegionViewer.buildMeshAndMaterialOnThread(planarRegionsList);
+      goalPoseEditor.setPlanarRegions(planarRegionsList);
+      waypointPoseEditor.setPlanarRegions(planarRegionsList);
+      this.planarRegionsList.set(planarRegionsList);
+   }
+
+   private void setStartAndGoal(Pose3D startPose, Pose3D goalPose)
+   {
+      double xOffset = -0.0357;
+      double height = 0.9902;
+      startPose.appendTranslation(xOffset, 0.0, height);
+      ValkyrieStandPrepParameters standPrepParameters = new ValkyrieStandPrepParameters(robotModel.getJointMap());
+      robotVisualizer.submitNewConfiguration(startPose.getOrientation(), startPose.getPosition(), standPrepParameters::getSetpoint);
+      valkyriePlannerDashboardController.setGoalPose(goalPose.getPosition(), goalPose.getYaw());
+      graphicsViewer.clearWaypoints();
    }
 
    private void setupPubSubs()
@@ -155,16 +221,17 @@ public class ValkyrieFootstepPlannerUI extends Application
                                               this.planarRegionsList.set(planarRegionsList);
                                               planarRegionViewer.buildMeshAndMaterialOnThread(planarRegionsList);
                                               goalPoseEditor.setPlanarRegions(planarRegionsList);
+                                              waypointPoseEditor.setPlanarRegions(planarRegionsList);
                                            });
       ROS2Tools.createCallbackSubscription(rosNode, WalkingStatusMessage.class, controllerPubNameGenerator, s ->
       {
          WalkingStatus walkingStatus = WalkingStatus.fromByte(s.takeNextData().getWalkingStatus());
-         if(walkingStatus == WalkingStatus.COMPLETED || walkingStatus == WalkingStatus.ABORT_REQUESTED || walkingStatus == WalkingStatus.PAUSED)
+         if(walkingStatus == WalkingStatus.COMPLETED || walkingStatus == WalkingStatus.PAUSED)
             graphicsViewer.reset();
       });
 
       valkyriePlannerDashboardController.setSendPlanningResultCallback(() -> footstepPublisher.publish(planningResult.get().getFootstepDataList()));
-      valkyriePlannerDashboardController.setStopWalkingCallback(() -> abortPublisher.publish(new AbortWalkingMessage()));
+      valkyriePlannerDashboardController.setStopWalkingCallback(() -> pausePublisher.publish(new PauseWalkingMessage()));
    }
 
    public void stop()
@@ -172,29 +239,31 @@ public class ValkyrieFootstepPlannerUI extends Application
       planarRegionViewer.stop();
       robotVisualizer.stop();
       graphicsViewer.stop();
+      planner.closeAndDispose();
    }
 
    private void submitPlanningRequest()
    {
       ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
-      requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList.get()));
+
       requestPacket.setTimeout(valkyriePlannerDashboardController.getTimeout());
       requestPacket.setAssumeFlatGround(false);
       planner.getParameters().setPacket(requestPacket.getParameters());
+      if(planarRegionsList.get() != null)
+         requestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList.get()));
 
       robotVisualizer.getFullRobotModel().updateFrames();
-      requestPacket.getLeftFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      requestPacket.getRightFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-      requestPacket.getGoalPoses()
-                   .add()
-                   .set(valkyriePlannerDashboardController.getGoalX().getValue(),
-                        valkyriePlannerDashboardController.getGoalY().getValue(),
-                        valkyriePlannerDashboardController.getGoalZ().getValue(),
-                        valkyriePlannerDashboardController.getGoalYaw().getValue(),
-                        0.0,
-                        0.0);
-      planningResult.set(planner.handleRequestPacket(requestPacket));
-      valkyriePlannerDashboardController.onPlannerCompleted();
+      requestPacket.getStartLeftFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      requestPacket.getStartRightFootPose().set(robotVisualizer.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+
+      requestPacket.getGoalLeftFootPose().set(valkyriePlannerDashboardController.getGoalPose());
+      requestPacket.getGoalLeftFootPose().appendTranslation(0.0, 0.5 * planner.getParameters().getIdealFootstepWidth(), 0.0);
+      requestPacket.getGoalRightFootPose().set(valkyriePlannerDashboardController.getGoalPose());
+      requestPacket.getGoalRightFootPose().appendTranslation(0.0, - 0.5 * planner.getParameters().getIdealFootstepWidth(), 0.0);
+
+      graphicsViewer.packWaypoints(requestPacket);
+
+      planner.handleRequestPacket(requestPacket);
    }
 
    public static void main(String[] args)

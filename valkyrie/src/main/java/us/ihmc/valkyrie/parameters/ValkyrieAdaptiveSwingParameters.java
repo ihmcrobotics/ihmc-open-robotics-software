@@ -57,7 +57,7 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
    @Override
    public double getMinimumStepTranslationForMaximumSwingTime()
    {
-      return 0.6;
+      return 0.75;
    }
 
    @Override
@@ -76,13 +76,15 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
     * Parameter for calculating custom waypoint proportions
     */
 
-   @Override public double getFootStubClearance()
+   @Override 
+   public double getFootStubClearance()
    {
-      return 0.06;
+      return 0.09;
    }
 
-   @Override public double getWaypointProportionShiftForStubAvoidance()
+   @Override 
+   public double getWaypointProportionShiftForStubAvoidance()
    {
-      return 0.1;
+      return 0.13;
    }
 }

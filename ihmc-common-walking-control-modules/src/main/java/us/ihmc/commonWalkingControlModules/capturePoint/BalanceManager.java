@@ -402,7 +402,7 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
