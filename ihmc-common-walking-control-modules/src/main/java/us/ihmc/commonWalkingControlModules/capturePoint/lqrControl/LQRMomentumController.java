@@ -11,8 +11,7 @@ import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianEigenCARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianSchurCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.HamiltonianIterativeSchurCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.List;
@@ -88,7 +87,7 @@ public class LQRMomentumController
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
-   private final CARESolver careSolver = new HamiltonianSchurCARESolver();
+   private final CARESolver careSolver = new HamiltonianIterativeSchurCARESolver();
 
    public LQRMomentumController()
    {

@@ -13,7 +13,7 @@ import org.ejml.ops.CommonOps;
  * It is based on the QR algorithm, as described in
  * http://people.inf.ethz.ch/arbenz/ewp/Lnotes/chapter4.pdf
  */
-public class QRBasedSchurDecomposition implements DecompositionInterface<DenseMatrix64F>
+public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix64F>
 {
    private final QRDecomposition<DenseMatrix64F> qrDecomposition;
    private final DenseMatrix64F T;

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
@@ -29,7 +28,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
  *    has only real eigenvalues, with no complex conjugate pairs.
  * </p>
  */
-public class HamiltonianSchurCARESolver implements CARESolver
+public class HamiltonianDirectSchurCARESolver implements CARESolver
 {
    /** The solution of the algebraic Riccati equation. */
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
