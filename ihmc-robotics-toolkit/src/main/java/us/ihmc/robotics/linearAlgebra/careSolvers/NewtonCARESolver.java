@@ -116,7 +116,6 @@ public class NewtonCARESolver implements CARESolver
       Rinv.reshape(m, m);
       NativeCommonOps.invert(R, Rinv);
 
-      // TODO change the initial approximation of P to not require the hamiltonian.
       hamiltonianCARESolver.setMatrices(A, B, Q, R, false);
       hamiltonianCARESolver.computeP();
 

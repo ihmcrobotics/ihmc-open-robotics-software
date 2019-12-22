@@ -1,11 +1,10 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers;
+package us.ihmc.robotics.linearAlgebra.careSolvers.schur;
 
-import org.apache.commons.math3.analysis.interpolation.UnivariatePeriodicInterpolator;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.DecompositionInterface;
 import org.ejml.interfaces.decomposition.QRDecomposition;
 import org.ejml.ops.CommonOps;
+import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 /**
  * This algorithm decomposes the A matrix into its Schur components, formed as
@@ -25,7 +24,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
    private final DenseMatrix64F R;
 
    private int maxIterations = 1000000;
-   private double epsilon = 1e-10;
+   private double epsilon = 1e-6;
 
    public QRBasedSchurDecomposition(int size)
    {

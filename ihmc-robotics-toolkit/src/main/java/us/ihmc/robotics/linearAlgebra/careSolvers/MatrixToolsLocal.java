@@ -6,7 +6,7 @@ import us.ihmc.commons.MathTools;
 public class MatrixToolsLocal
 {
    /** Computes the distance between two matrices, which is defined as the L2 norm of their difference. */
-   static double distance(DenseMatrix64F A, DenseMatrix64F B)
+   public static double distance(DenseMatrix64F A, DenseMatrix64F B)
    {
       MatrixChecking.assertRowDimensionsMatch(A, B);
       MatrixChecking.assertColDimensionsMatch(A, B);

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers;
+package us.ihmc.robotics.linearAlgebra.careSolvers.schur;
 
 import org.ejml.data.Matrix;
 import org.ejml.interfaces.decomposition.DecompositionInterface;

@@ -57,14 +57,11 @@ public interface CARESolver
 
    static boolean riccatiEquationIsZero(DenseMatrix64F A, DenseMatrix64F M, DenseMatrix64F Q, DenseMatrix64F P, DenseMatrix64F PDotToPack, double epsilon)
    {
-      NativeCommonOps.multQuad(P, M, PDotToPack);
-      CommonOps.multAddTransA(A, P, PDotToPack);
-      CommonOps.multAdd(P, A, PDotToPack);
-      CommonOps.addEquals(PDotToPack, Q);
+      CARETools.computeRiccatiRate(P, A, Q, M, PDotToPack);
 
       for (int i = 0; i < Q.getNumElements(); i++)
       {
-         if (!MathTools.epsilonEquals(Q.get(i), 0.0, epsilon))
+         if (!MathTools.epsilonEquals(PDotToPack.get(i), 0.0, epsilon))
             return false;
       }
 
