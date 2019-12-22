@@ -6,6 +6,8 @@ public class SchurDecompositionFactory
 {
    public static SchurDecomposition<DenseMatrix64F> qrBased(int size)
    {
-      return new QRBasedSchurDecomposition(size);
+      QRBasedSchurDecomposition decomposition = new QRBasedSchurDecomposition(size);
+      decomposition.setConvergenceEpsilon(1e-6);
+      return decomposition;
    }
 }

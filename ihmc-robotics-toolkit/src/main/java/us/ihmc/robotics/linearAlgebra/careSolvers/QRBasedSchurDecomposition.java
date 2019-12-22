@@ -24,7 +24,7 @@ public class QRBasedSchurDecomposition implements SchurDecomposition<DenseMatrix
    private final DenseMatrix64F Q;
    private final DenseMatrix64F R;
 
-   private int maxIterations = Integer.MAX_VALUE;
+   private int maxIterations = 1000000;
    private double epsilon = 1e-10;
 
    public QRBasedSchurDecomposition(int size)
