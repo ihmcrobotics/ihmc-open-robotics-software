@@ -1,35 +1,25 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
+import org.apache.commons.math3.linear.FieldLUDecomposition;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.robotics.linearAlgebra.careSolvers.*;
+import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecomposition;
+import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecompositionFactory;
 
 /**
- * This solver computes the solution to the algebraic Riccati equation
- *
  * <p>
- * A' P + P A - P B R^-1 B' P + Q = 0
- * </p>
- * <p> which can also be written as</p>
- * <p>A' P + P A - P M P + Q = 0</p>*
- * <p>where P is the unknown to be solved for, R is symmetric positive definite, Q is symmetric positive semi-definite, A is the state transition matrix,
- * and B is the control matrix.</p>
- *
- * <p>
- *    The solution is found by computing the Hamiltonian and performing an ordered eigen value decomposition, as outlined in
- *    https://en.wikipedia.org/wiki/Algebraic_Riccati_equation and https://stanford.edu/class/ee363/lectures/clqr.pdf. This assumes that the Hamiltonian
- *    has only real eigenvalues, with no complex conjugate pairs.
+ *   Algorithm taken from
+ *   Laub, "A Schur Method for Solving Algebraic Riccati Equations."
+ *   http://dspace.mit.edu/bitstream/handle/1721.1/1301/R-0859-05666488.pdf
  * </p>
  */
-public class HamiltonianSchurCARESolver implements CARESolver
+public class SchurCARESolver implements CARESolver
 {
    /** The solution of the algebraic Riccati equation. */
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
@@ -88,11 +78,11 @@ public class HamiltonianSchurCARESolver implements CARESolver
    /** {@inheritDoc} */
    public DenseMatrix64F computeP()
    {
-      // TODO need to reorder so that the negative eigen values precede nonnegative eigen values
       // defining Hamiltonian
       CARETools.assembleHamiltonian(A, ATranspose, Q, M, H);
 
       schur.decompose(H);
+      // FIXME need to reorder so that the negative eigen values precede nonnegative eigen values
       DenseMatrix64F U = schur.getU(null);
       DenseMatrix64F T = schur.getT(null);
 
@@ -103,6 +93,7 @@ public class HamiltonianSchurCARESolver implements CARESolver
       MatrixTools.setMatrixBlock(U11, 0 ,0, U, 0, 0, n, n, 1.0);
       MatrixTools.setMatrixBlock(U21, 0 ,0, U, n, 0, n, n, 1.0);
 
+      // TODO solve this with a solver.
       NativeCommonOps.invert(U11, U11Inv);
 
       P.reshape(n, n);

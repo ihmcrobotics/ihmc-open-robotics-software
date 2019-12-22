@@ -15,6 +15,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Random;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class CARESolverTest
@@ -65,6 +66,7 @@ public abstract class CARESolverTest
       EjmlUnitTests.assertEquals(QInput, Q, epsilon);
       EjmlUnitTests.assertEquals(RInput, R, epsilon);
 
+      assertIsSymmetric(solver.getP());
       assertSolutionIsValid(AInput, BInput, QInput, RInput, solver.getP());
    }
 
@@ -99,8 +101,11 @@ public abstract class CARESolverTest
       PExpected.set(1, 0, 1.8216);
       PExpected.set(1, 1, 8.8188);
 
-      assertSolutionIsValid(A, B, Q, R, solver.getP());
-      EjmlUnitTests.assertEquals(PExpected, solver.getP(), 1e-4);
+      DenseMatrix64F P = solver.getP();
+
+//      assertIsSymmetric(P);
+      assertSolutionIsValid(A, B, Q, R, P);
+      EjmlUnitTests.assertEquals(PExpected, P, 1e-4);
    }
 
    @Test
@@ -137,7 +142,6 @@ public abstract class CARESolverTest
       solver.setMatrices(A, B, Q, R);
       solver.computeP();
 
-      DenseMatrix64F PDot = new DenseMatrix64F(n, n);
       DenseMatrix64F RInverse = new DenseMatrix64F(m, m);
       DenseMatrix64F BTranspose = new DenseMatrix64F(m, n);
       DenseMatrix64F M = new DenseMatrix64F(n, n);
@@ -146,35 +150,32 @@ public abstract class CARESolverTest
       CommonOps.transpose(B, BTranspose);
       NativeCommonOps.multQuad(BTranspose, RInverse, M);
 
-      assertTrue(CARESolver.riccatiEquationIsZero(A, M, Q, solver.getP(), PDot, epsilon));
+//      assertIsSymmetric(solver.getP());
       assertSolutionIsValid(A, B, Q, R, solver.getP());
    }
 
+   private static void assertIsSymmetric(DenseMatrix64F A)
+   {
+      for (int row = 0; row < A.getNumRows(); row++)
+      {
+         for (int col = 0; col < A.getNumCols(); col++)
+         {
+            assertEquals("Not symmetric!", A.get(row, col), A.get(col, row), epsilon);
+         }
+      }
+   }
    private static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P)
    {
-      // FIXME IS THIS CORRECT?
       int n = A.getNumRows();
       int m = B.getNumCols();
       DenseMatrix64F PDot = new DenseMatrix64F(n, n);
-      DenseMatrix64F PDotOther = new DenseMatrix64F(n, n);
-      DenseMatrix64F PDotExpected = new DenseMatrix64F(n, n);
-      CommonOps.multTransA(A, P, PDot);
-      CommonOps.multAdd(P, A, PDot);
-
       DenseMatrix64F M = new DenseMatrix64F(m, m);
       DenseMatrix64F BTranspose = new DenseMatrix64F(m, n);
-      DenseMatrix64F RInv = new DenseMatrix64F(m, m);
-      NativeCommonOps.invert(R, RInv);
       CommonOps.transpose(B, BTranspose);
-      NativeCommonOps.multQuad(BTranspose, RInv, M);
-      NativeCommonOps.multQuad(P, M, PDot);
 
-      CommonOps.multAddTransA(-1.0, A, P, PDot);
-      CommonOps.multAdd(-1.0, P, A, PDot);
-      CommonOps.addEquals(PDot, -1.0, Q);
+      CARETools.computeS(BTranspose, R, null, M);
+      CARETools.computeRiccatiRate(P, A, Q, M, PDot);
 
-//      assertTrue(CARESolver.riccatiEquationIsZero(A, M, Q, P, PDotOther, epsilon));
-
-      EjmlUnitTests.assertEquals(PDotExpected, PDot, epsilon);
+      EjmlUnitTests.assertEquals(new DenseMatrix64F(n, n), PDot, epsilon);
    }
 }

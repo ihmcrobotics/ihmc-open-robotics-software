@@ -1,11 +1,10 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers;
+package us.ihmc.robotics.linearAlgebra.careSolvers.schur;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Random;
