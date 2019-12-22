@@ -78,11 +78,10 @@ public class HamiltonianEigenCARESolver implements CARESolver
 
       BTranspose.set(B);
       CommonOps.transpose(BTranspose);
+      ATranspose.reshape(n, n);
+      CommonOps.transpose(A, ATranspose);
 
-      Rinv.reshape(n, n);
-      NativeCommonOps.invert(R, Rinv);
-      M.reshape(n, n);
-      NativeCommonOps.multQuad(BTranspose, Rinv, M);
+      CARETools.computeS(BTranspose, R, Rinv, M);
 
       this.n = A.getNumRows();
 
@@ -95,7 +94,7 @@ public class HamiltonianEigenCARESolver implements CARESolver
    public DenseMatrix64F computeP()
    {
       // defining Hamiltonian
-      assembleHamiltonian(H);
+      CARETools.assembleHamiltonian(A, ATranspose, Q, M, H);
 
       // Eigen decomposition
       eigen.decompose(H);
@@ -138,19 +137,4 @@ public class HamiltonianEigenCARESolver implements CARESolver
    {
       return isUpToDate ? P : computeP();
    }
-
-   private void assembleHamiltonian(DenseMatrix64F hamiltonianToPack)
-   {
-      ATranspose.reshape(n, n);
-      CommonOps.transpose(A, ATranspose);
-
-      hamiltonianToPack.reshape(2 * n, 2 * n);
-
-      MatrixTools.setMatrixBlock(hamiltonianToPack, 0, 0, A, 0, 0, n, n, 1.0);
-      MatrixTools.setMatrixBlock(hamiltonianToPack, n, 0, Q, 0, 0, n, n, -1.0);
-      MatrixTools.setMatrixBlock(hamiltonianToPack, 0, n, M, 0, 0, n, n, -1.0);
-      MatrixTools.setMatrixBlock(hamiltonianToPack, n, n, ATranspose, 0, 0, n, n, -1.0);
-   }
-
-
 }

@@ -1,6 +1,9 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
  * This solver computes the solution to the algebraic Riccati equation
@@ -51,4 +54,20 @@ public interface CARESolver
     * Returns the P matrix.
     */
    DenseMatrix64F getP();
+
+   static boolean riccatiEquationIsZero(DenseMatrix64F A, DenseMatrix64F M, DenseMatrix64F Q, DenseMatrix64F P, DenseMatrix64F PDotToPack, double epsilon)
+   {
+      NativeCommonOps.multQuad(P, M, PDotToPack);
+      CommonOps.multAddTransA(A, P, PDotToPack);
+      CommonOps.multAdd(P, A, PDotToPack);
+      CommonOps.addEquals(PDotToPack, Q);
+
+      for (int i = 0; i < Q.getNumElements(); i++)
+      {
+         if (!MathTools.epsilonEquals(Q.get(i), 0.0, epsilon))
+            return false;
+      }
+
+      return true;
+   }
 }
