@@ -96,7 +96,7 @@ public class Newton2CARESolver implements CARESolver
 
      BTranspose.set(B);
      CommonOps.transpose(BTranspose);
-     CARETools.computeS(BTranspose, R, Rinv, S);
+     CARETools.computeM(BTranspose, R, Rinv, S);
 
      backendSolver.setMatrices(A, B, Q, R, false);
      P.set(backendSolver.getP());

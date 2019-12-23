@@ -9,7 +9,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.NewtonMatrixSignFunction;
 import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.QuadraticMatrixSignFunction;
 
 /**
@@ -71,7 +70,7 @@ public class MatrixSignFunctionCARESolver implements CARESolver
       ATranspose.reshape(n, n);
       CommonOps.transpose(A, ATranspose);
 
-      CARETools.computeS(BTranspose, R, Rinv, S);
+      CARETools.computeM(BTranspose, R, Rinv, S);
 
       this.n = A.getNumRows();
 

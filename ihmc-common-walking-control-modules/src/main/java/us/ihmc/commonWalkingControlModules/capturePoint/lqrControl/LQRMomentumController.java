@@ -155,7 +155,7 @@ public class LQRMomentumController
       DenseMatrix64F S = new DenseMatrix64F(P);
       DenseMatrix64F BTranspose = new DenseMatrix64F(B);
       CommonOps.transpose(BTranspose);
-      CARETools.computeS(BTranspose, R1, R1Inverse, S);
+      CARETools.computeM(BTranspose, R1, R1Inverse, S);
       CARETools.computeRiccatiRate(P, ARiccati, QRiccati, S, PDot);
       S1.set(P);
    }

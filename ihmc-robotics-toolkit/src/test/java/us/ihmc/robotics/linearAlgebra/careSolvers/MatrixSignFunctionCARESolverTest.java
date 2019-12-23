@@ -57,7 +57,7 @@ public class MatrixSignFunctionCARESolverTest extends CARESolverTest
       DenseMatrix64F BTranspose = new DenseMatrix64F(B);
       DenseMatrix64F H = new DenseMatrix64F(4, 4);
       CommonOps.transpose(BTranspose);
-      CARETools.computeS(BTranspose, R, null, S);
+      CARETools.computeM(BTranspose, R, null, S);
       CARETools.assembleHamiltonian(A, null, Q, S, H);
 
       MatrixSignFunction matrixSignFunction = new NewtonMatrixSignFunction();
