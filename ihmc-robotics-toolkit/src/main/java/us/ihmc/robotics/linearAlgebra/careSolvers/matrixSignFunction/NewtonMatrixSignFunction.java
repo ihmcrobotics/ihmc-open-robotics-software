@@ -2,19 +2,20 @@ package us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 public class NewtonMatrixSignFunction implements MatrixSignFunction
 {
+   private static final boolean debug = true;
    private int maxIterations = Integer.MAX_VALUE;
    private double epsilon = 1e-12;
 
-   private final DenseMatrix64F Wprev = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F Wlocal = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F WInverse = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F WDiff = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F WAlt = new DenseMatrix64F(0, 0);
 
    public void setMaxIterations(int maxIterations)
    {
@@ -31,11 +32,10 @@ public class NewtonMatrixSignFunction implements MatrixSignFunction
    {
       int size = K.getNumRows();
 
-      Wprev.set(K);
-      W.reshape(size, size);
+      Wlocal.set(K);
       WDiff.reshape(size, size);
+      W.reshape(size, size);
       WInverse.reshape(size, size);
-      WAlt.reshape(size, size);
 
       boolean converged = false;
       int iterations = 0;
@@ -45,18 +45,38 @@ public class NewtonMatrixSignFunction implements MatrixSignFunction
          if (iterations > maxIterations)
             return false;
 
-         NativeCommonOps.invert(Wprev, WInverse);
+         NativeCommonOps.invert(Wlocal, WInverse);
 
-         CommonOps.subtract(Wprev, WInverse, WDiff);
-         CommonOps.add(Wprev, -0.5, WDiff, W);
+         if (debug)
+            checkProperInversion(Wlocal, WInverse);
 
-         converged = MatrixToolsLocal.distance(W, Wprev) < epsilon;
+         CommonOps.subtract(Wlocal, WInverse, WDiff);
+         CommonOps.add(Wlocal, -0.5, WDiff, W);
 
-         Wprev.set(W);
+         converged = MatrixToolsLocal.distance(W, Wlocal) < epsilon;
+
+         Wlocal.set(W);
          iterations++;
       }
 
       return true;
+   }
+
+   private static void checkProperInversion(DenseMatrix64F A, DenseMatrix64F Ainv)
+   {
+      int n = A.getNumRows();
+      DenseMatrix64F expectedIdentify = new DenseMatrix64F(n, n);
+      CommonOps.mult(Ainv, A, expectedIdentify);
+      for (int row = 0; row < n; row++)
+      {
+         for (int col = 0; col < n; col++)
+         {
+            if (row == col && !MathTools.epsilonEquals(1.0, expectedIdentify.get(row, col), 1e-7))
+               throw new RuntimeException("Wrong inversion.");
+            else if (row != col && !MathTools.epsilonEquals(0.0, expectedIdentify.get(row, col), 1e-7))
+               throw new RuntimeException("Wrong inversion.");
+         }
+      }
    }
 
    @Override

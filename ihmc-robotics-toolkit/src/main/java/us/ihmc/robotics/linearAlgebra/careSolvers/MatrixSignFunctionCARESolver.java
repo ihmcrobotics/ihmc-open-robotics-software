@@ -10,6 +10,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
 import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.NewtonMatrixSignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.QuadraticMatrixSignFunction;
 
 /**
  * <p>
@@ -23,8 +24,8 @@ public class MatrixSignFunctionCARESolver implements CARESolver
    private final DenseMatrix64F PAssym = new DenseMatrix64F(0, 0);
 
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
-   private final MatrixSignFunction matrixSignFunction = new NewtonMatrixSignFunction();
+   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(3);
+   private final MatrixSignFunction matrixSignFunction = new QuadraticMatrixSignFunction();
 
    private final DenseMatrix64F BTranspose = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F ATranspose = new DenseMatrix64F(0, 0);
@@ -84,7 +85,11 @@ public class MatrixSignFunctionCARESolver implements CARESolver
    public DenseMatrix64F computeP()
    {
       // defining Hamiltonian
-      CARETools.assembleHamiltonian(A, ATranspose, Q, S, H);
+      H.reshape(2 * n, 2 * n);
+      MatrixTools.setMatrixBlock(H, 0, 0, A, 0, 0, n, n, 1.0);
+      MatrixTools.setMatrixBlock(H, 0, n, S, 0, 0, n, n, 1.0);
+      MatrixTools.setMatrixBlock(H, n, 0, Q, 0, 0, n, n, 1.0);
+      MatrixTools.setMatrixBlock(H, n, n, ATranspose, 0, 0, n, n, -1.0);
 
       if (!matrixSignFunction.compute(H))
          throw new RuntimeException("Error.");
@@ -98,6 +103,7 @@ public class MatrixSignFunctionCARESolver implements CARESolver
       M.reshape(2 * n, n);
       N.reshape(2 * n, n);
 
+      // M P = N
       MatrixTools.setMatrixBlock(M, 0, 0, W, 0, n, n, n, 1.0);
       MatrixTools.setMatrixBlock(M, n, 0, W, n, n, n, n, 1.0);
       MatrixTools.addMatrixBlock(M, n, 0, I, 0, 0, n, n, 1.0);
@@ -108,15 +114,9 @@ public class MatrixSignFunctionCARESolver implements CARESolver
 
       P.reshape(n, n);
       PAssym.reshape(n, n);
-      CommonOps.scale(-1.0, N);
       solver.setA(M);
       solver.solve(N, P);
-//      solver.solve(N, PAssym);
 
-//      CommonOps.transpose(PAssym, P);
-//      CommonOps.addEquals(P, PAssym);
-//      CommonOps.scale(0.5, P);
-//
       isUpToDate = true;
 
       return P;

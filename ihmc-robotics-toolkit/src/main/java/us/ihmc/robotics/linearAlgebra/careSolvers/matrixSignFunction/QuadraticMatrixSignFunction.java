@@ -46,7 +46,7 @@ public class QuadraticMatrixSignFunction implements MatrixSignFunction
             return false;
 
          double determinate = CommonOps.det(Wprev);
-         double c = Math.pow(Math.abs(determinate), -1.0 / size);
+         double c = Math.pow(Math.abs(determinate), -1.0 / (2 * size));
          Z.set(Wprev);
          CommonOps.scale(c, Z);
 

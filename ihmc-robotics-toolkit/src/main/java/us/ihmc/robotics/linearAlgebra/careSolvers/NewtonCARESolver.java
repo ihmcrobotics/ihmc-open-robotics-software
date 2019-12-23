@@ -30,7 +30,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 public class NewtonCARESolver implements CARESolver
 {
    /** Internally used maximum iterations. */
-   private static final int defaultMaxIterations = 100;
+   private static final int defaultMaxIterations = 100000;
    private final int maxIterations;
 
    /** Internally used epsilon criteria. */
@@ -55,7 +55,7 @@ public class NewtonCARESolver implements CARESolver
 
    private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
-   private final HamiltonianEigenCARESolver hamiltonianCARESolver = new HamiltonianEigenCARESolver();
+   private final CARESolver backendSolver;
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
 
    private int n;
@@ -66,6 +66,11 @@ public class NewtonCARESolver implements CARESolver
    public NewtonCARESolver()
    {
       this(defaultMaxIterations, defaultConvergenceEpsilon);
+   }
+
+   public NewtonCARESolver(CARESolver backendSolver)
+   {
+      this(backendSolver, defaultMaxIterations, defaultConvergenceEpsilon);
    }
 
    public NewtonCARESolver(int maxIterations)
@@ -80,6 +85,12 @@ public class NewtonCARESolver implements CARESolver
 
    public NewtonCARESolver(int maxIterations, double convergenceEpsilon)
    {
+      this(new HamiltonianEigenCARESolver(), maxIterations, convergenceEpsilon);
+   }
+
+   public NewtonCARESolver(CARESolver backendSolver, int maxIterations, double convergenceEpsilon)
+   {
+      this.backendSolver = backendSolver;
       this.maxIterations = maxIterations;
       this.convergenceEpsilon = convergenceEpsilon;
    }
@@ -116,10 +127,10 @@ public class NewtonCARESolver implements CARESolver
       Rinv.reshape(m, m);
       NativeCommonOps.invert(R, Rinv);
 
-      hamiltonianCARESolver.setMatrices(A, B, Q, R, false);
-      hamiltonianCARESolver.computeP();
+      backendSolver.setMatrices(A, B, Q, R, false);
+      backendSolver.computeP();
 
-      approximateP(hamiltonianCARESolver.getP(), maxIterations, convergenceEpsilon);
+      approximateP(backendSolver.getP(), maxIterations, convergenceEpsilon);
 
       isUpToDate = true;
       return P;

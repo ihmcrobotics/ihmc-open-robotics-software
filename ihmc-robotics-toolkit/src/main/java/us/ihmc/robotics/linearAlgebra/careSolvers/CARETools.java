@@ -24,6 +24,12 @@ public class CARETools
    {
       int n = A.getNumRows();
 
+      if (ATranspose == null)
+      {
+         ATranspose = new DenseMatrix64F(n, n);
+         CommonOps.transpose(A, ATranspose);
+      }
+
       hamiltonianToPack.reshape(2 * n, 2 * n);
 
       MatrixTools.setMatrixBlock(hamiltonianToPack, 0, 0, A, 0, 0, n, n, 1.0);

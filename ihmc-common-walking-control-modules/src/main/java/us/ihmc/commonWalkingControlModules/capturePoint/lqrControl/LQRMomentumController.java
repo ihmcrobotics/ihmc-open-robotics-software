@@ -10,8 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.SchurCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.*;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.List;
@@ -87,7 +86,7 @@ public class LQRMomentumController
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
-   private final CARESolver careSolver = new SchurCARESolver();
+   private final CARESolver careSolver = new NewtonCARESolver(new MatrixSignFunctionCARESolver());
 
    public LQRMomentumController()
    {
@@ -150,8 +149,15 @@ public class LQRMomentumController
       CommonOps.mult(R1Inverse, NTranspose, tempMatrix);
       CommonOps.multAdd(-1.0, B, tempMatrix, ARiccati);
 
-      careSolver.setMatrices(ARiccati, B, QRiccati, R);
-      S1.set(careSolver.computeP());
+      careSolver.setMatrices(ARiccati, B, QRiccati, R1);
+      DenseMatrix64F P = careSolver.computeP();
+      DenseMatrix64F PDot = new DenseMatrix64F(P);
+      DenseMatrix64F S = new DenseMatrix64F(P);
+      DenseMatrix64F BTranspose = new DenseMatrix64F(B);
+      CommonOps.transpose(BTranspose);
+      CARETools.computeS(BTranspose, R1, R1Inverse, S);
+      CARETools.computeRiccatiRate(P, ARiccati, QRiccati, S, PDot);
+      S1.set(P);
    }
 
    private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(3, 3);
