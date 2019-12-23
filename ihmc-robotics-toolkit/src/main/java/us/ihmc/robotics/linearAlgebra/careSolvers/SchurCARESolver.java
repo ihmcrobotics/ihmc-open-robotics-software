@@ -1,6 +1,5 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.apache.commons.math3.linear.FieldLUDecomposition;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
@@ -8,7 +7,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.careSolvers.*;
 import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecomposition;
 import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecompositionFactory;
 
@@ -67,7 +65,7 @@ public class SchurCARESolver implements CARESolver
       CommonOps.transpose(BTranspose);
       CommonOps.transpose(ATranspose);
 
-      CARETools.computeS(BTranspose, R, Rinv, M);
+      CARETools.computeM(BTranspose, R, Rinv, M);
 
       this.n = A.getNumRows();
 

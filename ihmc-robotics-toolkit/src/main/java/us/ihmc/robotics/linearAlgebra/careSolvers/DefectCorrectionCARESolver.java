@@ -92,7 +92,7 @@ public class DefectCorrectionCARESolver implements CARESolver
 
      BTranspose.set(B);
      CommonOps.transpose(BTranspose);
-     CARETools.computeS(BTranspose, R, Rinv, S);
+     CARETools.computeM(BTranspose, R, Rinv, S);
 
      backendSolver.setMatrices(A, B, Q, R, false);
 
@@ -135,7 +135,7 @@ public class DefectCorrectionCARESolver implements CARESolver
         CommonOps.mult(-1.0, S, P, Ak);
         CommonOps.addEquals(Ak, A);
 
-        backendSolver.setMatrices(Ak, );
+//        backendSolver.setMatrices(Ak, );
 
         CARETools.computeRiccatiRate(P, A, Q, S, Rk);
 

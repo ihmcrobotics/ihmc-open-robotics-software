@@ -51,6 +51,8 @@ import org.ejml.data.DenseMatrix64F;
  */
 public interface NewCARESolver
 {
+   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S);
+
    /**
     * Setter of the solver. A and B should be compatible. B and R must be
     * multiplicative compatible. A and Q must be multiplicative compatible. R
@@ -61,9 +63,9 @@ public interface NewCARESolver
     * @param Q state cost matrix
     * @param R control cost matrix
     */
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R);
+   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R);
 
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F M, DenseMatrix64F Q);
+   void setMatrices(DenseMatrix64F A, DenseMatrix64F E, DenseMatrix64F M, DenseMatrix64F Q);
 
    /**
     * Computes and returns the P matrix.

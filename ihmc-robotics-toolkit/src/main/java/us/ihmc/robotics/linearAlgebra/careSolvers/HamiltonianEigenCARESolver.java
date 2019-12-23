@@ -2,10 +2,8 @@ package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
@@ -81,7 +79,7 @@ public class HamiltonianEigenCARESolver implements CARESolver
       ATranspose.reshape(n, n);
       CommonOps.transpose(A, ATranspose);
 
-      CARETools.computeS(BTranspose, R, Rinv, M);
+      CARETools.computeM(BTranspose, R, Rinv, M);
 
       this.n = A.getNumRows();
 

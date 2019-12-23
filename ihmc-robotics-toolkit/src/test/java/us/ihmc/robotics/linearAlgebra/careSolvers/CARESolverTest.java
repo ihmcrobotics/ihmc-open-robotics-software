@@ -1,21 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
-import sun.security.jgss.GSSHeader;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.NewtonMatrixSignFunction;
-
-import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -176,7 +165,7 @@ public abstract class CARESolverTest
       DenseMatrix64F BTranspose = new DenseMatrix64F(m, n);
       CommonOps.transpose(B, BTranspose);
 
-      CARETools.computeS(BTranspose, R, null, M);
+      CARETools.computeM(BTranspose, R, null, M);
       CARETools.computeRiccatiRate(P, A, Q, M, PDot);
 
       EjmlUnitTests.assertEquals(new DenseMatrix64F(n, n), PDot, epsilon);

@@ -39,7 +39,7 @@ public class CAREToolsTest
          CommonOps.transpose(BTranspose);
 
          DenseMatrix64F S = new DenseMatrix64F(rows, rows);
-         CARETools.computeS(BTranspose, R, Rinv, S);
+         CARETools.computeM(BTranspose, R, Rinv, S);
 
          DenseMatrix64F RinvBTranspose = new DenseMatrix64F(cols, rows);
          CommonOps.multTransB(Rinv, B, RinvBTranspose);

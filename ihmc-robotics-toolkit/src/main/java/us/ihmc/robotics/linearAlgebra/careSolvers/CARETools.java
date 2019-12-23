@@ -7,7 +7,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 
 public class CARETools
 {
-   public static void computeS(DenseMatrix64F BTranspose, DenseMatrix64F R, DenseMatrix64F RinvToPack, DenseMatrix64F SToPack)
+   public static void computeM(DenseMatrix64F BTranspose, DenseMatrix64F R, DenseMatrix64F RinvToPack, DenseMatrix64F SToPack)
    {
       int n = BTranspose.getNumCols();
       if (RinvToPack == null)
