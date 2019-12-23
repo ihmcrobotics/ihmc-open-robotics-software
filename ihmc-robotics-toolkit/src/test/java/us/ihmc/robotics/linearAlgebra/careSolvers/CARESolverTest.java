@@ -12,6 +12,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.NewtonMatrixSignFunction;
 
 import java.util.Random;
 
@@ -103,7 +105,7 @@ public abstract class CARESolverTest
 
       DenseMatrix64F P = solver.getP();
 
-//      assertIsSymmetric(P);
+      //      assertIsSymmetric(P);
       assertSolutionIsValid(A, B, Q, R, P);
       EjmlUnitTests.assertEquals(PExpected, P, 1e-4);
    }
@@ -164,7 +166,8 @@ public abstract class CARESolverTest
          }
       }
    }
-   private static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P)
+
+   static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P)
    {
       int n = A.getNumRows();
       int m = B.getNumCols();
