@@ -86,7 +86,7 @@ public class LQRMomentumController
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
-   private final CARESolver careSolver = new NewtonCARESolver(new SignFunctionCARESolver());
+   private final NewCARESolver careSolver = new NewDefectCorrectionCARESolver(new NewSignFunctionCARESolver());
 
    public LQRMomentumController()
    {
@@ -149,7 +149,7 @@ public class LQRMomentumController
       CommonOps.mult(R1Inverse, NTranspose, tempMatrix);
       CommonOps.multAdd(-1.0, B, tempMatrix, ARiccati);
 
-      careSolver.setMatrices(ARiccati, B, QRiccati, R1);
+      careSolver.setMatrices(ARiccati, B, null, QRiccati, R1);
       DenseMatrix64F P = careSolver.computeP();
       DenseMatrix64F PDot = new DenseMatrix64F(P);
       DenseMatrix64F S = new DenseMatrix64F(P);
