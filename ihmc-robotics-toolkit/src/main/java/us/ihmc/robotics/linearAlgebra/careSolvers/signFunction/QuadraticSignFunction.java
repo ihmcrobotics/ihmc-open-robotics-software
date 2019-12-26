@@ -1,11 +1,11 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction;
+package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
-public class QuadraticMatrixSignFunction implements MatrixSignFunction
+public class QuadraticSignFunction implements SignFunction
 {
    private int maxIterations = Integer.MAX_VALUE;
    private double epsilon = 1e-12;

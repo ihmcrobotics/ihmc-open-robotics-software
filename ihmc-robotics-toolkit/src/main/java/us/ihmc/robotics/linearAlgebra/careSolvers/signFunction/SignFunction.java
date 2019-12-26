@@ -1,4 +1,4 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction;
+package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -16,7 +16,7 @@ import org.ejml.data.DenseMatrix64F;
  * sign(K) is undefined.
  *
  */
-public interface MatrixSignFunction
+public interface SignFunction
 {
    boolean compute(DenseMatrix64F K);
 
