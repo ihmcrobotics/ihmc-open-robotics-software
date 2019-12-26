@@ -8,7 +8,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 public class NewtonSignFunction implements SignFunction
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private int maxIterations = Integer.MAX_VALUE;
    private double epsilon = 1e-12;
 
@@ -72,9 +72,9 @@ public class NewtonSignFunction implements SignFunction
          for (int col = 0; col < n; col++)
          {
             if (row == col && !MathTools.epsilonEquals(1.0, expectedIdentify.get(row, col), 1e-7))
-               throw new RuntimeException("Wrong inversion.");
+               throw new RuntimeException("Wrong inversion. Identity property should be held at 1, was " + expectedIdentify.get(row, col));
             else if (row != col && !MathTools.epsilonEquals(0.0, expectedIdentify.get(row, col), 1e-7))
-               throw new RuntimeException("Wrong inversion.");
+               throw new RuntimeException("Wrong inversion. Off-diagonal property should be held at 0, was " + expectedIdentify.get(row, col));
          }
       }
    }

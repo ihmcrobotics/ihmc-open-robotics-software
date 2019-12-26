@@ -23,6 +23,8 @@ public abstract class AbstractCARESolver implements NewCARESolver
    protected final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
    protected boolean hasE = false;
 
+   protected boolean isUpToDate = false;
+
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S)
    {
       int m = Rinv.getNumRows();
@@ -132,5 +134,6 @@ public abstract class AbstractCARESolver implements NewCARESolver
       this.M.set(M);
       this.Q.set(Q);
 
+      isUpToDate = false;
    }
 }
