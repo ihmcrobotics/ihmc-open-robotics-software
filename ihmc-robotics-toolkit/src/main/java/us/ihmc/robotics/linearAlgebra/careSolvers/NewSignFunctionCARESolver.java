@@ -17,7 +17,6 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.SignFunction;
  */
 public class NewSignFunctionCARESolver extends AbstractCARESolver
 {
-   private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F ETransposePE = new DenseMatrix64F(0, 0);
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.qr(3, 3);
@@ -35,7 +34,6 @@ public class NewSignFunctionCARESolver extends AbstractCARESolver
    private final DenseMatrix64F EInverseMEInverseTranspose = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F leftColumn = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F rightColumn = new DenseMatrix64F(0, 0);
-
 
    private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
 
@@ -106,11 +104,5 @@ public class NewSignFunctionCARESolver extends AbstractCARESolver
       isUpToDate = true;
 
       return P;
-   }
-
-   /** {inheritDoc} */
-   public DenseMatrix64F getP()
-   {
-      return isUpToDate ? P : computeP();
    }
 }

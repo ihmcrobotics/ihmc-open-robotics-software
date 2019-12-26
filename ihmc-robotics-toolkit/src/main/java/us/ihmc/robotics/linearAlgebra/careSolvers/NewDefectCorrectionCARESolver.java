@@ -21,8 +21,6 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
 
   private final NewCARESolver backendSolver;
 
-  private boolean isUpToDate = false;
-
   public NewDefectCorrectionCARESolver(NewCARESolver backendSolver)
   {
      this.backendSolver = backendSolver;
@@ -52,7 +50,6 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
         iterations++;
      }
 
-
      isUpToDate = true;
      return P;
   }
@@ -80,12 +77,4 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
 
      return backendSolver.getP();
   }
-
-
-  /** {inheritDoc} */
-  public DenseMatrix64F getP()
-  {
-     return isUpToDate ? P : computeP();
-  }
-
 }
