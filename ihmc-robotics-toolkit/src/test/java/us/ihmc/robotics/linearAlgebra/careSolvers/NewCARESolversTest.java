@@ -46,7 +46,7 @@ public class NewCARESolversTest
          DenseMatrix64F QInput = new DenseMatrix64F(Q);
          DenseMatrix64F RInput = new DenseMatrix64F(R);
 
-         solver.setMatrices(A, B, null, Q, R);
+         solver.setMatrices(A, B, CommonOps.identity(2), CommonOps.identity(2), Q, R, null);
          solver.computeP();
 
          DenseMatrix64F assembledQ = new DenseMatrix64F(2, 2);
@@ -102,7 +102,7 @@ public class NewCARESolversTest
 
          CommonOps.multInner(C, Q);
 
-         solver.setMatrices(A, B, null, Q, R);
+         solver.setMatrices(A, B, CommonOps.identity(n), CommonOps.identity(n), Q, R, null);
          solver.computeP();
 
          DenseMatrix64F PExpected = new DenseMatrix64F(2, 2);
@@ -129,6 +129,7 @@ public class NewCARESolversTest
          DenseMatrix64F A = new DenseMatrix64F(n, n);
          DenseMatrix64F B = new DenseMatrix64F(n, m);
          DenseMatrix64F C = new DenseMatrix64F(1, n);
+         DenseMatrix64F E = CommonOps.identity(n);
          DenseMatrix64F Q = new DenseMatrix64F(n, n);
          DenseMatrix64F R = new DenseMatrix64F(1, 1);
          A.set(0, 0, 1);
@@ -151,7 +152,7 @@ public class NewCARESolversTest
 
          CommonOps.multInner(C, Q);
 
-         solver.setMatrices(A, B, null, Q, R);
+         solver.setMatrices(A, B, CommonOps.identity(n), E, Q, R, null);
          solver.computeP();
 
          DenseMatrix64F RInverse = new DenseMatrix64F(m, m);

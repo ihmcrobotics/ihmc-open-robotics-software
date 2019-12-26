@@ -95,6 +95,7 @@ public class NewNewton2CARESolver extends AbstractCARESolver
 
      if (hasE)
      {
+        P.reshape(n, n);
         EInverse.reshape(n, n);
         NativeCommonOps.invert(E, EInverse);
         CommonOps.mult(PE, EInverse, P);
