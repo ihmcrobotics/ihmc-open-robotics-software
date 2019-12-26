@@ -1,13 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-public class NewNewtonCARESolver extends AbstractCARESolver
+public class NewtonCARESolver extends AbstractCARESolver
 {
   private static final int defaultMaxIterations = 100000;
   private final int maxIterations;
@@ -24,19 +21,19 @@ public class NewNewtonCARESolver extends AbstractCARESolver
 
   private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
-  private final NewCARESolver backendSolver;
+  private final CARESolver backendSolver;
 
-  public NewNewtonCARESolver()
+  public NewtonCARESolver()
   {
-     this(new NewEigenvectorCARESolver());
+     this(new EigenvectorCARESolver());
   }
 
-  public NewNewtonCARESolver(NewCARESolver backendSolver)
+  public NewtonCARESolver(CARESolver backendSolver)
   {
      this(backendSolver, defaultMaxIterations, defaultConvergenceEpsilon);
   }
 
-  public NewNewtonCARESolver(NewCARESolver backendSolver, int maxIterations, double convergenceEpsilon)
+  public NewtonCARESolver(CARESolver backendSolver, int maxIterations, double convergenceEpsilon)
   {
      this.backendSolver = backendSolver;
      this.maxIterations = maxIterations;

@@ -15,7 +15,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.SignFunction;
  *    that book
  * </p>
  */
-public class NewSignFunctionCARESolver extends AbstractCARESolver
+public class SignFunctionCARESolver extends AbstractCARESolver
 {
    private final DenseMatrix64F ETransposePE = new DenseMatrix64F(0, 0);
 
