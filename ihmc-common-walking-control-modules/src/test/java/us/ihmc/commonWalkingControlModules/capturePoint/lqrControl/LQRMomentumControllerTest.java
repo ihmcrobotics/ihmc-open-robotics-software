@@ -18,7 +18,7 @@ public class LQRMomentumControllerTest
    private static final double epsilon = 1e-10;
 
    @Test
-   public void test()
+   public void testComputingS1()
    {
       LQRMomentumController controller = new LQRMomentumController();
 
@@ -95,7 +95,7 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(NTransposeExpected, controller.NTranspose, epsilon);
 
 
-         controller.computeS1();
+      controller.computeS1();
 
       EjmlUnitTests.assertEquals(AExpected, controller.A, epsilon);
       EjmlUnitTests.assertEquals(BExpected, controller.B, epsilon);
@@ -165,5 +165,23 @@ public class LQRMomentumControllerTest
 
       EjmlUnitTests.assertEquals(S1DotExpected, S1Dot, epsilon);
       EjmlUnitTests.assertEquals(new DenseMatrix64F(6, 6), S1Dot, epsilon);
+   }
+
+   @Test
+   public void testComputingS2()
+   {
+      LQRMomentumController controller = new LQRMomentumController();
+
+      Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
+      Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
+      Trajectory3D vrpTrajectory = new Trajectory3D(4);
+      vrpTrajectory.setLinear(0.0, 1.0, vrpStart, vrpEnd);
+      List<Trajectory3D> trajectories = new ArrayList<>();
+      trajectories.add(vrpTrajectory);
+
+      controller.setVrpTrajectory(trajectories);
+
+      controller.computeS2(0.0);
+
    }
 }

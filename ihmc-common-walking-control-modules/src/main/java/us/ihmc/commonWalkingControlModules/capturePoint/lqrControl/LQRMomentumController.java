@@ -44,9 +44,9 @@ public class LQRMomentumController
    final DenseMatrix64F C = new DenseMatrix64F(3, 6);
    final DenseMatrix64F D = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F A2 = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F A2Inverse = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F B2 = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F A2 = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F A2Inverse = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
 
    final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F q2 = new DenseMatrix64F(3, 1);
@@ -59,11 +59,11 @@ public class LQRMomentumController
    final DenseMatrix64F N = new DenseMatrix64F(6, 3);
    final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
 
-   private final DenseMatrix64F NB = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
    private final DenseMatrix64F rs = new DenseMatrix64F(3, 1);
 
-   final DenseMatrix64F S1 = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F s2 = new DenseMatrix64F(3, 1);
+   final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F s2 = new DenseMatrix64F(6, 1);
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
 
@@ -75,9 +75,9 @@ public class LQRMomentumController
    final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
 
 
-   private final RecyclingArrayList<DenseMatrix64F> alpha = new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1));
+   private final RecyclingArrayList<DenseMatrix64F> alpha = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
    private final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
+         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
    private final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gamma = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
 
@@ -160,17 +160,17 @@ public class LQRMomentumController
       S1.set(P);
    }
 
-   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
    private final DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F R1InverseDQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
    private final DenseMatrix64F c = new DenseMatrix64F(3, 1);
 
-   private final DenseMatrix64F exponential = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F summedBetas = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F exponential = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
 
-   private void computeS2Parameters()
+   void computeS2Parameters()
    {
       // Nb = N' + B' S1
       CommonOps.transpose(N, NB);
@@ -224,7 +224,7 @@ public class LQRMomentumController
 
          DenseMatrix64F betaLocalPrevious = betaLocal;
 
-         for (int i = k - 1; i >= 0; i++)
+         for (int i = k - 1; i >= 0; i--)
          {
             betaLocal = betas.get(j).get(i);
             gammaLocal = gamma.get(j).get(i);
@@ -266,7 +266,7 @@ public class LQRMomentumController
       }
    }
 
-   private void computeS2(double time)
+   void computeS2(double time)
    {
       computeS2Parameters();
 
@@ -278,13 +278,13 @@ public class LQRMomentumController
       matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
 
       CommonOps.mult(exponential, alpha.get(j), s2);
-      int k = vrpTrajectory.get(j).getNumberOfCoefficients();
+      int k = vrpTrajectory.get(j).getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
       {
          CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
       }
 
-      tempMatrix.reshape(3, 3);
+      tempMatrix.reshape(3, 6);
       CommonOps.mult(-0.5, R1InverseBTranspose, exponential, tempMatrix);
       CommonOps.mult(tempMatrix, alpha.get(j), k2);
       for (int i = 0; i <= k; i++)
@@ -342,6 +342,16 @@ public class LQRMomentumController
    public DenseMatrix64F getU()
    {
       return u;
+   }
+
+   public DenseMatrix64F getCostHessian()
+   {
+      return S1;
+   }
+
+   public DenseMatrix64F getCostJacobian()
+   {
+      return s2;
    }
 
    private int getSegmentNumber(double time)
