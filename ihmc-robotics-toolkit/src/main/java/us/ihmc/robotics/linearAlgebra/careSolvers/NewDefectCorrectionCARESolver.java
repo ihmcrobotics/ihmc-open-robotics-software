@@ -9,7 +9,7 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
   private static final int defaultMaxIterations = 1000;
   private final int maxIterations;
 
-  private static final double defaultConvergenceEpsilon = 1e-8;
+  private static final double defaultConvergenceEpsilon = 1e-12;
   private final double convergenceEpsilon;
 
   private final DenseMatrix64F P = new DenseMatrix64F(0, 0);

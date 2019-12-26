@@ -17,7 +17,6 @@ public class NewSignFunctionCARESolverTest extends NewCARESolverTest
    protected NewCARESolver getSolver()
    {
       return new NewSignFunctionCARESolver();
-//      return new NewDefectCorrectionCARESolver(new NewSignFunctionCARESolver());
    }
 
    @Override
