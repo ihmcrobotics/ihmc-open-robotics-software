@@ -17,7 +17,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecompositionFactor
  *   http://dspace.mit.edu/bitstream/handle/1721.1/1301/R-0859-05666488.pdf
  * </p>
  */
-public class SchurCARESolver implements CARESolver
+public class SchurCARESolver
 {
    /** The solution of the algebraic Riccati equation. */
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
@@ -40,6 +40,11 @@ public class SchurCARESolver implements CARESolver
    private int n;
 
    /** {@inheritDoc} */
+   public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R)
+   {
+      setMatrices(A, B, Q, R, true);
+   }
+
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, boolean checkMatrices)
    {
       isUpToDate = false;
