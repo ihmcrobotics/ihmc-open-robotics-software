@@ -6,7 +6,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 
 public abstract class AbstractCARESolver implements NewCARESolver
 {
-   protected final DenseMatrix64F Rinv = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F Rinv = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F RinvSTranspose = new DenseMatrix64F(0, 0);
@@ -23,8 +23,12 @@ public abstract class AbstractCARESolver implements NewCARESolver
    protected final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
    protected boolean hasE = false;
 
+   protected final DenseMatrix64F P = new DenseMatrix64F(0, 0);
+
    protected boolean isUpToDate = false;
 
+   /** {inheritDoc} */
+   @Override
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S)
    {
       int m = Rinv.getNumRows();
@@ -96,8 +100,7 @@ public abstract class AbstractCARESolver implements NewCARESolver
       setMatrices(ALocal, E, M, QLocal);
    }
 
-
-
+   /** {inheritDoc} */
    @Override
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R)
    {
@@ -115,6 +118,7 @@ public abstract class AbstractCARESolver implements NewCARESolver
       setMatrices(A, E, M, Q);
    }
 
+   /** {inheritDoc} */
    @Override
    public void setMatrices(DenseMatrix64F A, DenseMatrix64F E, DenseMatrix64F M, DenseMatrix64F Q)
    {
@@ -135,5 +139,13 @@ public abstract class AbstractCARESolver implements NewCARESolver
       this.Q.set(Q);
 
       isUpToDate = false;
+   }
+
+
+   /** {inheritDoc} */
+   @Override
+   public DenseMatrix64F getP()
+   {
+      return isUpToDate ? P : computeP();
    }
 }
