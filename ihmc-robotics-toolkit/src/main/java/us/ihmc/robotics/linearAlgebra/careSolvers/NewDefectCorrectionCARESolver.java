@@ -33,7 +33,8 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
   /** {@inheritDoc} */
   public DenseMatrix64F computeP()
   {
-     backendSolver.setMatrices(A, E, M, Q);
+     backendSolver.setMatrices(A, hasE ? E : null, M, Q);
+
      P.set(backendSolver.getP());
 
      int iterations = 0;
@@ -75,7 +76,7 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
      ASquiggle.set(A);
      CommonOps.multAdd(-1.0, M, PE, ASquiggle);
 
-     backendSolver.setMatrices(ASquiggle, E, M, QSquiggle);
+     backendSolver.setMatrices(ASquiggle, hasE ? E : null, M, QSquiggle);
 
      return backendSolver.getP();
   }

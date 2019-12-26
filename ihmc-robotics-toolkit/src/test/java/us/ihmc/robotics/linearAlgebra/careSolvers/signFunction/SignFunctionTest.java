@@ -2,6 +2,7 @@ package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -66,6 +67,53 @@ public abstract class SignFunctionTest
                   assertEquals("iteration " + iter + " Failed.", 0.0, S.get(i, j), epsilon);
             }
          }
+
+      }
+   }
+
+
+   @Test
+   public void testCommutationByConstruction()
+   {
+      Random random = new Random(1738L);
+
+      SignFunction function = getSolver();
+
+      for (int iter = 0; iter < iters;  iter++)
+      {
+         int size = RandomNumbers.nextInt(random, 1, 100);
+         DenseMatrix64F J = new DenseMatrix64F(size, size);
+
+         double jordanColumn = RandomNumbers.nextDouble(random, 10.0);
+         for (int i = 0; i < size; i++)
+         {
+            J.set(i, i, jordanColumn);
+            if (i < size - 1)
+               J.set(i, i + 1, 1.0);
+         }
+
+
+         // K = M J Minv
+         DenseMatrix64F M = new DenseMatrix64F(size, size);
+         DenseMatrix64F Minv = new DenseMatrix64F(size, size);
+         DenseMatrix64F temp = new DenseMatrix64F(size, size);
+         DenseMatrix64F K = new DenseMatrix64F(size, size);
+         M.setData(RandomNumbers.nextDoubleArray(random, size * size, 10.0));
+         NativeCommonOps.invert(M, Minv);
+         CommonOps.mult(J, Minv, temp);
+         CommonOps.mult(M, temp, K);
+
+         // Sign(K) = M Sign(J) Minv
+         // S = Minv W M
+         function.compute(K);
+         DenseMatrix64F SignK = function.getW(null);
+         function.compute(J);
+         DenseMatrix64F SignJ = function.getW(null);
+         DenseMatrix64F SignKConstructed = new DenseMatrix64F(size, size);
+         CommonOps.mult(M, SignJ, temp);
+         CommonOps.mult(temp, Minv, SignKConstructed);
+
+         EjmlUnitTests.assertEquals(SignK, SignKConstructed, epsilon);
 
       }
    }
