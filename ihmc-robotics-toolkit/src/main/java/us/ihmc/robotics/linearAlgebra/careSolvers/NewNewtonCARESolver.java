@@ -50,7 +50,10 @@ public class NewNewtonCARESolver extends AbstractCARESolver
      backendSolver.computeP();
 
      if (hasE)
+     {
+        PE.reshape(n, n);
         CommonOps.mult(backendSolver.getP(), E, PE);
+     }
      else
         PE.set(backendSolver.getP());
 
@@ -86,6 +89,7 @@ public class NewNewtonCARESolver extends AbstractCARESolver
      if (hasE)
      {
         EInverse.reshape(n, n);
+        P.reshape(n, n);
         NativeCommonOps.invert(E, EInverse);
         CommonOps.mult(PE, EInverse, P);
      }

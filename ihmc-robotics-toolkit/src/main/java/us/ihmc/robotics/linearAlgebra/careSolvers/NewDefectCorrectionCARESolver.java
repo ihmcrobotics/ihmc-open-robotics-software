@@ -55,6 +55,7 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
 
   private DenseMatrix64F computeErrorEstimate(DenseMatrix64F currentValue)
   {
+     PE.reshape(n, n);
      if (!hasE)
         PE.set(currentValue);
      else
