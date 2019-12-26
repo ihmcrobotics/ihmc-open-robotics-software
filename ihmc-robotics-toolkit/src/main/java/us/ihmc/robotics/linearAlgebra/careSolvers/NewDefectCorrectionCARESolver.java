@@ -12,7 +12,6 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
   private static final double defaultConvergenceEpsilon = 1e-12;
   private final double convergenceEpsilon;
 
-  private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
   private final DenseMatrix64F X = new DenseMatrix64F(0, 0);
 
   private final DenseMatrix64F PE = new DenseMatrix64F(0, 0);
