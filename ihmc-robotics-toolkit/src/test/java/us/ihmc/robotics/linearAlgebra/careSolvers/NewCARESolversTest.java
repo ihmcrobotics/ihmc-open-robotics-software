@@ -20,10 +20,12 @@ public class NewCARESolversTest
       List<NewCARESolver> solvers = new ArrayList<>();
       solvers.add(new NewEigenvectorCARESolver());
       solvers.add(new NewNewtonCARESolver(new NewEigenvectorCARESolver()));
+      solvers.add(new NewNewton2CARESolver(new NewEigenvectorCARESolver()));
       solvers.add(new NewDefectCorrectionCARESolver(new NewEigenvectorCARESolver()));
 
       solvers.add(new NewSignFunctionCARESolver());
       solvers.add(new NewNewtonCARESolver(new NewSignFunctionCARESolver()));
+      solvers.add(new NewNewton2CARESolver(new NewSignFunctionCARESolver()));
       solvers.add(new NewDefectCorrectionCARESolver(new NewSignFunctionCARESolver()));
 
       return solvers;
