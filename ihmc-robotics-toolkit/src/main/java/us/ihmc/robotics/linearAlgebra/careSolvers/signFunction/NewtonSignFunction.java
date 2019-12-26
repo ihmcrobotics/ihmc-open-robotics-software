@@ -1,4 +1,4 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction;
+package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -6,7 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
 
-public class NewtonMatrixSignFunction implements MatrixSignFunction
+public class NewtonSignFunction implements SignFunction
 {
    private static final boolean debug = true;
    private int maxIterations = Integer.MAX_VALUE;

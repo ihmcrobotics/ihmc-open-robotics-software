@@ -8,8 +8,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.QuadraticMatrixSignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.SignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.QuadraticSignFunction;
 
 /**
  * <p>
@@ -17,14 +17,14 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.QuadraticMa
  *    https://www.sciencedirect.com/science/article/pii/0024379587902229
  * </p>
  */
-public class MatrixSignFunctionCARESolver implements CARESolver
+public class SignFunctionCARESolver implements CARESolver
 {
    private final DenseMatrix64F P = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F PAssym = new DenseMatrix64F(0, 0);
 
    private final SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(0, 0, false, false, false);
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(3);
-   private final MatrixSignFunction matrixSignFunction = new QuadraticMatrixSignFunction();
+   private final SignFunction matrixSignFunction = new QuadraticSignFunction();
 
    private final DenseMatrix64F BTranspose = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F ATranspose = new DenseMatrix64F(0, 0);

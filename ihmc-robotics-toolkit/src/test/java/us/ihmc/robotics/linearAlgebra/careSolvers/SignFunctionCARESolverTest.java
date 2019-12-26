@@ -6,17 +6,17 @@ import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.MatrixSignFunction;
-import us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction.NewtonMatrixSignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.SignFunction;
+import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.NewtonSignFunction;
 import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecomposition;
 import us.ihmc.robotics.linearAlgebra.careSolvers.schur.SchurDecompositionFactory;
 
-public class MatrixSignFunctionCARESolverTest extends CARESolverTest
+public class SignFunctionCARESolverTest extends CARESolverTest
 {
    @Override
    protected CARESolver getSolver()
    {
-      return new MatrixSignFunctionCARESolver();
+      return new SignFunctionCARESolver();
    }
 
 
@@ -60,7 +60,7 @@ public class MatrixSignFunctionCARESolverTest extends CARESolverTest
       CARETools.computeM(BTranspose, R, null, S);
       CARETools.assembleHamiltonian(A, null, Q, S, H);
 
-      MatrixSignFunction matrixSignFunction = new NewtonMatrixSignFunction();
+      SignFunction matrixSignFunction = new NewtonSignFunction();
       SchurDecomposition<DenseMatrix64F> schur = SchurDecompositionFactory.qrBased(4);
       matrixSignFunction.compute(H);
       schur.decompose(H);

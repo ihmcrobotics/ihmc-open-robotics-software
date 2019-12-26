@@ -1,4 +1,4 @@
-package us.ihmc.robotics.linearAlgebra.careSolvers.matrixSignFunction;
+package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -10,19 +10,19 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public abstract class MatrixSignFunctionTest
+public abstract class SignFunctionTest
 {
    private static final int iters = 10;
    private static final double epsilon = 1e-6;
 
-   protected abstract MatrixSignFunction getSolver();
+   protected abstract SignFunction getSolver();
 
    @Test
    public void testRandomByConstruction()
    {
       Random random = new Random(1738L);
 
-      MatrixSignFunction function = getSolver();
+      SignFunction function = getSolver();
 
       for (int iter = 0; iter < iters;  iter++)
       {
