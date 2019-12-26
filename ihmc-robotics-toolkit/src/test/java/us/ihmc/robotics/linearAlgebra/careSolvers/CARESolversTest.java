@@ -11,22 +11,22 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class NewCARESolversTest
+public class CARESolversTest
 {
    private static final double epsilon = 1e-4;
 
-   private List<NewCARESolver> getSolvers()
+   private List<CARESolver> getSolvers()
    {
-      List<NewCARESolver> solvers = new ArrayList<>();
-      solvers.add(new NewEigenvectorCARESolver());
-      solvers.add(new NewNewtonCARESolver(new NewEigenvectorCARESolver()));
-      solvers.add(new NewNewton2CARESolver(new NewEigenvectorCARESolver()));
-      solvers.add(new NewDefectCorrectionCARESolver(new NewEigenvectorCARESolver()));
+      List<CARESolver> solvers = new ArrayList<>();
+      solvers.add(new EigenvectorCARESolver());
+      solvers.add(new NewtonCARESolver(new EigenvectorCARESolver()));
+      solvers.add(new Newton2CARESolver(new EigenvectorCARESolver()));
+      solvers.add(new DefectCorrectionCARESolver(new EigenvectorCARESolver()));
 
-      solvers.add(new NewSignFunctionCARESolver());
-      solvers.add(new NewNewtonCARESolver(new NewSignFunctionCARESolver()));
-      solvers.add(new NewNewton2CARESolver(new NewSignFunctionCARESolver()));
-      solvers.add(new NewDefectCorrectionCARESolver(new NewSignFunctionCARESolver()));
+      solvers.add(new SignFunctionCARESolver());
+      solvers.add(new NewtonCARESolver(new SignFunctionCARESolver()));
+      solvers.add(new Newton2CARESolver(new SignFunctionCARESolver()));
+      solvers.add(new DefectCorrectionCARESolver(new SignFunctionCARESolver()));
 
       return solvers;
    }
@@ -34,7 +34,7 @@ public class NewCARESolversTest
    @Test
    public void testSimple()
    {
-      for (NewCARESolver solver : getSolvers())
+      for (CARESolver solver : getSolvers())
       {
          DenseMatrix64F A = CommonOps.identity(2);
          DenseMatrix64F B = CommonOps.identity(2);
@@ -82,7 +82,7 @@ public class NewCARESolversTest
    @Test
    public void testMatlabCare()
    {
-      for (NewCARESolver solver : getSolvers())
+      for (CARESolver solver : getSolvers())
       {
          int n = 2;
          int m = 1;
@@ -122,7 +122,7 @@ public class NewCARESolversTest
    @Test
    public void testMatlabCare2()
    {
-      for (NewCARESolver solver : getSolvers())
+      for (CARESolver solver : getSolvers())
       {
          int n = 3;
          int m = 1;

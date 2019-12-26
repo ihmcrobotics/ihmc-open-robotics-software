@@ -1,10 +1,7 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
@@ -27,7 +24,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
  *    stops changing, can be set in the constructor as well.
  * </p>
 */
-public class NewNewton2CARESolver extends AbstractCARESolver
+public class Newton2CARESolver extends AbstractCARESolver
 {
   /** Internally used maximum iterations. */
   private static final int defaultMaxIterations = 10000;
@@ -42,11 +39,11 @@ public class NewNewton2CARESolver extends AbstractCARESolver
    private final DenseMatrix64F EInverse = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F Ak = new DenseMatrix64F(0, 0);
 
-  private final NewCARESolver backendSolver;
+  private final CARESolver backendSolver;
 
   private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
-  public NewNewton2CARESolver(NewCARESolver backendSolver)
+  public Newton2CARESolver(CARESolver backendSolver)
   {
      this.backendSolver = backendSolver;
      this.maxIterations = defaultMaxIterations;

@@ -49,7 +49,7 @@ import org.ejml.data.DenseMatrix64F;
  *          We can also
  *          </p>
  */
-public interface NewCARESolver
+public interface CARESolver
 {
    void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S);
 

@@ -86,7 +86,7 @@ public class LQRMomentumController
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
-   private final NewCARESolver careSolver = new NewDefectCorrectionCARESolver(new NewSignFunctionCARESolver());
+   private final CARESolver careSolver = new DefectCorrectionCARESolver(new SignFunctionCARESolver());
 
    public LQRMomentumController()
    {

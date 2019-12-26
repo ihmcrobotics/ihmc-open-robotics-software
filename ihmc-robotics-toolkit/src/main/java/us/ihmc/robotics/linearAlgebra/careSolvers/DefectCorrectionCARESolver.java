@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-public class NewDefectCorrectionCARESolver extends AbstractCARESolver
+public class DefectCorrectionCARESolver extends AbstractCARESolver
 {
   private static final int defaultMaxIterations = 1000;
   private final int maxIterations;
@@ -18,9 +18,9 @@ public class NewDefectCorrectionCARESolver extends AbstractCARESolver
   private final DenseMatrix64F ASquiggle = new DenseMatrix64F(0, 0);
   private final DenseMatrix64F QSquiggle = new DenseMatrix64F(0, 0);
 
-  private final NewCARESolver backendSolver;
+  private final CARESolver backendSolver;
 
-  public NewDefectCorrectionCARESolver(NewCARESolver backendSolver)
+  public DefectCorrectionCARESolver(CARESolver backendSolver)
   {
      this.backendSolver = backendSolver;
      this.maxIterations = defaultMaxIterations;

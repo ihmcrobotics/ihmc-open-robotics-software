@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-public class NewEigenvectorCARESolver extends AbstractCARESolver
+public class EigenvectorCARESolver extends AbstractCARESolver
 {
    private final EigenDecomposition<DenseMatrix64F> eigen = DecompositionFactory.eig(0, true);
 
