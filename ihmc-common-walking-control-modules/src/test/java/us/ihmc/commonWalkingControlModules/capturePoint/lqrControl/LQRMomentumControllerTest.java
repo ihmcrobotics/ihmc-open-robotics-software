@@ -1,27 +1,21 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import com.badlogic.gdx.physics.bullet.extras.ExtrasJNI;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
-import java.lang.annotation.Native;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class LQRMomentumControllerTest
 {
-   private static final double epsilon = 1e-12;
+   private static final double epsilon = 1e-10;
 
    @Test
    public void test()
@@ -170,7 +164,6 @@ public class LQRMomentumControllerTest
       CommonOps.multAddTransA(-1.0, controller.ARiccati, S1, S1Dot);
 
       EjmlUnitTests.assertEquals(S1DotExpected, S1Dot, epsilon);
-
-
+      EjmlUnitTests.assertEquals(new DenseMatrix64F(6, 6), S1Dot, epsilon);
    }
 }
