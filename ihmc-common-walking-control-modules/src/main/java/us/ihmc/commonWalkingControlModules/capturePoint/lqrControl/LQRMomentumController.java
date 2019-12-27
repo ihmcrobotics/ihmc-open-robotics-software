@@ -239,25 +239,19 @@ public class LQRMomentumController
          // TODO this should be checked because it kind of seems wrong.
          double duration = vrpTrajectory.get(j).getDuration();
          summedBetas.zero();
-         for (int i = 0; i < k; i++)
+         for (int i = 0; i <= k; i++)
             CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
 
-         if (j == numberOfSegments)
+         CommonOps.scale(duration, A2, timeScaledDynamics);
+         matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
+
+         if (j != numberOfSegments)
          {
-            CommonOps.scale(duration, A2, timeScaledDynamics);
-            matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
-            solver.setA(exponential);
-            solver.solve(summedBetas, alphas.get(j));
+            CommonOps.addEquals(summedBetas, alphas.get(j + 1));
+            CommonOps.addEquals(summedBetas, betas.get(j + 1).get(0));
          }
-         else
-         {
-            CommonOps.scale(duration, A2, timeScaledDynamics);
-            matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
-            CommonOps.addEquals(alphas.get(j + 1), summedBetas);
-            CommonOps.addEquals(betas.get(j + 1).get(1), summedBetas);
-            solver.setA(exponential);
-            solver.solve(summedBetas, alphas.get(j));
-         }
+         solver.setA(exponential);
+         solver.solve(summedBetas, alphas.get(j));
       }
    }
 
