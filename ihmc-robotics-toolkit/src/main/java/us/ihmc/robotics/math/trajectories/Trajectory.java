@@ -10,7 +10,7 @@ import us.ihmc.commons.MathTools;
 
 /**
  * Simple trajectory class. Does not use the {@code Polynomial} class since its weird
- * Coefficients are stored with lowest order at the lowest index (what else would you do?) 
+ * Coefficients are stored with lowest order at the lowest index (what else would you do?)
  */
 public class Trajectory
 {
@@ -138,7 +138,7 @@ public class Trajectory
     * dx<sup>n</sup>   (k-n)!
     * </pre>
     * The coefficient computed here is: <tt>(k! / (k-n)!)</tt>
-    * 
+    *
     * @param order the order of the derivative, i.e. the variable <tt>n</tt>.
     * @param exponent the exponent of the power, i.e. the variable <tt>k</tt>.
     * @return the coefficient <tt>(k! / (k-n)!)</tt>
@@ -810,6 +810,11 @@ public class Trajectory
       setDirectly(coefficients);
    }
 
+   public void offsetTrajectoryPosition(double scale, double offsetValue)
+   {
+      coefficients[0] += scale * offsetValue;
+   }
+
    /**
     * Dont use this. It creates garbage
     * @param from
@@ -881,13 +886,13 @@ public class Trajectory
       for (; row < maximumNumberOfCoefficients; row++)
          coefficients[row] = Double.NaN;
    }
-   
+
    private void setCoefficientsCopy()
    {
       for (int row = 0; row < numberOfCoefficients; row++)
          coefficientsCopy[row] = coefficients[row];
    }
-   
+
    public void reshape(int numberOfCoefficientsRequired)
    {
       if (numberOfCoefficientsRequired > maximumNumberOfCoefficients)

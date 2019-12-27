@@ -5,6 +5,19 @@ import us.ihmc.commons.MathTools;
 
 public class MatrixToolsLocal
 {
+   public static void setMatrixBlockToIdentity(DenseMatrix64F dest, int row, int col, int sizeToSet)
+   {
+      setMatrixBlockToConstant(dest, row, col, sizeToSet, 1.0);
+   }
+
+   public static void setMatrixBlockToConstant(DenseMatrix64F dest, int row, int col, int sizeToSet, double value)
+   {
+      for (int i = 0; i < sizeToSet; i++)
+      {
+         dest.set(row + i, col + i, value);
+      }
+   }
+
    /** Computes the distance between two matrices, which is defined as the L2 norm of their difference. */
    public static double distance(DenseMatrix64F A, DenseMatrix64F B)
    {

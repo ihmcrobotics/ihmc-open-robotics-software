@@ -271,6 +271,13 @@ public class Trajectory3D
       setFinalTime(tFinal);
    }
 
+   public void offsetTrajectoryPosition(double scale, DenseMatrix64F offsetValue)
+   {
+      getTrajectoryX().offsetTrajectoryPosition(scale, offsetValue.get(0, 0));
+      getTrajectoryY().offsetTrajectoryPosition(scale, offsetValue.get(1, 0));
+      getTrajectoryZ().offsetTrajectoryPosition(scale, offsetValue.get(2, 0));
+   }
+
    public void setInitialTime(double tInitial)
    {
       for (int i = 0; i < 3; i++)
