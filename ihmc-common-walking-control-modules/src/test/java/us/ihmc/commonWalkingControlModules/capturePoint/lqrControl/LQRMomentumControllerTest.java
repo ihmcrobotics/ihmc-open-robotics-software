@@ -8,6 +8,7 @@ import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
@@ -353,6 +354,7 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -553,6 +555,8 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method2, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -753,9 +757,6 @@ public class LQRMomentumControllerTest
 
       EjmlUnitTests.assertEquals(s2EndOf1, s2StartOf2, epsilon);
 
-      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
-      vrpEnd.get(finalY);
-
       for (double time = 0; time <= finalTime1; time += 0.01)
       {
          controller.computeS2(time);
@@ -777,7 +778,7 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory1.compute(time);
          vrpTrajectory1.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps.subtractEquals(yd, finalPosition);
 
          CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
          CommonOps.multAdd(R1InvDQ, yd, k2Method1);
@@ -790,6 +791,8 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method2, controller.k2, epsilon);
       }
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
@@ -809,21 +812,46 @@ public class LQRMomentumControllerTest
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
+         // validate the gammas
+         DenseMatrix64F gamma21ExpectedAlt = new DenseMatrix64F(3, 1);
+         DenseMatrix64F gamma22ExpectedAlt = new DenseMatrix64F(3, 1);
+
+         vrpTrajectory2.getCoefficients(0, coefficients);
+         CommonOps.subtractEquals(coefficients, finalPosition);
+         CommonOps.mult(R1InvDQ, coefficients, gamma21ExpectedAlt);
+         CommonOps.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21ExpectedAlt);
+
+         vrpTrajectory2.getCoefficients(1, coefficients);
+         CommonOps.mult(R1InvDQ, coefficients, gamma22ExpectedAlt);
+         CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22ExpectedAlt);
+
+         MatrixTestTools.assertMatrixEquals(gamma21ExpectedAlt, controller.gammas.get(1).get(0), epsilon);
+         MatrixTestTools.assertMatrixEquals(gamma22ExpectedAlt, controller.gammas.get(1).get(1), epsilon);
+
+         MatrixTestTools.assertMatrixEquals(gamma21ExpectedAlt, gamma21Expected, epsilon);
+         MatrixTestTools.assertMatrixEquals(gamma22ExpectedAlt, gamma22Expected, epsilon);
+
+         // validate the feedback solution
          vrpTrajectory2.compute(time);
          vrpTrajectory2.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps.subtractEquals(yd, finalPosition);
 
          CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
          CommonOps.multAdd(R1InvDQ, yd, k2Method1);
 
+
          tempMatrix.reshape(3, 6);
+         CommonOps.scale(localTime, A2Expected, timeScaledDynamics);
+         matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
          CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps.mult(tempMatrix, controller.alphas.get(1), k2Method2);
+         MatrixTestTools.assertMatrixEquals(matrixExponential, controller.exponential, epsilon);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
 
-         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals("Failed at time " + time + ", local time " + localTime, k2Method1, k2Method2, epsilon);
       }
 
       controller.computeS2(finalTime2);
@@ -1207,10 +1235,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
       }
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
       {
+         int j = 1;
          double localTime = time - finalTime1;
          controller.computeS2(time);
 
@@ -1237,13 +1267,14 @@ public class LQRMomentumControllerTest
 
          tempMatrix.reshape(3, 6);
          CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps.mult(tempMatrix, controller.alphas.get(1), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(1).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(1).get(3));
 
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
@@ -1275,14 +1306,15 @@ public class LQRMomentumControllerTest
 
          tempMatrix.reshape(3, 6);
          CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps.mult(tempMatrix, controller.alphas.get(2), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(2).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(2).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(2).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(2).get(3));
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
       }
 
       controller.computeS2(finalTime3);

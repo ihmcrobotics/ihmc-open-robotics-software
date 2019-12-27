@@ -66,8 +66,8 @@ public class LQRMomentumController
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F K1 = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F K1 = new DenseMatrix64F(3, 6);
+   final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F u = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F QRiccati = new DenseMatrix64F(3, 3);
@@ -299,13 +299,12 @@ public class LQRMomentumController
          CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
       }
 
+      // defined this way, because the R1Inverse BT already has a -0.5 appended.
       tempMatrix.reshape(3, 6);
-      CommonOps.mult(-0.5, R1InverseBTranspose, exponential, tempMatrix);
+      CommonOps.mult(R1InverseBTranspose, exponential, tempMatrix);
       CommonOps.mult(tempMatrix, alphas.get(j), k2);
       for (int i = 0; i <= k; i++)
-      {
          CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
-      }
    }
 
    private final DenseMatrix64F relativeState = new DenseMatrix64F(6, 1);
