@@ -5,11 +5,9 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -62,7 +60,7 @@ public class LQRSphereController implements SphereControllerInterface
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
-      lqrMomentumController.setVrpTrajectory(dcmPlan.getVRPTrajectories());
+      lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
       sphereRobot.getCenterOfMass().get(currentState);
       sphereRobot.getCenterOfMassVelocity().get(3, currentState);
       lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());

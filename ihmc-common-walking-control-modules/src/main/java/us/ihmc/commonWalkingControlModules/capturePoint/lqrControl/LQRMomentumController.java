@@ -6,7 +6,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
@@ -81,7 +80,7 @@ public class LQRMomentumController
    final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
 
-   private List<Trajectory3D> vrpTrajectory;
+   private final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
@@ -113,9 +112,22 @@ public class LQRMomentumController
       CommonOps.transpose(N, NTranspose);
    }
 
-   public void setVrpTrajectory(List<Trajectory3D> vrpTrajectory)
+   public void setVRPTrajectory(List<Trajectory3D> vrpTrajectory)
    {
-      this.vrpTrajectory = vrpTrajectory;
+      relativeVRPTrajectories.clear();
+
+      Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
+      lastTrajectory.compute(lastTrajectory.getFinalTime());
+      lastTrajectory.getPosition().get(finalVRPState);
+
+      for (int i = 0; i < vrpTrajectory.size(); i++)
+      {
+         Trajectory3D trajectory = vrpTrajectory.get(i);
+         Trajectory3D relativeTrajectory = relativeVRPTrajectories.add();
+
+         relativeTrajectory.set(trajectory);
+         relativeTrajectory.offsetTrajectoryPosition(-1.0, finalVRPState);
+      }
    }
 
    void computeS1()
@@ -188,17 +200,17 @@ public class LQRMomentumController
 
       resetParameters();
 
-      for (int j = 0; j < vrpTrajectory.size(); j++)
+      for (int j = 0; j < relativeVRPTrajectories.size(); j++)
       {
          betas.add();
          gammas.add();
          alphas.add().zero();
       }
 
-      int numberOfSegments = vrpTrajectory.size() - 1;
+      int numberOfSegments = relativeVRPTrajectories.size() - 1;
       for (int j = numberOfSegments; j >= 0; j--)
       {
-         Trajectory3D trajectorySegment = vrpTrajectory.get(j);
+         Trajectory3D trajectorySegment = relativeVRPTrajectories.get(j);
          int k = trajectorySegment.getNumberOfCoefficients() - 1;
          for (int i = 0; i <= k; i++)
          {
@@ -237,7 +249,7 @@ public class LQRMomentumController
          }
 
          // TODO this should be checked because it kind of seems wrong.
-         double duration = vrpTrajectory.get(j).getDuration();
+         double duration = relativeVRPTrajectories.get(j).getDuration();
          summedBetas.zero();
          for (int i = 0; i <= k; i++)
             CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
@@ -281,7 +293,7 @@ public class LQRMomentumController
       matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
 
       CommonOps.mult(exponential, alphas.get(j), s2);
-      int k = vrpTrajectory.get(j).getNumberOfCoefficients() - 1;
+      int k = relativeVRPTrajectories.get(j).getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
       {
          CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
@@ -297,7 +309,7 @@ public class LQRMomentumController
    }
 
    private final DenseMatrix64F relativeState = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F relativeVRPPosition = new DenseMatrix64F(3, 1);
+   private final DenseMatrix64F finalVRPState = new DenseMatrix64F(6, 1);
 
    public void computeControlInput(DenseMatrix64F currentState, double time)
    {
@@ -305,19 +317,12 @@ public class LQRMomentumController
       computeS2(time);
 
       relativeState.set(currentState);
-      Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(lastTrajectory.getFinalTime());
-      Point3DReadOnly finalPosition = lastTrajectory.getPosition();
       int activeSegment = getSegmentNumber(time);
-      Trajectory3D currentTrajectory = vrpTrajectory.get(activeSegment);
+      Trajectory3D currentTrajectory = relativeVRPTrajectories.get(activeSegment);
       currentTrajectory.compute(time);
-      Point3DReadOnly currentVRPPosition = currentTrajectory.getPosition();
 
       for (int i = 0; i < 3; i++)
-      {
-         relativeState.add(i, 0, -finalPosition.getElement(i));
-         relativeVRPPosition.set(i, 0, currentVRPPosition.getElement(i) - finalPosition.getElement(i));
-      }
+         relativeState.add(i, 0, -finalVRPState.get(i));
 
       // K1 = -R1inv NB
       CommonOps.mult(-1.0, R1Inverse, NB, K1);
@@ -359,9 +364,9 @@ public class LQRMomentumController
 
    private int getSegmentNumber(double time)
    {
-      for (int i = 0; i < vrpTrajectory.size(); i++)
+      for (int i = 0; i < relativeVRPTrajectories.size(); i++)
       {
-         if (time <= vrpTrajectory.get(i).getFinalTime())
+         if (time <= relativeVRPTrajectories.get(i).getFinalTime())
             return i;
       }
 
@@ -370,6 +375,6 @@ public class LQRMomentumController
 
    private double computeTimeInSegment(double time, int segment)
    {
-      return time - vrpTrajectory.get(segment).getInitialTime();
+      return time - relativeVRPTrajectories.get(segment).getInitialTime();
    }
 }

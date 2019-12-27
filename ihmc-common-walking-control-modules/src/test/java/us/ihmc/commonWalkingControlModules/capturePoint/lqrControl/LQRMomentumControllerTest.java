@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.apache.batik.ext.awt.geom.Linear;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -35,7 +34,7 @@ public class LQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
-      controller.setVrpTrajectory(trajectories);
+      controller.setVRPTrajectory(trajectories);
 
       DenseMatrix64F AExpected = new DenseMatrix64F(6, 6);
       AExpected.set(0, 3, 1.0);
@@ -186,7 +185,10 @@ public class LQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
-      controller.setVrpTrajectory(trajectories);
+      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalPosition);
+
+      controller.setVRPTrajectory(trajectories);
 
       controller.computeS1();
       controller.computeS2Parameters();
@@ -235,6 +237,9 @@ public class LQRMomentumControllerTest
       DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
+      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
 
       CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
       CommonOps.mult(controller.D, controller.Q, DQ);
@@ -260,6 +265,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
 
       vrpTrajectory.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta2Expected, beta1Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
 
@@ -292,6 +298,9 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
+      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalY);
+
       for (double time = 0.0; time <= finalTime; time += 0.01)
       {
          controller.computeS2(time);
@@ -304,12 +313,46 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta1Expected);
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta2Expected);
 
+         DenseMatrix64F gamma1ExpectedAlt = new DenseMatrix64F(3, 1);
+         DenseMatrix64F gamma2ExpectedAlt = new DenseMatrix64F(3, 1);
+
+         vrpTrajectory.getCoefficients(0, coefficients);
+         CommonOps.subtractEquals(coefficients, finalPosition);
+         CommonOps.mult(R1InvDQ, coefficients, gamma1ExpectedAlt);
+         CommonOps.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1ExpectedAlt);
+
+         vrpTrajectory.getCoefficients(1, coefficients);
+         CommonOps.mult(R1InvDQ, coefficients, gamma2ExpectedAlt);
+         CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2ExpectedAlt);
+
          EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
          EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
          EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
          EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
+         EjmlUnitTests.assertEquals(beta1Expected, controller.betas.get(0).get(0), epsilon);
+         EjmlUnitTests.assertEquals(beta2Expected, controller.betas.get(0).get(1), epsilon);
+         EjmlUnitTests.assertEquals(gamma1ExpectedAlt, gamma1Expected, epsilon);
+         EjmlUnitTests.assertEquals(gamma2ExpectedAlt, gamma2Expected, epsilon);
+         EjmlUnitTests.assertEquals(gamma1Expected, controller.gammas.get(0).get(0), epsilon);
+         EjmlUnitTests.assertEquals(gamma2Expected, controller.gammas.get(0).get(1), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory.compute(time);
+         vrpTrajectory.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -332,7 +375,10 @@ public class LQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
-      controller.setVrpTrajectory(trajectories);
+      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalPosition);
+
+      controller.setVRPTrajectory(trajectories);
 
       controller.computeS1();
       controller.computeS2Parameters();
@@ -381,6 +427,9 @@ public class LQRMomentumControllerTest
       DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
+      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
 
       CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
       CommonOps.mult(controller.D, controller.Q, DQ);
@@ -424,6 +473,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
 
       vrpTrajectory.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta2Expected, beta1Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
 
@@ -462,6 +512,9 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
+      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalY);
+
       for (double time = 0.0; time <= finalTime; time += 0.01)
       {
          controller.computeS2(time);
@@ -482,6 +535,24 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory.compute(time);
+         vrpTrajectory.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -509,7 +580,10 @@ public class LQRMomentumControllerTest
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
 
-      controller.setVrpTrajectory(trajectories);
+      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalPosition);
+
+      controller.setVRPTrajectory(trajectories);
 
       controller.computeS1();
       controller.computeS2Parameters();
@@ -558,6 +632,9 @@ public class LQRMomentumControllerTest
       DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
+      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
 
       CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
       CommonOps.mult(controller.D, controller.Q, DQ);
@@ -589,6 +666,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
 
       vrpTrajectory2.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta22Expected, beta21Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
 
@@ -609,6 +687,7 @@ public class LQRMomentumControllerTest
 
 
       vrpTrajectory1.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta12Expected, beta11Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
 
@@ -674,6 +753,9 @@ public class LQRMomentumControllerTest
 
       EjmlUnitTests.assertEquals(s2EndOf1, s2StartOf2, epsilon);
 
+      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalY);
+
       for (double time = 0; time <= finalTime1; time += 0.01)
       {
          controller.computeS2(time);
@@ -692,6 +774,22 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory1.compute(time);
+         vrpTrajectory1.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
@@ -710,6 +808,22 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory2.compute(time);
+         vrpTrajectory2.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       controller.computeS2(finalTime2);
@@ -742,7 +856,10 @@ public class LQRMomentumControllerTest
       trajectories.add(vrpTrajectory2);
       trajectories.add(vrpTrajectory3);
 
-      controller.setVrpTrajectory(trajectories);
+      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalPosition);
+
+      controller.setVRPTrajectory(trajectories);
 
       // double up on the computation to make sure things get zeroed properly between calls
       controller.computeS1();
@@ -794,6 +911,9 @@ public class LQRMomentumControllerTest
       DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
       DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
+      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
+      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
 
       CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
       CommonOps.mult(controller.D, controller.Q, DQ);
@@ -857,6 +977,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta32Expected, gamma32Expected);
 
       vrpTrajectory3.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta32Expected, beta31Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta31Expected);
 
@@ -894,6 +1015,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
 
       vrpTrajectory2.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta22Expected, beta21Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
 
@@ -930,6 +1052,7 @@ public class LQRMomentumControllerTest
       CommonOps.multAdd(-0.5, R1InvBTrans, beta12Expected, gamma12Expected);
 
       vrpTrajectory1.getCoefficients(0, coefficients);
+      CommonOps.subtractEquals(coefficients, finalPosition);
       CommonOps.mult(A2InverseExpected, beta12Expected, beta11Expected);
       CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
 
@@ -1041,6 +1164,9 @@ public class LQRMomentumControllerTest
 
       EjmlUnitTests.assertEquals(s2EndOf2, s2StartOf3, epsilon);
 
+      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      vrpEnd.get(finalY);
+
       // check trajectory
 
       for (double time = 0; time <= finalTime1; time += 0.01)
@@ -1063,6 +1189,24 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory1.compute(time);
+         vrpTrajectory1.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
@@ -1083,6 +1227,24 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory2.compute(time);
+         vrpTrajectory2.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       for (double time = finalTime2; time <= finalTime3; time += 0.01)
@@ -1103,6 +1265,24 @@ public class LQRMomentumControllerTest
          EjmlUnitTests.assertEquals(alpha3Expected, controller.alphas.get(2), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+
+         vrpTrajectory3.compute(time);
+         vrpTrajectory3.getPosition().get(yd);
+         CommonOps.subtractEquals(yd, finalY);
+
+         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+
+         tempMatrix.reshape(3, 6);
+         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+
+         EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       }
 
       controller.computeS2(finalTime3);
