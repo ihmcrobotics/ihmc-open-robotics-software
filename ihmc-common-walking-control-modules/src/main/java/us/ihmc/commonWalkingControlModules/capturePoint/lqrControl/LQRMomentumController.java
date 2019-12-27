@@ -44,9 +44,9 @@ public class LQRMomentumController
    final DenseMatrix64F C = new DenseMatrix64F(3, 6);
    final DenseMatrix64F D = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F A2 = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F A2Inverse = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
+   final DenseMatrix64F A2 = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F A2Inverse = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
 
    final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F q2 = new DenseMatrix64F(3, 1);
@@ -59,7 +59,7 @@ public class LQRMomentumController
    final DenseMatrix64F N = new DenseMatrix64F(6, 3);
    final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
 
-   private final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
+   final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
    private final DenseMatrix64F rs = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
@@ -75,10 +75,10 @@ public class LQRMomentumController
    final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
 
 
-   private final RecyclingArrayList<DenseMatrix64F> alpha = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
-   private final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
+   final RecyclingArrayList<DenseMatrix64F> alphas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
+   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
-   private final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gamma = new RecyclingArrayList<>(
+   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
 
    private List<Trajectory3D> vrpTrajectory;
@@ -116,13 +116,6 @@ public class LQRMomentumController
    public void setVrpTrajectory(List<Trajectory3D> vrpTrajectory)
    {
       this.vrpTrajectory = vrpTrajectory;
-   }
-
-   public void reset()
-   {
-      alpha.clear();
-      betas.clear();
-      gamma.clear();
    }
 
    void computeS1()
@@ -166,9 +159,9 @@ public class LQRMomentumController
    private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
    private final DenseMatrix64F c = new DenseMatrix64F(3, 1);
 
-   private final DenseMatrix64F exponential = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
+   final DenseMatrix64F exponential = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
 
    void computeS2Parameters()
    {
@@ -193,11 +186,13 @@ public class LQRMomentumController
 
       CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
 
+      resetParameters();
+
       for (int j = 0; j < vrpTrajectory.size(); j++)
       {
          betas.add();
-         gamma.add();
-         alpha.add().zero();
+         gammas.add();
+         alphas.add().zero();
       }
 
       int numberOfSegments = vrpTrajectory.size() - 1;
@@ -208,13 +203,13 @@ public class LQRMomentumController
          for (int i = 0; i <= k; i++)
          {
             betas.get(j).add().zero();
-            gamma.get(j).add().zero();
+            gammas.get(j).add().zero();
          }
 
          // solve for betas and gammas
          trajectorySegment.getCoefficients(k, c);
          DenseMatrix64F betaLocal = betas.get(j).get(k);
-         DenseMatrix64F gammaLocal = gamma.get(j).get(k);
+         DenseMatrix64F gammaLocal = gammas.get(j).get(k);
 
          // betaJK = -A2inv B2 cJK
          CommonOps.mult(A2InverseB2, c, betaLocal);
@@ -227,43 +222,57 @@ public class LQRMomentumController
          for (int i = k - 1; i >= 0; i--)
          {
             betaLocal = betas.get(j).get(i);
-            gammaLocal = gamma.get(j).get(i);
+            gammaLocal = gammas.get(j).get(i);
             trajectorySegment.getCoefficients(i, c);
 
             // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
             CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
-            CommonOps.multAdd(-1.0, A2InverseB2, c, betaLocal);
+            CommonOps.multAdd(A2InverseB2, c, betaLocal);
 
             // gammaJI = R1inv D Q cJI - 0.5 R1Inv B' betaJI
             CommonOps.mult(R1InverseDQ, c, gammaLocal);
-            CommonOps.multAdd(-0.5, R1InverseBTranspose, betaLocal, gammaLocal);
+            CommonOps.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
 
             betaLocalPrevious = betaLocal;
          }
 
          // TODO this should be checked because it kind of seems wrong.
          double duration = vrpTrajectory.get(j).getDuration();
+         summedBetas.zero();
          for (int i = 0; i < k; i++)
-            CommonOps.addEquals(summedBetas, MathTools.pow(duration, i), betas.get(j).get(i));
-         CommonOps.scale(-1.0, summedBetas);
+            CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
 
          if (j == numberOfSegments)
          {
             CommonOps.scale(duration, A2, timeScaledDynamics);
             matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
             solver.setA(exponential);
-            solver.solve(summedBetas, alpha.get(j));
+            solver.solve(summedBetas, alphas.get(j));
          }
          else
          {
             CommonOps.scale(duration, A2, timeScaledDynamics);
             matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
-            CommonOps.addEquals(alpha.get(j + 1), summedBetas);
+            CommonOps.addEquals(alphas.get(j + 1), summedBetas);
             CommonOps.addEquals(betas.get(j + 1).get(1), summedBetas);
             solver.setA(exponential);
-            solver.solve(summedBetas, alpha.get(j));
+            solver.solve(summedBetas, alphas.get(j));
          }
       }
+   }
+
+   private void resetParameters()
+   {
+      for (int i = 0; i < betas.size(); i++)
+         betas.get(i).clear();
+      for (int i = 0; i < gammas.size(); i++)
+         gammas.get(i).clear();
+
+      betas.clear();
+      gammas.clear();
+      alphas.clear();
+
+
    }
 
    void computeS2(double time)
@@ -277,7 +286,7 @@ public class LQRMomentumController
       CommonOps.scale(timeInSegment, A2, timeScaledDynamics);
       matrixExponentialCalculator.compute(exponential, timeScaledDynamics);
 
-      CommonOps.mult(exponential, alpha.get(j), s2);
+      CommonOps.mult(exponential, alphas.get(j), s2);
       int k = vrpTrajectory.get(j).getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
       {
@@ -286,10 +295,10 @@ public class LQRMomentumController
 
       tempMatrix.reshape(3, 6);
       CommonOps.mult(-0.5, R1InverseBTranspose, exponential, tempMatrix);
-      CommonOps.mult(tempMatrix, alpha.get(j), k2);
+      CommonOps.mult(tempMatrix, alphas.get(j), k2);
       for (int i = 0; i <= k; i++)
       {
-         CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gamma.get(j).get(i));
+         CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
       }
    }
 
@@ -358,7 +367,7 @@ public class LQRMomentumController
    {
       for (int i = 0; i < vrpTrajectory.size(); i++)
       {
-         if (time < vrpTrajectory.get(i).getFinalTime())
+         if (time <= vrpTrajectory.get(i).getFinalTime())
             return i;
       }
 
