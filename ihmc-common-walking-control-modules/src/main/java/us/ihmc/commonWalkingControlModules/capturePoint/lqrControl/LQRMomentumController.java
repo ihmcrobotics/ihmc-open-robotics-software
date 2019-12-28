@@ -80,7 +80,7 @@ public class LQRMomentumController
    final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
 
-   private final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
 
@@ -363,10 +363,13 @@ public class LQRMomentumController
 
    private int getSegmentNumber(double time)
    {
+      double timeToStart = 0.0;
       for (int i = 0; i < relativeVRPTrajectories.size(); i++)
       {
-         if (time <= relativeVRPTrajectories.get(i).getFinalTime())
+         double segmentDuration = relativeVRPTrajectories.get(i).getDuration();
+         if (time - timeToStart <= segmentDuration)
             return i;
+         timeToStart += segmentDuration;
       }
 
       return -1;
@@ -374,6 +377,9 @@ public class LQRMomentumController
 
    private double computeTimeInSegment(double time, int segment)
    {
-      return time - relativeVRPTrajectories.get(segment).getInitialTime();
+      double timeOffset = 0.0;
+      for (int i = 0; i < segment - 1; i++)
+         timeOffset += relativeVRPTrajectories.get(i).getDuration();
+      return time - timeOffset;
    }
 }
