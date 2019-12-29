@@ -25,13 +25,13 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FramePoint3D initialCoMPosition = new FramePoint3D();
 
    private final RecyclingArrayList<FramePoint3D> dcmCornerPointPool = new RecyclingArrayList<>(FramePoint3D::new);
-   private final List<FramePoint3D> dcmCornerPoints = new ArrayList<>();
+   final List<FramePoint3D> dcmCornerPoints = new ArrayList<>();
    private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    private final RecyclingArrayList<LineSegment3D> vrpWaypointPools = new RecyclingArrayList<>(LineSegment3D::new);
    private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
    private final List<LineSegment3D> vrpWaypoints = new ArrayList<>();
 
-   private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final DoubleProvider omega0;
 
@@ -103,8 +103,6 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       for (int i = contactSequence.size() - 1; i >= 0; i--)
       {
          ContactStateProvider contact = contactSequence.get(i);
-         double initialTime = contact.getTimeInterval().getStartTime();
-         double finalTime = contact.getTimeInterval().getEndTime();
          double duration = contact.getTimeInterval().getDuration();
 
          finalVRP.set(contact.getCopEndPosition());
@@ -120,7 +118,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          Trajectory3D vrpTrajectory = vrpTrajectoryPool.add();
          vrpTrajectories.add(vrpTrajectory);
          vrpWaypoints.add(vrpSegment);
-         vrpTrajectory.setLinear(initialTime, finalTime, startVRP, finalVRP);
+         vrpTrajectory.setLinear(0, duration, startVRP, finalVRP);
          vrpSegment.set(startVRP, finalVRP);
 
          finalDCM = nextCornerPoint;
@@ -173,9 +171,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       double omega = omega0.getValue();
 
       double duration = vrpTrajectory.getDuration();
-      double globalTime = MathTools.clamp(timeInPhase + vrpTrajectory.getInitialTime(), vrpTrajectory.getInitialTime(), vrpTrajectory.getFinalTime());
 
-      vrpTrajectory.compute(globalTime);
+      vrpTrajectory.compute(timeInPhase);
 
       FramePoint3DReadOnly initialDCM = dcmCornerPoints.get(segmentId);
       FramePoint3DReadOnly initialCoM = comCornerPoints.get(segmentId);
