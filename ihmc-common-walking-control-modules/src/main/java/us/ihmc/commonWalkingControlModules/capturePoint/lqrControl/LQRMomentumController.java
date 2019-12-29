@@ -6,11 +6,16 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.linearAlgebra.careSolvers.*;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.List;
 
@@ -30,9 +35,17 @@ import java.util.List;
  */
 public class LQRMomentumController
 {
-   static final double omega = 1.0;
-   static final double defaultVrpTrackingWeight = 1.0;
-   static final double defaultMomentumRateWeight = 1.0;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D relativeCoMPosition = new YoFramePoint3D("relativeCoMPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D relativeCoMVelocity = new YoFrameVector3D("relativeCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+   static final double defaultVrpTrackingWeight = 1e2;
+   static final double defaultMomentumRateWeight = 1e-8;
+
+   private double vrpTrackingWeight = defaultVrpTrackingWeight;
+   private double momentumRateWeight = defaultMomentumRateWeight;
 
    final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
    final DenseMatrix64F R = new DenseMatrix64F(3, 3);
@@ -48,31 +61,28 @@ public class LQRMomentumController
    final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
 
    final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F q2 = new DenseMatrix64F(3, 1);
-   private double q3;
 
    final DenseMatrix64F R1 = new DenseMatrix64F(3, 3);
    final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F r2 = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F N = new DenseMatrix64F(6, 3);
    final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
 
    final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
-   private final DenseMatrix64F rs = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
    private final DenseMatrix64F s2 = new DenseMatrix64F(6, 1);
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
 
-   private final DenseMatrix64F K1 = new DenseMatrix64F(3, 6);
+   final DenseMatrix64F K1 = new DenseMatrix64F(3, 6);
    final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F u = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F QRiccati = new DenseMatrix64F(3, 3);
    final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
 
+   private final DenseMatrix64F finalVRPState = new DenseMatrix64F(6, 1);
 
    final RecyclingArrayList<DenseMatrix64F> alphas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
    final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
@@ -87,29 +97,29 @@ public class LQRMomentumController
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
    private final CARESolver careSolver = new DefectCorrectionCARESolver(new SignFunctionCARESolver());
 
-   public LQRMomentumController()
+   public LQRMomentumController(DoubleProvider omega)
    {
-      CommonOps.setIdentity(Q);
-      CommonOps.setIdentity(R);
-      CommonOps.scale(defaultVrpTrackingWeight, Q);
-      CommonOps.scale(defaultMomentumRateWeight, R);
+      this(omega, null);
+   }
 
+   public LQRMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
+   {
       MatrixTools.setMatrixBlock(A, 0, 3, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(B, 3, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(C, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega));
+      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega.getValue()));
 
       CommonOps.invert(A, AInverse);
-      NativeCommonOps.multQuad(C, Q, Q1);
-      NativeCommonOps.multQuad(D, Q, R1);
-      CommonOps.addEquals(R1, R);
-
-      CommonOps.invert(R1, R1Inverse);
 
       tempMatrix.reshape(3, 3);
       CommonOps.mult(Q, D, tempMatrix);
       CommonOps.multTransA(C, tempMatrix, N);
       CommonOps.transpose(N, NTranspose);
+
+      computeS1();
+
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void setVRPTrajectory(List<Trajectory3D> vrpTrajectory)
@@ -132,6 +142,15 @@ public class LQRMomentumController
 
    void computeS1()
    {
+      MatrixTools.setDiagonal(Q, vrpTrackingWeight);
+      MatrixTools.setDiagonal(R, momentumRateWeight);
+
+      NativeCommonOps.multQuad(C, Q, Q1);
+      NativeCommonOps.multQuad(D, Q, R1);
+      CommonOps.addEquals(R1, R);
+
+      CommonOps.invert(R1, R1Inverse);
+
       /*
         A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
         or
@@ -163,23 +182,14 @@ public class LQRMomentumController
       CARETools.computeM(BTranspose, R1, R1Inverse, S);
       CARETools.computeRiccatiRate(P, ARiccati, QRiccati, S, PDot);
       S1.set(P);
-   }
 
-   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseDQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
-   private final DenseMatrix64F c = new DenseMatrix64F(3, 1);
-
-   final DenseMatrix64F exponential = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
-
-   void computeS2Parameters()
-   {
+      // all the below stuff is constant
       // Nb = N' + B' S1
       CommonOps.transpose(N, NB);
       CommonOps.multAddTransA(B, S1, NB);
+
+      // K1 = -R1inv NB
+      CommonOps.mult(-1.0, R1Inverse, NB, K1);
 
       // A2 = Nb' R1inv B' - A'
       tempMatrix.reshape(3, 6);
@@ -197,8 +207,28 @@ public class LQRMomentumController
       CommonOps.mult(-1.0, A2Inverse, B2, A2InverseB2);
 
       CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
+   }
 
-      resetParameters();
+   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
+   private final DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F R1InverseDQ = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
+   private final DenseMatrix64F c = new DenseMatrix64F(3, 1);
+
+   final DenseMatrix64F exponential = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
+
+   private void resetParameters()
+   {
+      for (int i = 0; i < betas.size(); i++)
+         betas.get(i).clear();
+      for (int i = 0; i < gammas.size(); i++)
+         gammas.get(i).clear();
+
+      betas.clear();
+      gammas.clear();
+      alphas.clear();
 
       for (int j = 0; j < relativeVRPTrajectories.size(); j++)
       {
@@ -206,6 +236,11 @@ public class LQRMomentumController
          gammas.add();
          alphas.add().zero();
       }
+   }
+
+   void computeS2Parameters()
+   {
+      resetParameters();
 
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
       for (int j = numberOfSegments; j >= 0; j--)
@@ -237,6 +272,9 @@ public class LQRMomentumController
             gammaLocal = gammas.get(j).get(i);
             trajectorySegment.getCoefficients(i, c);
 
+            if (c.get(2, 0) != 0.0)
+               throw new RuntimeException("WHat?");
+
             // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
             CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
             CommonOps.multAdd(A2InverseB2, c, betaLocal);
@@ -248,7 +286,6 @@ public class LQRMomentumController
             betaLocalPrevious = betaLocal;
          }
 
-         // TODO this should be checked because it kind of seems wrong.
          double duration = relativeVRPTrajectories.get(j).getDuration();
          summedBetas.zero();
          for (int i = 0; i <= k; i++)
@@ -265,20 +302,6 @@ public class LQRMomentumController
          solver.setA(exponential);
          solver.solve(summedBetas, alphas.get(j));
       }
-   }
-
-   private void resetParameters()
-   {
-      for (int i = 0; i < betas.size(); i++)
-         betas.get(i).clear();
-      for (int i = 0; i < gammas.size(); i++)
-         gammas.get(i).clear();
-
-      betas.clear();
-      gammas.clear();
-      alphas.clear();
-
-
    }
 
    void computeS2(double time)
@@ -305,45 +328,29 @@ public class LQRMomentumController
       CommonOps.mult(tempMatrix, alphas.get(j), k2);
       for (int i = 0; i <= k; i++)
          CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
+
+      yoK2.set(k2);
    }
 
    private final DenseMatrix64F relativeState = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F finalVRPState = new DenseMatrix64F(6, 1);
 
    public void computeControlInput(DenseMatrix64F currentState, double time)
    {
-      computeS1();
+//      computeS1();
       computeS2(time);
 
       relativeState.set(currentState);
-      int activeSegment = getSegmentNumber(time);
-      Trajectory3D currentTrajectory = relativeVRPTrajectories.get(activeSegment);
-      currentTrajectory.compute(time);
-
       for (int i = 0; i < 3; i++)
          relativeState.add(i, 0, -finalVRPState.get(i));
 
-      // K1 = -R1inv NB
-      CommonOps.mult(-1.0, R1Inverse, NB, K1);
+      relativeCoMPosition.set(relativeState);
+      relativeCoMVelocity.set(3, relativeState);
 
       // u = K1 relativeX + k2
       CommonOps.mult(K1, relativeState, u);
+      feedbackForce.set(u);
+
       CommonOps.addEquals(u, k2);
-
-      /*
-      // r2 = -2 D Q relativeVRP
-      tempMatrix.reshape(3, 1);
-      CommonOps.mult(Q, relativeVRPPosition, tempMatrix);
-      CommonOps.mult(-2.0, D, tempMatrix, r2);
-
-      // rs = 0.5 (r2 + B' s2)
-      CommonOps.scale(0.5, r2, rs);
-      CommonOps.multAddTransA(B, s2, rs);
-
-
-      // u = -R1inv (NB relativeX + rs
-      CommonOps.multAdd(-1.0, R1Inverse, rs, u);
-       */
    }
 
    public DenseMatrix64F getU()

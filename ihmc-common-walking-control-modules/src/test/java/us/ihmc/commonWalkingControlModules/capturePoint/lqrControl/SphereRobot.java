@@ -68,11 +68,13 @@ public class SphereRobot
    private final double totalMass;
    private final double controlDT;
    private final double desiredHeight;
+   private final double gravityZ;
 
    public SphereRobot(String name, double gravity, double controlDt, double desiredHeight, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDt;
       this.desiredHeight = desiredHeight;
+      this.gravityZ = Math.abs(gravity);
 
       elevator = new RigidBody(name + "_elevator", worldFrame);
       floatingJoint = new SixDoFJoint(name + "_floatingJoint", elevator);
@@ -158,6 +160,11 @@ public class SphereRobot
    public double getTotalMass()
    {
       return totalMass;
+   }
+
+   public double getGravityZ()
+   {
+      return gravityZ;
    }
 
    public RigidBodyBasics getElevator()

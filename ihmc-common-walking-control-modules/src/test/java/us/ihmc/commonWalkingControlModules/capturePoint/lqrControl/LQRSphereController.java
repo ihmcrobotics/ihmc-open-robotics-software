@@ -41,7 +41,7 @@ public class LQRSphereController implements SphereControllerInterface
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRMomentumController();
+      lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
    }
 
    private final DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
@@ -52,7 +52,7 @@ public class LQRSphereController implements SphereControllerInterface
       scsRobot.updateJointPositions_SCS_to_ID();
       scsRobot.updateJointVelocities_SCS_to_ID();
 
-      sphereRobot.getScsRobot().update();
+      sphereRobot.updateFrames();
 
       int segmentNumber = getSegmentNumber();
       dcmPlan.compute(segmentNumber, getTimeInPhase(segmentNumber));
@@ -66,6 +66,7 @@ public class LQRSphereController implements SphereControllerInterface
       lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
 
       lqrForce.set(lqrMomentumController.getU());
+      lqrForce.addZ(sphereRobot.getGravityZ());
       lqrForce.scale(sphereRobot.getTotalMass());
 
       externalForcePoint.setForce(lqrForce);
