@@ -378,7 +378,7 @@ public class LQRMomentumController
    private double computeTimeInSegment(double time, int segment)
    {
       double timeOffset = 0.0;
-      for (int i = 0; i < segment - 1; i++)
+      for (int i = 0; i < segment; i++)
          timeOffset += relativeVRPTrajectories.get(i).getDuration();
       return time - timeOffset;
    }

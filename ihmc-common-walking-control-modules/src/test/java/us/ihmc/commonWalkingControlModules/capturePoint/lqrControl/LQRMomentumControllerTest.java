@@ -924,7 +924,9 @@ public class LQRMomentumControllerTest
 
          EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
 
-         EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
+         MatrixTestTools.assertMatrixEquals("Beta 1 calculation failed at time " + time, beta21Expected, controller.betas.get(1).get(0), epsilon);
+         MatrixTestTools.assertMatrixEquals("Beta 2 calculation failed at time " + time, beta22Expected, controller.betas.get(1).get(1), epsilon);
+         MatrixTestTools.assertMatrixEquals("S2 calculation failed at time " + time, s2Expected, controller.getCostJacobian(), epsilon);
 
          // validate the gammas
          DenseMatrix64F gamma21ExpectedAlt = new DenseMatrix64F(3, 1);
@@ -946,7 +948,7 @@ public class LQRMomentumControllerTest
          MatrixTestTools.assertMatrixEquals(gamma22ExpectedAlt, gamma22Expected, epsilon);
 
          // validate the feedback solution
-         vrpTrajectory2.compute(time);
+         vrpTrajectory2.compute(localTime);
          vrpTrajectory2.getPosition().get(yd);
          CommonOps.subtractEquals(yd, finalPosition);
 
@@ -964,7 +966,7 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
 
-         MatrixTestTools.assertMatrixEquals("Failed at time " + time + ", local time " + localTime, k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
       }
 
@@ -991,8 +993,8 @@ public class LQRMomentumControllerTest
       double finalTime2 = 3.1;
       double finalTime3 = 3.97;
       vrpTrajectory1.setCubic(0.0, finalTime1, vrpStart, vrpMiddle);
-      vrpTrajectory2.setCubic(finalTime1, finalTime2, vrpMiddle, vrpMiddle2);
-      vrpTrajectory3.setCubic(finalTime2, finalTime3, vrpMiddle2, vrpEnd);
+      vrpTrajectory2.setCubic(0.0, finalTime2 - finalTime1, vrpMiddle, vrpMiddle2);
+      vrpTrajectory3.setCubic(0.0, finalTime3 - finalTime2, vrpMiddle2, vrpEnd);
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
@@ -1372,7 +1374,7 @@ public class LQRMomentumControllerTest
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
-         vrpTrajectory2.compute(time);
+         vrpTrajectory2.compute(localTime);
          vrpTrajectory2.getPosition().get(yd);
          CommonOps.subtractEquals(yd, finalY);
 
@@ -1411,7 +1413,7 @@ public class LQRMomentumControllerTest
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
-         vrpTrajectory3.compute(time);
+         vrpTrajectory3.compute(localTime);
          vrpTrajectory3.getPosition().get(yd);
          CommonOps.subtractEquals(yd, finalY);
 
