@@ -6,7 +6,15 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -1438,5 +1446,65 @@ public class LQRMomentumControllerTest
       // should be zero at tf
       DenseMatrix64F zeroMatrix = new DenseMatrix64F(6, 1);
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
+   }
+
+   @Test
+   public void testBasicTrajectoryTracking()
+   {
+      SimpleCoMTrajectoryPlanner planner = new SimpleCoMTrajectoryPlanner(() -> 3.0);
+      LQRMomentumController controller = new LQRMomentumController();
+
+      List<SettableContactStateProvider> contactSequence = new ArrayList<>();
+
+      SettableContactStateProvider firstContact = new SettableContactStateProvider();
+      SettableContactStateProvider secondContact = new SettableContactStateProvider();
+      SettableContactStateProvider thirdContact = new SettableContactStateProvider();
+
+      FramePoint2D vrpStart = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      FramePoint2D vrpMiddle = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.6, 0.75);
+      FramePoint2D vrpMiddle2 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.79, 0.88);
+      FramePoint2D vrpEnd = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, 0.5);
+
+      double finalTime1 = 1.5;
+      double finalTime2 = 3.1;
+      double finalTime3 = 3.97;
+
+      firstContact.getTimeInterval().setInterval(0.0, finalTime1);
+      firstContact.setStartCopPosition(vrpStart);
+      firstContact.setEndCopPosition(vrpMiddle);
+
+      secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
+      secondContact.setStartCopPosition(vrpMiddle);
+      secondContact.setEndCopPosition(vrpMiddle2);
+
+      thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
+      thirdContact.setStartCopPosition(vrpMiddle2);
+      thirdContact.setEndCopPosition(vrpEnd);
+
+      contactSequence.add(firstContact);
+      contactSequence.add(secondContact);
+      contactSequence.add(thirdContact);
+
+      planner.setNominalCoMHeight(1.0);
+      planner.solveForTrajectory(contactSequence);
+
+      controller.setVRPTrajectory(planner.getVRPTrajectories());
+
+      double time = 0.3;
+      planner.compute(time);
+      FramePoint3DReadOnly comPosition = planner.getDesiredCoMPosition();
+      FrameVector3DReadOnly comVelocity = planner.getDesiredCoMVelocity();
+
+      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      comPosition.get(currentState);
+      comVelocity.get(3, currentState);
+
+      controller.computeControlInput(currentState, time);
+
+      FrameVector3DReadOnly nominalCoMAcceleration = planner.getDesiredCoMAcceleration();
+      DenseMatrix64F expectedAcceleration = new DenseMatrix64F(3, 1);
+      nominalCoMAcceleration.get(expectedAcceleration);
+
+      EjmlUnitTests.assertEquals(expectedAcceleration, controller.getU(), epsilon);
    }
 }
