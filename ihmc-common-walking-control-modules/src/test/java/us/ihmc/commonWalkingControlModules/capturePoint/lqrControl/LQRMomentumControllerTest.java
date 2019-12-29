@@ -12,9 +12,11 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoM
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -29,12 +31,13 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class LQRMomentumControllerTest
 {
+   private static final double omega = 3.0;
    private static final double epsilon = 1e-10;
 
    @Test
    public void testComputingS1()
    {
-      LQRMomentumController controller = new LQRMomentumController();
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -63,9 +66,9 @@ public class LQRMomentumControllerTest
 
       DenseMatrix64F DExpected = new DenseMatrix64F(3, 3);
 
-      DExpected.set(0, 0, -1.0 / MathTools.square(LQRMomentumController.omega));
-      DExpected.set(1, 1, -1.0 / MathTools.square(LQRMomentumController.omega));
-      DExpected.set(2, 2, -1.0 / MathTools.square(LQRMomentumController.omega));
+      DExpected.set(0, 0, -1.0 / MathTools.square(omega));
+      DExpected.set(1, 1, -1.0 / MathTools.square(omega));
+      DExpected.set(2, 2, -1.0 / MathTools.square(omega));
 
       EjmlUnitTests.assertEquals(AExpected, controller.A, epsilon);
       EjmlUnitTests.assertEquals(BExpected, controller.B, epsilon);
@@ -141,7 +144,6 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(ARiccatiExpected, controller.ARiccati, epsilon);
 
 
-      Random random = new Random(1738L);
       DenseMatrix64F S1 = controller.S1;
 //      DenseMatrix64F S1Constructor = new DenseMatrix64F(6, 6);
 //      S1Constructor.setData(RandomNumbers.nextDoubleArray(random, 36, 10.0));
@@ -184,7 +186,8 @@ public class LQRMomentumControllerTest
    @Test
    public void testComputingS2FromSingleLinearTrajectory()
    {
-      LQRMomentumController controller = new LQRMomentumController();
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
+      controller.computeS1();
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -361,8 +364,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -375,7 +382,7 @@ public class LQRMomentumControllerTest
    @Test
    public void testComputingS2FromSingleCubicTrajectory()
    {
-      LQRMomentumController controller = new LQRMomentumController();
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpEnd = new Point3D(1.0, 0.5, 1.0);
@@ -431,6 +438,11 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(A2Expected, controller.A2, epsilon);
       EjmlUnitTests.assertEquals(B2Expected, controller.B2, epsilon);
       EjmlUnitTests.assertEquals(A2InverseExpected, controller.A2Inverse, epsilon);
+
+      DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+      CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
+      MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
 
 
       DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
@@ -562,9 +574,13 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
+         K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method2, controller.k2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       controller.computeS2(finalTime);
@@ -577,7 +593,7 @@ public class LQRMomentumControllerTest
    @Test
    public void testComputingS2FromTwoLinearTrajectories()
    {
-      LQRMomentumController controller = new LQRMomentumController();
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpMiddle = new Point3D(0.6, 0.75, 1.0);
@@ -911,9 +927,14 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
+
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method2, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       // check the actual trajectory for every time step of the second trajectory
@@ -974,8 +995,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
 
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          MatrixTestTools.assertMatrixEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       controller.computeS2(finalTime2);
@@ -988,7 +1013,7 @@ public class LQRMomentumControllerTest
    @Test
    public void testComputingS2FromThreeCubicTrajectories()
    {
-      LQRMomentumController controller = new LQRMomentumController();
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
 
       Point3D vrpStart = new Point3D(0.0, 0.0, 1.0);
       Point3D vrpMiddle = new Point3D(0.6, 0.75, 0.87);
@@ -1358,8 +1383,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
          CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
@@ -1398,8 +1427,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(1).get(2));
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(1).get(3));
 
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       for (double time = finalTime2; time <= finalTime3; time += 0.01)
@@ -1437,8 +1470,12 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(2).get(2));
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(2).get(3));
 
+         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
+         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
+         MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
       }
 
       controller.computeS2(finalTime3);
@@ -1451,8 +1488,8 @@ public class LQRMomentumControllerTest
    @Test
    public void testBasicTrajectoryTracking()
    {
-      SimpleCoMTrajectoryPlanner planner = new SimpleCoMTrajectoryPlanner(() -> 3.0);
-      LQRMomentumController controller = new LQRMomentumController();
+      SimpleCoMTrajectoryPlanner planner = new SimpleCoMTrajectoryPlanner(() -> omega);
+      LQRMomentumController controller = new LQRMomentumController(() -> omega);
 
       List<SettableContactStateProvider> contactSequence = new ArrayList<>();
 
@@ -1465,9 +1502,9 @@ public class LQRMomentumControllerTest
       FramePoint2D vrpMiddle2 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.79, 0.88);
       FramePoint2D vrpEnd = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, 0.5);
 
-      double finalTime1 = 1.5;
-      double finalTime2 = 3.1;
-      double finalTime3 = 3.97;
+      double finalTime1 = 0.05;
+      double finalTime2 = 0.1;
+      double finalTime3 = 0.15;
 
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
       firstContact.setStartCopPosition(vrpStart);
@@ -1482,29 +1519,52 @@ public class LQRMomentumControllerTest
       thirdContact.setEndCopPosition(vrpEnd);
 
       contactSequence.add(firstContact);
-      contactSequence.add(secondContact);
-      contactSequence.add(thirdContact);
+//      contactSequence.add(secondContact);
+      //      contactSequence.add(thirdContact);
 
-      planner.setNominalCoMHeight(1.0);
+      double nominalHeight = 1.0;
+      FramePoint3D initialComPosition = new FramePoint3D();
+      initialComPosition.setZ(nominalHeight);
+      planner.setNominalCoMHeight(nominalHeight);
+      planner.setInitialCenterOfMassState(initialComPosition, new FrameVector3D());
       planner.solveForTrajectory(contactSequence);
+      double time = 0.0;
+      planner.compute(time);
 
       controller.setVRPTrajectory(planner.getVRPTrajectories());
 
-      double time = 0.3;
-      planner.compute(time);
-      FramePoint3DReadOnly comPosition = planner.getDesiredCoMPosition();
-      FrameVector3DReadOnly comVelocity = planner.getDesiredCoMVelocity();
+      double dt = 5e-7;
+      FramePoint3D comPosition = new FramePoint3D(planner.getDesiredCoMPosition());
+      FrameVector3D comVelocity = new FrameVector3D(planner.getDesiredCoMVelocity());
+      FrameVector3D previousVelocity = new FrameVector3D();
+      FrameVector3D previousAcceleration = new FrameVector3D();
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
-      comPosition.get(currentState);
-      comVelocity.get(3, currentState);
+      for (; time <= finalTime1; time += dt)
+      {
+         DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+         comPosition.get(currentState);
+         comVelocity.get(3, currentState);
 
-      controller.computeControlInput(currentState, time);
+         controller.computeControlInput(currentState, time);
 
-      FrameVector3DReadOnly nominalCoMAcceleration = planner.getDesiredCoMAcceleration();
-      DenseMatrix64F expectedAcceleration = new DenseMatrix64F(3, 1);
-      nominalCoMAcceleration.get(expectedAcceleration);
+         FrameVector3D acceleration = new FrameVector3D();
+         acceleration.set(controller.getU());
 
-      EjmlUnitTests.assertEquals(expectedAcceleration, controller.getU(), epsilon);
+         comVelocity.scaleAdd(0.5 * dt, previousAcceleration, comVelocity);
+         comVelocity.scaleAdd(0.5 * dt, acceleration, comVelocity);
+         comPosition.scaleAdd(0.5 * dt, previousVelocity, comPosition);
+         comPosition.scaleAdd(0.5 * dt, comVelocity, comPosition);
+
+         previousAcceleration.set(acceleration);
+         previousVelocity.set(comVelocity);
+      }
+
+      FramePoint3D finalPosition = new FramePoint3D(vrpMiddle);
+      finalPosition.addZ(nominalHeight);
+
+      FramePoint3D icpPosition = new FramePoint3D();
+      icpPosition.scaleAdd(1.0 / omega, comVelocity, comPosition);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalPosition, icpPosition, 1e-5);
    }
 }
