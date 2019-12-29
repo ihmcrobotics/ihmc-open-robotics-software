@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
