@@ -28,7 +28,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 public class LQRMomentumControllerTest
 {
    private static final double omega = 3.0;
-   private static final double epsilon = 1e-10;
+   private static final double epsilon = 1e-9;
 
    @Test
    public void testComputingS1()
@@ -225,12 +225,12 @@ public class LQRMomentumControllerTest
       CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
       CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(3, 3);
+      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
       tempMatrix.reshape(6, 3);
       CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.mult(-1.0, controller.D, controller.Q, tempMatrix2);
-      CommonOps.mult(tempMatrix, tempMatrix2, B2Expected);
-      CommonOps.multAddTransA(2.0, controller.C, controller.Q, B2Expected);
+      CommonOps.transpose(controller.C, tempMatrix2);
+      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -420,12 +420,12 @@ public class LQRMomentumControllerTest
       CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
       CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(3, 3);
+      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
       tempMatrix.reshape(6, 3);
       CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.mult(-1.0, controller.D, controller.Q, tempMatrix2);
-      CommonOps.mult(tempMatrix, tempMatrix2, B2Expected);
-      CommonOps.multAddTransA(2.0, controller.C, controller.Q, B2Expected);
+      CommonOps.transpose(controller.C, tempMatrix2);
+      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -636,12 +636,12 @@ public class LQRMomentumControllerTest
       CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
       CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(3, 3);
+      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
       tempMatrix.reshape(6, 3);
       CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.mult(-1.0, controller.D, controller.Q, tempMatrix2);
-      CommonOps.mult(tempMatrix, tempMatrix2, B2Expected);
-      CommonOps.multAddTransA(2.0, controller.C, controller.Q, B2Expected);
+      CommonOps.transpose(controller.C, tempMatrix2);
+      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -1064,12 +1064,12 @@ public class LQRMomentumControllerTest
       CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
       CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(3, 3);
+      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
       tempMatrix.reshape(6, 3);
       CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.mult(-1.0, controller.D, controller.Q, tempMatrix2);
-      CommonOps.mult(tempMatrix, tempMatrix2, B2Expected);
-      CommonOps.multAddTransA(2.0, controller.C, controller.Q, B2Expected);
+      CommonOps.transpose(controller.C, tempMatrix2);
+      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -1498,9 +1498,9 @@ public class LQRMomentumControllerTest
       FramePoint2D vrpMiddle2 = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.79, 0.88);
       FramePoint2D vrpEnd = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, 0.5);
 
-      double finalTime1 = 0.05;
-      double finalTime2 = 0.1;
-      double finalTime3 = 0.15;
+      double finalTime1 = 0.31;
+      double finalTime2 = 0.65;
+      double finalTime3 = 1.0;
 
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
       firstContact.setStartCopPosition(vrpStart);
@@ -1535,9 +1535,14 @@ public class LQRMomentumControllerTest
       FrameVector3D previousVelocity = new FrameVector3D();
       FrameVector3D previousAcceleration = new FrameVector3D();
 
+      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      comPosition.get(currentState);
+      comVelocity.get(3, currentState);
+      controller.computeControlInput(currentState, time);
+
+
       for (; time <= finalTime1; time += dt)
       {
-         DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
          comPosition.get(currentState);
          comVelocity.get(3, currentState);
 
