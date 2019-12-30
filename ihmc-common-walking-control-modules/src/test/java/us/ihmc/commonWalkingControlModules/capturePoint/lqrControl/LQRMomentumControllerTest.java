@@ -6,7 +6,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commons.MathTools;
@@ -14,8 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -25,7 +22,6 @@ import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -305,8 +301,8 @@ public class LQRMomentumControllerTest
       solver.setA(matrixExponential);
       solver.solve(betaSum, alphaExpected);
 
-      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-      EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+      EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
@@ -337,8 +333,8 @@ public class LQRMomentumControllerTest
          CommonOps.mult(R1InvDQ, coefficients, gamma2ExpectedAlt);
          CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2ExpectedAlt);
 
-         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-         EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
          EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
          EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
          EjmlUnitTests.assertEquals(beta1Expected, controller.betas.get(0).get(0), epsilon);
@@ -529,8 +525,8 @@ public class LQRMomentumControllerTest
       solver.setA(matrixExponential);
       solver.solve(betaSum, alphaExpected);
 
-      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-      EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+      EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
@@ -551,8 +547,8 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 2), beta3Expected);
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 3), beta4Expected);
 
-         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-         EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
          EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
          EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
@@ -906,8 +902,8 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta11Expected);
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta12Expected);
 
-         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-         EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
          EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
          EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
 
@@ -990,7 +986,7 @@ public class LQRMomentumControllerTest
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
          CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
          CommonOps.mult(tempMatrix, controller.alphas.get(1), k2Method2);
-//         MatrixTestTools.assertMatrixEquals(matrixExponential, controller.exponential, epsilon);
+//         MatrixTestTools.assertMatrixEquals(matrixExponential, controller.A2Exponential, epsilon);
 
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
          CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
@@ -1360,8 +1356,8 @@ public class LQRMomentumControllerTest
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 2), beta13Expected);
          CommonOps.addEquals(s2Expected, MathTools.pow(time, 3), beta14Expected);
 
-         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledDynamics, epsilon);
-         EjmlUnitTests.assertEquals(matrixExponential, controller.exponential, epsilon);
+         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
+         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
          EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
          EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
 
