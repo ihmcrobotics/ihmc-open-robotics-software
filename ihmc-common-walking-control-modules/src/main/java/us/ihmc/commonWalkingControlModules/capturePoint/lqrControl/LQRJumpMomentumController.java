@@ -69,6 +69,13 @@ public class LQRJumpMomentumController
 
    final DenseMatrix64F Ad1 = new DenseMatrix64F(6, 6);
    final DenseMatrix64F Ad2 = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F Ad1TransposeS1 = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F Ad2TransposeS1 = new DenseMatrix64F(6, 6);
+   final DenseMatrix64F Bd1 = new DenseMatrix64F(6, 3);
+   final DenseMatrix64F Bd2 = new DenseMatrix64F(6, 3);
+   final DenseMatrix64F Bd1g = new DenseMatrix64F(6, 1);
+   final DenseMatrix64F Bd2g = new DenseMatrix64F(6, 1);
+   final DenseMatrix64F g = new DenseMatrix64F(3, 1);
 
    final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
 
@@ -118,8 +125,8 @@ public class LQRJumpMomentumController
    final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
 
-   final RecyclingArrayList<DenseMatrix64F> sigmas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
-   final RecyclingArrayList<DenseMatrix64F> phis = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
+   final RecyclingArrayList<DenseMatrix64F> sigmas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
+   final RecyclingArrayList<DenseMatrix64F> phis = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
 
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
@@ -146,6 +153,12 @@ public class LQRJumpMomentumController
       MatrixTools.setMatrixBlock(Ad2, 0, 0, identity, 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(Ad2, 3, 3, identity, 0, 0, 3, 3, 1.0);
 
+      MatrixTools.setMatrixBlock(Bd1, 0, 0, identity, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(Bd2, 3, 0, identity, 0, 0, 3, 3, 1.0);
+
+      g.set(2, 0, -9.81);
+      CommonOps.mult(Bd1, g, Bd1g);
+      CommonOps.mult(Bd2, g, Bd2g);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -282,7 +295,7 @@ public class LQRJumpMomentumController
             CommonOps.mult(phis.get(j+1), Ad1, sigmas.get(j));
 
             // phi_j = phi_j+1 (Ad,1 (t_j+1 + t_j) + Ad,2)
-            double duration = contactStateProviders.get(j).getTimeInterval().getDuration();
+            double duration = relativeVRPTrajectories.get(j).getDuration();
             tempMatrix.set(Ad2);
             CommonOps.addEquals(tempMatrix, duration, Ad1);
 
@@ -291,7 +304,7 @@ public class LQRJumpMomentumController
       }
    }
 
-   void computeS1(double time)
+   void computeS1AndK1(double time)
    {
       int segmentNumber = getSegmentNumber(time);
       double timeInState = computeTimeInSegment(time, segmentNumber);
@@ -308,22 +321,8 @@ public class LQRJumpMomentumController
       // K1 = -R1inv NB
       CommonOps.mult(-1.0, R1Inverse, NB, K1);
 
-      // A2 = Nb' R1inv B' - A'
-      tempMatrix.reshape(3, 6);
-      MatrixTools.scaleTranspose(-1.0, A, A2);
-      CommonOps.multTransB(R1Inverse, B, tempMatrix);
-      CommonOps.multAddTransA(NB, tempMatrix, A2);
-
-      // B2 = 2 (C' - Nb' R1inv D) Q
-      CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
-      CommonOps.multTransA(-2.0, NB, R1InverseDQ, B2);
-      CommonOps.multAddTransA(2.0, C, Q, B2);
-
-      NativeCommonOps.invert(A2, A2Inverse);
-      CommonOps.mult(-1.0, A2Inverse, B2, A2InverseB2);
 
       CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
-
    }
 
    private void resetS2Parameters()
@@ -350,6 +349,7 @@ public class LQRJumpMomentumController
       resetS2Parameters();
 
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
+      s2Hat.zero();
       for (int j = numberOfSegments; j >= 0; j--)
       {
          Trajectory3D trajectorySegment = relativeVRPTrajectories.get(j);
@@ -357,60 +357,96 @@ public class LQRJumpMomentumController
          for (int i = 0; i <= k; i++)
          {
             betas.get(j).add().zero();
+         }
+         for (int i = 0; i < 3; i++)
+         {
             gammas.get(j).add().zero();
          }
 
-         // solve for betas and gammas
-         trajectorySegment.getCoefficients(k, coefficients);
-         DenseMatrix64F betaLocal = betas.get(j).get(k);
-         DenseMatrix64F gammaLocal = gammas.get(j).get(k);
-
-         // betaJK = -A2inv B2 cJK
-         CommonOps.mult(A2InverseB2, coefficients, betaLocal);
-         // gammaJK = R1inv D Q cJK - 0.5 R1inv B' betaJK
-         CommonOps.mult(R1InverseDQ, coefficients, gammaLocal);
-         CommonOps.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
-
-         DenseMatrix64F betaLocalPrevious = betaLocal;
-
-         for (int i = k - 1; i >= 0; i--)
+         if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
-            betaLocal = betas.get(j).get(i);
-            gammaLocal = gammas.get(j).get(i);
-            trajectorySegment.getCoefficients(i, coefficients);
+            // Nb = N' + B' S1
+            CommonOps.transpose(N, NB);
+            CommonOps.multAddTransA(B, phis.get(j), NB);
 
-            // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
-            CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
-            CommonOps.multAdd(A2InverseB2, coefficients, betaLocal);
+            // A2 = Nb' R1inv B' - A'
+            tempMatrix.reshape(3, 6);
+            MatrixTools.scaleTranspose(-1.0, A, A2);
+            CommonOps.multTransB(R1Inverse, B, tempMatrix);
+            CommonOps.multAddTransA(NB, tempMatrix, A2);
 
-            // gammaJI = R1inv D Q cJI - 0.5 R1Inv B' betaJI
-            CommonOps.mult(R1InverseDQ, coefficients, gammaLocal);
-            CommonOps.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
+            // B2 = 2 (C' - Nb' R1inv D) Q
+            CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
+            CommonOps.multTransA(-2.0, NB, R1InverseDQ, B2);
+            CommonOps.multAddTransA(2.0, C, Q, B2);
 
-            betaLocalPrevious = betaLocal;
+            NativeCommonOps.invert(A2, A2Inverse);
+            CommonOps.mult(-1.0, A2Inverse, B2, A2InverseB2);
+
+            // solve for betas
+            trajectorySegment.getCoefficients(k, coefficients);
+            DenseMatrix64F betaLocal = betas.get(j).get(k);
+
+            // betaJK = -A2inv B2 cJK
+            CommonOps.mult(A2InverseB2, coefficients, betaLocal);
+
+            DenseMatrix64F betaLocalPrevious = betaLocal;
+
+            for (int i = k - 1; i >= 0; i--)
+            {
+               betaLocal = betas.get(j).get(i);
+               trajectorySegment.getCoefficients(i, coefficients);
+
+               // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
+               CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
+               CommonOps.multAdd(A2InverseB2, coefficients, betaLocal);
+
+               betaLocalPrevious = betaLocal;
+            }
+
+            double duration = relativeVRPTrajectories.get(j).getDuration();
+            summedBetas.zero();
+            for (int i = 0; i <= k; i++)
+               CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
+            CommonOps.addEquals(summedBetas, s2Hat);
+
+            CommonOps.scale(duration, A2, timeScaledA2);
+            a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
+
+            solver.setA(A2Exponential);
+            solver.solve(summedBetas, alphas.get(j));
+
+            CommonOps.add(alphas.get(j), betas.get(j).get(0), s2Hat);
          }
-
-         double duration = relativeVRPTrajectories.get(j).getDuration();
-         summedBetas.zero();
-         for (int i = 0; i <= k; i++)
-            CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
-
-         CommonOps.scale(duration, A2, timeScaledA2);
-         a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
-
-         if (j != numberOfSegments)
+         else
          {
-            CommonOps.addEquals(summedBetas, alphas.get(j + 1));
-            CommonOps.addEquals(summedBetas, betas.get(j + 1).get(0));
+            double duration = contactStateProviders.get(j).getTimeInterval().getDuration();
+            double d2 = duration * duration;
+            double d3 = duration * d2;
+
+            DenseMatrix64F nextS1 = phis.get(j+1);
+
+            CommonOps.multTransA(Ad1, nextS1, Ad1TransposeS1);
+            CommonOps.multTransA(Ad2, nextS1, Ad2TransposeS1);
+
+            // gamma 0 = 2 Ad2Transpose S1 Bd2 g
+            CommonOps.mult(2, Ad2TransposeS1, Bd2g, gammas.get(j).get(0));
+
+            // gamma 1 = 2 Ad1Transpose S1 Bd2 g + 2 Ad2Transpose S1 Bd1 g
+            CommonOps.mult(2, Ad1TransposeS1, Bd2g, gammas.get(j).get(1));
+            CommonOps.multAdd(2, Ad2TransposeS1, Bd1g, gammas.get(j).get(1));
+
+            // gamma 3 = 2 Ad1Transpose S1 Bd1 g
+            CommonOps.mult(2, Ad1TransposeS1, Bd1g, gammas.get(j).get(2));
+
+            CommonOps.scale(duration, gammas.get(j).get(0), s2Hat);
+            CommonOps.addEquals(s2Hat, d2, gammas.get(j).get(1));
+            CommonOps.addEquals(s2Hat, d3, gammas.get(j).get(2));
          }
-         solver.setA(A2Exponential);
-         solver.solve(summedBetas, alphas.get(j));
       }
-
-      throw new RuntimeException("This guy needs to be updated");
    }
 
-   void computeS2(double time)
+   void computeS2AndK2(double time)
    {
       int j = getSegmentNumber(time);
       double timeInSegment = computeTimeInSegment(time, j);
@@ -429,11 +465,10 @@ public class LQRJumpMomentumController
          CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
 
       // defined this way, because the R1Inverse BT already has a -0.5 appended.
-      tempMatrix.reshape(3, 6);
-      CommonOps.mult(R1InverseBTranspose, A2Exponential, tempMatrix);
-      CommonOps.mult(tempMatrix, alphas.get(j), k2);
-      for (int i = 0; i <= k; i++)
-         CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
+      tempMatrix.reshape(3, 1);
+      referenceVRPPosition.get(tempMatrix);
+      CommonOps.mult(R1InverseDQ, tempMatrix, k2);
+      CommonOps.multAdd(R1InverseBTranspose, s2, k2);
 
       yoK2.set(k2);
    }
@@ -444,10 +479,10 @@ public class LQRJumpMomentumController
          computeP();
 
       computeS1Parameters();
-      computeS1(time);
+      computeS1AndK1(time);
 
       computeS2Parameters();
-      computeS2(time);
+      computeS2AndK2(time);
 
       relativeState.set(currentState);
       for (int i = 0; i < 3; i++)
