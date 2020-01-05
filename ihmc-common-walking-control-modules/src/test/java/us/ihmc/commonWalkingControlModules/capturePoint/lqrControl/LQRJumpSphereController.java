@@ -59,7 +59,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
 
       if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
       {
-         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
+         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories(), contactStateProviders);
          sphereRobot.getCenterOfMass().get(currentState);
          sphereRobot.getCenterOfMassVelocity().get(3, currentState);
          lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
