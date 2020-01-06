@@ -299,7 +299,7 @@ public class LQRJumpMomentumController
          else
          {
             // sigma_j = phi_j+1 Ad,1
-            CommonOps.mult(phis.get(j+1), Ad1, sigmas.get(j));
+            CommonOps.mult(-1.0, phis.get(j+1), Ad1, sigmas.get(j));
 
             // phi_j = phi_j+1 (Ad,1 (t_j+1 + t_j) + Ad,2)
             double duration = relativeVRPTrajectories.get(j).getDuration();
@@ -518,7 +518,7 @@ public class LQRJumpMomentumController
 
    public DenseMatrix64F getCostHessian()
    {
-      return P;
+      return S1;
    }
 
    public DenseMatrix64F getCostJacobian()
