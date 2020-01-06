@@ -2,12 +2,10 @@ package us.ihmc.valkyrie.planner;
 
 import controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -610,15 +608,15 @@ public class ValkyrieAStarFootstepPlannerParameters
    {
       idealFootstepWidth.set(0.25);
       minimumFootstepLength.set(-0.4);
-      idealFootstepLength.set(0.2);
+      idealFootstepLength.set(0.3);
       minimumStepWidth.set(0.18);
       maximumStepWidth.set(0.4);
       maximumStepReach.set(0.5);
       minimumXClearanceFromStance.set(0.2);
       minimumYClearanceFromStance.set(0.2);
-      minimumStepYaw.set(-0.15);
-      maximumStepYaw.set(0.6);
-      stepYawReductionFactorAtMaxReach.set(0.5);
+      minimumStepYaw.set(-0.35);
+      maximumStepYaw.set(0.7);
+      stepYawReductionFactorAtMaxReach.set(0.0);
       maximumStepZ.set(0.15);
       minimumFootholdPercent.set(0.9);
       maximumSurfanceInclineRadians.set(Math.toRadians(45.0));
@@ -628,24 +626,24 @@ public class ValkyrieAStarFootstepPlannerParameters
       maximumYawWiggle.set(0.3);
       cliffHeightToAvoid.set(0.07);
       minimumDistanceFromCliffBottoms.set(0.04);
-      flatGroundLowerThreshold.set(0.05);
+      flatGroundLowerThreshold.set(-0.05);
       flatGroundUpperThreshold.set(0.1);
       maximumStepWidthWhenSteppingDown.set(0.3);
       maximumStepReachWhenSteppingDown.set(0.4);
       maximumStepWidthWhenSteppingUp.set(0.25);
       maximumStepReachWhenSteppingUp.set(0.4);
-      translationScaleFromGrandparentNode.set(1.5);
-      finalTurnProximity.set(0.25);
+      translationScaleFromGrandparentNode.set(0.0);
+      finalTurnProximity.set(0.2);
       checkForPathCollisions.set(true);
       checkForBodyBoxCollisions.set(false);
       bodyBoxDimensions.set(0.4, 0.85, 1.5);
       bodyBoxOffset.set(0.03, 0.2, 0.1);
       numberOfBoundingBoxChecks.set(1);
-      translationWeight.set(2.5, 1.0, 0.0);
-      orientationWeight.set(0.15, 0.0, 0.0);
-      costPerStep.set(0.5);
+      translationWeight.set(0.2, 0.2, 0.2);
+      orientationWeight.set(0.2, 0.3, 0.3);
+      costPerStep.set(0.1);
       footholdAreaWeight.set(4.0);
-      astarHeuristicsWeight.set(5.0);
+      astarHeuristicsWeight.set(2.0);
       waypointCost.set(2.0);
    }
 }
