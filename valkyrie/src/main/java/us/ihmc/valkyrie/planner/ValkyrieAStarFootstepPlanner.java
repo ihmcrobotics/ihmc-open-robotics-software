@@ -1,16 +1,6 @@
 package us.ihmc.valkyrie.planner;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.ValkyrieFootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningActionPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.commons.MathTools;
@@ -23,7 +13,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -31,13 +20,9 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.CompositeFootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootholdAreaCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.HeightCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.PitchAndRollBasedCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.QuadraticDistanceAndYawCost;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
@@ -56,6 +41,12 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
 public class ValkyrieAStarFootstepPlanner
 {
    private static final boolean sendCroppedFootholds = false;
@@ -72,6 +63,9 @@ public class ValkyrieAStarFootstepPlanner
    private final ValkyrieFootstepValidityChecker stepValidityChecker;
    private final ValkyrieFootstepPlannerHeuristics heuristics;
    private final AdaptiveSwingTrajectoryCalculator swingParameterCalculator;
+   private final ValkyrieStepCost stepCost;
+   private final BodyPathHelper bodyPathHelper = new BodyPathHelper(parameters);
+   private final ValkyrieIdealStepCalculator idealStepCalculator;
 
    private Status status = null;
    private FootstepNode endNode = null;
@@ -108,20 +102,10 @@ public class ValkyrieAStarFootstepPlanner
                                                                                   parameters::getMinimumXClearanceFromStance,
                                                                                   parameters::getMinimumYClearanceFromStance);
 
-      CompositeFootstepCost stepCost = new CompositeFootstepCost();
-      stepCost.addFootstepCost(new FootholdAreaCost(parameters::getFootholdAreaWeight, footPolygons, snapper));
-      stepCost.addFootstepCost(new HeightCost(() -> true, parameters.getTranslationWeight()::getZ, parameters.getTranslationWeight()::getZ, snapper));
-      stepCost.addFootstepCost(new PitchAndRollBasedCost(parameters.getOrientationWeight()::getPitch, parameters.getOrientationWeight()::getRoll, snapper));
-      stepCost.addFootstepCost(new QuadraticDistanceAndYawCost(parameters::getIdealFootstepWidth,
-                                                               parameters::getIdealFootstepLength,
-                                                               parameters.getTranslationWeight()::getX,
-                                                               parameters.getTranslationWeight()::getX,
-                                                               parameters.getTranslationWeight()::getY,
-                                                               parameters.getOrientationWeight()::getYaw,
-                                                               parameters::getCostPerStep));
-
       stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper);
-      heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, snapper);
+      idealStepCalculator = new ValkyrieIdealStepCalculator(parameters, bodyPathHelper, stepValidityChecker);
+      heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, bodyPathHelper);
+      this.stepCost = new ValkyrieStepCost(parameters, snapper, heuristics, idealStepCalculator::computeIdealStep, footPolygons);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
    }
@@ -140,7 +124,8 @@ public class ValkyrieAStarFootstepPlanner
       status = Status.PLANNING;
 
       requestCallback.accept(requestPacket);
-      heuristics.setRequestPacket(requestPacket);
+      bodyPathHelper.initialize(requestPacket);
+      idealStepCalculator.initialize();
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());

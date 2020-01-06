@@ -68,6 +68,7 @@ public class ValkyrieStepCost implements FootstepCost
       cost += Math.abs(parameters.getOrientationWeight().getRoll() * rollOffset);
 
       cost += computeAreaCost(candidateNode);
+      cost += parameters.getCostPerStep();
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
       double deltaHeuristics = heuristics.compute(idealStep) - heuristics.compute(candidateNode);
@@ -91,7 +92,7 @@ public class ValkyrieStepCost implements FootstepCost
          if (footholdAfterSnap.isEmpty())
             return 0.0;
 
-         double percentAreaUnoccupied = 1.0 - area / footArea;
+         double percentAreaUnoccupied = Math.max(0.0, 1.0 - area / footArea);
          return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
       }
       else
