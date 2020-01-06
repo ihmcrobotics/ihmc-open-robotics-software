@@ -90,6 +90,8 @@ public class LQRJumpMomentumController
    final DenseMatrix64F P = new DenseMatrix64F(6, 6);
    private final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
    private final DenseMatrix64F s2 = new DenseMatrix64F(6, 1);
+   private final DenseMatrix64F S1Hat = new DenseMatrix64F(6, 6);
+   private final DenseMatrix64F S1HatInverse = new DenseMatrix64F(6, 6);
    private final DenseMatrix64F s2Hat = new DenseMatrix64F(6, 1);
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
@@ -228,6 +230,9 @@ public class LQRJumpMomentumController
 
       CommonOps.mult(D, Q, DQ);
 
+      CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
+      CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
+
       tempMatrix.reshape(3, 3);
       CommonOps.mult(Q, D, tempMatrix);
       CommonOps.multTransA(C, tempMatrix, N);
@@ -257,6 +262,8 @@ public class LQRJumpMomentumController
 
       careSolver.setMatrices(ARiccati, B, null, QRiccati, R1);
       P.set(careSolver.computeP());
+
+
 
       shouldUpdateP = false;
    }
@@ -313,16 +320,12 @@ public class LQRJumpMomentumController
       CommonOps.addEquals(tempMatrix, timeInState, sigmas.get(segmentNumber));
       NativeCommonOps.multQuad(tempMatrix, P, S1);
 
-      // all the below stuff is constant
       // Nb = N' + B' S1
       CommonOps.transpose(N, NB);
       CommonOps.multAddTransA(B, S1, NB);
 
       // K1 = -R1inv NB
       CommonOps.mult(-1.0, R1Inverse, NB, K1);
-
-
-      CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
    }
 
    private void resetS2Parameters()
@@ -348,6 +351,8 @@ public class LQRJumpMomentumController
    {
       resetS2Parameters();
 
+
+
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
       s2Hat.zero();
       for (int j = numberOfSegments; j >= 0; j--)
@@ -367,7 +372,8 @@ public class LQRJumpMomentumController
          {
             // Nb = N' + B' S1
             CommonOps.transpose(N, NB);
-            CommonOps.multAddTransA(B, phis.get(j), NB);
+            NativeCommonOps.multQuad(phis.get(j), P, S1Hat);
+            CommonOps.multAddTransA(B, S1Hat, NB);
 
             // A2 = Nb' R1inv B' - A'
             tempMatrix.reshape(3, 6);
@@ -376,7 +382,6 @@ public class LQRJumpMomentumController
             CommonOps.multAddTransA(NB, tempMatrix, A2);
 
             // B2 = 2 (C' - Nb' R1inv D) Q
-            CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
             CommonOps.multTransA(-2.0, NB, R1InverseDQ, B2);
             CommonOps.multAddTransA(2.0, C, Q, B2);
 
@@ -405,18 +410,20 @@ public class LQRJumpMomentumController
             }
 
             double duration = relativeVRPTrajectories.get(j).getDuration();
-            summedBetas.zero();
+            summedBetas.set(s2Hat);
             for (int i = 0; i <= k; i++)
                CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
-            CommonOps.addEquals(summedBetas, s2Hat);
 
             CommonOps.scale(duration, A2, timeScaledA2);
             a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
 
-            solver.setA(A2Exponential);
-            solver.solve(summedBetas, alphas.get(j));
+            DenseMatrix64F alphaLocal = alphas.get(j);
 
-            CommonOps.add(alphas.get(j), betas.get(j).get(0), s2Hat);
+            solver.setA(A2Exponential);
+            solver.invert(S1HatInverse);
+            solver.solve(summedBetas, alphaLocal);
+
+            CommonOps.add(alphaLocal, betas.get(j).get(0), s2Hat);
          }
          else
          {
@@ -424,10 +431,10 @@ public class LQRJumpMomentumController
             double d2 = duration * duration;
             double d3 = duration * d2;
 
-            DenseMatrix64F nextS1 = phis.get(j+1);
+            NativeCommonOps.multQuad(phis.get(j+1), P, S1Hat);
 
-            CommonOps.multTransA(Ad1, nextS1, Ad1TransposeS1);
-            CommonOps.multTransA(Ad2, nextS1, Ad2TransposeS1);
+            CommonOps.multTransA(Ad1, S1Hat, Ad1TransposeS1);
+            CommonOps.multTransA(Ad2, S1Hat, Ad2TransposeS1);
 
             // gamma 0 = 2 Ad2Transpose S1 Bd2 g
             CommonOps.mult(2, Ad2TransposeS1, Bd2g, gammas.get(j).get(0));
