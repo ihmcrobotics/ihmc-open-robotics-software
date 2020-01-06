@@ -358,9 +358,32 @@ public class LQRJumpMomentumControllerTest
       EjmlUnitTests.assertEquals(PDotExpected, PDot, epsilon);
       EjmlUnitTests.assertEquals(new DenseMatrix64F(6, 6), PDot, epsilon);
 
-      DenseMatrix64F flightDynamics = new DenseMatrix64F(6, 6);
+      DenseMatrix64F flightDynamicsExpected = new DenseMatrix64F(6, 6);
 
       DenseMatrix64F S1Expected = new DenseMatrix64F(6, 6);
+
+      controller.computeS1Parameters();
+
+      for (double time = startTime; time <= landingTime; time += 0.001)
+      {
+         double remainingTime = landingTime - time;
+         CommonOps.setIdentity(flightDynamicsExpected);
+         flightDynamicsExpected.set(0, 3, remainingTime);
+         flightDynamicsExpected.set(1, 4, remainingTime);
+         flightDynamicsExpected.set(2, 5, remainingTime);
+
+         DenseMatrix64F flightDynamics = new DenseMatrix64F(6, 6);
+         CommonOps.scale(remainingTime, controller.Ad1, flightDynamics);
+         CommonOps.addEquals(flightDynamics, controller.Ad2);
+
+         // these are not the same functions, apparently
+         DenseMatrix64F flightDynamics2 = new DenseMatrix64F(6, 6);
+         CommonOps.scale(time - startTime, controller.sigmas.get(0), flightDynamics2);
+         CommonOps.addEquals(flightDynamics2, controller.phis.get(0));
+
+         MatrixTestTools.assertMatrixEquals(flightDynamicsExpected, flightDynamics, epsilon);
+         MatrixTestTools.assertMatrixEquals(flightDynamicsExpected, flightDynamics2, epsilon);
+      }
 
       for (double time = startTime; time <= landingTime; time += 0.001)
       {
@@ -368,18 +391,31 @@ public class LQRJumpMomentumControllerTest
          controller.computeS1AndK1(time);
 
          double remainingTime = landingTime - time;
-         CommonOps.setIdentity(flightDynamics);
-         flightDynamics.set(0, 3, remainingTime);
-         flightDynamics.set(1, 4, remainingTime);
-         flightDynamics.set(2, 5, remainingTime);
+         CommonOps.setIdentity(flightDynamicsExpected);
+         flightDynamicsExpected.set(0, 3, remainingTime);
+         flightDynamicsExpected.set(1, 4, remainingTime);
+         flightDynamicsExpected.set(2, 5, remainingTime);
 
-         NativeCommonOps.multQuad(flightDynamics, P, S1Expected);
+         DenseMatrix64F flightDynamics2 = new DenseMatrix64F(6, 6);
+         CommonOps.scale(time - startTime, controller.sigmas.get(0), flightDynamics2);
+         CommonOps.addEquals(flightDynamics2, controller.phis.get(0));
 
+         DenseMatrix64F S1Expected2 = new DenseMatrix64F(6, 6);
+         NativeCommonOps.multQuad(flightDynamics2, P, S1Expected2);
+
+         NativeCommonOps.multQuad(flightDynamicsExpected, P, S1Expected);
+
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
       }
 
-      MatrixTestTools.assertMatrixEquals(S1Expected, P, epsilon);
+      for (double time = landingTime; time <= finalTime; time += 0.001)
+      {
+         controller.computeS1Parameters();
+         controller.computeS1AndK1(time);
 
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, P, controller.getCostHessian(), epsilon);
+      }
    }
 
    /*
