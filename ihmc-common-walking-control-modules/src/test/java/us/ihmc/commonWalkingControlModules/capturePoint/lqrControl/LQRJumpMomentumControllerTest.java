@@ -419,6 +419,208 @@ public class LQRJumpMomentumControllerTest
    }
 
    @Test
+   public void testComputingAndS1FourContactsStartingInJump()
+   {
+      LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
+
+      Point3D vrpStart1 = new Point3D(1.0, 0.5, 1.0);
+      Point3D vrpEnd1 = new Point3D(1.0, 0.5, 1.0);
+      Point3D vrpStart2 = new Point3D(2.0, -0.5, 1.0);
+      Point3D vrpEnd2 = new Point3D(2.0, -0.5, 1.0);
+
+      double startTime = 0;
+      double landingTime1 = 0.15;
+      double liftOffTime1 = 1.0;
+      double landingTime2 = 1.15;
+      double finalTime = 2.0;
+      Trajectory3D vrpTrajectory1 = new Trajectory3D(2);
+      Trajectory3D vrpTrajectory2 = new Trajectory3D(4);
+      Trajectory3D vrpTrajectory3 = new Trajectory3D(2);
+      Trajectory3D vrpTrajectory4 = new Trajectory3D(4);
+      vrpTrajectory1.setLinear(startTime, landingTime1, vrpStart1, vrpEnd1);
+      vrpTrajectory2.setLinear(landingTime1, liftOffTime1, vrpStart1, vrpEnd1);
+      vrpTrajectory3.setLinear(liftOffTime1, landingTime2, vrpStart2, vrpEnd2);
+      vrpTrajectory4.setLinear(landingTime2, finalTime, vrpStart2, vrpEnd2);
+
+      List<Trajectory3D> trajectories = new ArrayList<>();
+      trajectories.add(vrpTrajectory1);
+      trajectories.add(vrpTrajectory2);
+      trajectories.add(vrpTrajectory3);
+      trajectories.add(vrpTrajectory4);
+
+      SettableContactStateProvider flightContact1 = new SettableContactStateProvider();
+      flightContact1.getTimeInterval().setInterval(startTime, landingTime1);
+      flightContact1.setContactState(ContactState.FLIGHT);
+
+      SettableContactStateProvider landingContact1 = new SettableContactStateProvider();
+      landingContact1.setStartCopPosition(new Point2D(vrpStart1));
+      landingContact1.setEndCopPosition(new Point2D(vrpEnd1));
+      landingContact1.getTimeInterval().setInterval(landingTime1, liftOffTime1);
+      landingContact1.setContactState(ContactState.IN_CONTACT);
+
+      SettableContactStateProvider flightContact2 = new SettableContactStateProvider();
+      flightContact2.getTimeInterval().setInterval(liftOffTime1, landingTime2);
+      flightContact2.setContactState(ContactState.FLIGHT);
+
+      SettableContactStateProvider landingContact2 = new SettableContactStateProvider();
+      landingContact2.setStartCopPosition(new Point2D(vrpStart2));
+      landingContact2.setEndCopPosition(new Point2D(vrpEnd2));
+      landingContact2.getTimeInterval().setInterval(landingTime2, finalTime);
+      landingContact2.setContactState(ContactState.IN_CONTACT);
+
+      List<SettableContactStateProvider> contactStates = new ArrayList<>();
+      contactStates.add(flightContact1);
+      contactStates.add(landingContact1);
+      contactStates.add(flightContact2);
+      contactStates.add(landingContact2);
+
+      controller.setVRPTrajectory(trajectories, contactStates);
+
+      controller.computeP();
+
+      DenseMatrix64F P = new DenseMatrix64F(controller.P);
+
+      DenseMatrix64F flightDynamicsExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F nextFlightDynamicsExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F S1Expected = new DenseMatrix64F(6, 6);
+
+      controller.computeS1Parameters();
+      
+      DenseMatrix64F s1EndOf1 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1StartOf2 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1EndOf2 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1StartOf3 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1EndOf3 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1StartOf4 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F s1EndOf4 = new DenseMatrix64F(6, 6);
+
+      DenseMatrix64F functionEndOf1 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionStartOf2 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionEndOf2 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionStartOf3 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionEndOf3 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionStartOf4 = new DenseMatrix64F(6, 6);
+      DenseMatrix64F functionEndOf4 = new DenseMatrix64F(6, 6);
+
+      functionEndOf1.set(controller.phis.get(0));
+      CommonOps.addEquals(functionEndOf1, landingTime1, controller.sigmas.get(0));
+      functionStartOf2.set(controller.phis.get(1));
+      functionEndOf2.set(controller.phis.get(1));
+      CommonOps.addEquals(functionEndOf2, liftOffTime1 - landingTime1, controller.sigmas.get(1));
+      functionStartOf3.set(controller.phis.get(2));
+      functionEndOf3.set(controller.phis.get(2));
+      CommonOps.addEquals(functionEndOf3, landingTime2 - liftOffTime1, controller.sigmas.get(2));
+      functionStartOf4.set(controller.phis.get(3));
+      functionEndOf4.set(controller.phis.get(3));
+      CommonOps.addEquals(functionEndOf4, finalTime - landingTime2, controller.sigmas.get(3));
+
+      NativeCommonOps.multQuad(functionEndOf1, P, s1EndOf1);
+      NativeCommonOps.multQuad(functionStartOf2, P, s1StartOf2);
+      NativeCommonOps.multQuad(functionEndOf2, P, s1EndOf2);
+      NativeCommonOps.multQuad(functionStartOf3, P, s1StartOf3);
+      NativeCommonOps.multQuad(functionEndOf3, P, s1EndOf3);
+      NativeCommonOps.multQuad(functionStartOf4, P, s1StartOf4);
+      NativeCommonOps.multQuad(functionEndOf4, P, s1EndOf4);
+
+      MatrixTestTools.assertMatrixEquals(s1EndOf1, s1StartOf2, epsilon);
+      MatrixTestTools.assertMatrixEquals(s1EndOf2, s1StartOf3, epsilon);
+      MatrixTestTools.assertMatrixEquals(s1EndOf3, s1StartOf4, epsilon);
+      MatrixTestTools.assertMatrixEquals(s1EndOf4, P, epsilon);
+
+      // compute during first flight phase
+      for (double time = 0; time <= landingTime1; time += 0.001)
+      {
+         controller.computeS1Parameters();
+         controller.computeS1AndK1(time);
+
+         double timeRemaining = landingTime1 - time;
+         CommonOps.setIdentity(flightDynamicsExpected);
+         flightDynamicsExpected.set(0, 3, timeRemaining);
+         flightDynamicsExpected.set(1, 4, timeRemaining);
+         flightDynamicsExpected.set(2, 5, timeRemaining);
+
+         double nextFlightTime = landingTime2 - liftOffTime1;
+         CommonOps.setIdentity(nextFlightDynamicsExpected);
+         nextFlightDynamicsExpected.set(0, 3, nextFlightTime);
+         nextFlightDynamicsExpected.set(1, 4, nextFlightTime);
+         nextFlightDynamicsExpected.set(2, 5, nextFlightTime);
+
+         DenseMatrix64F flightDynamics2 = new DenseMatrix64F(6, 6);
+         CommonOps.scale(time, controller.sigmas.get(0), flightDynamics2);
+         CommonOps.addEquals(flightDynamics2, controller.phis.get(0));
+
+         DenseMatrix64F S1Expected2 = new DenseMatrix64F(6, 6);
+         NativeCommonOps.multQuad(flightDynamics2, P, S1Expected2);
+
+         DenseMatrix64F nextS1Expected = new DenseMatrix64F(6, 6);
+         NativeCommonOps.multQuad(nextFlightDynamicsExpected, P, nextS1Expected);
+         NativeCommonOps.multQuad(flightDynamicsExpected, nextS1Expected, S1Expected);
+
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
+      }
+
+      // compute during first contact phase
+      for (double time = landingTime1; time <= liftOffTime1; time += 0.001)
+      {
+         controller.computeS1Parameters();
+         controller.computeS1AndK1(time);
+
+         double nextFlightTime = landingTime2 - liftOffTime1;
+         CommonOps.setIdentity(flightDynamicsExpected);
+         flightDynamicsExpected.set(0, 3, nextFlightTime);
+         flightDynamicsExpected.set(1, 4, nextFlightTime);
+         flightDynamicsExpected.set(2, 5, nextFlightTime);
+
+         DenseMatrix64F flightDynamics2 = new DenseMatrix64F(6, 6);
+         CommonOps.scale(time - landingTime1, controller.sigmas.get(1), flightDynamics2);
+         CommonOps.addEquals(flightDynamics2, controller.phis.get(1));
+
+         DenseMatrix64F S1Expected2 = new DenseMatrix64F(6, 6);
+         NativeCommonOps.multQuad(flightDynamics2, P, S1Expected2);
+
+         NativeCommonOps.multQuad(flightDynamicsExpected, P, S1Expected);
+
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
+      }
+
+      // compute during last flight phase
+      for (double time = liftOffTime1; time <= landingTime2; time += 0.001)
+      {
+         controller.computeS1Parameters();
+         controller.computeS1AndK1(time);
+
+         double remainingTime = landingTime2 - time;
+         CommonOps.setIdentity(flightDynamicsExpected);
+         flightDynamicsExpected.set(0, 3, remainingTime);
+         flightDynamicsExpected.set(1, 4, remainingTime);
+         flightDynamicsExpected.set(2, 5, remainingTime);
+
+         DenseMatrix64F flightDynamics2 = new DenseMatrix64F(6, 6);
+         CommonOps.scale(time - liftOffTime1, controller.sigmas.get(2), flightDynamics2);
+         CommonOps.addEquals(flightDynamics2, controller.phis.get(2));
+
+         DenseMatrix64F S1Expected2 = new DenseMatrix64F(6, 6);
+         NativeCommonOps.multQuad(flightDynamics2, P, S1Expected2);
+
+         NativeCommonOps.multQuad(flightDynamicsExpected, P, S1Expected);
+
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
+      }
+
+      // compute during last contact phase
+      for (double time = landingTime2; time <= finalTime; time += 0.001)
+      {
+         controller.computeS1Parameters();
+         controller.computeS1AndK1(time);
+
+         MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, P, controller.getCostHessian(), epsilon);
+      }
+   }
+
+   @Test
    public void testComputingS2FromTwoLinearTrajectoriesInContact()
    {
       LQRJumpMomentumController controller = new LQRJumpMomentumController(() -> omega);
