@@ -473,7 +473,7 @@ public class LQRJumpMomentumController
 
       // defined this way, because the R1Inverse BT already has a -0.5 appended.
       tempMatrix.reshape(3, 1);
-      referenceVRPPosition.get(tempMatrix);
+      relativeVRPTrajectories.get(j).getPosition().get(tempMatrix);
       CommonOps.mult(R1InverseDQ, tempMatrix, k2);
       CommonOps.multAdd(R1InverseBTranspose, s2, k2);
 
