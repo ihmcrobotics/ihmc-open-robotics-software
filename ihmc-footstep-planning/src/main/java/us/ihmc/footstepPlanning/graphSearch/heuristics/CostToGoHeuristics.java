@@ -12,31 +12,38 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.function.DoubleSupplier;
+
 public abstract class CostToGoHeuristics
 {
-   private final DoubleProvider weight;
    private final FramePose3D pose = new FramePose3D();
    private final FootstepNodeSnapperReadOnly snapper;
 
-   protected final FramePose3D goalPose = new FramePose3D();
+   private final DoubleSupplier weight;
+   private final DoubleSupplier idealFootstepWidth;
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   protected final FramePose3D goalPose = new FramePose3D();
 
    public CostToGoHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
    {
+      this(weight::getValue, parameters::getIdealFootstepWidth, snapper);
+   }
+
+   public CostToGoHeuristics(DoubleSupplier weight, DoubleSupplier idealFootstepWidth, FootstepNodeSnapperReadOnly snapper)
+   {
       this.weight = weight;
-      this.parameters = parameters;
+      this.idealFootstepWidth = idealFootstepWidth;
       this.snapper = snapper;
    }
 
    public double getWeight()
    {
-      return weight.getValue();
+      return weight.getAsDouble();
    }
 
    public double compute(FootstepNode node)
    {
-      Point3DBasics midfootPoint = new Point3D(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()));
+      Point3DBasics midfootPoint = new Point3D(node.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
 
       FootstepNodeSnapData snapData = snapper.getSnapData(node);
       if (snapData != null)
@@ -45,7 +52,7 @@ public abstract class CostToGoHeuristics
       pose.setPosition(midfootPoint);
       pose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
-      return weight.getValue() * computeHeuristics(pose);
+      return weight.getAsDouble() * computeHeuristics(pose);
    }
 
    abstract double computeHeuristics(FramePose3DReadOnly pose);

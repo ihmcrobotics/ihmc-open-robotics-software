@@ -268,7 +268,7 @@ public class VisibilityGraphsFrameworkTest
       }
 
       boolean testWithOcclusions = true;
-      ENABLE_TIMERS = true;
+      ENABLE_TIMERS = false;
       DYNAMIC_WAIT_FOR_CLICK = false;
       maxPointsInRegion = Integer.MAX_VALUE;
       walkerMarchingSpeed = 0.7;
@@ -352,7 +352,7 @@ public class VisibilityGraphsFrameworkTest
          if (!errorMessagesForCurrentFile.isEmpty())
             numberOfFailingDatasets++;
          errorMessages += errorMessagesForCurrentFile;
-         
+
          if (DEBUG)
          {
             LogTools.info("Finished processing file: " + dataset.getName());
@@ -449,7 +449,7 @@ public class VisibilityGraphsFrameworkTest
 
       String errorMessages = dataSetTester.apply(dataSetToTest);
 
-      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
+//      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       LogTools.info("Finished testing.");
       ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
@@ -959,21 +959,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 
-//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
-//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
-//      DataSetName dataSetName = DataSetName._20191008_153543_TrickCorridor;
-//      DataSetName dataSetName = DataSetName._20171216_111326_CrossoverPlatforms;
-//      DataSetName dataSetName = DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest;
-//      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
-//      DataSetName dataSetName = DataSetName._20171215_220523_SteppingStones;
-//      DataSetName dataSetName = DataSetName._20171218_204917_FlatGround;
-//      DataSetName dataSetName = DataSetName._20171215_201810_RampSteppingStones_Si"
-      DataSetName dataSetName = DataSetName._20191114_155310_SimplePlatform;
-//      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
-//      DataSetName dataSetName = DataSetName._20001201_205050_TwoSquaresOneObstacle;
-//      DataSetName dataSetName = DataSetName._20171215_210811_DoorwayWithCeiling;
-//      DataSetName dataSetName = DataSetName._20191007_185913_SimpleCorridor;
-//      DataSetName dataSetName = DataSetName._20191007_200400_Corridor1Wall;
+      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
 
       VISUALIZE = true;
       test.setup();

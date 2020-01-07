@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -33,20 +36,26 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class DRCNetworkProcessor
+public class DRCNetworkProcessor implements CloseableAndDisposable
 {
    private final boolean DEBUG = false;
    private final String[] programArgs;
+   private final PubSubImplementation pubSubImplementation;
+   private final List<CloseableAndDisposable> modules = new ArrayList<>();
+   private final Ros2Node ros2Node;
 
-   public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params, PubSubImplementation pubSubImplementation)
    {
-      this(null, robotModel, params);
+      this(null, robotModel, params, pubSubImplementation);
    }
 
-   public DRCNetworkProcessor(String[] programArgs, DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   public DRCNetworkProcessor(String[] programArgs, DRCRobotModel robotModel, DRCNetworkModuleParameters params, PubSubImplementation pubSubImplementation)
    {
       this.programArgs = programArgs;
+      this.pubSubImplementation = pubSubImplementation;
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "network_processor");
 
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
@@ -65,59 +74,62 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
       tryToStartModule(() -> setupHumanoidAvatarREAStateUpdater(robotModel, params));
+
+      LogTools.info("All modules in network processor are up and running!");
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         LogTools.info("Shutting down network processor modules.");
+         closeAndDispose();
+         ThreadTools.sleep(10);
+      }));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
    {
       if (params.isTextToSpeechModuleEnabled())
-         new TextToSpeechNetworkModule();
+         modules.add(new TextToSpeechNetworkModule(pubSubImplementation));
    }
 
    private void setupZeroPoseRobotConfigurationPublisherModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isZeroPoseRobotConfigurationPublisherEnabled())
-         new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
+         modules.add(new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel, pubSubImplementation));
    }
 
    private void setupWholebodyTrajectoryToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isWholeBodyTrajectoryToolboxEnabled())
-         return;
-
-      new WholeBodyTrajectoryToolboxModule(robotModel, params.isWholeBodyTrajectoryToolboxVisualizerEnabled());
+      if (params.isWholeBodyTrajectoryToolboxEnabled())
+         modules.add(new WholeBodyTrajectoryToolboxModule(robotModel, params.isWholeBodyTrajectoryToolboxVisualizerEnabled(), pubSubImplementation));
    }
 
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isKinematicsToolboxEnabled())
-         return;
-      new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
+      if (params.isKinematicsToolboxEnabled())
+         modules.add(new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled(), pubSubImplementation));
    }
 
    private void setupKinematicsPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isKinematicsPlanningToolboxEnabled())
-         return;
-      new KinematicsPlanningToolboxModule(robotModel, false);
+      if (params.isKinematicsPlanningToolboxEnabled())
+         modules.add(new KinematicsPlanningToolboxModule(robotModel, false, pubSubImplementation));
    }
-   
+
    private void setupKinematicsStreamingToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (!params.isKinematicsStreamingToolboxEnabled())
          return;
       if (params.getKinematicsStreamingToolboxLauncherClass() == null)
-         new KinematicsStreamingToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
+         modules.add(new KinematicsStreamingToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled(), pubSubImplementation));
       else
          new JavaProcessSpawner(true, true).spawn(params.getKinematicsStreamingToolboxLauncherClass(), programArgs);
-      new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName());
+      modules.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), pubSubImplementation));
    }
 
    private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (!params.isFootstepPlanningToolboxEnabled())
-         return;
-
-      new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+      if (params.isFootstepPlanningToolboxEnabled())
+         modules.add(new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled(), pubSubImplementation));
    }
 
    private void setupFootstepPostProcessingToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -125,7 +137,10 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPostProcessingToolboxEnabled())
          return;
 
-      new FootstepPlanPostProcessingToolboxModule(robotModel, null, robotModel.getFootstepPostProcessingParameters(), params.isFootstepPostProcessingToolboxVisualizerEnabled());
+      modules.add(new FootstepPlanPostProcessingToolboxModule(robotModel,
+                                                              null,
+                                                              params.isFootstepPostProcessingToolboxVisualizerEnabled(),
+                                                              pubSubImplementation));
    }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -134,8 +149,9 @@ public class DRCNetworkProcessor
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_mocap_localization_node");
-         ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              PlanarRegionsListMessage.class,
+                                              REACommunicationProperties.publisherTopicNameGenerator,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
          new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
 
@@ -150,18 +166,30 @@ public class DRCNetworkProcessor
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+         IHMCHumanoidBehaviorManager behaviorManager;
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),robotModel.getFootstepPlannerParameters(), robotModel, robotModel, logModelProvider,
-                                                                                   params.isBehaviorVisualizerEnabled(), sensorInformation,
-                                                                                   params.getTimeToWaitBeforeStartingDiagnostics());
+            behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
+                                                                                                     robotModel.getFootstepPlannerParameters(),
+                                                                                                     robotModel,
+                                                                                                     robotModel,
+                                                                                                     logModelProvider,
+                                                                                                     params.isBehaviorVisualizerEnabled(),
+                                                                                                     sensorInformation,
+                                                                                                     params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(), robotModel.getFootstepPlannerParameters(), robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(),
-                                            sensorInformation);
+            behaviorManager = new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
+                                                              robotModel.getFootstepPlannerParameters(),
+                                                              robotModel,
+                                                              robotModel,
+                                                              logModelProvider,
+                                                              params.isBehaviorVisualizerEnabled(),
+                                                              sensorInformation);
          }
+         modules.add(behaviorManager);
 
          String methodName = "setupBehaviorModule ";
          printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
@@ -171,7 +199,7 @@ public class DRCNetworkProcessor
    private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isRosModuleEnabled())
-         new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
+         modules.add(new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator(), pubSubImplementation));
    }
 
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -188,6 +216,7 @@ public class DRCNetworkProcessor
             sensorSuiteManager.initializePhysicalSensors(params.getRosUri());
          }
          sensorSuiteManager.connect();
+         modules.add(sensorSuiteManager);
       }
    }
 
@@ -207,12 +236,16 @@ public class DRCNetworkProcessor
    private void setupHeightQuadTreeToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isHeightQuadTreeToolboxEnabled())
-         new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
+         modules.add(new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(),
+                                                     robotModel.createFullRobotModel(),
+                                                     robotModel.getLogModelProvider(),
+                                                     pubSubImplementation));
    }
 
    private void setupRobotEnvironmentAwerenessModule(DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isRobotEnvironmentAwerenessModuleEnabled())
+      {
          try
          {
             LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt").start();
@@ -221,30 +254,31 @@ public class DRCNetworkProcessor
          {
             throw new RuntimeException(e);
          }
-      ;
+      }
    }
 
    private void setupBipedalSupportPlanarRegionPublisherModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isBipedalSupportPlanarRegionPublisherEnabled())
       {
-         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel);
+         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel, pubSubImplementation);
          module.start();
+         modules.add(module);
       }
    }
 
    private void setupWalkingPreviewModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if(params.isWalkingPreviewToolboxEnabled())
+      if (params.isWalkingPreviewToolboxEnabled())
       {
-         new WalkingControllerPreviewToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
+         modules.add(new WalkingControllerPreviewToolboxModule(robotModel, false, pubSubImplementation));
       }
    }
 
    private void setupHumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isAutoREAStateUpdaterEnabled())
-         new HumanoidAvatarREAStateUpdater(robotModel, PubSubImplementation.FAST_RTPS);
+         modules.add(new HumanoidAvatarREAStateUpdater(robotModel, pubSubImplementation));
    }
 
    protected void connect(PacketCommunicator communicator)
@@ -283,5 +317,23 @@ public class DRCNetworkProcessor
    private interface ModuleStarter
    {
       void startModule() throws IOException;
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      for (CloseableAndDisposable module : modules)
+      {
+         try
+         {
+            module.closeAndDispose();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      modules.clear();
    }
 }

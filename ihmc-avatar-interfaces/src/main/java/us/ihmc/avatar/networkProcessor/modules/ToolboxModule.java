@@ -37,6 +37,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as
  * an example.
  */
-public abstract class ToolboxModule
+public abstract class ToolboxModule implements CloseableAndDisposable
 {
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
@@ -340,6 +341,12 @@ public abstract class ToolboxModule
       {
          stopLogging();
       }
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      destroy();
    }
 
    public void destroy()

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -8,16 +9,20 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
+import java.util.function.DoubleSupplier;
+
 public class QuadraticHeightCost implements FootstepCost
 {
    private static final double stepHeightScalar = 10.0;
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DoubleSupplier stepUpWeight;
+   private final DoubleSupplier stepDownWeight;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   public QuadraticHeightCost(FootstepPlannerParametersReadOnly costParameters, FootstepNodeSnapperReadOnly snapper)
+   public QuadraticHeightCost(DoubleSupplier stepUpWeight, DoubleSupplier stepDownWeight, FootstepNodeSnapperReadOnly snapper)
    {
-      this.parameters = costParameters;
+      this.stepUpWeight = stepUpWeight;
+      this.stepDownWeight = stepDownWeight;
       this.snapper = snapper;
    }
 
@@ -36,8 +41,8 @@ public class QuadraticHeightCost implements FootstepCost
       double heightChange = snappedEndNodeTransform.getTranslationZ() - snappedStartNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
-         return parameters.getStepUpWeight() * Math.pow(stepHeightScalar * heightChange, 2.0);
+         return stepUpWeight.getAsDouble() * MathTools.square(stepHeightScalar * heightChange);
       else
-         return parameters.getStepDownWeight() * Math.pow(stepHeightScalar * heightChange, 2.0);
+         return stepDownWeight.getAsDouble() * MathTools.square(stepHeightScalar * heightChange);
    }
 }

@@ -2,7 +2,10 @@ package us.ihmc.wholeBodyController.parameters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Skully;
@@ -20,11 +23,11 @@ public class ParameterLoaderHelper
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
-      try 
+      try
       {
          loadParameters(caller, parameterFile, overwriteFile, registry, true);
       }
-      catch(RuntimeException exception)
+      catch (RuntimeException exception)
       {
          LogTools.error(exception.getMessage() + "\n file: " + controllerParameters.getParameterFileName());
          throw exception;
@@ -69,10 +72,10 @@ public class ParameterLoaderHelper
    }
 
    /**
-    * This will check some statistics about the loading of the parameters and print
-    * information if not everything went as expected. If that is the case consider
-    * turning on the debug flag {@link ParameterLoaderHelper#debugLoading} to see
-    * what parameters were not specified in the XML file.
+    * This will check some statistics about the loading of the parameters and print information if not
+    * everything went as expected. If that is the case consider turning on the debug flag
+    * {@link ParameterLoaderHelper#debugLoading} to see what parameters were not specified in the XML
+    * file.
     */
    private static void loadAndCheckStatistics(YoVariableRegistry registry, AbstractParameterReader reader, boolean printWarnings)
    {
@@ -80,22 +83,24 @@ public class ParameterLoaderHelper
       HashSet<String> unmatchedParameters = new HashSet<>();
       reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
 
-      if (printWarnings && !unmatchedParameters.isEmpty() && !debugLoading)
-      {
-         String message = "I think something is off in your parameter file.";
-         String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" +
-               "Parameters using their default value: " + defaultParameters.size() + "\n" +
-               "Parameters in XML with no match: " + unmatchedParameters.size();
-         Skully.say(message, additionalInfo);
-      }
-
       if (debugLoading)
       {
          LogTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
+         List<String> sortedUnmatchedParameters = new ArrayList<>(unmatchedParameters);
+         List<String> sortedDefaultParameters = new ArrayList<>(defaultParameters);
+         Collections.sort(sortedUnmatchedParameters);
+         Collections.sort(sortedDefaultParameters);
          LogTools.info("\n---> Unmatched in XML <---");
-         unmatchedParameters.forEach(parameter -> LogTools.info(parameter));
+         sortedUnmatchedParameters.forEach(parameter -> LogTools.info(parameter));
          LogTools.info("\n---> Default Values: <---");
-         defaultParameters.forEach(parameter -> LogTools.info(parameter));
+         sortedDefaultParameters.forEach(parameter -> LogTools.info(parameter));
+      }
+      else if (printWarnings && !unmatchedParameters.isEmpty())
+      {
+         String message = "I think something is off in your parameter file.";
+         String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" + "Parameters using their default value: "
+               + defaultParameters.size() + "\n" + "Parameters in XML with no match: " + unmatchedParameters.size();
+         Skully.say(message, additionalInfo);
       }
    }
 }

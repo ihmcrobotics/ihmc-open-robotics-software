@@ -93,7 +93,6 @@
                 <Spinner fx:id="occludedGoalEdgeWeight" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="4" />
                 <Spinner fx:id="weightForInterRegionEdge" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="5" />
                 <Spinner fx:id="weightForNonPreferredEdge" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="6" />
-                <Spinner fx:id="costForNonPreferredNode" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="7" />
 
             </children>
         </GridPane>

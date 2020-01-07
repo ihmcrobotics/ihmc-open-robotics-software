@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -254,9 +255,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.enableUiModule(automaticallyStartSimulation);
-      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
+      simulationStarter.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();

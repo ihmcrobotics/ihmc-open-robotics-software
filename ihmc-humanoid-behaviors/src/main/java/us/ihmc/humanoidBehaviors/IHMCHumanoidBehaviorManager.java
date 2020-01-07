@@ -9,33 +9,18 @@ import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.RepeatedlyWalkFootstepListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestDoorOpenBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehaviorAutomated;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.*;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior;
@@ -54,6 +39,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -65,6 +51,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -72,7 +59,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
-public class IHMCHumanoidBehaviorManager
+public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.01;
 
@@ -86,8 +73,10 @@ public class IHMCHumanoidBehaviorManager
    private YoVariableServer yoVariableServer = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
+   private final BehaviorDispatcher<HumanoidBehaviorType> dispatcher;
+
    public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
-                                      WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
+                                      WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
                                       LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo)
          throws IOException
    {
@@ -100,12 +89,12 @@ public class IHMCHumanoidBehaviorManager
    }
 
    private IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
-                                       WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
+                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
                                        LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo,
                                        boolean runAutomaticDiagnostic)
          throws IOException
    {
-      System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
+      LogTools.info("Initializing");
       this.footstepPlannerParameters = footstepPlannerParameters;
       if (startYoVariableServer)
       {
@@ -123,19 +112,30 @@ public class IHMCHumanoidBehaviorManager
 
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           controllerPubGenerator,
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(robotName, yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
-                                                                                     desiredBehaviorSubscriber, ros2Node, yoVariableServer,
-                                                                                     HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
-                                                                                     yoGraphicsListRegistry);
+      dispatcher = new BehaviorDispatcher<>(robotName,
+                                            yoTime,
+                                            robotDataReceiver,
+                                            desiredBehaviorControlSubscriber,
+                                            desiredBehaviorSubscriber,
+                                            ros2Node,
+                                            yoVariableServer,
+                                            HumanoidBehaviorType.class,
+                                            HumanoidBehaviorType.STOP,
+                                            registry,
+                                            yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           CapturabilityBasedStatus.class,
+                                           controllerPubGenerator,
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
@@ -150,9 +150,14 @@ public class IHMCHumanoidBehaviorManager
          wristSensorUpdatables = new SideDependentList<>();
          for (RobotSide robotSide : RobotSide.values)
          {
-            WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotName, robotSide, fullRobotModel, sensorInfo,
+            WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotName,
+                                                                                                           robotSide,
+                                                                                                           fullRobotModel,
+                                                                                                           sensorInfo,
                                                                                                            forceSensorDataHolder,
-                                                                                                           BEHAVIOR_YO_VARIABLE_SERVER_DT, ros2Node, registry);
+                                                                                                           BEHAVIOR_YO_VARIABLE_SERVER_DT,
+                                                                                                           ros2Node,
+                                                                                                           registry);
             wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
             dispatcher.addUpdatable(wristSensorUpdatable);
          }
@@ -160,21 +165,44 @@ public class IHMCHumanoidBehaviorManager
 
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
-         createAndRegisterAutomaticDiagnostic(robotName, dispatcher, fullRobotModel, referenceFrames, yoTime, ros2Node, capturePointUpdatable,
-                                              wholeBodyControllerParameters, footstepPlannerParameters, runAutomaticDiagnosticTimeToWait,
+         createAndRegisterAutomaticDiagnostic(robotName,
+                                              dispatcher,
+                                              fullRobotModel,
+                                              referenceFrames,
+                                              yoTime,
+                                              ros2Node,
+                                              capturePointUpdatable,
+                                              wholeBodyControllerParameters,
+                                              footstepPlannerParameters,
+                                              runAutomaticDiagnosticTimeToWait,
                                               yoGraphicsListRegistry);
       }
       else
       {
-         createAndRegisterBehaviors(robotName, dispatcher, modelProvider, fullRobotModel, robotModelFactory, wristSensorUpdatables, referenceFrames, yoTime,
-                                    ros2Node, yoGraphicsListRegistry, capturePointUpdatable, wholeBodyControllerParameters, footstepPlannerParameters);
+         createAndRegisterBehaviors(robotName,
+                                    dispatcher,
+                                    modelProvider,
+                                    fullRobotModel,
+                                    robotModelFactory,
+                                    wristSensorUpdatables,
+                                    referenceFrames,
+                                    yoTime,
+                                    ros2Node,
+                                    yoGraphicsListRegistry,
+                                    capturePointUpdatable,
+                                    wholeBodyControllerParameters,
+                                    footstepPlannerParameters);
       }
 
       MessageTopicNameGenerator behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
       dispatcher.finalizeStateMachine();
-      ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           BehaviorControlModePacket.class,
+                                           behaviorSubGenerator,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           HumanoidBehaviorTypePacket.class,
+                                           behaviorSubGenerator,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
@@ -187,32 +215,40 @@ public class IHMCHumanoidBehaviorManager
    }
 
    /**
-    * Create the different behaviors and register them in the dispatcher. When creating a new
-    * behavior, that's where you need to add it.
+    * Create the different behaviors and register them in the dispatcher. When creating a new behavior,
+    * that's where you need to add it.
     * 
-    * @param robotName TODO
-    * @param fullRobotModel Holds the robot data (like joint angles). The data is updated in the
-    *           dispatcher and can be shared with the behaviors.
-    * @param wristSensors Holds the force sensor data
-    * @param referenceFrames Give access to useful references related to the robot. They're
-    *           automatically updated.
-    * @param yoTime Holds the controller time. It is updated in the dispatcher and can be shared
-    *           with the behaviors.
-    * @param ros2Node used to send packets to the controller.
-    * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
+    * @param robotName                     TODO
+    * @param fullRobotModel                Holds the robot data (like joint angles). The data is
+    *                                      updated in the dispatcher and can be shared with the
+    *                                      behaviors.
+    * @param wristSensors                  Holds the force sensor data
+    * @param referenceFrames               Give access to useful references related to the robot.
+    *                                      They're automatically updated.
+    * @param yoTime                        Holds the controller time. It is updated in the dispatcher
+    *                                      and can be shared with the behaviors.
+    * @param ros2Node                      used to send packets to the controller.
+    * @param yoGraphicsListRegistry        Allows to register YoGraphics that will be displayed in SCS.
     * @param wholeBodyControllerParameters
     */
    private void createAndRegisterBehaviors(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher, LogModelProvider logModelProvider,
                                            FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
                                            YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                           CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                           CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                            FootstepPlannerParametersBasics footstepPlannerParameters)
    {
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
-      AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(robotName, ros2Node, footstepPlannerParameters, fullRobotModel, robotModelFactory,
-                                                                              referenceFrames, yoTime, wholeBodyControllerParameters, registry);
+      AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(robotName,
+                                                                              ros2Node,
+                                                                              footstepPlannerParameters,
+                                                                              fullRobotModel,
+                                                                              robotModelFactory,
+                                                                              referenceFrames,
+                                                                              yoTime,
+                                                                              wholeBodyControllerParameters,
+                                                                              registry);
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
@@ -220,33 +256,46 @@ public class IHMCHumanoidBehaviorManager
       // CREATE SERVICES
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,
                                                                                                             FiducialDetectorBehaviorService.class.getSimpleName(),
-                                                                                                            ros2Node, yoGraphicsListRegistry);
+                                                                                                            ros2Node,
+                                                                                                            yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
-//      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
-//      try
-//      {
-//         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(robotName, ros2Node, yoGraphicsListRegistry);
-//         dispatcher.addBehaviorService(objectDetectorBehaviorService);
-//      }
-//      catch (Exception e)
-//      {
-//         System.err.println("Error creating valve detection behavior service");
-//         e.printStackTrace();
-//      }
+      //      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
+      //      try
+      //      {
+      //         objectDetectorBehaviorService = new ObjectDetectorBehaviorService(robotName, ros2Node, yoGraphicsListRegistry);
+      //         dispatcher.addBehaviorService(objectDetectorBehaviorService);
+      //      }
+      //      catch (Exception e)
+      //      {
+      //         System.err.println("Error creating valve detection behavior service");
+      //         e.printStackTrace();
+      //      }
 
       //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
       //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
 
       dispatcher.addBehavior(HumanoidBehaviorType.FIRE_FIGHTING,
-                             new FireFighterStanceBehavior(robotName, "fireFighting", yoTime, ros2Node, fullRobotModel, referenceFrames,
-                                                           wholeBodyControllerParameters, atlasPrimitiveActions));
+                             new FireFighterStanceBehavior(robotName,
+                                                           "fireFighting",
+                                                           yoTime,
+                                                           ros2Node,
+                                                           fullRobotModel,
+                                                           referenceFrames,
+                                                           wholeBodyControllerParameters,
+                                                           atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
-                             new PickUpBallBehaviorStateMachine(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                                wholeBodyControllerParameters, atlasPrimitiveActions));
+                             new PickUpBallBehaviorStateMachine(robotName,
+                                                                ros2Node,
+                                                                yoTime,
+                                                                yoDoubleSupport,
+                                                                fullRobotModel,
+                                                                referenceFrames,
+                                                                wholeBodyControllerParameters,
+                                                                atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
 
@@ -255,17 +304,38 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName, yoTime, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
-                             new TurnValveBehaviorStateMachine(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                               wholeBodyControllerParameters, atlasPrimitiveActions));
+                             new TurnValveBehaviorStateMachine(robotName,
+                                                               ros2Node,
+                                                               yoTime,
+                                                               yoDoubleSupport,
+                                                               fullRobotModel,
+                                                               referenceFrames,
+                                                               wholeBodyControllerParameters,
+                                                               atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(robotName, "Human", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                         wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry));
+                             new WalkThroughDoorBehavior(robotName,
+                                                         "Human",
+                                                         ros2Node,
+                                                         yoTime,
+                                                         yoDoubleSupport,
+                                                         fullRobotModel,
+                                                         referenceFrames,
+                                                         wholeBodyControllerParameters,
+                                                         atlasPrimitiveActions,
+                                                         yoGraphicsListRegistry));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
-                             new DoorTimingBehaviorAutomated(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                             wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry));
+                             new DoorTimingBehaviorAutomated(robotName,
+                                                             ros2Node,
+                                                             yoTime,
+                                                             yoDoubleSupport,
+                                                             fullRobotModel,
+                                                             referenceFrames,
+                                                             wholeBodyControllerParameters,
+                                                             atlasPrimitiveActions,
+                                                             yoGraphicsListRegistry));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR, new WalkTimingBehavior(robotName, yoTime, ros2Node, true));
 
@@ -276,36 +346,65 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_GC_GENERATION, new TestGarbageGenerationBehavior(robotName, ros2Node, referenceFrames, yoTime));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_SMOOTH_ICP_PLANNER,
-                             new TestSmoothICPPlannerBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                              wholeBodyControllerParameters, atlasPrimitiveActions));
+                             new TestSmoothICPPlannerBehavior(robotName,
+                                                              ros2Node,
+                                                              yoTime,
+                                                              yoDoubleSupport,
+                                                              fullRobotModel,
+                                                              referenceFrames,
+                                                              wholeBodyControllerParameters,
+                                                              atlasPrimitiveActions));
 
       HumanoidRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
       dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK,
-                             new CollaborativeBehavior(robotName, ros2Node, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters,
+                             new CollaborativeBehavior(robotName,
+                                                       ros2Node,
+                                                       referenceFrames,
+                                                       fullRobotModel,
+                                                       sensorInformation,
+                                                       walkingControllerParameters,
                                                        yoGraphicsListRegistry));
 
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR, new ExampleComplexBehaviorStateMachine(robotName, ros2Node, yoTime, atlasPrimitiveActions));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR, new TestDoorOpenBehaviorService(robotName,"doorOpen", ros2Node, yoGraphicsListRegistry));
-      
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR,
+                             new TestDoorOpenBehaviorService(robotName, "doorOpen", ros2Node, yoGraphicsListRegistry));
+
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
-                                                                                                 referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
+                             new FollowFiducialBehavior(robotName,
+                                                        ros2Node,
+                                                        yoTime,
+                                                        wholeBodyControllerParameters,
+                                                        referenceFrames,
+                                                        fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50_AND_TURN,
-                             new WalkToFiducialAndTurnBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames,
-                                                               footstepPlannerParameters, fiducialDetectorBehaviorService, fullRobotModel));
+                             new WalkToFiducialAndTurnBehavior(robotName,
+                                                               ros2Node,
+                                                               yoTime,
+                                                               wholeBodyControllerParameters,
+                                                               referenceFrames,
+                                                               footstepPlannerParameters,
+                                                               fiducialDetectorBehaviorService,
+                                                               fullRobotModel));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN,
                              new WalkOverTerrainStateMachineBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames));
 
-//      if (objectDetectorBehaviorService != null)
-//      {
-//         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
-//         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
-//                                                                                              referenceFrames, fiducialDetectorBehaviorService));
-//      }
+      //      if (objectDetectorBehaviorService != null)
+      //      {
+      //         dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
+      //         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
+      //                                                                                              referenceFrames, fiducialDetectorBehaviorService));
+      //      }
 
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE, new BasicPipeLineBehavior(robotName, "pipelineTest", yoTime, ros2Node, fullRobotModel,
-                                                                                           referenceFrames, wholeBodyControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE,
+                             new BasicPipeLineBehavior(robotName,
+                                                       "pipelineTest",
+                                                       yoTime,
+                                                       ros2Node,
+                                                       fullRobotModel,
+                                                       referenceFrames,
+                                                       wholeBodyControllerParameters));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_STATEMACHINE,
                              new BasicStateMachineBehavior(robotName, "StateMachineTest", yoTime, ros2Node, atlasPrimitiveActions));
@@ -321,8 +420,16 @@ public class IHMCHumanoidBehaviorManager
       //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.SIMULATED_BALL);
       //      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
 
-      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName, fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     ros2Node, wholeBodyControllerParameters, footstepPlannerParameters, yoSupportPolygon,
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName,
+                                                                     fullRobotModel,
+                                                                     yoSupportLeg,
+                                                                     referenceFrames,
+                                                                     yoTime,
+                                                                     yoDoubleSupport,
+                                                                     ros2Node,
+                                                                     wholeBodyControllerParameters,
+                                                                     footstepPlannerParameters,
+                                                                     yoSupportPolygon,
                                                                      yoGraphicsListRegistry);
       diagnosticBehavior.setCanArmsReachFarBehind(robotModelFactory.getRobotDescription().getName().contains("valkyrie"));
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
@@ -330,11 +437,18 @@ public class IHMCHumanoidBehaviorManager
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(robotName, ros2Node, referenceFrames, walkingControllerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
-      WalkToLocationPlannedBehavior walkToLocationBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames,
-                                                                                               walkingControllerParameters, footstepPlannerParameters, yoTime);
+      WalkToLocationPlannedBehavior walkToLocationBehavior = new WalkToLocationPlannedBehavior(robotName,
+                                                                                               ros2Node,
+                                                                                               fullRobotModel,
+                                                                                               referenceFrames,
+                                                                                               walkingControllerParameters,
+                                                                                               footstepPlannerParameters,
+                                                                                               yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
-      RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(robotName, ros2Node, referenceFrames,
+      RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(robotName,
+                                                                                                                     ros2Node,
+                                                                                                                     referenceFrames,
                                                                                                                      registry);
       dispatcher.addBehavior(HumanoidBehaviorType.REPEATEDLY_WALK_FOOTSTEP_LIST, repeatedlyWalkFootstepListBehavior);
    }
@@ -350,15 +464,24 @@ public class IHMCHumanoidBehaviorManager
       YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
-      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName, fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     ros2Node, wholeBodyControllerParameters, footstepPlannerParameters, yoSupportPolygon,
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName,
+                                                                     fullRobotModel,
+                                                                     yoSupportLeg,
+                                                                     referenceFrames,
+                                                                     yoTime,
+                                                                     yoDoubleSupport,
+                                                                     ros2Node,
+                                                                     wholeBodyControllerParameters,
+                                                                     footstepPlannerParameters,
+                                                                     yoSupportPolygon,
                                                                      yoGraphicsListRegistry);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
    }
 
-   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
+   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName,
+                                                                                        FootstepPlannerParametersBasics footstepPlannerParameters,
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
                                                                                         LogModelProvider modelProvider, boolean startYoVariableServer,
@@ -366,9 +489,14 @@ public class IHMCHumanoidBehaviorManager
          throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
-      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(robotName, footstepPlannerParameters,
-                                                                                                wholeBodyControllerParameters, robotModelFactory, modelProvider,
-                                                                                                startYoVariableServer, sensorInfo, true);
+      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(robotName,
+                                                                                                footstepPlannerParameters,
+                                                                                                wholeBodyControllerParameters,
+                                                                                                robotModelFactory,
+                                                                                                modelProvider,
+                                                                                                startYoVariableServer,
+                                                                                                sensorInfo,
+                                                                                                true);
       return ihmcHumanoidBehaviorManager;
    }
 
@@ -395,5 +523,12 @@ public class IHMCHumanoidBehaviorManager
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      dispatcher.closeAndDispose();
+      ros2Node.destroy();
    }
 }

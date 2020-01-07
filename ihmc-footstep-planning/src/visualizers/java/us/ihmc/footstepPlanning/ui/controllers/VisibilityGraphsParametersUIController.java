@@ -77,8 +77,6 @@ public class VisibilityGraphsParametersUIController
    private Spinner<Double> weightForInterRegionEdge;
    @FXML
    private Spinner<Double> weightForNonPreferredEdge;
-   @FXML
-   private Spinner<Double> costForNonPreferredNode;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -118,7 +116,6 @@ public class VisibilityGraphsParametersUIController
       occludedGoalEdgeWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 100.0, 50.0, 1.0));
       weightForInterRegionEdge.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 1.5, 0.1));
       weightForNonPreferredEdge.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 1.5, 0.1));
-      costForNonPreferredNode.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.25, 0.25));
    }
 
    public void bindControls()
@@ -157,7 +154,6 @@ public class VisibilityGraphsParametersUIController
       javaFXStoredPropertyMap.put(occludedGoalEdgeWeight, VisibilityGraphParametersKeys.occludedGoalEdgeWeight);
       javaFXStoredPropertyMap.put(weightForInterRegionEdge, VisibilityGraphParametersKeys.weightForInterRegionEdge);
       javaFXStoredPropertyMap.put(weightForNonPreferredEdge, VisibilityGraphParametersKeys.weightForNonPreferredEdge);
-      javaFXStoredPropertyMap.put(costForNonPreferredNode, VisibilityGraphParametersKeys.costForNonPreferredNode);
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, parameters ->
