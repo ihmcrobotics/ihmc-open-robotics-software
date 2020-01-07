@@ -21,6 +21,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
+import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.ArrayList;
@@ -485,7 +488,7 @@ public class LQRJumpMomentumControllerTest
       DenseMatrix64F S1Expected = new DenseMatrix64F(6, 6);
 
       controller.computeS1Parameters();
-      
+
       DenseMatrix64F s1EndOf1 = new DenseMatrix64F(6, 6);
       DenseMatrix64F s1StartOf2 = new DenseMatrix64F(6, 6);
       DenseMatrix64F s1EndOf2 = new DenseMatrix64F(6, 6);
@@ -526,6 +529,9 @@ public class LQRJumpMomentumControllerTest
       MatrixTestTools.assertMatrixEquals(s1EndOf2, s1StartOf3, epsilon);
       MatrixTestTools.assertMatrixEquals(s1EndOf3, s1StartOf4, epsilon);
       MatrixTestTools.assertMatrixEquals(s1EndOf4, P, epsilon);
+
+      DenseMatrix64F S1DynamicsExpected = new DenseMatrix64F(6, 6);
+      S1DynamicsExpected.zero();
 
       // compute during first flight phase
       for (double time = 0; time <= landingTime1; time += 0.001)
@@ -583,6 +589,8 @@ public class LQRJumpMomentumControllerTest
 
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
+
+         MatrixTestTools.assertMatrixEquals(S1DynamicsExpected, computeRiccatiDynamics(controller, S1Expected), epsilon);
       }
 
       // compute during last flight phase
@@ -608,6 +616,8 @@ public class LQRJumpMomentumControllerTest
 
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected2, controller.getCostHessian(), epsilon);
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, S1Expected, controller.getCostHessian(), epsilon);
+
+         MatrixTestTools.assertMatrixEquals(S1DynamicsExpected, computeRiccatiDynamics(controller, S1Expected), epsilon);
       }
 
       // compute during last contact phase
@@ -617,7 +627,28 @@ public class LQRJumpMomentumControllerTest
          controller.computeS1AndK1(time);
 
          MatrixTestTools.assertMatrixEquals("Failed at time t = " + time, P, controller.getCostHessian(), epsilon);
+
+         MatrixTestTools.assertMatrixEquals(S1DynamicsExpected, computeRiccatiDynamics(controller, controller.getCostHessian()), epsilon);
+
       }
+   }
+
+   private static DenseMatrix64F computeRiccatiDynamics(LQRJumpMomentumController controller, DenseMatrix64F S1)
+   {
+      DenseMatrix64F M = new DenseMatrix64F(6, 6);
+      DenseMatrix64F BTranspose = new DenseMatrix64F(3, 6);
+      CommonOps.transpose(controller.B, BTranspose);
+      NativeCommonOps.multQuad(BTranspose, controller.R1, M);
+
+      DenseMatrix64F S1Dot = new DenseMatrix64F(6, 6);
+      NativeCommonOps.multQuad(S1, M, S1Dot);
+      CommonOps.scale(-1.0, S1Dot);
+
+      CommonOps.addEquals(S1Dot, controller.QRiccati);
+      CommonOps.multAddTransA(controller.ARiccati, S1, S1Dot);
+      CommonOps.multAdd(S1, controller.ARiccati, S1Dot);
+
+      return S1Dot;
    }
 
    @Test
