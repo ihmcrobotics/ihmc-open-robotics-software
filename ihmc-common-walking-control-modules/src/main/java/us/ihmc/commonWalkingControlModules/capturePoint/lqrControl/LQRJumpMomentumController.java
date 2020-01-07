@@ -16,6 +16,8 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.linearAlgebra.cdreSolvers.CDRESolver;
+import us.ihmc.robotics.linearAlgebra.cdreSolvers.NumericCDRESolver;
+import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -128,9 +130,6 @@ public class LQRJumpMomentumController
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
    final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
-
-   final RecyclingArrayList<DenseMatrix64F> sigmas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
-   final RecyclingArrayList<DenseMatrix64F> phis = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
 
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
@@ -275,14 +274,8 @@ public class LQRJumpMomentumController
 
    private void resetS1Parameters()
    {
-      sigmas.clear();
-      phis.clear();
-
-      for (int j = 0; j < relativeVRPTrajectories.size(); j++)
-      {
-         sigmas.add().zero();
-         phis.add().zero();
-      }
+      s1Contact.clear();
+      s1Flight.clear();
    }
 
    void computeS1Parameters()
@@ -291,27 +284,42 @@ public class LQRJumpMomentumController
 
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
 
-      sigmas.get(numberOfSegments).zero();
-      CommonOps.setIdentity(phis.get(numberOfSegments));
+      CDRESolver s1Trajectory = new NumericCDRESolver();
+      Trajectory3D nextVRPTrajectory = relativeVRPTrajectories.get(numberOfSegments);
+      s1Trajectory.setFinalBoundaryCondition(nextVRPTrajectory.getFinalTime(), P);
+      s1Trajectory.computePFunction(nextVRPTrajectory.getInitialTime());
+      s1Contact.put(nextVRPTrajectory, s1Trajectory);
 
       for (int j = numberOfSegments - 1; j >= 0; j--)
       {
+         DenseMatrix64F nextInitialS1 = new DenseMatrix64F(6, 6);
+         if (contactStateProviders.get(j + 1).getContactState().isLoadBearing())
+            nextInitialS1.set(s1Contact.get(nextVRPTrajectory).getP(nextVRPTrajectory.getInitialTime()));
+         else
+            s1Flight.get(nextVRPTrajectory).compute(0.0, nextInitialS1);
+
+         Trajectory3D thisVRPTrajectory = relativeVRPTrajectories.get(j);
+
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
-            sigmas.get(j).zero();
-            phis.get(j).set(phis.get(j+1));
+            CDRESolver thisS1Trajectory = new NumericCDRESolver();
+
+            thisS1Trajectory.setFinalBoundaryCondition(thisVRPTrajectory.getFinalTime(), nextInitialS1);
+            thisS1Trajectory.computePFunction(thisVRPTrajectory.getInitialTime());
+            s1Contact.put(thisVRPTrajectory, thisS1Trajectory);
          }
          else
          {
             // sigma_j = phi_j+1 Ad,1
-            CommonOps.mult(-1.0, phis.get(j+1), Ad1, sigmas.get(j));
-
             // phi_j = phi_j+1 (Ad,1 (t_j+1 + t_j) + Ad,2)
-            double duration = relativeVRPTrajectories.get(j).getDuration();
+            double duration = thisVRPTrajectory.getDuration();
             tempMatrix.set(Ad2);
             CommonOps.addEquals(tempMatrix, duration, Ad1);
 
-            CommonOps.mult(phis.get(j+1), tempMatrix, phis.get(j));
+            QuadraticS1Function s1Function = new QuadraticS1Function();
+            s1Function.set(Ad1, tempMatrix, nextInitialS1);
+
+            s1Flight.put(thisVRPTrajectory, s1Function);
          }
       }
    }
@@ -320,10 +328,11 @@ public class LQRJumpMomentumController
    {
       int segmentNumber = getSegmentNumber(time);
       double timeInState = computeTimeInSegment(time, segmentNumber);
-
-      tempMatrix.set(phis.get(segmentNumber));
-      CommonOps.addEquals(tempMatrix, timeInState, sigmas.get(segmentNumber));
-      NativeCommonOps.multQuad(tempMatrix, P, S1);
+      Trajectory3D relativeVRPTrajectory = relativeVRPTrajectories.get(segmentNumber);
+      if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
+         S1.set(s1Contact.get(relativeVRPTrajectory).getP(timeInState));
+      else
+         s1Flight.get(relativeVRPTrajectory).compute(timeInState, S1);
 
       // Nb = N' + B' S1
       CommonOps.transpose(N, NB);
@@ -356,8 +365,6 @@ public class LQRJumpMomentumController
    {
       resetS2Parameters();
 
-
-
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
       s2Hat.zero();
       for (int j = numberOfSegments; j >= 0; j--)
@@ -375,9 +382,9 @@ public class LQRJumpMomentumController
 
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
+            S1Hat.set(s1Contact.get(trajectorySegment).getP(0.0));
+
             // Nb = N' + B' S1
-            CommonOps.transpose(N, NB);
-            NativeCommonOps.multQuad(phis.get(j), P, S1Hat);
             CommonOps.multAddTransA(B, S1Hat, NB);
 
             // A2 = Nb' R1inv B' - A'
@@ -436,7 +443,7 @@ public class LQRJumpMomentumController
             double d2 = duration * duration;
             double d3 = duration * d2;
 
-            NativeCommonOps.multQuad(phis.get(j+1), P, S1Hat);
+            s1Flight.get(trajectorySegment).compute(0.0, S1Hat);
 
             CommonOps.multTransA(Ad1, S1Hat, Ad1TransposeS1);
             CommonOps.multTransA(Ad2, S1Hat, Ad2TransposeS1);

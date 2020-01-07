@@ -19,7 +19,7 @@ public class QuadraticS1Function
       b.set(constant);
    }
 
-   private void compute(double timeInState, DenseMatrix64F S1ToPack)
+   public void compute(double timeInState, DenseMatrix64F S1ToPack)
    {
       combined.set(b);
       CommonOps.addEquals(combined, timeInState, a);
