@@ -15,14 +15,12 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
-import us.ihmc.robotics.linearAlgebra.cdreSolvers.CDRESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -39,7 +37,7 @@ import java.util.List;
  * <p> B = [0; I]</p>
  * <p> C = </p>
  */
-public class LQRJumpMomentumController
+public class LQRJumpMomentumControllerOld
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
@@ -142,15 +140,12 @@ public class LQRJumpMomentumController
 
    private boolean shouldUpdateP = true;
 
-   private final HashMap<Trajectory3D, CDRESolver> s1Contact = new HashMap<>();
-   private final HashMap<Trajectory3D, QuadraticS1Function> s1Flight = new HashMap<>();
-
-   public LQRJumpMomentumController(DoubleProvider omega)
+   public LQRJumpMomentumControllerOld(DoubleProvider omega)
    {
       this(omega, null);
    }
 
-   public LQRJumpMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
+   public LQRJumpMomentumControllerOld(DoubleProvider omega, YoVariableRegistry parentRegistry)
    {
       computeDynamicsMatrix(omega.getValue());
 
