@@ -81,7 +81,8 @@ public class ValkyrieAStarPlannerEndToEndTest
       Assertions.assertTrue(status.get() != null && Status.fromByte(status.get().getPlannerStatus()) == Status.FOUND_SOLUTION);
 
       PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.02, generateGroundPlane);
-      DRCSimulationTestHelper simulationTestHelper = new DRCSimulationTestHelper(new SimulationTestingParameters(), robotModel, simEnvironment);
+      SimulationTestingParameters simulationTestParameters = SimulationTestingParameters.createFromSystemProperties();
+      DRCSimulationTestHelper simulationTestHelper = new DRCSimulationTestHelper(simulationTestParameters, robotModel, simEnvironment);
       simulationTestHelper.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw()));
       simulationTestHelper.createSimulation(getClass().getSimpleName());
 
