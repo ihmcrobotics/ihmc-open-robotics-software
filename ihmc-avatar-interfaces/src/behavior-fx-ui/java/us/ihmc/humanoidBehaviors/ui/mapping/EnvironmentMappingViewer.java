@@ -32,7 +32,7 @@ public class EnvironmentMappingViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
+      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic(true);
 
       File dataFolder = PlanarRegionDataImporter.chooseFile(primaryStage);
       File[] listOfFiles = dataFolder.listFiles();

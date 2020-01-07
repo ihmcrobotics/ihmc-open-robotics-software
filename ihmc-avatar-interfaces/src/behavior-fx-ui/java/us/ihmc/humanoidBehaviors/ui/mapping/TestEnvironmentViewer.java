@@ -54,7 +54,7 @@ public class TestEnvironmentViewer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
+      PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic(true);
 
       for (int i = 0; i < numbersToViz.size(); i++)
       {

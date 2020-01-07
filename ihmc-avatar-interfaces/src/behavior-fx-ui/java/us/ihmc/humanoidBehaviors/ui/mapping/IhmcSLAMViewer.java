@@ -23,7 +23,7 @@ public class IhmcSLAMViewer
    private static final Color DEFAULT_OCTREE_COLOR = Color.BEIGE;
 
    private final List<PlanarRegionsGraphic> planarRegionsGraphics = new ArrayList<>();
-   private final PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic();
+   private final PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic(true);
    private final NormalOctreeGraphic normalOctreeGraphic = new NormalOctreeGraphic();
 
    public IhmcSLAMViewer()
