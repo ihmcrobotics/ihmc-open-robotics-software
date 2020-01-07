@@ -7,68 +7,212 @@ import java.util.stream.Collectors;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
+import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
+import us.ihmc.tools.lists.PairList;
 
 public class ClusterTools
 {
-   //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by 
+   //TODO: +++JerryPratt: The case of vertical PlanarRegions needs a lot of work. The outside sides will get extruded based on their height, even if close by
    // there are high vertices. Need some example cases for this and need to fix it up.
    private static final double HALF_PI = 0.5 * Math.PI;
    private static final double POPPING_POLYGON_POINTS_THRESHOLD = 0.0; //MathTools.square(0.025);
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
    private static final double NAV_TO_NON_NAV_DISTANCE = 0.001;
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
+   public static List<ExtrusionHull> extrudePolygonInward(List<ConvexPolygon2D> polygons, ObstacleExtrusionDistanceCalculator calculator)
    {
-      return extrudePolygon(extrudeToTheLeft, cluster, calculator, false);
+      List<ExtrusionHull> listOfExtrusions = new ArrayList<>();
+      for (ConvexPolygon2DReadOnly polygon : polygons)
+      {
+         double[] extrusionDistances = polygon.getPolygonVerticesView().stream().mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), 0.0)).toArray();
+         ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+         extrudeConvexPolygonInward(polygon, extrusionDistances, scaledPolygon);
+
+         listOfExtrusions.add(new ExtrusionHull(scaledPolygon.getPolygonVerticesView()));
+      }
+
+      return listOfExtrusions;
    }
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator, boolean checkExtrusionDistance)
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
+    */
+   public static boolean extrudeConvexPolygonInward(ConvexPolygon2DReadOnly polygonQ, double[] distances, ConvexPolygon2DBasics polygonToPack)
    {
-      List<Point2DReadOnly> rawPoints = cluster.getRawPointsInLocal2D();
-      double[] extrusionDistances = cluster.getRawPointsInLocal3D().stream()
-                                           .mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), rawPoint.getZ())).toArray();
+      if (distances.length != polygonQ.getNumberOfVertices())
+         throw new IllegalArgumentException("Not a valid number of distances.");
 
-      return extrudePolygon(extrudeToTheLeft, rawPoints, extrusionDistances, checkExtrusionDistance);
+      boolean allAreZero = true;
+      for (double distance : distances)
+      {
+         if (distance < 0.0)
+            throw new IllegalArgumentException("Not a valid distance " + distance + ", must be positive.");
+
+         if (distance > 1.0e-10)
+         {
+            allAreZero = false;
+            break;
+         }
+      }
+      if (allAreZero)
+      {
+         polygonToPack.set(polygonQ);
+         return true;
+      }
+
+      List<? extends Point2DReadOnly> vertices = polygonQ.getPolygonVerticesView();
+
+      if (polygonQ.getNumberOfVertices() == 2)
+      {
+         Point2DReadOnly vertex0 = vertices.get(0);
+         Point2DReadOnly vertex1 = vertices.get(1);
+
+         if (vertex0.distance(vertex1) < distances[0] + distances[1])
+         {
+            Point2D midPoint = new Point2D(vertex0);
+            midPoint.add(vertex1);
+            midPoint.scale(0.5);
+
+            polygonToPack.clear();
+            polygonToPack.addVertex(midPoint);
+            polygonToPack.update();
+            return false;
+         }
+
+         double edgeLength = vertex0.distance(vertex1);
+         double percentageAlongSegment0 = distances[0] / edgeLength;
+         double percentageAlongSegment1 = distances[1] / edgeLength;
+
+         Point2D newVertex0 = new Point2D();
+         Point2D newVertex1 = new Point2D();
+         newVertex0.interpolate(vertex0, vertex1, percentageAlongSegment0);
+         newVertex1.interpolate(vertex1, vertex0, percentageAlongSegment1);
+
+         polygonToPack.clear();
+         polygonToPack.addVertex(newVertex0);
+         polygonToPack.addVertex(newVertex1);
+         polygonToPack.update();
+
+         return true;
+      }
+
+      if (polygonQ.getNumberOfVertices() == 1)
+      {
+         polygonToPack.set(polygonQ);
+         return false;
+      }
+
+      ArrayList<Line2D> rays = new ArrayList<>();
+
+      int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools
+            .findVertexIndex(polygonQ, true, EuclidGeometryPolygonTools.Bound.MIN, EuclidGeometryPolygonTools.Bound.MIN);
+      Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
+      int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
+      Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+      Point2DReadOnly nextNextVertexQ = polygonQ.getNextVertex(nextVertexQIndex);
+
+      Vector2D normalizedVector = new Vector2D();
+      Vector2D nextNormalizedVector = new Vector2D();
+      Point2D referencePoint = new Point2D();
+
+      for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
+      {
+         normalizedVector.sub(nextVertexQ, vertexQ);
+         normalizedVector.normalize();
+         nextNormalizedVector.sub(nextNextVertexQ, nextVertexQ);
+         nextNormalizedVector.normalize();
+
+         // don't include collinear points
+         if (normalizedVector.dot(nextNormalizedVector) < 1.0 - 1e-6)
+         {
+            Vector2DBasics vectorPerpendicularToEdgeOnQ = EuclidGeometryTools.perpendicularVector2D(normalizedVector);
+            vectorPerpendicularToEdgeOnQ.negate();
+
+            referencePoint.scaleAdd(distances[i], vectorPerpendicularToEdgeOnQ, vertexQ);
+
+            rays.add(new Line2D(referencePoint, normalizedVector));
+         }
+
+         nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
+
+         vertexQ = nextVertexQ;
+         nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
+         nextNextVertexQ = polygonQ.getNextVertex(nextVertexQIndex);
+      }
+
+
+      ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
+
+      boolean foundSolution = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToPack);
+      if (!foundSolution)
+      {
+         polygonToPack.clear();
+         polygonToPack.addVertex(polygonQ.getCentroid());
+         polygonToPack.update();
+      }
+
+      return foundSolution;
    }
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances)
+   public static ExtrusionHull extrudePolygon(boolean extrudeToTheLeft, Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
    {
-      return extrudePolygon(extrudeToTheLeft, pointsToExtrude, extrusionDistances, false);
+      return new ExtrusionHull(extrudePolygon(extrudeToTheLeft, cluster.getRawPointsInLocal3D(), calculator));
    }
 
-   public static List<Point2D> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, boolean checkExtrusionDistance)
+   public static List<Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, List<Point3DReadOnly> rawPoints, ObstacleExtrusionDistanceCalculator calculator)
+   {
+      double[] extrusionDistances = new double[rawPoints.size()];
+      List<Point2DReadOnly> rawPoints2D = new ArrayList<>();
+      for (int i = 0; i < rawPoints.size(); i++)
+      {
+         Point3DReadOnly rawPoint = rawPoints.get(i);
+         Point2DReadOnly rawPoint2D = new Point2D(rawPoint);
+         rawPoints2D.add(rawPoint2D);
+         extrusionDistances[i] = calculator.computeExtrusionDistance(rawPoint2D, rawPoint.getZ());
+      }
+      return extrudePolygon(extrudeToTheLeft, rawPoints2D, extrusionDistances);
+   }
+
+   public static List<Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances)
    {
       if (pointsToExtrude.size() == 2)
       {
          return extrudeMultiLine(pointsToExtrude, extrusionDistances, 5);
       }
 
-      List<Point2D> extrusions = new ArrayList<>();
+      List<Point2DReadOnly> extrusions = new ArrayList<>();
 
       // gets all the edges, where edge i is the edge that ends at point i.
       List<LineSegment2DReadOnly> edges = getAllEdges(pointsToExtrude);
@@ -82,9 +226,6 @@ public class ClusterTools
             continue;
 
          double extrusionDistance = extrusionDistances[i];
-
-         if (checkExtrusionDistance)
-            extrusionDistance = getMaximumExtrusionDistance(extrudeToTheLeft, i, edges, extrusionDistances);
 
          LineSegment2DReadOnly edgePrev = edges.get(i);
          LineSegment2DReadOnly edgeNext = ListWrappingIndexTools.getNext(i, edges);
@@ -127,76 +268,27 @@ public class ClusterTools
       return edges;
    }
 
-   private static double getMaximumExtrusionDistance(boolean extrudeToTheLeft, int currentEdgeIndex, List<LineSegment2DReadOnly> allEdges, double[] extrusionDistances)
+   public static List<Point2DReadOnly> extrudeMultiLine(List<Point3DReadOnly> rawPoints, ObstacleExtrusionDistanceCalculator calculator, int numberOfExtrusionsAtEndpoints)
    {
-      LineSegment2DReadOnly currentEdge = allEdges.get(currentEdgeIndex);
-
-      Point2DReadOnly currentMidpoint = currentEdge.midpoint();
-      Point2DReadOnly currentMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, currentEdge, extrusionDistances[currentEdgeIndex]);
-      Vector2DBasics currentExtrusionDirection = new Vector2D();
-      currentExtrusionDirection.sub(currentMidpointExtrusion, currentMidpoint);
-
-      double maxExtrusionDistance = extrusionDistances[currentEdgeIndex];
-
-      for (int i = 0; i < allEdges.size(); i++)
+      double[] extrusionDistances = new double[rawPoints.size()];
+      List<Point2DReadOnly> rawPoints2D = new ArrayList<>();
+      for (int i = 0; i < rawPoints.size(); i++)
       {
-         if (i == currentEdgeIndex)
-            continue;
-
-         LineSegment2DReadOnly otherEdge = allEdges.get(i);
-         Point2DReadOnly otherMidpointExtrusion = getMidpointExtrusion(extrudeToTheLeft, otherEdge, extrusionDistances[i]);
-
-         LineSegment2DReadOnly midpointConnection = new LineSegment2D(currentMidpoint, otherEdge.midpoint());
-
-         // FIXME this percentage thing isn't working quite right.
-         double currentPercentAlongSegment = midpointConnection.percentageAlongLineSegment(currentMidpointExtrusion);
-         double otherPercentAlongSegment = midpointConnection.percentageAlongLineSegment(otherMidpointExtrusion);
-
-         if (currentPercentAlongSegment > otherPercentAlongSegment)
-         {
-            double maxPercent = 0.5 * ( currentPercentAlongSegment + otherPercentAlongSegment);
-            if (maxPercent > 1.0 || maxPercent < 0.0)
-               continue;
-
-            double distanceAlongMidpointConnection = maxPercent * midpointConnection.length();
-            double angle = currentExtrusionDirection.angle(midpointConnection.direction(false));
-            double equivalentExtrusionDistance = distanceAlongMidpointConnection / Math.cos(angle);
-            maxExtrusionDistance = Math.min(maxExtrusionDistance, equivalentExtrusionDistance);
-         }
+         Point3DReadOnly rawPoint = rawPoints.get(i);
+         Point2DReadOnly rawPoint2D = new Point2D(rawPoint);
+         rawPoints2D.add(rawPoint2D);
+         extrusionDistances[i] = calculator.computeExtrusionDistance(rawPoint2D, rawPoint.getZ());
       }
-
-      return maxExtrusionDistance;
-   }
-
-   private static Point2DReadOnly getMidpointExtrusion(boolean extrudeToTheLeft, LineSegment2DReadOnly edge, double extrusionDistance)
-   {
-      Vector2DBasics currentDirection = edge.direction(true);
-      EuclidGeometryTools.perpendicularVector2D(currentDirection, currentDirection);
-      if (!extrudeToTheLeft)
-         currentDirection.negate();
-      Point2DReadOnly currentMidpoint = edge.midpoint();
-      Point2D extrudedMidpoint = new Point2D();
-      extrudedMidpoint.scaleAdd(extrusionDistance, currentDirection, currentMidpoint);
-
-      return extrudedMidpoint;
-   }
-
-   public static List<Point2D> extrudeMultiLine(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator, int numberOfExtrusionsAtEndpoints)
-   {
-      List<Point2DReadOnly> rawPoints = cluster.getRawPointsInLocal2D();
-      double[] extrusionDistances = cluster.getRawPointsInLocal3D().stream()
-                                           .mapToDouble(rawPoint -> calculator.computeExtrusionDistance(new Point2D(rawPoint), rawPoint.getZ())).toArray();
-
-      return extrudeMultiLine(rawPoints, extrusionDistances, numberOfExtrusionsAtEndpoints);
+      return extrudeMultiLine(rawPoints2D, extrusionDistances, numberOfExtrusionsAtEndpoints);
    }
 
    /**
     * Enlarges the area around a multi-point line segment to create a closed polygon and returns the polygon as a list of points.
     * Resulting polygon is in clockwise ordering.
     */
-   public static List<Point2D> extrudeMultiLine(List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, int numberOfExtrusionsAtEndpoints)
+   public static List<Point2DReadOnly> extrudeMultiLine(List<Point2DReadOnly> pointsToExtrude, double[] extrusionDistances, int numberOfExtrusionsAtEndpoints)
    {
-      List<Point2D> extrusions = new ArrayList<>();
+      List<Point2DReadOnly> extrusions = new ArrayList<>();
 
       if (pointsToExtrude.size() >= 2)
       {
@@ -267,12 +359,12 @@ public class ClusterTools
    }
 
    /**
-    * Extrudes a single point at the extrusionDistance. If this is to the inside of a corner (angle is less than 180), 
-    * then the two new lines will be moved by the extrusionDistance. 
+    * Extrudes a single point at the extrusionDistance. If this is to the inside of a corner (angle is less than 180),
+    * then the two new lines will be moved by the extrusionDistance.
     * If it is to the outside, then you should use extrudeMultiplePointsAtOutsideCorner() instead.
     */
-   public static Point2D extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, LineSegment2DReadOnly edgePrev, LineSegment2DReadOnly edgeNext,
-                                                          boolean extrudeToTheLeft, double extrusionDistance)
+   public static Point2DReadOnly extrudeSinglePointAtInsideCorner(Point2DReadOnly pointToExtrude, LineSegment2DReadOnly edgePrev,
+                                                                  LineSegment2DReadOnly edgeNext,  boolean extrudeToTheLeft, double extrusionDistance)
    {
       Vector2DBasics previousEdgeDirection = edgePrev.direction(true);
       Vector2DBasics nextEdgeDirection = edgeNext.direction(true);
@@ -312,10 +404,11 @@ public class ClusterTools
       return extrusion;
    }
 
-   public static List<Point2D> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, LineSegment2DReadOnly previousEdge, LineSegment2DReadOnly nextEdge,
-                                                                    boolean extrudeToTheLeft, int numberOfExtrusions, double extrusionDistance)
+   public static List<Point2DReadOnly> extrudeMultiplePointsAtOutsideCorner(Point2DReadOnly cornerPointToExtrude, LineSegment2DReadOnly previousEdge,
+                                                                            LineSegment2DReadOnly nextEdge, boolean extrudeToTheLeft, int numberOfExtrusions,
+                                                                            double extrusionDistance)
    {
-      List<Point2D> extrusions = new ArrayList<>();
+      List<Point2DReadOnly> extrusions = new ArrayList<>();
 
       Vector2D firstExtrusionDirection = EuclidGeometryTools.perpendicularVector2D(previousEdge.direction(true));
       if (!extrudeToTheLeft)
@@ -429,11 +522,8 @@ public class ClusterTools
    public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator preferredCalculator,
                                                  NavigableExtrusionDistanceCalculator calculator, boolean includePreferredExtrusions)
    {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      homeRegion.getTransformToWorld(transformToWorld);
-
       Cluster homeRegionCluster = new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON);
-      homeRegionCluster.setTransformToWorld(transformToWorld);
+      homeRegionCluster.setTransformToWorld(homeRegion.getTransformToWorld());
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
 
       double preferredExtrusionDistance = preferredCalculator.computeNavigableExtrusionDistance(homeRegion);
@@ -448,38 +538,35 @@ public class ClusterTools
 
       //TODO: JEP+++: Why do we add a NonNavigableExtrusion to a home region cluster?
       // I guess it's for inner region connections that cross over empty space.
-      // Need to make sure they don't. But then also need to make sure these 
-      // NonNavigable regions are not treated as boundaries when making 
+      // Need to make sure they don't. But then also need to make sure these
+      // NonNavigable regions are not treated as boundaries when making
       // inter region connections...
       if (includePreferredExtrusions)
       {
-         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, preferredNavigableCalculator, true));
+         List<ConvexPolygon2D> polygons = homeRegion.getConvexPolygons();
+         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNonNavigableCalculator));
+         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNavigableCalculator));
       }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
       return homeRegionCluster;
    }
 
-   public static List<Cluster> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
-                                                      ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
-                                                      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                      boolean includePreferredExtrusions)
+   public static PairList<Cluster, PlanarRegion> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
+                                                                        ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
+                                                                        ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
+                                                                        boolean includePreferredExtrusions)
    {
-      List<Cluster> obstacleClusters = new ArrayList<>();
+      PairList<Cluster, PlanarRegion> obstacleClusters = new PairList<>();
 
-      RigidBodyTransform transformFromHomeToWorld = new RigidBodyTransform();
-      homeRegion.getTransformToWorld(transformFromHomeToWorld);
-
-      Vector3D homeRegionSurfaceNormal = homeRegion.getNormal();
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle);
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
          Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
-                                                         transformFromHomeToWorld, homeRegionSurfaceNormal, zThresholdBeforeOrthogonal, obstacleRegion,
+                                                         homeRegion.getTransformToWorld(), zThresholdBeforeOrthogonal, obstacleRegion,
                                                          includePreferredExtrusions);
-         obstacleClusters.add(obstacleCluster);
+         obstacleClusters.add(obstacleCluster, obstacleRegion);
       }
 
       return obstacleClusters;
@@ -487,18 +574,16 @@ public class ClusterTools
 
    private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
                                                 ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                RigidBodyTransform transformFromHomeRegionToWorld, Vector3D referenceNormal, double zThresholdBeforeOrthogonal,
+                                                RigidBodyTransformReadOnly transformFromHomeRegionToWorld, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion, boolean includePreferredExtrusions)
    {
       Point2D[] concaveHull = obstacleRegion.getConcaveHull();
 
-      RigidBodyTransform transformFromObstacleToWorld = new RigidBodyTransform();
-      obstacleRegion.getTransformToWorld(transformFromObstacleToWorld);
+      RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 
       // Transform the obstacle to world and also Project the obstacle to z = 0:
-      List<Point3D> obstacleConcaveHullInWorld = new ArrayList<>();
-      List<Point3D> obstacleConcaveHullProjectedToHomeRegion = new ArrayList<>();
-      List<Point2D> obstacleConcaveHullProjectedToGround = new ArrayList<>();
+      List<Point3DReadOnly> obstacleConcaveHullInWorld = new ArrayList<>();
+      List<Point3DReadOnly> obstacleClusterPointsWithZeroZ = new ArrayList<>();
       for (int i = 0; i < concaveHull.length; i++)
       {
          Point2DReadOnly obstacleConcaveHullVertexInLocal = concaveHull[i];
@@ -507,49 +592,60 @@ public class ClusterTools
 
          obstacleConcaveHullInWorld.add(obstacleConcaveHullVertexInWorld);
 
-         Point2D obstacleConcaveHullVertexProjectedToGround2D = new Point2D(obstacleConcaveHullVertexInWorld);
-         obstacleConcaveHullProjectedToGround.add(obstacleConcaveHullVertexProjectedToGround2D);
+         double zInHomeRegion = homeRegion.getPlaneZGivenXY(obstacleConcaveHullVertexInWorld.getX(), obstacleConcaveHullVertexInWorld.getY());
 
-         Point3D obstacleConcaveHullVertexProjectedDownToHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(obstacleConcaveHullVertexInWorld, homeRegion);
-         obstacleConcaveHullProjectedToHomeRegion.add(obstacleConcaveHullVertexProjectedDownToHomeRegion);
+         double obstacleHeight = obstacleConcaveHullVertexInWorld.getZ() - zInHomeRegion;
+         Point3D temporaryClusterPoint = new Point3D(obstacleConcaveHullVertexInWorld);
+         temporaryClusterPoint.setZ(obstacleHeight);
+
+         obstacleClusterPointsWithZeroZ.add(temporaryClusterPoint);
       }
 
-      // TODO: This is good but hackish. Need to clean up to not require this temporary Cluster...
-      ArrayList<Point3D> temporaryClusterPoints = createTemporaryClusterPointsSettingZToHeightDifference(obstacleConcaveHullInWorld,
-                                                                                                         obstacleConcaveHullProjectedToHomeRegion);
 
       Vector3D obstacleNormal = obstacleRegion.getNormal();
       boolean verticalObstacle = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
-      Cluster tempFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(extrusionDistanceCalculator, temporaryClusterPoints,
-                                                                                          verticalObstacle);
 
-      List<Point2DReadOnly> navigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNavigableExtrusionsInLocal();
-      List<Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = tempFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+      ClusterType obstacleClusterType = getClusterType(verticalObstacle);
+      //TODO: +++JerryPratt: Rethink vertical obstacles and redo how they are done. Lots of potential issues with things like single region doorways, regions that start and end at a low height, etc.
+      if (verticalObstacle)
+         obstacleClusterPointsWithZeroZ = filterVerticalPolygonForMultiLineExtrusion(obstacleClusterPointsWithZeroZ, POPPING_MULTILINE_POINTS_THRESHOLD);
 
+      // actually extrude the points
+      List<? extends Point2DReadOnly> navigableExtrusionsInFlatWorld = computeObstacleNavigableExtrusionsInLocal(obstacleClusterType, obstacleClusterPointsWithZeroZ,
+                                                                                                                 extrusionDistanceCalculator);
+      List<? extends Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType, obstacleClusterPointsWithZeroZ,
+                                                                                                                       extrusionDistanceCalculator);
 
-      // Project the points back up to the home region...
+      // Project the points back up to the home region.
       RigidBodyTransform transformFromWorldToHome = new RigidBodyTransform(transformFromHomeRegionToWorld);
       transformFromWorldToHome.invert();
-      List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
-                                                                                                              transformFromWorldToHome);
-      List<Point2DReadOnly> nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion,
-                                                                                                                 nonNavigableExtrusionsInFlatWorld,
-                                                                                                                 transformFromWorldToHome);
+      ExtrusionHull navigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, navigableExtrusionsInFlatWorld,
+                                                                                                      transformFromWorldToHome);
+      ExtrusionHull nonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion,
+                                                                                                         nonNavigableExtrusionsInFlatWorld,
+                                                                                                         transformFromWorldToHome);
 
-      List<Point2DReadOnly> preferredNavigableExtrusionsInHomeRegionLocal = null;
-      List<Point2DReadOnly> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
+      List<ExtrusionHull> preferredNavigableExtrusionsInHomeRegionLocal = null;
+      List<ExtrusionHull> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
       if (includePreferredExtrusions)
       {
-         Cluster tempPreferredFlatClusterToExtrude = createTemporaryClusterWithZEqualZeroAndExtrudeIt(preferredExtrusionDistanceCalculator, temporaryClusterPoints,
-                                                                                                      verticalObstacle);
+         // actually extrude the points
+         List<? extends Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = computeObstacleNavigableExtrusionsInLocal(obstacleClusterType,
+                                                                                                                             obstacleClusterPointsWithZeroZ,
+                                                                                                                             preferredExtrusionDistanceCalculator);
 
-         List<Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNavigableExtrusionsInLocal();
-         List<Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = tempPreferredFlatClusterToExtrude.getNonNavigableExtrusionsInLocal();
+         List<? extends Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType,
+                                                                                                                                   obstacleClusterPointsWithZeroZ,
+                                                                                                                                   preferredExtrusionDistanceCalculator);
 
-         preferredNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
-                                                                                                    transformFromWorldToHome);
-         preferredNonNavigableExtrusionsInHomeRegionLocal = projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
-                                                                                                       transformFromWorldToHome);
+         // Project the points back to the the home region.
+         preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+         preferredNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
+                                                                                                      transformFromWorldToHome));
+
+         preferredNonNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+         preferredNonNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
+                                                                                                         transformFromWorldToHome));
       }
 
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
@@ -566,50 +662,16 @@ public class ClusterTools
       return cluster;
    }
 
-   private static Cluster createTemporaryClusterWithZEqualZeroAndExtrudeIt(ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                                           ArrayList<Point3D> temporaryClusterPoints, boolean verticalObstacle)
+   private static ClusterType getClusterType(boolean verticalExtrusion)
    {
-      Cluster tempFlatClusterToExtrude;
-
-      if (verticalObstacle)
-      {
-         // Project region as a line
-         //TODO: +++JerryPratt: Rethink vertical obstacles and redo how they are done. Lots of potential issues with things like single region doorways, regions that start and end at a low height, etc.
-         tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.MULTI_LINE);
-         List<Point3D> filteredPointsForMultiLine = filterVerticalPolygonForMultiLineExtrusion(temporaryClusterPoints, POPPING_MULTILINE_POINTS_THRESHOLD);
-         tempFlatClusterToExtrude.addRawPointsInLocal3D(filteredPointsForMultiLine);
-      }
-      else
-      {
-         tempFlatClusterToExtrude = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
-         tempFlatClusterToExtrude.addRawPointsInLocal3D(temporaryClusterPoints);
-      }
-
-      extrudeObstacleCluster(tempFlatClusterToExtrude, extrusionDistanceCalculator);
-      return tempFlatClusterToExtrude;
+      return verticalExtrusion ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
    }
 
-   private static ArrayList<Point3D> createTemporaryClusterPointsSettingZToHeightDifference(List<Point3D> obstacleConcaveHullInWorld,
-                                                                                            List<Point3D> obstacleConcaveHullProjectedToHomeRegion)
-   {
-      ArrayList<Point3D> temporaryClusterPoints = new ArrayList<>();
-      for (int i = 0; i < obstacleConcaveHullInWorld.size(); i++)
-      {
-         Point3D obstaclePointInWorld = obstacleConcaveHullInWorld.get(i);
-         Point3D obstacleProjectedToHomeRegionInWorld = obstacleConcaveHullProjectedToHomeRegion.get(i);
-
-         double obstacleHeight = obstaclePointInWorld.getZ() - obstacleProjectedToHomeRegionInWorld.getZ();
-
-         temporaryClusterPoints.add(new Point3D(obstaclePointInWorld.getX(), obstaclePointInWorld.getY(), obstacleHeight));
-      }
-      return temporaryClusterPoints;
-   }
-
-   private static List<Point2DReadOnly> projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
-                                                                                   List<Point2DReadOnly> pointsToProjectInWorld,
+   private static ExtrusionHull projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
+                                                                                   List<? extends Point2DReadOnly> pointsToProjectInWorld,
                                                                                    RigidBodyTransform transformFromWorldToPlanarRegion)
    {
-      List<Point2DReadOnly> navigableExtrusionsInHomeRegionLocal = new ArrayList<>();
+      ExtrusionHull navigableExtrusionsInHomeRegionLocal = new ExtrusionHull();
       for (int i = 0; i < pointsToProjectInWorld.size(); i++)
       {
          Point2DReadOnly navigableExtrusionInFlatWorld = pointsToProjectInWorld.get(i);
@@ -618,52 +680,59 @@ public class ClusterTools
          Point3D extrudedPointOnHomeRegion = PlanarRegionTools.projectInZToPlanarRegion(navigableExtrusionInFlatWorld3D, planarRegionToProjectOnto);
 
          transformFromWorldToPlanarRegion.transform(extrudedPointOnHomeRegion);
-         Point2D navigableExtrusionInHomeRegionLocal = new Point2D(extrudedPointOnHomeRegion);
-         navigableExtrusionsInHomeRegionLocal.add(navigableExtrusionInHomeRegionLocal);
+         navigableExtrusionsInHomeRegionLocal.addPoint(extrudedPointOnHomeRegion);
       }
 
       return navigableExtrusionsInHomeRegionLocal;
    }
 
-   public static void extrudeObstacleCluster(Cluster cluster, ObstacleExtrusionDistanceCalculator calculator)
+   private static List<? extends Point2DReadOnly> computeObstacleNonNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
+                                                                                               ObstacleExtrusionDistanceCalculator calculator)
    {
-      ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> calculator.computeExtrusionDistance(p, h) - NAV_TO_NON_NAV_DISTANCE;
-      ObstacleExtrusionDistanceCalculator navigableCalculator = calculator;
       int numberOfExtrusionsAtEndpoints = 5;
+      ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> calculator.computeExtrusionDistance(p, h) - NAV_TO_NON_NAV_DISTANCE;
 
-      switch (cluster.getType())
+      switch (type)
       {
       case MULTI_LINE:
-         cluster.addNonNavigableExtrusionsInLocal(extrudeMultiLine(cluster, nonNavigableCalculator, numberOfExtrusionsAtEndpoints));
-         cluster.addNavigableExtrusionsInLocal(extrudeMultiLine(cluster, navigableCalculator, numberOfExtrusionsAtEndpoints));
-         cluster.setType(ClusterType.POLYGON);
-         break;
+         return extrudeMultiLine(rawClusterPoints, nonNavigableCalculator, numberOfExtrusionsAtEndpoints);
       case POLYGON:
-         boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
-         cluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
-         cluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
-         break;
-
+         return extrudePolygon(true, rawClusterPoints, nonNavigableCalculator);
       default:
-         throw new RuntimeException("Unhandled cluster type: " + cluster.getType());
+         throw new RuntimeException("Unhandled cluster type: " + type);
       }
    }
 
+   private static List<? extends Point2DReadOnly> computeObstacleNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
+                                                                                            ObstacleExtrusionDistanceCalculator calculator)
+   {
+      int numberOfExtrusionsAtEndpoints = 5;
+
+      switch (type)
+      {
+      case MULTI_LINE:
+         return extrudeMultiLine(rawClusterPoints, calculator, numberOfExtrusionsAtEndpoints);
+      case POLYGON:
+         return extrudePolygon(true, rawClusterPoints, calculator);
+      default:
+         throw new RuntimeException("Unhandled cluster type: " + type);
+      }
+   }
+
+
    /**
-    * 
-    * 
     * @param verticalPolygonVertices
     * @param poppingPointsDistanceSquaredThreshold
     * @return
     */
-   static List<Point3D> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
+   static List<Point3DReadOnly> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
                                                                    double poppingPointsDistanceSquaredThreshold)
    {
+      if (verticalPolygonVertices.size() <= 2)
+         return verticalPolygonVertices.stream().map(Point3D::new).collect(Collectors.toList());
+
       // Making a deep copy
       List<Point3D> filteredPoints = verticalPolygonVertices.stream().map(Point3D::new).collect(Collectors.toList());
-
-      if (verticalPolygonVertices.size() <= 2)
-         return filteredPoints;
 
       Point3D mean = new Point3D();
       Vector3D principalVector = new Vector3D();
@@ -721,16 +790,19 @@ public class ClusterTools
       if (filteredPoints.get(0).distanceXYSquared(filteredPoints.get(filteredPoints.size() - 1)) <= poppingPointsDistanceSquaredThreshold)
       {
          double maxHeight = filteredPoints.stream().map(Point3D::getZ).max((d1, d2) -> Double.compare(d1, d2)).get();
-         List<Point3D> endpoints = new ArrayList<>();
-         endpoints.add(filteredPoints.get(0));
-         endpoints.add(filteredPoints.get(filteredPoints.size() - 1));
-         endpoints.forEach(p -> p.setZ(maxHeight));
+         List<Point3DReadOnly> endpoints = new ArrayList<>();
+         Point3D endPoint0 = filteredPoints.get(0);
+         Point3D endPoint1 = filteredPoints.get(filteredPoints.size() - 1);
+         endPoint0.setZ(maxHeight);
+         endPoint1.setZ(maxHeight);
+         endpoints.add(endPoint0);
+         endpoints.add(endPoint1);
          return endpoints;
       }
       else
       {
          filteredPoints = filterPointsWithSameXYCoordinatesKeepingHighest(filteredPoints, poppingPointsDistanceSquaredThreshold);
-         return filteredPoints;
+         return new ArrayList<>(filteredPoints);
       }
    }
 
@@ -739,7 +811,7 @@ public class ClusterTools
     * It assumes the list is ordered in such a way that the only possible duplicates are next to each other.
     * In removing a duplicate, it keeps the one with the larger z value.
     * At the end, all points are guaranteed to be greater than the threshold distance apart.
-    * 
+    *
     * @param pointsToFilter List of points to be filtered.
     * @param poppingPointsDistanceSquaredThreshold Threshold for the squared distance for considering points to be duplicates.
     */
@@ -754,7 +826,7 @@ public class ClusterTools
          filteredPointsToReturn.add(pointsToFilter.get(0));
          return filteredPointsToReturn;
       }
-      
+
       boolean pointWasFiltered = false;
 
       for (int i = 0; i < pointsToFilter.size(); i++)
@@ -764,7 +836,7 @@ public class ClusterTools
             filteredPointsToReturn.add(pointsToFilter.get(i));
             continue;
          }
-         
+
          Point3D currentPoint = pointsToFilter.get(i);
          Point3D nextPoint = pointsToFilter.get(i + 1);
 

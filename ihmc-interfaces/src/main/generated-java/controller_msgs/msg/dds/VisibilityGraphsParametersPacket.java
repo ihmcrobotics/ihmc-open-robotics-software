@@ -24,6 +24,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double preferred_obstacle_extrusion_distance_ = -11.1;
    public double obstacle_extrusion_distance_if_not_too_high_to_step_ = -11.1;
    public double too_high_to_step_distance_ = -11.1;
+   public double height_for_max_avoidance_ = -11.1;
    public double cluster_resolution_ = -11.1;
    public double exploration_distance_from_start_goal_ = -11.1;
    public double planar_region_min_area_;
@@ -54,7 +55,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double occluded_goal_edge_weight_ = -11.1;
    public double weight_for_inter_region_edge_ = -11.1;
    public double weight_for_non_preferred_edge_ = -11.1;
-   public double cost_for_non_preferred_node_ = -11.1;
    public boolean return_best_effort_solution_;
 
    public VisibilityGraphsParametersPacket()
@@ -86,6 +86,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       obstacle_extrusion_distance_if_not_too_high_to_step_ = other.obstacle_extrusion_distance_if_not_too_high_to_step_;
 
       too_high_to_step_distance_ = other.too_high_to_step_distance_;
+
+      height_for_max_avoidance_ = other.height_for_max_avoidance_;
 
       cluster_resolution_ = other.cluster_resolution_;
 
@@ -124,8 +126,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       weight_for_inter_region_edge_ = other.weight_for_inter_region_edge_;
 
       weight_for_non_preferred_edge_ = other.weight_for_non_preferred_edge_;
-
-      cost_for_non_preferred_node_ = other.cost_for_non_preferred_node_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
 
@@ -216,6 +216,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double getTooHighToStepDistance()
    {
       return too_high_to_step_distance_;
+   }
+
+   public void setHeightForMaxAvoidance(double height_for_max_avoidance)
+   {
+      height_for_max_avoidance_ = height_for_max_avoidance;
+   }
+   public double getHeightForMaxAvoidance()
+   {
+      return height_for_max_avoidance_;
    }
 
    public void setClusterResolution(double cluster_resolution)
@@ -411,15 +420,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return weight_for_non_preferred_edge_;
    }
 
-   public void setCostForNonPreferredNode(double cost_for_non_preferred_node)
-   {
-      cost_for_non_preferred_node_ = cost_for_non_preferred_node;
-   }
-   public double getCostForNonPreferredNode()
-   {
-      return cost_for_non_preferred_node_;
-   }
-
    public void setReturnBestEffortSolution(boolean return_best_effort_solution)
    {
       return_best_effort_solution_ = return_best_effort_solution;
@@ -465,6 +465,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.too_high_to_step_distance_, other.too_high_to_step_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_for_max_avoidance_, other.height_for_max_avoidance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cluster_resolution_, other.cluster_resolution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.exploration_distance_from_start_goal_, other.exploration_distance_from_start_goal_, epsilon)) return false;
@@ -503,8 +505,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_for_non_preferred_edge_, other.weight_for_non_preferred_edge_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_for_non_preferred_node_, other.cost_for_non_preferred_node_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
 
@@ -537,6 +537,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       if(this.obstacle_extrusion_distance_if_not_too_high_to_step_ != otherMyClass.obstacle_extrusion_distance_if_not_too_high_to_step_) return false;
 
       if(this.too_high_to_step_distance_ != otherMyClass.too_high_to_step_distance_) return false;
+
+      if(this.height_for_max_avoidance_ != otherMyClass.height_for_max_avoidance_) return false;
 
       if(this.cluster_resolution_ != otherMyClass.cluster_resolution_) return false;
 
@@ -576,8 +578,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.weight_for_non_preferred_edge_ != otherMyClass.weight_for_non_preferred_edge_) return false;
 
-      if(this.cost_for_non_preferred_node_ != otherMyClass.cost_for_non_preferred_node_) return false;
-
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
 
@@ -608,6 +608,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.obstacle_extrusion_distance_if_not_too_high_to_step_);      builder.append(", ");
       builder.append("too_high_to_step_distance=");
       builder.append(this.too_high_to_step_distance_);      builder.append(", ");
+      builder.append("height_for_max_avoidance=");
+      builder.append(this.height_for_max_avoidance_);      builder.append(", ");
       builder.append("cluster_resolution=");
       builder.append(this.cluster_resolution_);      builder.append(", ");
       builder.append("exploration_distance_from_start_goal=");
@@ -646,8 +648,6 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append(this.weight_for_inter_region_edge_);      builder.append(", ");
       builder.append("weight_for_non_preferred_edge=");
       builder.append(this.weight_for_non_preferred_edge_);      builder.append(", ");
-      builder.append("cost_for_non_preferred_node=");
-      builder.append(this.cost_for_non_preferred_node_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
       builder.append(this.return_best_effort_solution_);
       builder.append("}");

@@ -20,19 +20,19 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.eventHandlers.PlaneIntersectionCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class StartGoalOrientationEditor extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
 
-   private final EventHandler<MouseEvent> rayCastInterceptor;
+   private final PlaneIntersectionCalculator planeIntersectionCalculator;
    private final EventHandler<MouseEvent> leftClickInterceptor;
 
    private boolean isRayCastInterceptorAttached = false;
    private boolean isLeftClickInterceptorAttached = false;
 
-   private final AtomicReference<Point3D> latestInterception = new AtomicReference<>(null);
    private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
@@ -55,12 +55,8 @@ public class StartGoalOrientationEditor extends AnimationTimer
       startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
 
-      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(FootstepPlannerMessagerAPI.SelectedRegion);
-
-      rayCastInterceptor = (event) ->
-      {
-         latestInterception.set(intersectRayWithPlane(subScene.getCamera(), selectedRegionReference.get(), event));
-      };
+      planeIntersectionCalculator = new PlaneIntersectionCalculator(subScene.getCamera());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedRegion, planeIntersectionCalculator::setPlanarRegion);
 
       leftClickInterceptor = (event) ->
       {
@@ -70,35 +66,6 @@ public class StartGoalOrientationEditor extends AnimationTimer
          if (event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
             orientationValidated.set(true);
       };
-   }
-
-   private static Point3D intersectRayWithPlane(Camera camera, PlanarRegion planarRegion, MouseEvent event)
-   {
-      Line3D line = getPickRay(camera, event);
-
-      RigidBodyTransform regionTransform = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(regionTransform);
-      Vector3D planeNormal = planarRegion.getNormal();
-      Point3D pointOnPlane = new Point3D();
-      regionTransform.getTranslation(pointOnPlane);
-
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
-   }
-
-   private static Line3D getPickRay(Camera camera, MouseEvent event)
-   {
-      Point3D point1 = new Point3D();
-      point1.setX(camera.getLocalToSceneTransform().getTx());
-      point1.setY(camera.getLocalToSceneTransform().getTy());
-      point1.setZ(camera.getLocalToSceneTransform().getTz());
-
-      Point3D point2 = new Point3D();
-      javafx.geometry.Point3D pointOnProjectionPlane = CameraHelper.pickProjectPlane(camera, event.getSceneX(), event.getSceneY());
-      point2.setX(pointOnProjectionPlane.getX());
-      point2.setY(pointOnProjectionPlane.getY());
-      point2.setZ(pointOnProjectionPlane.getZ());
-
-      return new Line3D(point1, point2);
    }
 
    @Override
@@ -120,7 +87,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
       if(startEditModeEnabled.get())
       {
          Point3D startPosition = startPositionReference.get();
-         Point3D interception = latestInterception.getAndSet(null);
+         Point3D interception = planeIntersectionCalculator.pollIntersection();
 
          if(startPosition != null && interception != null)
          {
@@ -142,7 +109,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
       if(goalEditModeEnabled.get())
       {
          Point3D goalPosition = goalPositionReference.get();
-         Point3D interception = latestInterception.getAndSet(null);
+         Point3D interception = planeIntersectionCalculator.pollIntersection();
 
          if(goalPosition != null && interception != null)
          {
@@ -168,7 +135,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
       {
          if (VERBOSE)
             PrintTools.info(this, "Attaching ray cast event handler.");
-         subScene.addEventHandler(MouseEvent.ANY, rayCastInterceptor);
+         subScene.addEventHandler(MouseEvent.ANY, planeIntersectionCalculator);
          isRayCastInterceptorAttached = true;
       }
       if (!isLeftClickInterceptorAttached)
@@ -184,7 +151,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
    {
       if (isRayCastInterceptorAttached)
       {
-         subScene.removeEventHandler(MouseEvent.ANY, rayCastInterceptor);
+         subScene.removeEventHandler(MouseEvent.ANY, planeIntersectionCalculator);
          isRayCastInterceptorAttached = false;
       }
       if (isLeftClickInterceptorAttached)

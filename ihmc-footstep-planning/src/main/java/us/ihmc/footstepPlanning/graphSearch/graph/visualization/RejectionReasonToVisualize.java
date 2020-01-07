@@ -14,8 +14,7 @@ public enum RejectionReasonToVisualize
    STEP_IN_PLACE, 
    NOT_ENOUGH_AREA, 
    COULD_NOT_SNAP, 
-   COULD_NOT_WIGGLE_INSIDE, 
-   SURFACE_NORMAL_TOO_STEEP_TO_SNAP, 
+   SURFACE_NORMAL_TOO_STEEP_TO_SNAP,
    TOO_MUCH_PENETRATION_AFTER_WIGGLE, 
    STEP_NOT_LONG_ENOUGH, 
    STEP_TOO_WIDE,
@@ -59,8 +58,6 @@ public enum RejectionReasonToVisualize
          return rejectionReason == BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA;
       case COULD_NOT_SNAP:
          return rejectionReason == BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP;
-      case COULD_NOT_WIGGLE_INSIDE:
-         return rejectionReason == BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE;
       case SURFACE_NORMAL_TOO_STEEP_TO_SNAP:
          return rejectionReason == BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP;
       case TOO_MUCH_PENETRATION_AFTER_WIGGLE:

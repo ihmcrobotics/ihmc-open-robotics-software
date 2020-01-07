@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
@@ -62,6 +63,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setMaximumStepZ(double stepZ)
    {
       set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+   }
+
+   default void setMinimumStepZWhenFullyPitched(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.minStepZWhenFullyPitched, stepZ);
+   }
+
+   default void setMaximumStepXWhenFullyPitched(double stepX)
+   {
+      set(FootstepPlannerParameterKeys.maxStepXWhenFullyPitched, stepX);
    }
 
    default void setStepYawReductionFactorAtMaxReach(double factor)
@@ -162,11 +173,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
    {
       set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
-   }
-
-   default void setRejectIfCannotFullyWiggleInside(boolean rejectIfCannotFullyWiggleInside)
-   {
-      set(FootstepPlannerParameterKeys.rejectIfCannotFullyWiggleInside, rejectIfCannotFullyWiggleInside);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
@@ -379,6 +385,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
       if (parametersPacket.getMaximumStepZ() != noValue)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
+         setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
+      if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
+         setMaximumStepXWhenFullyPitched(parametersPacket.getMaximumStepXWhenFullyPitched());
       if (parametersPacket.getStepYawReductionFactorAtMaxReach() != noValue)
          setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
       if (parametersPacket.getMinimumFootholdPercent() != noValue)
@@ -386,7 +396,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
       setWiggleIntoConvexHullOfPlanarRegions(parametersPacket.getWiggleIntoConvexHullOfPlanarRegions());
-      setRejectIfCannotFullyWiggleInside(parametersPacket.getRejectIfCannotFullyWiggleInside());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
       if (parametersPacket.getMaximumYawWiggle() != noValue)

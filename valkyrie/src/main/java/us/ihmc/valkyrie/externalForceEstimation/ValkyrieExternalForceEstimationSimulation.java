@@ -45,7 +45,6 @@ public class ValkyrieExternalForceEstimationSimulation
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableLocalControllerCommunicator(false);
       simulationStarter.createSimulation(networkModuleParameters, false, false);
 
       double controllerDT = robotModel.getControllerDT();

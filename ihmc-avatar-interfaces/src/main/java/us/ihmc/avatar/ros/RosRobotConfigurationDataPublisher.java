@@ -10,12 +10,12 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -29,16 +29,11 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.RosImuPublisher;
-import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
-import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
-import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
-import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
-import us.ihmc.utilities.ros.publisher.RosStringPublisher;
-import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
+import us.ihmc.utilities.ros.publisher.*;
 
-public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
+public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable, CloseableAndDisposable
 {
    public static final String JOINT_STATE_TOPIC = "/output/joint_states";
    public static final String WORLD_FRAME = "world";
@@ -60,7 +55,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosMainNode rosMainNode;
    private final RobotROSClockCalculator rosClockCalculator;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
-   private final JointNameMap jointMap;
+   private final JointNameMap<?> jointMap;
    private final int jointNameHash;
 
    private boolean publishForceSensorInformation = false;
@@ -73,10 +68,12 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
+   private volatile boolean running = true;
+
    public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
                                              final RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
                                              AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation,
-                                             JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
+                                             JointNameMap<?> jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
@@ -195,7 +192,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    @Override
    public void run()
    {
-      while (true)
+      while (running)
       {
          RobotConfigurationData robotConfigurationData;
          try
@@ -299,7 +296,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   }
                }
             }
-
          }
       }
    }
@@ -322,7 +318,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             int index = nameList.indexOf(jointNames[i]);
             if (index == -1)
             {
-               PrintTools.error(this, "DID NOT FIND JOINT " + jointNames[i]);
+               LogTools.error("DID NOT FIND JOINT " + jointNames[i]);
                continue;
             }
             this.jointNames.add(jointNames[i]);
@@ -344,5 +340,11 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
          jointStatePublisher.publish(jointNames, jointAnglesSubSet, jointVelocitiesSubSet, jointJointTorquesSubSet, t);
       }
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      running = false;
    }
 }

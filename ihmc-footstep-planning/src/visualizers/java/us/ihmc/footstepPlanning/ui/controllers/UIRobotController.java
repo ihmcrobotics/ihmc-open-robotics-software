@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -35,6 +37,7 @@ public class UIRobotController
    private CheckBox enableSupportRegions;
    @FXML
    private Spinner<Double> supportRegionScale;
+   private IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    public void initialize()
    {
@@ -111,6 +114,13 @@ public class UIRobotController
       messager.submitMessage(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportPlanarRegionParametersMessage);
    }
 
+   @FXML public void clearREA()
+   {
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
+   }
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -121,5 +131,10 @@ public class UIRobotController
    {
       this.robotLowLevelMessenger = robotLowLevelMessenger;
       updateButtons();
+   }
+
+   public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
+   {
+      this.reaStateRequestPublisher = reaStateRequestPublisher;
    }
 }

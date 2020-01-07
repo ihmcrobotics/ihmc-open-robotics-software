@@ -31,26 +31,13 @@ public class FootstepPlanPostProcessingToolboxModule extends ToolboxModule
       this(drcRobotModel, modelProvider, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
-   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
-                                                  FootstepPostProcessingParametersBasics postProcessingParameters, boolean startYoVariableServer)
-   {
-      this(drcRobotModel, modelProvider, postProcessingParameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
-   }
-
-
    public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                                  DomainFactory.PubSubImplementation pubSubImplementation)
-   {
-      this(drcRobotModel, modelProvider, new DefaultFootstepPostProcessingParameters(), startYoVariableServer, pubSubImplementation);
-   }
-
-   public FootstepPlanPostProcessingToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider,
-                                                  FootstepPostProcessingParametersBasics postProcessingParameters, boolean startYoVariableServer,
                                                   DomainFactory.PubSubImplementation pubSubImplementation)
 
    {
       super(drcRobotModel.getSimpleRobotName(), drcRobotModel.createFullRobotModel(), modelProvider, startYoVariableServer, pubSubImplementation);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
+      FootstepPostProcessingParametersBasics postProcessingParameters = drcRobotModel.getFootstepPostProcessingParameters();
       if (postProcessingParameters == null)
          postProcessingParameters = new DefaultFootstepPostProcessingParameters();
 

@@ -3,11 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -31,11 +27,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    private final KinematicsStreamingToolboxController controller;
    private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
-
-   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
-   {
-      this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-   }
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {

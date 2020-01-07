@@ -73,12 +73,13 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
+      packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
       packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
       packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleIntoConvexHullOfPlanarRegions(parameters.getWiggleIntoConvexHullOfPlanarRegions());
-      packet.setRejectIfCannotFullyWiggleInside(parameters.getRejectIfCannotFullyWiggleInside());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
       packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
@@ -140,6 +141,7 @@ public class FootstepPlannerMessageTools
       packet.setPreferredObstacleExtrusionDistance(parameters.getPreferredObstacleExtrusionDistance());
       packet.setObstacleExtrusionDistanceIfNotTooHighToStep(parameters.getObstacleExtrusionDistanceIfNotTooHighToStep());
       packet.setTooHighToStepDistance(parameters.getTooHighToStepDistance());
+      packet.setHeightForMaxAvoidance(parameters.getHeightForMaxAvoidance());
       packet.setClusterResolution(parameters.getClusterResolution());
       packet.setExplorationDistanceFromStartGoal(parameters.getExplorationDistanceFromStartGoal());
       packet.setPlanarRegionMinArea(parameters.getPlanarRegionMinArea());
@@ -159,7 +161,6 @@ public class FootstepPlannerMessageTools
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
-      packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
       packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

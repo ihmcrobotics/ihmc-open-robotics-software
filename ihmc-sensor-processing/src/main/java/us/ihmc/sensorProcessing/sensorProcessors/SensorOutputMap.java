@@ -2,12 +2,10 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import gnu.trove.map.TObjectDoubleMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -20,24 +18,20 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
 
 /**
  * Simplified sensor output map that just holds all values and does not do any processing
- * 
- * @author jesper
  *
+ * @author jesper
  */
 public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfectSensorOutputMapReadOnly
 {
    private long wallTime;
    private long monotonicTime;
    private long syncTimestamp;
-   private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJointBasics> jointVelocity = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJointBasics> jointAcceleration = new TObjectDoubleHashMap<>();
-   private final TObjectDoubleMap<OneDoFJointBasics> jointTau = new TObjectDoubleHashMap<>();
-   private final TObjectIntMap<OneDoFJointBasics> jointEnabled = new TObjectIntHashMap<OneDoFJointBasics>();
+   private final List<OneDoFJointState> jointSensorOutputList = new ArrayList<>();
+   private final Map<OneDoFJointBasics, OneDoFJointState> jointSensorOutputMap = new HashMap<>();
    private final ArrayList<IMUSensor> imuSensors = new ArrayList<>();
    private final ForceSensorDataHolder forceSensorDataHolder;
-   
-   /** 
+
+   /**
     * Perfect sensors
     */
    private final RigidBodyTransform rootJointTransform = new RigidBodyTransform();
@@ -49,11 +43,13 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         jointPosition.put(joint, Double.NaN);
-         jointVelocity.put(joint, Double.NaN);
-         jointAcceleration.put(joint, Double.NaN);
-         jointTau.put(joint, Double.NaN);
-         jointEnabled.put(joint, 0);
+         OneDoFJointState jointSensorOutput = new OneDoFJointState(joint.getName());
+         jointSensorOutput.setPosition(Double.NaN);
+         jointSensorOutput.setVelocity(Double.NaN);
+         jointSensorOutput.setAcceleration(Double.NaN);
+         jointSensorOutput.setEffort(Double.NaN);
+         jointSensorOutputList.add(jointSensorOutput);
+         jointSensorOutputMap.put(joint, jointSensorOutput);
       }
 
       for (IMUDefinition imuDefinition : fullRobotModel.getIMUDefinitions())
@@ -63,11 +59,11 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
 
       if (forceSensorDefinitions != null)
       {
-         this.forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions);
+         forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions);
       }
       else
       {
-         this.forceSensorDataHolder = new ForceSensorDataHolder(Collections.emptyList());
+         forceSensorDataHolder = new ForceSensorDataHolder(Collections.emptyList());
       }
    }
 
@@ -105,68 +101,50 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public double getJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint)
+   public OneDoFJointState getOneDoFJointOutput(OneDoFJointBasics oneDoFJoint)
    {
-      return jointPosition.get(oneDoFJoint);
+      return jointSensorOutputMap.get(oneDoFJoint);
+   }
+
+   @Override
+   public List<OneDoFJointState> getOneDoFJointOutputs()
+   {
+      return jointSensorOutputList;
    }
 
    public void setJointPositionProcessedOutput(OneDoFJointBasics oneDoFJoint, double position)
    {
-      this.jointPosition.put(oneDoFJoint, position);
-   }
-
-   @Override
-   public double getJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return jointVelocity.get(oneDoFJoint);
+      getOneDoFJointOutput(oneDoFJoint).setPosition(position);
    }
 
    public void setJointVelocityProcessedOutput(OneDoFJointBasics oneDoFJoint, double velocity)
    {
-      this.jointVelocity.put(oneDoFJoint, velocity);
-   }
-
-   @Override
-   public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return jointAcceleration.get(oneDoFJoint);
+      getOneDoFJointOutput(oneDoFJoint).setVelocity(velocity);
    }
 
    public void setJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint, double acceleration)
    {
-      this.jointAcceleration.put(oneDoFJoint, acceleration);
-   }
-
-   @Override
-   public double getJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint)
-   {
-      return jointTau.get(oneDoFJoint);
+      getOneDoFJointOutput(oneDoFJoint).setAcceleration(acceleration);
    }
 
    public void setJointTauProcessedOutput(OneDoFJointBasics oneDoFJoint, double tau)
    {
-      this.jointTau.put(oneDoFJoint, tau);
-   }
-
-   @Override
-   public boolean isJointEnabled(OneDoFJointBasics oneDoFJoint)
-   {
-      return jointEnabled.get(oneDoFJoint) != 0;
+      getOneDoFJointOutput(oneDoFJoint).setEffort(tau);
    }
 
    public void setJointEnabled(OneDoFJointBasics oneDoFJoint, boolean enabled)
    {
-      this.jointEnabled.put(oneDoFJoint, enabled ? 1 : 0);
+      getOneDoFJointOutput(oneDoFJoint).setJointEnabled(enabled);
    }
 
    @Override
-   public List<? extends IMUSensor> getIMUProcessedOutputs()
+   public List<? extends IMUSensor> getIMUOutputs()
    {
       return imuSensors;
    }
 
    @Override
-   public ForceSensorDataHolder getForceSensorProcessedOutputs()
+   public ForceSensorDataHolder getForceSensorOutputs()
    {
       return forceSensorDataHolder;
    }
@@ -176,10 +154,10 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    {
       transformToPack.set(rootJointTransform);
    }
-   
+
    public void setRootJointTransform(RigidBodyTransform transform)
    {
-      this.rootJointTransform.set(transform);
+      rootJointTransform.set(transform);
    }
 
    @Override

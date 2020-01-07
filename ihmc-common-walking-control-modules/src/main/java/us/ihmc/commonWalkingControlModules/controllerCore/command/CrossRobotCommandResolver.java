@@ -172,7 +172,7 @@ public class CrossRobotCommandResolver
    public void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
    {
       out.set(in);
-      out.setFrameAndBody(resolveReferenceFrame(in.getMeasurementFrame()), resolveRigidBody(in.getMeasurementLink()));
+      out.setDefinition(in.getSensorName(), resolveReferenceFrame(in.getMeasurementFrame()), resolveRigidBody(in.getMeasurementLink()));
    }
 
    public void resolveForceSensorDefinition(ForceSensorDefinition in, ForceSensorDefinition out)

@@ -15,7 +15,6 @@ public class AtlasFootstepPostProcessingToolbox
    public static void main(String[] args)
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
-      new FootstepPlanPostProcessingToolboxModule(robotModel, null, new AtlasFootstepPostProcessorParameters(),
-                                                  false, DomainFactory.PubSubImplementation.FAST_RTPS);
+      new FootstepPlanPostProcessingToolboxModule(robotModel, null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 }

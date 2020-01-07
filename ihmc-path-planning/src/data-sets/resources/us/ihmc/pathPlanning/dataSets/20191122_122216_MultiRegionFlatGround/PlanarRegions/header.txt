@@ -1,0 +1,1 @@
+regionId: -1, index: 1, origin: 0.0, 0.0, 0.0, normal: 0.0, 0.0, 1.0, concave hull size: 8, number of convex polygons: 4, [4, 4, 4, 4]

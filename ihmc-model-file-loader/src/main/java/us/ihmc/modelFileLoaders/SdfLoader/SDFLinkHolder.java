@@ -6,12 +6,12 @@ import java.util.List;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SDFLinkHolder
 {

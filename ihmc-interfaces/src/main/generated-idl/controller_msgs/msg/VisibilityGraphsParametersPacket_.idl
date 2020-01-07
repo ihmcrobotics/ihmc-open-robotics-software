@@ -38,6 +38,8 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double too_high_to_step_distance;
         @defaultValue(value=-11.1)
+        double height_for_max_avoidance;
+        @defaultValue(value=-11.1)
         double cluster_resolution;
         @defaultValue(value=-11.1)
         double exploration_distance_from_start_goal;
@@ -82,8 +84,6 @@ module controller_msgs
         double weight_for_inter_region_edge;
         @defaultValue(value=-11.1)
         double weight_for_non_preferred_edge;
-        @defaultValue(value=-11.1)
-        double cost_for_non_preferred_node;
         boolean return_best_effort_solution;
       };
     };

@@ -11,13 +11,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class BoundingBoxCollisionDetector
 {
-   private final double boxDepth;
-   private final double boxWidth;
-   private final double boxHeight;
-   private final double xyProximityCheck;
-   
    private PlanarRegionsList planarRegionsList;
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+
+   private double boxDepth = Double.NaN;
+   private double boxWidth = Double.NaN;
+   private double boxHeight = Double.NaN;
+   private double xyProximityCheck = Double.NaN;
 
    private double bodyPoseX = Double.NaN;
    private double bodyPoseY = Double.NaN;
@@ -32,17 +32,17 @@ public class BoundingBoxCollisionDetector
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempPoint1 = new Point3D();
 
-   public BoundingBoxCollisionDetector(double boxDepth, double boxWidth, double boxHeight, double xyProximityCheck)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegions)
+   {
+      this.planarRegionsList = planarRegions;
+   }
+
+   public void setBoxDimensions(double boxDepth, double boxWidth, double boxHeight, double xyProximityCheck)
    {
       this.boxDepth = boxDepth;
       this.boxWidth = boxWidth;
       this.boxHeight = boxHeight;
       this.xyProximityCheck = xyProximityCheck;
-   }
-
-   public void setPlanarRegionsList(PlanarRegionsList planarRegions)
-   {
-      this.planarRegionsList = planarRegions;
    }
 
    public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
@@ -146,6 +146,9 @@ public class BoundingBoxCollisionDetector
 
    private void checkInputs()
    {
+      if (Double.isNaN(boxDepth) || Double.isNaN(boxWidth) || Double.isNaN(boxHeight) || Double.isNaN(xyProximityCheck))
+         throw new RuntimeException("Bounding box dimensions has not been set");
+
       if(Double.isNaN(bodyPoseX) || Double.isNaN(bodyPoseY) || Double.isNaN(bodyPoseZ) || Double.isNaN(bodyPoseYaw))
          throw new RuntimeException("Bounding box position has not been set");
    }
