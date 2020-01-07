@@ -67,7 +67,7 @@ public class NumericCDRESolver extends AbstractCDRESolver
    {
       int index = (int) (Math.floor(time / dt));
       index = MathTools.clamp(index, 0, PTrajectory.size() - 2);
-      
+
       double interpolationFraction = (time - index * dt) / dt;
       int reverseTimeTrajectoryIndex = PTrajectory.size() - 1 - index;
 
