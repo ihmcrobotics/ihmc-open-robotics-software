@@ -6,11 +6,12 @@ import java.util.List;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -19,46 +20,51 @@ public class EnvironmentMap
 {
    private final long initialTimeStamp;
    private final TDoubleArrayList timeMap = new TDoubleArrayList();
-   private final List<RigidBodyTransform> sensorPoses = new ArrayList<>();
-   private final List<StereoVisionPointCloudMessage> pointCloudMap = new ArrayList<>();
+   private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
+   private final List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
    private final List<NormalOcTree> octreeMap = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsMap;
 
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
 
    private static final double OCTREE_RESOLUTION = 0.02;
 
-   public EnvironmentMap(long firstTimeStamp, StereoVisionPointCloudMessage pointCloud)
+   public EnvironmentMap(long firstTimeStamp, StereoVisionPointCloudMessage message)
    {
       initialTimeStamp = firstTimeStamp;
       timeMap.add(0.0);
-      pointCloudMap.add(pointCloud);
-      sensorPoses.add(new RigidBodyTransform(pointCloud.getSensorOrientation(), pointCloud.getSensorPosition()));
-      
-      octreeMap.add(EnvironmentMappingTools.computeOctreeData(pointCloud, OCTREE_RESOLUTION));
-      
-      List<PlanarRegionSegmentationRawData> rawData = EnvironmentMappingTools.computePlanarRegionRawData(pointCloud, OCTREE_RESOLUTION);
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      pointCloudMap.add(IhmcSLAMTools.extractPointsFromMessage(message));
+      sensorPoses.add(IhmcSLAMTools.extractSensorPoseFromMessage(message));
+
+      octreeMap.add(EnvironmentMappingTools.computeOctreeData(message, OCTREE_RESOLUTION));
    }
 
-   public void addFrame(long newTimeStamp, StereoVisionPointCloudMessage newPointCloud)
+   public void addFrame(long newTimeStamp, StereoVisionPointCloudMessage newPointCloudMessage)
    {
       double time = Conversions.nanosecondsToSeconds(newTimeStamp - initialTimeStamp);
       timeMap.add(time);
-      octreeMap.add(EnvironmentMappingTools.computeOctreeData(newPointCloud, OCTREE_RESOLUTION));
+      pointCloudMap.add(IhmcSLAMTools.extractPointsFromMessage(newPointCloudMessage));
+      sensorPoses.add(IhmcSLAMTools.extractSensorPoseFromMessage(newPointCloudMessage));
 
-      List<PlanarRegionSegmentationRawData> rawData = EnvironmentMappingTools.computePlanarRegionRawData(newPointCloud, OCTREE_RESOLUTION);
-
-      planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
-                                                             polygonizerParameters);
-      
-      sensorPoses.add(new RigidBodyTransform(newPointCloud.getSensorOrientation(), newPointCloud.getSensorPosition()));
+      octreeMap.add(EnvironmentMappingTools.computeOctreeData(newPointCloudMessage, OCTREE_RESOLUTION));
    }
 
-   public RigidBodyTransform getLatestSensorPoses()
+   public void computePlanarRegions()
+   {
+      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      planarRegionSegmentationParameters.setMinRegionSize(200);
+      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setSearchRadius(0.05);
+
+      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, OCTREE_RESOLUTION,
+                                                                                               planarRegionSegmentationParameters);
+      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+   }
+
+   public RigidBodyTransformReadOnly getLatestSensorPoses()
    {
       return sensorPoses.get(sensorPoses.size() - 1);
    }
@@ -67,12 +73,12 @@ public class EnvironmentMap
    {
       return planarRegionsMap;
    }
-   
+
    public List<NormalOcTree> getOctreeMap()
    {
       return octreeMap;
    }
-   
+
    public double getOctreeResolution()
    {
       return OCTREE_RESOLUTION;

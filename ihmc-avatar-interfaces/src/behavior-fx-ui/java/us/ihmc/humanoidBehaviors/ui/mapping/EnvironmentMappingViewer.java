@@ -103,6 +103,7 @@ public class EnvironmentMappingViewer extends Application
                {
                   environmentMap.addFrame(timestamps.get(i), messagesFromFile.get(i));
                }
+               environmentMap.computePlanarRegions();
                regionsGraphic.generateMeshes(environmentMap.getPlanarRegionsMap());
                regionsGraphic.update();
                view3dFactory.addNodeToView(regionsGraphic);
