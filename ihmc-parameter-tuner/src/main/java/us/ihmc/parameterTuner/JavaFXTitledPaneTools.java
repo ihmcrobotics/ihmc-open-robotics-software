@@ -2,11 +2,8 @@ package us.ihmc.parameterTuner;
 
 import java.lang.reflect.Field;
 
-import com.sun.javafx.scene.control.skin.TitledPaneSkin;
-
 import javafx.util.Duration;
 
-@SuppressWarnings("restriction")
 public class JavaFXTitledPaneTools
 {
    /**
@@ -18,7 +15,8 @@ public class JavaFXTitledPaneTools
       {
          Field durationField = Duration.class.getDeclaredField("millis");
          durationField.setAccessible(true);
-         durationField.set(TitledPaneSkin.TRANSITION_DURATION, millis);
+         // FIXME The field is not accessible anymore. Best online suggestion is to create a skin.
+//         durationField.set(TitledPaneSkin.TRANSITION_DURATION, millis);
       }
       catch (Exception e)
       {
