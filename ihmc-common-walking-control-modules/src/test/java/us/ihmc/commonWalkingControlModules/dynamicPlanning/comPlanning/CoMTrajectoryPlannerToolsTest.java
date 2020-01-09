@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.DCMTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -218,12 +217,12 @@ public class CoMTrajectoryPlannerToolsTest
 
          desiredVRPPositionExpected.add(temp);
 
-         DCMTools.computeDesiredDCMPosition(desiredCoMPositionExpected, desiredCoMVelocityExpected, omega, desiredDCMPositionExpected2);
-         DCMTools.computeDesiredDCMPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition2);
-         DCMTools.computeDesiredDCMVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, desiredDCMVelocity);
-         DCMTools.computeDesiredDCMVelocity(desiredCoMVelocityExpected, desiredCoMAccelerationExpected, omega, desiredDCMVelocityExpected);
-         DCMTools.computeDesiredVRPPosition(desiredDCMPosition, desiredDCMVelocity, omega, desiredVRPPosition);
-         DCMTools.computeDesiredVRPPosition(desiredDCMPositionExpected, desiredDCMVelocityExpected, omega, desiredVRPPositionExpected2);
+         CapturePointTools.computeCapturePointPosition(desiredCoMPositionExpected, desiredCoMVelocityExpected, omega, desiredDCMPositionExpected2);
+         CapturePointTools.computeCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition2);
+         CapturePointTools.computeCapturePointVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, desiredDCMVelocity);
+         CapturePointTools.computeCapturePointVelocity(desiredCoMVelocityExpected, desiredCoMAccelerationExpected, omega, desiredDCMVelocityExpected);
+         CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega, desiredVRPPosition);
+         CapturePointTools.computeCentroidalMomentumPivot(desiredDCMPositionExpected, desiredDCMVelocityExpected, omega, desiredVRPPositionExpected2);
 
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredCoMPositionExpected, desiredCoMPosition, epsilon);
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredCoMVelocityExpected, desiredCoMVelocity, epsilon);

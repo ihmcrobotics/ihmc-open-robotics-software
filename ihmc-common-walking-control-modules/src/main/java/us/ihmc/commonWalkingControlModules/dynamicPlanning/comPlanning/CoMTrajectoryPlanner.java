@@ -6,6 +6,7 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -370,9 +371,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       CoMTrajectoryPlannerTools.constructDesiredCoMAcceleration(comAccelerationToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
                                       sixthCoefficient, timeInPhase, omega);
 
-      DCMTools.computeDesiredDCMPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
-      DCMTools.computeDesiredDCMVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
-      DCMTools.computeDesiredVRPPosition(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
+      CapturePointTools.computeCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
+      CapturePointTools.computeCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
+      CapturePointTools.computeCentroidalMomentumPivot(dcmPositionToPack, dcmVelocityToPack, omega, vrpPositionToPack);
 
       ecmpPositionToPack.set(vrpPositionToPack);
       ecmpPositionToPack.subZ(comHeight.getDoubleValue());

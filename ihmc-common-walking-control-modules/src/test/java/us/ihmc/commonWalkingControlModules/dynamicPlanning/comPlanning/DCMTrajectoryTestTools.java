@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.DCMTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
@@ -29,7 +28,7 @@ public class DCMTrajectoryTestTools
    public static void computeDCMUsingConstantVRP(double omega0, double time, FramePoint3DReadOnly initialDCMPosition, FramePoint3DReadOnly constantVRPPosition,
                                                  FixedFramePoint3DBasics desiredDCMPosition)
    {
-      DCMTools.computeDesiredDCMPosition(omega0, time, initialDCMPosition, constantVRPPosition, desiredDCMPosition);
+      CapturePointTools.computeDesiredCapturePointPosition(omega0, time, initialDCMPosition, constantVRPPosition, desiredDCMPosition);
    }
 
    public static void computeDCMUsingLinearVRP(double omega0, double time, double timeAtFinalVRP, FramePoint3DReadOnly initialDCMPosition,
