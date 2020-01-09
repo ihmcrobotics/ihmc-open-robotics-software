@@ -8,6 +8,7 @@ import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +22,8 @@ public class SettableContactStateProvider implements ContactStateProvider
    private final FramePoint3D endCopPosition = new FramePoint3D();
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
+   private final List<String> bodiesInContact = new ArrayList<>();
+
    public SettableContactStateProvider()
    {
       startCopPosition.setToNaN();
@@ -31,6 +34,7 @@ public class SettableContactStateProvider implements ContactStateProvider
    {
       startCopPosition.setToNaN();
       endCopPosition.setToNaN();
+      bodiesInContact.clear();
    }
 
    public void setStartCopPosition(FramePoint3DReadOnly startCopPosition)
@@ -73,6 +77,11 @@ public class SettableContactStateProvider implements ContactStateProvider
       this.contactState = contactState;
    }
 
+   public void addBodyInContact(String name)
+   {
+      bodiesInContact.add(name);
+   }
+
    public FramePoint3DReadOnly getCopStartPosition()
    {
       return startCopPosition;
@@ -88,15 +97,13 @@ public class SettableContactStateProvider implements ContactStateProvider
       return contactState;
    }
 
-   @Override
-   public List<String> getBodiesInContact()
-   {
-      return null;
-   }
-
    public TimeIntervalBasics getTimeInterval()
    {
       return timeInterval;
    }
 
+   public List<String> getBodiesInContact()
+   {
+      return bodiesInContact;
+   }
 }
