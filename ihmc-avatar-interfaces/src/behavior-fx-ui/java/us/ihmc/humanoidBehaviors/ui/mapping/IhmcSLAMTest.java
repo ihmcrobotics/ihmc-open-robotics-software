@@ -32,8 +32,9 @@ public class IhmcSLAMTest
    public void testViewer()
    {
       IhmcSLAMViewer viewer = new IhmcSLAMViewer();
-      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
-      List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(new File(stereoPath));
+      String pointCloudPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
+      File pointCloudFile = new File(pointCloudPath);
+      List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
       viewer.addStereoMessage(messagesFromFile.get(20), Color.GREEN, Color.GREEN);
       viewer.addStereoMessage(messagesFromFile.get(25), Color.BLUE, Color.BLUE);
@@ -514,7 +515,7 @@ public class IhmcSLAMTest
       RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.05, 5.0);
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
-      
+
       StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
                                                                                                                                  stairHeight, stairWidth,
                                                                                                                                  stairLength - movingForward,
@@ -586,46 +587,46 @@ public class IhmcSLAMTest
 
       Color color = Color.rgb(0, 255, 0);
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), color);
-      
-      for(IhmcSurfaceElement element:surfaceElements)
+
+      for (IhmcSurfaceElement element : surfaceElements)
          element.transform(slamTransformer);
       localViewer.addOctree(surfaceElements, Color.BEIGE);
-      
+
       //localViewer.addPlanarRegions(planarRegionsMap);
       localViewer.start("iteration ");
 
       ThreadTools.sleepForever();
    }
+
    @Test
    public void testTransformer()
    {
       RigidBodyTransform transformer = new RigidBodyTransform();
       transformer.setTranslation(0.1, 0.0, 0.0);
       transformer.appendYawRotation(Math.toRadians(30.0));
-      
+
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
       RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
       sensorPoseOne.setTranslation(1.0, 0.0, 1.0);
       sensorPoseOne.appendPitchRotation(Math.toRadians(70.0 + 90.0));
-      
+
       slamViewer.addSensorPose(sensorPoseOne, Color.RED);
-      
+
       RigidBodyTransform pointToSensorPose = new RigidBodyTransform();
       pointToSensorPose.setTranslation(0.1, 0.1, 1.0);
       pointToSensorPose.preMultiply(sensorPoseOne);
       slamViewer.addSensorPose(pointToSensorPose, Color.ORANGE);
-      
-      
+
       sensorPoseOne.preMultiply(transformer);
       pointToSensorPose.preMultiply(transformer);
       slamViewer.addSensorPose(sensorPoseOne, Color.BLACK);
       slamViewer.addSensorPose(pointToSensorPose, Color.DARKORANGE);
-      
+
       slamViewer.start("testTransformer");
 
       ThreadTools.sleepForever();
    }
-   
+
    @Test
    public void testNewPlanarRegionComingOut()
    {
@@ -674,7 +675,7 @@ public class IhmcSLAMTest
          //slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       }
 
-//      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+      //      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
       if (showLidarPlanarRegions)
       {
          PlanarRegionsList importPlanarRegionData = PlanarRegionFileTools.importPlanarRegionData(new File(planarRegionsPath));
@@ -698,15 +699,15 @@ public class IhmcSLAMTest
 
       slamViewer.start("EndToEnd");
 
-//      IhmcSLAMViewer slamViewer2 = new IhmcSLAMViewer();
-//      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-//      List<IhmcSurfaceElement> mergeableSurfaceElements = slam.getSLAMFrame(3).getMergeableSurfaceElements();
-//      System.out.println(mergeableSurfaceElements.size());
-//      for (IhmcSurfaceElement element : mergeableSurfaceElements)
-//         planarRegionsList.addPlanarRegion(element.getMergeablePlanarRegion());
-//      slamViewer2.addPlanarRegions(planarRegionsList);
-//      slamViewer2.addOctree(slam.getSLAMFrame(3).getMergeableSurfaceElements(), Color.BEIGE);
-//      slamViewer2.start("part");
+      //      IhmcSLAMViewer slamViewer2 = new IhmcSLAMViewer();
+      //      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      //      List<IhmcSurfaceElement> mergeableSurfaceElements = slam.getSLAMFrame(3).getMergeableSurfaceElements();
+      //      System.out.println(mergeableSurfaceElements.size());
+      //      for (IhmcSurfaceElement element : mergeableSurfaceElements)
+      //         planarRegionsList.addPlanarRegion(element.getMergeablePlanarRegion());
+      //      slamViewer2.addPlanarRegions(planarRegionsList);
+      //      slamViewer2.addOctree(slam.getSLAMFrame(3).getMergeableSurfaceElements(), Color.BEIGE);
+      //      slamViewer2.start("part");
 
       ThreadTools.sleepForever();
    }
