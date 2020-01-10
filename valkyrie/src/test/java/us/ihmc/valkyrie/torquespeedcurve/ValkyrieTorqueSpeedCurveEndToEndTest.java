@@ -60,7 +60,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieTorqueSpeedCurveEndToEndTest
@@ -77,10 +76,15 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
    public void configureRobotModels(boolean disableAnkleJointLimits)
    {
-      simRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      realRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.FINGERLESS);
-      smallSimRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      smallRealRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.FINGERLESS);
+      simRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      realRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
+      smallSimRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      smallRealRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
+      ValkyrieJointTorqueLimitMutator mutator = new ValkyrieJointTorqueLimitMutator(simRobotModel.getJointMap());
+      simRobotModel.setSDFDescriptionMutator(mutator);
+      realRobotModel.setSDFDescriptionMutator(mutator);
+      smallSimRobotModel.setSDFDescriptionMutator(mutator);
+      smallRealRobotModel.setSDFDescriptionMutator(mutator);
 
       smallSimRobotModel.setModelSizeScale(smallModelSizeScale);
       smallSimRobotModel.setModelMassScale(smallModelMassScale);
@@ -781,7 +785,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       System.out.println("Done Saving ReadMe");
 
       System.out.println("Saving data");
-      scs.writeData(new File(dataFolder, tagName + ".data.gz"));
+      scs.writeMatlabData("all", new File(dataFolder, tagName + ".mat"));
       System.out.println("Done Saving Data");
 
       System.out.println("Saving data in Matlab format");
