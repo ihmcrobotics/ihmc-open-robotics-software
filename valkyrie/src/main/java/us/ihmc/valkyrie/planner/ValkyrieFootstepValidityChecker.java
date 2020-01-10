@@ -19,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
 import java.util.List;

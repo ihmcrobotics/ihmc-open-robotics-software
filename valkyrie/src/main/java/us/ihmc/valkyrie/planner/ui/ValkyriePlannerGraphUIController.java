@@ -159,7 +159,7 @@ public class ValkyriePlannerGraphUIController
          double heuristicCost = planner.getHeuristics().compute(edge.getEndNode());
          double totalCost = graph.getCostFromStart(edge.getStartNode()) + edgeCost + heuristicCost;
          boolean expanded = graph.getOutgoingEdges().containsKey(edge.getEndNode());
-         boolean solution = path.contains(edge.getEndNode());
+         boolean solution = path.get(parentStepStack.size()).equals(edge.getEndNode());
          ChildStepProperty stepProperty = new ChildStepProperty(edge.getEndNode(), parentNode, childSnapData, parentSnapData, rejectionReason, edgeCost, heuristicCost, totalCost, expanded, solution);
          childTableItems.add(stepProperty);
       }
@@ -168,9 +168,11 @@ public class ValkyriePlannerGraphUIController
       parentTableItems.add(stepProperty);
 
       debugChildStepTable.getSortOrder().clear();
-//      debugChildStepTable.getSortOrder().add(childColumnHolder.totalCostColumn);
-//      childColumnHolder.totalCostColumn.setSortType(SortType.ASCENDING);
-//      debugChildStepTable.sort();
+      debugChildStepTable.getSortOrder().add(childColumnHolder.solutionStep);
+      childColumnHolder.solutionStep.setSortType(SortType.DESCENDING);
+      debugChildStepTable.getSortOrder().add(childColumnHolder.totalCostColumn);
+      childColumnHolder.totalCostColumn.setSortType(SortType.ASCENDING);
+      debugChildStepTable.sort();
 
       messager.submitMessage(ValkyriePlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
 
