@@ -156,6 +156,9 @@ public class LQRMomentumController
       shouldUpdateS1 = true;
    }
 
+   /**
+    * Sets the desired VRP trajectory for the LQR control to track.
+    */
    public void setVRPTrajectory(List<Trajectory3D> vrpTrajectory)
    {
       relativeVRPTrajectories.clear();
@@ -356,6 +359,10 @@ public class LQRMomentumController
       yoK2.set(k2);
    }
 
+   /**
+    * The current state is a stacked vector of the current CoM state and current CoM velocity, such that entries (0:2) are occupied by the position,
+    * and entries (3:5) are occupied by the velocity
+    */
    public void computeControlInput(DenseMatrix64F currentState, double time)
    {
       if (shouldUpdateS1)
@@ -384,16 +391,35 @@ public class LQRMomentumController
       feedbackVRPPosition.add(finalVRPPosition);
    }
 
+   /**
+    * Returns the unconstrained optimal control input, calculated by {@link #computeControlInput(DenseMatrix64F, double)}.
+    */
    public DenseMatrix64F getU()
    {
       return u;
    }
 
+   /**
+    * If the optimal cost to go is assumed be x<sup>T</sup>(t) S<sub>1</sub>(t) x(t) + s<sub>2</sub><sup>T</sup>(t) x(t) + s<sub>3</sub>(t),
+    * this method returns S<sub>1</sub>(t), where t is defined by {@link #computeControlInput(DenseMatrix64F, double)}.
+    *
+    * <p>
+    *    Note: this is ONLY the optimal solution if u(t) is completely defined by x(t), meaning u(t) is completely unconstrained.
+    * </p>
+    */
    public DenseMatrix64F getCostHessian()
    {
       return S1;
    }
 
+   /**
+    * If the optimal cost to go is assumed be x<sup>T</sup>(t) S<sub>1</sub>(t) x(t) + s<sub>2</sub><sup>T</sup>(t) x(t) + s<sub>3</sub>(t),
+    * this method returns s<sub>21</sub>(t), where t is defined by {@link #computeControlInput(DenseMatrix64F, double)}.
+    *
+    * <p>
+    *    Note: this is ONLY the optimal solution if u(t) is completely defined by x(t), meaning u(t) is completely unconstrained.
+    * </p>
+    */
    public DenseMatrix64F getCostJacobian()
    {
       return s2;
