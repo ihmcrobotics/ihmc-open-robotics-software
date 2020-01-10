@@ -18,7 +18,7 @@ public class MatrixToolsLocal
       }
    }
 
-   /** Computes the distance between two matrices, which is defined as the L2 norm of their difference. */
+   /** Computes the distance between two matrices, which is defined as the L2 normSquared of their difference. */
    public static double distance(DenseMatrix64F A, DenseMatrix64F B)
    {
       MatrixChecking.assertRowDimensionsMatch(A, B);
@@ -38,9 +38,9 @@ public class MatrixToolsLocal
       return norm;
    }
 
-   public static double norm(DenseMatrix64F A)
+   public static double normSquared(DenseMatrix64F A)
    {
-      double norm = 0.0;
+      double normSquared = 0.0;
       for (int col = 0; col < A.getNumCols(); col++)
       {
          double rowSum = 0.0;
@@ -48,14 +48,19 @@ public class MatrixToolsLocal
          {
             rowSum += MathTools.square(A.get(row, col));
          }
-         norm += MathTools.square(rowSum);
+         normSquared += MathTools.square(rowSum);
       }
 
-      return norm;
+      return normSquared;
+   }
+
+   public static double norm(DenseMatrix64F A)
+   {
+      return Math.sqrt(normSquared(A));
    }
 
    static boolean isZero(DenseMatrix64F P, double epsilon)
    {
-      return norm(P) < epsilon;
+      return normSquared(P) < epsilon;
    }
 }

@@ -74,7 +74,7 @@ public class NewtonCARESolver extends AbstractCARESolver
         lyapunovSolver.solve();
         DenseMatrix64F Pk = lyapunovSolver.getX();
 
-        // error = norm(P - P1);
+        // error = normSquared(P - P1);
         error = MatrixToolsLocal.distance(PE, Pk);
 
         PE.set(Pk);
