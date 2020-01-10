@@ -810,9 +810,9 @@ public class Trajectory
       setDirectly(coefficients);
    }
 
-   public void offsetTrajectoryPosition(double scale, double offsetValue)
+   public void offsetTrajectoryPosition(double offsetValue)
    {
-      coefficients[0] += scale * offsetValue;
+      coefficients[0] += offsetValue;
    }
 
    /**
