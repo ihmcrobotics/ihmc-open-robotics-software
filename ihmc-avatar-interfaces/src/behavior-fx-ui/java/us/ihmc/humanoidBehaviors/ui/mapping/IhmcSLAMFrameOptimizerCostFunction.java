@@ -8,25 +8,22 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
-public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
+public class IhmcSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
 {
    private List<IhmcSurfaceElement> surfaceElements;
    private static final double POSITION_WEIGHT = 5.0;
-   private static final double ANGLE_SCALER = 1.0;
    private static final double ANGLE_WEIGHT = 5.0;
    private static final double SNAPPING_PARALLEL_WEIGHT = 5.0;
 
    private static final double LEAST_SQUARE_WEIGHT = 0.1;
 
-   private RigidBodyTransformReadOnly transformWorldToSensorPose;
    private boolean assumeFlatGround = true;
 
-   public PreMultiplierOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   public IhmcSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
+      super(transformWorldToSensorPose);
       this.surfaceElements = surfaceElements;
-      this.transformWorldToSensorPose = transformWorldToSensorPose;
 
       int firstPlanarRegionId = surfaceElements.get(0).getMergeablePlanarRegionId();
       for (IhmcSurfaceElement surfaceElement : surfaceElements)
@@ -34,22 +31,6 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
          if (firstPlanarRegionId != surfaceElement.getMergeablePlanarRegionId())
             assumeFlatGround = false;
       }
-   }
-
-   public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
-   {
-      transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      transformToPack.setRotationYawPitchRoll(input.get(3) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(5) / ANGLE_SCALER); // TODO: improve this.
-   }
-
-   public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
-   {
-      RigidBodyTransform preMultiplier = new RigidBodyTransform();
-      convertToSensorPoseMultiplier(input, preMultiplier);
-
-      transformToPack.set(transformWorldToSensorPose);
-      transformToPack.multiply(preMultiplier);
-      transformToPack.multiplyInvertOther(transformWorldToSensorPose);
    }
 
    @Override
@@ -95,7 +76,7 @@ public class PreMultiplierOptimizerCostFunction implements SingleQueryFunction
          if (convertedElement.isInPlanarRegion())
             cnt++;
       }
-      
+
       double snappingScore;
       if (assumeFlatGround)
          snappingScore = 0.0;

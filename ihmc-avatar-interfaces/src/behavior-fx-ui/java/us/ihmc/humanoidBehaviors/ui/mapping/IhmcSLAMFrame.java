@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
@@ -21,117 +20,25 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class IhmcSLAMFrame
+public class IhmcSLAMFrame extends SLAMFrame
 {
-   private final IhmcSLAMFrame previousFrame;
+   private NormalOcTree octreeNodesInPreviousView;
+   private List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
 
-   // from message.
-   private final RigidBodyTransformReadOnly originalSensorPoseToWorld;
+   private static final double VALID_PLANES_RATIO_THRESHOLD = 0.1;
 
-   // fixedDiff(parent.originalSensorPoseToWorld vs this.originalSensorPoseToWorld).
-   private final RigidBodyTransformReadOnly transformFromPreviousFrame;
-
-   // parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
-   private final RigidBodyTransformReadOnly sensorPoseToWorld;
-
-   // SLAM result.
-   private final RigidBodyTransform slamTransformer = new RigidBodyTransform();
-
-   // this.sensorPoseToWorld * this.slamTransformer.
-   private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
-
-   private final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
-   private final Point3DReadOnly[] pointCloudToSensorFrame;
-   private final Point3D[] optimizedPointCloudToWorld;
+   private static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
+   private static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
 
    public IhmcSLAMFrame(StereoVisionPointCloudMessage message)
    {
-      previousFrame = null;
-
-      originalSensorPoseToWorld = IhmcSLAMTools.extractSensorPoseFromMessage(message);
-
-      transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
-      sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
-      optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
-
-      originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
-      optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
-      for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
-         optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
-
-      update();
+      super(message);
    }
 
-   public IhmcSLAMFrame(IhmcSLAMFrame frame, StereoVisionPointCloudMessage message)
+   public IhmcSLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
-      previousFrame = frame;
-
-      originalSensorPoseToWorld = IhmcSLAMTools.extractSensorPoseFromMessage(message);
-
-      RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
-      transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
-      transformFromPreviousFrame = new RigidBodyTransform(transformDiff);
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform(frame.optimizedSensorPoseToWorld);
-      transformToWorld.multiply(transformFromPreviousFrame);
-      sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
-
-      originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
-      optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
-      for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
-         optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
-
-      update();
+      super(frame, message);
    }
-
-   public void updateSLAM(RigidBodyTransform driftCorrectionTransform)
-   {
-      slamTransformer.set(driftCorrectionTransform);
-      update();
-   }
-
-   private void update()
-   {
-      optimizedSensorPoseToWorld.set(sensorPoseToWorld);
-      optimizedSensorPoseToWorld.preMultiply(slamTransformer);
-
-      for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
-      {
-         optimizedPointCloudToWorld[i].set(pointCloudToSensorFrame[i]);
-         optimizedSensorPoseToWorld.transform(optimizedPointCloudToWorld[i]);
-      }
-   }
-
-   public Point3DReadOnly[] getOriginalPointCloud()
-   {
-      return originalPointCloudToWorld;
-   }
-
-   public RigidBodyTransformReadOnly getOriginalSensorPose()
-   {
-      return originalSensorPoseToWorld;
-   }
-
-   public RigidBodyTransformReadOnly getInitialSensorPoseToWorld()
-   {
-      return sensorPoseToWorld;
-   }
-
-   public Point3DReadOnly[] getPointCloud()
-   {
-      return optimizedPointCloudToWorld;
-   }
-
-   public RigidBodyTransformReadOnly getSensorPose()
-   {
-      return optimizedSensorPoseToWorld;
-   }
-
-   private NormalOcTree octreeNodesInPreviousView;
-   private List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
-   private boolean mergeable = false;
 
    public NormalOcTree getOctreeNodesInPreviousView()
    {
@@ -143,14 +50,9 @@ public class IhmcSLAMFrame
       return mergeableSurfaceElements;
    }
 
-   public boolean isMergeableFrame()
-   {
-      return mergeable;
-   }
-
    public void computeOctreeInPreviousView(double octreeResolution)
    {
-      if (previousFrame == null)
+      if (isFirstFrame())
          octreeNodesInPreviousView = null;
 
       double[][] vertex = new double[pointCloudToSensorFrame.length][2];
@@ -284,8 +186,21 @@ public class IhmcSLAMFrame
       double ratio = (double) mergeableSurfaceElements.size() / (numberOfNodes + 1);
 
       if (ratio < validRatio || mergeableSurfaceElements.size() == 0)
-         mergeable = false;
+         setMergeableFrame(false);
       else
-         mergeable = true;
+         setMergeableFrame(true);
+   }
+
+   @Override
+   public SLAMFrameOptimizerCostFunction createCostFunction(AbstractSLAM slam)
+   {
+      computeOctreeInPreviousView(slam.getOctreeResolution());
+      computeMergeableSurfaceElements(slam.getPlanarRegionsMap(), slam.getOctreeResolution(), VALID_PLANES_RATIO_THRESHOLD, MAXIMUM_DISTANCE_OF_SIMILARITY,
+                                      MAXIMUM_ANGLE_OF_SIMILARITY);
+      List<IhmcSurfaceElement> surfaceElements = getMergeableSurfaceElements();
+
+      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, getInitialSensorPoseToWorld());
+
+      return function;
    }
 }
