@@ -431,7 +431,7 @@ public class IhmcSLAMTest
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       localViewer.addOctree(surfaceElements, Color.CORAL);
       localViewer.addPlanarRegions(planarRegionsMap);
-      PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
+      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
       GradientDescentModule optimizer = new GradientDescentModule(function, IhmcSLAM.initialQuery);
 
       int maxIterations = 200;
@@ -550,7 +550,7 @@ public class IhmcSLAMTest
       localViewer.addPointCloud(frameOne.getPointCloud(), Color.RED);
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       localViewer.addOctree(surfaceElements, Color.CORAL);
-      PreMultiplierOptimizerCostFunction function = new PreMultiplierOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
+      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
       GradientDescentModule optimizer = new GradientDescentModule(function, IhmcSLAM.initialQuery);
 
       int maxIterations = 200;
@@ -684,17 +684,6 @@ public class IhmcSLAMTest
             importPlanarRegionData.getPlanarRegion(i).setRegionId(0xFF0000);
          }
          slamViewer.addPlanarRegions(importPlanarRegionData);
-      }
-
-      List<List<IhmcSurfaceElement>> allSurfaceElements = slam.allSurfaceElements;
-      int size = allSurfaceElements.size();
-      for (int i = 0; i < size; i++)
-      {
-         int redScaler = (int) (0xFF * (1 - (double) i / size));
-         int blueScaler = (int) (0xFF * ((double) i / size));
-         Color color = Color.rgb(redScaler, 0, blueScaler);
-         List<IhmcSurfaceElement> surfaceElements = allSurfaceElements.get(i);
-         slamViewer.addOctree(surfaceElements, color);
       }
 
       slamViewer.start("EndToEnd");

@@ -69,16 +69,6 @@ public class IhmcSLAMEndToEndTest
          slamViewer.addPlanarRegions(importPlanarRegionData);
       }
 
-      List<List<IhmcSurfaceElement>> allSurfaceElements = slam.allSurfaceElements;
-      int size = allSurfaceElements.size();
-      for (int i = 0; i < size; i++)
-      {
-         int redScaler = (int) (0xFF * (1 - (double) i / size));
-         int blueScaler = (int) (0xFF * ((double) i / size));
-         Color color = Color.rgb(redScaler, 0, blueScaler);
-         //slamViewer.addOctree(allSurfaceElements.get(i), color);
-      }
-
       slamViewer.start("EndToEnd");
       ThreadTools.sleepForever();
    }
