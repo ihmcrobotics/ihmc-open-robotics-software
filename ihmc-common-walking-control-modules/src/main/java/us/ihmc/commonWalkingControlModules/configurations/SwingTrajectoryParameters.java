@@ -132,7 +132,7 @@ public abstract class SwingTrajectoryParameters
     */
    public boolean useSingularityAvoidanceInSupport()
    {
-      return true;
+      return false;
    }
 
    public abstract double getMinMechanicalLegLength();

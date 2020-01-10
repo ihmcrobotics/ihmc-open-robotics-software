@@ -289,14 +289,14 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       coMHeightTimeDerivativesSmoother.smooth(comHeightDataAfterSmoothing, comHeightDataBeforeSmoothing);
 
-      comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
+      comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
-      desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
-      desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
+      desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
+      desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
 
       if (feetManager != null)
       {
-         comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
+         comHeightDataAfterSingularityAvoidance.set(comHeightDataBeforeSmoothing);
          feetManager.correctCoMHeightForSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
@@ -306,7 +306,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       }
       else
       {
-         finalComHeightData.set(comHeightDataAfterSmoothing);
+         finalComHeightData.set(comHeightDataBeforeSmoothing);
       }
 
       finalComHeightData.getComHeight(desiredCenterOfMassHeightPoint);
