@@ -7,6 +7,20 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * This solver computes the solution to the algebraic Riccati equation using the Eigen vectors of the Hamiltonian of the problem. See that you can form the
+ * Hamiltonian from the cost function and its adjoints as part of the optimal control problem. You can then deconstruct this into Eigen values and Eigen vectors
+ * using a standard Eigen value decomposition. Because you are deconstructing a Hamiltonian, half of the eigen values are stable, and half are unstable.
+ * You can then find the solution to the algebraic Riccati equation using the top and bottom blocks of the stable eigen vectors.
+ *
+ * <p>
+ *    This approach is outlined in https://en.wikipedia.org/wiki/Algebraic_Riccati_equation.
+ * </p>
+ * <p>
+ *    NOTE: This solver is fast, but requires that the Hamiltonian has only REAL eigen values, so that the eigen vector decomposition is possible. In general,
+ *    this is not a valid assumption. If you know for your system that it is, then this returns a fast solution.
+ * </p>
+ */
 public class EigenvectorCARESolver extends AbstractCARESolver
 {
    private final EigenDecomposition<DenseMatrix64F> eigen = DecompositionFactory.eig(0, true);

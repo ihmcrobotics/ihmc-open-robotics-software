@@ -4,6 +4,18 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * This solver computes the solution to the algebraic Riccati equation, using an iterative Newton algorithm outlined in
+ * http://et.engr.iupui.edu//~skoskie/ECE684/Riccati_algorithms.pdf.
+ *
+ * <p>
+ *    An initial estimate of the solution is required, and calculated using the backend solver provided at construction.
+ * </p>
+ * <p>
+ *    The maximum number of iterations can be set using the maxIterations value in the constructor. The convergence epsilon, which says when the value of P
+ *    stops changing, can be set in the constructor as well.
+ * </p>
+ */
 public class NewtonCARESolver extends AbstractCARESolver
 {
   private static final int defaultMaxIterations = 100000;

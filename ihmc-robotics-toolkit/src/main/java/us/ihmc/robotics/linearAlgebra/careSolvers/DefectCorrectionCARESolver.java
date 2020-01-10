@@ -4,6 +4,15 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * This solver performs a numerical correction to the solution to the algebraic Riccati equation, using an iterative defect correction algorithm outlined in
+ * Chapter 10 of "The Autonomous Linear Quadratic Control Problem." In practice, this algorithm should converge in one to two iterations. It is only meant to
+ * correct for numerical inaccuracies in the original CARE solver, and is not meant as a standalone solver on its own.
+ *
+ * <p>
+ *    An initial estimate of the solution is required, and calculated using the backend solver provided at construction.
+ * </p>
+ */
 public class DefectCorrectionCARESolver extends AbstractCARESolver
 {
   private static final int defaultMaxIterations = 1000;
