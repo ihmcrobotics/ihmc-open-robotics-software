@@ -36,13 +36,13 @@ public class ValkyrieAStarPlannerEndToEndTest
    @Test
    public void testCinders()
    {
-      runTest(DataSetName._20190220_172417_EOD_Cinders, 4.0, 12.0, true);
+      runTest(DataSetName._20190220_172417_EOD_Cinders, 4.0, 30.0, true);
    }
 
    @Test
    public void testGappedPlatform()
    {
-      runTest(DataSetName._20190219_182005_Hole, 4.0, 12.0, false);
+      runTest(DataSetName._20190219_182005_Hole, 4.0, 24.0, false);
    }
 
    private void runTest(DataSetName dataSetName, double timeout, double maxSimTime, boolean generateGroundPlane)
