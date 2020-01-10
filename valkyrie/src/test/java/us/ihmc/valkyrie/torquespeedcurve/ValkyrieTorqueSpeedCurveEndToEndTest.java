@@ -25,6 +25,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -39,6 +40,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,10 +63,13 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieTorqueSpeedCurveEndToEndTest
 {
+   private static final boolean ENABLE_JOINT_TORQUE_LIMITS = true;
+
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private ValkyrieRobotModel simRobotModel, realRobotModel, smallSimRobotModel, smallRealRobotModel;
@@ -80,7 +86,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       realRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       smallSimRobotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       smallRealRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
-      ValkyrieJointTorqueLimitMutator mutator = new ValkyrieJointTorqueLimitMutator(simRobotModel.getJointMap());
+      ValkyrieJointMap jointMap = simRobotModel.getJointMap();
+      SDFDescriptionMutator mutator = new SDFDescriptionMutatorList(new ValkyrieSDFDescriptionMutator(jointMap, false), new ValkyrieJointTorqueLimitMutator(jointMap));
       simRobotModel.setSDFDescriptionMutator(mutator);
       realRobotModel.setSDFDescriptionMutator(mutator);
       smallSimRobotModel.setSDFDescriptionMutator(mutator);
@@ -128,6 +135,14 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
       simulationTestingParameters = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private void setupJointTorqueLimitEnforcement(DRCSimulationTestHelper drcSimulationTestHelper)
+   {
+      if (ENABLE_JOINT_TORQUE_LIMITS)
+      {
+         drcSimulationTestHelper.getYoVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "enforceJointTorqueLimit").setValueFromDouble(1.0);
+      }
    }
 
    @Test
@@ -183,7 +198,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
          throw caughtException;
    }
 
-   public void testStepUpWithSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
+   private void testStepUpWithSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
                                       File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
@@ -198,6 +213,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
          drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
          drcSimulationTestHelper.createSimulation("StepUpWithSquareUpFast");
+         setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          scs.setCameraFix(1.0, 0.0, 0.8);
          scs.setCameraPosition(1.0, -8.0, 1.0);
@@ -291,7 +307,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
          throw caughtException;
    }
 
-   public void testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
+   private void testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepHeightInches, WalkingControllerParameters walkingControllerParameters,
                                          File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
@@ -306,6 +322,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
          drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
          drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+         setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          scs.setCameraFix(1.0, 0.0, 0.8);
          scs.setCameraPosition(1.0, -8.0, 1.0);
@@ -425,7 +442,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
          throw caughtException;
    }
 
-   public void testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters,
+   private void testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters,
                              File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
@@ -439,6 +456,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
          drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
          drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable()));
          drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+         setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          double cameraX = 2.0;
          double cameraZ = 0.8 + slope.getTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 0.0);
@@ -548,7 +566,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
          throw caughtException;
    }
 
-   public void testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches, int numberOfStairSteps,
+   private void testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches, int numberOfStairSteps,
                             WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
          throws SimulationExceededMaximumTimeException
    {
@@ -562,6 +580,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTest
 
          drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
          drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+         setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          double xGoal = 0.6 + numberOfStairSteps * stairStepLength + 1.0e-3;
          double cameraX = xGoal / 2.0;
