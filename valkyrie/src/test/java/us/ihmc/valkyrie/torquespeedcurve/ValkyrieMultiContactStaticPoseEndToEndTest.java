@@ -181,6 +181,30 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
+   public void testSit3()
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
+                                                                                                           robotModel.getRobotPhysicalProperties());
+      addButt2ContactPoint(robotModel.getJointMap(), contactPointParameters);
+      addHeelBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
+      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
+      robotModel.setContactPointParameters(contactPointParameters);
+
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+
+      double simulationDT = 2.0e-4;
+      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
+      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+
+      setRobotToSit3Configuration(robot, robotModel.getJointMap());
+      scs.startOnAThread();
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
    public void testRolling1()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
@@ -459,6 +483,29 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       RigidBodyTransform rootJointPose = new RigidBodyTransform();
       rootJointPose.setRotation(new Quaternion(0.0, -0.6, 0.0, 1.0));
       rootJointPose.setTranslation(0.0, 0.0, 0.23);
+      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+   }
+
+   private static void setRobotToSit3Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.875);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.425);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.8);
+
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(-0.5);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(1.266));
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(-3.1);
+         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(2.0));
+      }
+
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.4);
+
+      RigidBodyTransform rootJointPose = new RigidBodyTransform();
+      rootJointPose.setRotation(new Quaternion(0.0, -0.8, 0.0, 1.0));
+      rootJointPose.setTranslation(0.0, 0.0, 0.17);
       robot.getRootJoint().setRotationAndTranslation(rootJointPose);
    }
 
