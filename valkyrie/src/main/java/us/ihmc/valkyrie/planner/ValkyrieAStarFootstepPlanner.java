@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -33,12 +34,15 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
 import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -63,6 +67,10 @@ public class ValkyrieAStarFootstepPlanner
    private final ValkyrieStepCost stepCost;
    private final BodyPathHelper bodyPathHelper = new BodyPathHelper(parameters);
    private final ValkyrieIdealStepCalculator idealStepCalculator;
+
+   private final ValkyriePlannerEdgeData edgeData = new ValkyriePlannerEdgeData();
+   private final HashMap<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final RecyclingArrayList<ValkyriePlannerIterationData> iterationData = new RecyclingArrayList<>(1000, ValkyriePlannerIterationData::new);
 
    private Status status = null;
    private FootstepNode endNode = null;
@@ -105,6 +113,7 @@ public class ValkyrieAStarFootstepPlanner
       this.stepCost = new ValkyrieStepCost(parameters, snapper, heuristics, idealStepCalculator::computeIdealStep, footPolygons);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
+      planner.getGraph().setGraphExpansionCallback(edge -> edgeDataMap.put(edge, edgeData.getCopyAndClear()));
    }
 
    public void handleRequestPacket(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -124,6 +133,9 @@ public class ValkyrieAStarFootstepPlanner
       bodyPathHelper.initialize(requestPacket);
       idealStepCalculator.initialize();
       stepValidityChecker.initialize();
+      edgeData.clear();
+      edgeDataMap.clear();
+      iterationData.clear();
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());
@@ -170,6 +182,7 @@ public class ValkyrieAStarFootstepPlanner
          }
 
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
+         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
          if (iterationData.getParentNode() == null)
@@ -191,6 +204,15 @@ public class ValkyrieAStarFootstepPlanner
 
       reportStatus();
       isPlanning.set(false);
+   }
+
+   private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
+   {
+      ValkyriePlannerIterationData loggedData = this.iterationData.add();
+      loggedData.setStanceNode(iterationData.getParentNode());
+      iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
+      iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
+      loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
    }
 
    private void reportStatus()
@@ -389,6 +411,16 @@ public class ValkyrieAStarFootstepPlanner
    public FootstepNode getEndNode()
    {
       return endNode;
+   }
+
+   public HashMap<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> getEdgeDataMap()
+   {
+      return edgeDataMap;
+   }
+
+   public RecyclingArrayList<ValkyriePlannerIterationData> getIterationData()
+   {
+      return iterationData;
    }
 
    public void addRequestCallback(Consumer<ValkyrieFootstepPlanningRequestPacket> callback)
