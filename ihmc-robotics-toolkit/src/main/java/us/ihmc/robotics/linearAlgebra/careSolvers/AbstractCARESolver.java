@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 
+/**
+ * {@inheritDoc}
+ */
 public abstract class AbstractCARESolver implements CARESolver
 {
    private final DenseMatrix64F Rinv = new DenseMatrix64F(0, 0);

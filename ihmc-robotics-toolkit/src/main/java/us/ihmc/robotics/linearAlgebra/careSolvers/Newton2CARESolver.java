@@ -5,28 +5,19 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
-* This solver computes the solution to the algebraic Riccati equation
-*
-* <p>
-* A' P + P A - P B R^-1 B' P + Q = 0
-* </p>
-* <p> which can also be written as</p>
-* <p>A' P + P A - P M P + Q = 0</p>*
-* <p>where P is the unknown to be solved for, R is symmetric positive definite, Q is symmetric positive semi-definite, A is the state transition matrix,
-* and B is the control matrix.</p>
-*
-* <p>
-*    The solution is found by first finding a solution using the Hamiltonian using the solver {@link HamiltonianEigenCARESolver}.
-*    This is then used as initial guess for the Newton iterative algorithm outlined here: http://et.engr.iupui.edu//~skoskie/ECE684/Riccati_algorithms.pdf.
-* </p>
+ * This solver computes the solution to the algebraic Riccati equation, using an iterative Newton algorithm outlined in Chapter 11 of
+ * "The Autonomous Linear Quadratic Control Problem." This method is different than the one performed by {@link NewtonCARESolver}.
+ *
+ * <p>
+ *    An initial estimate of the solution is required, and calculated using the backend solver provided at construction.
+ * </p>
  * <p>
  *    The maximum number of iterations can be set using the maxIterations value in the constructor. The convergence epsilon, which says when the value of P
  *    stops changing, can be set in the constructor as well.
  * </p>
-*/
+ */
 public class Newton2CARESolver extends AbstractCARESolver
 {
-  /** Internally used maximum iterations. */
   private static final int defaultMaxIterations = 10000;
   private static final double defaultConvergenceEpsilon = 1e-12;
 
