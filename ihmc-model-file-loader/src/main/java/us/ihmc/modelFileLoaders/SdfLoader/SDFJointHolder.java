@@ -23,7 +23,7 @@ public class SDFJointHolder
    private double upperLimit;
    private double lowerLimit;
    
-   private final double effortLimit;
+   private double effortLimit;
    private final double velocityLimit;
    
    
@@ -361,5 +361,10 @@ public class SDFJointHolder
          PrintTools.debug(DEBUG, this, getName() + " has invalid joint limits.  LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit
                + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
       }
+   }
+
+   public void setEffortLimit(double effortLimit)
+   {
+      this.effortLimit = effortLimit;
    }
 }
