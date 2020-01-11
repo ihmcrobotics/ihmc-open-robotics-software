@@ -33,7 +33,6 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
-import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
 import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
@@ -44,7 +43,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -70,7 +68,7 @@ public class ValkyrieAStarFootstepPlanner
 
    private final ValkyriePlannerEdgeData edgeData = new ValkyriePlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
-   private final RecyclingArrayList<ValkyriePlannerIterationData> iterationData = new RecyclingArrayList<>(1000, ValkyriePlannerIterationData::new);
+   private final HashMap<FootstepNode, ValkyriePlannerIterationData> iterationData = new HashMap<>();
 
    private Status status = null;
    private FootstepNode endNode = null;
@@ -107,7 +105,7 @@ public class ValkyrieAStarFootstepPlanner
                                                                                   parameters::getMinimumXClearanceFromStance,
                                                                                   parameters::getMinimumYClearanceFromStance);
 
-      stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper);
+      stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper, edgeData);
       idealStepCalculator = new ValkyrieIdealStepCalculator(parameters, bodyPathHelper, stepValidityChecker);
       heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, bodyPathHelper);
       this.stepCost = new ValkyrieStepCost(parameters, snapper, heuristics, idealStepCalculator::computeIdealStep, footPolygons);
@@ -132,7 +130,6 @@ public class ValkyrieAStarFootstepPlanner
       requestCallback.accept(requestPacket);
       bodyPathHelper.initialize(requestPacket);
       idealStepCalculator.initialize();
-      stepValidityChecker.initialize();
       edgeData.clear();
       edgeDataMap.clear();
       iterationData.clear();
@@ -208,11 +205,12 @@ public class ValkyrieAStarFootstepPlanner
 
    private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
    {
-      ValkyriePlannerIterationData loggedData = this.iterationData.add();
+      ValkyriePlannerIterationData loggedData = new ValkyriePlannerIterationData();
       loggedData.setStanceNode(iterationData.getParentNode());
       iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
       iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
       loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
+      this.iterationData.put(iterationData.getParentNode(), loggedData);
    }
 
    private void reportStatus()
@@ -383,7 +381,7 @@ public class ValkyrieAStarFootstepPlanner
       return parameters;
    }
 
-   public FootstepNodeSnapperReadOnly getSnapper()
+   public FootstepNodeSnapper getSnapper()
    {
       return snapper;
    }
@@ -396,11 +394,6 @@ public class ValkyrieAStarFootstepPlanner
    public AStarPathPlanner<FootstepNode> getInternalPlanner()
    {
       return planner;
-   }
-
-   public Map<GraphEdge<FootstepNode>, StepRejectionReason> getRejectionReasonMap()
-   {
-      return stepValidityChecker.getRejectionReasonMap();
    }
 
    public ValkyrieFootstepPlannerHeuristics getHeuristics()
@@ -418,7 +411,7 @@ public class ValkyrieAStarFootstepPlanner
       return edgeDataMap;
    }
 
-   public RecyclingArrayList<ValkyriePlannerIterationData> getIterationData()
+   public HashMap<FootstepNode, ValkyriePlannerIterationData> getIterationData()
    {
       return iterationData;
    }

@@ -31,6 +31,7 @@ public class ValkyriePlannerMessagerAPI
 
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> parentDebugStep = topic("ParentDebugStep");
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> childDebugStep = topic("ChildDebugStep");
+   public static final Topic<RigidBodyTransform> idealDebugStep = topic("IdealDebugStep");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
