@@ -33,6 +33,21 @@ public class ValkyriePlannerIterationData
       childNodes.add(childNode);
    }
 
+   public FootstepNode getStanceNode()
+   {
+      return stanceNode;
+   }
+
+   public FootstepNode getIdealStep()
+   {
+      return idealStep;
+   }
+
+   public List<FootstepNode> getChildNodes()
+   {
+      return childNodes;
+   }
+
    public void clear()
    {
       stanceNode = null;

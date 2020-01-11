@@ -55,11 +55,13 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
    private final MeshHolder solutionSteps = new MeshHolder();
    private final MeshHolder debugParentStepGraphic = new MeshHolder();
    private final MeshHolder debugChildStepGraphic = new MeshHolder();
+   private final MeshHolder debugIdealStepGraphic = new MeshHolder();
    private final FootstepPairGraphic goalGraphic;
    private final FootstepPairGraphic[] waypointGraphics = new FootstepPairGraphic[20];
 
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugParentStep;
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugChildStep;
+   private final AtomicReference<RigidBodyTransform> debugIdealStep;
 
    public ValkyriePlannerGraphicsViewer(FootstepNodeSnapperReadOnly snapper, ValkyrieAStarFootstepPlannerParameters parameters, Messager messager)
    {
@@ -68,6 +70,7 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
 
       debugParentStep = messager.createInput(ValkyriePlannerMessagerAPI.parentDebugStep);
       debugChildStep = messager.createInput(ValkyriePlannerMessagerAPI.childDebugStep);
+      debugIdealStep = messager.createInput(ValkyriePlannerMessagerAPI.idealDebugStep);
 
       ValkyriePhysicalProperties physicalProperties = new ValkyriePhysicalProperties();
       double footLength = physicalProperties.getFootLength();
@@ -122,6 +125,7 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
 
       Pair<RigidBodyTransform, ConvexPolygon2D> debugParentStep = this.debugParentStep.getAndSet(null);
       Pair<RigidBodyTransform, ConvexPolygon2D> debugChildStep = this.debugChildStep.getAndSet(null);
+      RigidBodyTransform debugIdealStep = this.debugIdealStep.getAndSet(null);
 
       if (debugParentStep != null)
       {
@@ -144,9 +148,20 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       {
          meshBuilder.clear();
          List<Point2D> footPolygon = debugChildStep.getValue().getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList());
-         addFootstep(debugChildStep.getKey().getTranslation(), debugChildStep.getKey().getRotation(), footPolygon, debugChildStep.getValue(), Color.RED);
+         if (footPolygon.isEmpty() || debugChildStep.getValue().containsNaN())
+            addFootstep(debugChildStep.getKey().getTranslation(), debugChildStep.getKey().getRotation(), defaultFootPoints, defaultFootPolygon, Color.RED);
+         else
+            addFootstep(debugChildStep.getKey().getTranslation(), debugChildStep.getKey().getRotation(), footPolygon, debugChildStep.getValue(), Color.RED);
          this.debugChildStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          debugChildStepGraphic.update();
+      }
+
+      if (debugIdealStep != null)
+      {
+         meshBuilder.clear();
+         addFootstep(debugIdealStep.getTranslation(), debugIdealStep.getRotation(), defaultFootPoints, defaultFootPolygon, Color.BLUE);
+         this.debugIdealStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+         debugIdealStepGraphic.update();
       }
    }
 

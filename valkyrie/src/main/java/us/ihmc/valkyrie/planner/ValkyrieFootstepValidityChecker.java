@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.planner;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -13,27 +14,24 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class ValkyrieFootstepValidityChecker
 {
+   private final ValkyriePlannerEdgeData edgeData;
    private final FootstepNodeSnapper snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ValkyrieAStarFootstepPlannerParameters parameters;
    private final PlanarRegionBaseOfCliffAvoider cliffAvoider;
    private final ObstacleBetweenNodesChecker obstacleBetweenNodesChecker;
    private final FootstepNodeBodyCollisionDetector collisionDetector;
-   private final HashMap<GraphEdge<FootstepNode>, StepRejectionReason> rejectionReasonMap = new HashMap<>();
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
@@ -45,10 +43,19 @@ public class ValkyrieFootstepValidityChecker
    private UnaryOperator<FootstepNode> parentNodeSupplier = null;
    private PlanarRegionsList planarRegionsList = null;
 
+   // Variables to log
+   private double stepWidth;
+   private double stepLength;
+   private double stepHeight;
+   private double stepReach;
+   private double footAreaPercentage;
+
    public ValkyrieFootstepValidityChecker(ValkyrieAStarFootstepPlannerParameters parameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons,
-                                          FootstepNodeSnapper snapper)
+                                          FootstepNodeSnapper snapper,
+                                          ValkyriePlannerEdgeData edgeData)
    {
+      this.edgeData = edgeData;
       this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
@@ -70,23 +77,32 @@ public class ValkyrieFootstepValidityChecker
                                                                      parameters.getBodyBoxOffset()::getZ);
    }
 
+<<<<<<< HEAD
    public void initialize()
    {
       rejectionReasonMap.clear();
    }
 
    public boolean checkFootstep(FootstepNode candidateNode, FootstepNode stanceNode)
+=======
+   public boolean isFootstepValid(FootstepNode candidateNode, FootstepNode stanceNode)
+>>>>>>> 92e69489dc... Adding ui elements for viewing ideal steps and logging data
    {
       StepRejectionReason rejectionReason = checkFootstepInternal(candidateNode, stanceNode);
-      if(rejectionReason == null)
+
+      if(edgeData.getStanceNode() == null)
       {
-         return true;
+         edgeData.setStanceNode(stanceNode);
+         edgeData.setCandidateNode(candidateNode);
+
+         edgeData.setStepWidth(stepWidth);
+         edgeData.setStepLength(stepLength);
+         edgeData.setStepHeight(stepHeight);
+         edgeData.setStepReach(stepReach);
+         edgeData.setRejectionReason(rejectionReason);
       }
-      else
-      {
-         rejectionReasonMap.put(new GraphEdge<>(stanceNode, candidateNode), rejectionReason);
-         return false;
-      }
+
+      return rejectionReason == null;
    }
 
    private StepRejectionReason checkFootstepInternal(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -114,11 +130,12 @@ public class ValkyrieFootstepValidityChecker
 
       // Check snap area
       ConvexPolygon2D footholdAfterSnap = candidateNodeSnapData.getCroppedFoothold();
-      double area = footholdAfterSnap.getArea();
-      double footArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
+      double croppedFootArea = footholdAfterSnap.getArea();
+      double fullFootArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
+      footAreaPercentage = croppedFootArea / fullFootArea;
 
       double epsilonAreaPercentage = 1e-4;
-      if (!footholdAfterSnap.isEmpty() && area < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage) * footArea)
+      if (!footholdAfterSnap.isEmpty() && footAreaPercentage < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
       {
          return StepRejectionReason.AREA_TOO_SMALL;
       }
@@ -136,19 +153,20 @@ public class ValkyrieFootstepValidityChecker
       candidateFootPosition.setToZero(candidateFootFrame);
       candidateFootPosition.changeFrame(stanceFootZUpFrame);
 
+      stepLength = candidateFootPosition.getX();
+      stepWidth = candidateNode.getRobotSide().negateIfRightSide(candidateFootPosition.getY());
+      stepReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()),
+                                                                     Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
+      stepHeight = candidateFootPosition.getZ();
+
       // Check step height
-      if (Math.abs(candidateFootPosition.getZ()) > parameters.getMaximumStepZ())
+      if (Math.abs(stepHeight) > parameters.getMaximumStepZ())
       {
          return StepRejectionReason.HEIGHT_TOO_LOW_OR_HIGH;
       }
 
       // Check step width and reach
-      double stepWidth = candidateNode.getRobotSide().negateIfRightSide(candidateFootPosition.getY());
-      double stepReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()),
-                                                                     Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
-
-      // Flat ground
-      boolean flatGround = MathTools.intervalContains(candidateFootPosition.getZ(),
+      boolean flatGround = MathTools.intervalContains(stepHeight,
                                                       parameters.getFlatGroundLowerThreshold(),
                                                       parameters.getFlatGroundUpperThreshold());
       if (flatGround)
@@ -163,7 +181,7 @@ public class ValkyrieFootstepValidityChecker
          }
       }
       // Stepping up
-      else if (candidateFootPosition.getZ() >= parameters.getFlatGroundUpperThreshold())
+      else if (stepHeight >= parameters.getFlatGroundUpperThreshold())
       {
          if (stepReach > parameters.getMaximumStepReachWhenSteppingUp())
          {
@@ -200,14 +218,14 @@ public class ValkyrieFootstepValidityChecker
 
          double swingReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()), Math.abs(candidateFootPosition.getY()));
 
-         if (candidateFootPosition.getZ() > parameters.getFlatGroundUpperThreshold())
+         if (stepHeight > parameters.getFlatGroundUpperThreshold())
          {
             if (swingReach > alpha * parameters.getMaximumStepReachWhenSteppingUp())
             {
                return StepRejectionReason.SWING_REACH_EXCEEDED;
             }
          }
-         else if (candidateFootPosition.getZ() < parameters.getFlatGroundLowerThreshold())
+         else if (stepHeight < parameters.getFlatGroundLowerThreshold())
          {
             if (swingReach > alpha * parameters.getMaximumStepReachWhenSteppingDown())
             {
@@ -264,11 +282,6 @@ public class ValkyrieFootstepValidityChecker
    public enum StepRejectionReason
    {
       COULD_NOT_SNAP, INCLINE_TOO_STEEP, AREA_TOO_SMALL, HEIGHT_TOO_LOW_OR_HIGH, REACH_EXCEEDED, WIDTH_TOO_SMALL_OR_LARGE, SWING_REACH_EXCEEDED, TOO_CLOSE_TO_LEDGE, OBSTACLE_BETWEEN_STEPS, BOUNDING_BOX_COLLISION
-   }
-
-   public HashMap<GraphEdge<FootstepNode>, StepRejectionReason> getRejectionReasonMap()
-   {
-      return rejectionReasonMap;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)

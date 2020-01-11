@@ -4,21 +4,18 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.SortType;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-import javafx.util.Callback;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -26,13 +23,15 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ValkyriePlannerGraphUIController
@@ -99,7 +98,7 @@ public class ValkyriePlannerGraphUIController
                                                                     if (event.getClickCount() == 2 && (!row.isEmpty()))
                                                                     {
                                                                        ChildStepProperty rowData = row.getItem();
-                                                                       parentStepStack.push(rowData.node);
+                                                                       parentStepStack.push(rowData.edgeData.getCandidateNode());
                                                                        updateTable();
                                                                     }
                                                                  });
@@ -111,7 +110,7 @@ public class ValkyriePlannerGraphUIController
                                             TableRow<ParentStepProperty> row = new TableRow<>();
                                             row.setOnMouseClicked(event ->
                                                                   {
-                                                                     if (event.getClickCount() == 2 && (!row.isEmpty()))
+                                                                     if (event.getClickCount() == 2)
                                                                         stepBack();
                                                                   });
                                             return row;
@@ -136,13 +135,13 @@ public class ValkyriePlannerGraphUIController
    {
       FootstepNode parentNode = parentStepStack.peek();
       DirectedGraph<FootstepNode> graph = planner.getInternalPlanner().getGraph();
-      FootstepNodeSnapperReadOnly snapper = planner.getSnapper();
-      Map<GraphEdge<FootstepNode>, StepRejectionReason> rejectionReasonMap = planner.getRejectionReasonMap();
+      FootstepNodeSnapper snapper = planner.getSnapper();
+      FootstepNode idealStep = planner.getIterationData().get(parentNode).getIdealStep();
 
       FootstepNodeSnapData parentSnapData = snapper.getSnapData(parentNode);
-      HashSet<GraphEdge<FootstepNode>> startEdges = graph.getOutgoingEdges().get(parentNode);
+      HashSet<GraphEdge<FootstepNode>> edges = graph.getOutgoingEdges().get(parentNode);
 
-      if(startEdges == null)
+      if(edges == null)
       {
          parentStepStack.pop();
          return;
@@ -151,20 +150,20 @@ public class ValkyriePlannerGraphUIController
       parentTableItems.clear();
       childTableItems.clear();
 
-      for (GraphEdge<FootstepNode> edge : startEdges)
+      for (GraphEdge<FootstepNode> edge : edges)
       {
-         StepRejectionReason rejectionReason = rejectionReasonMap.get(edge);
          FootstepNodeSnapData childSnapData = snapper.getSnapData(edge.getEndNode());
          double edgeCost = graph.getCostFromStart(edge.getEndNode()) - graph.getCostFromStart(edge.getStartNode());
          double heuristicCost = planner.getHeuristics().compute(edge.getEndNode());
+         ValkyriePlannerEdgeData edgeData = planner.getEdgeDataMap().get(edge);
          double totalCost = graph.getCostFromStart(edge.getStartNode()) + edgeCost + heuristicCost;
          boolean expanded = graph.getOutgoingEdges().containsKey(edge.getEndNode());
          boolean solution = path.get(parentStepStack.size()).equals(edge.getEndNode());
-         ChildStepProperty stepProperty = new ChildStepProperty(edge.getEndNode(), parentNode, childSnapData, parentSnapData, rejectionReason, edgeCost, heuristicCost, totalCost, expanded, solution);
+         ChildStepProperty stepProperty = new ChildStepProperty(edgeData, childSnapData, edgeCost, heuristicCost, totalCost, expanded, solution);
          childTableItems.add(stepProperty);
       }
 
-      ParentStepProperty stepProperty = new ParentStepProperty(parentNode, parentSnapData);
+      ParentStepProperty stepProperty = new ParentStepProperty(parentNode, parentSnapData, idealStep, snapper.snapFootstepNode(idealStep));
       parentTableItems.add(stepProperty);
 
       debugChildStepTable.getSortOrder().clear();
@@ -175,6 +174,7 @@ public class ValkyriePlannerGraphUIController
       debugChildStepTable.sort();
 
       messager.submitMessage(ValkyriePlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
+      messager.submitMessage(ValkyriePlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
 
       debugChildStepTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
                                                                                  {
@@ -197,7 +197,7 @@ public class ValkyriePlannerGraphUIController
       ChildStepProperty selectedRow = this.selectedRow.get();
       if (selectedRow != null && selectedRow.expanded)
       {
-         parentStepStack.push(selectedRow.node);
+         parentStepStack.push(selectedRow.edgeData.getCandidateNode());
          updateTable();
       }
    }
@@ -302,12 +302,23 @@ public class ValkyriePlannerGraphUIController
       private final FootstepNode node;
       private final FootstepNodeSnapData snapData;
       private final RigidBodyTransform transform = new RigidBodyTransform();
+      private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
 
-      public ParentStepProperty(FootstepNode node, FootstepNodeSnapData snapData)
+      public ParentStepProperty(FootstepNode node, FootstepNodeSnapData snapData, FootstepNode idealStep, FootstepNodeSnapData idealStepSnapData)
       {
          this.node = node;
          this.snapData = snapData;
          FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), transform);
+
+         if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
+         {
+            FootstepNodeTools.getNodeTransform(idealStep, idealStepTransform);
+            idealStepTransform.setTranslationZ(transform.getTranslationZ());
+         }
+         else
+         {
+            FootstepNodeTools.getSnappedNodeTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
+         }
       }
 
       public String getX()
@@ -341,14 +352,9 @@ public class ValkyriePlannerGraphUIController
       }
    }
 
-   private final TransformReferenceFrame parentFootFrame = new TransformReferenceFrame("parentFootFrame", ReferenceFrame.getWorldFrame());
-   private final TransformReferenceFrame childFootFrame = new TransformReferenceFrame("childFootFrame", ReferenceFrame.getWorldFrame());
-   private final ZUpFrame parentFootZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), parentFootFrame, "parentFootZUpFrame");
-   private final FramePoint3D stepPosition = new FramePoint3D();
-
    public class ChildStepProperty
    {
-      private final FootstepNode node;
+      private final ValkyriePlannerEdgeData edgeData;
       private final RigidBodyTransform transform = new RigidBodyTransform();
       private final FootstepNodeSnapData snapData;
       private final StepRejectionReason rejectionReason;
@@ -363,29 +369,29 @@ public class ValkyriePlannerGraphUIController
       private final double stepYaw;
       private final boolean solution;
 
-      public ChildStepProperty(FootstepNode childNode,
-                               FootstepNode parentNode,
+      public ChildStepProperty(ValkyriePlannerEdgeData edgeData,
                                FootstepNodeSnapData childSnapData,
-                               FootstepNodeSnapData parentSnapData,
-                               StepRejectionReason rejectionReason,
                                double edgeCost,
                                double heuristicCost,
                                double totalCost,
                                boolean expanded,
                                boolean solution)
       {
-         this.node = childNode;
+         this.edgeData = edgeData;
          this.snapData = childSnapData;
-         this.rejectionReason = rejectionReason;
          this.edgeCost = edgeCost;
          this.heuristicCost = heuristicCost;
          this.totalCost = totalCost;
          this.expanded = expanded;
          this.solution = solution;
+         this.rejectionReason = edgeData.getRejectionReason();
+
+         FootstepNode candidateNode = edgeData.getCandidateNode();
+         FootstepNode stanceNode = edgeData.getCandidateNode();
 
          if (childSnapData.getSnapTransform().containsNaN())
          {
-            FootstepNodeTools.getSnappedNodeTransform(node, new RigidBodyTransform(), transform);
+            FootstepNodeTools.getSnappedNodeTransform(candidateNode, new RigidBodyTransform(), transform);
 
             stepWidth = Double.NaN;
             stepLength = Double.NaN;
@@ -395,19 +401,13 @@ public class ValkyriePlannerGraphUIController
          }
          else
          {
-            FootstepNodeTools.getSnappedNodeTransform(node, childSnapData.getSnapTransform(), transform);
+            FootstepNodeTools.getSnappedNodeTransform(candidateNode, childSnapData.getSnapTransform(), transform);
 
-            parentFootFrame.setTransformAndUpdate(parentSnapData.getOrComputeSnappedNodeTransform(parentNode));
-            childFootFrame.setTransformAndUpdate(childSnapData.getOrComputeSnappedNodeTransform(childNode));
-            parentFootZUpFrame.update();
-            stepPosition.setToZero(childFootFrame);
-            stepPosition.changeFrame(parentFootZUpFrame);
-
-            stepWidth = childNode.getRobotSide().negateIfRightSide(stepPosition.getY());
-            stepLength = stepPosition.getX();
-            stepReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(stepPosition.getX()), Math.abs(stepWidth - planner.getParameters().getIdealFootstepWidth()));
-            stepHeight = stepPosition.getZ();
-            stepYaw = AngleTools.trimAngleMinusPiToPi(childNode.getRobotSide().negateIfLeftSide(childNode.getYaw() - parentNode.getYaw()));
+            stepWidth = edgeData.getStepWidth();
+            stepLength = edgeData.getStepLength();
+            stepHeight = edgeData.getStepHeight();
+            stepReach = edgeData.getStepReach();
+            stepYaw = candidateNode.getRobotSide().negateIfLeftSide(AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw()));
          }
       }
 
