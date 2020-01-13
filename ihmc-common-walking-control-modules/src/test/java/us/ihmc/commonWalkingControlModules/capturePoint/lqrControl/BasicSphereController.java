@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
@@ -35,17 +36,15 @@ public class BasicSphereController implements SphereControllerInterface
    private final YoFramePoint3D perfectVRP = new YoFramePoint3D("perfectVRP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D vrpForces = new YoFrameVector3D("vrpForces", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleCoMTrajectoryPlanner dcmPlan;
+   private final CoMTrajectoryProvider dcmPlan;
 
    private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
 
-   public BasicSphereController(SphereRobot sphereRobot, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BasicSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.sphereRobot = sphereRobot;
       externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
-      dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot.getOmega0Provider());
-      dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
-      dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
+      dcmPlan = comTrajectoryProvider;
 
       YoICPControlGains gains = new YoICPControlGains("", registry);
       gains.setKpOrthogonalToMotion(3.0);
