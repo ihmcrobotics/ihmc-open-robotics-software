@@ -127,7 +127,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-@Ignore
+@Disabled
 public class BipedContinuousPlanningToolboxDataSetTest
 {
    private static final double defaultNominalWidth = 0.3;
@@ -338,6 +338,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    public void testFewDataSets()
    {
@@ -354,6 +355,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
+   @Disabled
    @Test
    @Tag("avatar-interfaces-slow")
    public void testAllDataSets()
