@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
@@ -26,18 +27,16 @@ public class LQRSphereController implements SphereControllerInterface
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SimpleCoMTrajectoryPlanner dcmPlan;
+   private final CoMTrajectoryProvider dcmPlan;
    private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
 
-   public LQRSphereController(SphereRobot sphereRobot, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LQRSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scsRobot = sphereRobot.getScsRobot();
       this.sphereRobot = sphereRobot;
       externalForcePoint = sphereRobot.getScsRobot().getAllExternalForcePoints().get(0);
 
-      dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot.getOmega0Provider());
-      dcmPlan.setNominalCoMHeight(sphereRobot.getDesiredHeight());
-      dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
+      dcmPlan = comTrajectoryProvider;
 
       sphereRobot.getScsRobot().setController(this);
 

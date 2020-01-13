@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,6 +13,7 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.ArrayTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
@@ -49,8 +48,14 @@ public class LQRMomentumControllerSimulation
          yoGraphicsListRegistry1 = new YoGraphicsListRegistry();
          SphereRobot sphereRobot1 = new SphereRobot("SphereRobot1", gravity, controlDT, desiredHeight, yoGraphicsListRegistry1);
          sphereRobot1.initRobot(initialPosition1, new Vector3D());
-         controller1 = new BasicSphereController(sphereRobot1, yoGraphicsListRegistry1);
+
          robots.add(sphereRobot1.getScsRobot());
+
+         YoVariableRegistry registry = sphereRobot1.getScsRobot().getRobotsYoVariableRegistry();
+         SimpleCoMTrajectoryPlanner dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot1.getOmega0Provider());
+         dcmPlan.setNominalCoMHeight(sphereRobot1.getDesiredHeight());
+         dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry1));
+         controller1 = new BasicSphereController(sphereRobot1, dcmPlan, yoGraphicsListRegistry1);
 
          pushController1 = createPusher(sphereRobot1, yoGraphicsListRegistry1);
          setupGroundContactModel(sphereRobot1.getScsRobot());
@@ -73,7 +78,11 @@ public class LQRMomentumControllerSimulation
 
          robots.add(sphereRobot2.getScsRobot());
 
-         controller2 = new LQRSphereController(sphereRobot2, yoGraphicsListRegistry2);
+         YoVariableRegistry registry = sphereRobot2.getScsRobot().getRobotsYoVariableRegistry();
+         SimpleCoMTrajectoryPlanner dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot2.getOmega0Provider());
+         dcmPlan.setNominalCoMHeight(sphereRobot2.getDesiredHeight());
+         dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry2));
+         controller2 = new LQRSphereController(sphereRobot2, dcmPlan, yoGraphicsListRegistry2);
 
          pushController2 = createPusher(sphereRobot2, yoGraphicsListRegistry2);
          setupGroundContactModel(sphereRobot2.getScsRobot());
