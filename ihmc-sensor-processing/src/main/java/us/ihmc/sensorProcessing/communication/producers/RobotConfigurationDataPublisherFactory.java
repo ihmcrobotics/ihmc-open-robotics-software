@@ -55,7 +55,7 @@ public class RobotConfigurationDataPublisherFactory
       forceSensorDefinitionsField.setDefaultValue(new ForceSensorDefinition[0]);
 
       robotMotionStatusHolderField.setDefaultValue(new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN));
-      publishPeriod.setDefaultValue(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
+      publishPeriod.setDefaultValue(0L);
    }
 
    /**
