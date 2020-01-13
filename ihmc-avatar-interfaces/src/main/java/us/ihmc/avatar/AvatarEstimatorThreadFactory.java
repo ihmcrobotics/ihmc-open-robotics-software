@@ -761,6 +761,7 @@ public class AvatarEstimatorThreadFactory
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
          factory.setROS2Info(realtimeRos2NodeField.get(), publisherTopicNameGeneratorField.get());
+         factory.setPublishEvery(8);
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();
