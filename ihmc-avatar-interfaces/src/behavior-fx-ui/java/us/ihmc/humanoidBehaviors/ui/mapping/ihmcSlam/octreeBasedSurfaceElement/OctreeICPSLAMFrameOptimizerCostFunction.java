@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +8,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 
-public class IhmcSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
+public class OctreeICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
 {
    private List<IhmcSurfaceElement> surfaceElements;
    private static final double POSITION_WEIGHT = 5.0;
@@ -20,7 +21,7 @@ public class IhmcSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFu
 
    private boolean assumeFlatGround = true;
 
-   public IhmcSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   public OctreeICPSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
       super(transformWorldToSensorPose);
       this.surfaceElements = surfaceElements;

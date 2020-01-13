@@ -1,11 +1,14 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.AbstractSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrame;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
-public class IhmcSLAM extends AbstractSLAM<IhmcSLAMFrame>
+public class OctreeICPSLAM extends AbstractSLAM<OctreeICPSLAMFrame>
 {
    public static final double OCTREE_RESOLUTION = 0.02;
 
@@ -32,12 +35,12 @@ public class IhmcSLAM extends AbstractSLAM<IhmcSLAMFrame>
       }
    }
 
-   public IhmcSLAM()
+   public OctreeICPSLAM()
    {
       this(false);
    }
 
-   public IhmcSLAM(boolean naiveSLAM)
+   public OctreeICPSLAM(boolean naiveSLAM)
    {
       super(naiveSLAM, OCTREE_RESOLUTION);
    }
@@ -73,12 +76,12 @@ public class IhmcSLAM extends AbstractSLAM<IhmcSLAMFrame>
    @Override
    public SLAMFrame createFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      return new IhmcSLAMFrame(pointCloudMessage);
+      return new OctreeICPSLAMFrame(pointCloudMessage);
    }
 
    @Override
    public SLAMFrame createFrame(SLAMFrame previousFrame, StereoVisionPointCloudMessage pointCloudMessage)
    {
-      return new IhmcSLAMFrame(previousFrame, pointCloudMessage);
+      return new OctreeICPSLAMFrame(previousFrame, pointCloudMessage);
    }
 }

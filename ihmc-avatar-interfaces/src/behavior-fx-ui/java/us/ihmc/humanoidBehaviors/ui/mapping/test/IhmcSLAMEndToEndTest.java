@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,6 +7,8 @@ import java.util.List;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeICPSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -37,7 +39,7 @@ public class IhmcSLAMEndToEndTest
       messages.addAll(messagesFromFile);
       System.out.println("number of messages " + messages.size());
 
-      IhmcSLAM slam = new IhmcSLAM(doNaiveSLAM);
+      OctreeICPSLAM slam = new OctreeICPSLAM(doNaiveSLAM);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
 //      for (int i = 20; i < 60; i++)
