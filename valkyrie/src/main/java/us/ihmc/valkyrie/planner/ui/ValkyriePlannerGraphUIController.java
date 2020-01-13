@@ -152,14 +152,10 @@ public class ValkyriePlannerGraphUIController
 
       for (GraphEdge<FootstepNode> edge : edges)
       {
-         FootstepNodeSnapData childSnapData = snapper.getSnapData(edge.getEndNode());
-         double edgeCost = graph.getCostFromStart(edge.getEndNode()) - graph.getCostFromStart(edge.getStartNode());
-         double heuristicCost = planner.getHeuristics().compute(edge.getEndNode());
          ValkyriePlannerEdgeData edgeData = planner.getEdgeDataMap().get(edge);
-         double totalCost = graph.getCostFromStart(edge.getStartNode()) + edgeCost + heuristicCost;
          boolean expanded = graph.getOutgoingEdges().containsKey(edge.getEndNode());
-         boolean solution = path.get(parentStepStack.size()).equals(edge.getEndNode());
-         ChildStepProperty stepProperty = new ChildStepProperty(edgeData, childSnapData, edgeCost, heuristicCost, totalCost, expanded, solution);
+         boolean solution = parentStepStack.size() < path.size() && path.get(parentStepStack.size()).equals(edge.getEndNode());
+         ChildStepProperty stepProperty = new ChildStepProperty(edgeData, expanded, solution);
          childTableItems.add(stepProperty);
       }
 
@@ -183,7 +179,7 @@ public class ValkyriePlannerGraphUIController
                                                                                        ChildStepProperty property = (ChildStepProperty) newValue;
                                                                                        messager.submitMessage(ValkyriePlannerMessagerAPI.childDebugStep,
                                                                                                               Pair.of(property.transform,
-                                                                                                                      property.snapData.getCroppedFoothold()));
+                                                                                                                      property.edgeData.getCandidateNodeSnapData().getCroppedFoothold()));
                                                                                        selectedRow.set(property);
                                                                                     }
                                                                                  });
@@ -356,57 +352,29 @@ public class ValkyriePlannerGraphUIController
    {
       private final ValkyriePlannerEdgeData edgeData;
       private final RigidBodyTransform transform = new RigidBodyTransform();
-      private final FootstepNodeSnapData snapData;
-      private final StepRejectionReason rejectionReason;
-      private final double edgeCost;
-      private final double heuristicCost;
-      private final double totalCost;
       private final boolean expanded;
-      private final double stepWidth;
-      private final double stepLength;
-      private final double stepHeight;
-      private final double stepReach;
       private final double stepYaw;
       private final boolean solution;
 
       public ChildStepProperty(ValkyriePlannerEdgeData edgeData,
-                               FootstepNodeSnapData childSnapData,
-                               double edgeCost,
-                               double heuristicCost,
-                               double totalCost,
                                boolean expanded,
                                boolean solution)
       {
          this.edgeData = edgeData;
-         this.snapData = childSnapData;
-         this.edgeCost = edgeCost;
-         this.heuristicCost = heuristicCost;
-         this.totalCost = totalCost;
          this.expanded = expanded;
          this.solution = solution;
-         this.rejectionReason = edgeData.getRejectionReason();
 
          FootstepNode candidateNode = edgeData.getCandidateNode();
          FootstepNode stanceNode = edgeData.getCandidateNode();
 
-         if (childSnapData.getSnapTransform().containsNaN())
+         if (edgeData.getCandidateNodeSnapData().getSnapTransform().containsNaN())
          {
             FootstepNodeTools.getSnappedNodeTransform(candidateNode, new RigidBodyTransform(), transform);
-
-            stepWidth = Double.NaN;
-            stepLength = Double.NaN;
-            stepHeight = Double.NaN;
-            stepReach = Double.NaN;
             stepYaw = Double.NaN;
          }
          else
          {
-            FootstepNodeTools.getSnappedNodeTransform(candidateNode, childSnapData.getSnapTransform(), transform);
-
-            stepWidth = edgeData.getStepWidth();
-            stepLength = edgeData.getStepLength();
-            stepHeight = edgeData.getStepHeight();
-            stepReach = edgeData.getStepReach();
+            FootstepNodeTools.getSnappedNodeTransform(candidateNode, edgeData.getCandidateNodeSnapData().getSnapTransform(), transform);
             stepYaw = candidateNode.getRobotSide().negateIfLeftSide(AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw()));
          }
       }
@@ -443,22 +411,22 @@ public class ValkyriePlannerGraphUIController
 
       public String getWidth()
       {
-         return doubleFormat.format(stepWidth);
+         return doubleFormat.format(edgeData.getStepWidth());
       }
 
       public String getLength()
       {
-         return doubleFormat.format(stepLength);
+         return doubleFormat.format(edgeData.getStepLength());
       }
 
       public String getHeight()
       {
-         return doubleFormat.format(stepHeight);
+         return doubleFormat.format(edgeData.getStepHeight());
       }
 
       public String getReach()
       {
-         return doubleFormat.format(stepReach);
+         return doubleFormat.format(edgeData.getStepReach());
       }
 
       public String getStepYaw()
@@ -468,17 +436,17 @@ public class ValkyriePlannerGraphUIController
 
       public String getEdgeCost()
       {
-         return doubleFormat.format(edgeCost);
+         return doubleFormat.format(edgeData.getEdgeCost());
       }
 
       public String getHeuristicCost()
       {
-         return doubleFormat.format(heuristicCost);
+         return doubleFormat.format(edgeData.getHeuristicCost());
       }
 
       public String getTotalCost()
       {
-         return doubleFormat.format(totalCost);
+         return doubleFormat.format(edgeData.getCostFromStart() + edgeData.getHeuristicCost());
       }
 
       public String getExpanded()
@@ -488,7 +456,7 @@ public class ValkyriePlannerGraphUIController
 
       public String getRejectionReason()
       {
-         return rejectionReason == null ? "" : rejectionReason.toString();
+         return edgeData.getRejectionReason() == null ? "" : edgeData.getRejectionReason().toString();
       }
 
       public String getSolution()

@@ -48,6 +48,8 @@ public class ValkyrieFootstepValidityChecker
    private double stepHeight;
    private double stepReach;
    private double footAreaPercentage;
+   private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
+   private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
 
    public ValkyrieFootstepValidityChecker(ValkyrieAStarFootstepPlannerParameters parameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons,
@@ -78,19 +80,11 @@ public class ValkyrieFootstepValidityChecker
 
    public boolean checkFootstep(FootstepNode candidateNode, FootstepNode stanceNode)
    {
+      clearLoggedVariables();
       StepRejectionReason rejectionReason = checkFootstepInternal(candidateNode, stanceNode);
 
       if(edgeData.getStanceNode() == null)
-      {
-         edgeData.setStanceNode(stanceNode);
-         edgeData.setCandidateNode(candidateNode);
-
-         edgeData.setStepWidth(stepWidth);
-         edgeData.setStepLength(stepLength);
-         edgeData.setStepHeight(stepHeight);
-         edgeData.setStepReach(stepReach);
-         edgeData.setRejectionReason(rejectionReason);
-      }
+         logVariables(candidateNode, stanceNode, rejectionReason);
 
       return rejectionReason == null;
    }
@@ -102,7 +96,7 @@ public class ValkyrieFootstepValidityChecker
          return null;
       }
 
-      FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
+      candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())
@@ -135,7 +129,7 @@ public class ValkyrieFootstepValidityChecker
          return null;
       }
 
-      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
+      stanceNodeSnapData.set(snapper.snapFootstepNode(stanceNode));
       candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getOrComputeSnappedNodeTransform(candidateNode));
       stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getOrComputeSnappedNodeTransform(stanceNode));
       stanceFootZUpFrame.update();
@@ -267,6 +261,31 @@ public class ValkyrieFootstepValidityChecker
       }
 
       return null;
+   }
+
+   private void logVariables(FootstepNode candidateNode, FootstepNode stanceNode, StepRejectionReason rejectionReason)
+   {
+      edgeData.setStanceNode(stanceNode);
+      edgeData.setCandidateNode(candidateNode);
+      edgeData.setCandidateNodeSnapData(candidateNodeSnapData);
+
+      edgeData.setStepWidth(stepWidth);
+      edgeData.setStepLength(stepLength);
+      edgeData.setStepHeight(stepHeight);
+      edgeData.setStepReach(stepReach);
+      edgeData.setFootAreaPercentage(footAreaPercentage);
+      edgeData.setRejectionReason(rejectionReason);
+   }
+
+   private void clearLoggedVariables()
+   {
+      stepWidth = Double.NaN;
+      stepLength = Double.NaN;
+      stepHeight = Double.NaN;
+      stepReach = Double.NaN;
+      footAreaPercentage = Double.NaN;
+      candidateNodeSnapData.clear();
+      stanceNodeSnapData.clear();
    }
 
    public enum StepRejectionReason
