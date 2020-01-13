@@ -1,6 +1,9 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.AbstractSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrame;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 
 public class RandomICPSLAMFrame extends SLAMFrame
 {

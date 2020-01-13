@@ -1,9 +1,12 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.AbstractSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrame;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class RandomICPSLAM extends AbstractSLAM<RandomICPSLAMFrame>

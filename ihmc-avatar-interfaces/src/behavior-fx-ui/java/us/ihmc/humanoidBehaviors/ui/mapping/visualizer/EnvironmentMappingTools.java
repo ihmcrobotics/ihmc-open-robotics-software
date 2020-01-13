@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
 import java.util.List;
@@ -12,6 +12,11 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeICPSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP.RandomICPSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
@@ -348,7 +353,7 @@ public class IhmcSLAMTimeDelayTest
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      IhmcSLAM slam = new IhmcSLAM(true);
+      OctreeICPSLAM slam = new OctreeICPSLAM(true);
       slam.addFirstFrame(messages.get(47));
       for (int i = 40; i < 70; i++)
       {

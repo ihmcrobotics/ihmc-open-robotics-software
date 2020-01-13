@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,13 +21,13 @@ public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunct
    /**
     * newSensorPose = originalSensorPose * transformToPack;
     */
-   protected void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
+   public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
       transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER); // TODO: improve this.
    }
 
-   protected void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
+   public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
       convertToSensorPoseMultiplier(input, preMultiplier);

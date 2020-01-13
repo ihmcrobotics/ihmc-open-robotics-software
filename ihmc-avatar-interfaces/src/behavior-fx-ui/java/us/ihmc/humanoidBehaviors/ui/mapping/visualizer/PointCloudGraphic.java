@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
+import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 

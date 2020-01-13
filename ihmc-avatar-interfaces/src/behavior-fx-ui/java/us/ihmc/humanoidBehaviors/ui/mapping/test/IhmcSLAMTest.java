@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,6 +14,14 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeICPSLAMFrame;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeICPSLAMFrameOptimizerCostFunction;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.IhmcSurfaceElement;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeICPSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.EnvironmentMappingTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
@@ -250,8 +258,8 @@ public class IhmcSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  false);
 
-      IhmcSLAMFrame frameOne = new IhmcSLAMFrame(messageOne);
-      IhmcSLAMFrame driftedFrameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
+      OctreeICPSLAMFrame frameOne = new OctreeICPSLAMFrame(messageOne);
+      OctreeICPSLAMFrame driftedFrameTwo = new OctreeICPSLAMFrame(frameOne, driftedMessageTwo);
       driftedFrameTwo.computeOctreeInPreviousView(octreeResolution);
       NormalOcTree overlappedOctreeNode = driftedFrameTwo.getOctreeNodesInPreviousView();
 
@@ -315,8 +323,8 @@ public class IhmcSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  false);
 
-      IhmcSLAMFrame frameOne = new IhmcSLAMFrame(messageOne);
-      IhmcSLAMFrame driftedFrameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
+      OctreeICPSLAMFrame frameOne = new OctreeICPSLAMFrame(messageOne);
+      OctreeICPSLAMFrame driftedFrameTwo = new OctreeICPSLAMFrame(frameOne, driftedMessageTwo);
 
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frameOne.getPointCloud(),
                                                                                                frameOne.getSensorPose().getTranslation(), octreeResolution,
@@ -403,8 +411,8 @@ public class IhmcSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  false);
 
-      IhmcSLAMFrame frameOne = new IhmcSLAMFrame(messageOne);
-      IhmcSLAMFrame driftedFrameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
+      OctreeICPSLAMFrame frameOne = new OctreeICPSLAMFrame(messageOne);
+      OctreeICPSLAMFrame driftedFrameTwo = new OctreeICPSLAMFrame(frameOne, driftedMessageTwo);
 
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frameOne.getPointCloud(),
                                                                                                frameOne.getSensorPose().getTranslation(), octreeResolution,
@@ -431,16 +439,16 @@ public class IhmcSLAMTest
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       localViewer.addOctree(surfaceElements, Color.CORAL);
       localViewer.addPlanarRegions(planarRegionsMap);
-      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
-      GradientDescentModule optimizer = new GradientDescentModule(function, IhmcSLAM.initialQuery);
+      OctreeICPSLAMFrameOptimizerCostFunction function = new OctreeICPSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
+      GradientDescentModule optimizer = new GradientDescentModule(function, OctreeICPSLAM.initialQuery);
 
       int maxIterations = 200;
       double convergenceThreshold = 10E-5;
       double optimizerStepSize = -0.1;
       double optimizerPerturbationSize = 0.0001;
 
-      optimizer.setInputLowerLimit(IhmcSLAM.lowerLimit);
-      optimizer.setInputUpperLimit(IhmcSLAM.upperLimit);
+      optimizer.setInputLowerLimit(OctreeICPSLAM.lowerLimit);
+      optimizer.setInputUpperLimit(OctreeICPSLAM.upperLimit);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
       optimizer.setStepSize(optimizerStepSize);
@@ -448,7 +456,7 @@ public class IhmcSLAMTest
       optimizer.setReducingStepSizeRatio(2);
 
       int run = optimizer.run();
-      System.out.println(run + " " + function.getQuery(IhmcSLAM.initialQuery) + " " + optimizer.getOptimalQuery());
+      System.out.println(run + " " + function.getQuery(OctreeICPSLAM.initialQuery) + " " + optimizer.getOptimalQuery());
       TDoubleArrayList optimalInput = optimizer.getOptimalInput();
       System.out.println(optimalInput.get(0) + " " + optimalInput.get(1) + " " + optimalInput.get(2) + " " + optimalInput.get(3));
 
@@ -522,8 +530,8 @@ public class IhmcSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  false);
 
-      IhmcSLAMFrame frameOne = new IhmcSLAMFrame(messageOne);
-      IhmcSLAMFrame driftedFrameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
+      OctreeICPSLAMFrame frameOne = new OctreeICPSLAMFrame(messageOne);
+      OctreeICPSLAMFrame driftedFrameTwo = new OctreeICPSLAMFrame(frameOne, driftedMessageTwo);
 
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frameOne.getPointCloud(),
                                                                                                frameOne.getSensorPose().getTranslation(), octreeResolution,
@@ -550,16 +558,16 @@ public class IhmcSLAMTest
       localViewer.addPointCloud(frameOne.getPointCloud(), Color.RED);
       localViewer.addPointCloud(driftedFrameTwo.getPointCloud(), Color.YELLOW);
       localViewer.addOctree(surfaceElements, Color.CORAL);
-      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
-      GradientDescentModule optimizer = new GradientDescentModule(function, IhmcSLAM.initialQuery);
+      OctreeICPSLAMFrameOptimizerCostFunction function = new OctreeICPSLAMFrameOptimizerCostFunction(surfaceElements, driftedFrameTwo.getInitialSensorPoseToWorld());
+      GradientDescentModule optimizer = new GradientDescentModule(function, OctreeICPSLAM.initialQuery);
 
       int maxIterations = 200;
       double convergenceThreshold = 10E-5;
       double optimizerStepSize = -0.1;
       double optimizerPerturbationSize = 0.0001;
 
-      optimizer.setInputLowerLimit(IhmcSLAM.lowerLimit);
-      optimizer.setInputUpperLimit(IhmcSLAM.upperLimit);
+      optimizer.setInputLowerLimit(OctreeICPSLAM.lowerLimit);
+      optimizer.setInputUpperLimit(OctreeICPSLAM.upperLimit);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
       optimizer.setStepSize(optimizerStepSize);
@@ -567,7 +575,7 @@ public class IhmcSLAMTest
       optimizer.setReducingStepSizeRatio(2);
 
       int run = optimizer.run();
-      System.out.println(run + " " + function.getQuery(IhmcSLAM.initialQuery) + " " + optimizer.getOptimalQuery());
+      System.out.println(run + " " + function.getQuery(OctreeICPSLAM.initialQuery) + " " + optimizer.getOptimalQuery());
       TDoubleArrayList optimalInput = optimizer.getOptimalInput();
       System.out.println(optimalInput.get(0) + " " + optimalInput.get(1) + " " + optimalInput.get(2) + " " + optimalInput.get(3));
 
@@ -639,7 +647,7 @@ public class IhmcSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(new File(stereoPath));
       System.out.println("number of messages " + messages.size());
 
-      IhmcSLAM slam = new IhmcSLAM(doNaiveSLAM);
+      OctreeICPSLAM slam = new OctreeICPSLAM(doNaiveSLAM);
       slam.addFirstFrame(messages.get(0));
       slam.addFrame(messages.get(35));
       slam.addFrame(messages.get(36));

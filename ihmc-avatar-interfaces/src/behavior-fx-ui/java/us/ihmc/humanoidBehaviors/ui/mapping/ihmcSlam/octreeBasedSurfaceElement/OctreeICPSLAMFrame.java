@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,10 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.AbstractSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrame;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
@@ -20,7 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class IhmcSLAMFrame extends SLAMFrame
+public class OctreeICPSLAMFrame extends SLAMFrame
 {
    private NormalOcTree octreeNodesInPreviousView;
    private List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
@@ -30,12 +34,12 @@ public class IhmcSLAMFrame extends SLAMFrame
    private static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
    private static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
 
-   public IhmcSLAMFrame(StereoVisionPointCloudMessage message)
+   public OctreeICPSLAMFrame(StereoVisionPointCloudMessage message)
    {
       super(message);
    }
 
-   public IhmcSLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
+   public OctreeICPSLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
       super(frame, message);
    }
@@ -66,15 +70,15 @@ public class IhmcSLAMFrame extends SLAMFrame
       ConvexPolygon2D window = new ConvexPolygon2D(supplier);
 
       boolean ignorePreviousOrientation = true;
-      RigidBodyTransform previousSensorPoseToWorld;
+      RigidBodyTransformReadOnly previousSensorPoseToWorld;
       if (ignorePreviousOrientation)
       {
-         previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
-         previousSensorPoseToWorld.setRotation(optimizedSensorPoseToWorld.getRotation());
+         previousSensorPoseToWorld = previousFrame.getSensorPose();
+         //previousSensorPoseToWorld.setRotation(optimizedSensorPoseToWorld.getRotation());
       }
       else
       {
-         previousSensorPoseToWorld = previousFrame.optimizedSensorPoseToWorld;
+         previousSensorPoseToWorld = previousFrame.getSensorPose();
       }
 
       Point3D[] pointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
@@ -199,7 +203,7 @@ public class IhmcSLAMFrame extends SLAMFrame
                                       MAXIMUM_ANGLE_OF_SIMILARITY);
       List<IhmcSurfaceElement> surfaceElements = getMergeableSurfaceElements();
 
-      IhmcSLAMFrameOptimizerCostFunction function = new IhmcSLAMFrameOptimizerCostFunction(surfaceElements, getInitialSensorPoseToWorld());
+      OctreeICPSLAMFrameOptimizerCostFunction function = new OctreeICPSLAMFrameOptimizerCostFunction(surfaceElements, getInitialSensorPoseToWorld());
 
       return function;
    }

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.IhmcSurfaceElement;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
