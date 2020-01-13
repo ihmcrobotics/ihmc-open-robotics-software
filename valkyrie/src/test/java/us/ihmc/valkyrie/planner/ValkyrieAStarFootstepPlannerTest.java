@@ -60,7 +60,7 @@ public class ValkyrieAStarFootstepPlannerTest
    @Test
    public void testLargeCinderBlockField()
    {
-      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> p.setFlatGroundLowerThreshold(-0.2));
+      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> {p.setFlatGroundLowerThreshold(-0.2); p.setMaximumStepZ(0.2);});
    }
 
    @Test

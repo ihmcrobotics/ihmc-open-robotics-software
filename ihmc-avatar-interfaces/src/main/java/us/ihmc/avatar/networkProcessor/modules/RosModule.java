@@ -38,7 +38,6 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 
 public class RosModule implements CloseableAndDisposable
 {
-   private static final boolean DEBUG = false;
    private static final boolean CREATE_ROS_ECHO_PUBLISHER = false;
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
@@ -64,6 +63,8 @@ public class RosModule implements CloseableAndDisposable
                     URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, String robotConfigurationDataTopicName,
                     PubSubImplementation pubSubImplementation)
    {
+      LogTools.info("Starting ROS Module");
+
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_ros_node");
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
@@ -117,8 +118,8 @@ public class RosModule implements CloseableAndDisposable
 
       System.out.flush();
       rosMainNode.execute();
-      if (DEBUG)
-         LogTools.debug("Finished creating ROS Module.");
+
+      LogTools.info("Finished starting ROS Module");
    }
 
    private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, AvatarRobotVisionSensorInformation sensorInformation,
