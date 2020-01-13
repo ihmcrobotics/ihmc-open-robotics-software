@@ -40,10 +40,10 @@ public abstract class AbstractSLAM<T extends SLAMFrame>
 
       planarRegionSegmentationParameters.setMinRegionSize(200);
       planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
-      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.05);
       planarRegionSegmentationParameters.setSearchRadius(0.05);
 
-      customRegionMergeParameters.setMaxDistanceFromPlane(0.03);
+      customRegionMergeParameters.setMaxDistanceFromPlane(0.05);
       customRegionMergeParameters.setSearchRadius(0.05);
    }
    
@@ -65,8 +65,12 @@ public abstract class AbstractSLAM<T extends SLAMFrame>
                                                                                                octreeResolution, planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
-
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   {
+      return addFrame(pointCloudMessage, true);
+   }
+   
+   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean updatePlanarRegionsMap)
    {
       SLAMFrame frame = createFrame(getLatestFrame(), pointCloudMessage);
       originalPointCloudMap.add(frame.getOriginalPointCloud());
@@ -82,8 +86,8 @@ public abstract class AbstractSLAM<T extends SLAMFrame>
          optimizedMultiplier = computeOptimizedMultiplier(frame);
       }
 
-      System.out.println();
       System.out.println(optimizedMultiplier);
+      System.out.println();
 
       frame.updateSLAM(optimizedMultiplier);
 
@@ -91,7 +95,7 @@ public abstract class AbstractSLAM<T extends SLAMFrame>
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
 
-      if (!naiveSLAM)
+      if (updatePlanarRegionsMap)
          updatePlanarRegionsMap(frame);
 
       return true;
@@ -99,7 +103,7 @@ public abstract class AbstractSLAM<T extends SLAMFrame>
 
    public abstract RigidBodyTransform computeOptimizedMultiplier(SLAMFrame newFrame);
 
-   public void doNaiveSLAM()
+   public void updatePlanarRegionsSLAM()
    {
       updatePlanarRegionsMap();
    }

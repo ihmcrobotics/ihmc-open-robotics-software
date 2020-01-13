@@ -17,7 +17,9 @@ public class RandomICPSLAMFrame extends SLAMFrame
    @Override
    public SLAMFrameOptimizerCostFunction createCostFunction(AbstractSLAM slam)
    {
-      // TODO Auto-generated method stub
-      return null;
+      RandomICPSLAMFrameOptimizerCostFunction function = new RandomICPSLAMFrameOptimizerCostFunction(getInitialSensorPoseToWorld(),
+                                                                                                     getOriginalPointCloudToSensorPose(), previousFrame,
+                                                                                                     slam.getOctreeResolution());
+      return function;
    }
 }

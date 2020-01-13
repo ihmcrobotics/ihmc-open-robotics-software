@@ -43,7 +43,7 @@ public class IhmcSLAMEndToEndTest
 //      for (int i = 20; i < 60; i++)
          slam.addFrame(messages.get(i));
       if (doNaiveSLAM)
-         slam.doNaiveSLAM();
+         slam.updatePlanarRegionsSLAM();
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
