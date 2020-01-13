@@ -31,6 +31,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
    private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
 
+   private final int publishEvery;
+   private long countForSkippingPublishes = 0;
+
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
     * 
@@ -42,11 +45,17 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param forceSensorData             the data providers for the force sensors.
     * @param timestampHolder             the data provider for the timestamps.
     * @param robotMotionStatusHolder     the data provider for the robot motion status.
+    * @param publishEvery                only publish data every N writes.
     */
-   public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node, MessageTopicNameGenerator publisherTopicNameGenerator,
-                                          FloatingJointStateReadOnly rootJointSensorData, List<? extends OneDoFJointStateReadOnly> jointSensorData,
-                                          List<? extends IMUSensorReadOnly> imuSensorData, List<? extends ForceSensorDataReadOnly> forceSensorData,
-                                          SensorTimestampHolder timestampHolder, RobotMotionStatusHolder robotMotionStatusHolder)
+   public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node,
+                                          MessageTopicNameGenerator publisherTopicNameGenerator,
+                                          FloatingJointStateReadOnly rootJointSensorData,
+                                          List<? extends OneDoFJointStateReadOnly> jointSensorData,
+                                          List<? extends IMUSensorReadOnly> imuSensorData,
+                                          List<? extends ForceSensorDataReadOnly> forceSensorData,
+                                          SensorTimestampHolder timestampHolder,
+                                          RobotMotionStatusHolder robotMotionStatusHolder,
+                                          int publishEvery)
    {
       this.rootJointSensorData = rootJointSensorData;
       this.jointSensorData = jointSensorData;
@@ -54,6 +63,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.forceSensorData = forceSensorData;
       this.timestampHolder = timestampHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
+      this.publishEvery = publishEvery;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, RobotConfigurationData.class, publisherTopicNameGenerator);
@@ -67,6 +77,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    @Override
    public void write()
    {
+      if (countForSkippingPublishes++ % publishEvery != 0)
+         return;
+
       // Write timestamps
       robotConfigurationData.setWallTime(timestampHolder.getWallTime());
       robotConfigurationData.setMonotonicTime(timestampHolder.getMonotonicTime());

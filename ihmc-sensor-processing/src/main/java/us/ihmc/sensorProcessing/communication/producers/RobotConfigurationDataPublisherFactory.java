@@ -36,6 +36,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<List<? extends IMUSensorReadOnly>> imuSensorData = new OptionalFactoryField<>("imuSensorData");
    private final OptionalFactoryField<ForceSensorDataHolderReadOnly> forceSensorDataHolder = new OptionalFactoryField<>("forceSensorDataHolder");
    private final OptionalFactoryField<SensorTimestampHolder> timestampHolder = new OptionalFactoryField<>("timestampHolder");
+   private final OptionalFactoryField<Integer> publishEvery = new OptionalFactoryField<>("publishEvery");
 
    private final RequiredFactoryField<OneDoFJointBasics[]> jointsField = new RequiredFactoryField<>("joints");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
@@ -52,6 +53,7 @@ public class RobotConfigurationDataPublisherFactory
       forceSensorDefinitionsField.setDefaultValue(new ForceSensorDefinition[0]);
 
       robotMotionStatusHolderField.setDefaultValue(new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN));
+      publishEvery.setDefaultValue(1);
    }
 
    /**
@@ -182,6 +184,16 @@ public class RobotConfigurationDataPublisherFactory
    }
 
    /**
+    * Reduce the publish rate of RobotConfigurationData.
+    *
+    * @param publishEvery
+    */
+   public void setPublishEvery(int publishEvery)
+   {
+      this.publishEvery.set(publishEvery);
+   }
+
+   /**
     * Instantiates a new publisher and disposes of this factory.
     * 
     * @return the new publisher ready to use.
@@ -201,7 +213,8 @@ public class RobotConfigurationDataPublisherFactory
                                                                                       imuSensorDataToPublish,
                                                                                       forceSensorDataToPublish,
                                                                                       timestampHolder.get(),
-                                                                                      robotMotionStatusHolderField.get());
+                                                                                      robotMotionStatusHolderField.get(),
+                                                                                      publishEvery.get());
 
       FactoryTools.disposeFactory(this);
 
