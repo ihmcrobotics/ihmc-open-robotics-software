@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -49,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
  *    <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> + c<sub>5</sub></li>
  *    </p>
  */
-public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
+public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 {
    private static boolean verbose = false;
    private static final int maxCapacity = 10;
@@ -114,6 +116,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
    private final List<YoFramePoint3D> comCornerPoints = new ArrayList<>();
    private final List<YoFramePoint3D> vrpCornerPoints = new ArrayList<>();
+
+   private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
+   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
 
    private int numberOfConstraints = 0;
 
@@ -244,8 +250,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       yoSixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex));
       yoSixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
 
-      int numberOfPhases = contactSequence.size();
-      updateCornerPoints(numberOfPhases);
+      updateCornerPoints(contactSequence);
    }
 
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
@@ -289,21 +294,53 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final FramePoint3D fifthCoefficient = new FramePoint3D();
    private final FramePoint3D sixthCoefficient = new FramePoint3D();
 
+   private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
+   private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
+   private final FramePoint3D vrpPositionToThrowAway = new FramePoint3D();
+
    private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
    private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
    private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
    private final FramePoint3D ecmpPositionToThrowAway = new FramePoint3D();
 
-   private void updateCornerPoints(int size)
+   private void updateCornerPoints(List<? extends ContactStateProvider> contactSequence)
    {
+      vrpTrajectoryPool.clear();
+      vrpTrajectories.clear();
+
+      vrpSegments.clear();
+
       boolean verboseBefore = verbose;
       verbose = false;
       int segmentId = 0;
-      for (; segmentId < Math.min(size, maxCapacity + 1); segmentId++)
+      for (; segmentId < Math.min(contactSequence.size(), maxCapacity + 1); segmentId++)
       {
          compute(segmentId, 0.0, comCornerPoints.get(segmentId), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.get(segmentId),
                  dcmVelocityToThrowAway, vrpCornerPoints.get(segmentId), ecmpPositionToThrowAway);
+
+         if (segmentId > 0)
+         {
+            double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
+            FramePoint3DReadOnly startVRPPosition = vrpCornerPoints.get(segmentId - 1);
+            FramePoint3DReadOnly endVRPPosition = vrpCornerPoints.get(segmentId);
+
+            Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+            vrpTrajectories.add(trajectory3D);
+            trajectory3D.setCubic(0.0, duration, startVRPPosition, endVRPPosition);
+
+            vrpSegments.add().set(startVRPPosition, endVRPPosition);
+         }
       }
+
+      double duration = contactSequence.get(segmentId - 1).getTimeInterval().getDuration();
+      compute(segmentId - 1, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway, dcmVelocityToThrowAway,
+              vrpPositionToThrowAway, ecmpPositionToThrowAway);
+      FramePoint3DReadOnly startVRPPosition = vrpCornerPoints.get(segmentId - 1);
+
+      Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+      vrpTrajectories.add(trajectory3D);
+      trajectory3D.setCubic(0.0, duration, startVRPPosition, vrpPositionToThrowAway);
+      vrpSegments.add().set(startVRPPosition, vrpPositionToThrowAway);
 
       for (; segmentId < maxCapacity + 1; segmentId++)
       {
@@ -710,5 +747,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    {
       CoMTrajectoryPlannerTools.constrainCoMJerkToZero(time, omega.getValue(), sequenceId, numberOfConstraints, coefficientMultipliers);
       numberOfConstraints++;
+   }
+
+   @Override
+   public List<Trajectory3D> getVRPTrajectories()
+   {
+      return vrpTrajectories;
    }
 }
