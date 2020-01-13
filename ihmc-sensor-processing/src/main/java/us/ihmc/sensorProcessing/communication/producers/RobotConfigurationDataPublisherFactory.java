@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -25,6 +26,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -36,7 +38,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<List<? extends IMUSensorReadOnly>> imuSensorData = new OptionalFactoryField<>("imuSensorData");
    private final OptionalFactoryField<ForceSensorDataHolderReadOnly> forceSensorDataHolder = new OptionalFactoryField<>("forceSensorDataHolder");
    private final OptionalFactoryField<SensorTimestampHolder> timestampHolder = new OptionalFactoryField<>("timestampHolder");
-   private final OptionalFactoryField<Integer> publishEvery = new OptionalFactoryField<>("publishEvery");
+   private final OptionalFactoryField<Long> publishPeriod = new OptionalFactoryField<>("publishPeriod");
 
    private final RequiredFactoryField<OneDoFJointBasics[]> jointsField = new RequiredFactoryField<>("joints");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
@@ -53,7 +55,7 @@ public class RobotConfigurationDataPublisherFactory
       forceSensorDefinitionsField.setDefaultValue(new ForceSensorDefinition[0]);
 
       robotMotionStatusHolderField.setDefaultValue(new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN));
-      publishEvery.setDefaultValue(1);
+      publishPeriod.setDefaultValue(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
    }
 
    /**
@@ -184,13 +186,13 @@ public class RobotConfigurationDataPublisherFactory
    }
 
    /**
-    * Reduce the publish rate of RobotConfigurationData.
+    * Publish period of RobotConfigurationData.
     *
-    * @param publishEvery
+    * @param publishPeriod
     */
-   public void setPublishEvery(int publishEvery)
+   public void setPublishPeriod(long publishPeriod)
    {
-      this.publishEvery.set(publishEvery);
+      this.publishPeriod.set(publishPeriod);
    }
 
    /**
@@ -214,7 +216,7 @@ public class RobotConfigurationDataPublisherFactory
                                                                                       forceSensorDataToPublish,
                                                                                       timestampHolder.get(),
                                                                                       robotMotionStatusHolderField.get(),
-                                                                                      publishEvery.get());
+                                                                                      publishPeriod.get());
 
       FactoryTools.disposeFactory(this);
 
