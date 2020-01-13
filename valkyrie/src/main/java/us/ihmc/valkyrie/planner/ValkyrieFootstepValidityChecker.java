@@ -1,6 +1,5 @@
 package us.ihmc.valkyrie.planner;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -77,16 +76,7 @@ public class ValkyrieFootstepValidityChecker
                                                                      parameters.getBodyBoxOffset()::getZ);
    }
 
-<<<<<<< HEAD
-   public void initialize()
-   {
-      rejectionReasonMap.clear();
-   }
-
    public boolean checkFootstep(FootstepNode candidateNode, FootstepNode stanceNode)
-=======
-   public boolean isFootstepValid(FootstepNode candidateNode, FootstepNode stanceNode)
->>>>>>> 92e69489dc... Adding ui elements for viewing ideal steps and logging data
    {
       StepRejectionReason rejectionReason = checkFootstepInternal(candidateNode, stanceNode);
 

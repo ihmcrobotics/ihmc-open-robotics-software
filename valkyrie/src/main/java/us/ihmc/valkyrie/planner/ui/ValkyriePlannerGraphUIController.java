@@ -136,7 +136,7 @@ public class ValkyriePlannerGraphUIController
       FootstepNode parentNode = parentStepStack.peek();
       DirectedGraph<FootstepNode> graph = planner.getInternalPlanner().getGraph();
       FootstepNodeSnapper snapper = planner.getSnapper();
-      FootstepNode idealStep = planner.getIterationData().get(parentNode).getIdealStep();
+      FootstepNode idealStep = planner.getIterationData().stream().filter(iterationData -> iterationData.getStanceNode().equals(parentNode)).findFirst().get().getIdealStep();
 
       FootstepNodeSnapData parentSnapData = snapper.getSnapData(parentNode);
       HashSet<GraphEdge<FootstepNode>> edges = graph.getOutgoingEdges().get(parentNode);

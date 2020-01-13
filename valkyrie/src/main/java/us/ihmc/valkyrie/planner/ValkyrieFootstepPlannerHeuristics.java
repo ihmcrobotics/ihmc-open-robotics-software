@@ -5,16 +5,19 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.valkyrie.planner.BodyPathHelper.WaypointData;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 
 public class ValkyrieFootstepPlannerHeuristics
 {
    private final ValkyrieAStarFootstepPlannerParameters parameters;
    private final BodyPathHelper bodyPathHelper;
+   private final ValkyriePlannerEdgeData edgeData;
 
-   public ValkyrieFootstepPlannerHeuristics(ValkyrieAStarFootstepPlannerParameters parameters, BodyPathHelper bodyPathHelper)
+   public ValkyrieFootstepPlannerHeuristics(ValkyrieAStarFootstepPlannerParameters parameters, BodyPathHelper bodyPathHelper, ValkyriePlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.bodyPathHelper = bodyPathHelper;
+      this.edgeData = edgeData;
    }
 
    public double compute(FootstepNode node)
@@ -45,6 +48,8 @@ public class ValkyrieFootstepPlannerHeuristics
          heuristicCost += parameters.getWaypointCost() * remainingWaypoints;
       }
 
-      return parameters.getAstarHeuristicsWeight() * heuristicCost;
+      double weightedHeuristicCost = parameters.getAstarHeuristicsWeight() * heuristicCost;
+      edgeData.setHeuristicCost(weightedHeuristicCost);
+      return weightedHeuristicCost;
    }
 }
