@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,6 +127,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+@Disabled
 public class BipedContinuousPlanningToolboxDataSetTest
 {
    private static final double defaultNominalWidth = 0.3;
@@ -336,6 +338,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    public void testFewDataSets()
    {
@@ -352,6 +355,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
+   @Disabled
    @Test
    @Tag("avatar-interfaces-slow")
    public void testAllDataSets()
