@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
+public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
 {
    private double nominalCoMHeight;
 
@@ -238,6 +238,7 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       return desiredECMPPosition;
    }
 
+   @Override
    public List<Trajectory3D> getVRPTrajectories()
    {
       return vrpTrajectories;
