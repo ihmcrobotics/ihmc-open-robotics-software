@@ -174,7 +174,7 @@ public class LQRMomentumController
          Trajectory3D relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), finalVRPState.get(2, 0));
+         relativeTrajectory.offsetTrajectoryPosition(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
       }
    }
 
