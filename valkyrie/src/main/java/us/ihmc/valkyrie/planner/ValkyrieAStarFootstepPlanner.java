@@ -68,7 +68,7 @@ public class ValkyrieAStarFootstepPlanner
 
    private final ValkyriePlannerEdgeData edgeData = new ValkyriePlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
-   private final HashMap<FootstepNode, ValkyriePlannerIterationData> iterationData = new HashMap<>();
+   private final List<ValkyriePlannerIterationData> iterationData = new ArrayList<>();
 
    private Status status = null;
    private FootstepNode endNode = null;
@@ -107,11 +107,15 @@ public class ValkyrieAStarFootstepPlanner
 
       stepValidityChecker = new ValkyrieFootstepValidityChecker(parameters, footPolygons, snapper, edgeData);
       idealStepCalculator = new ValkyrieIdealStepCalculator(parameters, bodyPathHelper, stepValidityChecker);
-      heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, bodyPathHelper);
-      this.stepCost = new ValkyrieStepCost(parameters, snapper, heuristics, idealStepCalculator::computeIdealStep, footPolygons);
+      heuristics = new ValkyrieFootstepPlannerHeuristics(parameters, bodyPathHelper, edgeData);
+      stepCost = new ValkyrieStepCost(parameters, snapper, heuristics, idealStepCalculator::computeIdealStep, footPolygons, edgeData);
 
       planner = new AStarPathPlanner<>(nodeExpansion::expandNode, stepValidityChecker::checkFootstep, stepCost::compute, heuristics::compute);
-      planner.getGraph().setGraphExpansionCallback(edge -> edgeDataMap.put(edge, edgeData.getCopyAndClear()));
+      planner.getGraph().setGraphExpansionCallback(edge ->
+                                                   {
+                                                      edgeData.setCostFromStart(planner.getGraph().getCostFromStart(edge.getEndNode()));
+                                                      edgeDataMap.put(edge, edgeData.getCopyAndClear());
+                                                   });
    }
 
    public void handleRequestPacket(ValkyrieFootstepPlanningRequestPacket requestPacket)
@@ -179,7 +183,6 @@ public class ValkyrieAStarFootstepPlanner
          }
 
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
-         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
          if (iterationData.getParentNode() == null)
@@ -197,6 +200,8 @@ public class ValkyrieAStarFootstepPlanner
             reportStatus();
             stopwatch.lap();
          }
+
+         recordIterationData(iterationData);
       }
 
       reportStatus();
@@ -210,7 +215,7 @@ public class ValkyrieAStarFootstepPlanner
       iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
       iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
       loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
-      this.iterationData.put(iterationData.getParentNode(), loggedData);
+      this.iterationData.add(loggedData);
    }
 
    private void reportStatus()
@@ -411,7 +416,7 @@ public class ValkyrieAStarFootstepPlanner
       return edgeDataMap;
    }
 
-   public HashMap<FootstepNode, ValkyriePlannerIterationData> getIterationData()
+   public List<ValkyriePlannerIterationData> getIterationData()
    {
       return iterationData;
    }

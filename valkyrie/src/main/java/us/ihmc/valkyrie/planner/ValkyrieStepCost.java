@@ -9,6 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 
 import java.util.function.UnaryOperator;
 
@@ -24,17 +25,21 @@ public class ValkyrieStepCost implements FootstepCost
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform candidateNodeTransform = new RigidBodyTransform();
 
+   private ValkyriePlannerEdgeData edgeData;
+
    public ValkyrieStepCost(ValkyrieAStarFootstepPlannerParameters parameters,
                            FootstepNodeSnapperReadOnly snapper,
                            ValkyrieFootstepPlannerHeuristics heuristics,
                            UnaryOperator<FootstepNode> idealStepCalculator,
-                           SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
+                           SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
+                           ValkyriePlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.heuristics = heuristics;
       this.idealStepCalculator = idealStepCalculator;
       this.footPolygons = footPolygons;
+      this.edgeData = edgeData;
    }
 
    @Override
@@ -77,6 +82,7 @@ public class ValkyrieStepCost implements FootstepCost
       else
          cost = Math.max(0.0, cost - deltaHeuristics);
 
+      edgeData.setEdgeCost(cost);
       return cost;
    }
 
