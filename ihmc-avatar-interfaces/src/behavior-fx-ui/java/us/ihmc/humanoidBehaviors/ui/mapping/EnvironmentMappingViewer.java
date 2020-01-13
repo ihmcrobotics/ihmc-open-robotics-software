@@ -18,7 +18,7 @@ public class EnvironmentMappingViewer extends Application
    private static final boolean SHOW_PLANAR_REGIONS = false;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
 
-   private static final boolean BUILD_PLANAR_REGIONS = true;
+   private static final boolean BUILD_PLANAR_REGIONS = false;
 
    private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegion";
    private static final String POINT_CLOUD_FILE_NAME = "PointCloud";

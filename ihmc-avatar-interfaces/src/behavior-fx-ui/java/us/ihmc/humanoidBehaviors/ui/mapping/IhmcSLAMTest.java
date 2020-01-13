@@ -660,7 +660,7 @@ public class IhmcSLAMTest
       slam.addFrame(messages.get(54));
 
       if (doNaiveSLAM)
-         slam.doNaiveSLAM();
+         slam.updatePlanarRegionsSLAM();
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 

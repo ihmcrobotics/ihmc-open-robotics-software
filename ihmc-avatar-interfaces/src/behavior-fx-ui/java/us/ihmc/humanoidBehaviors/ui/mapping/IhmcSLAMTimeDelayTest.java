@@ -23,6 +23,131 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 
 public class IhmcSLAMTimeDelayTest
 {
+   private RigidBodyTransform createRandomDriftedTransform(Random random, double positionBound, double angleBoundDegree)
+   {
+      RigidBodyTransform randomTransform = new RigidBodyTransform();
+      int positionAxis = random.nextInt(2);
+      int angleAxis = random.nextInt(2);
+
+      double randomAngle = 2 * Math.toRadians(angleBoundDegree) * (random.nextDouble() - 0.5);
+      if (angleAxis == 0)
+         randomTransform.appendRollRotation(randomAngle);
+      if (angleAxis == 1)
+         randomTransform.appendPitchRotation(randomAngle);
+      else
+         randomTransform.appendYawRotation(randomAngle);
+
+      double randomTranslation = 2 * positionBound * (random.nextDouble() - 0.5);
+      if (positionAxis == 0)
+         randomTransform.appendTranslation(randomTranslation, 0.0, 0.0);
+      if (positionAxis == 1)
+         randomTransform.appendTranslation(0.0, randomTranslation, 0.0);
+      else
+         randomTransform.appendTranslation(0.0, 0.0, randomTranslation);
+
+      System.out.println("positionAxis " + positionAxis + " " + randomTranslation);
+      System.out.println("angleAxis " + angleAxis + " " + Math.toDegrees(randomAngle));
+
+      return randomTransform;
+   }
+
+   @Test
+   public void testOptimization()
+   {
+      double movingForward = 0.1;
+      double fixedHeight = 1.0;
+
+      double sensorPitchAngle = Math.toRadians(90.0 + 70.0);
+      double stairHeight = 0.3;
+      double stairWidth = 0.5;
+      double stairLength = 0.25;
+
+      RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
+      sensorPoseOne.setTranslation(0.0, 0.0, fixedHeight);
+      sensorPoseOne.appendPitchRotation(sensorPitchAngle);
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne,
+                                                                                                                          new RigidBodyTransform(), stairHeight,
+                                                                                                                          stairWidth, stairLength, stairLength,
+                                                                                                                          true);
+
+      double translationX = movingForward / 2;
+      double translationY = 0.0;
+      double translationZ = 0.0;
+      double rotateY = Math.toRadians(0.0);
+      RigidBodyTransform preMultiplier = new RigidBodyTransform();
+      preMultiplier.setTranslation(translationX, translationY, translationZ);
+      preMultiplier.appendPitchRotation(rotateY);
+
+      RigidBodyTransform sensorPoseTwo = new RigidBodyTransform();
+      sensorPoseTwo.setTranslation(movingForward, 0.0, fixedHeight);
+      sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
+
+      RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.05, 5.0);
+      preMultiplier.multiply(randomTransformer);
+      sensorPoseTwo.multiply(randomTransformer);
+
+      StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
+                                                                                                                                 stairHeight, stairWidth,
+                                                                                                                                 stairLength - movingForward,
+                                                                                                                                 stairLength + movingForward,
+                                                                                                                                 false);
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+      RandomICPSLAM slam = new RandomICPSLAM();
+
+      slam.addFirstFrame(messageOne);
+      slam.addFrame(driftedMessageTwo);
+
+      slamViewer.addPointCloud(slam.getSLAMFrame(0).getOriginalPointCloud(), Color.BLUE);
+      slamViewer.addPointCloud(slam.getSLAMFrame(1).getOriginalPointCloud(), Color.BLACK);
+      slamViewer.addSensorPose(slam.getSLAMFrame(1).getOriginalSensorPose(), Color.BLACK);
+
+      slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
+      slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
+
+      slamViewer.addPointCloud(slam.staticPoints, Color.RED);
+
+      slamViewer.start("");
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testRandomICPSLAM()
+   {
+      String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      RandomICPSLAM slam = new RandomICPSLAM(false);
+      slam.addFirstFrame(messages.get(0));
+      //for (int i = 1; i < messages.size(); i++)
+      for (int i = 20; i < 60; i++)
+      {
+         System.out.println(" ## add frame " + i);
+         slam.addFrame(messages.get(i), false);
+      }
+
+      //slam.updatePlanarRegionsSLAM();
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
+      for (int i = 0; i < slam.getOriginalPointCloudMap().size(); i++)
+      {
+         //                  slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.BLACK);
+         //                  slamViewer.addSensorPose(slam.getOriginalSensorPoses().get(i), Color.BLACK);
+      }
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+      {
+         slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
+         slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
+      }
+      //slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+
+      slamViewer.start("EndToEnd");
+      ThreadTools.sleepForever();
+   }
+
    @Test
    public void testFrameDistanceComputation()
    {
@@ -80,15 +205,15 @@ public class IhmcSLAMTimeDelayTest
             Point3D selectedPoint = pointCloud[selectedIndex];
 
             inverseTransformer.transform(selectedPoint, convertedPoint);
-            if(convertedPoint.getZ() > 0.7)
+            if (convertedPoint.getZ() > 0.7)
             {
                if (-0.1 < convertedPoint.getX() && convertedPoint.getX() < 0.1)
                {
                   if (-0.1 < convertedPoint.getY() && convertedPoint.getY() < 0.1)
                   {
-                     indexOfSourcePoints.add(selectedIndex);      
+                     indexOfSourcePoints.add(selectedIndex);
                   }
-               }   
+               }
             }
          }
       }

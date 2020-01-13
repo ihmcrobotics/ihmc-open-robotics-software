@@ -82,7 +82,7 @@ public abstract class SLAMFrame
    private void update()
    {
       optimizedSensorPoseToWorld.set(sensorPoseToWorld);
-      optimizedSensorPoseToWorld.preMultiply(slamTransformer);
+      optimizedSensorPoseToWorld.multiply(slamTransformer); //TODO: fix for IhmcSLAMFrame. IhmcSLAMFrame works with preMultiply
 
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
       {
@@ -94,6 +94,11 @@ public abstract class SLAMFrame
    public Point3DReadOnly[] getOriginalPointCloud()
    {
       return originalPointCloudToWorld;
+   }
+   
+   public Point3DReadOnly[] getOriginalPointCloudToSensorPose()
+   {
+      return pointCloudToSensorFrame;
    }
 
    public RigidBodyTransformReadOnly getOriginalSensorPose()
