@@ -56,8 +56,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static boolean verbose = false;
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean VISUALIZE = true;
-   private static final double POINT_SIZE = 0.005;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -113,9 +111,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final YoFramePoint3D yoFifthCoefficient = new YoFramePoint3D("comFifthCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoSixthCoefficient = new YoFramePoint3D("comSixthCoefficient", worldFrame, registry);
 
-   private final List<YoFramePoint3D> dcmCornerPoints = new ArrayList<>();
-   private final List<YoFramePoint3D> comCornerPoints = new ArrayList<>();
-   private final List<YoFramePoint3D> vrpCornerPoints = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
 
    private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
@@ -123,57 +120,21 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private int numberOfConstraints = 0;
 
-   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
-   {
-      this(gravityZ, nominalCoMHeight, parentRegistry, null);
-   }
+   private CornerPointViewer viewer = null;
 
-   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry,
-                               YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
 
       comHeight.addVariableChangedListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
 
-      for (int i = 0; i < maxCapacity + 1; i++)
-      {
-         dcmCornerPoints.add(new YoFramePoint3D("dcmCornerPoint" + i, worldFrame, registry));
-         comCornerPoints.add(new YoFramePoint3D("comCornerPoint" + i, worldFrame, registry));
-         vrpCornerPoints.add(new YoFramePoint3D("vrpCornerPoint" + i, worldFrame, registry));
-      }
-
-      String packageName = "dcmPlanner";
-      //      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
-      ArtifactList artifactList = new ArtifactList(packageName);
-
-      for (int i = 0; i < dcmCornerPoints.size(); i++)
-      {
-         YoFramePoint3D dcmCornerPoint = dcmCornerPoints.get(i);
-         YoFramePoint3D comCornerPoint = comCornerPoints.get(i);
-         YoFramePoint3D vrpCornerPoint = vrpCornerPoints.get(i);
-         YoGraphicPosition dcmCornerPointViz = new YoGraphicPosition("DCMCornerPoint" + i, dcmCornerPoint, POINT_SIZE, YoAppearance.Blue(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
-         YoGraphicPosition comCornerPointViz = new YoGraphicPosition("CoMCornerPoint" + i, comCornerPoint, POINT_SIZE, YoAppearance.Black(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
-         YoGraphicPosition vrpCornerPointViz = new YoGraphicPosition("VRPCornerPoint" + i, vrpCornerPoint, POINT_SIZE, YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
-         //         graphicsList.add(dcmCornerPointViz);
-         //         graphicsList.add(comCornerPointViz);
-
-         artifactList.add(dcmCornerPointViz.createArtifact());
-         artifactList.add(comCornerPointViz.createArtifact());
-         artifactList.add(vrpCornerPointViz.createArtifact());
-      }
-
-      artifactList.setVisible(VISUALIZE);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         yoGraphicsListRegistry.registerArtifactList(artifactList);
-      }
-
       parentRegistry.addChild(registry);
+   }
+
+   public void setCornerPointViewer(CornerPointViewer viewer)
+   {
+      this.viewer = viewer;
    }
 
    /** {@inheritDoc} */
@@ -251,6 +212,13 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       yoSixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
 
       updateCornerPoints(contactSequence);
+
+      if (viewer != null)
+      {
+         viewer.updateDCMCornerPoints(dcmCornerPoints);
+         viewer.updateCoMCornerPoints(comCornerPoints);
+         viewer.updateVRPWaypoints(vrpSegments);
+      }
    }
 
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
@@ -286,21 +254,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
 
-
-   private final FramePoint3D firstCoefficient = new FramePoint3D();
-   private final FramePoint3D secondCoefficient = new FramePoint3D();
-   private final FramePoint3D thirdCoefficient = new FramePoint3D();
-   private final FramePoint3D fourthCoefficient = new FramePoint3D();
-   private final FramePoint3D fifthCoefficient = new FramePoint3D();
-   private final FramePoint3D sixthCoefficient = new FramePoint3D();
-
    private final FramePoint3D comPositionToThrowAway = new FramePoint3D();
    private final FramePoint3D dcmPositionToThrowAway = new FramePoint3D();
-   private final FramePoint3D vrpPositionToThrowAway = new FramePoint3D();
 
    private final FrameVector3D comVelocityToThrowAway = new FrameVector3D();
    private final FrameVector3D comAccelerationToThrowAway = new FrameVector3D();
    private final FrameVector3D dcmVelocityToThrowAway = new FrameVector3D();
+   private final FramePoint3D vrpStartPosition = new FramePoint3D();
+   private final FramePoint3D vrpEndPosition = new FramePoint3D();
    private final FramePoint3D ecmpPositionToThrowAway = new FramePoint3D();
 
    private void updateCornerPoints(List<? extends ContactStateProvider> contactSequence)
@@ -308,46 +269,28 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       vrpTrajectoryPool.clear();
       vrpTrajectories.clear();
 
+      comCornerPoints.clear();
+      dcmCornerPoints.clear();
       vrpSegments.clear();
 
       boolean verboseBefore = verbose;
       verbose = false;
-      int segmentId = 0;
-      for (; segmentId < Math.min(contactSequence.size(), maxCapacity + 1); segmentId++)
+      for (int segmentId = 0; segmentId < Math.min(contactSequence.size(), maxCapacity + 1); segmentId++)
       {
-         compute(segmentId, 0.0, comCornerPoints.get(segmentId), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.get(segmentId),
-                 dcmVelocityToThrowAway, vrpCornerPoints.get(segmentId), ecmpPositionToThrowAway);
+         double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
 
-         if (segmentId > 0)
-         {
-            double duration = contactSequence.get(segmentId).getTimeInterval().getDuration();
-            FramePoint3DReadOnly startVRPPosition = vrpCornerPoints.get(segmentId - 1);
-            FramePoint3DReadOnly endVRPPosition = vrpCornerPoints.get(segmentId);
+         compute(segmentId, 0.0, comCornerPoints.add(), comVelocityToThrowAway, comAccelerationToThrowAway, dcmCornerPoints.add(),
+                 dcmVelocityToThrowAway, vrpStartPosition, ecmpPositionToThrowAway);
+         compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
+                 dcmVelocityToThrowAway, vrpEndPosition, ecmpPositionToThrowAway);
 
-            Trajectory3D trajectory3D = vrpTrajectoryPool.add();
-            vrpTrajectories.add(trajectory3D);
-            trajectory3D.setCubic(0.0, duration, startVRPPosition, endVRPPosition);
+         Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+         trajectory3D.setLinear(0.0, duration, vrpStartPosition, vrpEndPosition);
+         vrpTrajectories.add(trajectory3D);
 
-            vrpSegments.add().set(startVRPPosition, endVRPPosition);
-         }
+         vrpSegments.add().set(vrpStartPosition, vrpEndPosition);
       }
 
-      double duration = contactSequence.get(segmentId - 1).getTimeInterval().getDuration();
-      compute(segmentId - 1, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway, dcmVelocityToThrowAway,
-              vrpPositionToThrowAway, ecmpPositionToThrowAway);
-      FramePoint3DReadOnly startVRPPosition = vrpCornerPoints.get(segmentId - 1);
-
-      Trajectory3D trajectory3D = vrpTrajectoryPool.add();
-      vrpTrajectories.add(trajectory3D);
-      trajectory3D.setCubic(0.0, duration, startVRPPosition, vrpPositionToThrowAway);
-      vrpSegments.add().set(startVRPPosition, vrpPositionToThrowAway);
-
-      for (; segmentId < maxCapacity + 1; segmentId++)
-      {
-         comCornerPoints.get(segmentId).setToNaN();
-         dcmCornerPoints.get(segmentId).setToNaN();
-         vrpCornerPoints.get(segmentId).setToNaN();
-      }
       verbose = verboseBefore;
    }
 
@@ -363,6 +306,13 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          LogTools.info("At time " + timeInPhase + ", Desired DCM = " + desiredDCMPosition + ", Desired CoM = " + desiredCoMPosition);
       }
    }
+
+   private final FramePoint3D firstCoefficient = new FramePoint3D();
+   private final FramePoint3D secondCoefficient = new FramePoint3D();
+   private final FramePoint3D thirdCoefficient = new FramePoint3D();
+   private final FramePoint3D fourthCoefficient = new FramePoint3D();
+   private final FramePoint3D fifthCoefficient = new FramePoint3D();
+   private final FramePoint3D sixthCoefficient = new FramePoint3D();
 
    @Override
    public void compute(int segmentId, double timeInPhase, FixedFramePoint3DBasics comPositionToPack, FixedFrameVector3DBasics comVelocityToPack,
