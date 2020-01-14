@@ -101,14 +101,10 @@ public class RandomICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerC
       double totalDistance = 0;
       int numberOfInliers = 0;
       Point3D newSourcePointToWorld = new Point3D();
-      int index = 0;
       for (Point3DReadOnly sourcePoint : sourcePointsToSensor)
       {
          newSourcePointToWorld.set(sourcePoint);
          newSensorPose.transform(newSourcePointToWorld);
-
-         staticPoints[index].set(newSourcePointToWorld);
-         index++;
 
          int searchingSize = initialSearchingSize;
          double distance = -1.0;
