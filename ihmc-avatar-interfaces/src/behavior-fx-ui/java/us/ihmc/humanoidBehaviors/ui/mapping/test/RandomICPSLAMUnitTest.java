@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -9,11 +10,14 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAMFrame;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP.RICPSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
@@ -21,36 +25,74 @@ import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoad
 public class RandomICPSLAMUnitTest
 {
    @Test
-   public void testComputeDistance()
+   public void testComputeOverlappedArea()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.02;
-      RICPSLAM slam = new RICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(49));
+
+      IhmcSLAMFrame previousFrame = new IhmcSLAMFrame(messages.get(49));
+      IhmcSLAMFrame frame = new IhmcSLAMFrame(previousFrame, messages.get(50));
+
+      List<Point3D> pointsOutOfPreviousWindow = new ArrayList<>();
+      List<Point3D> pointsInPreviousWindow = new ArrayList<>();
+
+      double windowWidth = 1.0;
+      double windowHeight = 0.4;
+      double windowDepth = 0.5;
+      ConvexPolygon2D previousWindow = new ConvexPolygon2D();
+      previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
+      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2);
+      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2);
+      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
+      previousWindow.update();
+
+      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.getInitialSensorPoseToWorld();
+      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToSensorPose(previousSensorPoseToWorld, frame.getOriginalPointCloud());
+
+      int numberOfPointsInPreviousView = 0;
+      for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
+      {
+         Point3D pointInPreviousView = convertedPointsToPreviousSensorPose[i];
+         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()) && pointInPreviousView.getZ() > windowDepth)
+         {
+            previousSensorPoseToWorld.transform(pointInPreviousView);
+            pointsInPreviousWindow.add(new Point3D(pointInPreviousView));
+            numberOfPointsInPreviousView++;
+         }
+         else
+         {
+            previousSensorPoseToWorld.transform(pointInPreviousView);
+            pointsOutOfPreviousWindow.add(new Point3D(pointInPreviousView));
+         }
+      }
+      System.out.println(convertedPointsToPreviousSensorPose.length + " " + numberOfPointsInPreviousView);
+      Point3D[] inliers = new Point3D[pointsInPreviousWindow.size()];
+      Point3D[] outliers = new Point3D[pointsOutOfPreviousWindow.size()];
+      for (int i = 0; i < inliers.length; i++)
+      {
+         inliers[i] = new Point3D(pointsInPreviousWindow.get(i));
+      }
+      for (int i = 0; i < outliers.length; i++)
+      {
+         outliers[i] = new Point3D(pointsOutOfPreviousWindow.get(i));
+      }
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
-      slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(0), Color.BLUE);
+      slamViewer.addSensorPose(previousFrame.getSensorPose(), Color.BLUE);
+      slamViewer.addSensorPose(frame.getSensorPose(), Color.GREEN);
+      slamViewer.addPointCloud(previousFrame.getPointCloud(), Color.BLUE);
+      slamViewer.addPointCloud(frame.getPointCloud(), Color.GREEN);
       
-      Point3D[] ruler = new Point3D[150];
-      for (int i = 0; i < 150; i++)
-         ruler[i] = new Point3D((double) i * 0.01, 0.0, 0.05);
-      slamViewer.addPointCloud(ruler, Color.BLACK);
+      slamViewer.addPointCloud(inliers, Color.RED);
+      slamViewer.addPointCloud(outliers, Color.BLACK);
       
-      Point3D[] point = new Point3D[1];
-      point[0] = new Point3D(0.8, 0.0, 0.05);
-      double distance = IhmcSLAMTools.computeDistanceToPointCloud(slam.getOriginalPointCloudMap().get(0), point[0]);
-      System.out.println(distance);
-      slamViewer.addPointCloud(point, Color.RED);
-      slamViewer.addPointCloud(IhmcSLAMTools.dummyPoint, Color.GREEN);
-      
-      slamViewer.start("testComputeDistance");
+      slamViewer.start("testComputeOverlappedArea");
       ThreadTools.sleepForever();
    }
-   
+
    @Test
    public void testOptimizationForSimulatedPointCloud()
    {
@@ -123,21 +165,18 @@ public class RandomICPSLAMUnitTest
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.005;
+      double octreeResolution = 0.01;
       RICPSLAM slam = new RICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(49));
       slam.addFrame(messages.get(50));
-      //      slam.addFrame(messages.get(51));
-      //      slam.addFrame(messages.get(52));
-      //      slam.addFrame(messages.get(53));
-      //      slam.addFrame(messages.get(54));
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
       slamViewer.addSensorPose(slam.getSensorPoses().get(0), Color.BLUE);
       slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.GREEN);
-      
+
       slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
+      slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
       slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
 
       Point3D[] sourcePoints = new Point3D[slam.sourcePointsToWorld.size()];
