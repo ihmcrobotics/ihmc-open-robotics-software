@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -32,6 +33,29 @@ public abstract class IhmcSLAM implements IhmcSLAMInterface
    protected final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
    protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+   
+   private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
+
+   protected static final TDoubleArrayList INITIAL_QUERY = new TDoubleArrayList();
+   protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
+   protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
+
+   static
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         INITIAL_QUERY.add(0.0);
+         LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
+         UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
+      }
+      for (int i = 0; i < 3; i++)
+      {
+         INITIAL_QUERY.add(0.0);
+         LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
+         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+      }
+   }
 
    public IhmcSLAM(double octreeResolution)
    {

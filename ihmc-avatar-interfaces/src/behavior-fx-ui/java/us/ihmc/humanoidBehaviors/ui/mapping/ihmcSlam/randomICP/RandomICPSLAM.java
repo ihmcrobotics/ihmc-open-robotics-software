@@ -46,14 +46,10 @@ public class RandomICPSLAM extends AbstractSLAM<RandomICPSLAMFrame>
       super(doNaiveSLAM, OCTREE_RESOLUTION);
    }
 
-   public Point3D[] staticPoints;
-
    @Override
    public RigidBodyTransform computeOptimizedMultiplier(SLAMFrame newFrame)
    {
       SLAMFrameOptimizerCostFunction costFunction = newFrame.createCostFunction(this);
-
-      staticPoints = costFunction.staticPoints;
 
       GradientDescentModule optimizer = new GradientDescentModule(costFunction, initialQuery);
 

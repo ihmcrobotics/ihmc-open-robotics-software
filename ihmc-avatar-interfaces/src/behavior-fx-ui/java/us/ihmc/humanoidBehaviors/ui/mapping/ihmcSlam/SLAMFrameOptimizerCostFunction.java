@@ -8,14 +8,11 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction
 {
-   private static final double ANGLE_SCALER = 0.2; //TODO:
+   private static final double ANGLE_SCALER = 0.1; //TODO:
    protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
-   public Point3D[] staticPoints = new Point3D[200];
    public SLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
       this.transformWorldToSensorPose = transformWorldToSensorPose;
-      for (int i = 0; i < staticPoints.length; i++)
-         staticPoints[i] = new Point3D();
    }
 
    /**

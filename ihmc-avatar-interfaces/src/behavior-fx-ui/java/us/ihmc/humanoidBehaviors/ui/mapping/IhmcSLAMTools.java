@@ -411,4 +411,24 @@ public class IhmcSLAMTools
 
       return minDistance;
    }
+
+   public static Point3D[] dummyPoint = new Point3D[1];
+
+   public static double computeDistanceToPointCloud(Point3DReadOnly[] pointCloud, Point3DReadOnly point)
+   {
+      dummyPoint[0] = new Point3D();
+
+      double minDistance = Double.MAX_VALUE;
+      for (int i = 0; i < pointCloud.length; i++)
+      {
+         double distance = pointCloud[i].distance(point);
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+            dummyPoint[0].set(pointCloud[i]);
+         }
+      }
+
+      return minDistance;
+   }
 }

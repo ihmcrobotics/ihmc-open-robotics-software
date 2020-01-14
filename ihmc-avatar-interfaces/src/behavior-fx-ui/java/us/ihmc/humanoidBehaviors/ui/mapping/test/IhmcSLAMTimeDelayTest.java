@@ -110,8 +110,6 @@ public class IhmcSLAMTimeDelayTest
       slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
-      slamViewer.addPointCloud(slam.staticPoints, Color.RED);
-
       slamViewer.start("");
 
       ThreadTools.sleepForever();
