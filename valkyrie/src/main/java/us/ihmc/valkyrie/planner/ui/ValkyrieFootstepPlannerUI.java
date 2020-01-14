@@ -121,13 +121,6 @@ public class ValkyrieFootstepPlannerUI extends Application
       primaryStage.setScene(mainScene);
       primaryStage.show();
 
-      valkyriePlannerDashboardController.setDoPlanningCallback(this::submitPlanningRequest);
-      valkyriePlannerDashboardController.setHaltPlanningCallback(planner::halt);
-      valkyriePlannerDashboardController.setDataSetSelectionCallback(name ->
-                                                                     {
-                                                                        setupWithDataSet(name);
-                                                                        graphicsViewer.reset();
-                                                                     });
       valkyriePlannerDashboardController.setParameters(planner.getParameters());
 
       graphicsViewer.setGoalPoseProperties(valkyriePlannerDashboardController.getGoalX().getValueFactory().valueProperty(),
@@ -155,9 +148,8 @@ public class ValkyrieFootstepPlannerUI extends Application
                                                   valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
       waypointPoseEditor.start();
 
-      valkyriePlannerDashboardController.setGoalPlacementCallback(goalPoseEditor::enable);
-      valkyriePlannerDashboardController.setAddWaypointCallback(() -> {graphicsViewer.addWaypoint(); waypointPoseEditor.enable();});
-      valkyriePlannerDashboardController.setClearWaypointsCallback(graphicsViewer::clearWaypoints);
+      valkyriePlannerDashboardController.setMessager(messager);
+      valkyriePlannerDashboardController.setPlanner(planner);
 
       valkyriePlannerGraphUIController.setup();
       valkyriePlannerGraphUIController.setPlanner(planner);
@@ -170,17 +162,20 @@ public class ValkyrieFootstepPlannerUI extends Application
       planner.addStatusCallback(graphicsViewer::processPlanningStatus);
       planner.addStatusCallback(planningResult::set);
       planner.addStatusCallback(valkyriePlannerDashboardController::updatePlanningStatus);
-      planner.addStatusCallback(result ->
-                                {
-                                   if (result.getPlannerStatus() != Status.PLANNING.toByte())
-                                      valkyriePlannerDashboardController.setTimerEnabled(false);
-                                });
+      planner.addStatusCallback(result -> valkyriePlannerDashboardController.setTimerEnabled(result.getPlannerStatus() == Status.PLANNING.toByte()));
 
       subScene.setOnKeyPressed(keyEvent ->
                                {
                                   if (keyEvent.getCode() == KeyCode.ESCAPE)
                                      pausePublisher.publish(new PauseWalkingMessage());
                                });
+
+
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.doPlanning, request -> new Thread(this::submitPlanningRequest).start());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.haltPlanning, halt -> planner.halt());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.placeGoal, placeGoal -> goalPoseEditor.enable());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.addWaypoint, addWaypoint -> waypointPoseEditor.enable());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.dataSetSelected, this::setupWithDataSet);
 
       robotVisualizer.getRootNode().setMouseTransparent(true);
       showRobot.setOnAction(event -> robotVisualizer.getRootNode().setVisible(showRobot.isSelected()));
@@ -257,8 +252,8 @@ public class ValkyrieFootstepPlannerUI extends Application
             graphicsViewer.reset();
       });
 
-      valkyriePlannerDashboardController.setSendPlanningResultCallback(() -> footstepPublisher.publish(planningResult.get().getFootstepDataList()));
-      valkyriePlannerDashboardController.setStopWalkingCallback(() -> pausePublisher.publish(new PauseWalkingMessage()));
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.sendPlanningResult, send -> footstepPublisher.publish(planningResult.get().getFootstepDataList()));
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.stopWalking, send -> pausePublisher.publish(new PauseWalkingMessage()));
    }
 
    public void stop()

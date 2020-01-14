@@ -108,13 +108,11 @@
                         <Spinner fx:id="waypointYaw" editable="true" prefWidth="95.0"/>
                     </HBox>
 
+                    <Label text="Load data set:" prefWidth="120.0" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.halignment="CENTER" textAlignment="CENTER"/>
+                    <ComboBox fx:id="dataSetSelector" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.halignment="CENTER" GridPane.columnSpan="4"/>
+                    <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
+                    <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
                 </GridPane>
-
-                <Region prefHeight="15" />
-
-                <Label text="Load data set:" />
-                <ComboBox fx:id="dataSetSelector" prefWidth="400.0" GridPane.halignment="CENTER" />
-
             </children>
         </VBox>
 

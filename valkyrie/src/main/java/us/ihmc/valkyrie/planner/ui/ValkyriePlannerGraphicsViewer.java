@@ -87,6 +87,10 @@ public class ValkyriePlannerGraphicsViewer extends AnimationTimer
       {
          waypointGraphics[i] = new FootstepPairGraphic(Color.GRAY);
       }
+
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.addWaypoint, addWaypoint -> addWaypoint());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.clearWaypoints, clear -> clearWaypoints());
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.dataSetSelected, clear -> reset());
    }
 
    @Override
