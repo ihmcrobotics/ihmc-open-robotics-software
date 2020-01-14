@@ -122,6 +122,9 @@ public class ValkyriePlannerGraphUIController
 
    public void reset()
    {
+      ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
+      logger.logSession();
+
       parentStepStack.clear();
       selectedRow.set(null);
 
@@ -187,9 +190,6 @@ public class ValkyriePlannerGraphUIController
 
       debugChildStepTable.getSelectionModel().select(0);
       debugChildStepTable.getFocusModel().focus(0);
-
-      ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
-      logger.logSession();
    }
 
    public void stepInto()
