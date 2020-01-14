@@ -1,0 +1,185 @@
+package us.ihmc.valkyrie.planner.log;
+
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacketPubSubType;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
+import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatusPubSubType;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+public class ValkyriePlannerLogger
+{
+   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+
+   private final ValkyrieAStarFootstepPlanner planner;
+   private FileOutputStream outputStream = null;
+   private PrintStream printStream = null;
+   private FileWriter fileWriter = null;
+   private final JSONSerializer<ValkyrieFootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningRequestPacketPubSubType());
+   private final JSONSerializer<ValkyrieFootstepPlanningStatus> statusPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningStatusPubSubType());
+
+   public ValkyriePlannerLogger(ValkyrieAStarFootstepPlanner planner)
+   {
+      this.planner = planner;
+   }
+
+   public void logSession()
+   {
+      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "ValkyriePlannerLog" + File.separator;
+
+      // log request packet
+      String requestPacketFile = sessionDirectory + "RequestPacket.json";
+      try
+      {
+         FileTools.ensureFileExists(new File(requestPacketFile).toPath());
+         outputStream = new FileOutputStream(requestPacketFile);
+         printStream = new PrintStream(outputStream);
+         printStream.write(requestPacketSerializer.serializeToBytes(planner.getRequestPacket()));
+         printStream.flush();
+         outputStream.close();
+         printStream.close();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging request packet");
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return;
+      }
+
+      // log status packet
+      String statusPacketFile = sessionDirectory + "StatusPacket.json";
+      try
+      {
+         FileTools.ensureFileExists(new File(statusPacketFile).toPath());
+         outputStream = new FileOutputStream(statusPacketFile);
+         printStream = new PrintStream(outputStream);
+         printStream.write(statusPacketSerializer.serializeToBytes(planner.getPlanningStatus()));
+         printStream.flush();
+         outputStream.close();
+         printStream.close();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging status packet");
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return;
+      }
+
+      // log planner iteration data
+      String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
+      try
+      {
+         File plannerDataFile = new File(plannerIterationDataFileName);
+         FileTools.ensureFileExists(plannerDataFile.toPath());
+         fileWriter = new FileWriter(plannerIterationDataFileName);
+
+         fileWriter.write("edge data: " +
+                          "rejectionReason" + ", " +
+                          "footAreaPercentage" + ", " +
+                          "stepWidth" + ", " +
+                          "stepLength" + ", " +
+                          "stepHeight" + ", " +
+                          "stepReach" + ", " +
+                          "costFromStart" + ", " +
+                          "edgeCost" + ", " +
+                          "heuristicCost" + "\n");
+
+         List<ValkyriePlannerIterationData> iterationDataList = planner.getIterationData();
+         for (int i = 0; i < iterationDataList.size(); i++)
+         {
+            ValkyriePlannerIterationData iterationData = iterationDataList.get(i);
+            fileWriter.write("-Iteration " + i + "\n");
+            writeNode("stanceNode", iterationData.getStanceNode());
+            writeNode("idealStep", iterationData.getIdealStep());
+            writeSnapData(iterationData.getStanceNodeSnapData());
+
+            for (int j = 0; j < iterationData.getChildNodes().size(); j++)
+            {
+               ValkyriePlannerEdgeData edgeData = planner.getEdgeDataMap()
+                                                         .get(new GraphEdge<>(iterationData.getStanceNode(), iterationData.getChildNodes().get(i)));
+
+               // indicate start of data
+               fileWriter.write("-Edge:\n");
+               writeNode("candidateNode", edgeData.getCandidateNode());
+               writeSnapData(edgeData.getCandidateNodeSnapData());
+
+               // write additional data as doubles
+               fileWriter.write("edgeData: " + EuclidCoreIOTools.getStringOf(",",
+                                                                             EuclidCoreIOTools.getStringFormat(8, 8),
+                                                                             edgeData.getRejectionReason() == null ? -1.0 : (double) edgeData.getRejectionReason().ordinal(),
+                                                                             edgeData.getFootAreaPercentage(),
+                                                                             edgeData.getStepWidth(),
+                                                                             edgeData.getStepLength(),
+                                                                             edgeData.getStepHeight(),
+                                                                             edgeData.getStepReach(),
+                                                                             edgeData.getCostFromStart(),
+                                                                             edgeData.getEdgeCost(),
+                                                                             edgeData.getHeuristicCost()));
+               fileWriter.write("\n");
+            }
+         }
+
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging edge data");
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+      }
+   }
+
+   private void writeNode(String name, FootstepNode node) throws IOException
+   {
+      if(node == null)
+         fileWriter.write(name + ": " + Double.NaN + ", " + Double.NaN + ", " + Double.NaN + ", " + Double.NaN + "\n");
+      else
+         fileWriter.write(name + ": " + node.getXIndex() + ", " + node.getYIndex() + ", " + node.getYawIndex() + ", " + node.getRobotSide().ordinal() + "\n");
+   }
+
+   private void writeSnapData(FootstepNodeSnapData snapData) throws IOException
+   {
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      Quaternion quaternion = new Quaternion(snapTransform.getRotation());
+      fileWriter.write("snapTransform: " + EuclidCoreIOTools.getStringOf(",",
+                                                                       EuclidCoreIOTools.getStringFormat(8, 8),
+                                                                       snapTransform.getTranslation().getX(),
+                                                                       snapTransform.getTranslation().getY(),
+                                                                       snapTransform.getTranslation().getZ(),
+                                                                       quaternion.getS(),
+                                                                       quaternion.getX(),
+                                                                       quaternion.getY(),
+                                                                       quaternion.getZ()) + "\n");
+
+      ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
+      fileWriter.write("croppedFoothold: ");
+      for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
+      {
+         Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
+         fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ", "));
+      }
+
+      fileWriter.write("\n");
+   }
+}

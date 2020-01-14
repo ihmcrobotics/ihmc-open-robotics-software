@@ -27,6 +27,7 @@ import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogger;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -186,6 +187,9 @@ public class ValkyriePlannerGraphUIController
 
       debugChildStepTable.getSelectionModel().select(0);
       debugChildStepTable.getFocusModel().focus(0);
+
+      ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
+      logger.logSession();
    }
 
    public void stepInto()

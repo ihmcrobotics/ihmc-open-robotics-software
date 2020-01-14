@@ -81,6 +81,7 @@ public class ValkyrieAStarFootstepPlanner
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private final ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
+   private final ValkyrieFootstepPlanningStatus planningStatus = new ValkyrieFootstepPlanningStatus();
    private final Stopwatch stopwatch = new Stopwatch();
 
    public static final String MODULE_NAME = "valkyrie_footstep_planner";
@@ -215,17 +216,18 @@ public class ValkyrieAStarFootstepPlanner
       iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
       iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
       loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
+      loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
       this.iterationData.add(loggedData);
    }
 
    private void reportStatus()
    {
-      ValkyrieFootstepPlanningStatus planningStatus = new ValkyrieFootstepPlanningStatus();
       planningStatus.setPlanId(requestPacket.getPlannerRequestId());
       planningStatus.setPlannerStatus(status.toByte());
 
       // Pack solution path
       FootstepDataListMessage footstepDataList = planningStatus.getFootstepDataList();
+      footstepDataList.getFootstepDataList().clear();
       List<FootstepNode> path = planner.getGraph().getPathFromStart(endNode);
       for (int i = 1; i < path.size(); i++)
       {
@@ -419,6 +421,16 @@ public class ValkyrieAStarFootstepPlanner
    public List<ValkyriePlannerIterationData> getIterationData()
    {
       return iterationData;
+   }
+
+   public ValkyrieFootstepPlanningRequestPacket getRequestPacket()
+   {
+      return requestPacket;
+   }
+
+   public ValkyrieFootstepPlanningStatus getPlanningStatus()
+   {
+      return planningStatus;
    }
 
    public void addRequestCallback(Consumer<ValkyrieFootstepPlanningRequestPacket> callback)
