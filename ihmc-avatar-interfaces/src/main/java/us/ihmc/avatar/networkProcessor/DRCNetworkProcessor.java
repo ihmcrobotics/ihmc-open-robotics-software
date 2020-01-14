@@ -199,7 +199,13 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isRosModuleEnabled())
+      {
          modules.add(new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator(), pubSubImplementation));
+      }
+      else if (params.getRosModuleLauncherClass() != null)
+      {
+         modules.add(new ClosableAndDisposableSpawnedProcess(params.getRosModuleLauncherClass()));
+      }
    }
 
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

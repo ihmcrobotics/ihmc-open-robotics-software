@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasNetworkProcessor
@@ -61,9 +62,9 @@ public class AtlasNetworkProcessor
          URI rosuri = NetworkParameters.getROSURI();
          if (rosuri != null)
          {
-            networkModuleParams.enableRosModule(true);
+            networkModuleParams.enableRosModule(AtlasRosModule.class);
             networkModuleParams.setRosUri(rosuri);
-            System.out.println("ROS_MASTER_URI=" + rosuri);
+            LogTools.info("ROS_MASTER_URI = " + rosuri);
 
             createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
          }
@@ -92,7 +93,7 @@ public class AtlasNetworkProcessor
             return;
          }
 
-         System.out.println("Using the " + model + " model");
+         LogTools.info("Selected model: {}", model);
 
          URI rosMasterURI = NetworkParameters.getROSURI();
          networkModuleParams.setRosUri(rosMasterURI);
