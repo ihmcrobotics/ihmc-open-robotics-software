@@ -405,6 +405,94 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       startSim();
    }
 
+   @Test
+   public void testRollingB10()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB10Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB11()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB11Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB12()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB12Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB13()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addElbowOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB13Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB14()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB14Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB15()
+   {
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB15Configuration(robot, jointMap);
+      startSim();
+   }
+
    private void startSim()
    {
       scs.startOnAThread();
@@ -801,6 +889,61 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
       setSpineJointQs(robot, jointMap, 0.65, 0.0, 0.15);
       setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, 1.1, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB11Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.1, -0.2, -0.825, 1.175, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
+      setSpineJointQs(robot, jointMap, 1.15, 0.0, 0.15);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, halfPi, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB12Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.5, -0.2, -1.325, 1.725, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
+      setSpineJointQs(robot, jointMap, 1.15, 0.0, 0.15);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, halfPi, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB13Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.5, -0.2, -1.325, 1.725, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.275, 0.65, 2.0);
+      setSpineJointQs(robot, jointMap, 0.95, -0.1, 0.05);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, halfPi, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB14Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.5, -0.2, -1.325, 1.725, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.0, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.3, 1.375, -0.55, 2.0);
+      setSpineJointQs(robot, jointMap, 0.65, -0.1, 0.05);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, halfPi, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB15Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.5, -0.2, -1.325, 1.725, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.0, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.5, 1.275, -1.55, 2.0);
+      setSpineJointQs(robot, jointMap, 0.65, -0.1, 0.05);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, halfPi, halfPi);
       assertJointLimits(robot);
    }
 
