@@ -1,11 +1,15 @@
 package us.ihmc.valkyrie.torquespeedcurve;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
@@ -38,6 +42,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -49,587 +54,371 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieMultiContactStaticPoseEndToEndTest
 {
+   private static final double halfPi = Math.PI / 2.0;
+   private static final double simulationDT = 2.0e-4;
+
+   private ValkyrieRobotModel robotModel;
+   private ValkyrieJointMap jointMap;
+   private ValkyrieMultiContactPointParameters contactPointParameters;
+   private HumanoidFloatingRootJointRobot robot;
+   private SimulationConstructionSet scs;
+
+   @BeforeEach
+   private void setup()
+   {
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      jointMap = robotModel.getJointMap();
+      contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
+   }
+
+   @AfterEach
+   private void clean()
+   {
+      robotModel = null;
+      jointMap = null;
+      contactPointParameters = null;
+
+      scs.closeAndDispose();
+      scs = null;
+      robot = null;
+   }
+
    @Test
    public void testCrawl1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addKneeUpperContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addToeFrontContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addElbowContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addKneeUpperContactPoints(jointMap, contactPointParameters);
+      addToeFrontContactPoints(jointMap, contactPointParameters);
+      addElbowContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, yoGraphicsListRegistry);
-
-      setRobotToCrawl1Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToCrawl1Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testCrawl2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addKneeLowerContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addToeFrontContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addKneeLowerContactPoints(jointMap, contactPointParameters);
+      addToeFrontContactPoints(jointMap, contactPointParameters);
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, yoGraphicsListRegistry);
-
-      setRobotToCrawl2Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToCrawl2Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testKneel1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addKneeLowerContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addToeTopContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addKneeLowerContactPoints(jointMap, contactPointParameters);
+      addToeTopContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, yoGraphicsListRegistry);
-
-      setRobotToKneel1Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToKneel1Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testKneel2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addKneeLowerContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addToeFrontContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addKneeLowerContactPoints(jointMap, contactPointParameters);
+      addToeFrontContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
-
-      setRobotToKneel2Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToKneel2Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testSit1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addButt1ContactPoint(robotModel.getJointMap(), contactPointParameters);
-      addHeelBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
-      //      addToeBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addButt1ContactPoint(jointMap, contactPointParameters);
+      addHeelBottomContactPoints(jointMap, contactPointParameters);
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
-
-      setRobotToSit1Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToSit1Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testSit2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addButt2ContactPoint(robotModel.getJointMap(), contactPointParameters);
-      addHeelBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addButt2ContactPoint(jointMap, contactPointParameters);
+      addHeelBottomContactPoints(jointMap, contactPointParameters);
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
-
-      setRobotToSit2Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToSit2Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testSit3()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(robotModel.getJointMap(),
-                                                                                                           robotModel.getRobotPhysicalProperties());
-      addButt2ContactPoint(robotModel.getJointMap(), contactPointParameters);
-      addHeelBottomContactPoints(robotModel.getJointMap(), contactPointParameters);
-      addHandFist1ContactPoints(robotModel.getJointMap(), contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
+      addButt2ContactPoint(jointMap, contactPointParameters);
+      addHeelBottomContactPoints(jointMap, contactPointParameters);
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
 
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
-
-      setRobotToSit3Configuration(robot, robotModel.getJointMap());
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      setRobotToSit3Configuration(robot, jointMap);
+      startSim();
    }
 
    @Test
    public void testRollingA1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA1Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA2Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA3()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA3Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA4()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA4Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA5()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addHeelInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA5Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA6()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA6Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingA7()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addElbowContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingA7Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testLieDown1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHeelBottomContactPoints(jointMap, contactPointParameters);
       addBackpackFourContactPoints(jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToLieDown1Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testLieDown2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHeelBottomContactPoints(jointMap, contactPointParameters);
       addBackpackFourContactPoints(jointMap, contactPointParameters);
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToLieDown2Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB1()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addFootOuterEdgeContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
       addBackpackSideEdgeContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB1Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHeelBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addFootOuterEdgeContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
       addBackpackSideEdgeContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
       addShoulderPitchBackContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB2Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB3()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addFootInnerEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addShoulderPitchBackContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB3Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB4()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addFootInnerEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addShoulderPitchBackContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB4Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB5()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addFootInnerEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addShoulderPitchOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB5Configuration(robot, jointMap);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      startSim();
    }
 
    @Test
    public void testRollingB6()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
-      ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieMultiContactPointParameters contactPointParameters = new ValkyrieMultiContactPointParameters(jointMap, robotModel.getRobotPhysicalProperties());
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addFootInnerEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
       addShoulderPitchOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
-      robotModel.setContactPointParameters(contactPointParameters);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-
-      double simulationDT = 2.0e-4;
-      YoGraphicsListRegistry yoGraphicsListRegistry = setupController(robotModel, fullRobotModel, robot, simulationDT);
-      SimulationConstructionSet scs = setupSCS(robotModel, robot, simulationDT, yoGraphicsListRegistry);
+      setupSimulationAndController();
 
       setRobotToRollingB6Configuration(robot, jointMap);
-      scs.startOnAThread();
+      startSim();
+   }
 
+   @Test
+   public void testRollingB7()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB7Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB8()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB8Configuration(robot, jointMap);
+      startSim();
+   }
+
+   @Test
+   public void testRollingB9()
+   {
+      addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addKneeLowerContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeInnerBottomContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
+      addShoulderPitchFrontContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addKneeUpperContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      addToeOuterContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setRobotToRollingB9Configuration(robot, jointMap);
+      startSim();
+   }
+
+   private void startSim()
+   {
+      scs.startOnAThread();
       ThreadTools.sleepForever();
    }
 
-   private SimulationConstructionSet setupSCS(ValkyrieRobotModel robotModel, HumanoidFloatingRootJointRobot robot,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupSimulationAndController()
    {
-      return setupSCS(robotModel, robot, robotModel.getSimulateDT(), yoGraphicsListRegistry);
-   }
-
-   private SimulationConstructionSet setupSCS(ValkyrieRobotModel robotModel, HumanoidFloatingRootJointRobot robot, double simulationDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SimulationTestingParameters.createFromSystemProperties());
-
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-      simulationOverheadPlotterFactory.setShowOnStart(true);
-      simulationOverheadPlotterFactory.createOverheadPlotter();
-
-      scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(flatGroundEnvironment.getTerrainObject3D().getLinkGraphics());
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-
-      DRCSCSInitialSetup initialSetup = new DRCSCSInitialSetup(flatGroundEnvironment, simulationDT);
-      initialSetup.setDrawGroundProfile(false);
-      initialSetup.setRecordFrequency((int) (robotModel.getControllerDT() / simulationDT));
-      initialSetup.initializeSimulation(scs);
-      initialSetup.initializeRobot(robot, robotModel, yoGraphicsListRegistry);
-      return scs;
-   }
-
-   private YoGraphicsListRegistry setupController(ValkyrieRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidFloatingRootJointRobot robot)
-   {
-      return setupController(robotModel, fullRobotModel, robot, robotModel.getSimulateDT());
-   }
-
-   private YoGraphicsListRegistry setupController(ValkyrieRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidFloatingRootJointRobot robot,
-                                                  double simulationDT)
-   {
+      robotModel.setContactPointParameters(contactPointParameters);
+      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      // Setup Controller
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = createContactablePlaneBodies((ValkyrieMultiContactPointParameters) robotModel.getContactPointParameters(),
-                                                                                                 fullRobotModel);
+      List<? extends ContactablePlaneBody> contactablePlaneBodies = createContactablePlaneBodies(fullRobotModel);
       MultiContactStaticController controller = new MultiContactStaticController(robotModel.getControllerDT(),
                                                                                  9.81,
                                                                                  fullRobotModel,
@@ -650,7 +439,24 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       modularRobotController.addRobotController(controller);
       robot.setController(new InitializingRobotController(modularRobotController), (int) (robotModel.getControllerDT() / simulationDT));
 
-      return yoGraphicsListRegistry;
+      // Setup SCS
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      scs = new SimulationConstructionSet(robot, SimulationTestingParameters.createFromSystemProperties());
+
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.setShowOnStart(true);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
+
+      scs.setGroundVisible(false);
+      scs.addStaticLinkGraphics(flatGroundEnvironment.getTerrainObject3D().getLinkGraphics());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+
+      DRCSCSInitialSetup initialSetup = new DRCSCSInitialSetup(flatGroundEnvironment, simulationDT);
+      initialSetup.setDrawGroundProfile(false);
+      initialSetup.setRecordFrequency((int) (robotModel.getControllerDT() / simulationDT));
+      initialSetup.initializeSimulation(scs);
+      initialSetup.initializeRobot(robot, robotModel, yoGraphicsListRegistry);
    }
 
    private RawSensorReader toRawSensorReader(DRCPerfectSensorReader sensorReader)
@@ -700,8 +506,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       };
    }
 
-   private List<? extends ContactablePlaneBody> createContactablePlaneBodies(ValkyrieMultiContactPointParameters contactPointParameters,
-                                                                             FullHumanoidRobotModel fullRobotModel)
+   private List<? extends ContactablePlaneBody> createContactablePlaneBodies(FullHumanoidRobotModel fullRobotModel)
    {
       Map<String, ? extends RigidBodyBasics> bodyNameToBodyMap = fullRobotModel.getElevator().subtreeStream()
                                                                                .collect(Collectors.toMap(RigidBodyBasics::getName, Function.identity()));
@@ -733,669 +538,359 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
 
    private static void setRobotToCrawl1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.5));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.2);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(-2.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.2));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.2));
-      }
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotationPitch(0.5 * Math.PI);
-      rootJointPose.setTranslation(0.0, 0.0, 0.39);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.5, 0.0, -1.0, 1.2, 0.2, 0.0);
+      setArmJointQs(robot, jointMap, -2.0, -1.2, 0.0, -1.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.39, 0.0, halfPi, 0.0);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToCrawl2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.25);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.75);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.8);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(-1.5);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(0.65));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(1.5);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.4));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.1);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.4, 0.0, 0.5));
-      rootJointPose.setTranslation(0.0, 0.0, 0.56);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -1.25, 1.75, -0.8, 0.0);
+      setArmJointQs(robot, jointMap, -1.5, -0.65, 1.5, -1.4);
+      setSpineJointQs(robot, jointMap, 0.0, 0.1, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.56, 0.0, 0.4, 0.0, 0.5);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToKneel1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.3);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.9);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.8);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.7);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.2));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.7));
-      }
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setTranslation(0.0, 0.0, 0.74);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.3, 1.9, 0.8, 0.0);
+      setArmJointQs(robot, jointMap, 0.7, -1.2, 0.0, -1.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.74, 0.0, 0.0, 0.0);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToKneel2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(0.75);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(2.05);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.8);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.7);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.2));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.7));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.4);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.4, 0.0, 0.8));
-      rootJointPose.setTranslation(0.0, 0.0, 0.64);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, 0.75, 2.05, -0.8, 0.0);
+      setArmJointQs(robot, jointMap, 0.7, -1.2, 0.0, -1.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.4, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.64, 0.0, -0.4, 0.0, 0.8);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToSit1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.9);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.525);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.775);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(1.1);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(1.1);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(0.9));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(-0.1);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.2, 0.0, 1.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.33);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -1.9, 1.525, 0.775, 0.0);
+      setArmJointQs(robot, jointMap, 1.1, -1.0, 1.1, -0.9);
+      setSpineJointQs(robot, jointMap, 0.0, -0.1, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.33, 0.0, -0.2, 0.0, 1.0);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToSit2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-1.2);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.525);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.775);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(1.4);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(0.2));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(1.5);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(1.8));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(-0.1);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.6, 0.0, 1.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.23);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -1.2, 1.525, 0.775, 0.0);
+      setArmJointQs(robot, jointMap, 1.4, 0.2, 1.5, -1.8);
+      setSpineJointQs(robot, jointMap, 0.0, -0.1, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.23, 0.0, -0.6, 0.0, 1.0);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToSit3Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(robotSide.negateIfRightSide(0.0));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.875);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.425);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.8);
-
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(-0.5);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(1.266));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(-3.1);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(2.0));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.4);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.8, 0.0, 1.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.17);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.875, 1.425, 0.8, 0.0);
+      setArmJointQs(robot, jointMap, -0.5, 1.266, -3.1, -2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.4, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.17, 0.0, -0.8, 0.0, 1.0);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.33);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(0.26);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.8);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(1.95);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.34);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.85);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.5, -0.5, 0.0, 0.7));
-      rootJointPose.setTranslation(0.0, 0.0, 0.26);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.8, 0.2, -0.33, 1.6, 0.3, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.4, 0.26, 1.5, -1.8);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.8, -0.1, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.7, 1.3, 0.0, 1.95);
+      setSpineJointQs(robot, jointMap, 0.85, 0.34, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.26, 0.5, -0.5, 0.0, 0.7);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.33);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(-0.15);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(1.266);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(-3.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-2.0);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(1.95);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.34);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.85);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.5, -0.5, 0.0, 0.7));
-      rootJointPose.setTranslation(0.0, 0.0, 0.26);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.8, 0.2, -0.33, 1.6, 0.3, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -0.15, 1.266, -3.1, -2.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.8, -0.1, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.7, 1.3, 0.0, 1.95);
+      setSpineJointQs(robot, jointMap, 0.85, 0.34, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.26, 0.5, -0.5, 0.0, 0.7);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA3Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.450);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.425);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(-0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.2);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.55);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.13);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.36);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.60);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.585, 1.3));
-      rootJointPose.setTranslation(0.0, 0.0, 0.31);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.8, 0.2, -0.45, 1.4, 0.425, -0.2);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.7, -1.5, 0.0, -1.2);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.55, 0.13, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.6, 1.3, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.60, 0.36, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.31, 0.0, -0.585, 1.3);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA4Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.975);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.450);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.425);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(-0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.2);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.41);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.25);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.30);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.36);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(-0.2);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.385, 1.2));
-      rootJointPose.setTranslation(0.0, 0.0, 0.34);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.975, 0.5, -0.45, 1.4, 0.425, -0.3);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.7, -1.5, 0.0, -1.2);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.41, 0.25, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.2, 1.1, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.30, 0.36, -0.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.34, 0.0, -0.385, 1.2);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA5Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(1.075);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.250);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.225);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(-0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.2);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.01);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(0.9);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.10);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.36);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(-0.2);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.0, 1.2));
-      rootJointPose.setTranslation(0.0, 0.0, 0.34);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 1.075, 0.5, -0.25, 1.4, 0.225, -0.3);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.7, -1.5, 0.0, -1.2);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.01, 0.3, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.2, 0.9, 0.3, 2.0);
+      setSpineJointQs(robot, jointMap, 0.10, 0.36, -0.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.34, 0.0, 0.0, 1.2);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA6Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.875);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.550);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.225);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(-0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.2);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.01);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(0.9);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.10);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.36);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(-0.2);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.0, 1.2));
-      rootJointPose.setTranslation(0.0, 0.0, 0.34);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.875, 0.5, -0.55, 1.4, 0.225, -0.3);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.7, -1.5, 0.0, -1.2);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.01, 0.3, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.2, 0.9, 0.3, 2.0);
+      setSpineJointQs(robot, jointMap, 0.10, 0.36, -0.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.34, 0.0, 0.0, 1.2);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingA7Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(-0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.35);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.950);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(0.8);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.225);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(-0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(1.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.2);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.01);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.6);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(0.9);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.10);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.36);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(-0.2);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.0, 1.2));
-      rootJointPose.setTranslation(0.0, 0.0, 0.34);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, -0.414, 0.35, -0.95, 0.4, 0.225, -0.3);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 1.7, -1.5, 0.0, -1.2);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.01, 0.3, -0.6, 1.4, 0.0, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 1.2, 0.9, 0.3, 2.0);
+      setSpineJointQs(robot, jointMap, 0.10, 0.36, -0.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.34, 0.0, 0.0, 1.2);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToLieDown1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.325);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.8);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.5));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(2.0));
-      }
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -Math.PI / 2.0, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.245);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.325, 1.1, 0.8, 0.0);
+      setArmJointQs(robot, jointMap, 0.0, -1.5, 0.0, -2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.245, 0.0, -halfPi, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToLieDown2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.325);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(0.8);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfLeftSide(1.5));
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(0);
-         robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(robotSide.negateIfLeftSide(2.0));
-      }
-
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.75);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -Math.PI / 2.0, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.245);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.325, 1.1, 0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, halfPi, 0.4, halfPi, -1.75);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.245, 0.0, -halfPi, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB1Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.250);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.625);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.45);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -1.07, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.275);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.5, 0.1, -0.25, 1.2, 0.625, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, halfPi, -0.5, halfPi, -1.45);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.2, 0.0, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.275, 0.0, -1.07, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB2Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.220);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.625);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-0.75);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.35);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.9, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.26);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.5, 0.1, -0.22, 1.2, 0.625, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, halfPi, -0.75, halfPi, -1.35);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.2, 0.0, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.26, 0.0, -0.9, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB3Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(0.7);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(-0.05);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.25);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.35);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.65);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.12);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.5);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.6, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.30);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.7, 0.3, -0.05, 1.2, 0.5, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, halfPi, -1.25, halfPi, -1.35);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.65, -0.12, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.3, 0.0, -0.6, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB4Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(1.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(0.025);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.45);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-1.25);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.35);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.35);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.13);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.519);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(-0.3);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, -0.3, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.32);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 1.0, 0.4, 0.025, 1.2, 0.45, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, halfPi, -1.25, halfPi, -1.35);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.35, -0.13, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.519, -0.3, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.32, 0.0, -0.3, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB5Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(0.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(-0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-0.7);
-
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.075);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.15);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.519);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
-
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.0);
-
-      RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.0, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.335);
-      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 1.1, 0.4, 0.2, 1.2, 0.4, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, halfPi, -0.7);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.075, -0.15, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.519, 0.0, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.335, 0.0, 0.0, halfPi);
+      assertJointLimits(robot);
    }
 
    private static void setRobotToRollingB6Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      RobotSide leftSide = RobotSide.LEFT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_YAW)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_ROLL)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.HIP_PITCH)).setQ(0.175);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.KNEE_PITCH)).setQ(1.2);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_PITCH)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(leftSide, LegJointName.ANKLE_ROLL)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_PITCH)).setQ(-0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_ROLL)).setQ(-0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.SHOULDER_YAW)).setQ(0.5 * Math.PI);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(leftSide, ArmJointName.ELBOW_PITCH)).setQ(-1.3);
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 1.1, 0.4, 0.175, 1.2, 0.4, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, halfPi, -1.3);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.075, -0.13, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.519, 0.4, 2.0);
+      setSpineJointQs(robot, jointMap, -0.4, 0.0, 0.075);
+      setRootJointPose(robot, 0.0, 0.0, 0.32, 0.0, 0.0, halfPi);
+      assertJointLimits(robot);
+   }
 
-      RobotSide rightSide = RobotSide.RIGHT;
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_YAW)).setQ(-0.075);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_ROLL)).setQ(-0.13);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.HIP_PITCH)).setQ(-0.375);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.KNEE_PITCH)).setQ(1.1);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(rightSide, LegJointName.ANKLE_PITCH)).setQ(0.82);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_ROLL)).setQ(1.519);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.SHOULDER_YAW)).setQ(0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(rightSide, ArmJointName.ELBOW_PITCH)).setQ(2.0);
+   private static void setRobotToRollingB7Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, -0.4, -0.2, -0.825, 0.5, 0.4, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, halfPi, -1.3);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.075, -0.13, -0.375, 1.1, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.519, 0.4, 2.0);
+      setSpineJointQs(robot, jointMap, -0.4, 0.0, 0.075);
+      setRootJointPose(robot, 0.0, 0.0, 0.32, 0.0, 0.0, halfPi);
+      assertJointLimits(robot);
+   }
 
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(-0.4);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(0.075);
+   private static void setRobotToRollingB8Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, -0.4, 0.0, -1.425, 1.3, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.3, -1.3);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.05, -0.13, -0.475, 0.8, 0.82, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.1);
+      setRootJointPose(robot, 0.0, 0.0, 0.35, 0.0, 0.3, halfPi);
+      assertJointLimits(robot);
+   }
 
+   private static void setRobotToRollingB9Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, -0.4, 0.0, -1.625, 2.0, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.35, -1.5);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.65, -0.2, -0.425, 0.775, -0.8, 0.0);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
+      setSpineJointQs(robot, jointMap, 0.25, 0.0, 0.15);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, 0.7, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setRobotToRollingB10Configuration(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   {
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.1, 0.0, -1.625, 2.057, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, -0.8, -0.2, -0.825, 1.175, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, -halfPi, -1.519, 1.35, -1.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.45, 0.45, 2.0);
+      setSpineJointQs(robot, jointMap, 0.65, 0.0, 0.15);
+      setRootJointPose(robot, 0.0, 0.0, 0.36, 0.0, 1.1, halfPi);
+      assertJointLimits(robot);
+   }
+
+   private static void setLegJointQs(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, double hipYaw, double hipRoll, double hipPitch,
+                                     double knee, double anklePitch, double ankleRoll)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setLegJointQs(robotSide,
+                       robot,
+                       jointMap,
+                       robotSide.negateIfRightSide(hipYaw),
+                       robotSide.negateIfRightSide(hipRoll),
+                       hipPitch,
+                       knee,
+                       anklePitch,
+                       robotSide.negateIfRightSide(ankleRoll));
+      }
+   }
+
+   private static void setLegJointQs(RobotSide robotSide, HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, double hipYaw, double hipRoll,
+                                     double hipPitch, double knee, double anklePitch, double ankleRoll)
+   {
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(hipYaw);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(hipRoll);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(hipPitch);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH)).setQ(knee);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(anklePitch);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(ankleRoll);
+   }
+
+   private static void setArmJointQs(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, double shoulderPitch, double shoulderRoll,
+                                     double shoulderYaw, double elbowPitch)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setArmJointQs(robotSide,
+                       robot,
+                       jointMap,
+                       shoulderPitch,
+                       robotSide.negateIfRightSide(shoulderRoll),
+                       shoulderYaw,
+                       robotSide.negateIfRightSide(elbowPitch));
+      }
+   }
+
+   private static void setArmJointQs(RobotSide robotSide, HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, double shoulderPitch,
+                                     double shoulderRoll, double shoulderYaw, double elbowPitch)
+   {
+      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(shoulderPitch);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(shoulderRoll);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW)).setQ(shoulderYaw);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(elbowPitch);
+   }
+
+   private static void setSpineJointQs(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap, double qYaw, double qPitch, double qRoll)
+   {
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)).setQ(qYaw);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)).setQ(qPitch);
+      robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)).setQ(qRoll);
+   }
+
+   private static void setRootJointPose(HumanoidFloatingRootJointRobot robot, double x, double y, double z, double yaw, double pitch, double roll)
+   {
       RigidBodyTransform rootJointPose = new RigidBodyTransform();
-      rootJointPose.setRotation(new Quaternion(0.0, 0.0, Math.PI / 2.0));
-      rootJointPose.setTranslation(0.0, 0.0, 0.32);
+      rootJointPose.setRotation(new Quaternion(yaw, pitch, roll));
+      rootJointPose.setTranslation(x, y, z);
       robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+   }
+
+   private static void setRootJointPose(HumanoidFloatingRootJointRobot robot, double x, double y, double z, double qx, double qy, double qz, double qs)
+   {
+      RigidBodyTransform rootJointPose = new RigidBodyTransform();
+      rootJointPose.setRotation(new Quaternion(qx, qy, qz, qs));
+      rootJointPose.setTranslation(x, y, z);
+      robot.getRootJoint().setRotationAndTranslation(rootJointPose);
+   }
+
+   private static void assertJointLimits(HumanoidFloatingRootJointRobot robot)
+   {
+      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
+      robot.getAllOneDegreeOfFreedomJoints(joints);
+
+      for (OneDegreeOfFreedomJoint joint : joints)
+      {
+         assertTrue(joint.getQ() >= joint.getJointLowerLimit(),
+                    "Joint " + joint.getName() + " is out of range: " + joint.getQ() + " < lower-limit (" + joint.getJointLowerLimit() + ")");
+         assertTrue(joint.getQ() <= joint.getJointUpperLimit(),
+                    "Joint " + joint.getName() + " is out of range: " + joint.getQ() + " > upper-limit (" + joint.getJointUpperLimit() + ")");
+      }
    }
 
    private static void addButt1ContactPoint(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
@@ -1417,12 +912,15 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    private static void addKneeUpperContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
    {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
-         String bodyName = parentJointName + "Link";
-         String contactName = robotSide.getCamelCaseName() + "KneeCP";
-         contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.06, robotSide.negateIfRightSide(0.07), -0.46));
-      }
+         addKneeUpperContactPoint(robotSide, jointMap, contactPointParameters);
+   }
+
+   private static void addKneeUpperContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
+      String bodyName = parentJointName + "Link";
+      String contactName = robotSide.getCamelCaseName() + "KneeCP";
+      contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.06, robotSide.negateIfRightSide(0.07), -0.46));
    }
 
    private static void addKneeOuterContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
@@ -1436,12 +934,15 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    private static void addKneeLowerContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
    {
       for (RobotSide robotSide : RobotSide.values)
-      {
-         String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
-         String bodyName = parentJointName + "Link";
-         String contactName = robotSide.getCamelCaseName() + "KneeCP";
-         contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.075, robotSide.negateIfRightSide(0.07), -0.01));
-      }
+         addKneeLowerContactPoint(robotSide, jointMap, contactPointParameters);
+   }
+
+   private static void addKneeLowerContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
+      String bodyName = parentJointName + "Link";
+      String contactName = robotSide.getCamelCaseName() + "KneeCP";
+      contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.075, 0.0, -0.01));
    }
 
    private static void addToeFrontContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
@@ -1553,8 +1054,17 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(-0.1, robotSide.negateIfRightSide(0.3), 0.0));
    }
 
+   private static void addShoulderPitchFrontContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap,
+                                                         ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
+      String bodyName = parentJointName + "Link";
+      String contactName = robotSide.getCamelCaseName() + "ShoulderCP";
+      contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.1, robotSide.negateIfRightSide(0.3), 0.0));
+   }
+
    private static void addShoulderPitchOuterContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap,
-                                                        ValkyrieMultiContactPointParameters contactPointParameters)
+                                                         ValkyrieMultiContactPointParameters contactPointParameters)
    {
       String parentJointName = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
       String bodyName = parentJointName + "Link";
@@ -1608,7 +1118,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       String bodyName = jointMap.getChestName();
       String contactName = "BackpackCP";
 
-      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, 0.5 * Math.PI, 0.0), new Point3D(-0.29, 0.0, 0.25));
+      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, halfPi, 0.0), new Point3D(-0.29, 0.0, 0.25));
       List<Point2D> contactPoints = new ArrayList<>();
       contactPoints.add(new Point2D(0.15, 0.1));
       contactPoints.add(new Point2D(0.15, -0.1));
@@ -1624,7 +1134,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       String bodyName = jointMap.getChestName();
       String contactName = "BackpackCP";
 
-      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, 0.5 * Math.PI, 0.0), new Point3D(-0.29, 0.0, 0.25));
+      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, halfPi, 0.0), new Point3D(-0.29, 0.0, 0.25));
       List<Point2D> contactPoints = new ArrayList<>();
       contactPoints.add(new Point2D(0.15, robotSide.negateIfRightSide(0.1)));
       contactPoints.add(new Point2D(-0.15, robotSide.negateIfRightSide(0.1)));
