@@ -12,23 +12,22 @@ import javafx.scene.control.TextField;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogLoader;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogger;
 
 import java.util.function.Consumer;
 
 public class ValkyriePlannerDashboardController
 {
-   private Runnable doPlanningCallback = null;
-   private Runnable haltPlanningCallback = null;
-   private Runnable sendPlanningResultCallback = null;
-   private Runnable stopWalkingCallback = null;
-   private Runnable placeGoalCallback = null;
-   private Runnable addWaypointCallback = null;
-   private Runnable clearWaypointsCallback = null;
-   private Consumer<DataSetName> dataSetSelectionCallback = null;
+   private Messager messager = null;
+
    private TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
+   private ValkyrieAStarFootstepPlanner planner = null;
 
    @FXML
    private Spinner<Double> idealFootstepWidth;
@@ -149,83 +148,53 @@ public class ValkyriePlannerDashboardController
    @FXML
    public void doPlanning()
    {
-      new Thread(doPlanningCallback).start();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.doPlanning, true);
    }
 
    @FXML
    public void haltPlanning()
    {
-      haltPlanningCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.haltPlanning, true);
    }
 
    @FXML
    public void sendPlanningResult()
    {
-      sendPlanningResultCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.sendPlanningResult, true);
    }
 
    @FXML
    public void stopWalking()
    {
-      stopWalkingCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.stopWalking, true);
    }
 
    @FXML
    public void placeGoal()
    {
-      placeGoalCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.placeGoal, true);
    }
 
    @FXML
    public void addWaypoint()
    {
-      addWaypointCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.addWaypoint, true);
    }
 
    @FXML
    public void clearWaypoints()
    {
-      clearWaypointsCallback.run();
+      messager.submitMessage(ValkyriePlannerMessagerAPI.clearWaypoints, true);
    }
 
-   public void setDoPlanningCallback(Runnable doPlanningCallback)
+   void setMessager(Messager messager)
    {
-      this.doPlanningCallback = doPlanningCallback;
+      this.messager = messager;
    }
 
-   public void setHaltPlanningCallback(Runnable haltPlanningCallback)
+   void setPlanner(ValkyrieAStarFootstepPlanner planner)
    {
-      this.haltPlanningCallback = haltPlanningCallback;
-   }
-
-   public void setSendPlanningResultCallback(Runnable sendPlanningResultCallback)
-   {
-      this.sendPlanningResultCallback = sendPlanningResultCallback;
-   }
-
-   public void setStopWalkingCallback(Runnable stopWalkingCallback)
-   {
-      this.stopWalkingCallback = stopWalkingCallback;
-   }
-
-   public void setDataSetSelectionCallback(Consumer<DataSetName> dataSetSelectionCallback)
-   {
-      this.dataSetSelectionCallback = dataSetSelectionCallback;
-   }
-
-   public void setGoalPlacementCallback(Runnable setGoalCallback)
-   {
-      this.placeGoalCallback = setGoalCallback;
-   }
-
-   public void setAddWaypointCallback(Runnable addWaypointCallback)
-   {
-      this.addWaypointCallback = addWaypointCallback;
-   }
-
-   public void setClearWaypointsCallback(Runnable clearWaypointsCallback)
-   {
-      this.clearWaypointsCallback = clearWaypointsCallback;
+      this.planner = planner;
    }
 
    public void updatePlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
@@ -240,6 +209,21 @@ public class ValkyriePlannerDashboardController
          timeElapsedManager.start();
       else
          timeElapsedManager.stop();
+   }
+
+   public synchronized void generateLog()
+   {
+      if(planner != null)
+      {
+         ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
+         logger.logSession();
+      }
+   }
+
+   public void loadLog()
+   {
+      ValkyriePlannerLogLoader logLoader = new ValkyriePlannerLogLoader();
+      logLoader.load();
    }
 
    public void setParameters(ValkyrieAStarFootstepPlannerParameters parameters)
@@ -391,7 +375,7 @@ public class ValkyriePlannerDashboardController
       astarHeuristicsWeight.getValueFactory().valueProperty().addListener(observable -> parameters.setAstarHeuristicsWeight(astarHeuristicsWeight.getValue()));
 
       dataSetSelector.getItems().setAll(DataSetName.values());
-      dataSetSelector.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> dataSetSelectionCallback.accept(dataSetSelector.getValue()));
+      dataSetSelector.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> messager.submitMessage(ValkyriePlannerMessagerAPI.dataSetSelected, dataSetSelector.getValue()));
    }
 
    private class TimeElapsedManager extends AnimationTimer
