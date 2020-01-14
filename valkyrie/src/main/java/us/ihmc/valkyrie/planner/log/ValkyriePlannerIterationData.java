@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.planner.log;
 
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
@@ -12,6 +13,7 @@ public class ValkyriePlannerIterationData
    private FootstepNode stanceNode = null;
    private FootstepNode idealStep = null;
    private final List<FootstepNode> childNodes = new ArrayList<>();
+   private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
 
    public ValkyriePlannerIterationData()
    {
@@ -26,6 +28,11 @@ public class ValkyriePlannerIterationData
    public void setIdealStep(FootstepNode idealStep)
    {
       this.idealStep = idealStep;
+   }
+
+   public void setStanceNodeSnapData(FootstepNodeSnapData stanceNodeSnapData)
+   {
+      this.stanceNodeSnapData.set(stanceNodeSnapData);
    }
 
    public void addChildNode(FootstepNode childNode)
@@ -48,10 +55,16 @@ public class ValkyriePlannerIterationData
       return childNodes;
    }
 
+   public FootstepNodeSnapData getStanceNodeSnapData()
+   {
+      return stanceNodeSnapData;
+   }
+
    public void clear()
    {
       stanceNode = null;
       idealStep = null;
       childNodes.clear();
+      stanceNodeSnapData.clear();
    }
 }

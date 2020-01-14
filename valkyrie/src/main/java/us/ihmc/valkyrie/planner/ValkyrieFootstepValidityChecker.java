@@ -49,7 +49,6 @@ public class ValkyrieFootstepValidityChecker
    private double stepReach;
    private double footAreaPercentage;
    private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
-   private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
 
    public ValkyrieFootstepValidityChecker(ValkyrieAStarFootstepPlannerParameters parameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons,
@@ -129,7 +128,7 @@ public class ValkyrieFootstepValidityChecker
          return null;
       }
 
-      stanceNodeSnapData.set(snapper.snapFootstepNode(stanceNode));
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
       candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getOrComputeSnappedNodeTransform(candidateNode));
       stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getOrComputeSnappedNodeTransform(stanceNode));
       stanceFootZUpFrame.update();
@@ -285,7 +284,6 @@ public class ValkyrieFootstepValidityChecker
       stepReach = Double.NaN;
       footAreaPercentage = Double.NaN;
       candidateNodeSnapData.clear();
-      stanceNodeSnapData.clear();
    }
 
    public enum StepRejectionReason
