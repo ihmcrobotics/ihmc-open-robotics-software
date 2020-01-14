@@ -27,6 +27,10 @@ public class ValkyriePlannerLogger
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
+   static final String requestPacketFileName = "RequestPacket.json";
+   static final String statusPacketFileName = "StatusPacket.json";
+   static final String dataFileName = "PlannerIterationData.log";
+
    private final ValkyrieAStarFootstepPlanner planner;
    private FileOutputStream outputStream = null;
    private PrintStream printStream = null;
@@ -111,6 +115,7 @@ public class ValkyriePlannerLogger
             fileWriter.write("-Iteration " + i + "\n");
             writeNode("stanceNode", iterationData.getStanceNode());
             writeNode("idealStep", iterationData.getIdealStep());
+            fileWriter.write("edges: " + iterationData.getChildNodes().size());
             writeSnapData(iterationData.getStanceNodeSnapData());
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
@@ -163,14 +168,14 @@ public class ValkyriePlannerLogger
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       Quaternion quaternion = new Quaternion(snapTransform.getRotation());
       fileWriter.write("snapTransform: " + EuclidCoreIOTools.getStringOf(",",
-                                                                       EuclidCoreIOTools.getStringFormat(8, 8),
-                                                                       snapTransform.getTranslation().getX(),
-                                                                       snapTransform.getTranslation().getY(),
-                                                                       snapTransform.getTranslation().getZ(),
-                                                                       quaternion.getS(),
-                                                                       quaternion.getX(),
-                                                                       quaternion.getY(),
-                                                                       quaternion.getZ()) + "\n");
+                                                                         EuclidCoreIOTools.getStringFormat(8, 8),
+                                                                         quaternion.getX(),
+                                                                         quaternion.getY(),
+                                                                         quaternion.getZ(),
+                                                                         quaternion.getS(),
+                                                                         snapTransform.getTranslation().getX(),
+                                                                         snapTransform.getTranslation().getY(),
+                                                                         snapTransform.getTranslation().getZ()) + "\n");
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
       fileWriter.write("croppedFoothold: ");
