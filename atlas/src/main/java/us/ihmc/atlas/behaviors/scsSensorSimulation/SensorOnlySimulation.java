@@ -1,15 +1,15 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
+import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.gui.AWTTools;
 
 public class SensorOnlySimulation
 {
-
    private final SimulationConstructionSet scs;
 
    public SensorOnlySimulation()
@@ -36,6 +36,9 @@ public class SensorOnlySimulation
       addSphere(-2.0, -2.0, scs);
 
       controller.initialize();
+
+      if (!SystemUtils.IS_OS_WINDOWS)
+         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
 
       scs.startOnAThread();
    }
