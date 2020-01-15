@@ -1,13 +1,12 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +78,8 @@ public class SimpleConcaveHullFactoryTest
    {
       AtomicReference<PolygonizerVisualizerUI> ui = new AtomicReference<>(null);
 
-      PlatformImpl.startup(() -> {
+      PlatformImpl.startup(() ->
+      {
          try
          {
             Stage primaryStage = new Stage();
@@ -106,6 +106,38 @@ public class SimpleConcaveHullFactoryTest
          while (!uiIsGoingDown.booleanValue())
             ThreadTools.sleep(100);
       }
+   }
+
+   @Test
+   public void testNullPointerExceptionBug20191213()
+   {
+      List<Point3D> pointcloud = new ArrayList<>();
+      pointcloud.add(new Point3D(5.714, 0.921, 0.0));
+      pointcloud.add(new Point3D(5.553, 0.922, 0.0));
+      pointcloud.add(new Point3D(5.395, 0.924, 0.0));
+      pointcloud.add(new Point3D(5.239, 0.925, 0.0));
+      pointcloud.add(new Point3D(5.086, 0.926, 0.0));
+      pointcloud.add(new Point3D(4.935, 0.928, 0.0));
+      pointcloud.add(new Point3D(4.786, 0.929, 0.0));
+      pointcloud.add(new Point3D(4.639, 0.930, 0.0));
+      pointcloud.add(new Point3D(4.493, 0.931, 0.0));
+      pointcloud.add(new Point3D(4.350, 0.932, 0.0));
+
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
+      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
+      messager.submitMessage(Polygonizer.PolygonizerParameters, parameters);
+
+      AtomicReference<List<Output>> output = messager.createInput(Polygonizer.PolygonizerOutput, null);
+      messager.submitMessage(PolygonizerManager.PlanarRegionSemgentationData, Collections.singletonList(data));
+
+      assertTimeout(Duration.ofSeconds(10), () ->
+      {
+         while (output.get() == null)
+            ThreadTools.sleep(100);
+      });
+
+      assertEquals(1, output.get().size());
+      assertNull(output.get().get(0).getConcaveHullFactoryResult());
    }
 
    @Test
@@ -260,8 +292,10 @@ public class SimpleConcaveHullFactoryTest
       Random random = new Random(34543);
       PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis.Z, new Point3D(), pointcloud);
 
-      List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0), new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),
-                                                   new LineSegment3D(0.25, -0.025, 0, 0.35, -0.025, 0), new LineSegment3D(0.25, -0.20, 0, 0.35, -0.20, 0));
+      List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0),
+                                                   new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),
+                                                   new LineSegment3D(0.25, -0.025, 0, 0.35, -0.025, 0),
+                                                   new LineSegment3D(0.25, -0.20, 0, 0.35, -0.20, 0));
       polygon1.forEach(segment -> segment.translate(0.09, 0.00, 0.0));
 
       data.addIntersections(polygon1);
@@ -300,8 +334,10 @@ public class SimpleConcaveHullFactoryTest
 
       PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis.Z, new Point3D(), pointcloud);
 
-      List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0), new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),
-                                                   new LineSegment3D(0.25, -0.025, 0, 0.35, -0.025, 0), new LineSegment3D(0.25, -0.20, 0, 0.35, -0.20, 0));
+      List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0),
+                                                   new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),
+                                                   new LineSegment3D(0.25, -0.025, 0, 0.35, -0.025, 0),
+                                                   new LineSegment3D(0.25, -0.20, 0, 0.35, -0.20, 0));
 
       List<LineSegment3D> polygon2 = polygon1.stream().map(LineSegment3D::new).peek(segment -> segment.translate(0.09, 0.005, 0.0))
                                              .collect(Collectors.toList());
