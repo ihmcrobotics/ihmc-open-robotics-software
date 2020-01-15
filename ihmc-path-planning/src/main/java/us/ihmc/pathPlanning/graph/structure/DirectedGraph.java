@@ -72,12 +72,12 @@ public class DirectedGraph<N>
       if (nodeCostMap.containsKey(endNode))
       {
          double oldNodeCost = nodeCostMap.get(endNode).getNodeCost();
-         if (newNodeCost >= oldNodeCost)
-            return;
-
-         nodeCostMap.put(endNode, new NodeCost(newNodeCost));
-         incomingBestEdge.put(endNode, edge);
-         updateChildCostsRecursively(endNode);
+         if (newNodeCost < oldNodeCost)
+         {
+            nodeCostMap.put(endNode, new NodeCost(newNodeCost));
+            incomingBestEdge.put(endNode, edge);
+            updateChildCostsRecursively(endNode);
+         }
       }
       else
       {
@@ -86,9 +86,7 @@ public class DirectedGraph<N>
       }
 
       if(graphExpansionCallback != null)
-      {
          graphExpansionCallback.accept(edge);
-      }
    }
 
    /**
