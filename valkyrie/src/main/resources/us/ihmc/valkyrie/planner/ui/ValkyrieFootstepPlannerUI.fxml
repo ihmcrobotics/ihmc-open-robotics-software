@@ -25,19 +25,23 @@
     </right>
 
     <bottom>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
+        <TabPane tabClosingPolicy="UNAVAILABLE" >
             <tabs>
                 <Tab text="Main">
                     <content>
                         <fx:include fx:id="valkyriePlannerDashboard" source="ValkyriePlannerDashboard.fxml"/>
                     </content>
                 </Tab>
-            </tabs>
 
-            <tabs>
-                <Tab text="Graph Table">
+                <Tab text="Parameters">
                     <content>
-                        <fx:include fx:id="valkyriePlannerGraphUI" source="ValkyriePlannerGraphUI.fxml"/>
+                        <fx:include fx:id="valkyriePlannerParameters" source="ValkyriePlannerParameters.fxml"/>
+                    </content>
+                </Tab>
+
+                <Tab text="Debugger">
+                    <content>
+                        <fx:include fx:id="valkyriePlannerDebugger" source="ValkyriePlannerDebugger.fxml"/>
                     </content>
                 </Tab>
             </tabs>
