@@ -13,6 +13,6 @@ public class ValkyrieMultiContactMomentumOptimizationSettings extends ValkyrieMo
    @Override
    public int getNumberOfContactableBodies()
    {
-      return 6;
+      return 7;
    }
 }
