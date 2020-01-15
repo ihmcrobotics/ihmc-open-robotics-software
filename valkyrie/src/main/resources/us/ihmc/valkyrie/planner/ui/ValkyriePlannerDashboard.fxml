@@ -110,8 +110,10 @@
 
                     <Label text="Load data set:" prefWidth="120.0" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.halignment="CENTER" textAlignment="CENTER"/>
                     <ComboBox fx:id="dataSetSelector" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.halignment="CENTER" GridPane.columnSpan="4"/>
-                    <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
-                    <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
+                    <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
+                    <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
+                    <TextField fx:id="logGenerationStatus" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.columnSpan="3"/>
+                    <TextField fx:id="logLoadStatus" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.columnSpan="3"/>
                 </GridPane>
             </children>
         </VBox>
