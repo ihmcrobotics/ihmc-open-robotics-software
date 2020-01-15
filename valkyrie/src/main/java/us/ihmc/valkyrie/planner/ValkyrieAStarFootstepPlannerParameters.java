@@ -426,9 +426,9 @@ public class ValkyrieAStarFootstepPlannerParameters
       this.bodyBoxDimensions.setY(bodyBoxDimensionY);
    }
 
-   public void setBodyBoxDimensionZ(double bodyBoxDimensionY)
+   public void setBodyBoxDimensionZ(double bodyBoxDimensionZ)
    {
-      this.bodyBoxDimensions.setY(bodyBoxDimensionY);
+      this.bodyBoxDimensions.setZ(bodyBoxDimensionZ);
    }
 
    public void setBodyBoxOffsetX(double bodyBoxOffsetX)
