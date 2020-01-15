@@ -1,7 +1,9 @@
 package us.ihmc.atlas.sensors;
 
+import geometry_msgs.msg.dds.TransformStamped;
 import sensor_msgs.PointField;
 import sensor_msgs.msg.dds.PointCloud2;
+import tf2_msgs.msg.dds.TFMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -32,6 +34,7 @@ public class AtlasRealsenseROS1Bridge
    // create concurrent queue
    private final ConcurrentLinkedDeque<sensor_msgs.PointCloud2> ros1Deque = new ConcurrentLinkedDeque<>();
    private final IHMCROS2Publisher<PointCloud2> pointCloud2ROS2Publisher;
+   private final IHMCROS2Publisher<TFMessage> framePublisher;
 
    public AtlasRealsenseROS1Bridge()
    {
@@ -61,7 +64,9 @@ public class AtlasRealsenseROS1Bridge
 
       pointCloud2ROS2Publisher = new IHMCROS2Publisher<>(ros2Node, PointCloud2.class);
 
-      new PausablePeriodicThread("PublishThread", UnitConversions.hertzToSeconds(8), this::dequeAndPublish);
+      framePublisher = new IHMCROS2Publisher<>(ros2Node, TFMessage.class, "/tf");
+
+      new PausablePeriodicThread("PublishThread", UnitConversions.hertzToSeconds(8), this::dequeAndPublish).start();
    }
 
    private void dequeAndPublish()
@@ -71,44 +76,87 @@ public class AtlasRealsenseROS1Bridge
          ros1Deque.removeLast();
       }
 
+
+
       sensor_msgs.PointCloud2 ros1PointCloud2 = ros1Deque.removeLast();
 
-      sensor_msgs.msg.dds.PointCloud2 ros2PointCloud2 = new PointCloud2();
+      TFMessage tfMessage = new TFMessage();
+      TransformStamped stamped = tfMessage.getTransforms().add();
+      stamped.getHeader().setFrameId("world");
+      stamped.setChildFrameId(ros1PointCloud2.getHeader().getFrameId());
+      framePublisher.publish(tfMessage);
 
-      long timestamp = ros1PointCloud2.getHeader().getStamp().totalNsecs();
+      PointCloud2 ros2PointCloud2 = new PointCloud2();
+      ros2PointCloud2.getHeader().setFrameId(ros1PointCloud2.getHeader().getFrameId());
+//      ros2PointCloud2.setHeight(ros1PointCloud2.getHeight());
+//      ros2PointCloud2.setWidth(ros1PointCloud2.getWidth());
 
-      ros2PointCloud2 = new sensor_msgs.msg.dds.PointCloud2();
-      ros2PointCloud2.setWidth(ros1PointCloud2.getWidth());
-      ros2PointCloud2.setHeight(ros1PointCloud2.getHeight());
-      ros2PointCloud2.setIsBigendian(true);
-      ros2PointCloud2.setIsDense(true);
-      int pointStep = ros1PointCloud2.getPointStep();
-      ros2PointCloud2.setPointStep(pointStep);
-      ros2PointCloud2.setRowStep(ros1PointCloud2.getRowStep());
+      ros2PointCloud2.setHeight(1);
+      ros2PointCloud2.setWidth(5);
 
-      int numberOfPoints = ros1PointCloud2.getWidth() * ros1PointCloud2.getHeight();
-      int arrayOffset = ros1PointCloud2.getData().arrayOffset();
-      ByteBuffer byteBuffer = ByteBuffer.wrap(ros1PointCloud2.getData().array(), arrayOffset, numberOfPoints * pointStep);
-
-      if (ros1PointCloud2.getIsBigendian())
-         byteBuffer.order(ByteOrder.BIG_ENDIAN);
-      else
-         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-      for (int i = 0; i < 100; i++)
+      for (PointField field : ros1PointCloud2.getFields())
       {
-         PointField ros1PointField = ros1PointCloud2.getFields().get(i);
-         sensor_msgs.msg.dds.PointField ros2PointField = new sensor_msgs.msg.dds.PointField();
-         ros2PointField.setOffset(ros1PointField.getOffset());
-         ros2PointField.setCount(ros1PointField.getCount());
-         ros2PointField.setDatatype(ros1PointField.getDatatype());
-         ros2PointCloud2.getFields().add(ros2PointField);
-
-         byteBuffer.position(i * pointStep + arrayOffset);
-         ros2PointCloud2.getData().add(byteBuffer.get());
-         ros2PointCloud2.getData().add(byteBuffer.get());
-         ros2PointCloud2.getData().add(byteBuffer.get());
+         sensor_msgs.msg.dds.PointField pointField = ros2PointCloud2.getFields().add();
+         pointField.setName(field.getName());
+         pointField.setOffset(field.getOffset());
+         pointField.setDatatype(field.getDatatype());
+         pointField.setCount(field.getCount());
       }
+      ros2PointCloud2.setIsBigendian(ros1PointCloud2.getIsBigendian());
+      ros2PointCloud2.setPointStep(ros1PointCloud2.getPointStep());
+      ros2PointCloud2.setRowStep(ros1PointCloud2.getRowStep());
+      int i = 0;
+      for (byte b : ros1PointCloud2.getData().array())
+      {
+         if (i++ < 100)
+            ros2PointCloud2.getData().add(b);
+      }
+      ros2PointCloud2.setIsDense(ros1PointCloud2.getIsDense());
+//      LogTools.info("Publishing {} points", pointCloud2.width_);
+
+//      sensor_msgs.msg.dds.PointCloud2 ros2PointCloud2 = new sensor_msgs.msg.dds.PointCloud2();
+//
+//      long timestamp = ros1PointCloud2.getHeader().getStamp().totalNsecs();
+//
+//
+//      ros2PointCloud2.getHeader().setFrameId("world");
+//
+//      ros2PointCloud2.setWidth(ros1PointCloud2.getWidth());
+//      ros2PointCloud2.setHeight(ros1PointCloud2.getHeight());
+//      ros2PointCloud2.setIsBigendian(true);
+//      ros2PointCloud2.setIsDense(true);
+//      int pointStep = ros1PointCloud2.getPointStep();
+//      ros2PointCloud2.setPointStep(pointStep);
+//      ros2PointCloud2.setRowStep(ros1PointCloud2.getRowStep());
+//
+//      int numberOfPoints = ros1PointCloud2.getWidth() * ros1PointCloud2.getHeight();
+//      int arrayOffset = ros1PointCloud2.getData().arrayOffset();
+//      ByteBuffer byteBuffer = ByteBuffer.wrap(ros1PointCloud2.getData().array(), arrayOffset, numberOfPoints * pointStep);
+//
+//      if (ros1PointCloud2.getIsBigendian())
+//         byteBuffer.order(ByteOrder.BIG_ENDIAN);
+//      else
+//         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+//
+//      for (int i = 0; i < 4; i++)
+//      {
+//         PointField ros1PointField = ros1PointCloud2.getFields().get(i);
+//         sensor_msgs.msg.dds.PointField ros2PointField = new sensor_msgs.msg.dds.PointField();
+//         ros2PointField.setOffset(ros1PointField.getOffset());
+//         ros2PointField.setCount(ros1PointField.getCount());
+//         ros2PointField.setDatatype(ros1PointField.getDatatype());
+//         ros2PointCloud2.getFields().add();
+//         ros2PointCloud2.getFields().get(ros2PointCloud2.getFields().size()-1).set(ros2PointField);
+//      }
+//      for (int i = 0; i < 30; i++)
+//      {
+//         byteBuffer.position(i * pointStep + arrayOffset);
+//         System.out.println();
+//
+//         ros2PointCloud2.getData().add(byteBuffer.get());
+//         ros2PointCloud2.getData().add(byteBuffer.get());
+//         ros2PointCloud2.getData().add(byteBuffer.get());
+//      }
 
       pointCloud2ROS2Publisher.publish(ros2PointCloud2);
    }
