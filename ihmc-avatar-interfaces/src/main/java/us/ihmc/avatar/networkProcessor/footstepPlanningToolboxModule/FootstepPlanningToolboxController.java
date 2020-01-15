@@ -112,15 +112,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       new YoVariablesForFootstepPlannerParameters(registry, footstepPlannerParameters);
       new YoVisibilityGraphParameters(registry, visibilityGraphsParameters);
 
-      plannerMap.put(FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(footstepPlanningParameters), contactPointsInSoleFrame));
       plannerMap.put(FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame));
-      plannerMap
-            .put(FootstepPlannerType.SIMPLE_BODY_PATH, new SplinePathWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry, null));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, this.visibilityGraphsParameters, contactPointsInSoleFrame,
                                                          graphicsListRegistry, parentRegistry));
-      activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+      activePlanner.set(FootstepPlannerType.A_STAR);
 
       graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -165,20 +162,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
                                                               postProcessingSnapper, plannerListener, footPolygons, registry);
 
       return planner;
-   }
-
-   private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
-   {
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, footstepPlanningParameters);
-      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
-
-      DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
-      footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      footstepPlanner.setExitAfterInitialSolution(false);
-
-      return footstepPlanner;
    }
 
    private FootstepPlannerStatusMessage packStatus(FootstepPlannerStatus status)
