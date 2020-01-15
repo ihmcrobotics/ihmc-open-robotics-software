@@ -206,6 +206,7 @@ public class ValkyrieAStarFootstepPlanner
       }
 
       reportStatus();
+      markSolutionEdges();
       isPlanning.set(false);
    }
 
@@ -271,6 +272,15 @@ public class ValkyrieAStarFootstepPlanner
       }
 
       statusCallback.accept(planningStatus);
+   }
+
+   private void markSolutionEdges()
+   {
+      List<FootstepNode> path = planner.getGraph().getPathFromStart(endNode);
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
    }
 
    private void setSwingParameters(FootstepDataListMessage footstepDataListMessage)
