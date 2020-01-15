@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.createFootPolygons;
 
-public class ValkyriePlannerGraphUIController
+public class ValkyriePlannerDebuggerController
 {
    private final ObservableList<ChildStepProperty> childTableItems = FXCollections.observableArrayList();
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();

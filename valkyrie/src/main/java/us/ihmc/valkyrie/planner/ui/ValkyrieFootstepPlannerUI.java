@@ -88,9 +88,10 @@ public class ValkyrieFootstepPlannerUI extends Application
 
    @FXML
    private ValkyriePlannerDashboardController valkyriePlannerDashboardController;
-
    @FXML
-   private ValkyriePlannerGraphUIController valkyriePlannerGraphUIController;
+   private ValkyriePlannerParametersController valkyriePlannerParametersController;
+   @FXML
+   private ValkyriePlannerDebuggerController valkyriePlannerDebuggerController;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -125,7 +126,6 @@ public class ValkyrieFootstepPlannerUI extends Application
       valkyriePlannerDashboardController.setMessager(messager);
       valkyriePlannerDashboardController.setPlanner(planner);
       valkyriePlannerDashboardController.bindParameters();
-      valkyriePlannerDashboardController.setSpinnersFromPlannerParameters();
       graphicsViewer.setGoalPoseProperties(valkyriePlannerDashboardController.getGoalX().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalY().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalZ().getValueFactory().valueProperty(),
@@ -134,6 +134,10 @@ public class ValkyrieFootstepPlannerUI extends Application
                                                valkyriePlannerDashboardController.getWaypointY().getValueFactory().valueProperty(),
                                                valkyriePlannerDashboardController.getWaypointZ().getValueFactory().valueProperty(),
                                                valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
+
+      valkyriePlannerParametersController.setPlanner(planner);
+      valkyriePlannerParametersController.bindParameters();
+      valkyriePlannerParametersController.setSpinnersFromPlannerParameters();
 
       setupPubSubs();
       primaryStage.setOnCloseRequest(event -> stop());
@@ -151,9 +155,9 @@ public class ValkyrieFootstepPlannerUI extends Application
                                                   valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
       waypointPoseEditor.start();
 
-      valkyriePlannerGraphUIController.setup();
-      valkyriePlannerGraphUIController.setMessager(messager);
-      valkyriePlannerGraphUIController.initialize();
+      valkyriePlannerDebuggerController.setup();
+      valkyriePlannerDebuggerController.setMessager(messager);
+      valkyriePlannerDebuggerController.initialize();
 
       planner.addRequestCallback(graphicsViewer::initialize);
       planner.addRequestCallback(result -> valkyriePlannerDashboardController.setTimerEnabled(true));
@@ -217,14 +221,14 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       // set parameters
       planner.getParameters().setFromPacket(log.getRequestPacket().getParameters());
-      valkyriePlannerDashboardController.setSpinnersFromPlannerParameters();
+      valkyriePlannerParametersController.setSpinnersFromPlannerParameters();
 
       // set status/solution
       valkyriePlannerDashboardController.updatePlanningStatus(log.getStatusPacket());
       graphicsViewer.processPlanningStatus(log.getStatusPacket());
 
       // debugger
-      valkyriePlannerGraphUIController.reset(log.getIterationData(), log.getEdgeDataMap(), planarRegionsList);
+      valkyriePlannerDebuggerController.reset(log.getIterationData(), log.getEdgeDataMap(), planarRegionsList);
    }
 
    private void handleRequest(ValkyrieFootstepPlanningRequestPacket request)
@@ -311,7 +315,7 @@ public class ValkyrieFootstepPlannerUI extends Application
       graphicsViewer.packWaypoints(requestPacket);
 
       planner.handleRequestPacket(requestPacket);
-      Platform.runLater(() -> valkyriePlannerGraphUIController.reset(planner.getIterationData(), planner.getEdgeDataMap(), planarRegionsList.get()));
+      Platform.runLater(() -> valkyriePlannerDebuggerController.reset(planner.getIterationData(), planner.getEdgeDataMap(), planarRegionsList.get()));
    }
 
    private void startMessager()

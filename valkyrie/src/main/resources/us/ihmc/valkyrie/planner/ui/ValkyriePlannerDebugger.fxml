@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Separator?>
-<BorderPane xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.valkyrie.planner.ui.ValkyriePlannerGraphUIController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.valkyrie.planner.ui.ValkyriePlannerDebuggerController">
 
     <left>
         <Region prefWidth="50" />
