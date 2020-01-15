@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 
@@ -37,6 +38,8 @@ public class RobotAndMapViewer
 
    public RobotAndMapViewer(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
+      JavaFXApplicationCreator.createAJavaFXApplication();
+
       Platform.runLater(() ->
       {
          View3DFactory view3dFactory = new View3DFactory(1200, 800);
