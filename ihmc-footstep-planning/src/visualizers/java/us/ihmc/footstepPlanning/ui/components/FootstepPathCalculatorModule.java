@@ -349,14 +349,10 @@ public class FootstepPathCalculatorModule
 
       switch (footstepPlannerTypeReference.get())
       {
-      case PLANAR_REGION_BIPEDAL:
-         return createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, registry);
       case PLAN_THEN_SNAP:
          return new PlanThenSnapPlanner(new TurnWalkTurnPlanner(parameters.get()), contactPointsInSoleFrame);
       case A_STAR:
          return createAStarPlanner(contactPointsInSoleFrame, registry);
-      case SIMPLE_BODY_PATH:
-         return new SplinePathWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, registry, null);
       case VIS_GRAPH_WITH_A_STAR:
          SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(contactPointsInSoleFrame);
          long updateFrequency = 1000;
@@ -401,20 +397,6 @@ public class FootstepPathCalculatorModule
 
       return new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper, plannerListener, footPolygons,
                                       registry);
-   }
-
-   private BodyPathAndFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, YoVariableRegistry registry)
-   {
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters.get());
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, parameters.get());
-      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
-
-      DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(parameters.get(), snapper, nodeChecker, stepCostCalculator, registry);
-      footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
-      footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
-      footstepPlanner.setExitAfterInitialSolution(false);
-
-      return footstepPlanner;
    }
 
    public static FootstepPathCalculatorModule createMessagerModule(SharedMemoryMessager messager)

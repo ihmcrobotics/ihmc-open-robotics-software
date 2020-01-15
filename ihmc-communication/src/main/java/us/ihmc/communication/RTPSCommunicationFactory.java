@@ -67,7 +67,7 @@ public class RTPSCommunicationFactory
          LogTools.info("Scanning interfaces for restriction: " +  restrictionHost);
 
          SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
-         LogTools.info("Restriction subnet info: " + restrictionSubnetInfo);
+         LogTools.debug("Restriction subnet info: " + restrictionSubnetInfo);
          LogTools.info("Restriction address: " + restrictionSubnetInfo.getAddress());
          LogTools.info("Restriction Netmask: " + restrictionSubnetInfo.getNetmask());
 
@@ -82,9 +82,9 @@ public class RTPSCommunicationFactory
                String interfaceHost = address.getHostAddress();
                SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + Short.toString(netmaskAsShort)).getInfo();
 
-               LogTools.info("Interface Subnet Info: " + interfaceSubnetInfo);
-               LogTools.info("Interface address: " + interfaceSubnetInfo.getAddress());
-               LogTools.info("Interface netmask: " + interfaceSubnetInfo.getNetmask());
+               LogTools.debug("Interface Subnet Info: " + interfaceSubnetInfo);
+               LogTools.debug("Interface address: " + interfaceSubnetInfo.getAddress());
+               LogTools.debug("Interface netmask: " + interfaceSubnetInfo.getNetmask());
 
 //               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress()); -- This worked on Windows, but not Linux: Doug
                boolean inRange = restrictionSubnetInfo.isInRange(interfaceSubnetInfo.getAddress()); // This works on Linux. Hopefully works on Windows?
