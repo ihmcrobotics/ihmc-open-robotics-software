@@ -15,19 +15,15 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.CompositeFootstepCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootholdAreaCost;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,6 +32,7 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
+import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
 import us.ihmc.valkyrie.planner.ui.ValkyrieFootstepPlannerUI;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -43,9 +40,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 public class ValkyrieAStarFootstepPlanner
 {
@@ -126,6 +123,7 @@ public class ValkyrieAStarFootstepPlanner
       requestCallback.accept(requestPacket);
       bodyPathHelper.initialize(requestPacket);
       idealStepCalculator.initialize();
+      stepValidityChecker.initialize();
 
       // update parameters
       parameters.setFromPacket(requestPacket.getParameters());
@@ -144,6 +142,7 @@ public class ValkyrieAStarFootstepPlanner
 
       // Set up planner
       FootstepNode startNode = createStartNode(requestPacket);
+      addStartPosesToSnapper(requestPacket);
       endNode = startNode;
       endNodeCost = heuristics.compute(endNode);
       SideDependentList<FootstepNode> goalNodes = createGoalNodes(requestPacket);
@@ -327,6 +326,21 @@ public class ValkyrieAStarFootstepPlanner
                                      });
    }
 
+   private void addStartPosesToSnapper(ValkyrieFootstepPlanningRequestPacket requestPacket)
+   {
+      Pose3D leftFootPose = requestPacket.getStartLeftFootPose();
+      Pose3D rightFootPose = requestPacket.getStartRightFootPose();
+
+      FootstepNode leftFootNode = new FootstepNode(leftFootPose.getX(), leftFootPose.getY(), leftFootPose.getYaw(), RobotSide.LEFT);
+      FootstepNode rightFootNode = new FootstepNode(rightFootPose.getX(), rightFootPose.getY(), rightFootPose.getYaw(), RobotSide.RIGHT);
+
+      RigidBodyTransform leftFootSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(leftFootNode, leftFootPose);
+      RigidBodyTransform rightFootSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(rightFootNode, rightFootPose);
+
+      snapper.addSnapData(leftFootNode, new FootstepNodeSnapData(leftFootSnapTransform));
+      snapper.addSnapData(rightFootNode, new FootstepNodeSnapData(rightFootSnapTransform));
+   }
+
    public static SideDependentList<ConvexPolygon2D> createFootPolygons(ValkyrieRobotModel robotModel)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -355,6 +369,26 @@ public class ValkyrieAStarFootstepPlanner
    public ValkyrieRobotModel getRobotModel()
    {
       return robotModel;
+   }
+
+   public AStarPathPlanner<FootstepNode> getInternalPlanner()
+   {
+      return planner;
+   }
+
+   public Map<GraphEdge<FootstepNode>, StepRejectionReason> getRejectionReasonMap()
+   {
+      return stepValidityChecker.getRejectionReasonMap();
+   }
+
+   public ValkyrieFootstepPlannerHeuristics getHeuristics()
+   {
+      return heuristics;
+   }
+
+   public FootstepNode getEndNode()
+   {
+      return endNode;
    }
 
    public void addRequestCallback(Consumer<ValkyrieFootstepPlanningRequestPacket> callback)
