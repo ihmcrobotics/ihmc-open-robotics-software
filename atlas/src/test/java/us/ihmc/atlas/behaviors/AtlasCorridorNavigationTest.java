@@ -5,10 +5,7 @@ import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.*;
@@ -56,7 +53,6 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -104,6 +100,7 @@ public class AtlasCorridorNavigationTest
       if (KEEP_VISUALIZATION_UP) ThreadTools.sleepForever();
    }
 
+   @Disabled
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
    {
@@ -118,6 +115,7 @@ public class AtlasCorridorNavigationTest
                                           waypointsToHit);
    }
 
+   @Disabled
    @Test
    public void testAtlasMakesItToGoalInMazeCorridor()
    {
