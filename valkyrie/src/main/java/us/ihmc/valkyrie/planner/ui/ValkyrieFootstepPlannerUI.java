@@ -2,9 +2,11 @@ package us.ihmc.valkyrie.planner.ui;
 
 import controller_msgs.msg.dds.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -18,8 +20,10 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -42,6 +46,7 @@ public class ValkyrieFootstepPlannerUI extends Application
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRosControlController.VERSION);
    private final ValkyrieAStarFootstepPlanner planner;
+   private final Messager messager = new SharedMemoryJavaFXMessager(ValkyriePlannerMessagerAPI.API);
    private final AtomicReference<ValkyrieFootstepPlanningStatus> planningResult = new AtomicReference<>();
 
    public static final String MODULE_NAME = "valkyrie_footstep_planner_ui";
@@ -58,21 +63,33 @@ public class ValkyrieFootstepPlannerUI extends Application
    private FootstepPoseEditor goalPoseEditor;
    private FootstepPoseEditor waypointPoseEditor;
 
+   @FXML
+   private CheckBox showRobot;
+   @FXML
+   private CheckBox showPath;
+   @FXML
+   private CheckBox showDebugSteps;
+
    public ValkyrieFootstepPlannerUI()
    {
       this.planner = new ValkyrieAStarFootstepPlanner(robotModel);
-      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters());
+      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters(), messager);
+      startMessager();
    }
 
    public ValkyrieFootstepPlannerUI(ValkyrieAStarFootstepPlanner planner)
    {
       this.planner = planner;
-      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters());
+      this.graphicsViewer = new ValkyriePlannerGraphicsViewer(planner.getSnapper(), planner.getParameters(), messager);
       planner.addRequestCallback(this::handleRequest);
+      startMessager();
    }
 
    @FXML
    private ValkyriePlannerDashboardController valkyriePlannerDashboardController;
+
+   @FXML
+   private ValkyriePlannerGraphUIController valkyriePlannerGraphUIController;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -142,6 +159,11 @@ public class ValkyrieFootstepPlannerUI extends Application
       valkyriePlannerDashboardController.setAddWaypointCallback(() -> {graphicsViewer.addWaypoint(); waypointPoseEditor.enable();});
       valkyriePlannerDashboardController.setClearWaypointsCallback(graphicsViewer::clearWaypoints);
 
+      valkyriePlannerGraphUIController.setup();
+      valkyriePlannerGraphUIController.setPlanner(planner);
+      valkyriePlannerGraphUIController.setMessager(messager);
+      valkyriePlannerGraphUIController.initialize();
+
       planner.addRequestCallback(graphicsViewer::initialize);
       planner.addRequestCallback(result -> valkyriePlannerDashboardController.setTimerEnabled(true));
       planner.addIterationCallback(graphicsViewer::processIterationData);
@@ -159,6 +181,11 @@ public class ValkyrieFootstepPlannerUI extends Application
                                   if (keyEvent.getCode() == KeyCode.ESCAPE)
                                      pausePublisher.publish(new PauseWalkingMessage());
                                });
+
+      robotVisualizer.getRootNode().setMouseTransparent(true);
+      showRobot.setOnAction(event -> robotVisualizer.getRootNode().setVisible(showRobot.isSelected()));
+      showPath.setOnAction(event -> graphicsViewer.showPath(showPath.isSelected()));
+      showDebugSteps.setOnAction(event -> graphicsViewer.showDebugSteps(showDebugSteps.isSelected()));
    }
 
    private void setupWithDataSet(DataSetName dataSetName)
@@ -264,6 +291,20 @@ public class ValkyrieFootstepPlannerUI extends Application
       graphicsViewer.packWaypoints(requestPacket);
 
       planner.handleRequestPacket(requestPacket);
+      Platform.runLater(valkyriePlannerGraphUIController::reset);
+   }
+
+   private void startMessager()
+   {
+      try
+      {
+         messager.startMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         throw new RuntimeException("Unable to start message");
+      }
    }
 
    public static void main(String[] args)
