@@ -38,6 +38,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieStandPrepParameters;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.Status;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogLoader.ValkyriePlannerLog;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -121,8 +122,10 @@ public class ValkyrieFootstepPlannerUI extends Application
       primaryStage.setScene(mainScene);
       primaryStage.show();
 
-      valkyriePlannerDashboardController.setParameters(planner.getParameters());
-
+      valkyriePlannerDashboardController.setMessager(messager);
+      valkyriePlannerDashboardController.setPlanner(planner);
+      valkyriePlannerDashboardController.bindParameters();
+      valkyriePlannerDashboardController.setSpinnersFromPlannerParameters();
       graphicsViewer.setGoalPoseProperties(valkyriePlannerDashboardController.getGoalX().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalY().getValueFactory().valueProperty(),
                                            valkyriePlannerDashboardController.getGoalZ().getValueFactory().valueProperty(),
@@ -148,11 +151,7 @@ public class ValkyrieFootstepPlannerUI extends Application
                                                   valkyriePlannerDashboardController.getWaypointYaw().getValueFactory().valueProperty());
       waypointPoseEditor.start();
 
-      valkyriePlannerDashboardController.setMessager(messager);
-      valkyriePlannerDashboardController.setPlanner(planner);
-
       valkyriePlannerGraphUIController.setup();
-      valkyriePlannerGraphUIController.setPlanner(planner);
       valkyriePlannerGraphUIController.setMessager(messager);
       valkyriePlannerGraphUIController.initialize();
 
@@ -176,6 +175,7 @@ public class ValkyrieFootstepPlannerUI extends Application
       messager.registerTopicListener(ValkyriePlannerMessagerAPI.placeGoal, placeGoal -> goalPoseEditor.enable());
       messager.registerTopicListener(ValkyriePlannerMessagerAPI.addWaypoint, addWaypoint -> waypointPoseEditor.enable());
       messager.registerTopicListener(ValkyriePlannerMessagerAPI.dataSetSelected, this::setupWithDataSet);
+      messager.registerTopicListener(ValkyriePlannerMessagerAPI.logToLoad, this::setupWithLog);
 
       robotVisualizer.getRootNode().setMouseTransparent(true);
       showRobot.setOnAction(event -> robotVisualizer.getRootNode().setVisible(showRobot.isSelected()));
@@ -198,8 +198,33 @@ public class ValkyrieFootstepPlannerUI extends Application
       PlannerInput plannerInput = dataSet.getPlannerInput();
       Pose3D startPose = new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
       Pose3D goalPose = new Pose3D(plannerInput.getGoalPosition(), new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
-
       setStartAndGoal(startPose, goalPose);
+   }
+
+   private void setupWithLog(ValkyriePlannerLog log)
+   {
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
+
+      // set regions
+      setRegions(planarRegionsList);
+
+      // set start/goal
+      Pose3D startPose = new Pose3D();
+      Pose3D goalPose = new Pose3D();
+      startPose.interpolate(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose(), 0.5);
+      goalPose.interpolate(log.getRequestPacket().getGoalLeftFootPose(), log.getRequestPacket().getGoalRightFootPose(), 0.5);
+      setStartAndGoal(startPose, goalPose);
+
+      // set parameters
+      planner.getParameters().setFromPacket(log.getRequestPacket().getParameters());
+      valkyriePlannerDashboardController.setSpinnersFromPlannerParameters();
+
+      // set status/solution
+      valkyriePlannerDashboardController.updatePlanningStatus(log.getStatusPacket());
+      graphicsViewer.processPlanningStatus(log.getStatusPacket());
+
+      // debugger
+      valkyriePlannerGraphUIController.reset(log.getIterationData(), log.getEdgeDataMap(), planarRegionsList);
    }
 
    private void handleRequest(ValkyrieFootstepPlanningRequestPacket request)
@@ -286,7 +311,7 @@ public class ValkyrieFootstepPlannerUI extends Application
       graphicsViewer.packWaypoints(requestPacket);
 
       planner.handleRequestPacket(requestPacket);
-      Platform.runLater(valkyriePlannerGraphUIController::reset);
+      Platform.runLater(() -> valkyriePlannerGraphUIController.reset(planner.getIterationData(), planner.getEdgeDataMap(), planarRegionsList.get()));
    }
 
    private void startMessager()

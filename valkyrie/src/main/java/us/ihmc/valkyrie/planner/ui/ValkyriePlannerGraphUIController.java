@@ -13,39 +13,41 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
-import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
-import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogger;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.createFootPolygons;
 
 public class ValkyriePlannerGraphUIController
 {
-   private ValkyrieAStarFootstepPlanner planner;
    private final ObservableList<ChildStepProperty> childTableItems = FXCollections.observableArrayList();
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();
    private TableColumnHolder parentColumnHolder;
    private TableColumnHolder childColumnHolder;
    private Messager messager;
-   private List<FootstepNode> path;
+   private List<FootstepNode> path = new ArrayList<>();
    private final Stack<FootstepNode> parentStepStack = new Stack<>();
    private final AtomicReference<ChildStepProperty> selectedRow = new AtomicReference<>();
+
+   private List<ValkyriePlannerIterationData> iterationDataList;
+   private Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap;
+   private FootstepNodeSnapper snapper;
 
    @FXML
    private TableView debugParentStepTable;
@@ -59,11 +61,6 @@ public class ValkyriePlannerGraphUIController
    @FXML
    private Button stepBack;
 
-   void setPlanner(ValkyrieAStarFootstepPlanner planner)
-   {
-      this.planner = planner;
-   }
-
    void setMessager(Messager messager)
    {
       this.messager = messager;
@@ -71,6 +68,8 @@ public class ValkyriePlannerGraphUIController
 
    void setup()
    {
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(createFootPolygons(new ValkyrieRobotModel(RobotTarget.SCS)));
+
       parentColumnHolder = new TableColumnHolder(debugParentStepTable, true);
       childColumnHolder = new TableColumnHolder(debugChildStepTable, false);
 
@@ -120,50 +119,65 @@ public class ValkyriePlannerGraphUIController
       debugParentStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
    }
 
-   public void reset()
+   public void reset(List<ValkyriePlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap, PlanarRegionsList planarRegionsList)
    {
-      ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
-      logger.logSession();
+      this.iterationDataList = iterationDataList;
+      this.edgeDataMap = edgeDataMap;
+      this.snapper.setPlanarRegions(planarRegionsList);
 
       parentStepStack.clear();
       selectedRow.set(null);
 
-      FootstepNode endNode = planner.getEndNode();
-      path = planner.getInternalPlanner().getGraph().getPathFromStart(endNode);
+      path.clear();
+      recursivelyBuildPath(iterationDataList.get(0), iterationDataList, edgeDataMap);
+
       FootstepNode startNode = path.get(0);
       parentStepStack.push(startNode);
       updateTable();
    }
 
+   private void recursivelyBuildPath(ValkyriePlannerIterationData iterationData, List<ValkyriePlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap)
+   {
+      FootstepNode stanceNode = iterationData.getStanceNode();
+      path.add(stanceNode);
+
+      for (int i = 0; i < iterationData.getChildNodes().size(); i++)
+      {
+         FootstepNode childNode = iterationData.getChildNodes().get(i);
+         if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).getSolutionEdge())
+         {
+            iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
+            return;
+         }
+      }
+   }
+
    private void updateTable()
    {
       FootstepNode parentNode = parentStepStack.peek();
-      DirectedGraph<FootstepNode> graph = planner.getInternalPlanner().getGraph();
-      FootstepNodeSnapper snapper = planner.getSnapper();
-      FootstepNode idealStep = planner.getIterationData().stream().filter(iterationData -> iterationData.getStanceNode().equals(parentNode)).findFirst().get().getIdealStep();
+      Optional<ValkyriePlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
 
-      FootstepNodeSnapData parentSnapData = snapper.getSnapData(parentNode);
-      HashSet<GraphEdge<FootstepNode>> edges = graph.getOutgoingEdges().get(parentNode);
-
-      if(edges == null)
+      if(!iterationDataOptional.isPresent())
       {
          parentStepStack.pop();
          return;
       }
 
+      ValkyriePlannerIterationData iterationData = iterationDataOptional.get();
+
       parentTableItems.clear();
       childTableItems.clear();
 
-      for (GraphEdge<FootstepNode> edge : edges)
+      for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
-         ValkyriePlannerEdgeData edgeData = planner.getEdgeDataMap().get(edge);
-         boolean expanded = graph.getOutgoingEdges().containsKey(edge.getEndNode());
-         boolean solution = parentStepStack.size() < path.size() && path.get(parentStepStack.size()).equals(edge.getEndNode());
-         ChildStepProperty stepProperty = new ChildStepProperty(edgeData, expanded, solution);
+         FootstepNode childNode = iterationData.getChildNodes().get(i);
+         ValkyriePlannerEdgeData edgeData = edgeDataMap.get(new GraphEdge<>(iterationData.getStanceNode(), childNode));
+         boolean expanded = iterationDataList.stream().anyMatch(data -> data.getStanceNode().equals(childNode));
+         ChildStepProperty stepProperty = new ChildStepProperty(edgeData, expanded);
          childTableItems.add(stepProperty);
       }
 
-      ParentStepProperty stepProperty = new ParentStepProperty(parentNode, parentSnapData, idealStep, snapper.snapFootstepNode(idealStep));
+      ParentStepProperty stepProperty = new ParentStepProperty(iterationData);
       parentTableItems.add(stepProperty);
 
       debugChildStepTable.getSortOrder().clear();
@@ -204,7 +218,7 @@ public class ValkyriePlannerGraphUIController
 
    public void stepBack()
    {
-      if (parentStepStack.size() < 2)
+      if (parentStepStack.size() <= 1)
       {
          return;
       }
@@ -299,17 +313,19 @@ public class ValkyriePlannerGraphUIController
 
    public class ParentStepProperty
    {
-      private final FootstepNode node;
+      private final FootstepNode stanceNode;
       private final FootstepNodeSnapData snapData;
       private final RigidBodyTransform transform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
 
-      public ParentStepProperty(FootstepNode node, FootstepNodeSnapData snapData, FootstepNode idealStep, FootstepNodeSnapData idealStepSnapData)
+      public ParentStepProperty(ValkyriePlannerIterationData iterationData)
       {
-         this.node = node;
-         this.snapData = snapData;
-         FootstepNodeTools.getSnappedNodeTransform(node, snapData.getSnapTransform(), transform);
+         this.stanceNode = iterationData.getStanceNode();
+         this.snapData = iterationData.getStanceNodeSnapData();
+         FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapData.getSnapTransform(), transform);
 
+         FootstepNode idealStep = iterationData.getIdealStep();
+         FootstepNodeSnapData idealStepSnapData = snapper.snapFootstepNode(idealStep);
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
             FootstepNodeTools.getNodeTransform(idealStep, idealStepTransform);
@@ -358,15 +374,12 @@ public class ValkyriePlannerGraphUIController
       private final RigidBodyTransform transform = new RigidBodyTransform();
       private final boolean expanded;
       private final double stepYaw;
-      private final boolean solution;
 
       public ChildStepProperty(ValkyriePlannerEdgeData edgeData,
-                               boolean expanded,
-                               boolean solution)
+                               boolean expanded)
       {
          this.edgeData = edgeData;
          this.expanded = expanded;
-         this.solution = solution;
 
          FootstepNode candidateNode = edgeData.getCandidateNode();
          FootstepNode stanceNode = edgeData.getCandidateNode();
@@ -465,7 +478,7 @@ public class ValkyriePlannerGraphUIController
 
       public String getSolution()
       {
-         return Boolean.toString(solution);
+         return Boolean.toString(edgeData.getSolutionEdge());
       }
    }
 }

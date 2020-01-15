@@ -223,10 +223,11 @@ public class ValkyriePlannerDashboardController
    public void loadLog()
    {
       ValkyriePlannerLogLoader logLoader = new ValkyriePlannerLogLoader();
-      logLoader.load();
+      if(logLoader.load())
+         messager.submitMessage(ValkyriePlannerMessagerAPI.logToLoad, logLoader.getLog());
    }
 
-   public void setParameters(ValkyrieAStarFootstepPlannerParameters parameters)
+   public void bindParameters()
    {
       idealFootstepWidth.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
       minimumFootstepLength.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
@@ -282,52 +283,7 @@ public class ValkyriePlannerDashboardController
       waypointZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
       waypointYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
-      idealFootstepWidth.getValueFactory().setValue(parameters.getIdealFootstepWidth());
-      minimumFootstepLength.getValueFactory().setValue(parameters.getMinimumFootstepLength());
-      idealFootstepLength.getValueFactory().setValue(parameters.getIdealFootstepLength());
-      minimumStepWidth.getValueFactory().setValue(parameters.getMinimumStepWidth());
-      maximumStepWidth.getValueFactory().setValue(parameters.getMaximumStepWidth());
-      maximumStepReach.getValueFactory().setValue(parameters.getMaximumStepReach());
-      minimumXClearanceFromStance.getValueFactory().setValue(parameters.getMinimumXClearanceFromStance());
-      minimumYClearanceFromStance.getValueFactory().setValue(parameters.getMinimumYClearanceFromStance());
-      minimumStepYaw.getValueFactory().setValue(parameters.getMinimumStepYaw());
-      maximumStepYaw.getValueFactory().setValue(parameters.getMaximumStepYaw());
-      stepYawReductionFactorAtMaxReach.getValueFactory().setValue(parameters.getStepYawReductionFactorAtMaxReach());
-      maximumStepZ.getValueFactory().setValue(parameters.getMaximumStepZ());
-      minimumFootholdPercent.getValueFactory().setValue(parameters.getMinimumFootholdPercent());
-      maximumSurfanceInclineRadians.getValueFactory().setValue(parameters.getMaximumSurfanceInclineRadians());
-      wiggleInsideDelta.getValueFactory().setValue(parameters.getWiggleInsideDelta());
-      maximumXYWiggle.getValueFactory().setValue(parameters.getMaximumXYWiggle());
-      maximumYawWiggle.getValueFactory().setValue(parameters.getMaximumYawWiggle());
-      cliffHeightToAvoid.getValueFactory().setValue(parameters.getCliffHeightToAvoid());
-      minimumDistanceFromCliffBottoms.getValueFactory().setValue(parameters.getMinimumDistanceFromCliffBottoms());
-      flatGroundLowerThreshold.getValueFactory().setValue(parameters.getFlatGroundLowerThreshold());
-      flatGroundUpperThreshold.getValueFactory().setValue(parameters.getFlatGroundUpperThreshold());
-      maximumStepWidthWhenSteppingDown.getValueFactory().setValue(parameters.getMaximumStepWidthWhenSteppingDown());
-      maximumStepReachWhenSteppingDown.getValueFactory().setValue(parameters.getMaximumStepReachWhenSteppingDown());
-      maximumStepWidthWhenSteppingUp.getValueFactory().setValue(parameters.getMaximumStepWidthWhenSteppingUp());
-      maximumStepReachWhenSteppingUp.getValueFactory().setValue(parameters.getMaximumStepReachWhenSteppingUp());
-      translationScaleFromGrandparentNode.getValueFactory().setValue(parameters.getTranslationScaleFromGrandparentNode());
-      finalTurnProximity.getValueFactory().setValue(parameters.getFinalTurnProximity());
-      checkForPathCollisions.setSelected(parameters.getCheckForPathCollisions());
-      checkForBodyBoxCollisions.setSelected(parameters.getCheckForBodyBoxCollisions());
-      bodyBoxDimensionX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
-      bodyBoxDimensionY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
-      bodyBoxDimensionZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
-      bodyBoxOffsetX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
-      bodyBoxOffsetY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
-      bodyBoxOffsetZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
-      numberOfBoundingBoxChecks.getValueFactory().setValue(parameters.getNumberOfBoundingBoxChecks());
-      translationWeightX.getValueFactory().setValue(parameters.getTranslationWeight().getX());
-      translationWeightY.getValueFactory().setValue(parameters.getTranslationWeight().getY());
-      translationWeightZ.getValueFactory().setValue(parameters.getTranslationWeight().getZ());
-      orientationWeightYaw.getValueFactory().setValue(parameters.getOrientationWeight().getYaw());
-      orientationWeightPitch.getValueFactory().setValue(parameters.getOrientationWeight().getPitch());
-      orientationWeightRoll.getValueFactory().setValue(parameters.getOrientationWeight().getRoll());
-      costPerStep.getValueFactory().setValue(parameters.getCostPerStep());
-      footholdAreaWeight.getValueFactory().setValue(parameters.getFootholdAreaWeight());
-      astarHeuristicsWeight.getValueFactory().setValue(parameters.getAstarHeuristicsWeight());
-
+      ValkyrieAStarFootstepPlannerParameters parameters = planner.getParameters();
       idealFootstepWidth.getValueFactory().valueProperty().addListener(observable -> parameters.setIdealFootstepWidth(idealFootstepWidth.getValue()));
       minimumFootstepLength.getValueFactory().valueProperty().addListener(observable -> parameters.setMinimumFootstepLength(minimumFootstepLength.getValue()));
       idealFootstepLength.getValueFactory().valueProperty().addListener(observable -> parameters.setIdealFootstepLength(idealFootstepLength.getValue()));
@@ -376,6 +332,56 @@ public class ValkyriePlannerDashboardController
 
       dataSetSelector.getItems().setAll(DataSetName.values());
       dataSetSelector.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> messager.submitMessage(ValkyriePlannerMessagerAPI.dataSetSelected, dataSetSelector.getValue()));
+   }
+
+   public void setSpinnersFromPlannerParameters()
+   {
+      ValkyrieAStarFootstepPlannerParameters parameters = planner.getParameters();
+      idealFootstepWidth.getValueFactory().setValue(parameters.getIdealFootstepWidth());
+      minimumFootstepLength.getValueFactory().setValue(parameters.getMinimumFootstepLength());
+      idealFootstepLength.getValueFactory().setValue(parameters.getIdealFootstepLength());
+      minimumStepWidth.getValueFactory().setValue(parameters.getMinimumStepWidth());
+      maximumStepWidth.getValueFactory().setValue(parameters.getMaximumStepWidth());
+      maximumStepReach.getValueFactory().setValue(parameters.getMaximumStepReach());
+      minimumXClearanceFromStance.getValueFactory().setValue(parameters.getMinimumXClearanceFromStance());
+      minimumYClearanceFromStance.getValueFactory().setValue(parameters.getMinimumYClearanceFromStance());
+      minimumStepYaw.getValueFactory().setValue(parameters.getMinimumStepYaw());
+      maximumStepYaw.getValueFactory().setValue(parameters.getMaximumStepYaw());
+      stepYawReductionFactorAtMaxReach.getValueFactory().setValue(parameters.getStepYawReductionFactorAtMaxReach());
+      maximumStepZ.getValueFactory().setValue(parameters.getMaximumStepZ());
+      minimumFootholdPercent.getValueFactory().setValue(parameters.getMinimumFootholdPercent());
+      maximumSurfanceInclineRadians.getValueFactory().setValue(parameters.getMaximumSurfanceInclineRadians());
+      wiggleInsideDelta.getValueFactory().setValue(parameters.getWiggleInsideDelta());
+      maximumXYWiggle.getValueFactory().setValue(parameters.getMaximumXYWiggle());
+      maximumYawWiggle.getValueFactory().setValue(parameters.getMaximumYawWiggle());
+      cliffHeightToAvoid.getValueFactory().setValue(parameters.getCliffHeightToAvoid());
+      minimumDistanceFromCliffBottoms.getValueFactory().setValue(parameters.getMinimumDistanceFromCliffBottoms());
+      flatGroundLowerThreshold.getValueFactory().setValue(parameters.getFlatGroundLowerThreshold());
+      flatGroundUpperThreshold.getValueFactory().setValue(parameters.getFlatGroundUpperThreshold());
+      maximumStepWidthWhenSteppingDown.getValueFactory().setValue(parameters.getMaximumStepWidthWhenSteppingDown());
+      maximumStepReachWhenSteppingDown.getValueFactory().setValue(parameters.getMaximumStepReachWhenSteppingDown());
+      maximumStepWidthWhenSteppingUp.getValueFactory().setValue(parameters.getMaximumStepWidthWhenSteppingUp());
+      maximumStepReachWhenSteppingUp.getValueFactory().setValue(parameters.getMaximumStepReachWhenSteppingUp());
+      translationScaleFromGrandparentNode.getValueFactory().setValue(parameters.getTranslationScaleFromGrandparentNode());
+      finalTurnProximity.getValueFactory().setValue(parameters.getFinalTurnProximity());
+      checkForPathCollisions.setSelected(parameters.getCheckForPathCollisions());
+      checkForBodyBoxCollisions.setSelected(parameters.getCheckForBodyBoxCollisions());
+      bodyBoxDimensionX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
+      bodyBoxDimensionY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
+      bodyBoxDimensionZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
+      bodyBoxOffsetX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
+      bodyBoxOffsetY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
+      bodyBoxOffsetZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
+      numberOfBoundingBoxChecks.getValueFactory().setValue(parameters.getNumberOfBoundingBoxChecks());
+      translationWeightX.getValueFactory().setValue(parameters.getTranslationWeight().getX());
+      translationWeightY.getValueFactory().setValue(parameters.getTranslationWeight().getY());
+      translationWeightZ.getValueFactory().setValue(parameters.getTranslationWeight().getZ());
+      orientationWeightYaw.getValueFactory().setValue(parameters.getOrientationWeight().getYaw());
+      orientationWeightPitch.getValueFactory().setValue(parameters.getOrientationWeight().getPitch());
+      orientationWeightRoll.getValueFactory().setValue(parameters.getOrientationWeight().getRoll());
+      costPerStep.getValueFactory().setValue(parameters.getCostPerStep());
+      footholdAreaWeight.getValueFactory().setValue(parameters.getFootholdAreaWeight());
+      astarHeuristicsWeight.getValueFactory().setValue(parameters.getAstarHeuristicsWeight());
    }
 
    private class TimeElapsedManager extends AnimationTimer
