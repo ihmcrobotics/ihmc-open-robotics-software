@@ -26,18 +26,13 @@ import java.util.Map;
 
 public class ValkyriePlannerLogLoader
 {
-   private final ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
-   private final ValkyrieFootstepPlanningStatus statusPacket = new ValkyrieFootstepPlanningStatus();
-
    private final JSONSerializer<ValkyrieFootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<ValkyrieFootstepPlanningStatus> statusPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningStatusPubSubType());
-   private final Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
-   private final List<ValkyriePlannerIterationData> iterationData = new ArrayList<>();
+   private ValkyriePlannerLog log = null;
 
-   public void load()
+   public boolean load()
    {
-      edgeDataMap.clear();
-      iterationData.clear();
+      log = new ValkyriePlannerLog();
 
       JFileChooser fileChooser = new JFileChooser();
       File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs");
@@ -46,7 +41,7 @@ public class ValkyriePlannerLogLoader
       int chooserState = fileChooser.showOpenDialog(null);
 
       if (chooserState != JFileChooser.APPROVE_OPTION)
-         return;
+         return false;
 
       try
       {
@@ -57,14 +52,14 @@ public class ValkyriePlannerLogLoader
          InputStream requestPacketInputStream = new FileInputStream(requestFile);
          ObjectMapper objectMapper = new ObjectMapper();
          JsonNode jsonNode = objectMapper.readTree(requestPacketInputStream);
-         requestPacket.set(requestPacketSerializer.deserialize(jsonNode.toString()));
+         log.requestPacket.set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
          // load status packet
          File statusFile = new File(selectedFile, ValkyriePlannerLogger.statusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
-         statusPacket.set(statusPacketSerializer.deserialize(jsonNode.toString()));
+         log.statusPacket.set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
          // load data file
@@ -76,17 +71,14 @@ public class ValkyriePlannerLogLoader
 
          while(dataFileReader.readLine() != null)
          {
-            // iteration number
-            dataFileReader.readLine();
-
             ValkyriePlannerIterationData iterationData = new ValkyriePlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealStep(readNode(dataFileReader.readLine()));
+            int edges = getIntCSV(dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-            this.iterationData.add(iterationData);
+            log.iterationData.add(iterationData);
 
-            int edges = getIntCSV(dataFileReader.readLine())[0];
             for (int i = 0; i < edges; i++)
             {
                // edge marker
@@ -107,39 +99,61 @@ public class ValkyriePlannerLogLoader
                edgeData.setCostFromStart(doubleCSV[6]);
                edgeData.setEdgeCost(doubleCSV[7]);
                edgeData.setHeuristicCost(doubleCSV[8]);
+               edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
+               iterationData.getChildNodes().add(edgeData.getCandidateNode());
 
-               edgeDataMap.put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
+               log.edgeDataMap.put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
+
+         return true;
       }
       catch (Exception e)
       {
          LogTools.error("Exception while loading log");
+         e.printStackTrace();
+         return false;
       }
    }
 
-   public ValkyrieFootstepPlanningRequestPacket getRequestPacket()
+   public class ValkyriePlannerLog
    {
-      return requestPacket;
+      private final ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
+      private final ValkyrieFootstepPlanningStatus statusPacket = new ValkyrieFootstepPlanningStatus();
+      private final Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
+      private final List<ValkyriePlannerIterationData> iterationData = new ArrayList<>();
+
+      public ValkyrieFootstepPlanningRequestPacket getRequestPacket()
+      {
+         return requestPacket;
+      }
+
+      public ValkyrieFootstepPlanningStatus getStatusPacket()
+      {
+         return statusPacket;
+      }
+
+      public Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> getEdgeDataMap()
+      {
+         return edgeDataMap;
+      }
+
+      public List<ValkyriePlannerIterationData> getIterationData()
+      {
+         return iterationData;
+      }
    }
 
-   public ValkyrieFootstepPlanningStatus getStatusPacket()
+   public ValkyriePlannerLog getLog()
    {
-      return statusPacket;
-   }
-
-   public Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> getEdgeDataMap()
-   {
-      return edgeDataMap;
-   }
-
-   public List<ValkyriePlannerIterationData> getIterationData()
-   {
-      return iterationData;
+      return log;
    }
 
    private static int[] getIntCSV(String dataFileLine)
    {
+      if(dataFileLine.contains("null"))
+         return new int[0];
+
       String[] csvString = getStringCSV(dataFileLine);
       int[] data = new int[csvString.length];
       for (int i = 0; i < csvString.length; i++)
@@ -151,6 +165,9 @@ public class ValkyriePlannerLogLoader
 
    private static double[] getDoubleCSV(String dataFileLine)
    {
+      if(dataFileLine.contains("null"))
+         return new double[0];
+
       String[] csvString = getStringCSV(dataFileLine);
       double[] data = new double[csvString.length];
       for (int i = 0; i < csvString.length; i++)
@@ -162,12 +179,12 @@ public class ValkyriePlannerLogLoader
 
    private static String[] getStringCSV(String dataFileLine)
    {
-      if(!dataFileLine.contains(": "))
+      if(!dataFileLine.contains(":"))
       {
-         throw new RuntimeException("Error parsing data file, `:` not found at line: \n" + dataFileLine);
+         throw new RuntimeException("Error parsing data file, ':' not found at line: \n" + dataFileLine);
       }
 
-      return dataFileLine.split(": ")[1].split(",");
+      return dataFileLine.split(":")[1].split(",");
    }
 
    private static FootstepNode readNode(String dataFileString)

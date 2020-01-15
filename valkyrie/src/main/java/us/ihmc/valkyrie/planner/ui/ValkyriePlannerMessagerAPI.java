@@ -9,6 +9,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogLoader.ValkyriePlannerLog;
 
 public class ValkyriePlannerMessagerAPI
 {
@@ -16,19 +17,22 @@ public class ValkyriePlannerMessagerAPI
    private static final Category Root = apiFactory.createRootCategory("ValkyriePlannerMessagerAPI");
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
+   // Planner control
    public static final Topic<Boolean> doPlanning = topic("DoPlanning");
    public static final Topic<Boolean> haltPlanning = topic("HaltPlanning");
-   public static final Topic<Boolean> sendPlanningResult = topic("SendPlanningResult");
-   public static final Topic<Boolean> stopWalking = topic("StopWalking");
    public static final Topic<Boolean> placeGoal = topic("PlaceGoal");
    public static final Topic<Boolean> addWaypoint = topic("AddWaypoint");
    public static final Topic<Boolean> clearWaypoints = topic("ClearWaypoints");
+
+   // Robot control
+   public static final Topic<Boolean> sendPlanningResult = topic("SendPlanningResult");
+   public static final Topic<Boolean> stopWalking = topic("StopWalking");
+
+   // Loading logs
    public static final Topic<DataSetName> dataSetSelected = topic("DataSetSelected");
+   public static final Topic<ValkyriePlannerLog> logToLoad = topic("LogToLoad");
 
-   public static final Topic<Boolean> showRobot = topic("ShowRobot");
-   public static final Topic<Boolean> showSolutionSteps = topic("ShowSolutionSteps");
-   public static final Topic<Boolean> showDebugSteps = topic("ShowDebugSteps");
-
+   // Graphic control for debugger
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> parentDebugStep = topic("ParentDebugStep");
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> childDebugStep = topic("ChildDebugStep");
    public static final Topic<RigidBodyTransform> idealDebugStep = topic("IdealDebugStep");

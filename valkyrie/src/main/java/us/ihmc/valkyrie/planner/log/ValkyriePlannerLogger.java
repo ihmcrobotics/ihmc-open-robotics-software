@@ -20,6 +20,7 @@ import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 public class ValkyriePlannerLogger
@@ -89,6 +90,13 @@ public class ValkyriePlannerLogger
          return;
       }
 
+      HashSet<GraphEdge<FootstepNode>> solutionEdges = new HashSet<>();
+      List<FootstepNode> solutionPath = planner.getInternalPlanner().getGraph().getPathFromStart(planner.getEndNode());
+      for (int i = 0; i < solutionPath.size() - 1; i++)
+      {
+         solutionEdges.add(new GraphEdge<>(solutionPath.get(i), solutionPath.get(i + 1)));
+      }
+
       // log planner iteration data
       String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
       try
@@ -106,7 +114,8 @@ public class ValkyriePlannerLogger
                           "stepReach" + ", " +
                           "costFromStart" + ", " +
                           "edgeCost" + ", " +
-                          "heuristicCost" + "\n");
+                          "heuristicCost" +
+                          "solutionEdge" + "\n");
 
          List<ValkyriePlannerIterationData> iterationDataList = planner.getIterationData();
          for (int i = 0; i < iterationDataList.size(); i++)
@@ -115,7 +124,7 @@ public class ValkyriePlannerLogger
             fileWriter.write("-Iteration " + i + "\n");
             writeNode("stanceNode", iterationData.getStanceNode());
             writeNode("idealStep", iterationData.getIdealStep());
-            fileWriter.write("edges: " + iterationData.getChildNodes().size());
+            fileWriter.write("edges:" + iterationData.getChildNodes().size() + "\n");
             writeSnapData(iterationData.getStanceNodeSnapData());
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
@@ -129,7 +138,8 @@ public class ValkyriePlannerLogger
                writeSnapData(edgeData.getCandidateNodeSnapData());
 
                // write additional data as doubles
-               fileWriter.write("edgeData: " + EuclidCoreIOTools.getStringOf(",",
+               boolean solutionEdge = solutionEdges.contains(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()));
+               fileWriter.write("edgeData:" + EuclidCoreIOTools.getStringOf(",",
                                                                              EuclidCoreIOTools.getStringFormat(8, 8),
                                                                              edgeData.getRejectionReason() == null ? -1.0 : (double) edgeData.getRejectionReason().ordinal(),
                                                                              edgeData.getFootAreaPercentage(),
@@ -139,7 +149,8 @@ public class ValkyriePlannerLogger
                                                                              edgeData.getStepReach(),
                                                                              edgeData.getCostFromStart(),
                                                                              edgeData.getEdgeCost(),
-                                                                             edgeData.getHeuristicCost()));
+                                                                             edgeData.getHeuristicCost(),
+                                                                             solutionEdge ? 0.0 : 1.0));
                fileWriter.write("\n");
             }
          }
@@ -158,16 +169,16 @@ public class ValkyriePlannerLogger
    private void writeNode(String name, FootstepNode node) throws IOException
    {
       if(node == null)
-         fileWriter.write(name + ": " + Double.NaN + ", " + Double.NaN + ", " + Double.NaN + ", " + Double.NaN + "\n");
+         fileWriter.write(name + ":null" + "\n");
       else
-         fileWriter.write(name + ": " + node.getXIndex() + ", " + node.getYIndex() + ", " + node.getYawIndex() + ", " + node.getRobotSide().ordinal() + "\n");
+         fileWriter.write(name + ":" + node.getXIndex() + "," + node.getYIndex() + "," + node.getYawIndex() + "," + node.getRobotSide().ordinal() + "\n");
    }
 
    private void writeSnapData(FootstepNodeSnapData snapData) throws IOException
    {
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       Quaternion quaternion = new Quaternion(snapTransform.getRotation());
-      fileWriter.write("snapTransform: " + EuclidCoreIOTools.getStringOf(",",
+      fileWriter.write("snapTransform:" + EuclidCoreIOTools.getStringOf(",",
                                                                          EuclidCoreIOTools.getStringFormat(8, 8),
                                                                          quaternion.getX(),
                                                                          quaternion.getY(),
@@ -178,11 +189,18 @@ public class ValkyriePlannerLogger
                                                                          snapTransform.getTranslation().getZ()) + "\n");
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
-      fileWriter.write("croppedFoothold: ");
-      for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
+      fileWriter.write("croppedFoothold:");
+      if(croppedFoothold.isEmpty() || croppedFoothold.containsNaN())
       {
-         Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
-         fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ", "));
+         fileWriter.write("null");
+      }
+      else
+      {
+         for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
+         {
+            Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
+            fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ","));
+         }
       }
 
       fileWriter.write("\n");
