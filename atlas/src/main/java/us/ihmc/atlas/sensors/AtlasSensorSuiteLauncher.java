@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.communication.configuration.NetworkParameters;
 
 import java.io.IOException;
@@ -22,6 +23,8 @@ public class AtlasSensorSuiteLauncher
       atlasSensorSuiteManager.initializePhysicalSensors(rosCoreURI);
 
       new RosModule(atlasRobotModel, rosCoreURI, null, FAST_RTPS);
+
+      new BipedalSupportPlanarRegionPublisher(atlasRobotModel, FAST_RTPS).start();
 
       try
       {

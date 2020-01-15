@@ -33,9 +33,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -161,7 +161,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
-   private MultiStageFootstepPlanningModule footstepPlanningModule = null;
+   private FootstepPlanningToolboxModule footstepPlanningModule = null;
    private VisibilityGraphsParametersBasics visibilityGraphsParameters = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters = null;
    private BipedContinuousPlanningToolboxModule continuousPlanningModule = null;
@@ -230,7 +230,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          footstepPlannerParameters = getTestFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
-      footstepPlanningModule = new MultiStageFootstepPlanningModule(robotModel, null, true, pubSubImplementation);
+      footstepPlanningModule = new FootstepPlanningToolboxModule(robotModel, null, true, pubSubImplementation);
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);

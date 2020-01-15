@@ -6,8 +6,8 @@ import java.util.List;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -126,10 +126,10 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       modules.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), pubSubImplementation));
    }
 
-   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isFootstepPlanningToolboxEnabled())
-         modules.add(new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled(), pubSubImplementation));
+         modules.add(new FootstepPlanningToolboxModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled(), pubSubImplementation));
    }
 
    private void setupFootstepPostProcessingToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -199,7 +199,13 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isRosModuleEnabled())
+      {
          modules.add(new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator(), pubSubImplementation));
+      }
+      else if (params.getRosModuleLauncherClass() != null)
+      {
+         modules.add(new ClosableAndDisposableSpawnedProcess(params.getRosModuleLauncherClass()));
+      }
    }
 
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
