@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -29,9 +30,14 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
+      this(ros2Node, ROS2Tools.REA, initializeToFlatGround);
+   }
+
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2ModuleIdentifier regionsSource, boolean initializeToFlatGround)
+   {
       super(initializeToFlatGround);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, regionsSource, this::acceptPlanarRegions);
       animationTimer.start();
    }
 
