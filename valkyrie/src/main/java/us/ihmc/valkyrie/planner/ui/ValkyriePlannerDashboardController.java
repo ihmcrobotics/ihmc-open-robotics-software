@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.planner.ui;
 
 import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -9,6 +10,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -20,7 +22,9 @@ import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlannerParameters;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogLoader;
 import us.ihmc.valkyrie.planner.log.ValkyriePlannerLogger;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ValkyriePlannerDashboardController
 {
@@ -146,6 +150,11 @@ public class ValkyriePlannerDashboardController
    private Spinner<Double> waypointYaw;
 
    @FXML
+   private TextField logLoadStatus;
+   @FXML
+   private TextField logGenerationStatus;
+
+   @FXML
    public void doPlanning()
    {
       messager.submitMessage(ValkyriePlannerMessagerAPI.doPlanning, true);
@@ -200,7 +209,7 @@ public class ValkyriePlannerDashboardController
    public void updatePlanningStatus(ValkyrieFootstepPlanningStatus planningStatus)
    {
       Status status = Status.fromByte(planningStatus.getPlannerStatus());
-      this.planningStatus.setText(status.toString());
+      Platform.runLater(() -> this.planningStatus.setText(status.toString()));
    }
 
    public void setTimerEnabled(boolean enabled)
@@ -211,77 +220,105 @@ public class ValkyriePlannerDashboardController
          timeElapsedManager.stop();
    }
 
-   public synchronized void generateLog()
+   private final AtomicBoolean generatingLog = new AtomicBoolean();
+   private final AtomicBoolean loadingLog = new AtomicBoolean();
+
+   public void generateLog()
    {
-      if(planner != null)
+      if(planner != null && !generatingLog.get())
       {
+         generatingLog.set(true);
          ValkyriePlannerLogger logger = new ValkyriePlannerLogger(planner);
-         logger.logSession();
+         boolean success = logger.logSession();
+
+         if(success)
+            updateTextField(logGenerationStatus, logger.getLatestLogDirectory());
+         else
+            updateTextField(logGenerationStatus, "Error writing log");
+         generatingLog.set(false);
       }
    }
 
    public void loadLog()
    {
+      if(loadingLog.get())
+         return;
+
+      loadingLog.set(true);
       ValkyriePlannerLogLoader logLoader = new ValkyriePlannerLogLoader();
       if(logLoader.load())
+      {
          messager.submitMessage(ValkyriePlannerMessagerAPI.logToLoad, logLoader.getLog());
+         logLoadStatus.setText(logLoader.getLog().getLogName());
+      }
+      else
+      {
+         logLoadStatus.setText("Error loading log");
+      }
+      loadingLog.set(false);
+   }
+
+   private static void updateTextField(TextField textField, String text)
+   {
+      Platform.runLater(() -> textField.setText(text));
    }
 
    public void bindParameters()
    {
-      idealFootstepWidth.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumFootstepLength.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      idealFootstepLength.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepReach.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumXClearanceFromStance.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumYClearanceFromStance.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      stepYawReductionFactorAtMaxReach.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumSurfanceInclineRadians.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      wiggleInsideDelta.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumXYWiggle.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumYawWiggle.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      minimumDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      flatGroundLowerThreshold.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      flatGroundUpperThreshold.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepWidthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepReachWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepWidthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      maximumStepReachWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      translationScaleFromGrandparentNode.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      finalTurnProximity.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxDimensionX.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxDimensionY.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxDimensionZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxOffsetX.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxOffsetY.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      bodyBoxOffsetZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      Supplier<DoubleSpinnerValueFactory> doubleSpinnerValueFactory = () -> new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1);
+      idealFootstepWidth.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumFootstepLength.setValueFactory(doubleSpinnerValueFactory.get());
+      idealFootstepLength.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumStepWidth.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepWidth.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepReach.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumXClearanceFromStance.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumYClearanceFromStance.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumStepYaw.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepYaw.setValueFactory(doubleSpinnerValueFactory.get());
+      stepYawReductionFactorAtMaxReach.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepZ.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumFootholdPercent.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumSurfanceInclineRadians.setValueFactory(doubleSpinnerValueFactory.get());
+      wiggleInsideDelta.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumXYWiggle.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumYawWiggle.setValueFactory(doubleSpinnerValueFactory.get());
+      cliffHeightToAvoid.setValueFactory(doubleSpinnerValueFactory.get());
+      minimumDistanceFromCliffBottoms.setValueFactory(doubleSpinnerValueFactory.get());
+      flatGroundLowerThreshold.setValueFactory(doubleSpinnerValueFactory.get());
+      flatGroundUpperThreshold.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepWidthWhenSteppingDown.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepReachWhenSteppingDown.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepWidthWhenSteppingUp.setValueFactory(doubleSpinnerValueFactory.get());
+      maximumStepReachWhenSteppingUp.setValueFactory(doubleSpinnerValueFactory.get());
+      translationScaleFromGrandparentNode.setValueFactory(doubleSpinnerValueFactory.get());
+      finalTurnProximity.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxDimensionX.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxDimensionY.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxDimensionZ.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxOffsetX.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxOffsetY.setValueFactory(doubleSpinnerValueFactory.get());
+      bodyBoxOffsetZ.setValueFactory(doubleSpinnerValueFactory.get());
       numberOfBoundingBoxChecks.setValueFactory(new IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0, 1));
-      translationWeightX.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      translationWeightY.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      translationWeightZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      orientationWeightYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      orientationWeightPitch.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      orientationWeightRoll.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      costPerStep.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      footholdAreaWeight.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      astarHeuristicsWeight.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      translationWeightX.setValueFactory(doubleSpinnerValueFactory.get());
+      translationWeightY.setValueFactory(doubleSpinnerValueFactory.get());
+      translationWeightZ.setValueFactory(doubleSpinnerValueFactory.get());
+      orientationWeightYaw.setValueFactory(doubleSpinnerValueFactory.get());
+      orientationWeightPitch.setValueFactory(doubleSpinnerValueFactory.get());
+      orientationWeightRoll.setValueFactory(doubleSpinnerValueFactory.get());
+      costPerStep.setValueFactory(doubleSpinnerValueFactory.get());
+      footholdAreaWeight.setValueFactory(doubleSpinnerValueFactory.get());
+      astarHeuristicsWeight.setValueFactory(doubleSpinnerValueFactory.get());
 
       timeout.setValueFactory(new DoubleSpinnerValueFactory(0.0, Double.MAX_VALUE, 15.0, 1.0));
-      goalX.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      goalY.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      goalZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      goalYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      waypointX.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      waypointY.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      waypointZ.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
-      waypointYaw.setValueFactory(new DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
+      goalX.setValueFactory(doubleSpinnerValueFactory.get());
+      goalY.setValueFactory(doubleSpinnerValueFactory.get());
+      goalZ.setValueFactory(doubleSpinnerValueFactory.get());
+      goalYaw.setValueFactory(doubleSpinnerValueFactory.get());
+      waypointX.setValueFactory(doubleSpinnerValueFactory.get());
+      waypointY.setValueFactory(doubleSpinnerValueFactory.get());
+      waypointZ.setValueFactory(doubleSpinnerValueFactory.get());
+      waypointYaw.setValueFactory(doubleSpinnerValueFactory.get());
 
       ValkyrieAStarFootstepPlannerParameters parameters = planner.getParameters();
       idealFootstepWidth.getValueFactory().valueProperty().addListener(observable -> parameters.setIdealFootstepWidth(idealFootstepWidth.getValue()));
@@ -369,9 +406,9 @@ public class ValkyriePlannerDashboardController
       bodyBoxDimensionX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
       bodyBoxDimensionY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
       bodyBoxDimensionZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
-      bodyBoxOffsetX.getValueFactory().setValue(parameters.getBodyBoxDimensions().getX());
-      bodyBoxOffsetY.getValueFactory().setValue(parameters.getBodyBoxDimensions().getY());
-      bodyBoxOffsetZ.getValueFactory().setValue(parameters.getBodyBoxDimensions().getZ());
+      bodyBoxOffsetX.getValueFactory().setValue(parameters.getBodyBoxOffset().getX());
+      bodyBoxOffsetY.getValueFactory().setValue(parameters.getBodyBoxOffset().getY());
+      bodyBoxOffsetZ.getValueFactory().setValue(parameters.getBodyBoxOffset().getZ());
       numberOfBoundingBoxChecks.getValueFactory().setValue(parameters.getNumberOfBoundingBoxChecks());
       translationWeightX.getValueFactory().setValue(parameters.getTranslationWeight().getX());
       translationWeightY.getValueFactory().setValue(parameters.getTranslationWeight().getY());

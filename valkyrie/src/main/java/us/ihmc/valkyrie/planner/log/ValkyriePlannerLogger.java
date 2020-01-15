@@ -33,6 +33,7 @@ public class ValkyriePlannerLogger
    static final String dataFileName = "PlannerIterationData.log";
 
    private final ValkyrieAStarFootstepPlanner planner;
+   private String latestLogDirectory;
    private FileOutputStream outputStream = null;
    private PrintStream printStream = null;
    private FileWriter fileWriter = null;
@@ -44,9 +45,10 @@ public class ValkyriePlannerLogger
       this.planner = planner;
    }
 
-   public void logSession()
+   public boolean logSession()
    {
       String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "ValkyriePlannerLog" + File.separator;
+      latestLogDirectory = sessionDirectory;
 
       // log request packet
       String requestPacketFile = sessionDirectory + "RequestPacket.json";
@@ -66,7 +68,7 @@ public class ValkyriePlannerLogger
          outputStream = null;
          printStream = null;
          e.printStackTrace();
-         return;
+         return false;
       }
 
       // log status packet
@@ -87,7 +89,7 @@ public class ValkyriePlannerLogger
          outputStream = null;
          printStream = null;
          e.printStackTrace();
-         return;
+         return false;
       }
 
       HashSet<GraphEdge<FootstepNode>> solutionEdges = new HashSet<>();
@@ -105,16 +107,16 @@ public class ValkyriePlannerLogger
          FileTools.ensureFileExists(plannerDataFile.toPath());
          fileWriter = new FileWriter(plannerIterationDataFileName);
 
-         fileWriter.write("edge data: " +
-                          "rejectionReason" + ", " +
-                          "footAreaPercentage" + ", " +
-                          "stepWidth" + ", " +
-                          "stepLength" + ", " +
-                          "stepHeight" + ", " +
-                          "stepReach" + ", " +
-                          "costFromStart" + ", " +
-                          "edgeCost" + ", " +
-                          "heuristicCost" +
+         fileWriter.write("edgeData:" +
+                          "rejectionReason, " +
+                          "footAreaPercentage, " +
+                          "stepWidth, " +
+                          "stepLength, " +
+                          "stepHeight, " +
+                          "stepReach, " +
+                          "costFromStart, " +
+                          "edgeCost, " +
+                          "heuristicCost," +
                           "solutionEdge" + "\n");
 
          List<ValkyriePlannerIterationData> iterationDataList = planner.getIterationData();
@@ -130,7 +132,7 @@ public class ValkyriePlannerLogger
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
                ValkyriePlannerEdgeData edgeData = planner.getEdgeDataMap()
-                                                         .get(new GraphEdge<>(iterationData.getStanceNode(), iterationData.getChildNodes().get(i)));
+                                                         .get(new GraphEdge<>(iterationData.getStanceNode(), iterationData.getChildNodes().get(j)));
 
                // indicate start of data
                fileWriter.write("-Edge:\n");
@@ -150,7 +152,7 @@ public class ValkyriePlannerLogger
                                                                              edgeData.getCostFromStart(),
                                                                              edgeData.getEdgeCost(),
                                                                              edgeData.getHeuristicCost(),
-                                                                             solutionEdge ? 0.0 : 1.0));
+                                                                             solutionEdge ? 1.0 : 0.0));
                fileWriter.write("\n");
             }
          }
@@ -163,7 +165,15 @@ public class ValkyriePlannerLogger
          outputStream = null;
          printStream = null;
          e.printStackTrace();
+         return false;
       }
+
+      return true;
+   }
+
+   public String getLatestLogDirectory()
+   {
+      return latestLogDirectory;
    }
 
    private void writeNode(String name, FootstepNode node) throws IOException

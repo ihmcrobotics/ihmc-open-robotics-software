@@ -98,6 +98,8 @@ public class ValkyriePlannerGraphUIController
                                                                     if (event.getClickCount() == 2 && (!row.isEmpty()))
                                                                     {
                                                                        ChildStepProperty rowData = row.getItem();
+                                                                       if (!rowData.expanded)
+                                                                          return;
                                                                        parentStepStack.push(rowData.edgeData.getCandidateNode());
                                                                        updateTable();
                                                                     }
@@ -156,12 +158,6 @@ public class ValkyriePlannerGraphUIController
    {
       FootstepNode parentNode = parentStepStack.peek();
       Optional<ValkyriePlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
-
-      if(!iterationDataOptional.isPresent())
-      {
-         parentStepStack.pop();
-         return;
-      }
 
       ValkyriePlannerIterationData iterationData = iterationDataOptional.get();
 

@@ -32,8 +32,6 @@ public class ValkyriePlannerLogLoader
 
    public boolean load()
    {
-      log = new ValkyriePlannerLog();
-
       JFileChooser fileChooser = new JFileChooser();
       File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs");
       fileChooser.setCurrentDirectory(logDirectory);
@@ -46,6 +44,7 @@ public class ValkyriePlannerLogLoader
       try
       {
          File selectedFile = fileChooser.getSelectedFile();
+         log = new ValkyriePlannerLog(selectedFile.getName());
 
          // load request packet
          File requestFile = new File(selectedFile, ValkyriePlannerLogger.requestPacketFileName);
@@ -118,11 +117,21 @@ public class ValkyriePlannerLogLoader
 
    public class ValkyriePlannerLog
    {
+      private final String logName;
       private final ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
       private final ValkyrieFootstepPlanningStatus statusPacket = new ValkyrieFootstepPlanningStatus();
       private final Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
       private final List<ValkyriePlannerIterationData> iterationData = new ArrayList<>();
 
+      public ValkyriePlannerLog(String logName)
+      {
+         this.logName = logName;
+      }
+
+      public String getLogName()
+      {
+         return logName;
+      }
       public ValkyrieFootstepPlanningRequestPacket getRequestPacket()
       {
          return requestPacket;
