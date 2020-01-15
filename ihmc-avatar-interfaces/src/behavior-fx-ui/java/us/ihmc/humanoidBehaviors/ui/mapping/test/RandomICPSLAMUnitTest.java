@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -10,9 +9,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
@@ -25,7 +22,7 @@ import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoad
 public class RandomICPSLAMUnitTest
 {
    @Test
-   public void testComputeOverlappedArea()
+   public void testSourcePointsInOverlappedArea()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
@@ -35,49 +32,13 @@ public class RandomICPSLAMUnitTest
       IhmcSLAMFrame previousFrame = new IhmcSLAMFrame(messages.get(49));
       IhmcSLAMFrame frame = new IhmcSLAMFrame(previousFrame, messages.get(50));
 
-      List<Point3D> pointsOutOfPreviousWindow = new ArrayList<>();
-      List<Point3D> pointsInPreviousWindow = new ArrayList<>();
-
-      double windowWidth = 1.0;
+      int numberOfSourcePoints = 100;
+      double windowWidth = 0.6;
       double windowHeight = 0.4;
       double windowDepth = 0.5;
-      ConvexPolygon2D previousWindow = new ConvexPolygon2D();
-      previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
-      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
-      previousWindow.update();
+      double minimumOverlappedRatio = 0.3; // TODO : very important for after cinder block.
 
-      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.getInitialSensorPoseToWorld();
-      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToSensorPose(previousSensorPoseToWorld, frame.getOriginalPointCloud());
-
-      int numberOfPointsInPreviousView = 0;
-      for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
-      {
-         Point3D pointInPreviousView = convertedPointsToPreviousSensorPose[i];
-         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()) && pointInPreviousView.getZ() > windowDepth)
-         {
-            previousSensorPoseToWorld.transform(pointInPreviousView);
-            pointsInPreviousWindow.add(new Point3D(pointInPreviousView));
-            numberOfPointsInPreviousView++;
-         }
-         else
-         {
-            previousSensorPoseToWorld.transform(pointInPreviousView);
-            pointsOutOfPreviousWindow.add(new Point3D(pointInPreviousView));
-         }
-      }
-      System.out.println(convertedPointsToPreviousSensorPose.length + " " + numberOfPointsInPreviousView);
-      Point3D[] inliers = new Point3D[pointsInPreviousWindow.size()];
-      Point3D[] outliers = new Point3D[pointsOutOfPreviousWindow.size()];
-      for (int i = 0; i < inliers.length; i++)
-      {
-         inliers[i] = new Point3D(pointsInPreviousWindow.get(i));
-      }
-      for (int i = 0; i < outliers.length; i++)
-      {
-         outliers[i] = new Point3D(pointsOutOfPreviousWindow.get(i));
-      }
+      Point3D[] sourcePoints = IhmcSLAMTools.createSourcePoints(frame, numberOfSourcePoints, windowWidth, windowHeight, windowDepth, minimumOverlappedRatio);
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
@@ -85,11 +46,10 @@ public class RandomICPSLAMUnitTest
       slamViewer.addSensorPose(frame.getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(previousFrame.getPointCloud(), Color.BLUE);
       slamViewer.addPointCloud(frame.getPointCloud(), Color.GREEN);
-      
-      slamViewer.addPointCloud(inliers, Color.RED);
-      slamViewer.addPointCloud(outliers, Color.BLACK);
-      
-      slamViewer.start("testComputeOverlappedArea");
+
+      slamViewer.addPointCloud(sourcePoints, Color.YELLOW);
+
+      slamViewer.start("testSourcePointsInOverlappedArea");
       ThreadTools.sleepForever();
    }
 

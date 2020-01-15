@@ -1,17 +1,22 @@
 package us.ihmc.humanoidBehaviors.ui.mapping;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAMFrame;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
@@ -20,16 +25,11 @@ import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMTools
 {
@@ -351,6 +351,7 @@ public class IhmcSLAMTools
          Point3D[] newPointCloud = IhmcSLAMTools.createConvertedPointsToWorld(sensorPose, pointCloud, newSensorPose);
 
          double score = IhmcSLAMTools.computeSimilarity(previousPointCloud, previousSensorPose, newPointCloud, newSensorPose, octreeResolution);
+
          if (score < minScore)
          {
             bestAlpha = assumedAlpha;
@@ -394,7 +395,8 @@ public class IhmcSLAMTools
 
                   Point3D pointInBox = OcTreeKeyConversionTools.keyToCoordinate(dummyKey, octreeResolution, treeDepth);
 
-                  double distance = pointInBox.distance(point);
+                  //double distance = pointInBox.distance(point);
+                  double distance = computeDistanceToNormalOctreeNode(searchNode, point);
                   if (distance < minDistance)
                   {
                      minDistance = distance;
@@ -412,23 +414,88 @@ public class IhmcSLAMTools
       return minDistance;
    }
 
-   public static Point3D[] dummyPoint = new Point3D[1];
-
-   public static double computeDistanceToPointCloud(Point3DReadOnly[] pointCloud, Point3DReadOnly point)
+   private static double computeDistanceToNormalOctreeNode(NormalOcTreeNode searchNode, Point3DReadOnly point)
    {
-      dummyPoint[0] = new Point3D();
+      Plane3D plane = new Plane3D(searchNode.getHitLocationCopy(), searchNode.getNormalCopy());
 
-      double minDistance = Double.MAX_VALUE;
-      for (int i = 0; i < pointCloud.length; i++)
+      return plane.distance(point);
+   }
+
+   public static Point3D[] createSourcePoints(IhmcSLAMFrame frame, int numberOfSourcePoints, double windowWidth, double windowHeight, double windowDepth,
+                                              double minimumOverlappedRatio)
+   {
+      IhmcSLAMFrame previousFrame = frame.getPreviousFrame();
+
+      List<Point3D> pointsOutOfPreviousWindow = new ArrayList<>();
+      List<Point3D> pointsInPreviousWindow = new ArrayList<>();
+
+      ConvexPolygon2D previousWindow = new ConvexPolygon2D();
+      previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
+      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2);
+      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2);
+      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
+      previousWindow.update();
+
+      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.getSensorPose();
+      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToOtherSensorPose(frame.getInitialSensorPoseToWorld(),
+                                                                                                           previousSensorPoseToWorld,
+                                                                                                           frame.getOriginalPointCloudToSensorPose());
+
+      int numberOfPointsInPreviousView = 0;
+      for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
       {
-         double distance = pointCloud[i].distance(point);
-         if (distance < minDistance)
+         Point3D pointInPreviousView = convertedPointsToPreviousSensorPose[i];
+         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()) && pointInPreviousView.getZ() > windowDepth)
          {
-            minDistance = distance;
-            dummyPoint[0].set(pointCloud[i]);
+            previousSensorPoseToWorld.transform(pointInPreviousView);
+            pointsInPreviousWindow.add(new Point3D(pointInPreviousView));
+            numberOfPointsInPreviousView++;
+         }
+         else
+         {
+            previousSensorPoseToWorld.transform(pointInPreviousView);
+            pointsOutOfPreviousWindow.add(new Point3D(pointInPreviousView));
+         }
+      }
+      double overlappedRatio = (double) numberOfPointsInPreviousView / convertedPointsToPreviousSensorPose.length;
+
+      /**
+      Point3D[] inliers = new Point3D[pointsInPreviousWindow.size()];
+      Point3D[] outliers = new Point3D[pointsOutOfPreviousWindow.size()];
+      for (int i = 0; i < inliers.length; i++)
+      {
+         inliers[i] = new Point3D(pointsInPreviousWindow.get(i));
+      }
+      for (int i = 0; i < outliers.length; i++)
+      {
+         outliers[i] = new Point3D(pointsOutOfPreviousWindow.get(i));
+      }
+      */
+
+      TIntArrayList indexOfSourcePoints = new TIntArrayList();
+      int index = 0;
+      Point3D[] sourcePoints = new Point3D[numberOfSourcePoints];
+      Random randomSelector = new Random(0612L);
+      while (indexOfSourcePoints.size() != numberOfSourcePoints)
+      {
+         int selectedIndex = randomSelector.nextInt(pointsInPreviousWindow.size());
+         if (!indexOfSourcePoints.contains(selectedIndex))
+         {
+            Point3DReadOnly selectedPoint = pointsInPreviousWindow.get(selectedIndex);
+            sourcePoints[index] = new Point3D(selectedPoint);
+            index++;
+            indexOfSourcePoints.add(selectedIndex);
          }
       }
 
-      return minDistance;
+      System.out.println(convertedPointsToPreviousSensorPose.length + " " + numberOfPointsInPreviousView + " " + overlappedRatio);
+      if (overlappedRatio < minimumOverlappedRatio)
+      {
+         return null;
+      }
+      else
+      {
+         return sourcePoints;
+      }
    }
 }

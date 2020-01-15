@@ -127,4 +127,9 @@ public class IhmcSLAMFrame
       else
          return false;
    }
+   
+   public IhmcSLAMFrame getPreviousFrame()
+   {
+      return previousFrame;
+   }
 }
