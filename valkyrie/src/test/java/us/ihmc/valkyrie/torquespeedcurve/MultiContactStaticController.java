@@ -83,11 +83,13 @@ public class MultiContactStaticController implements RobotController
 
    private final YoFramePoint2D centerOfMass2D = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 10, registry);
+   private final FullHumanoidRobotModel fullRobotModel;
 
    public MultiContactStaticController(double controlDT, double gravityZ, FullHumanoidRobotModel fullRobotModel,
                                        ControllerCoreOptimizationSettings optimizationSettings, WholeBodyControllerParameters<RobotSide> controllerParameters,
                                        List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.fullRobotModel = fullRobotModel;
       this.contactablePlaneBodies = contactablePlaneBodies;
 
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
@@ -158,7 +160,7 @@ public class MultiContactStaticController implements RobotController
       yoGraphicsListRegistry.registerArtifact("Balance",
                                               new YoGraphicPosition("centerOfMass",
                                                                     centerOfMass2D,
-                                                                    0.008,
+                                                                    0.015,
                                                                     YoAppearance.Black(),
                                                                     GraphicType.BALL_WITH_CROSS).createArtifact());
       yoGraphicsListRegistry.registerArtifact("Balance", new YoArtifactPolygon("supportPolygon", supportPolygon, Color.BLUE, false));
@@ -257,5 +259,15 @@ public class MultiContactStaticController implements RobotController
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+
+   public YoFrameConvexPolygon2D getSupportPolygon()
+   {
+      return supportPolygon;
+   }
+
+   public FullHumanoidRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
    }
 }
