@@ -185,6 +185,7 @@ public class ValkyrieAStarFootstepPlanner
 
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
          iterationCallback.accept(iterationData);
+         recordIterationData(iterationData);
 
          if (iterationData.getParentNode() == null)
          {
@@ -201,8 +202,6 @@ public class ValkyrieAStarFootstepPlanner
             reportStatus();
             stopwatch.lap();
          }
-
-         recordIterationData(iterationData);
       }
 
       reportStatus();
