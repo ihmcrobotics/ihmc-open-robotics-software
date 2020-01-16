@@ -160,7 +160,7 @@ public class MultiContactStaticController implements RobotController
       yoGraphicsListRegistry.registerArtifact("Balance",
                                               new YoGraphicPosition("centerOfMass",
                                                                     centerOfMass2D,
-                                                                    0.015,
+                                                                    0.03,
                                                                     YoAppearance.Black(),
                                                                     GraphicType.BALL_WITH_CROSS).createArtifact());
       yoGraphicsListRegistry.registerArtifact("Balance", new YoArtifactPolygon("supportPolygon", supportPolygon, Color.BLUE, false));

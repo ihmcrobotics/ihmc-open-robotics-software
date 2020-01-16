@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -751,7 +754,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
 
       setLegJointQs(robot, jointMap, 0.0, 0.0, -1.3, 1.625, -0.65, 0.0);
       setArmJointQs(RobotSide.LEFT, robot, jointMap, -1.45, -0.8, 1.5, -2.0);
-      setArmJointQs(RobotSide.RIGHT, robot, jointMap, -2.4, 1.334, 1.5, 0.5);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, -2.4, 1.45, 1.5, 0.5);
       setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
       setRootJointPose(robot, 0.0, 0.0, 0.485, 0.0, halfPi, 0.0);
       startSim(info);
@@ -915,17 +918,20 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
          FullHumanoidRobotModel fullRobotModel = controller.getFullRobotModel();
          FramePoint3D headPosition = new FramePoint3D(fullRobotModel.getHead().getBodyFixedFrame());
          headPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         plotter.getPlotter().addArtifact(new TextArtifact("head", "Head", headPosition.getX(), headPosition.getY()));
+         TextArtifact headText = new TextArtifact("head", "Head", headPosition.getX(), headPosition.getY());
+         headText.setFontSize(16);
+         plotter.getPlotter().addArtifact(headText);
          FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getPelvis().getBodyFixedFrame());
          pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         plotter.getPlotter().addArtifact(new TextArtifact("pelvis", "Pelvis", pelvisPosition.getX(), pelvisPosition.getY()));
+         TextArtifact pelvisText = new TextArtifact("pelvis", "Pelvis", pelvisPosition.getX(), pelvisPosition.getY());
+         pelvisText.setFontSize(16);
+         plotter.getPlotter().addArtifact(pelvisText);
       });
    }
 
    private void saveScreenshot(File outputFolder, String fileName) throws IOException
    {
-      ArrayList<ViewportAdapterAndCameraControllerHolder> cameraAdapters = viewportWindow.getViewportPanel().getCameraAdapters();
-      BufferedImage view3Dimage = scs.exportSnapshotAsBufferedImage(cameraAdapters.get(0).getViewportAdapter().getCaptureDevice());
+      BufferedImage view3Dimage = getSCSView3D(0, 2.0);
 
       int smallWidth = view3Dimage.getWidth();
       int smallHeight = view3Dimage.getHeight();
@@ -934,17 +940,30 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       BufferedImage allViews = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
       Graphics graphics = allViews.getGraphics();
       graphics.drawImage(view3Dimage, 0, 0, null);
-      graphics.drawImage(scs.exportSnapshotAsBufferedImage(cameraAdapters.get(1).getViewportAdapter().getCaptureDevice()), smallWidth + 5, 0, null);
-      graphics.drawImage(scs.exportSnapshotAsBufferedImage(cameraAdapters.get(2).getViewportAdapter().getCaptureDevice()), 0, smallHeight + 5, null);
-      graphics.drawImage(scs.exportSnapshotAsBufferedImage(cameraAdapters.get(3).getViewportAdapter().getCaptureDevice()),
-                         smallWidth + 5,
-                         smallHeight + 5,
-                         null);
-      ImageIO.write(allViews, "png", new File(outputFolder, fileName + ".png"));
+      graphics.drawImage(getSCSView3D(1, 2.0), smallWidth + 5, 0, null);
+      graphics.drawImage(getSCSView3D(2, 2.0), 0, smallHeight + 5, null);
+      graphics.drawImage(getSCSView3D(3, 2.0), smallWidth + 5, smallHeight + 5, null);
 
       BufferedImage plotterImage = new BufferedImage(plotter.getJPanel().getWidth(), plotter.getJPanel().getHeight(), BufferedImage.TYPE_INT_RGB);
       plotter.getJPanel().paint(plotterImage.getGraphics());
-      ImageIO.write(plotterImage, "png", new File(outputFolder, fileName + "Plotter.png"));
+      graphics.drawImage(plotterImage, smallWidth - plotterImage.getWidth() / 2, height - plotterImage.getHeight(), null);
+      ImageIO.write(allViews, "png", new File(outputFolder, fileName + ".png"));
+   }
+
+   private BufferedImage getSCSView3D(int viewIndex, double scale)
+   {
+      ArrayList<ViewportAdapterAndCameraControllerHolder> cameraAdapters = viewportWindow.getViewportPanel().getCameraAdapters();
+      BufferedImage exportSnapshotAsBufferedImage = scs.exportSnapshotAsBufferedImage(cameraAdapters.get(viewIndex).getViewportAdapter().getCaptureDevice());
+      return scaleImage(exportSnapshotAsBufferedImage, scale);
+   }
+
+   private static BufferedImage scaleImage(BufferedImage imageToScale, double scale)
+   {
+      AffineTransform scaleTransform = new AffineTransform();
+      scaleTransform.scale(scale, scale);
+      AffineTransformOp scaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
+      scaleOp.getRenderingHints().add(new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON));
+      return scaleOp.filter(imageToScale, null);
    }
 
    private void setupSimulationAndController()
@@ -1010,18 +1029,18 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       double rootY = robot.getRootJoint().getQy().getValue();
       double rootZ = robot.getRootJoint().getQz().getValue();
 
-      CameraConfiguration leftCamera = new CameraConfiguration("LeftView");
-      leftCamera.setCameraFix(rootX, rootY, rootZ);
-      leftCamera.setCameraPosition(rootX + 0.0, rootY + 5.0, rootZ + 0.0);
-      leftCamera.setCameraTracking(false, false, false, false);
-      leftCamera.setCameraDolly(false, false, false, false);
-      scs.setupCamera(leftCamera);
       CameraConfiguration rightCamera = new CameraConfiguration("RightView");
       rightCamera.setCameraFix(rootX, rootY, rootZ);
       rightCamera.setCameraPosition(rootX + 0.0, rootY - 5.0, rootZ + 0.0);
       rightCamera.setCameraTracking(false, false, false, false);
       rightCamera.setCameraDolly(false, false, false, false);
       scs.setupCamera(rightCamera);
+      CameraConfiguration leftCamera = new CameraConfiguration("LeftView");
+      leftCamera.setCameraFix(rootX, rootY, rootZ);
+      leftCamera.setCameraPosition(rootX + 0.0, rootY + 5.0, rootZ + 0.0);
+      leftCamera.setCameraTracking(false, false, false, false);
+      leftCamera.setCameraDolly(false, false, false, false);
+      scs.setupCamera(leftCamera);
       CameraConfiguration headCamera = new CameraConfiguration("HeadView");
       headCamera.setCameraFix(rootX, rootY, rootZ);
       headCamera.setCameraPosition(rootX + 5.0, rootY + 0.0, rootZ + 1.40);
@@ -1036,8 +1055,8 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       scs.setupCamera(feetCamera);
 
       ViewportConfiguration multiView = new ViewportConfiguration("multi-view");
-      multiView.addCameraView("LeftView", 0, 0, 1, 1);
-      multiView.addCameraView("RightView", 1, 0, 1, 1);
+      multiView.addCameraView("RightView", 0, 0, 1, 1);
+      multiView.addCameraView("LeftView", 1, 0, 1, 1);
       multiView.addCameraView("HeadView", 0, 1, 1, 1);
       multiView.addCameraView("FeetView", 1, 1, 1, 1);
       scs.setupViewport(multiView);
