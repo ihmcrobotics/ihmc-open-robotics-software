@@ -1,0 +1,148 @@
+package us.ihmc.atlas.behaviors.scsSensorSimulation;
+
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.VideoPacket;
+import org.apache.commons.lang3.SystemUtils;
+import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.producers.VideoDataServerImageCallback;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
+import us.ihmc.tools.gui.AWTTools;
+
+public class SCSLidarAndCameraSimulator
+{
+   private final ROS2Input<RobotConfigurationData> robotConfigurationData;
+   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames;
+   private final FramePose3D tempNeckFramePose = new FramePose3D();
+   private final SimulationConstructionSet scs;
+   private final FloatingJoint floatingHeadJoint;
+
+   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, DRCRobotModel robotModel)
+   {
+      robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+
+      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+
+      Robot robot = new Robot("Robot");
+
+      floatingHeadJoint = new FloatingJoint("head", new Vector3D(), robot);
+      Link link = new Link("lidar");
+      double radius = 0.05;
+      link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      link.setLinkGraphics(linkGraphics);
+      linkGraphics.addModelFile("models/hokuyo.dae", YoAppearance.Black());
+      linkGraphics.translate(0, 0, -0.1);
+      link.setLinkGraphics(linkGraphics);
+      floatingHeadJoint.setLink(link);
+//      floatingHeadJoint.setLink(new Link("hello"));
+
+      String videoCameraMountName = "videoCameraMount";
+      CameraMount videoCameraMount = new CameraMount(videoCameraMountName, new Vector3D(), robot);
+      floatingHeadJoint.addCameraMount(videoCameraMount);
+
+      GimbalJoint gimbalJoint = setupLidarGimbal(robot);
+
+//      floatingHeadJoint.addJoint(gimbalJoint);
+
+      robot.addRootJoint(floatingHeadJoint);
+
+      scs = new SimulationConstructionSet(robot);
+      scs.setDT(0.001, 100); // TODO: Check this, might greatly alter performance
+
+      FunctionalRobotController controller = new FunctionalRobotController();
+      controller.setDoControl(this::doControl);
+
+      robot.setController(controller);
+
+      // must create a joint and attach a CameraMount; make it another robot?
+
+      // required for timestamp
+      ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
+                                                                                 RobotConfigurationData.class,
+                                                                                 robotModel.getSimpleRobotName(),
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+      CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
+      cameraConfiguration.setCameraMount(videoCameraMountName);
+      scs.setupCamera(cameraConfiguration);
+      int width = 1024;
+      int height = 544;
+      int framesPerSecond = 25;
+      scs.startStreamingVideoData(cameraConfiguration,
+                                  width,
+                                  height,
+                                  new VideoDataServerImageCallback(new SCSVideoDataROS2Bridge(scsCameraPublisher::publish)),
+                                  () -> robotConfigurationData.getLatest().getSyncTimestamp(),
+                                  framesPerSecond);
+
+      if (!SystemUtils.IS_OS_WINDOWS)
+         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
+
+      scs.startOnAThread();
+
+      scs.simulate();
+   }
+
+   private GimbalJoint setupLidarGimbal(Robot lidarRobot)
+   {
+      double height = 0.2;
+      double radius = 0.05;
+      GimbalJoint gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), lidarRobot, Axis.Z, Axis.X, Axis.Y);
+      Link link = new Link("lidar");
+      link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      link.setLinkGraphics(linkGraphics);
+      gimbalJoint.setLink(link);
+      gimbalJoint.setDamping(1.0);
+
+      CameraMount robotCam = new CameraMount("camera", new Vector3D(radius + 0.001, 0.0, height / 2.0), lidarRobot);
+      gimbalJoint.addCameraMount(robotCam);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      LidarScanParameters lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
+      LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
+      lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
+      lidarSensorDescription.setScanHeight(lidarScanParameters.getScanHeight());
+      lidarSensorDescription.setSweepYawLimits(lidarScanParameters.getSweepYawMin(), lidarScanParameters.getSweepYawMax());
+      lidarSensorDescription.setHeightPitchLimits(lidarScanParameters.heightPitchMin, lidarScanParameters.heightPitchMax);
+      lidarSensorDescription.setRangeLimits(lidarScanParameters.getMinRange(), lidarScanParameters.getMaxRange());
+      LidarMount lidarMount = new LidarMount(lidarSensorDescription);
+
+      gimbalJoint.addLidarMount(lidarMount);
+
+      linkGraphics.addModelFile("models/hokuyo.dae", YoAppearance.Black());
+      linkGraphics.translate(0, 0, -0.1);
+      link.setLinkGraphics(linkGraphics);
+      return gimbalJoint;
+   }
+
+   private void doControl()
+   {
+      HumanoidRobotState humanoidRobotState = remoteSyncedHumanoidFrames.pollHumanoidRobotState();
+      tempNeckFramePose.setToZero(humanoidRobotState.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+      tempNeckFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      floatingHeadJoint.setPosition(tempNeckFramePose.getPosition());
+      floatingHeadJoint.setQuaternion(tempNeckFramePose.getOrientation());
+   }
+}
