@@ -685,7 +685,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA2(TestInfo info) throws Exception
+   public void testJSCSequenceA2a(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -700,7 +700,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA2_Mod1(TestInfo info) throws Exception
+   public void testJSCSequenceA2b(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -715,7 +715,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA2_Mod2(TestInfo info) throws Exception
+   public void testJSCSequenceA2c(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -761,7 +761,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA5(TestInfo info) throws Exception
+   public void testJSCSequenceA5a(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -777,7 +777,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA5_Mod1(TestInfo info) throws Exception
+   public void testJSCSequenceA5b(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -793,7 +793,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA5_Mod2(TestInfo info) throws Exception
+   public void testJSCSequenceA5c(TestInfo info) throws Exception
    {
       addElbowContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addHandFist1ContactPoint(RobotSide.RIGHT, jointMap, contactPointParameters);
@@ -810,7 +810,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA6(TestInfo info) throws Exception
+   public void testJSCSequenceA6a(TestInfo info) throws Exception
    {
       addHandFist1ContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -826,7 +826,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA6_Mod1(TestInfo info) throws Exception
+   public void testJSCSequenceA6b(TestInfo info) throws Exception
    {
       addElbowContactPoint(RobotSide.LEFT, jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -857,7 +857,7 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
    }
 
    @Test
-   public void testJSCSequenceA7(TestInfo info) throws Exception
+   public void testJSCSequenceA7a(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
@@ -867,22 +867,177 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       setLegJointQs(robot, jointMap, 0.6, 0.25, -1.8, 2.05, -0.8, 0.0);
       setArmJointQs(robot, jointMap, -1.8, -0.775, 1.1, -1.7);
       setSpineJointQs(robot, jointMap, 0.0, -0.1, 0.0);
-      setRootJointPose(robot, 0.0, 0.14, 0.4, 0.0, halfPi, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.4, 0.0, halfPi, 0.0);
       startSim(info);
    }
 
    @Test
-   public void testJSCSequenceA8(TestInfo info) throws Exception
+   public void testJSCSequenceA7b(TestInfo info) throws Exception
    {
       addHandFist1ContactPoints(jointMap, contactPointParameters);
       addKneeLowerContactPoints(jointMap, contactPointParameters);
       addToeInnerBottomContactPoints(jointMap, contactPointParameters);
       setupSimulationAndController();
 
-      setLegJointQs(robot, jointMap, 0.6, 0.25, -1.8, 2.05, -0.8, 0.0);
-      setArmJointQs(robot, jointMap, -1.8, -0.775, 1.1, -1.7);
-      setSpineJointQs(robot, jointMap, 0.0, -0.1, 0.0);
-      setRootJointPose(robot, 0.0, 0.14, 0.4, 0.0, halfPi, 0.0);
+      setLegJointQs(robot, jointMap, 0.45, 0.55, -1.25, 2.05, -0.8, 0.0);
+      setArmJointQs(robot, jointMap, -1.55, -1.519, 1.1, -0.2);
+      setSpineJointQs(robot, jointMap, 0.0, 0.075, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.5, 0.0, 1.0, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA7c(TestInfo info) throws Exception
+   {
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      addKneeLowerContactPoints(jointMap, contactPointParameters);
+      addToeInnerBottomContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(robot, jointMap, 0.45, 0.55, -0.9, 2.05, -0.8, 0.3);
+      setArmJointQs(robot, jointMap, -1.45, -1.519, 1.1, -0.2);
+      setSpineJointQs(robot, jointMap, 0.0, 0.4, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.53, 0.0, 0.7, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA7d(TestInfo info) throws Exception
+   {
+      addHandFist1ContactPoints(jointMap, contactPointParameters);
+      addKneeLowerContactPoints(jointMap, contactPointParameters);
+      addToeInnerBottomContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.875, 2.05, -0.8, 0.0);
+      setArmJointQs(robot, jointMap, -1.35, -1.519, 1.2, -0.2);
+      setSpineJointQs(robot, jointMap, 0.0, 0.666, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.67, 0.0, 0.75, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA10(TestInfo info) throws Exception
+   {
+      addKneeMidEdgeContactPoints(jointMap, contactPointParameters);
+      addToeBottomEdgeContactPoints(jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(robot, jointMap, 0.0, 0.0, -0.15, 2.05, -0.8, 0.0);
+      setArmJointQs(robot, jointMap, 0.0, -1.3, 0.4, -0.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.74, 0.0, 0.0, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA11(TestInfo info) throws Exception
+   {
+      addKneeMidEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.5, -0.15, 2.05, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.4, -0.15, 2.05, -0.8, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 0.0, -0.6, 0.4, -0.7);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.4, 1.3);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, -0.23);
+      setRootJointPose(robot, 0.0, 0.0, 0.755, 0.0, 0.0, -0.5);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA12(TestInfo info) throws Exception
+   {
+      addKneeMidEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.5, -0.15, 2.05, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.4, -1.4, 1.35, 0.05, 0.1);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 0.0, -0.6, 0.4, -0.7);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.4, 1.3);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, -0.23);
+      setRootJointPose(robot, 0.0, 0.0, 0.755, 0.0, 0.0, -0.5);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA13a(TestInfo info) throws Exception
+   {
+      addKneeMidEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addFootFullSupportContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.5, -0.15, 2.05, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.4, -1.35, 1.35, 0.0, 0.1);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 0.0, -0.6, 0.4, -0.7);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.5, 0.4, 1.3);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, -0.23);
+      setRootJointPose(robot, 0.0, 0.0, 0.755, 0.0, 0.0, -0.5);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA13b(TestInfo info) throws Exception
+   {
+      addKneeMidEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addFootFullSupportContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.0, -0.15, 2.05, -0.8, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.0, -1.55, 1.35, 0.2, 0.0);
+      setArmJointQs(robot, jointMap, 0.0, -1.2, 0.4, -0.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.735, 0.0, 0.0, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA15a(TestInfo info) throws Exception
+   {
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addFootFullSupportContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.0, 0.05, 1.6, -0.5, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.0, -1.31, 1.35, -0.04, 0.0);
+      setArmJointQs(robot, jointMap, 0.0, -1.2, 0.4, -0.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.85, 0.0, 0.0, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA15b(TestInfo info) throws Exception
+   {
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addFootFullSupportContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+      
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.0, -0.25, 1.59, -0.5, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.0, -1.62, 1.35, -0.03, 0.0);
+      setArmJointQs(robot, jointMap, 0.0, -1.2, 0.4, -0.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.0);
+      setRootJointPose(robot, 0.0, 0.0, 0.835, 0.0, 0.3, 0.0);
+      startSim(info);
+   }
+
+   @Test
+   public void testJSCSequenceA16(TestInfo info) throws Exception
+   {
+      addToeBottomEdgeContactPoints(RobotSide.LEFT, jointMap, contactPointParameters);
+      addFootFullSupportContactPoints(RobotSide.RIGHT, jointMap, contactPointParameters);
+      setupSimulationAndController();
+      
+      setLegJointQs(RobotSide.LEFT, robot, jointMap, 0.0, 0.06, 0.365, 0.3, 0.5, 0.0);
+      setLegJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 0.1, -1.1, 1.2, -0.4, 0.0);
+      setArmJointQs(RobotSide.LEFT, robot, jointMap, 0.0, -1.4, 0.4, -0.7);
+      setArmJointQs(RobotSide.RIGHT, robot, jointMap, 0.0, 1.2, 0.4, 0.7);
+      setSpineJointQs(robot, jointMap, 0.0, 0.0, 0.2);
+      setRootJointPose(robot, 0.0, 0.0, 0.995, 0.0, 0.3, 0.0);
       startSim(info);
    }
 
@@ -1279,6 +1434,39 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.075, 0.0, -0.01));
    }
 
+   private static void addKneeMidContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         addKneeMidContactPoint(robotSide, jointMap, contactPointParameters);
+   }
+
+   private static void addKneeMidContactPoint(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
+      String bodyName = parentJointName + "Link";
+      String contactName = robotSide.getCamelCaseName() + "KneeCP";
+      contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.05, 0.0, 0.04));
+   }
+
+   private static void addKneeMidEdgeContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         addKneeMidEdgeContactPoints(robotSide, jointMap, contactPointParameters);
+   }
+
+   private static void addKneeMidEdgeContactPoints(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
+      String bodyName = parentJointName + "Link";
+      String contactName = robotSide.getCamelCaseName() + "KneeCP";
+
+      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, -halfPi, 0.0), new Point3D(0.05, 0.0, 0.04));
+      List<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(0.0, 0.08));
+      contactPoints.add(new Point2D(0.0, -0.02));
+      contactPointParameters.addPlaneContact(parentJointName, bodyName, contactName, contactFramePose, contactPoints);
+   }
+
    private static void addToeFrontContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -1334,6 +1522,27 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       contactPointParameters.addSingleContactPoint(parentJointName, bodyName, contactName, new Point3D(0.165, robotSide.negateIfRightSide(0.075), -0.06));
    }
 
+   private static void addToeBottomEdgeContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         addToeBottomEdgeContactPoints(robotSide, jointMap, contactPointParameters);
+      }
+   }
+
+   private static void addToeBottomEdgeContactPoints(RobotSide robotSide, ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getJointBeforeFootName(robotSide);
+      String bodyName = jointMap.getFootName(robotSide);
+      String contactName = robotSide.getCamelCaseName() + "ToeCP";
+
+      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(0.0, 0.0, -0.085));
+      List<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(0.18, 0.07));
+      contactPoints.add(new Point2D(0.18, -0.07));
+      contactPointParameters.addPlaneContact(parentJointName, bodyName, contactName, contactFramePose, contactPoints);
+   }
+
    private static void addHeelBottomContactPoints(ValkyrieJointMap jointMap, ValkyrieMultiContactPointParameters contactPointParameters)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -1382,6 +1591,22 @@ public class ValkyrieMultiContactStaticPoseEndToEndTest
       List<Point2D> contactPoints = new ArrayList<>();
       contactPoints.add(new Point2D(0.18, robotSide.negateIfRightSide(0.07)));
       contactPoints.add(new Point2D(-0.085, robotSide.negateIfRightSide(0.07)));
+      contactPointParameters.addPlaneContact(parentJointName, bodyName, contactName, contactFramePose, contactPoints);
+   }
+
+   private static void addFootFullSupportContactPoints(RobotSide robotSide, ValkyrieJointMap jointMap,
+                                                       ValkyrieMultiContactPointParameters contactPointParameters)
+   {
+      String parentJointName = jointMap.getJointBeforeFootName(robotSide);
+      String bodyName = jointMap.getFootName(robotSide);
+      String contactName = robotSide.getCamelCaseName() + "FootCP";
+
+      RigidBodyTransform contactFramePose = new RigidBodyTransform(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(0.0, 0.0, -0.085));
+      List<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(0.18, 0.07));
+      contactPoints.add(new Point2D(0.18, -0.07));
+      contactPoints.add(new Point2D(-0.085, 0.07));
+      contactPoints.add(new Point2D(-0.085, -0.07));
       contactPointParameters.addPlaneContact(parentJointName, bodyName, contactName, contactFramePose, contactPoints);
    }
 

@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.torquespeedcurve;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -10,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -25,9 +27,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -47,6 +50,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class MultiContactStaticController implements RobotController
@@ -62,15 +66,22 @@ public class MultiContactStaticController implements RobotController
    private final JointDesiredOutputList jointDesiredOutputList;
 
    private final YoDouble[] desiredJointPositions;
+   private final YoFrameQuaternion desiredHeadOrientation = new YoFrameQuaternion("desiredHeadOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameQuaternion desiredChestOrientation = new YoFrameQuaternion("desiredChestOrientation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameQuaternion desiredPelvisOrientation = new YoFrameQuaternion("desiredPelvisOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCenterOfMassPosition = new YoFramePoint3D("desiredCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final OneDoFJointFeedbackControlCommand[] jointFeedbackControlCommands;
+   private final OrientationFeedbackControlCommand headOrientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+   private final OrientationFeedbackControlCommand chestOrientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+   private final OrientationFeedbackControlCommand pelvisOrientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
    private final CenterOfMassFeedbackControlCommand centerOfMassFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
    private final PlaneContactStateCommand[] planeContactStateCommands;
    private final SpatialAccelerationCommand[] contactAccelerationCommands;
 
    private final YoPDGains jointGains = new YoPDGains("jointGains", registry);
+   private final YoPID3DGains taskspaceAccelerationGains = new SymmetricYoPIDSE3Gains("taskspaceAccelerationGains", false, registry);
    private final YoPID3DGains centerOfMassGains = new SymmetricYoPIDSE3Gains("CenterOfMass", false, registry);
 
    private final YoDouble jointWeight = new YoDouble("jointWeight", registry);
@@ -83,6 +94,7 @@ public class MultiContactStaticController implements RobotController
 
    private final YoFramePoint2D centerOfMass2D = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 10, registry);
+   private final List<YoFramePoint3D> yoContactPoints = new ArrayList<>();
    private final FullHumanoidRobotModel fullRobotModel;
 
    public MultiContactStaticController(double controlDT, double gravityZ, FullHumanoidRobotModel fullRobotModel,
@@ -108,7 +120,14 @@ public class MultiContactStaticController implements RobotController
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
       toolbox.setJointPrivilegedConfigurationParameters(controllerParameters.getWalkingControllerParameters().getJointPrivilegedConfigurationParameters());
       FeedbackControlCommandList template = new FeedbackControlCommandList();
-      template.addCommand(new CenterOfMassFeedbackControlCommand());
+      template.addCommand(centerOfMassFeedbackControlCommand);
+      headOrientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getHead());
+      template.addCommand(headOrientationFeedbackControlCommand);
+      chestOrientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getChest());
+      template.addCommand(chestOrientationFeedbackControlCommand);
+      pelvisOrientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getPelvis());
+      template.addCommand(pelvisOrientationFeedbackControlCommand);
+
       for (OneDoFJointBasics joint : controlledJoints)
       {
          OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
@@ -131,6 +150,8 @@ public class MultiContactStaticController implements RobotController
 
       jointGains.setPDGains(10.0, 10.0);
       jointGains.createDerivativeGainUpdater(true);
+      taskspaceAccelerationGains.setProportionalGains(10.0);
+      taskspaceAccelerationGains.setDerivativeGains(30.0);
       centerOfMassGains.setProportionalGains(100.0);
       centerOfMassGains.setDerivativeGains(40.0);
 
@@ -153,7 +174,6 @@ public class MultiContactStaticController implements RobotController
          SpatialAccelerationCommand accelerationCommand = new SpatialAccelerationCommand();
          accelerationCommand.set(fullRobotModel.getElevator(), contactablePlaneBody.getRigidBody());
          accelerationCommand.setSelectionMatrixForLinearControl();
-         accelerationCommand.setWeight(contactAccelerationWeight.getValue());
          contactAccelerationCommands[i] = accelerationCommand;
       }
 
@@ -164,12 +184,22 @@ public class MultiContactStaticController implements RobotController
                                                                     YoAppearance.Black(),
                                                                     GraphicType.BALL_WITH_CROSS).createArtifact());
       yoGraphicsListRegistry.registerArtifact("Balance", new YoArtifactPolygon("supportPolygon", supportPolygon, Color.BLUE, false));
+
+      for (int i = 0; i < 30; i++)
+      {
+         YoFramePoint3D yoContactPoint = new YoFramePoint3D("contactPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         yoGraphicsListRegistry.registerArtifact("Balance", new YoArtifactPosition("contactPoint" + i, yoContactPoint.getYoX(), yoContactPoint.getYoY(), GraphicType.BALL, Color.CYAN, 0.02));
+         yoContactPoints.add(yoContactPoint);
+      }
    }
 
    @Override
    public void initialize()
    {
       referenceFrames.updateFrames();
+      desiredHeadOrientation.setFromReferenceFrame(fullRobotModel.getHead().getBodyFixedFrame());
+      desiredChestOrientation.setFromReferenceFrame(fullRobotModel.getChest().getBodyFixedFrame());
+      desiredPelvisOrientation.setFromReferenceFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
       desiredCenterOfMassPosition.setFromReferenceFrame(referenceFrames.getCenterOfMassFrame());
 
       for (int i = 0; i < controlledJoints.length; i++)
@@ -187,11 +217,18 @@ public class MultiContactStaticController implements RobotController
 
       centerOfMass2D.setFromReferenceFrame(referenceFrames.getCenterOfMassFrame());
       supportPolygon.clear();
+      yoContactPoints.forEach(YoFramePoint3D::setToNaN);
+      int contactPointIndex = 0;
+
       for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
       {
          List<FramePoint3D> contactPoints = contactablePlaneBody.getContactPointsCopy();
          contactPoints.forEach(point -> point.changeFrame(ReferenceFrame.getWorldFrame()));
          contactPoints.forEach(point -> supportPolygon.addVertex(point));
+         for (FramePoint3D contactPoint : contactPoints)
+         {
+            yoContactPoints.get(contactPointIndex++).set(contactPoint);
+         }
       }
       supportPolygon.update();
 
@@ -210,7 +247,20 @@ public class MultiContactStaticController implements RobotController
          privilegedConfigurationCommand.addJoint(controlledJoints[i], desiredJointPositions[i].getValue());
       }
 
-      //      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      headOrientationFeedbackControlCommand.setInverseDynamics(desiredHeadOrientation, zeroVector, zeroVector);
+      headOrientationFeedbackControlCommand.setGains(taskspaceAccelerationGains);
+      headOrientationFeedbackControlCommand.setWeightForSolver(jointWeight.getValue());
+      controllerCoreCommand.addFeedbackControlCommand(headOrientationFeedbackControlCommand);
+
+      chestOrientationFeedbackControlCommand.setInverseDynamics(desiredChestOrientation, zeroVector, zeroVector);
+      chestOrientationFeedbackControlCommand.setGains(taskspaceAccelerationGains);
+      chestOrientationFeedbackControlCommand.setWeightForSolver(jointWeight.getValue());
+      controllerCoreCommand.addFeedbackControlCommand(chestOrientationFeedbackControlCommand);
+
+      pelvisOrientationFeedbackControlCommand.setInverseDynamics(desiredPelvisOrientation, zeroVector, zeroVector);
+      pelvisOrientationFeedbackControlCommand.setGains(taskspaceAccelerationGains);
+      pelvisOrientationFeedbackControlCommand.setWeightForSolver(jointWeight.getValue());
+      controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationFeedbackControlCommand);
 
       centerOfMassFeedbackControlCommand.setInverseDynamics(desiredCenterOfMassPosition, zeroVector, zeroVector);
       centerOfMassFeedbackControlCommand.setGains(centerOfMassGains);
