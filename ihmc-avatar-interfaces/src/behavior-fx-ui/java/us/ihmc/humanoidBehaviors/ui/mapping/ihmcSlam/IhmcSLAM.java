@@ -90,14 +90,12 @@ public abstract class IhmcSLAM implements IhmcSLAMInterface
 
       if (optimizedMultiplier == null)
       {
-         System.out.println("This frame should not be merged.");
-         System.out.println();
          return false;
       }
       else
       {
-         System.out.println(optimizedMultiplier);
-         System.out.println();
+//         System.out.println(optimizedMultiplier);
+//         System.out.println();
 
          frame.updateOptimizedCorrection(optimizedMultiplier);
 
