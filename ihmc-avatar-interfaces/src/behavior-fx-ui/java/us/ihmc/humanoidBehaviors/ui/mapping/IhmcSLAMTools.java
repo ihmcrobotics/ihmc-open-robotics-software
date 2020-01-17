@@ -9,7 +9,6 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -361,6 +360,10 @@ public class IhmcSLAMTools
       return bestAlpha;
    }
 
+   public static List<Point3D> closestOctreePoints = new ArrayList<>();
+   public static List<Point3D> duplicatedPoints = new ArrayList<>();
+   public static List<Point3D> candidatePoints = new ArrayList<>();
+
    public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point, int searchingSize)
    {
       double octreeResolution = octree.getResolution();
@@ -370,7 +373,8 @@ public class IhmcSLAMTools
 
       int lengthOfBox = 1 + searchingSize * 2;
       Point3D closestPoint = new Point3D();
-      double minDistance = -1.0;
+      //double minDistance = -1.0;
+      double minDistance = Double.MAX_VALUE;
       for (int i = 0; i < lengthOfBox; i++)
       {
          for (int j = 0; j < lengthOfBox; j++)
@@ -390,13 +394,13 @@ public class IhmcSLAMTools
                NormalOcTreeNode searchNode = octree.search(dummyKey);
                if (searchNode != null)
                {
-                  if (minDistance < 0.0)
-                     minDistance = Double.MAX_VALUE;
+                  //                  if (minDistance < 0.0)
+                  //                     minDistance = Double.MAX_VALUE;
 
                   Point3D pointInBox = OcTreeKeyConversionTools.keyToCoordinate(dummyKey, octreeResolution, treeDepth);
 
-                  //double distance = pointInBox.distance(point);
-                  double distance = computeDistanceToNormalOctreeNode(searchNode, point);
+                  double distance = pointInBox.distance(point);
+                  //double distance = computeDistanceToNormalOctreeNode(searchNode, point);
                   if (distance < minDistance)
                   {
                      minDistance = distance;
@@ -410,8 +414,112 @@ public class IhmcSLAMTools
             }
          }
       }
+      closestOctreePoints.add(closestPoint);
+      System.out.println();
+      System.out.println("point " + point);
+      System.out.println("closestPoint " + closestPoint);
 
       return minDistance;
+   }
+
+   public static double computeDistanceToNormalOctree2(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize)
+   {
+      double octreeResolution = octree.getResolution();
+      int treeDepth = octree.getTreeDepth();
+
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
+
+      Point3D closestPoint = new Point3D();
+      double minDistance = -1.0;
+
+      if (octree.search(occupiedKey) != null)
+      {
+         Point3D candidatePoint = OcTreeKeyConversionTools.keyToCoordinate(occupiedKey, octreeResolution, treeDepth);
+         duplicatedPoints.add(candidatePoint);
+         return 0.0;
+      }
+
+      for (int searchingSize = 1; searchingSize < maximumSearchingSize + 1; searchingSize++)
+      {
+         OcTreeKey[] candidateKeys = createCandidateOctreeKey(occupiedKey, searchingSize);
+         for (int i = 0; i < candidateKeys.length; i++)
+         {
+            OcTreeKey candidateKey = candidateKeys[i];
+
+            NormalOcTreeNode searchNode = octree.search(candidateKey);
+            if (searchNode != null)
+            {
+               if (minDistance < 0.0)
+                  minDistance = Double.MAX_VALUE;
+
+               //Point3D candidatePoint = OcTreeKeyConversionTools.keyToCoordinate(candidateKey, octreeResolution, treeDepth);
+               Point3D candidatePoint = new Point3D(searchNode.getX(), searchNode.getY(), searchNode.getZ());
+
+               candidatePoints.add(candidatePoint);
+
+               double distance = candidatePoint.distance(point);
+               if (distance < minDistance)
+               {
+                  minDistance = distance;
+                  closestPoint.set(candidatePoint);
+               }
+            }
+            else
+            {
+               continue;
+            }
+         }
+         if (minDistance > 0)
+         {
+            break;
+         }
+      }
+
+      closestOctreePoints.add(closestPoint);
+
+      return minDistance;
+   }
+
+   private static OcTreeKey[] createCandidateOctreeKey(OcTreeKey key, int searchingSize)
+   {
+      int outerSize = 2 * searchingSize + 1;
+      int innerSize = 2 * searchingSize - 1;
+      int numberOfCandidates = outerSize * outerSize * outerSize - innerSize * innerSize * innerSize;
+      OcTreeKey[] candidates = new OcTreeKey[numberOfCandidates];
+
+      int index = 0;
+      for (int i = 0; i < outerSize; i++)
+      {
+         for (int j = 0; j < outerSize; j++)
+         {
+            for (int k = 0; k < outerSize; k++)
+            {
+               if (i == 0 || i == outerSize - 1)
+               {
+                  OcTreeKey candidate = new OcTreeKey();
+                  candidate.setKey(0, key.getKey(0) - searchingSize + i);
+                  candidate.setKey(1, key.getKey(1) - searchingSize + j);
+                  candidate.setKey(2, key.getKey(2) - searchingSize + k);
+                  candidates[index] = candidate;
+                  index++;
+               }
+               else
+               {
+                  if (j == 0 || j == outerSize - 1 || k == 0 || k == outerSize - 1)
+                  {
+                     OcTreeKey candidate = new OcTreeKey();
+                     candidate.setKey(0, key.getKey(0) - searchingSize + i);
+                     candidate.setKey(1, key.getKey(1) - searchingSize + j);
+                     candidate.setKey(2, key.getKey(2) - searchingSize + k);
+                     candidates[index] = candidate;
+                     index++;
+                  }
+               }
+            }
+         }
+      }
+
+      return candidates;
    }
 
    private static double computeDistanceToNormalOctreeNode(NormalOcTreeNode searchNode, Point3DReadOnly point)
@@ -421,56 +529,47 @@ public class IhmcSLAMTools
       return plane.distance(point);
    }
 
-   public static Point3D[] createSourcePoints(IhmcSLAMFrame frame, int numberOfSourcePoints, double windowWidth, double windowHeight, double windowDepth,
-                                              double minimumOverlappedRatio)
+   /**
+    * if there is not enough source points, think this frame is key frame.
+    * return null.
+    */
+   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow, double windowDepth,
+                                                          double minimumOverlappedRatio)
    {
       IhmcSLAMFrame previousFrame = frame.getPreviousFrame();
 
-      List<Point3D> pointsOutOfPreviousWindow = new ArrayList<>();
-      List<Point3D> pointsInPreviousWindow = new ArrayList<>();
-
-      ConvexPolygon2D previousWindow = new ConvexPolygon2D();
-      previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
-      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
-      previousWindow.update();
+      //List<Point3DReadOnly> pointsOutOfPreviousWindow = new ArrayList<>();
+      List<Point3DReadOnly> pointsInPreviousWindow = new ArrayList<>();
 
       RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.getSensorPose();
-      Point3D[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToOtherSensorPose(frame.getInitialSensorPoseToWorld(),
-                                                                                                           previousSensorPoseToWorld,
-                                                                                                           frame.getOriginalPointCloudToSensorPose());
+      Point3DReadOnly[] originalPointCloudToSensorPose = frame.getOriginalPointCloudToSensorPose();
+      Point3DReadOnly[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToOtherSensorPose(frame.getInitialSensorPoseToWorld(),
+                                                                                                                   previousSensorPoseToWorld,
+                                                                                                                   originalPointCloudToSensorPose);
 
       int numberOfPointsInPreviousView = 0;
       for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
       {
-         Point3D pointInPreviousView = convertedPointsToPreviousSensorPose[i];
+         Point3DReadOnly pointInPreviousView = convertedPointsToPreviousSensorPose[i];
          if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()) && pointInPreviousView.getZ() > windowDepth)
          {
-            previousSensorPoseToWorld.transform(pointInPreviousView);
-            pointsInPreviousWindow.add(new Point3D(pointInPreviousView));
+            pointsInPreviousWindow.add(originalPointCloudToSensorPose[i]);
             numberOfPointsInPreviousView++;
          }
          else
          {
-            previousSensorPoseToWorld.transform(pointInPreviousView);
-            pointsOutOfPreviousWindow.add(new Point3D(pointInPreviousView));
+            //pointsOutOfPreviousWindow.add(originalPointCloudToSensorPose[i]);
          }
       }
       double overlappedRatio = (double) numberOfPointsInPreviousView / convertedPointsToPreviousSensorPose.length;
-
-      /**
-      Point3D[] inliers = new Point3D[pointsInPreviousWindow.size()];
-      Point3D[] outliers = new Point3D[pointsOutOfPreviousWindow.size()];
-      for (int i = 0; i < inliers.length; i++)
+      if (overlappedRatio < minimumOverlappedRatio)
       {
-         inliers[i] = new Point3D(pointsInPreviousWindow.get(i));
+         return null;
       }
-      for (int i = 0; i < outliers.length; i++)
+      if (pointsInPreviousWindow.size() < numberOfSourcePoints)
       {
-         outliers[i] = new Point3D(pointsOutOfPreviousWindow.get(i));
+         return null;
       }
-      */
 
       TIntArrayList indexOfSourcePoints = new TIntArrayList();
       int index = 0;
@@ -489,13 +588,30 @@ public class IhmcSLAMTools
       }
 
       System.out.println(convertedPointsToPreviousSensorPose.length + " " + numberOfPointsInPreviousView + " " + overlappedRatio);
-      if (overlappedRatio < minimumOverlappedRatio)
+
+      return sourcePoints;
+   }
+
+   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor,
+                                          int maximumSearchingSize)
+   {
+      int numberOfInliers = 0;
+      Point3D newSourcePointToWorld = new Point3D();
+      for (Point3DReadOnly sourcePoint : sourcePointsToSensor)
       {
-         return null;
+         newSourcePointToWorld.set(sourcePoint);
+         sensorPoseToWorld.transform(newSourcePointToWorld);
+
+         double distance = IhmcSLAMTools.computeDistanceToNormalOctree2(octree, newSourcePointToWorld, maximumSearchingSize);
+
+         if (distance >= 0)
+         {
+            if (distance < octree.getResolution())
+            {
+               numberOfInliers++;
+            }
+         }
       }
-      else
-      {
-         return sourcePoints;
-      }
+      return numberOfInliers;
    }
 }
