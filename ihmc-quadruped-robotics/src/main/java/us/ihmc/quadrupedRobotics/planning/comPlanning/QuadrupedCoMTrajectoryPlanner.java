@@ -69,7 +69,8 @@ public class QuadrupedCoMTrajectoryPlanner implements DCMPlannerInterface
       contactSequenceCalculator = new ContactSequenceCalculator<>(new QuadrupedCoPWaypointCalculator(plannerParameters), registry);
 
       comTrajectoryPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
-      comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+      if (graphicsListRegistry != null)
+         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
 
       parentRegistry.addChild(registry);
    }
