@@ -14,15 +14,16 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
-import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.EnvironmentMappingTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SimulatedPointCloudTest
@@ -187,8 +188,7 @@ public class SimulatedPointCloudTest
          List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
                                                                                                   planarRegionSegmentationParameters);
 
-         planarRegionsMap = EnvironmentMappingTools.buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters,
-                                                                polygonizerParameters);
+         planarRegionsMap = buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters, polygonizerParameters);
       }
 
       IhmcSLAMViewer viewer = new IhmcSLAMViewer();
@@ -204,5 +204,19 @@ public class SimulatedPointCloudTest
       viewer.start("testPlanarRegionsForFlatGround");
 
       ThreadTools.sleepForever();
+   }
+
+   private PlanarRegionsList buildNewMap(List<PlanarRegionSegmentationRawData> newRawData, PlanarRegionsList oldMap,
+                                         CustomRegionMergeParameters customRegionMergeParameters, ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                         PolygonizerParameters polygonizerParameters)
+   {
+      List<PlanarRegion> oldMapCopy = new ArrayList<>(oldMap.getPlanarRegionsAsList());
+      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(oldMapCopy, newRawData,
+                                                                                                                      customRegionMergeParameters);
+
+      PlanarRegionsList newMap = PlanarRegionPolygonizer.createPlanarRegionsList(newRawData, concaveHullFactoryParameters, polygonizerParameters);
+      unmergedCustomPlanarRegions.forEach(newMap::addPlanarRegion);
+
+      return newMap;
    }
 }
