@@ -15,7 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoad
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
-public class EnvironmentMappingViewer extends Application
+public class PointCloudDataLoader extends Application
 {
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
