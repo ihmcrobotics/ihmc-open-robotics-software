@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 
-public class OctreeICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
+public class OctreeSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
 {
    private List<IhmcSurfaceElement> surfaceElements;
    private static final double POSITION_WEIGHT = 5.0;
@@ -21,7 +21,7 @@ public class OctreeICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerC
 
    private boolean assumeFlatGround = true;
 
-   public OctreeICPSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
+   public OctreeSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
       super(transformWorldToSensorPose);
       this.surfaceElements = surfaceElements;

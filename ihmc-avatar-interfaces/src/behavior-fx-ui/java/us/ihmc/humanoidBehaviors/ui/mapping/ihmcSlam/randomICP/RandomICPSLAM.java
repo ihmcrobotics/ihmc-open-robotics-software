@@ -21,7 +21,7 @@ import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
-public class RICPSLAM extends IhmcSLAM
+public class RandomICPSLAM extends IhmcSLAM
 {
    public final List<Point3D> sourcePointsToWorld = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class RICPSLAM extends IhmcSLAM
 
    private final NormalOcTree octree;
 
-   public RICPSLAM(double octreeResolution)
+   public RandomICPSLAM(double octreeResolution)
    {
       super(octreeResolution);
 
