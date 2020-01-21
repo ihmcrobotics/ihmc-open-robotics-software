@@ -33,7 +33,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 
-public class RandomICPSLAMUnitTest
+public class RandomICPSLAMTest
 {
    @Test
    public void testComputeDistance()
