@@ -8,8 +8,9 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
@@ -53,7 +54,7 @@ public class AtlasBehaviorUIDemo
    private static final Supplier<PlanarRegionsList> SLAM_REAL_DATA = BehaviorPlanarRegionEnvironments::realDataFromAtlasSLAMDataset20190710;
    private static final Supplier<PlanarRegionsList> CORRIDOR = PlannerTestEnvironments::getTrickCorridor;
 
-   private static final Supplier<PlanarRegionsList> ENVIRONMENT = UP_DOWN_FOUR_HIGH_WITH_FLAT_CENTER;
+   private static final Supplier<PlanarRegionsList> ENVIRONMENT = CORRIDOR;
 
    // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
    private final int recordFrequencySpeedup = 10;
@@ -66,7 +67,7 @@ public class AtlasBehaviorUIDemo
       {
          new Thread(() -> {
             LogTools.info("Creating planar region publisher");
-            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel()).start();
+            new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), PubSubImplementation.FAST_RTPS).start();
          }).start();
 
          new Thread(() -> {
@@ -79,7 +80,10 @@ public class AtlasBehaviorUIDemo
          LogTools.info("Creating simulation");
          if (USE_KINEMATIC_SIMULATION)
          {
-            HumanoidKinematicsSimulation.createForManualTest(createRobotModel(), CREATE_YO_VARIABLE_SERVER);
+            HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+            kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
+            kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YO_VARIABLE_SERVER);
+            HumanoidKinematicsSimulation.create(createRobotModel(), kinematicsSimulationParameters);
          }
          else
          {
@@ -91,7 +95,7 @@ public class AtlasBehaviorUIDemo
 
       new Thread(() -> {
          LogTools.info("Creating footstep toolbox");
-         new MultiStageFootstepPlanningModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+         new FootstepPlanningToolboxModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       }).start();
 
       new Thread(() -> {

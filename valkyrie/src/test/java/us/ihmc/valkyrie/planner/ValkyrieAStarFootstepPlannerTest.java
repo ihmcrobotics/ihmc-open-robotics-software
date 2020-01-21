@@ -42,7 +42,7 @@ public class ValkyrieAStarFootstepPlannerTest
    @Test
    public void testSteppingStones()
    {
-      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0, p -> p.setMinimumFootholdPercent(0.8));
+      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0, p -> {p.setMinimumFootholdPercent(0.8); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
@@ -54,13 +54,13 @@ public class ValkyrieAStarFootstepPlannerTest
    @Test
    public void testRandomField()
    {
-      testDataSet(DataSetName._20190219_182005_Random, 7.0, null);
+      testDataSet(DataSetName._20190219_182005_Random, 7.0, p -> {p.setIdealFootstepLength(0.45); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
    public void testLargeCinderBlockField()
    {
-      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> p.setFlatGroundLowerThreshold(-0.2));
+      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> {p.setFlatGroundLowerThreshold(-0.2); p.setMaximumStepZ(0.2);});
    }
 
    @Test

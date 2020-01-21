@@ -10,6 +10,7 @@ import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
@@ -135,7 +136,7 @@ public class PlanarRegionSLAMUITabController extends Group
       visualizer = new PlanarRegionSLAMGraphic();
       visualizer.setStateListener(this::onVisualizerStateChange);
 
-      simulatedREAModule = new SimulatedREAModule(loadDataSet(DATASET_1));
+      simulatedREAModule = new SimulatedREAModule(loadDataSet(DATASET_1), PubSubImplementation.FAST_RTPS);
 
       animationTimer.start();
    }

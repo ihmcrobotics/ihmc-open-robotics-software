@@ -28,6 +28,7 @@ public class DRCNetworkModuleParameters
     * isolating the toolbox. The class provided has to come with a main method.
     */
    private Class<? extends KinematicsStreamingToolboxModule> kinematicsStreamingToolboxLauncherClass;
+   private Class<?> rosModuleLauncherClass;
    private boolean useFootstepPlanningToolbox;
    private boolean useFootstepPostProcessingToolbox;
    private boolean useFootstepPlanningToolboxVisualizer;
@@ -83,6 +84,11 @@ public class DRCNetworkModuleParameters
    public Class<? extends KinematicsStreamingToolboxModule> getKinematicsStreamingToolboxLauncherClass()
    {
       return kinematicsStreamingToolboxLauncherClass;
+   }
+
+   public Class<?> getRosModuleLauncherClass()
+   {
+      return rosModuleLauncherClass;
    }
 
    public boolean isFootstepPlanningToolboxEnabled()
@@ -259,6 +265,11 @@ public class DRCNetworkModuleParameters
          {
             e.printStackTrace();
          }
+   }
+
+   public void enableRosModule(Class<?> launcherClass)
+   {
+      rosModuleLauncherClass = launcherClass;
    }
 
    public boolean isRosModuleEnabled()

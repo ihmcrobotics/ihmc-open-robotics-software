@@ -6,7 +6,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -183,6 +190,51 @@ public class CapturePointToolsTest
 
          EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, capturePointVelocity, 1e-10);
       }
+   }
+
+   @Test
+   public void testDCMCalculations()
+   {
+      Random random = new Random(1738L);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0);
+         FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), -10.0, 10.0);
+         FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), -10.0, 10.0);
+
+         double omega = RandomNumbers.nextDouble(random, 1.0, 10.0);
+         FramePoint3D expectedDCM = new FramePoint3D();
+         FramePoint3D expectedVRP = new FramePoint3D();
+         FramePoint3D expectedVRP2 = new FramePoint3D();
+         FrameVector3D expectedDCMVelocity = new FrameVector3D();
+         FramePoint3D returnedDCM = new FramePoint3D();
+         FramePoint3D returnedVRP = new FramePoint3D();
+         FramePoint3D returnedVRP2 = new FramePoint3D();
+         FrameVector3D returnedDCMVelocity = new FrameVector3D();
+
+         expectedDCM.scaleAdd(1.0 / omega, desiredCoMVelocity, desiredCoMPosition);
+         expectedDCMVelocity.scaleAdd(1.0 / omega, desiredCoMAcceleration, desiredCoMVelocity);
+         expectedVRP.scaleAdd(-1.0 / MathTools.square(omega), desiredCoMAcceleration, desiredCoMPosition);
+         expectedVRP2.scaleAdd(-1.0 / omega, expectedDCMVelocity, expectedDCM);
+
+         CapturePointTools.computeCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, returnedDCM);
+         CapturePointTools.computeCapturePointVelocity(desiredCoMVelocity, desiredCoMAcceleration, omega, returnedDCMVelocity);
+         CapturePointTools.computeCentroidalMomentumPivot(returnedDCM, returnedDCMVelocity, omega, returnedVRP);
+         computeDesiredVRPPositionFromCoM(desiredCoMPosition, desiredCoMAcceleration, omega, returnedVRP2);
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedDCM, returnedDCM, 1e-5);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(expectedDCMVelocity, returnedDCMVelocity, 1e-5);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedVRP, expectedVRP2, 1e-5);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedVRP, returnedVRP2, 1e-5);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedVRP, returnedVRP, 1e-5);
+      }
+   }
+
+   private static void computeDesiredVRPPositionFromCoM(FramePoint3DReadOnly desiredCoMPosition, FrameVector3DReadOnly desiredCoMAcceleration, double omega0,
+                                                        FixedFramePoint3DBasics desiredVRPToPack)
+   {
+      desiredVRPToPack.scaleAdd(-1.0 / MathTools.square(omega0), desiredCoMAcceleration, desiredCoMPosition);
    }
 
 }
