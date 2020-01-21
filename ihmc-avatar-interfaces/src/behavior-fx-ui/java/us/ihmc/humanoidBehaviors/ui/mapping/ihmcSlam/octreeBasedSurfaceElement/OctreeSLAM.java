@@ -31,7 +31,7 @@ public class OctreeSLAM extends IhmcSLAM
 
    private static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
    private static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
-   
+
    public OctreeSLAM(double octreeResolution)
    {
       super(octreeResolution);
@@ -100,7 +100,7 @@ public class OctreeSLAM extends IhmcSLAM
       }
 
       octreeNodesInPreviousView = IhmcSLAMTools.computeOctreeData(pointsInPreviousView, previousSensorPoseToWorld.getTranslation(), getOctreeResolution());
-      
+
       // ComputeMergeableSurfaceElements
       List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
       boolean useSufficientScoreDecision = true;
@@ -168,12 +168,13 @@ public class OctreeSLAM extends IhmcSLAM
             mergeableSurfaceElements.add(surfaceElement);
          }
       }
-      
-      if(mergeableSurfaceElements.size() == 0)
+
+      if (mergeableSurfaceElements.size() == 0)
          return null;
 
       // Cost function
-      OctreeSLAMFrameOptimizerCostFunctionCopy costFunction = new OctreeSLAMFrameOptimizerCostFunctionCopy(mergeableSurfaceElements, frame.getInitialSensorPoseToWorld());
+      OctreeSLAMFrameOptimizerCostFunction costFunction = new OctreeSLAMFrameOptimizerCostFunction(mergeableSurfaceElements,
+                                                                                                   frame.getInitialSensorPoseToWorld());
 
       GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
 
@@ -200,7 +201,7 @@ public class OctreeSLAM extends IhmcSLAM
       return transformer;
    }
 
-   class OctreeSLAMFrameOptimizerCostFunctionCopy extends SLAMFrameOptimizerCostFunction
+   class OctreeSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
    {
       List<IhmcSurfaceElement> surfaceElements;
       static final double POSITION_WEIGHT = 5.0;
@@ -211,7 +212,7 @@ public class OctreeSLAM extends IhmcSLAM
 
       boolean assumeFlatGround = true;
 
-      OctreeSLAMFrameOptimizerCostFunctionCopy(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
+      OctreeSLAMFrameOptimizerCostFunction(List<IhmcSurfaceElement> surfaceElements, RigidBodyTransformReadOnly transformWorldToSensorPose)
       {
          super(transformWorldToSensorPose);
          this.surfaceElements = surfaceElements;
@@ -232,7 +233,6 @@ public class OctreeSLAM extends IhmcSLAM
           */
          RigidBodyTransform transformer = new RigidBodyTransform();
          convertToPointCloudTransformer(values, transformer);
-         //convertToSensorPoseMultiplier(values, transformer);
 
          List<IhmcSurfaceElement> convertedElements = new ArrayList<>();
          for (int i = 0; i < surfaceElements.size(); i++)

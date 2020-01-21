@@ -94,9 +94,6 @@ public abstract class IhmcSLAM implements IhmcSLAMInterface
       }
       else
       {
-         //         System.out.println(optimizedMultiplier);
-         //         System.out.println();
-
          frame.updateOptimizedCorrection(optimizedMultiplier);
 
          slamFrames.add(frame);
