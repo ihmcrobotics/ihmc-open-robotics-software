@@ -24,7 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class OctreeICPSLAMFrame extends SLAMFrame
+public class OctreeSLAMFrame extends SLAMFrame
 {
    private NormalOcTree octreeNodesInPreviousView;
    private List<IhmcSurfaceElement> mergeableSurfaceElements = new ArrayList<>();
@@ -34,12 +34,12 @@ public class OctreeICPSLAMFrame extends SLAMFrame
    private static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
    private static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
 
-   public OctreeICPSLAMFrame(StereoVisionPointCloudMessage message)
+   public OctreeSLAMFrame(StereoVisionPointCloudMessage message)
    {
       super(message);
    }
 
-   public OctreeICPSLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
+   public OctreeSLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
       super(frame, message);
    }
@@ -203,7 +203,7 @@ public class OctreeICPSLAMFrame extends SLAMFrame
                                       MAXIMUM_ANGLE_OF_SIMILARITY);
       List<IhmcSurfaceElement> surfaceElements = getMergeableSurfaceElements();
 
-      OctreeICPSLAMFrameOptimizerCostFunction function = new OctreeICPSLAMFrameOptimizerCostFunction(surfaceElements, getInitialSensorPoseToWorld());
+      OctreeSLAMFrameOptimizerCostFunction function = new OctreeSLAMFrameOptimizerCostFunction(surfaceElements, getInitialSensorPoseToWorld());
 
       return function;
    }

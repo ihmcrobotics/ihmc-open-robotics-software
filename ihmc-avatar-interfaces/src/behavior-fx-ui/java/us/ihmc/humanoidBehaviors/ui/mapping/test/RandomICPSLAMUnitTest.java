@@ -21,7 +21,7 @@ import us.ihmc.humanoidBehaviors.ui.mapping.IhmcSLAMTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAMFrame;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP.RICPSLAM;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP.RandomICPSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -294,7 +294,7 @@ public class RandomICPSLAMUnitTest
                                                                                                                                  true);
 
       double octreeResolution = 0.01;
-      RICPSLAM slam = new RICPSLAM(octreeResolution);
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
 
       slam.addFirstFrame(messageOne);
       slam.addFrame(driftedMessageTwo);
@@ -325,7 +325,7 @@ public class RandomICPSLAMUnitTest
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.01;
-      RICPSLAM slam = new RICPSLAM(octreeResolution);
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(49));
       slam.addFrame(messages.get(50));
 
@@ -355,7 +355,7 @@ public class RandomICPSLAMUnitTest
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
-      IhmcSLAM slam = new RICPSLAM(octreeResolution);
+      IhmcSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(0));
       //for (int i = 1; i < 60; i++)
       for (int i = 1; i < messages.size(); i++)

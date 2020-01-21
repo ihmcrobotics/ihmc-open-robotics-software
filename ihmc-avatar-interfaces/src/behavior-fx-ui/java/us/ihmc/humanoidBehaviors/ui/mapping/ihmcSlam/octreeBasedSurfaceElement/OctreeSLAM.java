@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrame;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.SLAMFrameOptimizerCostFunction;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
-public class OctreeICPSLAM extends AbstractSLAM<OctreeICPSLAMFrame>
+public class OctreeSLAM extends AbstractSLAM<OctreeSLAMFrame>
 {
    public static final double OCTREE_RESOLUTION = 0.02;
 
@@ -35,12 +35,12 @@ public class OctreeICPSLAM extends AbstractSLAM<OctreeICPSLAMFrame>
       }
    }
 
-   public OctreeICPSLAM()
+   public OctreeSLAM()
    {
       this(false);
    }
 
-   public OctreeICPSLAM(boolean naiveSLAM)
+   public OctreeSLAM(boolean naiveSLAM)
    {
       super(naiveSLAM, OCTREE_RESOLUTION);
    }
@@ -76,12 +76,12 @@ public class OctreeICPSLAM extends AbstractSLAM<OctreeICPSLAMFrame>
    @Override
    public SLAMFrame createFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      return new OctreeICPSLAMFrame(pointCloudMessage);
+      return new OctreeSLAMFrame(pointCloudMessage);
    }
 
    @Override
    public SLAMFrame createFrame(SLAMFrame previousFrame, StereoVisionPointCloudMessage pointCloudMessage)
    {
-      return new OctreeICPSLAMFrame(previousFrame, pointCloudMessage);
+      return new OctreeSLAMFrame(previousFrame, pointCloudMessage);
    }
 }
