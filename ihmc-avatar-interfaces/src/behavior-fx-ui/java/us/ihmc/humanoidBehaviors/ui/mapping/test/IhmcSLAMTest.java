@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 
-public class NaiveSLAMUnitTest
+public class IhmcSLAMTest
 {
    @Test
    public void testNaiveSLAMEndToEnd()
