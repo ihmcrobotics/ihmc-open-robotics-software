@@ -95,7 +95,7 @@ public class RandomICPSLAM extends IhmcSLAM
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
          SLAMFrameOptimizerCostFunction costFunction = new RICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
 
-         double initialQuery = costFunction.getQuery(INITIAL_QUERY);
+         double initialQuery = costFunction.getQuery(INITIAL_INPUT);
          System.out.println("frame distance " + initialQuery);
 
          // TODO: if the source points are too far.
@@ -115,7 +115,7 @@ public class RandomICPSLAM extends IhmcSLAM
             
             System.out.println("optimization started. " + initialQuery);
             //            return new RigidBodyTransform();
-            GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_QUERY);
+            GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
 
             int maxIterations = 100;
             double convergenceThreshold = 1 * 10E-4;
