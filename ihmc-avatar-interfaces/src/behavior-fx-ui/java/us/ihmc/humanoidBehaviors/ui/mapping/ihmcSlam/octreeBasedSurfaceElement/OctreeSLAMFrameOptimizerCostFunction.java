@@ -41,8 +41,8 @@ public class OctreeSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCost
        * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
        */
       RigidBodyTransform transformer = new RigidBodyTransform();
-      //convertToPointCloudTransformer(values, transformer);
-      convertToSensorPoseMultiplier(values, transformer);
+      convertToPointCloudTransformer(values, transformer);
+      //convertToSensorPoseMultiplier(values, transformer);
 
       List<IhmcSurfaceElement> convertedElements = new ArrayList<>();
       for (int i = 0; i < surfaceElements.size(); i++)
