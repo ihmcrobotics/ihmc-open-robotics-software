@@ -55,7 +55,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.12.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.13.0")
    api("us.ihmc:robotiq-hand-drivers:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
@@ -81,4 +81,5 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+   api("us.ihmc:simulation-construction-set-2:alpha-20191122")
 }

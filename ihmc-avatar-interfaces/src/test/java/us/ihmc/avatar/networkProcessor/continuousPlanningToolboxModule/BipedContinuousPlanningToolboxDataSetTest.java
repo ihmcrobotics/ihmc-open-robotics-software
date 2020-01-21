@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +33,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -126,6 +127,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+@Disabled
 public class BipedContinuousPlanningToolboxDataSetTest
 {
    private static final double defaultNominalWidth = 0.3;
@@ -159,7 +161,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
-   private MultiStageFootstepPlanningModule footstepPlanningModule = null;
+   private FootstepPlanningToolboxModule footstepPlanningModule = null;
    private VisibilityGraphsParametersBasics visibilityGraphsParameters = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters = null;
    private BipedContinuousPlanningToolboxModule continuousPlanningModule = null;
@@ -228,7 +230,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          footstepPlannerParameters = getTestFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
-      footstepPlanningModule = new MultiStageFootstepPlanningModule(robotModel, null, true, pubSubImplementation);
+      footstepPlanningModule = new FootstepPlanningToolboxModule(robotModel, null, true, pubSubImplementation);
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
@@ -336,6 +338,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    public void testFewDataSets()
    {
@@ -352,6 +355,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
+   @Disabled
    @Test
    @Tag("avatar-interfaces-slow")
    public void testAllDataSets()

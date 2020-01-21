@@ -88,6 +88,27 @@ public class CapturePointTools
    }
 
    /**
+    * Computes the Instantaneous Capture Point velocity by
+    * <p>
+    *    x&#775;<sup>ICP</sup> = &omega; (x<sup>ICP</sup> - x<sup>CMP</sup>)
+    * </p>
+    *
+    * @param capturePointPosition
+    * @param cmpPosition
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param icpVelocityToPack
+    */
+   public static void computeCapturePointVelocity(FramePoint3DReadOnly capturePointPosition, FramePoint3DReadOnly cmpPosition,
+                                                  double omega0, FixedFrameVector3DBasics icpVelocityToPack)
+   {
+      icpVelocityToPack.sub(capturePointPosition, cmpPosition);
+      icpVelocityToPack.scale(omega0);
+   }
+
+
+   /**
     * FIXME this method is probably wrong.
     * Compute the capture point acceleration given the desired capture point velocity
     *
@@ -290,5 +311,19 @@ public class CapturePointTools
 
          return -(normalizedCapturePointVelocityX * capturePointErrorX + normalizedCapturePointVelocityY * capturePointErrorY);
       }
+   }
+
+   public static void computeCenterOfMassVelocity(FramePoint3DReadOnly comPosition, FramePoint3DReadOnly dcmPosition, double omega0,
+                                                  FixedFrameVector3DBasics comVelocityToPack)
+   {
+      comVelocityToPack.sub(dcmPosition, comPosition);
+      comVelocityToPack.scale(omega0);
+   }
+
+   public static void computeCenterOfMassAcceleration(FrameVector3DReadOnly comVelocity, FrameVector3DReadOnly dcmVelocity, double omega0,
+                                                      FixedFrameVector3DBasics comAccelerationToPack)
+   {
+      comAccelerationToPack.sub(dcmVelocity, comVelocity);
+      comAccelerationToPack.scale(omega0);
    }
 }

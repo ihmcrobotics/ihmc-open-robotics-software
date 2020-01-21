@@ -257,6 +257,11 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
       TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
 
+      if(newJointAngles.size() != oneDoFJoints.length)
+      {
+         throw new RuntimeException("Received RobotConfigurationData packet with " + newJointAngles.size() + "joints, expected " + oneDoFJoints.length);
+      }
+
       for (int i = 0; i < newJointAngles.size(); i++)
       {
          oneDoFJoints[i].setQ(newJointAngles.get(i));
