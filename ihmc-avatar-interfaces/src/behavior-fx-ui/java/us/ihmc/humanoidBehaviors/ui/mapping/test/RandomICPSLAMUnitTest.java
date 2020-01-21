@@ -94,7 +94,7 @@ public class RandomICPSLAMUnitTest
       {
          int maximumSearchingSize = 10;
          double distance = -1.0;
-         distance = IhmcSLAMTools.computeDistanceToNormalOctree2(octree, sourcePoint, maximumSearchingSize);
+         distance = IhmcSLAMTools.computeDistanceToNormalOctree(octree, sourcePoint, maximumSearchingSize);
 
          if (distance >= 0.0)
          {
@@ -116,16 +116,6 @@ public class RandomICPSLAMUnitTest
       System.out.println("closestPoints " + closestPoints.length);
       for (int i = 0; i < closestPoints.length; i++)
          closestPoints[i] = new Point3D(IhmcSLAMTools.closestOctreePoints.get(i));
-
-      Point3D[] duplicatedPoints = new Point3D[IhmcSLAMTools.duplicatedPoints.size()];
-      System.out.println("duplicatedPoints " + duplicatedPoints.length);
-      for (int i = 0; i < duplicatedPoints.length; i++)
-         duplicatedPoints[i] = new Point3D(IhmcSLAMTools.duplicatedPoints.get(i));
-
-      Point3D[] candidatePoints = new Point3D[IhmcSLAMTools.candidatePoints.size()];
-      System.out.println("candidatePoints " + candidatePoints.length);
-      for (int i = 0; i < candidatePoints.length; i++)
-         candidatePoints[i] = new Point3D(IhmcSLAMTools.candidatePoints.get(i));
 
       List<Point3D> allPoints = new ArrayList<>();
       NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
@@ -151,14 +141,10 @@ public class RandomICPSLAMUnitTest
 
       slamViewer.addSensorPose(previousFrame.getSensorPose(), Color.BLUE);
       slamViewer.addSensorPose(frame.getSensorPose(), Color.GREEN);
-      //      slamViewer.addPointCloud(previousFrame.getPointCloud(), Color.BLUE);
-      //slamViewer.addPointCloud(frame.getPointCloud(), Color.GREEN);
 
       slamViewer.addPointCloud(sourcePointsToWorld, Color.BLACK);
-      //slamViewer.addPointCloud(candidatePoints, Color.YELLOW);
       slamViewer.addPointCloud(allPointss, Color.YELLOW);
       slamViewer.addPointCloud(closestPoints, Color.RED);
-      slamViewer.addPointCloud(duplicatedPoints, Color.GREEN);
 
       slamViewer.start("testComputeDistance");
       ThreadTools.sleepForever();
