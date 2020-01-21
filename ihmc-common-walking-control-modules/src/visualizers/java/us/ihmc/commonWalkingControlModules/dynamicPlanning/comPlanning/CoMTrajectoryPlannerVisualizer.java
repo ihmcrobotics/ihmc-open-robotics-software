@@ -104,7 +104,9 @@ public class CoMTrajectoryPlannerVisualizer
 //      while (contactStates.size() > 1)
 //         contactStates.remove(contactStates.size() - 1);
 
-      planner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry, graphicsListRegistry);
+      planner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
+      ((CoMTrajectoryPlanner) planner).setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
