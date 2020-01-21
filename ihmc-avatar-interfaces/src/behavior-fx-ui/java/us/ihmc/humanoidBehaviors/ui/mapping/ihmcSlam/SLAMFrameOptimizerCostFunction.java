@@ -3,13 +3,13 @@ package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction
 {
    private static final double ANGLE_SCALER = 0.1; //TODO:
    protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
+
    public SLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose)
    {
       this.transformWorldToSensorPose = transformWorldToSensorPose;

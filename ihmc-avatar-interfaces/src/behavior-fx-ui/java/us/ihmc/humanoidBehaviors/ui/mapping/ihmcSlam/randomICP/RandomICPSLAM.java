@@ -2,10 +2,8 @@ package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -93,7 +91,7 @@ public class RandomICPSLAM extends IhmcSLAM
       else
       {
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
-         SLAMFrameOptimizerCostFunction costFunction = new RICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
+         SLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
 
          double initialQuery = costFunction.getQuery(INITIAL_INPUT);
          System.out.println("frame distance " + initialQuery);
@@ -107,12 +105,12 @@ public class RandomICPSLAM extends IhmcSLAM
          else
          {
             int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, maximumSearchingSize);
-            if(numberOfInliers > 0.9 * sourcePointsToSensor.length)
+            if (numberOfInliers > 0.9 * sourcePointsToSensor.length)
             {
                System.out.println("close enough. many inliers.");
-               return new RigidBodyTransform();   
+               return new RigidBodyTransform();
             }
-            
+
             System.out.println("optimization started. " + initialQuery);
             //            return new RigidBodyTransform();
             GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
@@ -137,19 +135,16 @@ public class RandomICPSLAM extends IhmcSLAM
             RigidBodyTransform transformer = new RigidBodyTransform();
             costFunction.convertToSensorPoseMultiplier(optimalInput, transformer);
 
-//          System.out.println();
-//          System.out.println(transformer);
-
             return transformer;
          }
       }
    }
 
-   class RICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
+   class RandomICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
    {
       final Point3DReadOnly[] sourcePointsToSensor;
 
-      RICPSLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose, Point3DReadOnly[] sourcePointsToSensor)
+      RandomICPSLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose, Point3DReadOnly[] sourcePointsToSensor)
       {
          super(transformWorldToSensorPose);
          this.sourcePointsToSensor = sourcePointsToSensor;
