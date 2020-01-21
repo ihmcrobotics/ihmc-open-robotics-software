@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.ui.mapping.SimulatedStereoVisionPointCloudMessageLibrary;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeSLAMCopy;
+import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement.OctreeSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -62,7 +62,7 @@ public class OctreeSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  false);
 
-      OctreeSLAMCopy slam = new OctreeSLAMCopy(octreeResolution);
+      OctreeSLAM slam = new OctreeSLAM(octreeResolution);
       slam.addFirstFrame(messageOne);
       slam.addFrame(driftedMessageTwo);
 
@@ -92,7 +92,7 @@ public class OctreeSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(new File(stereoPath));
       System.out.println("number of messages " + messages.size());
 
-      OctreeSLAMCopy slam = new OctreeSLAMCopy(0.02);
+      OctreeSLAM slam = new OctreeSLAM(0.02);
       slam.addFirstFrame(messages.get(0));
       slam.addFrame(messages.get(35));
       slam.addFrame(messages.get(36));
@@ -149,7 +149,7 @@ public class OctreeSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(new File(stereoPath));
       System.out.println("number of messages " + messages.size());
 
-      OctreeSLAMCopy slam = new OctreeSLAMCopy(0.02);
+      OctreeSLAM slam = new OctreeSLAM(0.02);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
          slam.addFrame(messages.get(i));
