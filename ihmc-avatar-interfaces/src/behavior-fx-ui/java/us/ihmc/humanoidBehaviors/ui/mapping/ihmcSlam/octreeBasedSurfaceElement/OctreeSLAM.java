@@ -25,14 +25,14 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
-public class OctreeSLAMCopy extends IhmcSLAM
+public class OctreeSLAM extends IhmcSLAM
 {
    private NormalOcTree octreeNodesInPreviousView;
 
    private static final double MAXIMUM_DISTANCE_OF_SIMILARITY = 0.1;
    private static final double MAXIMUM_ANGLE_OF_SIMILARITY = Math.toRadians(10.0);
    
-   public OctreeSLAMCopy(double octreeResolution)
+   public OctreeSLAM(double octreeResolution)
    {
       super(octreeResolution);
    }
