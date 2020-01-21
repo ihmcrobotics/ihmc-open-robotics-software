@@ -8,7 +8,6 @@ import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.NaiveSLAM;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
@@ -102,7 +101,7 @@ public class PointCloudDataLoader extends Application
             {
                System.out.println("Building planar regions map.");
                List<Long> timestamps = StereoVisionPointCloudDataLoader.extractTimestamps(pointCloudFile);
-               IhmcSLAM slam = new NaiveSLAM(DEFAULT_OCTREE_RESOLUTION);
+               IhmcSLAM slam = new IhmcSLAM(DEFAULT_OCTREE_RESOLUTION);
                slam.addFirstFrame(messagesFromFile.get(0));
                for (int i = 1; i < messagesFromFile.size(); i++)
                   slam.addFrame(messagesFromFile.get(i));

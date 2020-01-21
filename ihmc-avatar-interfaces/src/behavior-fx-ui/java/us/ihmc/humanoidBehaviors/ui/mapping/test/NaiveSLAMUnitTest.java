@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.NaiveSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 
@@ -23,7 +22,7 @@ public class NaiveSLAMUnitTest
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
-      IhmcSLAM slam = new NaiveSLAM(octreeResolution);
+      IhmcSLAM slam = new IhmcSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {

@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -26,4 +27,9 @@ public interface IhmcSLAMInterface
    abstract List<RigidBodyTransformReadOnly> getSensorPoses();
 
    abstract PlanarRegionsList getPlanarRegionsMap();
+
+   default RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   {
+      return new RigidBodyTransform();
+   }
 }

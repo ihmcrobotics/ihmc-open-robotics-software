@@ -17,7 +17,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public abstract class IhmcSLAM implements IhmcSLAMInterface
+public class IhmcSLAM implements IhmcSLAMInterface
 {
    private final double octreeResolution;
 
@@ -128,8 +128,6 @@ public abstract class IhmcSLAM implements IhmcSLAMInterface
                                                                                                planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
-
-   protected abstract RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame);
 
    public List<Point3DReadOnly[]> getOriginalPointCloudMap()
    {

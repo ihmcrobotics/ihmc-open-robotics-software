@@ -48,7 +48,7 @@ public class RandomICPSLAM extends IhmcSLAM
    }
 
    @Override
-   protected RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
    {
       IhmcSLAMFrame previousFrame = getLatestFrame();
       Point3DReadOnly[] referencePointCloud = previousFrame.getPointCloud();

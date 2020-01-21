@@ -38,7 +38,7 @@ public class OctreeSLAM extends IhmcSLAM
    }
 
    @Override
-   protected RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
    {
       Point3DReadOnly[] pointCloudToSensor = frame.getOriginalPointCloudToSensorPose();
       RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
