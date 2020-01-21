@@ -172,7 +172,7 @@ public class RandomICPSLAM extends IhmcSLAM
             newSourcePointToWorld.set(sourcePoint);
             newSensorPose.transform(newSourcePointToWorld);
 
-            double distance = IhmcSLAMTools.computeDistanceToNormalOctree2(octree, newSourcePointToWorld, maximumSearchingSize);
+            double distance = IhmcSLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
 
             if (distance >= 0)
             {
