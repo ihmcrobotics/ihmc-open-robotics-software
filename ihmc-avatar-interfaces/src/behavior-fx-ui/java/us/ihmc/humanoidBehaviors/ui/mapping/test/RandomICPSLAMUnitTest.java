@@ -327,7 +327,7 @@ public class RandomICPSLAMUnitTest
       double octreeResolution = 0.01;
       RICPSLAM slam = new RICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(49));
-      slam.addFrame(messages.get(51));
+      slam.addFrame(messages.get(50));
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
