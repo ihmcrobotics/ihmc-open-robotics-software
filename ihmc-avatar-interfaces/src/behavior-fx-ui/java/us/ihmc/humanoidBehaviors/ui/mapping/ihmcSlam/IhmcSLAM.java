@@ -49,12 +49,12 @@ public class IhmcSLAM implements IhmcSLAMInterface
          LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
          UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
       }
-      for (int i = 0; i < 3; i++)
-      {
-         INITIAL_INPUT.add(0.0);
-         LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
-         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
-      }
+//      for (int i = 0; i < 3; i++)
+//      {
+//         INITIAL_INPUT.add(0.0);
+//         LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
+//         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+//      }
    }
 
    public IhmcSLAM(double octreeResolution)

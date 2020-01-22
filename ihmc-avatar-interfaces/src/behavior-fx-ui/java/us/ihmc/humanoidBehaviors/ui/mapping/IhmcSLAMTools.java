@@ -161,7 +161,7 @@ public class IhmcSLAMTools
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(false);
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
@@ -213,9 +213,11 @@ public class IhmcSLAMTools
       Point3D closestPoint = new Point3D();
       double minDistance = -1.0;
 
-      if (octree.search(occupiedKey) != null)
+      NormalOcTreeNode firstNode = octree.search(occupiedKey);
+      if (firstNode != null)
       {
-         return 0.0;
+         Point3D firstPoint = new Point3D(firstNode.getX(), firstNode.getY(), firstNode.getZ());
+         return firstPoint.distance(point);
       }
 
       for (int searchingSize = 1; searchingSize < maximumSearchingSize + 1; searchingSize++)

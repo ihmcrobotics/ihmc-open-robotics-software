@@ -1,8 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.randomICP;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,15 +18,16 @@ import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
-   public final List<Point3D> sourcePointsToWorld = new ArrayList<>();
-
    private static final int numberOfSourcePoints = 300;
 
    private final ConvexPolygon2D previousWindow = new ConvexPolygon2D();
-   private static final double windowWidth = 0.6;
-   private static final double windowHeight = 0.4;
+   private static final double windowWidth = 0.4;  // 0.6
+   private static final double windowHeight = 0.4; // 0.4
+   private static final double windowHeightBackWardOffset = -0.1; // 0.05 = verified by `testOptimizationSimulattedPointCloud`. 
    private static final double windowDepthThreshold = 0.5;
    private static final double minimumOverlappedRatio = 0.1;
+
+   private static final double maximumInitialDistanceRatio = 10.0;
 
    private static final int maximumSearchingSize = 5;
 
@@ -40,12 +38,15 @@ public class RandomICPSLAM extends IhmcSLAM
       super(octreeResolution);
 
       octree = new NormalOcTree(octreeResolution);
-      previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
-      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2);
-      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
+      previousWindow.addVertex(windowWidth / 2, windowHeight / 2 + windowHeightBackWardOffset);
+      previousWindow.addVertex(windowWidth / 2, -windowHeight / 2 + windowHeightBackWardOffset);
+      previousWindow.addVertex(-windowWidth / 2, -windowHeight / 2 + windowHeightBackWardOffset);
+      previousWindow.addVertex(-windowWidth / 2, windowHeight / 2 + windowHeightBackWardOffset);
       previousWindow.update();
    }
+
+   public Point3D[] sourcePointsToWorld;
+   public Point3D[] correctedSourcePointsToWorld;
 
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
@@ -90,6 +91,8 @@ public class RandomICPSLAM extends IhmcSLAM
       }
       else
       {
+         this.sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
+         
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
          SLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
 
@@ -97,7 +100,7 @@ public class RandomICPSLAM extends IhmcSLAM
          System.out.println("frame distance " + initialQuery);
 
          // TODO: if the source points are too far.
-         if (initialQuery > 2 * getOctreeResolution())
+         if (initialQuery > maximumInitialDistanceRatio * getOctreeResolution())
          {
             System.out.println("too far. will not be merged.");
             return null;
@@ -115,10 +118,10 @@ public class RandomICPSLAM extends IhmcSLAM
             //            return new RigidBodyTransform();
             GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
 
-            int maxIterations = 100;
-            double convergenceThreshold = 1 * 10E-4;
+            int maxIterations = 300;
+            double convergenceThreshold = 1 * 10E-5;
             double optimizerStepSize = -1.0;
-            double optimizerPerturbationSize = 0.001;
+            double optimizerPerturbationSize = 0.00001;
 
             optimizer.setInputLowerLimit(LOWER_LIMIT);
             optimizer.setInputUpperLimit(UPPER_LIMIT);
@@ -126,14 +129,21 @@ public class RandomICPSLAM extends IhmcSLAM
             optimizer.setConvergenceThreshold(convergenceThreshold);
             optimizer.setStepSize(optimizerStepSize);
             optimizer.setPerturbationSize(optimizerPerturbationSize);
-            optimizer.setReducingStepSizeRatio(5);
+            optimizer.setReducingStepSizeRatio(2);
 
             int run = optimizer.run();
             System.out.println("optimization result # " + run + "              " + initialQuery + " " + optimizer.getOptimalQuery());
             TDoubleArrayList optimalInput = optimizer.getOptimalInput();
+            
+            System.out.println("optimalInput # " + optimalInput.get(0)+" "+ optimalInput.get(1)+" "+ optimalInput.get(2));
 
             RigidBodyTransform transformer = new RigidBodyTransform();
             costFunction.convertToSensorPoseMultiplier(optimalInput, transformer);
+            
+            // TODO: remove
+            RigidBodyTransform optimizedSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
+            optimizedSensorPose.multiply(transformer); //TODO: fix for IhmcSLAMFrame. IhmcSLAMFrame works with preMultiply
+            correctedSourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
 
             return transformer;
          }
@@ -174,26 +184,29 @@ public class RandomICPSLAM extends IhmcSLAM
 
             double distance = IhmcSLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
 
-            if (distance >= 0)
+            if (distance < 0)
             {
-               totalDistance = totalDistance + distance;
+               distance = maximumSearchingSize * getOctreeResolution();
+            }
 
-               if (distance > octree.getResolution())
-               {
-                  totalOutliersDistance = totalOutliersDistance + distance;
-                  numberOfOutliers++;
-               }
-               else
-               {
-                  numberOfInliers++;
-               }
+            totalDistance = totalDistance + distance;
+
+            if (distance > octree.getResolution())
+            {
+               totalOutliersDistance = totalOutliersDistance + distance;
+               numberOfOutliers++;
+            }
+            else
+            {
+               numberOfInliers++;
             }
          }
 
-         if (numberOfInliers == 0)
-            return 100;
+//         if (numberOfInliers == 0 || numberOfOutliers == 0)
+//            return 100.0;
 
-         return totalOutliersDistance / numberOfOutliers;
+         //return totalOutliersDistance / numberOfOutliers;
+         return totalDistance / sourcePointsToSensor.length;
       }
    }
 }

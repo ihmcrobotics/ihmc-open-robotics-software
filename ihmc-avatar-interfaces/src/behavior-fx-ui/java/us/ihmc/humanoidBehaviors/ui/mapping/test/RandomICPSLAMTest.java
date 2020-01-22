@@ -36,6 +36,37 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 public class RandomICPSLAMTest
 {
    @Test
+   public void testAssumedGroundOccupancyMap()
+   {
+
+   }
+
+   @Test
+   public void testSmallOverlappedFrameDetection()
+   {
+      String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      double octreeResolution = 0.01;
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      slam.addFirstFrame(messages.get(49));
+      slam.addFrame(messages.get(50));
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
+      slamViewer.addSensorPose(slam.getSensorPoses().get(0), Color.BLUE);
+      slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.GREEN);
+
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
+      slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
+
+      slamViewer.start("testOptimizationForRealData");
+      ThreadTools.sleepForever();
+   }
+
+   @Test
    public void testComputeDistance()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
@@ -252,6 +283,7 @@ public class RandomICPSLAMTest
       RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
       sensorPoseOne.setTranslation(0.0, 0.0, fixedHeight);
       sensorPoseOne.appendPitchRotation(sensorPitchAngle);
+      sensorPoseOne.appendYawRotation(Math.toRadians(-90.0));
       StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne,
                                                                                                                           new RigidBodyTransform(), stairHeight,
                                                                                                                           stairWidth, stairLength, stairLength,
@@ -268,8 +300,11 @@ public class RandomICPSLAMTest
       RigidBodyTransform sensorPoseTwo = new RigidBodyTransform();
       sensorPoseTwo.setTranslation(movingForward, 0.0, fixedHeight);
       sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
+      sensorPoseTwo.appendYawRotation(Math.toRadians(-90.0));
 
-      RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.1, 10.0);
+      //RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.1, 10.0);
+      RigidBodyTransform randomTransformer = new RigidBodyTransform();
+      randomTransformer.appendTranslation(-0.05, 0.0, 0.0);
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
 
@@ -293,10 +328,14 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
+      slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
+      if(slam.correctedSourcePointsToWorld != null)
+         slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
+
       Point3D[] ruler = new Point3D[50];
       for (int i = 0; i < 50; i++)
          ruler[i] = new Point3D(0.15, 0.0, (double) i * octreeResolution);
-      slamViewer.addPointCloud(ruler, Color.RED);
+      slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
 
       slamViewer.start("testOptimizationForSimulatedPointCloud");
 
@@ -310,10 +349,10 @@ public class RandomICPSLAMTest
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.01;
+      double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(49));
-      slam.addFrame(messages.get(50));
+      slam.addFirstFrame(messages.get(47));
+      slam.addFrame(messages.get(48));
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
@@ -323,11 +362,10 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
       slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
       slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
-
-      Point3D[] sourcePoints = new Point3D[slam.sourcePointsToWorld.size()];
-      for (int i = 0; i < sourcePoints.length; i++)
-         sourcePoints[i] = new Point3D(slam.sourcePointsToWorld.get(i));
-      slamViewer.addPointCloud(sourcePoints, Color.RED);
+      
+      slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
+      if(slam.correctedSourcePointsToWorld != null)
+         slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
       slamViewer.start("testOptimizationForRealData");
       ThreadTools.sleepForever();
@@ -336,14 +374,16 @@ public class RandomICPSLAMTest
    @Test
    public void testRandomICPSLAMEndToEnd()
    {
-      String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\Walking10\\PointCloud\\";  // very effective.
+      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       IhmcSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(0));
-      //for (int i = 1; i < 60; i++)
+//      for (int i = 1; i < 49; i++)
       for (int i = 1; i < messages.size(); i++)
       {
          System.out.println();
@@ -355,6 +395,7 @@ public class RandomICPSLAMTest
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
+      System.out.println(slam.getPointCloudMap().size());
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {
          slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
