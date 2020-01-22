@@ -132,7 +132,7 @@ public class RandomICPSLAM extends IhmcSLAM
             optimizer.setReducingStepSizeRatio(2);
 
             int run = optimizer.run();
-            System.out.println("optimization result # " + run + "              " + initialQuery + " " + optimizer.getOptimalQuery());
+            System.out.println("optimization result # [" + run + "], #"+ optimizer.getComputationTime() +" sec # "+ "Init Q: " + initialQuery + ", Opt Q: " + optimizer.getOptimalQuery());
             TDoubleArrayList optimalInput = optimizer.getOptimalInput();
             
             System.out.println("optimalInput # " + optimalInput.get(0)+" "+ optimalInput.get(1)+" "+ optimalInput.get(2));

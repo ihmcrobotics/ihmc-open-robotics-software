@@ -21,7 +21,7 @@ public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunct
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      //transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER); // TODO: improve this.
+      transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER); // TODO: improve this.
    }
 
    public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
