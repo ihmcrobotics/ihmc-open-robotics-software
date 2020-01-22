@@ -100,7 +100,6 @@ public class AtlasCorridorNavigationTest
       if (KEEP_VISUALIZATION_UP) ThreadTools.sleepForever();
    }
 
-   @Disabled
    @Test
    public void testAtlasMakesItToGoalInTrickyCorridor()
    {
@@ -115,7 +114,6 @@ public class AtlasCorridorNavigationTest
                                           waypointsToHit);
    }
 
-   @Disabled
    @Test
    public void testAtlasMakesItToGoalInMazeCorridor()
    {
