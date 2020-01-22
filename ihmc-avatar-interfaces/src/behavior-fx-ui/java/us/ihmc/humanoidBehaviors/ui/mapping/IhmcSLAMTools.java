@@ -311,8 +311,8 @@ public class IhmcSLAMTools
     * if there is not enough source points, think this frame is key frame.
     * return null.
     */
-   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow, double windowDepth,
-                                                          double minimumOverlappedRatio)
+   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow, double windowMinimumDepth,
+                                                          double windowMaximumDepth, double minimumOverlappedRatio)
    {
       IhmcSLAMFrame previousFrame = frame.getPreviousFrame();
 
@@ -329,8 +329,9 @@ public class IhmcSLAMTools
       for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
       {
          Point3DReadOnly pointInPreviousView = convertedPointsToPreviousSensorPose[i];
-         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()) && pointInPreviousView.getZ() > windowDepth)
+         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()))
          {
+            if(pointInPreviousView.getZ() > windowMinimumDepth && pointInPreviousView.getZ() < windowMaximumDepth)
             pointsInPreviousWindow.add(originalPointCloudToSensorPose[i]);
             numberOfPointsInPreviousView++;
          }

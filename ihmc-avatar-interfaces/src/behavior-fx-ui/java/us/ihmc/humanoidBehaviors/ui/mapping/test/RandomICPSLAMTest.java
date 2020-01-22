@@ -36,9 +36,33 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 public class RandomICPSLAMTest
 {
    @Test
-   public void visualizeBadFrameForNewPlane()
+   public void visualizeBadFrameForFlatTop()
    {
-      
+      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      double octreeResolution = 0.01;
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      slam.addFirstFrame(messages.get(41));
+      slam.addFrame(messages.get(42));
+      slam.addFrame(messages.get(43));
+      slam.addFrame(messages.get(44));
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.SKYBLUE);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(2), Color.GREEN);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(3), Color.BLACK);
+
+      slamViewer.addSensorPose(slam.getSensorPoses().get(0), Color.BLUE);
+      slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.SKYBLUE);
+      slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.GREEN);
+      slamViewer.addSensorPose(slam.getSensorPoses().get(2), Color.BLACK);
+
+      slamViewer.start("visualizeBadFrameForNewPlane slamViewer");
+      ThreadTools.sleepForever();
    }
 
    @Test
@@ -81,7 +105,8 @@ public class RandomICPSLAMTest
       int numberOfSourcePoints = 100;
       double windowWidth = 0.6;
       double windowHeight = 0.4;
-      double windowDepthThreshold = 0.5;
+      double windowDepthMinimumThreshold = 0.5;
+      double windowDepthMaximumThreshold = 1.5;
       double minimumOverlappedRatio = 0.3;
       ConvexPolygon2D previousWindow = new ConvexPolygon2D();
       previousWindow.addVertex(windowWidth / 2, windowHeight / 2);
@@ -90,7 +115,8 @@ public class RandomICPSLAMTest
       previousWindow.addVertex(-windowWidth / 2, windowHeight / 2);
       previousWindow.update();
 
-      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, numberOfSourcePoints, previousWindow, windowDepthThreshold,
+      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, numberOfSourcePoints, previousWindow,
+                                                                                        windowDepthMinimumThreshold, windowDepthMaximumThreshold,
                                                                                         minimumOverlappedRatio);
       Point3D[] sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getSensorPose(), sourcePointsToSensorPose);
 
@@ -329,7 +355,7 @@ public class RandomICPSLAMTest
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
       slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
-      if(slam.correctedSourcePointsToWorld != null)
+      if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
       Point3D[] ruler = new Point3D[50];
@@ -362,9 +388,9 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
       slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
       slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
-      
+
       slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
-      if(slam.correctedSourcePointsToWorld != null)
+      if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
       slamViewer.start("testOptimizationForRealData");
@@ -374,36 +400,45 @@ public class RandomICPSLAMTest
    @Test
    public void testRandomICPSLAMEndToEnd()
    {
-      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";  // 0.4(w), 0.4(h), -0.1(h offset)
       //String stereoPath = "E:\\Data\\Walking10\\PointCloud\\";  // very effective.
-      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
+      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\"; // 0.4(w), 0.3(h), 0.0(h offset) // from 36, 37, next 38 has not been merged well <- this solved by window size.
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       IhmcSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(0));
-//      for (int i = 1; i < 49; i++)
       for (int i = 1; i < messages.size(); i++)
       {
          System.out.println();
          System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
       }
+      System.out.println(slam.getPointCloudMap().size());
 
       slam.updatePlanarRegionsMap();
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
-      System.out.println(slam.getPointCloudMap().size());
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {
          slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
          slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       }
-      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+      //slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
 
-      slamViewer.start("testRandomICPSLAMEndToEnd");
+      slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
+
+      IhmcSLAMViewer originalViewer = new IhmcSLAMViewer();
+
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+      {
+         originalViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.GREEN);
+         originalViewer.addSensorPose(slam.getOriginalSensorPoses().get(i), Color.GREEN);
+      }
+
+      originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
       ThreadTools.sleepForever();
    }
 
