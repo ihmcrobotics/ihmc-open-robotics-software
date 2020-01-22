@@ -36,9 +36,9 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 public class RandomICPSLAMTest
 {
    @Test
-   public void testAssumedGroundOccupancyMap()
+   public void visualizeBadFrameForNewPlane()
    {
-
+      
    }
 
    @Test
@@ -48,10 +48,10 @@ public class RandomICPSLAMTest
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.01;
+      double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(49));
-      slam.addFrame(messages.get(50));
+      slam.addFirstFrame(messages.get(50));
+      slam.addFrame(messages.get(51));
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
@@ -62,7 +62,7 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
       slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
 
-      slamViewer.start("testOptimizationForRealData");
+      slamViewer.start("testSmallOverlappedFrameDetection");
       ThreadTools.sleepForever();
    }
 
