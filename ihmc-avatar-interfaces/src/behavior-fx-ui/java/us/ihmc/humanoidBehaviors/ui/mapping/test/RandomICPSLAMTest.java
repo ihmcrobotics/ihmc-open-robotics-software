@@ -42,22 +42,19 @@ public class RandomICPSLAMTest
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.01;
+      double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(41));
-      slam.addFrame(messages.get(42));
+      slam.addFirstFrame(messages.get(42));
       slam.addFrame(messages.get(43));
       slam.addFrame(messages.get(44));
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
       slamViewer.addPointCloud(slam.getPointCloudMap().get(0), Color.BLUE);
-      slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.SKYBLUE);
-      slamViewer.addPointCloud(slam.getPointCloudMap().get(2), Color.GREEN);
-      slamViewer.addPointCloud(slam.getPointCloudMap().get(3), Color.BLACK);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
+      slamViewer.addPointCloud(slam.getPointCloudMap().get(2), Color.BLACK);
 
       slamViewer.addSensorPose(slam.getSensorPoses().get(0), Color.BLUE);
-      slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.SKYBLUE);
       slamViewer.addSensorPose(slam.getSensorPoses().get(1), Color.GREEN);
       slamViewer.addSensorPose(slam.getSensorPoses().get(2), Color.BLACK);
 

@@ -23,7 +23,7 @@ public class RandomICPSLAM extends IhmcSLAM
    private final ConvexPolygon2D previousWindow = new ConvexPolygon2D();
    private static final double windowWidth = 0.4; // 0.6
    private static final double windowHeight = 0.3; // 0.4
-   private static final double windowHeightBackWardOffset = -0.; // 0.05 = verified by `testOptimizationSimulattedPointCloud`. 
+   private static final double windowHeightBackWardOffset = -0.0; // 0.05 = verified by `testOptimizationSimulattedPointCloud`. 
    private static final double windowDepthMinimumThreshold = 0.5;
    private static final double windowDepthMaximumThreshold = 1.5;
    private static final double minimumOverlappedRatio = 0.1;
@@ -65,7 +65,7 @@ public class RandomICPSLAM extends IhmcSLAM
 
       // TODO: using octree from whole previous map would be ideal.
       // Or considering normal vector of the octree would be better.
-      octree.clear();
+      //octree.clear();
       octree.insertScanCollection(scanCollection, false);
 
       octree.enableParallelComputationForNormals(true);
@@ -81,6 +81,8 @@ public class RandomICPSLAM extends IhmcSLAM
       // if this frame is detected as a key frame, return new RigidBodyTransform();
       // if this frame needs drift correction, return optimized transform;
       // if this frame should not be mergeable, return null;
+      // TODO: if the angle distance between original sensor pose orientation and new one, think it is key frame.
+      // put credit to trust slam. when it exceed, the frame is key frame.
 
       // see the overlapped area.
       Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, numberOfSourcePoints, previousWindow, windowDepthMinimumThreshold,
