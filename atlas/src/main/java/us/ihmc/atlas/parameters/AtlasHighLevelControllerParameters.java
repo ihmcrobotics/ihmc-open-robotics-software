@@ -147,8 +147,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Shoulder joints:
       JointAccelerationIntegrationParameters shoulderJointSettings = new JointAccelerationIntegrationParameters();
-      shoulderJointSettings.setPositionBreakFrequency(0.5);
-      shoulderJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
+      shoulderJointSettings.setPositionBreakFrequency(1.0);
+      shoulderJointSettings.setVelocityBreakFrequency(1.7);
       shoulderJointSettings.setMaxPositionError(0.2);
       shoulderJointSettings.setMaxVelocity(2.0);
 
@@ -165,8 +165,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Elbow joints:
       JointAccelerationIntegrationParameters elbowJointSettings = new JointAccelerationIntegrationParameters();
-      elbowJointSettings.setPositionBreakFrequency(0.5);
-      elbowJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
+      elbowJointSettings.setPositionBreakFrequency(1.0);
+      elbowJointSettings.setVelocityBreakFrequency(1.25);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
