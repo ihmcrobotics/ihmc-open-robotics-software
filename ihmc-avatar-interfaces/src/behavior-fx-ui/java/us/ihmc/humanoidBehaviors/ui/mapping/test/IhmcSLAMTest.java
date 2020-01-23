@@ -30,7 +30,7 @@ public class IhmcSLAMTest
          slam.addFrame(messages.get(i));
       }
 
-      //slam.updatePlanarRegionsMap();
+      slam.updatePlanarRegionsMap();
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
 
