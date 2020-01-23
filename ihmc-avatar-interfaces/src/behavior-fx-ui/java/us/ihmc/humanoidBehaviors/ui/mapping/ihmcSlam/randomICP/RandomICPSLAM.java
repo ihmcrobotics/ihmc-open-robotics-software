@@ -82,8 +82,6 @@ public class RandomICPSLAM extends IhmcSLAM
       normalEstimationParameters.setNumberOfIterations(7);
       octree.setNormalEstimationParameters(normalEstimationParameters);
 
-      //octree.updateNormals();
-
       // if this frame is detected as a key frame, return new RigidBodyTransform();
       // if this frame needs drift correction, return optimized transform;
       // if this frame should not be mergeable, return null;
@@ -120,7 +118,7 @@ public class RandomICPSLAM extends IhmcSLAM
          else
          {
             int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
-            if (numberOfInliers > 0.9 * sourcePointsToSensor.length)
+            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
             {
                if (DEBUG)
                   System.out.println("close enough. many inliers.");

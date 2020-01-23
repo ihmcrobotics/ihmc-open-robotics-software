@@ -7,7 +7,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction
 {
-   private static final double ANGLE_SCALER = 0.5;
+   private static final double ANGLE_SCALER = 0.1;
    protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
 
    public SLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose)
