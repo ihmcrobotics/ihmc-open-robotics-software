@@ -164,7 +164,6 @@ public class AtlasCorridorNavigationTest
       new Thread(() ->
       {
          LogTools.info("Creating simulation");
-         boolean createYoVariableServer = true;
          HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
          kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
          kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
