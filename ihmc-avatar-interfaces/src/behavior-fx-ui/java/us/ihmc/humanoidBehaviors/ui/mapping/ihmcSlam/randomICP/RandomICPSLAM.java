@@ -18,7 +18,7 @@ import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
-   public static final boolean DEBUG = false;
+   public static final boolean DEBUG = true;
 
    private static final int NUMBER_OF_SOURCE_POINTS = 300;
 
@@ -33,6 +33,8 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
 
    private static final int MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
+
+   private static final boolean USE_WHOLE_OCTREE = true;
 
    private final NormalOcTree octree;
 
@@ -66,9 +68,10 @@ public class RandomICPSLAM extends IhmcSLAM
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(IhmcSLAMTools.toScan(referencePointCloud, referenceSensorPose.getTranslation()));
 
-      // TODO: using octree from whole previous map would be ideal.
+      // using octree from whole previous map would be ideal.
       // Or considering normal vector of the octree would be better.
-      //octree.clear();
+      if (!USE_WHOLE_OCTREE)
+         octree.clear();
       octree.insertScanCollection(scanCollection, false);
 
       octree.enableParallelComputationForNormals(true);
@@ -84,7 +87,7 @@ public class RandomICPSLAM extends IhmcSLAM
       // if this frame is detected as a key frame, return new RigidBodyTransform();
       // if this frame needs drift correction, return optimized transform;
       // if this frame should not be mergeable, return null;
-      // TODO: if the angle distance between original sensor pose orientation and new one, think it is key frame.
+      // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
       // put credit to trust slam. when it exceed, the frame is key frame.
 
       // see the overlapped area.
@@ -108,7 +111,6 @@ public class RandomICPSLAM extends IhmcSLAM
          if (DEBUG)
             System.out.println("frame distance " + initialQuery);
 
-         // TODO: if the source points are too far.
          if (initialQuery > MAXIMUM_INITIAL_DISTANCE_RATIO * getOctreeResolution())
          {
             if (DEBUG)
@@ -157,7 +159,7 @@ public class RandomICPSLAM extends IhmcSLAM
             if (DEBUG)
             {
                RigidBodyTransform optimizedSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
-               optimizedSensorPose.multiply(transformer); //TODO: fix for IhmcSLAMFrame. IhmcSLAMFrame works with preMultiply
+               optimizedSensorPose.multiply(transformer);
                correctedSourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
             }
 

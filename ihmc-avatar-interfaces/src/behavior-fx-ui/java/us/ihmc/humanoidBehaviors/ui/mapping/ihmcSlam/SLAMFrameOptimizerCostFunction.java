@@ -7,7 +7,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction
 {
-   private static final double ANGLE_SCALER = 0.1; //TODO:
+   private static final double ANGLE_SCALER = 0.5;
    protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
 
    public SLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose)
@@ -21,7 +21,8 @@ public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunct
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER); // TODO: improve this.
+      if(IhmcSLAM.ENABLE_ORIENTATION_CORRECTION)
+         transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER);
    }
 
    public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)

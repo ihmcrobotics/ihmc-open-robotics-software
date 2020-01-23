@@ -325,9 +325,7 @@ public class RandomICPSLAMTest
       sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
       sensorPoseTwo.appendYawRotation(Math.toRadians(-90.0));
 
-      //RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.1, 10.0);
-      RigidBodyTransform randomTransformer = new RigidBodyTransform();
-      randomTransformer.appendTranslation(-0.05, 0.0, 0.0);
+      RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.1, 10.0);
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
 

@@ -156,6 +156,7 @@ public class IhmcSLAMTools
                                                                                   List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution,
                                                                                   PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
    {
+      // TODO: FB-348: Surface normal filter in NormalOctree.
       NormalOcTree referenceOctree = computeOctreeData(pointCloudMap, sensorPoses, octreeResolution);
 
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
@@ -311,8 +312,8 @@ public class IhmcSLAMTools
     * if there is not enough source points, think this frame is key frame.
     * return null.
     */
-   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow, double windowMinimumDepth,
-                                                          double windowMaximumDepth, double minimumOverlappedRatio)
+   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow,
+                                                          double windowMinimumDepth, double windowMaximumDepth, double minimumOverlappedRatio)
    {
       IhmcSLAMFrame previousFrame = frame.getPreviousFrame();
 
@@ -331,8 +332,8 @@ public class IhmcSLAMTools
          Point3DReadOnly pointInPreviousView = convertedPointsToPreviousSensorPose[i];
          if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()))
          {
-            if(pointInPreviousView.getZ() > windowMinimumDepth && pointInPreviousView.getZ() < windowMaximumDepth)
-            pointsInPreviousWindow.add(originalPointCloudToSensorPose[i]);
+            if (pointInPreviousView.getZ() > windowMinimumDepth && pointInPreviousView.getZ() < windowMaximumDepth)
+               pointsInPreviousWindow.add(originalPointCloudToSensorPose[i]);
             numberOfPointsInPreviousView++;
          }
          else

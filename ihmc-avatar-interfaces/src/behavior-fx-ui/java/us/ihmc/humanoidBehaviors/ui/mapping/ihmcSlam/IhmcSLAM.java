@@ -40,6 +40,8 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
    protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
+   
+   public static boolean ENABLE_ORIENTATION_CORRECTION = true;
 
    static
    {
@@ -49,11 +51,14 @@ public class IhmcSLAM implements IhmcSLAMInterface
          LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
          UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
       }
-      for (int i = 0; i < 3; i++)
+      if(ENABLE_ORIENTATION_CORRECTION)
       {
-         INITIAL_INPUT.add(0.0);
-         LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
-         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+         for (int i = 0; i < 3; i++)
+         {
+            INITIAL_INPUT.add(0.0);
+            LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
+            UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+         }   
       }
    }
 
@@ -128,7 +133,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public void updatePlanarRegionsMap()
    {
-      // TODO : Try to think re-using NormalOctree that is computed before for speed up. 
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, octreeResolution,
                                                                                                planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
