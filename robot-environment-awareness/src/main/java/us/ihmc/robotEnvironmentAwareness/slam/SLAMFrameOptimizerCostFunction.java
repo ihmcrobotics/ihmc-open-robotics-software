@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam;
+package us.ihmc.robotEnvironmentAwareness.slam;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;

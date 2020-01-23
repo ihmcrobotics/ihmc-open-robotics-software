@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 
 public class IhmcSLAMTest
 {

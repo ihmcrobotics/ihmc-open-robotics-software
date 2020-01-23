@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam;
+package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
 

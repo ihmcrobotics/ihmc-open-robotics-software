@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.octreeBasedSurfaceElement;
+package us.ihmc.robotEnvironmentAwareness.slam;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
