@@ -351,7 +351,8 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
-      slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
+      if(RandomICPSLAM.DEBUG)
+         slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
@@ -386,7 +387,8 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(1), Color.BLACK);
       slamViewer.addPointCloud(slam.getPointCloudMap().get(1), Color.GREEN);
 
-      slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
+      if(RandomICPSLAM.DEBUG)
+         slamViewer.addPointCloud(slam.sourcePointsToWorld, Color.RED);
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
