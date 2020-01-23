@@ -44,7 +44,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SleepBehavior sleepBehavior;
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
-   protected final AtomicReference<DoorLocationPacket> doorLocationReference = new AtomicReference<DoorLocationPacket>();
+   protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
 
    private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
@@ -59,7 +59,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
 
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationReference::set);
+      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
 
       setupStateMachine();
 
@@ -69,7 +69,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    public void onBehaviorEntered()
    {
       succeeded = false;
-      doorLocationReference.set(null);
+      doorLocationPacket.set(null);
       super.onBehaviorEntered();
    }
 
@@ -85,6 +85,12 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       BehaviorAction start = new BehaviorAction()
       {
          @Override
+         public void onEntry()
+         {
+            super.onEntry();
+            doorLocationPacket.set(null);
+         }
+         @Override
          protected void setBehaviorInput()
          {
 
@@ -94,7 +100,11 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          public boolean isDone()
          {
             //wait for the door to be located and a baseline set for open detection
-            return doorLocationReference.get() != null;
+            if(doorLocationPacket.get()!=null)
+            {
+               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
+            }
+            return doorLocationPacket.get() != null;
          }
 
       };
