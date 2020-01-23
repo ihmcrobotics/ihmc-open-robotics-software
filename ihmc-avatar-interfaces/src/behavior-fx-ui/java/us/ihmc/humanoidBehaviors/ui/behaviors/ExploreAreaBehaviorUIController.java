@@ -1,8 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
@@ -21,7 +19,6 @@ import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
-import us.ihmc.javafx.parameter.JavaFXParameterTableEntry;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -40,13 +37,11 @@ public class ExploreAreaBehaviorUIController extends Group
    @FXML private TextField stateTextField;
    @FXML private TableView parameterTable;
 
-   private final ObservableList<JavaFXParameterTableEntry> parameterTableItems = FXCollections.observableArrayList();
-
    private Messager behaviorMessager;
 
    private PlanarRegionsGraphic planarRegionsGraphic = null;
 
-   private ArrayList<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();
+   private ArrayList<PlanarRegion> planarRegions = new ArrayList<>();
 
    private HashMap<Integer, RigidBodyTransform> transformMap = new HashMap<>();
    private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
@@ -76,7 +71,7 @@ public class ExploreAreaBehaviorUIController extends Group
                                              state -> Platform.runLater(() -> stateTextField.setText(state.name())));
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
-      javaFXStoredPropertyTable.setup(parameters, parameters.keys, this::publishParameters);
+      javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
    }
 
    private void publishParameters()
