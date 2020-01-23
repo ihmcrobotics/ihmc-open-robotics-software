@@ -22,7 +22,7 @@ public class BehaviorModule
 {
    public static final MessagerAPI MessagerAPI = API.create(); // Assuming MessagerAPI is thread safe
 
-   public static BehaviorModule createForBackpack(DRCRobotModel robotModel)
+   public static BehaviorModule createInterprocess(DRCRobotModel robotModel)
    {
       KryoMessager messager = KryoMessager.createServer(MessagerAPI,
                                                         NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
@@ -31,7 +31,7 @@ public class BehaviorModule
       return new BehaviorModule(robotModel, messager);
    }
 
-   public static BehaviorModule createForTest(DRCRobotModel robotModel, Messager messager)
+   public static BehaviorModule createIntraprocess(DRCRobotModel robotModel, SharedMemoryMessager messager)
    {
       return new BehaviorModule(robotModel, messager);
    }

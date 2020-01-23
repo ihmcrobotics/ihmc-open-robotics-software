@@ -32,7 +32,7 @@ public class AtlasBehaviorModule
       }
 
       LogTools.info("Creating behavior module");
-      BehaviorModule.createForBackpack(createRobotModel());
+      BehaviorModule.createInterprocess(createRobotModel());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       { // add cleanup actions here
