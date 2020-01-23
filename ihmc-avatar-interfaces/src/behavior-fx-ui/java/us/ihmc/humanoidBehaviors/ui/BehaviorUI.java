@@ -15,12 +15,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.*;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -49,6 +44,7 @@ public class BehaviorUI
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
    @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
+   @FXML private NavigationBehaviorUIController navigationBehaviorUIController;
    @FXML private PlannerParametersUIController plannerParametersUIController;
    @FXML private DirectRobotUIController directRobotUIController;
 
@@ -90,6 +86,7 @@ public class BehaviorUI
          stepInPlaceBehaviorUIController.init(behaviorMessager);
          fancyPosesBehaviorUIController.init(behaviorMessager);
          exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+         navigationBehaviorUIController.init(behaviorMessager);
          patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
          plannerParametersUIController.init(behaviorMessager, robotModel);
          directRobotUIController.init(ros2Node, robotModel);

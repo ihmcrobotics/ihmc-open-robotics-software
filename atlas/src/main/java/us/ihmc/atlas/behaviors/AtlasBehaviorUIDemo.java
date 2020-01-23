@@ -100,7 +100,7 @@ public class AtlasBehaviorUIDemo
 
       new Thread(() -> {
          LogTools.info("Creating behavior backpack");
-         BehaviorModule.createForBackpack(createRobotModel());
+         BehaviorModule.createInterprocess(createRobotModel());
       }).start();
 
       if (LAUNCH_PARAMETER_TUNER)

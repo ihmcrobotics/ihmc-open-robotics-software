@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
+import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -16,6 +17,7 @@ public enum BehaviorRegistry
    PATROL(PatrolBehavior::new, PatrolBehaviorAPI.create()),
    FANCY_POSES(FancyPosesBehavior::new, FancyPosesBehavior.API.create()),
    EXPLORE(ExploreAreaBehavior::new, ExploreAreaBehavior.ExploreAreaBehaviorAPI.create()),
+   NAVIGATION(NavigationBehavior::new, NavigationBehavior.NavigationBehaviorAPI.create()),
    ;
 
    public static final BehaviorRegistry[] values = values();
