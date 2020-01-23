@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping;
+package us.ihmc.robotEnvironmentAwareness.slam.tools;
 
 import java.util.ArrayList;
 import java.util.List;

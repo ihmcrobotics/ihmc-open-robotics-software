@@ -7,10 +7,10 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import us.ihmc.humanoidBehaviors.ui.mapping.ihmcSlam.IhmcSLAM;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
