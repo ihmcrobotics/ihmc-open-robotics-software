@@ -24,7 +24,6 @@ public class BehaviorModule
 {
    private enum CommunicationMode { INTERPROCESS, INTRAPROCESS }
 
-   private final BehaviorRegistry behaviorRegistry;
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final PairList<BehaviorStatics, BehaviorInterface> constructedBehaviors = new PairList<>();
@@ -41,7 +40,6 @@ public class BehaviorModule
 
    private BehaviorModule(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, CommunicationMode communicationMode)
    {
-      this.behaviorRegistry = behaviorRegistry;
       LogTools.info("Starting behavior module in {} mode", communicationMode.name());
 
       messagerAPI = behaviorRegistry.constructMessagerAPI();
@@ -81,11 +79,6 @@ public class BehaviorModule
    public Messager getMessager()
    {
       return messager;
-   }
-
-   public MessagerAPI getMessagerAPI()
-   {
-      return messagerAPI;
    }
 
    // API created here from build
