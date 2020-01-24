@@ -9,6 +9,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMViewer;
 
 public class SLAMAnchorPaneController extends REABasicUIController
@@ -27,6 +28,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    public void bindControls()
    {
       ihmcSLAMViewer = new IhmcSLAMViewer(uiMessager);
+      uiMessager.bindBidirectionalInternal(REAModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty(), true);
    }
 
    public void openMap() throws IOException
