@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -13,9 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.*;
+import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -40,15 +39,28 @@ public class BehaviorUI
 
    @FXML private ChoiceBox<String> behaviorSelector;
 
-   @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
-   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
-   @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
-   @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
-   @FXML private NavigationBehaviorUIController navigationBehaviorUIController;
-   @FXML private PlannerParametersUIController plannerParametersUIController;
-   @FXML private DirectRobotUIController directRobotUIController;
+//   @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
+//   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
+//   @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
+//   @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
+//   @FXML private NavigationBehaviorUIController navigationBehaviorUIController;
+//   @FXML private PlannerParametersUIController plannerParametersUIController;
+//   @FXML private DirectRobotUIController directRobotUIController;
 
-   public BehaviorUI(Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   public static BehaviorUI createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
+   {
+      return new BehaviorUI(behaviorRegistry,
+                            RemoteBehaviorInterface.createForUI(behaviorRegistry, behaviorModuleAddress),
+                            robotModel,
+                            PubSubImplementation.FAST_RTPS);
+   }
+
+   public static BehaviorUI createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
+   {
+      return new BehaviorUI(behaviorRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
+   }
+
+   private BehaviorUI(BehaviorRegistry behaviorRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
@@ -68,6 +80,9 @@ public class BehaviorUI
 
          ExceptionTools.handle(() -> mainPane = loader.load(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
+         BorderPane bottom = (BorderPane) mainPane.getBottom();
+         TabPane tabPane = (TabPane) bottom.getCenter();
+
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
          view3dFactory.addWorldCoordinateSystem(0.3);
@@ -76,23 +91,24 @@ public class BehaviorUI
          Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
          behaviorSelector.getItems().add("NONE");
-         for (BehaviorRegistry behavior : BehaviorRegistry.values)
+
+         for (BehaviorStatics behaviorStatics : behaviorRegistry.getEntries())
          {
-            behaviorSelector.getItems().add(behavior.name());
+            behaviorSelector.getItems().add(behaviorStatics.getName());
          }
          behaviorSelector.valueProperty().addListener(
                (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
 
-         stepInPlaceBehaviorUIController.init(behaviorMessager);
-         fancyPosesBehaviorUIController.init(behaviorMessager);
-         exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-         navigationBehaviorUIController.init(behaviorMessager);
-         patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-         plannerParametersUIController.init(behaviorMessager, robotModel);
-         directRobotUIController.init(ros2Node, robotModel);
+//         stepInPlaceBehaviorUIController.init(behaviorMessager);
+//         fancyPosesBehaviorUIController.init(behaviorMessager);
+//         exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+//         navigationBehaviorUIController.init(behaviorMessager);
+//         patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+//         plannerParametersUIController.init(behaviorMessager, robotModel);
+//         directRobotUIController.init(ros2Node, robotModel);
 
-         view3dFactory.addNodeToView(patrolBehaviorUIController);
-         view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
+//         view3dFactory.addNodeToView(patrolBehaviorUIController);
+//         view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
 
          if (showLivePlanarRegionsGraphic)
          {

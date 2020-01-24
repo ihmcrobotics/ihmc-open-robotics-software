@@ -8,8 +8,10 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -32,11 +34,9 @@ public class AtlasStepInPlaceBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-
       LogTools.info("Creating behavior module");
-      BehaviorModule.createIntraprocess(robotModel, messager);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(StepInPlaceBehavior.STATICS), robotModel);
+      Messager messager = behaviorModule.getMessager();
 
       LogTools.info("Creating behavior messager");
 

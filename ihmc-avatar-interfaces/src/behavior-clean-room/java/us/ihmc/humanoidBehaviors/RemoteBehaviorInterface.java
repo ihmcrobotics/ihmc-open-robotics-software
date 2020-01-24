@@ -9,10 +9,10 @@ import us.ihmc.messager.kryo.KryoMessager;
 
 public class RemoteBehaviorInterface
 {
-   public static Messager createForUI(String backpackAddress)
+   public static Messager createForUI(BehaviorRegistry behaviorRegistry, String behaviorModuleAddress)
    {
-      KryoMessager moduleMessager = KryoMessager.createClient(BehaviorModule.MessagerAPI,
-                                                              backpackAddress,
+      KryoMessager moduleMessager = KryoMessager.createClient(behaviorRegistry.constructMessagerAPI(),
+                                                              behaviorModuleAddress,
                                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                                               new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));
       new Thread(() -> ExceptionTools.handle(() -> moduleMessager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION),

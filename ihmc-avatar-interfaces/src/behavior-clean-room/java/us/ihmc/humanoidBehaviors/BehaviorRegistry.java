@@ -1,50 +1,54 @@
 package us.ihmc.humanoidBehaviors;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.ros2.Ros2Node;
 
-public enum BehaviorRegistry
+import java.util.ArrayList;
+
+public class BehaviorRegistry
 {
-   STEP_IN_PLACE(StepInPlaceBehavior::new, StepInPlaceBehavior.API.create()),
-   PATROL(PatrolBehavior::new, PatrolBehaviorAPI.create()),
-   FANCY_POSES(FancyPosesBehavior::new, FancyPosesBehavior.API.create()),
-   EXPLORE(ExploreAreaBehavior::new, ExploreAreaBehavior.ExploreAreaBehaviorAPI.create()),
-   NAVIGATION(NavigationBehavior::new, NavigationBehavior.NavigationBehaviorAPI.create()),
-   ;
-
-   public static final BehaviorRegistry[] values = values();
-
-   private final BehaviorSupplier behaviorSupplier;
-   private final MessagerAPI behaviorAPI;
-
-   private BehaviorInterface constructedBehavior;
-
-   BehaviorRegistry(BehaviorSupplier behaviorSupplier, MessagerAPI behaviorAPI)
+   public static final BehaviorRegistry DEFAULT_BEHAVIORS = new BehaviorRegistry();
+   static
    {
-      this.behaviorSupplier = behaviorSupplier;
-      this.behaviorAPI = behaviorAPI;
+      DEFAULT_BEHAVIORS.add(StepInPlaceBehavior.STATICS);
+      DEFAULT_BEHAVIORS.add(PatrolBehavior.STATICS);
+      DEFAULT_BEHAVIORS.add(FancyPosesBehavior.STATICS);
+      DEFAULT_BEHAVIORS.add(ExploreAreaBehavior.STATICS);
+      DEFAULT_BEHAVIORS.add(NavigationBehavior.STATICS);
    }
 
-   public void build(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
+   private final ArrayList<BehaviorStatics> entries = new ArrayList<>();
+
+   public static BehaviorRegistry of(BehaviorStatics... entries)
    {
-      constructedBehavior = behaviorSupplier.build(new BehaviorHelper(robotModel, messager, ros2Node));
+      BehaviorRegistry registry = new BehaviorRegistry();
+      for (BehaviorStatics entry : entries)
+      {
+         registry.add(entry);
+      }
+      return registry;
    }
 
-   public MessagerAPI getBehaviorAPI()
+   public void add(BehaviorStatics statics)
    {
-      return behaviorAPI;
+      entries.add(statics);
    }
 
-   public BehaviorInterface getConstructedBehavior()
+   public MessagerAPI constructMessagerAPI()
    {
-      return constructedBehavior;
+      MessagerAPI[] behaviorAPIs = new MessagerAPI[entries.size()];
+      for (int i = 0; i < entries.size(); i++)
+      {
+         behaviorAPIs[i] = entries.get(i).getBehaviorAPI();
+      }
+      return BehaviorModule.API.create(behaviorAPIs);
+   }
+
+   public ArrayList<BehaviorStatics> getEntries()
+   {
+      return entries;
    }
 }
