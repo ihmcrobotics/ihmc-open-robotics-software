@@ -14,6 +14,13 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -39,6 +46,7 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -57,8 +65,7 @@ public class LogVisualizer
       this(8000, false, null);
    }
 
-   public LogVisualizer(int bufferSize, boolean showOverheadView,
-         File logFile) throws IOException
+   public LogVisualizer(int bufferSize, boolean showOverheadView, File logFile) throws IOException
    {
       if (logFile == null)
       {
@@ -77,7 +84,8 @@ public class LogVisualizer
          scs.setFastSimulate(true, 50);
          readLogFile(logFile, showOverheadView);
 
-         if (PRINT_OUT_YOVARIABLE_NAMES) printOutYoVariableNames();
+         if (PRINT_OUT_YOVARIABLE_NAMES)
+            printOutYoVariableNames();
       }
       else
       {
@@ -107,7 +115,6 @@ public class LogVisualizer
       {
          throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
-
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
       byte[] handshakeData = new byte[(int) handshake.length()];
@@ -160,8 +167,7 @@ public class LogVisualizer
 
       RobotDescription robotDescription;
 
-
-      if(generalizedSDFRobotModel != null)
+      if (generalizedSDFRobotModel != null)
       {
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
          robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
@@ -174,7 +180,7 @@ public class LogVisualizer
          robotDescription.addRootJoint(rootJoint);
       }
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, jointStates, parser.getYoVariablesList(), logProperties ,scs);
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, jointStates, parser.getYoVariablesList(), logProperties, scs);
       scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
@@ -208,16 +214,14 @@ public class LogVisualizer
          e.printStackTrace();
       }
 
-
-
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
 
       AdditionalPanelTools.setupFrameView(scs, parser.getFrameIndexMap()::getReferenceFrame, SCSVisualizer.createFrameFilter());
 
-//      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
-//      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
+      //      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
+      //      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
 
       setupReadEveryNTicksTextField();
    }
@@ -298,7 +302,6 @@ public class LogVisualizer
       robot.addLogPlaybackListener(listener);
    }
 
-
    private PlaybackListener createYoGraphicsUpdater(final YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       return new PlaybackListener()
@@ -336,9 +339,45 @@ public class LogVisualizer
       yoGraphicsListRegistry.update();
    }
 
-   public static void main(String[] args) throws IOException
+   /**
+    * Valid arguments are:
+    * <ul>
+    * <li>SCS Var group file path, example: <tt>--varGroupFile="/home/user/varGroupExample.xml"</tt>
+    * </ul>
+    * 
+    * @param args
+    * @throws Exception
+    */
+   public static void main(String[] args) throws Exception
    {
+      JSAP jsap = new JSAP();
+
+      FlaggedOption varGroupFileFlag = new FlaggedOption("varGroupFile").setLongFlag("varGroupFile").setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      jsap.registerParameter(varGroupFileFlag);
+
+      JSAPResult config = jsap.parse(args);
+
       LogVisualizer visualizer = new LogVisualizer();
+
+      if (config.success())
+      {
+         File varGroupFile = new File(config.getString("varGroupFile"));
+         List<VarGroup> varGroups = loadVarGroups(varGroupFile);
+         if (varGroups != null && !varGroups.isEmpty())
+         {
+            varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
+         }
+      }
+
       visualizer.run();
+   }
+
+   private static List<VarGroup> loadVarGroups(File file) throws JAXBException
+   {
+      JAXBContext context = JAXBContext.newInstance(XMLVarGroupCollection.class);
+      Unmarshaller unmarshaller = context.createUnmarshaller();
+      XMLVarGroupCollection loaded = (XMLVarGroupCollection) unmarshaller.unmarshal(file);
+      return loaded.toVarGroup();
+
    }
 }
