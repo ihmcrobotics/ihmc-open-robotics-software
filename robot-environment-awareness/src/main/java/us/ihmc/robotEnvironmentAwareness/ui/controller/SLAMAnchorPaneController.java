@@ -16,17 +16,17 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @FXML
    private ToggleButton enableSLAMButton;
 
-   private final IhmcSLAMViewer ihmcSLAMViewer;
+   private IhmcSLAMViewer ihmcSLAMViewer;
 
    public SLAMAnchorPaneController()
    {
-      ihmcSLAMViewer = new IhmcSLAMViewer(uiMessager);
+      
    }
 
    @Override
    public void bindControls()
    {
-
+      ihmcSLAMViewer = new IhmcSLAMViewer(uiMessager);
    }
 
    public void openMap() throws IOException
