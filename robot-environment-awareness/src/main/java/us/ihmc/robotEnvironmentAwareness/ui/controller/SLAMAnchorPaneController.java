@@ -9,15 +9,18 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMViewer;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
    @FXML
    private ToggleButton enableSLAMButton;
 
+   private final IhmcSLAMViewer ihmcSLAMViewer;
+
    public SLAMAnchorPaneController()
    {
-
+      ihmcSLAMViewer = new IhmcSLAMViewer(uiMessager);
    }
 
    @Override
@@ -39,6 +42,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
+      view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
       Stage stage = new Stage();
