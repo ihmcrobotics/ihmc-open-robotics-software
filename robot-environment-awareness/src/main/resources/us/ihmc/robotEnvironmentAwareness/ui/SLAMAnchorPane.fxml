@@ -9,5 +9,9 @@
    <children>
       <Button layoutX="52.0" layoutY="79.0" mnemonicParsing="false" onAction="#openMap" prefHeight="25.0" prefWidth="89.0" text="Open Map" />
       <ToggleButton fx:id="enableSLAMButton" layoutX="52.0" layoutY="14.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="89.0" text="Enable" />
+      <ToggleButton layoutX="328.0" layoutY="28.0" mnemonicParsing="false" text="Original Point Cloud" />
+	  <ToggleButton layoutX="328.0" layoutY="70.0" mnemonicParsing="false" text="Point Cloud Map" />
+	  <ToggleButton layoutX="329.0" layoutY="108.0" mnemonicParsing="false" text="Octree Map" />
+	  <ToggleButton layoutX="329.0" layoutY="147.0" mnemonicParsing="false" text="Planar Regions Map" />
    </children>
 </AnchorPane>
