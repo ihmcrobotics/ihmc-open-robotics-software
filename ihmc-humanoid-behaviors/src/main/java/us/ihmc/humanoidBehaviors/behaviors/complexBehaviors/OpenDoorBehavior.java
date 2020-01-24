@@ -116,11 +116,13 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
             setAutomaticArmAbort(false);
 
             //pre speedup values for distance from door -0.102
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.0635, 1.079, 1.551252338779563, 0.048351007951384285,
-
-                                                                                0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.0635, 1.079, 1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(   0.7568, -0.1393, 1.079, 1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
+           
+                                                                             
+                                                                               
             atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.298, -0.147, 1.097, 1.2554068994570775, 0.03416782147174632,
-                                                                               0.26586161890007015, RobotSide.LEFT, "Moving Left Hand To Door",3));
+                                                                               0.26586161890007015, RobotSide.LEFT, "Moving Left Hand To Door",4));
                                                                                
 
          }
@@ -158,8 +160,12 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             setAutomaticArmAbort(true);
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.0635, 0.879, 1.551252338779563, 0.048351007951384285,
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.0635, 0.879, 1.551252338779563, 0.048351007951384285,
+//                                                                                0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+            
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.7, -0.1, 0.879, 1.551252338779563, 0.048351007951384285,
                                                                                 0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+            
          }
       };
       BehaviorAction pushDoorALittle = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
@@ -167,7 +173,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          protected void setBehaviorInput()
          {
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.7, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,
                                                                                 0.007252343575301105, RobotSide.RIGHT, "Push Door A Little", 1));
 
          }
