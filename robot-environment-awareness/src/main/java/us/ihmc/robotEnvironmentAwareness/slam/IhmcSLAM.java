@@ -40,7 +40,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
    protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
-   
+
    public static boolean ENABLE_ORIENTATION_CORRECTION = true;
 
    static
@@ -51,21 +51,21 @@ public class IhmcSLAM implements IhmcSLAMInterface
          LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
          UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
       }
-      if(ENABLE_ORIENTATION_CORRECTION)
+      if (ENABLE_ORIENTATION_CORRECTION)
       {
          for (int i = 0; i < 3; i++)
          {
             INITIAL_INPUT.add(0.0);
             LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
             UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
-         }   
+         }
       }
    }
 
    public IhmcSLAM(double octreeResolution)
    {
       this.octreeResolution = octreeResolution;
-      
+
       planarRegionSegmentationParameters.setSearchRadius(0.03);
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.04);
       planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
@@ -136,6 +136,24 @@ public class IhmcSLAM implements IhmcSLAMInterface
       List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, octreeResolution,
                                                                                                planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+   }
+
+   public void clear()
+   {
+      originalPointCloudMap.clear();
+      originalSensorPoses.clear();
+
+      slamFrames.clear();
+      pointCloudMap.clear();
+      sensorPoses.clear();
+   }
+
+   public boolean isEmpty()
+   {
+      if (slamFrames.size() == 0)
+         return true;
+      else
+         return false;
    }
 
    public List<Point3DReadOnly[]> getOriginalPointCloudMap()
