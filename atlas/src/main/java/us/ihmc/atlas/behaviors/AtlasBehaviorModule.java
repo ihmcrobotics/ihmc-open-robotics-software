@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 
@@ -32,7 +33,7 @@ public class AtlasBehaviorModule
       }
 
       LogTools.info("Creating behavior module");
-      BehaviorModule.createInterprocess(createRobotModel());
+      BehaviorModule.createInterprocess(BehaviorRegistry.DEFAULT_BEHAVIORS, createRobotModel());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       { // add cleanup actions here

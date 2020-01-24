@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.humanoidBehaviors.BehaviorStatics;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
@@ -46,6 +47,8 @@ import us.ihmc.tools.thread.TypedNotification;
  */
 public class PatrolBehavior implements BehaviorInterface
 {
+   public static final BehaviorStatics STATICS = new BehaviorStatics("PATROL", PatrolBehavior::new, PatrolBehaviorAPI.create());
+
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */

@@ -6,13 +6,13 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -65,16 +65,12 @@ public class AtlasNavigationBehaviorDemo
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       }).start();
 
-      new Thread(() ->
-      {
-         LogTools.info("Creating behavior module");
-         BehaviorModule.createInterprocess(createRobotModel());
-      }).start();
+      BehaviorRegistry behaviorRegistry = BehaviorRegistry.of(NavigationBehavior.STATICS);
+
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
-      AtlasRobotModel robotModel = createRobotModel();
-      new BehaviorUI(behaviorMessager, robotModel, pubSubMode);
+      BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
    }
 
    private AtlasRobotModel createRobotModel()

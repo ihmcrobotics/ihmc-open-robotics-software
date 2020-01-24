@@ -7,14 +7,14 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -43,11 +43,9 @@ public class AtlasPatrolBehaviorTest
    {
       new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
 
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-
       LogTools.info("Creating behavior module");
-      BehaviorModule.createIntraprocess(robotModel, messager);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(PatrolBehavior.STATICS), robotModel);
+      Messager messager = behaviorModule.getMessager();
 
       LogTools.info("Creating behavior messager");
       messager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));
