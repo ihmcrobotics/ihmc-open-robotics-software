@@ -57,8 +57,10 @@ public class DynamicsMatrixCalculator
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
 
-      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore));
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootBody, jointsToIgnore, toolbox.getGravityZ());
+      MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
+      massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(multiBodySystemInput);
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(multiBodySystemInput);
+      coriolisMatrixCalculator.setGravitionalAcceleration(-Math.abs(toolbox.getGravityZ()));
       contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(rootBody, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler);
 
       helper = new DynamicsMatrixCalculatorHelper(coriolisMatrixCalculator, jointIndexHandler);
@@ -87,7 +89,7 @@ public class DynamicsMatrixCalculator
 
    public void reset()
    {
-      coriolisMatrixCalculator.reset();
+      coriolisMatrixCalculator.setExternalWrenchesToZero();
    }
 
    public void compute()
