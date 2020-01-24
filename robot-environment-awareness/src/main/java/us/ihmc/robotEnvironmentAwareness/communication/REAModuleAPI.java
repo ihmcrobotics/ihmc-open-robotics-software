@@ -176,6 +176,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
 
+   public static final Topic<Boolean> SLAMEnable = ModuleCategory.child(SLAM).topic(Enable);
    public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = ModuleCategory.child(SLAM).child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = PlanarRegionsCategory.child(SLAM).topic(Data);
 
