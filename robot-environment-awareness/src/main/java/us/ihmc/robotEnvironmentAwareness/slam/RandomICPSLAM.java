@@ -51,6 +51,17 @@ public class RandomICPSLAM extends IhmcSLAM
       previousWindow.update();
    }
 
+   public NormalOcTree getOctree()
+   {
+      return octree;
+   }
+
+   public void clear()
+   {
+      super.clear();
+      octree.clear();
+   }
+
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
    {

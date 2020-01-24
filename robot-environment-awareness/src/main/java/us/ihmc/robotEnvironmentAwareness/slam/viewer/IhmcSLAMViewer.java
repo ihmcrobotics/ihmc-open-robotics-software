@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -15,6 +16,7 @@ import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
@@ -35,12 +37,12 @@ public class IhmcSLAMViewer
 
    private final IhmcSLAMFrameViewer ihmcSLAMFrameViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
-
+   
    public IhmcSLAMViewer(REAUIMessager uiMessager)
    {
-      ihmcSLAMFrameViewer = new IhmcSLAMFrameViewer();
+      ihmcSLAMFrameViewer = new IhmcSLAMFrameViewer(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState);
-
+      
       Node ihmcSLAMRootNode = ihmcSLAMFrameViewer.getRoot();
       ihmcSLAMRootNode.setMouseTransparent(true);
       root.getChildren().addAll(ihmcSLAMRootNode, planarRegionMeshView);
@@ -56,6 +58,13 @@ public class IhmcSLAMViewer
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
          }
       };
+      
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+         if (isMessagerOpen)
+            start();
+         else
+            stop();
+      });
    }
    
    public void start()
@@ -64,7 +73,6 @@ public class IhmcSLAMViewer
          return;
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ihmcSLAMFrameViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
    

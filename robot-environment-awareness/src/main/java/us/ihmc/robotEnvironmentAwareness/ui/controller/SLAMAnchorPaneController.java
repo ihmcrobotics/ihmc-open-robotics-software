@@ -21,7 +21,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    public SLAMAnchorPaneController()
    {
-      
+
    }
 
    @Override
@@ -51,5 +51,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       Scene mainScene = new Scene(mainPane, 600, 400);
       stage.setScene(mainScene);
       stage.show();
+
+      uiMessager.submitMessageToModule(REAModuleAPI.RequestSLAMBuildMap, true);
    }
 }
