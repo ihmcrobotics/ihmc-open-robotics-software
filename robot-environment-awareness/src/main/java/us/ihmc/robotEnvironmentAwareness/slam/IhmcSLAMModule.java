@@ -10,9 +10,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -41,6 +45,8 @@ public class IhmcSLAMModule
       this.reaMessager = reaMessager;
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
+      
+      reaMessager.registerTopicListener(REAModuleAPI.RequestSLAMBuildMap, (content) -> buildAndSubmitPlanarRegionsMap());
    }
 
    public void start() throws IOException
@@ -149,8 +155,17 @@ public class IhmcSLAMModule
 
    public void buildAndSubmitPlanarRegionsMap()
    {
+      System.out.println("buildAndSubmitPlanarRegionsMap. ");
       slam.updatePlanarRegionsMap();
       PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
       reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
+      
+      NormalOcTree octreeMap = slam.getOctree();
+      NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
+      reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
+      
+      System.out.println("Octree");
+      System.out.println(octreeMap.getNumberOfNodes());
+      
    }
 }

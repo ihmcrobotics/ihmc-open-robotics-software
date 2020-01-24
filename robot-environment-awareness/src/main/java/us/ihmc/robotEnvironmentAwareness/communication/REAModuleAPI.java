@@ -178,7 +178,9 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> SLAMEnable = ModuleCategory.child(SLAM).topic(Enable);
    public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = ModuleCategory.child(SLAM).child(Buffer).topic(Data);
+   public static final Topic<Boolean> RequestSLAMBuildMap = ModuleCategory.child(SLAM).child(Request).topic(Data);
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = PlanarRegionsCategory.child(SLAM).topic(Data);
+   public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = OcTreeCategory.child(SLAM).topic(Data);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
