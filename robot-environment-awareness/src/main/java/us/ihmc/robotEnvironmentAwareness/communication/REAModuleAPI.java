@@ -24,6 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationPara
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -56,6 +57,7 @@ public class REAModuleAPI
    private static final CategoryTheme Preserve = apiFactory.createCategoryTheme("Preserve");
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
+   private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -173,6 +175,9 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveMainUpdaterConfiguration = OcTreeCategory.topic(Save);
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
+
+   public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = ModuleCategory.child(SLAM).child(Buffer).topic(Data);
+   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = PlanarRegionsCategory.child(SLAM).topic(Data);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
