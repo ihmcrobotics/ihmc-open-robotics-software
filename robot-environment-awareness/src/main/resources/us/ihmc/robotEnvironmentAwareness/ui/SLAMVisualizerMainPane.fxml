@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500" prefWidth="500" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <center>
+      <AnchorPane prefHeight="900.0" prefWidth="1200.0" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <AnchorPane prefHeight="200.0" prefWidth="1200.0" BorderPane.alignment="CENTER">
+         <children>
+            <ToggleButton layoutX="328.0" layoutY="28.0" mnemonicParsing="false" text="Original Point Cloud" />
+            <ToggleButton layoutX="328.0" layoutY="70.0" mnemonicParsing="false" text="Point Cloud Map" />
+            <ToggleButton layoutX="329.0" layoutY="108.0" mnemonicParsing="false" text="Octree Map" />
+            <ToggleButton layoutX="329.0" layoutY="147.0" mnemonicParsing="false" text="Planar Regions Map" />
+            <ToggleButton layoutX="34.0" layoutY="28.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="96.0" text="Enable" />
+         </children></AnchorPane>
+   </bottom>
+</BorderPane>
