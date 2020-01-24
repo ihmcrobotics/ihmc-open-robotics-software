@@ -15,6 +15,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -74,14 +75,11 @@ public class BehaviorUI
       JavaFXApplicationCreator.createAJavaFXApplication();
       Platform.runLater(() ->
       {
-         FXMLLoader loader = new FXMLLoader();
-         loader.setController(this);
-         loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-
-         ExceptionTools.handle(() -> mainPane = loader.load(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         mainPane = JavaFXMissingTools.loadFromFXML(this);
 
          BorderPane bottom = (BorderPane) mainPane.getBottom();
          TabPane tabPane = (TabPane) bottom.getCenter();
+         LogTools.info("TAB PANEEE {}", tabPane);
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
