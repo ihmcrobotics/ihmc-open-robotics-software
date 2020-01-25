@@ -61,10 +61,6 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double transfer_duration;
-        /**
-         * The time to delay this command on the controller side before being executed.
-         */
-        double execution_delay_time;
       };
     };
   };
