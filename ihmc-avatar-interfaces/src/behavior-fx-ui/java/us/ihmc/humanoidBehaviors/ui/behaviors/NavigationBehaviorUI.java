@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import javafx.fxml.FXML;
 import us.ihmc.messager.Messager;
 
-public class NavigationBehaviorUIController
+public class NavigationBehaviorUI
 {
 
    public void init(Messager behaviorMessager)

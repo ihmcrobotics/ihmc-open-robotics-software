@@ -2,19 +2,18 @@ package us.ihmc.humanoidBehaviors.ui;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
+import us.ihmc.humanoidBehaviors.ui.behaviors.NavigationBehaviorUI;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
@@ -80,6 +79,9 @@ public class BehaviorUI
          BorderPane bottom = (BorderPane) mainPane.getBottom();
          TabPane tabPane = (TabPane) bottom.getCenter();
          LogTools.info("TAB PANEEE {}", tabPane);
+
+         Tab tab = new Tab("Nav", JavaFXMissingTools.loadFromFXML(new NavigationBehaviorUI()));
+         tabPane.getTabs().add(tab);
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
