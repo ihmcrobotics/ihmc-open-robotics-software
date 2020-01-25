@@ -56,8 +56,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       return current_alignment - initial_alignment;
    }
@@ -75,9 +73,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -120,8 +115,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       cdr.write_type_6(data.getTransferDuration());
 
-      cdr.write_type_6(data.getExecutionDelayTime());
-
    }
 
    public static void read(controller_msgs.msg.dds.ExoStepDataMessage data, us.ihmc.idl.CDR cdr)
@@ -142,8 +135,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       data.setTransferDuration(cdr.read_type_6());
       	
-      data.setExecutionDelayTime(cdr.read_type_6());
-      	
 
    }
 
@@ -158,7 +149,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_6("swing_height", data.getSwingHeight());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
-      ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
    }
 
    @Override
@@ -172,7 +162,6 @@ public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setSwingHeight(ser.read_type_6("swing_height"));
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
-      data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ExoStepDataMessage src, controller_msgs.msg.dds.ExoStepDataMessage dest)

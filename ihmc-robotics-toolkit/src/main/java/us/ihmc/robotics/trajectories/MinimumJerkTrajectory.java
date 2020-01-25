@@ -50,6 +50,11 @@ public class MinimumJerkTrajectory
     * @param Af
     * @param moveDuration
     */
+   public void setMoveParameters(double X0, double Xf, double moveDuration)
+   {
+      setMoveParameters(X0, 0.0, 0.0, Xf, 0.0, 0.0, moveDuration);
+   }
+
    public void setMoveParameters(double X0, double V0, double A0, double Xf, double Vf, double Af, double moveDuration)
    {
       if (moveDuration <= 0.0)

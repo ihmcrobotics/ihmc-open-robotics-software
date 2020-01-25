@@ -55,13 +55,6 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double default_transfer_duration;
         /**
-         * Specifies the time used to return to a stable standing stance after the execution of the
-         * footstep list is finished. If the value is negative the default_transfer_duration will be used,
-         * which in turn if not provided indicate the controller to use its own internal default value.
-         */
-        @defaultValue(value=-1.0)
-        double final_transfer_duration;
-        /**
          * Properties for queueing footstep lists.
          */
         controller_msgs::msg::dds::QueueableMessage queueing_properties;

@@ -37,7 +37,4 @@ float64 swing_duration
 # Field default value -1.0
 float64 transfer_duration
 
-# The time to delay this command on the controller side before being executed.
-float64 execution_delay_time
-
 

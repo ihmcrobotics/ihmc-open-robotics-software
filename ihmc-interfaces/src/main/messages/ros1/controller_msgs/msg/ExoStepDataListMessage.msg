@@ -30,12 +30,6 @@ float64 default_swing_duration
 # Field default value -1.0
 float64 default_transfer_duration
 
-# Specifies the time used to return to a stable standing stance after the execution of the
-# footstep list is finished. If the value is negative the default_transfer_duration will be used,
-# which in turn if not provided indicate the controller to use its own internal default value.
-# Field default value -1.0
-float64 final_transfer_duration
-
 # Properties for queueing footstep lists.
 controller_msgs/QueueableMessage queueing_properties
 

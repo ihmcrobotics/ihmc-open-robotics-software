@@ -40,12 +40,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
             */
    public double default_transfer_duration_ = -1.0;
    /**
-            * Specifies the time used to return to a stable standing stance after the execution of the
-            * footstep list is finished. If the value is negative the default_transfer_duration will be used,
-            * which in turn if not provided indicate the controller to use its own internal default value.
-            */
-   public double final_transfer_duration_ = -1.0;
-   /**
             * Properties for queueing footstep lists.
             */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
@@ -72,8 +66,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
       default_swing_duration_ = other.default_swing_duration_;
 
       default_transfer_duration_ = other.default_transfer_duration_;
-
-      final_transfer_duration_ = other.final_transfer_duration_;
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       step_type_ = other.step_type_;
@@ -146,25 +138,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
       return default_transfer_duration_;
    }
 
-   /**
-            * Specifies the time used to return to a stable standing stance after the execution of the
-            * footstep list is finished. If the value is negative the default_transfer_duration will be used,
-            * which in turn if not provided indicate the controller to use its own internal default value.
-            */
-   public void setFinalTransferDuration(double final_transfer_duration)
-   {
-      final_transfer_duration_ = final_transfer_duration;
-   }
-   /**
-            * Specifies the time used to return to a stable standing stance after the execution of the
-            * footstep list is finished. If the value is negative the default_transfer_duration will be used,
-            * which in turn if not provided indicate the controller to use its own internal default value.
-            */
-   public double getFinalTransferDuration()
-   {
-      return final_transfer_duration_;
-   }
-
 
    /**
             * Properties for queueing footstep lists.
@@ -214,8 +187,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_duration_, other.default_transfer_duration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_duration_, other.final_transfer_duration_, epsilon)) return false;
-
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_type_, other.step_type_, epsilon)) return false;
 
@@ -239,8 +210,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
       if(this.default_transfer_duration_ != otherMyClass.default_transfer_duration_) return false;
 
-      if(this.final_transfer_duration_ != otherMyClass.final_transfer_duration_) return false;
-
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
       if(this.step_type_ != otherMyClass.step_type_) return false;
 
@@ -262,8 +231,6 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
       builder.append(this.default_swing_duration_);      builder.append(", ");
       builder.append("default_transfer_duration=");
       builder.append(this.default_transfer_duration_);      builder.append(", ");
-      builder.append("final_transfer_duration=");
-      builder.append(this.final_transfer_duration_);      builder.append(", ");
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);      builder.append(", ");
       builder.append("step_type=");

@@ -50,10 +50,6 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
             * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
             */
    public double transfer_duration_ = -1.0;
-   /**
-            * The time to delay this command on the controller side before being executed.
-            */
-   public double execution_delay_time_;
 
    public ExoStepDataMessage()
    {
@@ -82,8 +78,6 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
       swing_duration_ = other.swing_duration_;
 
       transfer_duration_ = other.transfer_duration_;
-
-      execution_delay_time_ = other.execution_delay_time_;
 
    }
 
@@ -215,21 +209,6 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
       return transfer_duration_;
    }
 
-   /**
-            * The time to delay this command on the controller side before being executed.
-            */
-   public void setExecutionDelayTime(double execution_delay_time)
-   {
-      execution_delay_time_ = execution_delay_time;
-   }
-   /**
-            * The time to delay this command on the controller side before being executed.
-            */
-   public double getExecutionDelayTime()
-   {
-      return execution_delay_time_;
-   }
-
 
    public static Supplier<ExoStepDataMessagePubSubType> getPubSubType()
    {
@@ -264,8 +243,6 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
-
 
       return true;
    }
@@ -295,8 +272,6 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
-      if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
-
 
       return true;
    }
@@ -322,9 +297,7 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
       builder.append("swing_duration=");
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");
-      builder.append(this.transfer_duration_);      builder.append(", ");
-      builder.append("execution_delay_time=");
-      builder.append(this.execution_delay_time_);
+      builder.append(this.transfer_duration_);
       builder.append("}");
       return builder.toString();
    }

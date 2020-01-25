@@ -26,5 +26,3 @@ float64 swing_duration -1.0
 # The transferDuration is the time spent with the feet in ground contact before a step.
 # If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
 float64 transfer_duration -1.0
-# The time to delay this command on the controller side before being executed.
-float64 execution_delay_time 0.0
