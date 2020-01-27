@@ -19,7 +19,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private ToggleButton enableSLAMButton;
 
    private IhmcSLAMMeshViewer ihmcSLAMViewer;
-   
+
    private UIConnectionHandler uiConnectionHandler;
 
    public SLAMAnchorPaneController()
@@ -36,14 +36,12 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    public void openMap() throws IOException
    {
-      System.out.println("open Map.");
-
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource("../SLAMVisualizerMainPane" + ".fxml"));
 
       BorderPane mainPane = loader.load();
-      
+
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
@@ -54,15 +52,13 @@ public class SLAMAnchorPaneController extends REABasicUIController
       Scene mainScene = new Scene(mainPane, 600, 400);
       stage.setScene(mainScene);
       stage.setOnCloseRequest(event -> stop());
-      
+
       uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
       uiConnectionHandler.start();
-      
-      stage.show();
 
-      uiMessager.submitMessageToModule(REAModuleAPI.RequestSLAMBuildMap, true);
+      stage.show();
    }
-   
+
    public void stop()
    {
       try
@@ -74,5 +70,10 @@ public class SLAMAnchorPaneController extends REABasicUIController
       {
          e.printStackTrace();
       }
+   }
+
+   public void buildPlanarRegions()
+   {
+      uiMessager.submitMessageToModule(REAModuleAPI.RequestSLAMBuildMap, true);
    }
 }

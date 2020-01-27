@@ -162,16 +162,8 @@ public class IhmcSLAMModule
 
    public void buildAndSubmitPlanarRegionsMap()
    {
-      System.out.println("buildAndSubmitPlanarRegionsMap. ");
-      //slam.updatePlanarRegionsMap();
-      //PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-      //reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
-
-      NormalOcTree octreeMap = slam.getOctree();
-      NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-      reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
-
-      System.out.println("Octree");
-      System.out.println(octreeMap.getNumberOfNodes());
+      slam.updatePlanarRegionsMap();
+      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
+      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
    }
 }

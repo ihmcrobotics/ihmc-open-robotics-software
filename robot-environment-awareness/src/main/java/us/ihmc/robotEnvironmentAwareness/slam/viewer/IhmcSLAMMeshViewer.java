@@ -35,21 +35,21 @@ public class IhmcSLAMMeshViewer
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
    private final AnimationTimer renderMeshAnimation;
 
-//   private final IhmcSLAMFrameViewer ihmcSLAMFrameViewer;
+   //   private final IhmcSLAMFrameViewer ihmcSLAMFrameViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
-   private final OcTreeMeshBuilder ocTreeViewer;
+   private final SLAMOcTreeMeshBuilder ocTreeViewer;
 
    public IhmcSLAMMeshViewer(REAUIMessager uiMessager)
    {
-//      ihmcSLAMFrameViewer = new IhmcSLAMFrameViewer(uiMessager);
+      //      ihmcSLAMFrameViewer = new IhmcSLAMFrameViewer(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState);
 
-      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.SLAMOcTreeEnable, REAModuleAPI.SLAMOctreeMapState);
+      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.SLAMOcTreeEnable, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
 
-//      Node ihmcSLAMRootNode = ihmcSLAMFrameViewer.getRoot();
-//      ihmcSLAMRootNode.setMouseTransparent(true);
+      //      Node ihmcSLAMRootNode = ihmcSLAMFrameViewer.getRoot();
+      //      ihmcSLAMRootNode.setMouseTransparent(true);
       ocTreeViewer.getRoot().setMouseTransparent(true);
-//      root.getChildren().addAll(ihmcSLAMRootNode, planarRegionMeshView, ocTreeViewer.getRoot());
+      //      root.getChildren().addAll(ihmcSLAMRootNode, planarRegionMeshView, ocTreeViewer.getRoot());
       root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot());
 
       renderMeshAnimation = new AnimationTimer()
@@ -57,7 +57,7 @@ public class IhmcSLAMMeshViewer
          @Override
          public void handle(long now)
          {
-//            ihmcSLAMFrameViewer.render();
+            //            ihmcSLAMFrameViewer.render();
             ocTreeViewer.render();
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
@@ -78,7 +78,7 @@ public class IhmcSLAMMeshViewer
       if (!meshBuilderScheduledFutures.isEmpty())
          return;
       renderMeshAnimation.start();
-//      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ihmcSLAMFrameViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      //      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ihmcSLAMFrameViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
