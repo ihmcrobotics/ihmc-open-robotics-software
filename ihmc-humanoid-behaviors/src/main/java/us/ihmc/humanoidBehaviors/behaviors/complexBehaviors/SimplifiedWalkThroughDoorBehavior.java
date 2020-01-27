@@ -263,6 +263,8 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
 
             super.onExit();
          }
+
+
       };
 
       BehaviorAction walkToDoorAction = new BehaviorAction(walkToInteractableObjectBehavior)
@@ -305,14 +307,18 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
             {
                publishTextToSpeech("setup for walk");
             }
-            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
-                  1.3376930879072813};
-            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
-                  -0.8771109242461594, -1.336089159719967};
+//            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
+//                  1.3376930879072813};
+//            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
+//                  -0.8771109242461594, -1.336089159719967};
 
-            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 3, rightArmPose);
+            double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
+          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
 
-            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 3, leftArmPose);
+            
+            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+
+            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
 
             atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
             atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
@@ -375,7 +381,7 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
 
       factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.OPEN_DOOR,
                             t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
+      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.DONE,
                             t -> setUpForWalk.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
 
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
