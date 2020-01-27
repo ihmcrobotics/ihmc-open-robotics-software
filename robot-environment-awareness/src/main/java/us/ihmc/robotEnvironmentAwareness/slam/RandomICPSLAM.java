@@ -1,5 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.List;
+
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -9,6 +12,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
@@ -30,8 +37,6 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
 
    private static final int MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
-
-   private static final boolean USE_WHOLE_OCTREE = true;
 
    private final NormalOcTree octree;
 
@@ -62,24 +67,17 @@ public class RandomICPSLAM extends IhmcSLAM
       octree.clear();
    }
 
-   @Override
-   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   private void insertNewPointCloud(IhmcSLAMFrame frame)
    {
-      IhmcSLAMFrame previousFrame = getLatestFrame();
-      Point3DReadOnly[] referencePointCloud = previousFrame.getPointCloud();
-      RigidBodyTransformReadOnly referenceSensorPose = previousFrame.getSensorPose();
+      Point3DReadOnly[] pointCloud = frame.getPointCloud();
+      RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
 
-      // compute NormalOctree for previous frame.
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = referencePointCloud.length;
+      int numberOfPoints = getLatestFrame().getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(IhmcSLAMTools.toScan(referencePointCloud, referenceSensorPose.getTranslation()));
+      scanCollection.addScan(IhmcSLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
 
-      // using octree from whole previous map would be ideal.
-      // Or considering normal vector of the octree would be better.
-      if (!USE_WHOLE_OCTREE)
-         octree.clear();
       octree.insertScanCollection(scanCollection, false);
 
       octree.enableParallelComputationForNormals(true);
@@ -89,7 +87,51 @@ public class RandomICPSLAM extends IhmcSLAM
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
       octree.setNormalEstimationParameters(normalEstimationParameters);
+      octree.updateNormals();
+   }
 
+   @Override
+   public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   {
+      super.addFirstFrame(pointCloudMessage);
+
+      IhmcSLAMFrame firstFrame = getLatestFrame();
+
+      insertNewPointCloud(firstFrame);
+   }
+
+   @Override
+   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   {
+      boolean success = super.addFrame(pointCloudMessage);
+
+      if (success)
+      {
+         IhmcSLAMFrame newFrame = getLatestFrame();
+         insertNewPointCloud(newFrame);
+
+         PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
+
+         SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+         surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+
+         segmentationCalculator.setParameters(planarRegionSegmentationParameters);
+         segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
+         segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
+
+         segmentationCalculator.compute(octree.getRoot());
+
+         List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
+
+         planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+      }
+
+      return success;
+   }
+
+   @Override
+   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   {
       // if this frame is detected as a key frame, return new RigidBodyTransform();
       // if this frame needs drift correction, return optimized transform;
       // if this frame should not be mergeable, return null;
