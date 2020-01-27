@@ -34,6 +34,7 @@ import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
@@ -63,10 +64,10 @@ public class OcTreeMeshBuilder implements Runnable
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> clear;
 
-   private final Property<ColoringType> coloringType;
-   private final Property<DisplayType> displayType;
-   private final Property<Integer> treeDepthForDisplay;
-   private final Property<Boolean> hidePlanarRegionNodes;
+   protected final Property<ColoringType> coloringType;
+   protected final Property<DisplayType> displayType;
+   protected final Property<Integer> treeDepthForDisplay;
+   protected final Property<Boolean> hidePlanarRegionNodes;
 
    private final Group root = new Group();
    private final ObservableList<Node> children = root.getChildren();
@@ -89,10 +90,10 @@ public class OcTreeMeshBuilder implements Runnable
    private final REAUIMessager uiMessager;
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
 
-   public OcTreeMeshBuilder(REAUIMessager uiMessager)
+   public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<NormalOcTreeMessage> octreeStateTopic)
    {
       this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
+      enable = uiMessager.createInput(octreeEnableTopic, false);
       clear = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       treeDepthForDisplay = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeDepth, Integer.MAX_VALUE);
@@ -105,7 +106,7 @@ public class OcTreeMeshBuilder implements Runnable
       hidePlanarRegionNodes = uiMessager.createPropertyInput(REAModuleAPI.UIPlanarRegionHideNodes, false);
       hidePlanarRegionNodes.addListener(this::setProcessChange);
 
-      ocTreeState = uiMessager.createInput(REAModuleAPI.OcTreeState);
+      ocTreeState = uiMessager.createInput(octreeStateTopic);
       planarRegionSegmentationState = uiMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationState);
 
       normalBasedColorPalette1D.setHueBased(0.9, 0.8);

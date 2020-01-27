@@ -9,4 +9,15 @@
    <center>
       <AnchorPane prefHeight="900.0" prefWidth="1200.0" BorderPane.alignment="CENTER" />
    </center>
+   <right>
+      <AnchorPane prefHeight="500.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <ToggleButton layoutX="6.0" layoutY="42.0" mnemonicParsing="false" text="Octree Map" />
+            <ToggleButton layoutX="6.0" layoutY="80.0" mnemonicParsing="false" text="Original Map" />
+            <ToggleButton layoutX="8.0" layoutY="122.0" mnemonicParsing="false" text="Planar Regions" />
+            <ToggleButton layoutX="3.0" layoutY="194.0" mnemonicParsing="false" text="Original Sensor" />
+            <ToggleButton layoutX="1.0" layoutY="225.0" mnemonicParsing="false" text="SLAM Sensor" />
+         </children>
+      </AnchorPane>
+   </right>
 </BorderPane>

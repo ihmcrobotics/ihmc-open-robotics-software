@@ -45,7 +45,7 @@ public class IhmcSLAMModule
       this.reaMessager = reaMessager;
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
-      
+
       reaMessager.registerTopicListener(REAModuleAPI.RequestSLAMBuildMap, (content) -> buildAndSubmitPlanarRegionsMap());
    }
 
@@ -110,19 +110,27 @@ public class IhmcSLAMModule
       System.out.println("stacked point cloud data set = [" + stackedPointCloud.size() + "].");
       if (slam.isEmpty())
       {
-         System.out.println("add first frame.");
          slam.addFirstFrame(pointCloudToCompute);
-         //reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, slam.getLatestFrame());
+         System.out.println("add first frame.");
       }
       else
       {
-         System.out.println("add frame [" + stackedPointCloud.size() + "].");
-         boolean merged = slam.addFrame(pointCloudToCompute);
-         //         if (merged)
-         //            reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, slam.getLatestFrame());
+         boolean success = slam.addFrame(pointCloudToCompute);
+         System.out.println("add frame " + success + " [" + stackedPointCloud.size() + "].");
       }
       stackedPointCloud.removeFirst();
       System.out.println("SLAM Computation is done [" + stackedPointCloud.size() + "].");
+
+      reaMessager.submitMessage(REAModuleAPI.SLAMOcTreeEnable, true);
+
+      NormalOcTree octreeMap = slam.getOctree();
+      NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
+      reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
+      System.out.println("# Octree " + octreeMap.getNumberOfNodes());
+
+      slam.updatePlanarRegionsMap();
+      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
+      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
    }
 
    public void updateMain()
@@ -158,14 +166,13 @@ public class IhmcSLAMModule
       System.out.println("buildAndSubmitPlanarRegionsMap. ");
       slam.updatePlanarRegionsMap();
       PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
-      
+      //reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
+
       NormalOcTree octreeMap = slam.getOctree();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
       reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
-      
+
       System.out.println("Octree");
       System.out.println(octreeMap.getNumberOfNodes());
-      
    }
 }

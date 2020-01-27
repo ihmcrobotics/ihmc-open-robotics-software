@@ -15,7 +15,7 @@ import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
-   public static final boolean DEBUG = true;
+   public static final boolean DEBUG = false;
 
    private static final int NUMBER_OF_SOURCE_POINTS = 300;
 
