@@ -520,7 +520,7 @@ public class InverseDynamicsQPSolver
     *           constant wrenches usually used for compensating for the weight of an object that the
     *           robot is holding.
     * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
-    *           the wieght of the robot.
+    *           the weight of the robot.
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
                                                   DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
