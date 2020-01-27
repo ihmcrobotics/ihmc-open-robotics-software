@@ -428,18 +428,6 @@ public class TriangleToolsTest
                .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationNegative);
          assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
          assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
-
-         for (int iterB = 0; iterB < 1000; iterB++)
-         {
-            double farSideLengthVelocity = RandomNumbers.nextDouble(random, -10.0, 10.0);
-
-            positiveInteriorAccel = TriangleTools
-                  .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideLengthVelocity, farSideLengthAccelerationPositive);
-            negativeInteriorAccel = TriangleTools
-                  .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, farSideLengthVelocity, farSideLengthAccelerationNegative);
-            assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
-            assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
-         }
       }
    }
 }
