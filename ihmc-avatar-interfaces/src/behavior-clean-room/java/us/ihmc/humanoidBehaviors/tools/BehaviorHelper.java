@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
@@ -10,8 +11,11 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.StepThroughAlgorithm;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -105,6 +109,20 @@ public class BehaviorHelper
    public <T> AtomicReference<T> createUIInput(Topic<T> topic, T initialValue)
    {
       return managedMessager.createInput(topic, initialValue);
+   }
+
+   public Notification createUINotification(Topic<Object> topic)
+   {
+      Notification notification = new Notification();
+      createUICallback(topic, object -> notification.set());
+      return notification;
+   }
+
+   public <T> TypedNotification<T> createUITypedNotification(Topic<T> topic)
+   {
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      createUICallback(topic, message -> typedNotification.add(message));
+      return typedNotification;
    }
 
    // Thread and Schedule Methods:

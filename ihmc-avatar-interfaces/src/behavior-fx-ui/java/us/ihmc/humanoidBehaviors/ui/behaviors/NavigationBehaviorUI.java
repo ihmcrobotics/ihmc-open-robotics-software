@@ -10,19 +10,21 @@ import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.messager.Messager;
 
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.FootstepPlanForUI;
+import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 
 public class NavigationBehaviorUI extends BehaviorUIInterface
 {
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(NavigationBehavior.DEFINITION, NavigationBehaviorUI::new);
 
+   private Messager behaviorMessager;
    private FootstepPlanGraphic footstepPlanGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
 
    @Override
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
+      this.behaviorMessager = behaviorMessager;
+
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       getChildren().add(footstepPlanGraphic);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
@@ -34,6 +36,6 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
 
    @FXML public void step()
    {
-
+      behaviorMessager.submitMessage(StepThroughAlgorithm, new Object());
    }
 }
