@@ -61,6 +61,27 @@ public class IhmcSLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
+   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition, double minimumDepth, double maximumDepth)
+   {
+      PointCloud pointCloud = new PointCloud();
+
+      double minimumSquared = minimumDepth * minimumDepth;
+      double maximumSquared = maximumDepth * maximumDepth;
+
+      for (int i = 0; i < points.length; i++)
+      {
+         double x = points[i].getX();
+         double y = points[i].getY();
+         double z = points[i].getZ();
+         double depthSquared = (x - sensorPosition.getX()) * (x - sensorPosition.getX()) + (y - sensorPosition.getY()) * (y - sensorPosition.getY())
+               + (z - sensorPosition.getZ()) * (z - sensorPosition.getZ());
+
+         if (minimumSquared < depthSquared && depthSquared < maximumSquared)
+            pointCloud.add(x, y, z);
+      }
+      return new Scan(new Point3D(sensorPosition), pointCloud);
+   }
+
    public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
    {
       Point3D[] convertedPoints = new Point3D[pointCloud.length];
