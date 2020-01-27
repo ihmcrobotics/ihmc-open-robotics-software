@@ -44,7 +44,7 @@ public class AtlasPatrolBehaviorTest
       new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
 
       LogTools.info("Creating behavior module");
-      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(PatrolBehavior.STATICS), robotModel);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(PatrolBehavior.DEFINITION), robotModel);
       Messager messager = behaviorModule.getMessager();
 
       LogTools.info("Creating behavior messager");

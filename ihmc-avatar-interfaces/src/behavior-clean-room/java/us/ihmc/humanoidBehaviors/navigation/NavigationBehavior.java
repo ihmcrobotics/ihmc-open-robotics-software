@@ -1,13 +1,13 @@
 package us.ihmc.humanoidBehaviors.navigation;
 
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.BehaviorStatics;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.messager.MessagerAPIFactory;
 
 public class NavigationBehavior implements BehaviorInterface
 {
-   public static final BehaviorStatics STATICS = new BehaviorStatics("NAVIGATION", NavigationBehavior::new, NavigationBehaviorAPI.create());
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new, NavigationBehaviorAPI.create());
 
    private final BehaviorHelper helper;
 

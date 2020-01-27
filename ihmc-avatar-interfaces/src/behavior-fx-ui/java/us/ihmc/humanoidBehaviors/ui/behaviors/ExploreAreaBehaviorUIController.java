@@ -13,10 +13,13 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.BoundingBox3DGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
@@ -29,8 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class ExploreAreaBehaviorUIController extends Group
+public class ExploreAreaBehaviorUIController extends BehaviorUIInterface
 {
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUIController::new);
+
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    @FXML private CheckBox exploreAreaCheckBox;

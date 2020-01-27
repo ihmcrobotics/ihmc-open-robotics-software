@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
@@ -17,10 +16,13 @@ import javafx.scene.input.PickResult;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
@@ -39,8 +41,10 @@ import java.util.HashMap;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
-public class PatrolBehaviorUIController extends Group
+public class PatrolBehaviorUIController extends BehaviorUIInterface
 {
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(PatrolBehavior.DEFINITION, PatrolBehaviorUIController::new);
+
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
    @FXML private Button cancelPlanning2;
