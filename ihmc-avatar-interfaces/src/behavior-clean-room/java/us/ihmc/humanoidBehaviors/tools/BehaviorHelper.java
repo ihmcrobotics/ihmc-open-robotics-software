@@ -139,4 +139,14 @@ public class BehaviorHelper
    {
       return managedMessager;
    }
+
+   public ManagedROS2Node getManagedROS2Node()
+   {
+      return managedROS2Node;
+   }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
 }
