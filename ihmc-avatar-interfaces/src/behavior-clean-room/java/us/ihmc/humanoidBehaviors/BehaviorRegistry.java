@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.LinkedHashSet;
@@ -19,6 +20,7 @@ public class BehaviorRegistry
    }
 
    private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
+   private MessagerAPI messagerAPI;
 
    public static BehaviorRegistry of(BehaviorDefinition... entries)
    {
@@ -35,15 +37,19 @@ public class BehaviorRegistry
       definitionEntries.add(definition);
    }
 
-   public MessagerAPI constructMessagerAPI()
+   public MessagerAPI getMessagerAPI()
    {
-      MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
-      int i = 0;
-      for (BehaviorDefinition definitionEntry : definitionEntries)
+      if (messagerAPI == null) // MessagerAPI can only be created once
       {
-         behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
+         MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
+         int i = 0;
+         for (BehaviorDefinition definitionEntry : definitionEntries)
+         {
+            behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
+         }
+         messagerAPI = BehaviorModule.API.create(behaviorAPIs);
       }
-      return BehaviorModule.API.create(behaviorAPIs);
+      return messagerAPI;
    }
 
    public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()
