@@ -60,7 +60,7 @@ public class REAMeshViewer
       stereoVisionBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowStereoVisionBuffer,
                                                                         REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState,
                                                                         Color.DARKORANGE);
-      ocTreeViewer = new OcTreeMeshBuilder(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeState);
+      ocTreeViewer = new OcTreeMeshBuilder(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeState, REAModuleAPI.UIOcTreeDisplayType);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.PlanarRegionsState);
       intersectionsMeshBuilder = new PlanarRegionsIntersectionsMeshBuilder(uiMessager);
       boundingBoxMeshView = new BoundingBoxMeshView(uiMessager);

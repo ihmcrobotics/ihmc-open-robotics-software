@@ -90,7 +90,8 @@ public class OcTreeMeshBuilder implements Runnable
    private final REAUIMessager uiMessager;
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
 
-   public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<NormalOcTreeMessage> octreeStateTopic)
+   public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<NormalOcTreeMessage> octreeStateTopic,
+                            Topic<DisplayType> displayTypeTopic)
    {
       this.uiMessager = uiMessager;
       enable = uiMessager.createInput(octreeEnableTopic, false);
@@ -101,7 +102,7 @@ public class OcTreeMeshBuilder implements Runnable
       coloringType = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeColoringMode, ColoringType.DEFAULT);
       coloringType.addListener(this::setProcessChange);
 
-      displayType = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeDisplayType, DisplayType.PLANE);
+      displayType = uiMessager.createPropertyInput(displayTypeTopic, DisplayType.PLANE);
       displayType.addListener(this::setProcessChange);
       hidePlanarRegionNodes = uiMessager.createPropertyInput(REAModuleAPI.UIPlanarRegionHideNodes, false);
       hidePlanarRegionNodes.addListener(this::setProcessChange);
@@ -113,7 +114,7 @@ public class OcTreeMeshBuilder implements Runnable
       meshBuilder = new JavaFXMultiColorMeshBuilder(normalBasedColorPalette1D);
    }
 
-   private <T> void setProcessChange(ObservableValue<? extends T> observableValue, T oldValue, T newValue)
+   protected <T> void setProcessChange(ObservableValue<? extends T> observableValue, T oldValue, T newValue)
    {
       try
       {
@@ -139,9 +140,7 @@ public class OcTreeMeshBuilder implements Runnable
 
       if (newMeshViews != null)
       {
-         List<Node> newChildren = children.stream()
-                                          .filter(newMeshViews::contains)
-                                          .collect(Collectors.toList());
+         List<Node> newChildren = children.stream().filter(newMeshViews::contains).collect(Collectors.toList());
 
          children.clear();
          children.addAll(newChildren);
@@ -247,7 +246,7 @@ public class OcTreeMeshBuilder implements Runnable
          break;
       default:
          throw new RuntimeException("Unexpected value for display type: " + displayType);
-      }      
+      }
    }
 
    private Color getNodeColor(ColoringType coloringType, UIOcTreeNode node)
