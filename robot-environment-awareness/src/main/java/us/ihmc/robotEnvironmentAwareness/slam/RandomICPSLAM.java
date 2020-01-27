@@ -28,8 +28,8 @@ public class RandomICPSLAM extends IhmcSLAM
 
    private final ConvexPolygon2D previousWindow = new ConvexPolygon2D();
    private static final double WINDOW_WIDTH = 0.4; // 0.6
-   private static final double WINDOW_HEIGHT = 0.3; // 0.4
-   private static final double WINDOW_HEIGHT_OFFSET = -0.0; // 0.05 is for `testOptimizationSimulattedPointCloud`. 
+   private static final double WINDOW_HEIGHT = 0.4; // 0.4
+   private static final double WINDOW_HEIGHT_OFFSET = -0.1; // 0.05 is for `testOptimizationSimulattedPointCloud`. 
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
    private static final double MINIMUM_OVERLAPPED_RATIO = 0.1;
@@ -39,6 +39,7 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final int MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
 
    private final NormalOcTree octree;
+   private final PlanarRegionSegmentationCalculator segmentationCalculator;
 
    // debugging variables.
    public Point3D[] sourcePointsToWorld;
@@ -54,6 +55,16 @@ public class RandomICPSLAM extends IhmcSLAM
       previousWindow.addVertex(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
       previousWindow.addVertex(-WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
       previousWindow.update();
+
+      segmentationCalculator = new PlanarRegionSegmentationCalculator();
+
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+
+      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
+      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
+      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
+
    }
 
    public NormalOcTree getOctree()
@@ -110,41 +121,18 @@ public class RandomICPSLAM extends IhmcSLAM
          IhmcSLAMFrame newFrame = getLatestFrame();
          insertNewPointCloud(newFrame);
 
-         PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-         SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-         surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-
-         segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-         segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-         segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
-
          segmentationCalculator.compute(octree.getRoot());
-
-//         List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-//
-//         planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
       }
 
       return success;
    }
-   
+
    @Override
    public void updatePlanarRegionsMap()
    {
-      PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
-
       segmentationCalculator.compute(octree.getRoot());
-      
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
 
+      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
