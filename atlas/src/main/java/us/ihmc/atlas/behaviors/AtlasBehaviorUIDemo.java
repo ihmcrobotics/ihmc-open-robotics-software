@@ -13,14 +13,9 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
-import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -102,7 +97,7 @@ public class AtlasBehaviorUIDemo
          new FootstepPlanningToolboxModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       }).start();
 
-      BehaviorRegistry behaviorRegistry = BehaviorRegistry.DEFAULT_BEHAVIORS;
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       new Thread(() -> {
          LogTools.info("Creating behavior backpack");

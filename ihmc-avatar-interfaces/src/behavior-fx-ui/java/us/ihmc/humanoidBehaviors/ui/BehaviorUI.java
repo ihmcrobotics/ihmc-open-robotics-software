@@ -47,20 +47,20 @@ public class BehaviorUI
 //   @FXML private PlannerParametersUIController plannerParametersUIController;
 //   @FXML private DirectRobotUIController directRobotUIController;
 
-   public static BehaviorUI createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
+   public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
-      return new BehaviorUI(behaviorRegistry,
-                            RemoteBehaviorInterface.createForUI(behaviorRegistry, behaviorModuleAddress),
+      return new BehaviorUI(behaviorUIRegistry,
+                            RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress),
                             robotModel,
                             PubSubImplementation.FAST_RTPS);
    }
 
-   public static BehaviorUI createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
+   public static BehaviorUI createIntraprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
    {
-      return new BehaviorUI(behaviorRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
+      return new BehaviorUI(behaviorUIRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
    }
 
-   private BehaviorUI(BehaviorRegistry behaviorRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   private BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
@@ -80,8 +80,13 @@ public class BehaviorUI
          TabPane tabPane = (TabPane) bottom.getCenter();
          LogTools.info("TAB PANEEE {}", tabPane);
 
-         Tab tab = new Tab("Nav", JavaFXMissingTools.loadFromFXML(new NavigationBehaviorUI()));
-         tabPane.getTabs().add(tab);
+         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         {
+            BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
+            Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
+            tabPane.getTabs().add(tab);
+         }
+
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
@@ -92,9 +97,9 @@ public class BehaviorUI
 
          behaviorSelector.getItems().add("NONE");
 
-         for (BehaviorStatics behaviorStatics : behaviorRegistry.getEntries())
+         for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
-            behaviorSelector.getItems().add(behaviorStatics.getName());
+            behaviorSelector.getItems().add(behaviorDefinition.getName());
          }
          behaviorSelector.valueProperty().addListener(
                (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));

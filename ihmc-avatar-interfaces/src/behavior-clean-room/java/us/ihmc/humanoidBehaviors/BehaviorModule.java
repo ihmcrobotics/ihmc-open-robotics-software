@@ -26,7 +26,7 @@ public class BehaviorModule
 
    private final MessagerAPI messagerAPI;
    private final Messager messager;
-   private final PairList<BehaviorStatics, BehaviorInterface> constructedBehaviors = new PairList<>();
+   private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -62,14 +62,14 @@ public class BehaviorModule
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
-      for (BehaviorStatics behaviorStatics : behaviorRegistry.getEntries())
+      for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         constructedBehaviors.add(behaviorStatics, behaviorStatics.getBehaviorSupplier().build(new BehaviorHelper(robotModel, messager, ros2Node)));
+         constructedBehaviors.add(behaviorDefinition, behaviorDefinition.getBehaviorSupplier().build(new BehaviorHelper(robotModel, messager, ros2Node)));
       }
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
       {
-         for (ImmutablePair<BehaviorStatics, BehaviorInterface> behavior : constructedBehaviors)
+         for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
          {
             behavior.getRight().setEnabled(behavior.getLeft().getName().equals(selection));
          }

@@ -2,53 +2,52 @@ package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
-import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class BehaviorRegistry
 {
    public static final BehaviorRegistry DEFAULT_BEHAVIORS = new BehaviorRegistry();
    static
    {
-      DEFAULT_BEHAVIORS.add(StepInPlaceBehavior.STATICS);
-      DEFAULT_BEHAVIORS.add(PatrolBehavior.STATICS);
-      DEFAULT_BEHAVIORS.add(FancyPosesBehavior.STATICS);
-      DEFAULT_BEHAVIORS.add(ExploreAreaBehavior.STATICS);
-      DEFAULT_BEHAVIORS.add(NavigationBehavior.STATICS);
+      DEFAULT_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(PatrolBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(FancyPosesBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ExploreAreaBehavior.DEFINITION);
    }
 
-   private final ArrayList<BehaviorStatics> entries = new ArrayList<>();
+   private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
 
-   public static BehaviorRegistry of(BehaviorStatics... entries)
+   public static BehaviorRegistry of(BehaviorDefinition... entries)
    {
       BehaviorRegistry registry = new BehaviorRegistry();
-      for (BehaviorStatics entry : entries)
+      for (BehaviorDefinition entry : entries)
       {
-         registry.add(entry);
+         registry.register(entry);
       }
       return registry;
    }
 
-   public void add(BehaviorStatics statics)
+   public void register(BehaviorDefinition definition)
    {
-      entries.add(statics);
+      definitionEntries.add(definition);
    }
 
    public MessagerAPI constructMessagerAPI()
    {
-      MessagerAPI[] behaviorAPIs = new MessagerAPI[entries.size()];
-      for (int i = 0; i < entries.size(); i++)
+      MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
+      int i = 0;
+      for (BehaviorDefinition definitionEntry : definitionEntries)
       {
-         behaviorAPIs[i] = entries.get(i).getBehaviorAPI();
+         behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
       }
       return BehaviorModule.API.create(behaviorAPIs);
    }
 
-   public ArrayList<BehaviorStatics> getEntries()
+   public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()
    {
-      return entries;
+      return definitionEntries;
    }
 }

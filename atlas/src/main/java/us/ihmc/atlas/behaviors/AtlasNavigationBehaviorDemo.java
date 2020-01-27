@@ -6,11 +6,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.ui.behaviors.NavigationBehaviorUI;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -65,7 +65,7 @@ public class AtlasNavigationBehaviorDemo
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       }).start();
 
-      BehaviorRegistry behaviorRegistry = BehaviorRegistry.of(NavigationBehavior.STATICS);
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
 
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(behaviorRegistry, createRobotModel());
 

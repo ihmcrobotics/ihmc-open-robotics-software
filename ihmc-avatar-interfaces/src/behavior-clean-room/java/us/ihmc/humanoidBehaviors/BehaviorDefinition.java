@@ -2,13 +2,13 @@ package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
-public class BehaviorStatics
+public class BehaviorDefinition
 {
    private final String name;
    private final BehaviorSupplier behaviorSupplier;
    private final MessagerAPI behaviorAPI;
 
-   public BehaviorStatics(String name, BehaviorSupplier behaviorSupplier, MessagerAPI behaviorAPI)
+   public BehaviorDefinition(String name, BehaviorSupplier behaviorSupplier, MessagerAPI behaviorAPI)
    {
       this.name = name;
       this.behaviorSupplier = behaviorSupplier;
