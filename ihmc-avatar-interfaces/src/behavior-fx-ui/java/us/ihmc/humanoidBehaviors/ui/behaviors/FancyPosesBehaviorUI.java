@@ -8,9 +8,9 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.messager.Messager;
 
-public class FancyPosesBehaviorUIController extends BehaviorUIInterface
+public class FancyPosesBehaviorUI extends BehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(FancyPosesBehavior.DEFINITION, FancyPosesBehaviorUIController::new);
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(FancyPosesBehavior.DEFINITION, FancyPosesBehaviorUI::new);
 
    private Messager behaviorMessager;
 

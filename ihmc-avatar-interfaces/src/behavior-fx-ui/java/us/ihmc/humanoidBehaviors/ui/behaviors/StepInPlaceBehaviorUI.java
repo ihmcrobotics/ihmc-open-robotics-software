@@ -8,9 +8,9 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.messager.Messager;
 
-public class StepInPlaceBehaviorUIController extends BehaviorUIInterface
+public class StepInPlaceBehaviorUI extends BehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(StepInPlaceBehavior.DEFINITION, StepInPlaceBehaviorUIController::new);
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(StepInPlaceBehavior.DEFINITION, StepInPlaceBehaviorUI::new);
 
    private Messager behaviorMessager;
 

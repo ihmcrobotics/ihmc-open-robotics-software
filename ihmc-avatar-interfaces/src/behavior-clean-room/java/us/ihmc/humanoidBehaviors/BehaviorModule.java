@@ -42,7 +42,7 @@ public class BehaviorModule
    {
       LogTools.info("Starting behavior module in {} mode", communicationMode.name());
 
-      messagerAPI = behaviorRegistry.constructMessagerAPI();
+      messagerAPI = behaviorRegistry.getMessagerAPI();
 
       PubSubImplementation pubSubImplementation;
       if (communicationMode == CommunicationMode.INTERPROCESS)

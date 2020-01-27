@@ -11,7 +11,7 @@ public class RemoteBehaviorInterface
 {
    public static Messager createForUI(BehaviorRegistry behaviorRegistry, String behaviorModuleAddress)
    {
-      KryoMessager moduleMessager = KryoMessager.createClient(behaviorRegistry.constructMessagerAPI(),
+      KryoMessager moduleMessager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
                                                               behaviorModuleAddress,
                                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                                               new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));

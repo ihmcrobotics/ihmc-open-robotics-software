@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
-import us.ihmc.humanoidBehaviors.ui.behaviors.NavigationBehaviorUI;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
@@ -25,6 +24,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
+
+import java.util.ArrayList;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -38,14 +39,6 @@ public class BehaviorUI
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
-
-//   @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
-//   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
-//   @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
-//   @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
-//   @FXML private NavigationBehaviorUIController navigationBehaviorUIController;
-//   @FXML private PlannerParametersUIController plannerParametersUIController;
-//   @FXML private DirectRobotUIController directRobotUIController;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
@@ -80,13 +73,14 @@ public class BehaviorUI
          TabPane tabPane = (TabPane) bottom.getCenter();
          LogTools.info("TAB PANEEE {}", tabPane);
 
+         ArrayList<BehaviorUIInterface> behaviorUIInterfaces = new ArrayList<>();
          for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
          {
             BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
+            behaviorUIInterfaces.add(behaviorUIInterface);
             Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
             tabPane.getTabs().add(tab);
          }
-
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
@@ -95,7 +89,7 @@ public class BehaviorUI
          SubScene subScene = view3dFactory.getSubScene();
          Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-         behaviorSelector.getItems().add("NONE");
+         behaviorSelector.getItems().add("None");
 
          for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
@@ -104,16 +98,11 @@ public class BehaviorUI
          behaviorSelector.valueProperty().addListener(
                (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
 
-//         stepInPlaceBehaviorUIController.init(behaviorMessager);
-//         fancyPosesBehaviorUIController.init(behaviorMessager);
-//         exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-//         navigationBehaviorUIController.init(behaviorMessager);
-//         patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-//         plannerParametersUIController.init(behaviorMessager, robotModel);
-//         directRobotUIController.init(ros2Node, robotModel);
-
-//         view3dFactory.addNodeToView(patrolBehaviorUIController);
-//         view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
+         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces)
+         {
+            behaviorUIInterface.init(subScene, behaviorMessager, robotModel);
+            view3dFactory.addNodeToView(behaviorUIInterface);
+         }
 
          if (showLivePlanarRegionsGraphic)
          {

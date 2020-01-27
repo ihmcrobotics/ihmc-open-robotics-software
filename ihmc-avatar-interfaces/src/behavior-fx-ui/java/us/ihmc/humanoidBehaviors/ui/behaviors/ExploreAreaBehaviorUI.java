@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class ExploreAreaBehaviorUIController extends BehaviorUIInterface
+public class ExploreAreaBehaviorUI extends BehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUIController::new);
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUI::new);
 
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 

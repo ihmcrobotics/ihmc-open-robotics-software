@@ -41,9 +41,9 @@ import java.util.HashMap;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
-public class PatrolBehaviorUIController extends BehaviorUIInterface
+public class PatrolBehaviorUI extends BehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(PatrolBehavior.DEFINITION, PatrolBehaviorUIController::new);
+   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(PatrolBehavior.DEFINITION, PatrolBehaviorUI::new);
 
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
