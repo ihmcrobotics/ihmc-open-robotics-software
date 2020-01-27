@@ -46,7 +46,6 @@ public class ContactWrenchMatrixCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("Dummy");
          RandomFloatingRevoluteJointChain robot = new RandomFloatingRevoluteJointChain(random, numberOfJoints);
          robot.nextState(random, JointStateType.CONFIGURATION);
 
@@ -57,7 +56,7 @@ public class ContactWrenchMatrixCalculatorTest
          toolbox.setupForInverseDynamicsSolver(Collections.singletonList(contactablePlaneBody));
          JointIndexHandler jointIndexHandler = new JointIndexHandler(robot.getJoints());
 
-         WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+         WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
          wrenchMatrixCalculator.submitPlaneContactStateCommand(nextPlaneContactStateCommand(random, contactablePlaneBody));
          ContactWrenchMatrixCalculator contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(toolbox);
          InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator());
