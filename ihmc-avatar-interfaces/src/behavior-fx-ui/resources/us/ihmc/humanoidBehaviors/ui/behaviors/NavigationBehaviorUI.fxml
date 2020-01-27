@@ -6,10 +6,7 @@
 
 <AnchorPane prefHeight="187.0" prefWidth="861.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <FlowPane prefWrapLength="1300.0">
-            <children>
-                <Button fx:id="step" mnemonicParsing="false" onAction="#step" text="Step" />
-            </children>
-        </FlowPane>
+        <FlowPane prefWrapLength="1300.0" />
+          <Button fx:id="step" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#step" text="Step Through Algorithm" />
     </children>
 </AnchorPane>

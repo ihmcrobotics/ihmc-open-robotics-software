@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Input;
@@ -70,9 +71,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.FootstepPlanForUI;
+import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
 public class NavigationBehavior implements BehaviorInterface
@@ -95,6 +96,7 @@ public class NavigationBehavior implements BehaviorInterface
    private HumanoidRobotState latestHumanoidRobotState;
    private List<Point3DReadOnly> pathPoints = null;
    private List<? extends Pose3DReadOnly> path = null;
+   private final Notification stepThroughAlgorithm;
 
    public NavigationBehavior(BehaviorHelper helper)
    {
@@ -107,6 +109,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       footPolygons = createFootPolygons(helper.getRobotModel());
 
+      stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, this::navigate);
    }
@@ -130,6 +133,7 @@ public class NavigationBehavior implements BehaviorInterface
       latestMapSequenceId = mapRegionsInput.getMessageNotification().peek().getSequenceId();
 //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
+      stepThroughAlgorithm.blockingPoll();
       LogTools.info("Planning with occlusions");
 
       latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -165,6 +169,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       helper.getManagedMessager().submitMessage(BodyPathPlanForUI, new ArrayList<>(pathPoints));
 
+      stepThroughAlgorithm.blockingPoll();
       LogTools.info("Computing poses from path");
       // find last two path points
       Point3DReadOnly lastPoint = pathPoints.get(pathPoints.size() - 1);
@@ -313,6 +318,7 @@ public class NavigationBehavior implements BehaviorInterface
          shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
       }
 
+      stepThroughAlgorithm.blockingPoll();
       LogTools.info("Requesting walk");
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
             shortenedFootstepPlan,
@@ -359,7 +365,7 @@ public class NavigationBehavior implements BehaviorInterface
       private static final Category RootCategory = apiFactory.createRootCategory("NavigationBehavior");
       private static final CategoryTheme NavigationTheme = apiFactory.createCategoryTheme("Navigation");
 
-      public static final Topic<Object> Step = topic("Step");
+      public static final Topic<Object> StepThroughAlgorithm = topic("StepThroughAlgorithm");
       public static final Topic<ArrayList<Point3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPoints");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
 
