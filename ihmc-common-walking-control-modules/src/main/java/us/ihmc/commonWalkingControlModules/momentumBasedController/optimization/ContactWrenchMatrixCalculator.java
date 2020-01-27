@@ -5,11 +5,11 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 
 /**
  * Equation of dynamics:
@@ -41,7 +41,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 public class ContactWrenchMatrixCalculator
 {
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
-   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
+   private final List<RigidBodyBasics> contactableBodies;
    private final JointIndexHandler jointIndexHandler;
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
@@ -52,13 +52,12 @@ public class ContactWrenchMatrixCalculator
    private final DenseMatrix64F tmpCompactContactForceJacobianMatrix;
    private final DenseMatrix64F tmpFullContactForceJacobianMatrix;
 
-   public ContactWrenchMatrixCalculator(RigidBodyBasics rootBody, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-                                        WrenchMatrixCalculator wrenchMatrixCalculator, JointIndexHandler jointIndexHandler)
+   public ContactWrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox)
    {
-      this.rootBody = rootBody;
-      this.contactablePlaneBodies = contactablePlaneBodies;
-      this.wrenchMatrixCalculator = wrenchMatrixCalculator;
-      this.jointIndexHandler = jointIndexHandler;
+      this.rootBody = toolbox.getRootBody();
+      this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
+      this.contactableBodies = wrenchMatrixCalculator.getRigidBodies();
+      this.jointIndexHandler = toolbox.getJointIndexHandler();
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
@@ -76,9 +75,10 @@ public class ContactWrenchMatrixCalculator
    {
       int contactForceStartIndex = 0;
 
-      for (int bodyIndex = 0; bodyIndex < contactablePlaneBodies.size(); bodyIndex++)
+      for (int bodyIndex = 0; bodyIndex < contactableBodies.size(); bodyIndex++)
       {
-         RigidBodyBasics rigidBody = contactablePlaneBodies.get(bodyIndex).getRigidBody();
+         RigidBodyBasics rigidBody = contactableBodies.get(bodyIndex);
+
          jacobianCalculator.setKinematicChain(rootBody, rigidBody);
          jacobianCalculator.setJacobianFrame(wrenchMatrixCalculator.getJacobianFrame());
          DenseMatrix64F contactableBodyJacobianMatrix = jacobianCalculator.getJacobianMatrix();

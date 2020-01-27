@@ -59,10 +59,7 @@ public class ContactWrenchMatrixCalculatorTest
 
          WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
          wrenchMatrixCalculator.submitPlaneContactStateCommand(nextPlaneContactStateCommand(random, contactablePlaneBody));
-         ContactWrenchMatrixCalculator contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(robot.getElevator(),
-                                                                                                         Collections.singletonList(contactablePlaneBody),
-                                                                                                         wrenchMatrixCalculator,
-                                                                                                         jointIndexHandler);
+         ContactWrenchMatrixCalculator contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(toolbox);
          InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator());
 
          wrenchMatrixCalculator.computeMatrices();
