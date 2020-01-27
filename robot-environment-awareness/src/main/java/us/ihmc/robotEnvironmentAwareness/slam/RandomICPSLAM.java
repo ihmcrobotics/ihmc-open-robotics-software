@@ -76,7 +76,7 @@ public class RandomICPSLAM extends IhmcSLAM
       int numberOfPoints = getLatestFrame().getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(IhmcSLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
+      scanCollection.addScan(IhmcSLAMTools.toScan(pointCloud, sensorPose.getTranslation(), WINDOW_MINIMUM_DEPTH, WINDOW_MAXIMUM_DEPTH));
 
       octree.insertScanCollection(scanCollection, false);
 
@@ -121,12 +121,31 @@ public class RandomICPSLAM extends IhmcSLAM
 
          segmentationCalculator.compute(octree.getRoot());
 
-         List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-
-         planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
+//         List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
+//
+//         planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
       }
 
       return success;
+   }
+   
+   @Override
+   public void updatePlanarRegionsMap()
+   {
+      PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
+
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+
+      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
+      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
+      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
+
+      segmentationCalculator.compute(octree.getRoot());
+      
+      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
+
+      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override
