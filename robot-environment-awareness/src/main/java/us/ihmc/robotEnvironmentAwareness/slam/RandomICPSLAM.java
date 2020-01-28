@@ -28,8 +28,8 @@ public class RandomICPSLAM extends IhmcSLAM
 
    private final ConvexPolygon2D previousWindow = new ConvexPolygon2D();
    private static final double WINDOW_WIDTH = 0.4; // 0.6
-   private static final double WINDOW_HEIGHT = 0.4; // 0.4
-   private static final double WINDOW_HEIGHT_OFFSET = -0.1; // 0.05 is for `testOptimizationSimulattedPointCloud`. 
+   private static final double WINDOW_HEIGHT = 0.3; // 0.4
+   private static final double WINDOW_HEIGHT_OFFSET = -0.0; // 0.05 is for `testOptimizationSimulattedPointCloud`. 
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
    private static final double MINIMUM_OVERLAPPED_RATIO = 0.1;
@@ -98,7 +98,6 @@ public class RandomICPSLAM extends IhmcSLAM
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
       octree.setNormalEstimationParameters(normalEstimationParameters);
-      octree.updateNormals();
    }
 
    @Override
@@ -121,6 +120,7 @@ public class RandomICPSLAM extends IhmcSLAM
          IhmcSLAMFrame newFrame = getLatestFrame();
          insertNewPointCloud(newFrame);
 
+         octree.updateNormals();
          segmentationCalculator.compute(octree.getRoot());
       }
 
@@ -130,6 +130,7 @@ public class RandomICPSLAM extends IhmcSLAM
    @Override
    public void updatePlanarRegionsMap()
    {
+      octree.updateNormals();
       segmentationCalculator.compute(octree.getRoot());
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
@@ -146,8 +147,11 @@ public class RandomICPSLAM extends IhmcSLAM
       // put credit to trust slam. when it exceed, the frame is key frame.
 
       // see the overlapped area.
-      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, NUMBER_OF_SOURCE_POINTS, previousWindow, WINDOW_MINIMUM_DEPTH,
-                                                                                    WINDOW_MAXIMUM_DEPTH, MINIMUM_OVERLAPPED_RATIO);
+//            Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, NUMBER_OF_SOURCE_POINTS, previousWindow, WINDOW_MINIMUM_DEPTH,
+//                                                                                          WINDOW_MAXIMUM_DEPTH, MINIMUM_OVERLAPPED_RATIO);
+      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPoseWithKinematicGuess(frame, octree, NUMBER_OF_SOURCE_POINTS,
+                                                                                                      MINIMUM_OVERLAPPED_RATIO);
+
       if (sourcePointsToSensor == null) // if it is too small overlapped,
       {
          if (DEBUG)
