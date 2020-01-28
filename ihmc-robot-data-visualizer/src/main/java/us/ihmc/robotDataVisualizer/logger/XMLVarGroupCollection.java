@@ -84,8 +84,8 @@ public class XMLVarGroupCollection
 
       public VarGroup toVarGroup()
       {
-         VarGroup varGroup = new VarGroup(name);
-         varNames.forEach(varGroup::addVar);
+         VarGroup varGroup = new VarGroup(name.trim());
+         varNames.forEach(varName -> varGroup.addVar(varName.trim()));
          return varGroup;
       }
    }
