@@ -13,10 +13,10 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
+import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -32,13 +32,12 @@ import java.util.ArrayList;
  */
 public class BehaviorUI
 {
-   private static boolean showLivePlanarRegionsGraphic = true;
-
    private BorderPane mainPane;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
+   @FXML private DirectRobotUIController directRobotUIController;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
@@ -71,7 +70,6 @@ public class BehaviorUI
 
          BorderPane bottom = (BorderPane) mainPane.getBottom();
          TabPane tabPane = (TabPane) bottom.getCenter();
-         LogTools.info("TAB PANEEE {}", tabPane);
 
          ArrayList<BehaviorUIInterface> behaviorUIInterfaces = new ArrayList<>();
          for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
@@ -104,11 +102,8 @@ public class BehaviorUI
             view3dFactory.addNodeToView(behaviorUIInterface);
          }
 
-         if (showLivePlanarRegionsGraphic)
-         {
-            view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, false));
-         }
-
+         directRobotUIController.init(subScene, ros2Node, robotModel);
+         view3dFactory.addNodeToView(directRobotUIController);
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          mainPane.setCenter(subSceneWrappedInsidePane);
