@@ -157,8 +157,10 @@ public class NavigationBehavior implements BehaviorInterface
          mapRegionsInput.getMessageNotification().blockingPoll();
       }
       while (mapRegionsInput.getMessageNotification().peek().getSequenceId() <= latestMapSequenceId);
-      latestMapSequenceId = mapRegionsInput.getMessageNotification().peek().getSequenceId();
+      latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
+
+      helper.publishToUI(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
    }
 
    private void planBodyPath()
@@ -399,6 +401,7 @@ public class NavigationBehavior implements BehaviorInterface
       private static final CategoryTheme NavigationTheme = apiFactory.createCategoryTheme("Navigation");
 
       public static final Topic<Object> StepThroughAlgorithm = topic("StepThroughAlgorithm");
+      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<ArrayList<Point3DReadOnly>> BodyPathPlanForUI = topic("BodyPathPoints");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
 

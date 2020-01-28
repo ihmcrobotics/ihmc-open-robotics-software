@@ -41,13 +41,34 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       animationTimer.start();
    }
 
-   private synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
+   public LivePlanarRegionsGraphic(boolean initializeToFlatGround)
+   {
+      super(initializeToFlatGround);
+      animationTimer.start();
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
    {
       if (acceptNewRegions)
       {
          synchronized (this) // just here for clear method
          {
             executorService.submit(() -> convertAndGenerateMesh(incomingData));
+         }
+      }
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsList incomingData)
+   {
+      if (acceptNewRegions)
+      {
+         synchronized (this) // just here for clear method
+         {
+            executorService.submit(() ->
+            {
+               this.latestPlanarRegionsList = incomingData;
+               generateMeshes(incomingData);
+            });
          }
       }
    }
@@ -62,6 +83,19 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private void handle(long now)
    {
       super.update();
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      acceptNewRegions = enabled;
+//      if (enabled)
+//      {
+//         animationTimer.start();
+//      }
+//      else
+//      {
+//         animationTimer.stop();
+//      }
    }
 
    public synchronized void clear()
