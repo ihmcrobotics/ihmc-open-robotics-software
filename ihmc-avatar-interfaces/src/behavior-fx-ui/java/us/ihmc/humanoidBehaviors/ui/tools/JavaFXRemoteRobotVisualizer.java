@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
+import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
