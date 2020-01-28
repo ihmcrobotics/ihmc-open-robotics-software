@@ -88,14 +88,6 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    public void setEnabled(boolean enabled)
    {
       acceptNewRegions = enabled;
-//      if (enabled)
-//      {
-//         animationTimer.start();
-//      }
-//      else
-//      {
-//         animationTimer.stop();
-//      }
    }
 
    public synchronized void clear()
