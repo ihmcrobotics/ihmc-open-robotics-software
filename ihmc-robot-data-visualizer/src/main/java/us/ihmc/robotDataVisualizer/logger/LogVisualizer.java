@@ -361,11 +361,15 @@ public class LogVisualizer
 
       if (config.success())
       {
-         File varGroupFile = new File(config.getString("varGroupFile"));
-         List<VarGroup> varGroups = loadVarGroups(varGroupFile);
-         if (varGroups != null && !varGroups.isEmpty())
+         String varGroupFilePath = config.getString("varGroupFile");
+         if (varGroupFilePath != null)
          {
-            varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
+            File varGroupFile = new File(varGroupFilePath);
+            List<VarGroup> varGroups = loadVarGroups(varGroupFile);
+            if (varGroups != null && !varGroups.isEmpty())
+            {
+               varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
+            }
          }
       }
 
