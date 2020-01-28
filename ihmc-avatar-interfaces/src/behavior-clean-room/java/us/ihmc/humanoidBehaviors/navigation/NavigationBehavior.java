@@ -44,6 +44,10 @@ import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.NeverFailsAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.RunAndSucceedEverytimeAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.SequenceNode;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -71,7 +75,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
@@ -90,13 +93,17 @@ public class NavigationBehavior implements BehaviorInterface
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
    private final FramePose3D robotPose = new FramePose3D();
+   private final SequenceNode sequence;
+   private final Notification stepThroughAlgorithm;
    private final PausablePeriodicThread mainThread;
 
    private long latestMapSequenceId = 0;
    private HumanoidRobotState latestHumanoidRobotState;
    private List<Point3DReadOnly> pathPoints = null;
    private List<? extends Pose3DReadOnly> path = null;
-   private final Notification stepThroughAlgorithm;
+   private NavigableRegionsManager navigableRegionsManager;
+   private FootstepPlan latestFootstepPlan;
+   private PlanarRegionsList latestMap;
 
    public NavigationBehavior(BehaviorHelper helper)
    {
@@ -111,7 +118,20 @@ public class NavigationBehavior implements BehaviorInterface
 
       stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
-      mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, this::navigate);
+      sequence = new SequenceNode();
+      ArrayList<BehaviorTreeAction> resetableActions = new ArrayList<>();
+      // store these actions to reset them at the end? a task should do that?
+      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("aquire map"))));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(this::aquireMap)));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("plan body path"))));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(this::planBodyPath)));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps"))));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(this::planBodyOrientationTrajectoryAndFootsteps)));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it"))));
+      resetableActions.add(sequence.addChild(new NeverFailsAction(this::shortenFootstepPlanAndWalkIt)));
+      sequence.addChild(new RunAndSucceedEverytimeAction(() -> resetableActions.forEach(BehaviorTreeAction::reset)));
+
+      mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }
 
    @Override
@@ -123,17 +143,26 @@ public class NavigationBehavior implements BehaviorInterface
       helper.setCommunicationCallbacksEnabled(enabled);
    }
 
-   private void navigate()
+   private void stepThroughAlgorithm(String message)
    {
+      LogTools.info("Press step to {}", message);
+      stepThroughAlgorithm.blockingPoll();
+   }
+
+   private void aquireMap()
+   {
+      LogTools.info("Aquiring map...");
       do
       {
          mapRegionsInput.getMessageNotification().blockingPoll();
       }
       while (mapRegionsInput.getMessageNotification().peek().getSequenceId() <= latestMapSequenceId);
       latestMapSequenceId = mapRegionsInput.getMessageNotification().peek().getSequenceId();
-//      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
+      //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
+   }
 
-      stepThroughAlgorithm.blockingPoll();
+   private void planBodyPath()
+   {
       LogTools.info("Planning with occlusions");
 
       latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -145,10 +174,9 @@ public class NavigationBehavior implements BehaviorInterface
       visibilityGraphParameters.setObstacleExtrusionDistance(0.8); // <-- this appears to be all that's necessary
       //         visibilityGraphParameters.setPreferredNavigableExtrusionDistance(0.60);
       //         visibilityGraphParameters.setPreferredObstacleExtrusionDistance(0.6);
-      NavigableRegionsManager manager = new NavigableRegionsManager(visibilityGraphParameters, null, new ObstacleAvoidanceProcessor(visibilityGraphParameters));
-      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(manager);
-      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(visibilityGraphParameters);
-      PlanarRegionsList latestMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest());
+      navigableRegionsManager = new NavigableRegionsManager(visibilityGraphParameters, null, new ObstacleAvoidanceProcessor(visibilityGraphParameters));
+      OcclusionHandlingPathPlanner occlusionHandlingPathPlanner = new OcclusionHandlingPathPlanner(navigableRegionsManager);
+      latestMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest());
 
       if (latestMap.isEmpty())
       {
@@ -157,7 +185,7 @@ public class NavigationBehavior implements BehaviorInterface
          return;
       }
 
-      manager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
+      navigableRegionsManager.setPlanarRegions(latestMap.getPlanarRegionsAsList());
       boolean fullyExpandVisibilityGraph = false;
       pathPoints = occlusionHandlingPathPlanner.calculateBodyPath(robotPose.getPosition(), goal, fullyExpandVisibilityGraph);
       if (pathPoints == null || pathPoints.size() < 2)
@@ -168,8 +196,10 @@ public class NavigationBehavior implements BehaviorInterface
       }
 
       helper.getManagedMessager().submitMessage(BodyPathPlanForUI, new ArrayList<>(pathPoints));
+   }
 
-      stepThroughAlgorithm.blockingPoll();
+   private void planBodyOrientationTrajectoryAndFootsteps()
+   {
       LogTools.info("Computing poses from path");
       // find last two path points
       Point3DReadOnly lastPoint = pathPoints.get(pathPoints.size() - 1);
@@ -179,7 +209,8 @@ public class NavigationBehavior implements BehaviorInterface
       vector.normalize();
       AxisAngle finalOrientation = new AxisAngle(Math.atan2(vector.getY(), vector.getX()), 0.0, 0.0);
 
-      path = orientationCalculator.computePosesFromPath(pathPoints, manager.getVisibilityMapSolution(), robotPose.getOrientation(), finalOrientation);
+      PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(visibilityGraphParameters);
+      path = orientationCalculator.computePosesFromPath(pathPoints, navigableRegionsManager.getVisibilityMapSolution(), robotPose.getOrientation(), finalOrientation);
 
       // request footstep plan
       WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
@@ -298,27 +329,29 @@ public class NavigationBehavior implements BehaviorInterface
          return;
       }
 
-      FootstepPlan footstepPlan = planner.getPlan();
-      LogTools.info("Got {} footsteps", footstepPlan.getNumberOfSteps());
+      latestFootstepPlan = planner.getPlan();
+      LogTools.info("Got {} footsteps", latestFootstepPlan.getNumberOfSteps());
 
       // make robot walk a little of the path
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlan));
+      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(latestFootstepPlan));
+   }
 
+   private void shortenFootstepPlanAndWalkIt()
+   {
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
 
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      for (int i = 0; i < latestFootstepPlan.getNumberOfSteps(); i++)
       {
-         SimpleFootstep footstep = footstepPlan.getFootstep(i);
+         SimpleFootstep footstep = latestFootstepPlan.getFootstep(i);
 
          if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 2.0)
          {
             break; // don't go farther than 0.3 meters
          }
 
-         shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(i));
+         shortenedFootstepPlan.addFootstep(latestFootstepPlan.getFootstep(i));
       }
 
-      stepThroughAlgorithm.blockingPoll();
       LogTools.info("Requesting walk");
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
             shortenedFootstepPlan,
