@@ -114,7 +114,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       robot = helper.getOrCreateRobotInterface();
 
-      footPolygons = createFootPolygons(helper.getRobotModel());
+      footPolygons = helper.createFootPolygons();
 
       stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
@@ -378,20 +378,6 @@ public class NavigationBehavior implements BehaviorInterface
       }
 
       LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
-   }
-
-   private SideDependentList<ConvexPolygon2D> createFootPolygons(DRCRobotModel robotModel)
-   {
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
-         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
-         footPolygons.set(side, scaledFoot);
-      }
-
-      return footPolygons;
    }
 
    public static class NavigationBehaviorAPI
