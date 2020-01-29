@@ -40,7 +40,7 @@ public class StereoVisionPointCloudPublisher
 
    private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
-   private static final int MAX_NUMBER_OF_POINTS = 400000;
+   private static final int MAX_NUMBER_OF_POINTS = 200000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -113,7 +113,7 @@ public class StereoVisionPointCloudPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1000L, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()

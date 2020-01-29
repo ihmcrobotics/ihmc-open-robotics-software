@@ -39,9 +39,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
    private final AtlasPointCloudSensorManager pointCloudSensorManager;
 
+   private static final boolean ENABLE_LIDAR_PUBLISHER = false;
    private static final boolean ENABLE_STEREO_PUBLISHER = true;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
+   private static final boolean ENABLE_FISHEYE_CAMERAS = false;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -122,8 +124,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
 
-      lidarScanPublisher.receiveLidarFromROSAsPointCloud2WithSource(multisenseLidarParameters.getRosTopic(), rosMainNode);
-      lidarScanPublisher.setScanFrameToWorldFrame();
+      if (ENABLE_LIDAR_PUBLISHER)
+      {
+         lidarScanPublisher.receiveLidarFromROSAsPointCloud2WithSource(multisenseLidarParameters.getRosTopic(), rosMainNode);
+         lidarScanPublisher.setScanFrameToWorldFrame();
+      }
 
       if (ENABLE_STEREO_PUBLISHER)
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
@@ -131,35 +136,39 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
       multiSenseSensorManager = new MultiSenseSensorManager(modelFactory,
-                                                                                    robotConfigurationDataBuffer,
-                                                                                    rosMainNode,
-                                                                                    ros2Node,
-                                                                                    rosClockCalculator,
-                                                                                    multisenseLeftEyeCameraParameters,
-                                                                                    multisenseLidarParameters,
-                                                                                    multisenseStereoParameters,
-                                                                                    sensorInformation.setupROSParameterSetters());
+                                                            robotConfigurationDataBuffer,
+                                                            rosMainNode,
+                                                            ros2Node,
+                                                            rosClockCalculator,
+                                                            multisenseLeftEyeCameraParameters,
+                                                            multisenseLidarParameters,
+                                                            multisenseStereoParameters,
+                                                            sensorInformation.setupROSParameterSetters());
 
-      AvatarRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
-      AvatarRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
+      if (ENABLE_FISHEYE_CAMERAS)
+      {
+         AvatarRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
+         AvatarRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
 
-      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory,
-                                                                                  leftFishEyeCameraParameters,
-                                                                                  robotConfigurationDataBuffer,
-                                                                                  ros2Node,
-                                                                                  rosClockCalculator::computeRobotMonotonicTime,
-                                                                                  rosMainNode);
-      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory,
-                                                                                   rightFishEyeCameraParameters,
-                                                                                   robotConfigurationDataBuffer,
-                                                                                   ros2Node,
-                                                                                   rosClockCalculator::computeRobotMonotonicTime,
-                                                                                   rosMainNode);
+         FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory,
+                                                                                     leftFishEyeCameraParameters,
+                                                                                     robotConfigurationDataBuffer,
+                                                                                     ros2Node,
+                                                                                     rosClockCalculator::computeRobotMonotonicTime,
+                                                                                     rosMainNode);
+         FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory,
+                                                                                      rightFishEyeCameraParameters,
+                                                                                      robotConfigurationDataBuffer,
+                                                                                      ros2Node,
+                                                                                      rosClockCalculator::computeRobotMonotonicTime,
+                                                                                      rosMainNode);
 
-      leftFishEyeCameraReceiver.start();
-      rightFishEyeCameraReceiver.start();
-      lidarScanPublisher.start();
+         leftFishEyeCameraReceiver.start();
+         rightFishEyeCameraReceiver.start();
+      }
 
+      if (ENABLE_LIDAR_PUBLISHER)
+         lidarScanPublisher.start();
       if (ENABLE_STEREO_PUBLISHER)
          multisenseStereoVisionPointCloudPublisher.start();
       if (ENABLE_DEPTH_PUBLISHER)
