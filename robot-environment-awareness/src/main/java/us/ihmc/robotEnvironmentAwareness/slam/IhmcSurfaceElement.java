@@ -93,6 +93,27 @@ public class IhmcSurfaceElement
 
       return positionWeight * positionDistance + angleWeight * angleDistance;
    }
+   
+   public double getDistance(RigidBodyTransformReadOnly transform, double positionWeight, double angleWeight)
+   {
+      Point3D centerCopy = plane.getPointCopy();
+      Vector3D normalCopy = plane.getNormalCopy();
+
+      RigidBodyTransform planeTransform = new RigidBodyTransform();
+      planeTransform.setTranslation(centerCopy);
+      planeTransform.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(normalCopy));
+      planeTransform.preMultiply(transform);
+
+      Point3D newCenter = new Point3D(planeTransform.getTranslation());
+      Vector3D newNormal = new Vector3D();
+      planeTransform.getRotation().getColumn(2, newNormal);
+      
+      Plane3D planarRegionPlane = mergeablePlanarRegion.getPlane();
+      double positionDistance = planarRegionPlane.distance(newCenter);
+      double angleDistance = Math.abs(Math.acos(Math.abs(mergeablePlanarRegion.getNormal().dot(newNormal))));
+
+      return positionWeight * positionDistance + angleWeight * angleDistance;
+   }
 
    public boolean isInPlanarRegion()
    {
