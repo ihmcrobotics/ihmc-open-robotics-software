@@ -22,17 +22,13 @@ import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
-   public static final boolean DEBUG = false;
+   public static final boolean DEBUG = true;
 
-   private static final int NUMBER_OF_SOURCE_POINTS = 300;
+   private static final int NUMBER_OF_SOURCE_POINTS = 1000;
 
-   private final ConvexPolygon2D previousWindow = new ConvexPolygon2D();
-   private static final double WINDOW_WIDTH = 0.4; // 0.6
-   private static final double WINDOW_HEIGHT = 0.3; // 0.4
-   private static final double WINDOW_HEIGHT_OFFSET = -0.0; // 0.05 is for `testOptimizationSimulattedPointCloud`. 
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
-   private static final double MINIMUM_OVERLAPPED_RATIO = 0.1;
+   private static final double MINIMUM_OVERLAPPED_RATIO = 0.4;
 
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
 
@@ -50,16 +46,13 @@ public class RandomICPSLAM extends IhmcSLAM
       super(octreeResolution);
 
       octree = new NormalOcTree(octreeResolution);
-      previousWindow.addVertex(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
-      previousWindow.addVertex(WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
-      previousWindow.addVertex(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
-      previousWindow.addVertex(-WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + WINDOW_HEIGHT_OFFSET);
-      previousWindow.update();
 
       segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-10.0));
+      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(10.0));
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
@@ -147,8 +140,6 @@ public class RandomICPSLAM extends IhmcSLAM
       // put credit to trust slam. when it exceed, the frame is key frame.
 
       // see the overlapped area.
-//            Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, NUMBER_OF_SOURCE_POINTS, previousWindow, WINDOW_MINIMUM_DEPTH,
-//                                                                                          WINDOW_MAXIMUM_DEPTH, MINIMUM_OVERLAPPED_RATIO);
       Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPoseWithKinematicGuess(frame, octree, NUMBER_OF_SOURCE_POINTS,
                                                                                                       MINIMUM_OVERLAPPED_RATIO);
 
@@ -178,16 +169,14 @@ public class RandomICPSLAM extends IhmcSLAM
          }
          else
          {
-            int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
-            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
-            {
-               if (DEBUG)
-                  System.out.println("close enough. many inliers.");
-               return new RigidBodyTransform();
-            }
+//            int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
+//            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
+//            {
+//               if (DEBUG)
+//                  System.out.println("close enough. many inliers.");
+//               return new RigidBodyTransform();
+//            }
 
-            if (DEBUG)
-               System.out.println("optimization started. " + initialQuery);
             GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
 
             int maxIterations = 300;
@@ -209,9 +198,6 @@ public class RandomICPSLAM extends IhmcSLAM
                      + ", Opt Q: " + optimizer.getOptimalQuery());
             TDoubleArrayList optimalInput = optimizer.getOptimalInput();
 
-            if (DEBUG)
-               System.out.println("optimalInput # " + optimalInput.get(0) + " " + optimalInput.get(1) + " " + optimalInput.get(2));
-
             RigidBodyTransform transformer = new RigidBodyTransform();
             costFunction.convertToSensorPoseMultiplier(optimalInput, transformer);
 
@@ -222,8 +208,6 @@ public class RandomICPSLAM extends IhmcSLAM
                correctedSourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
             }
 
-            if (DEBUG)
-               System.out.println(transformer);
             return transformer;
          }
       }

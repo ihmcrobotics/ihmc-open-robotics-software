@@ -259,6 +259,7 @@ public class IhmcSLAMTools
 
                Point3D candidatePoint = new Point3D(searchNode.getX(), searchNode.getY(), searchNode.getZ());
 
+               //double distance = candidatePoint.distanceSquared(point);
                double distance = candidatePoint.distance(point);
                if (distance < minDistance)
                {
@@ -356,7 +357,7 @@ public class IhmcSLAMTools
          vertex[i][0] = octreePointMapToSensorPose[i].getX();
          vertex[i][1] = octreePointMapToSensorPose[i].getY();
       }
-      double fixedWindowMargin = -0.1;
+      double fixedWindowMargin = -0.05;
       Vertex2DSupplier supplier = Vertex2DSupplier.asVertex2DSupplier(vertex);
       ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
       
@@ -385,7 +386,6 @@ public class IhmcSLAMTools
          }
       }
 
-      System.out.println("newPointCloudToSensorPose " + newPointCloudToSensorPose.length + " " + numberOfPointsInWindow);
       double overlappedRatio = (double) numberOfPointsInWindow / newPointCloudToSensorPose.length;
       if (overlappedRatio < minimumOverlappedRatio)
       {
