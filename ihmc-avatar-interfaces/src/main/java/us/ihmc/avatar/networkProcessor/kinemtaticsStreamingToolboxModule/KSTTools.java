@@ -173,7 +173,7 @@ public class KSTTools
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      outputConverter.computeHandTrajectoryMessages();
+//      outputConverter.computeHandTrajectoryMessages();
       outputConverter.computeArmTrajectoryMessages();
       outputConverter.computeNeckTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
@@ -191,7 +191,7 @@ public class KSTTools
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.5);
 
-      outputConverter.computeHandTrajectoryMessages();
+//      outputConverter.computeHandTrajectoryMessages();
       outputConverter.computeArmTrajectoryMessages();
       outputConverter.computeNeckTrajectoryMessage();
       outputConverter.computeChestTrajectoryMessage();
