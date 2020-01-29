@@ -231,25 +231,12 @@ public class OctreeSLAM extends IhmcSLAM
          RigidBodyTransform transformer = new RigidBodyTransform();
          convertToPointCloudTransformer(values, transformer);
 
-         List<IhmcSurfaceElement> convertedElements = new ArrayList<>();
-         for (int i = 0; i < surfaceElements.size(); i++)
-         {
-            Vector3D convertedNormal = surfaceElements.get(i).getPlane().getNormalCopy();
-            Point3D convertedCenter = surfaceElements.get(i).getPlane().getPointCopy();
-
-            transformer.transform(convertedNormal);
-            transformer.transform(convertedCenter);
-            IhmcSurfaceElement convertedElement = new IhmcSurfaceElement(surfaceElements.get(i));
-            convertedElement.transform(transformer);
-            convertedElements.add(convertedElement);
-         }
-
          double cost = 0;
          int cnt = 0;
-         for (int i = 0; i < convertedElements.size(); i++)
+         for (int i = 0; i < surfaceElements.size(); i++)
          {
-            IhmcSurfaceElement convertedElement = convertedElements.get(i);
-            double distance = convertedElement.getDistance(POSITION_WEIGHT, ANGLE_WEIGHT);
+            IhmcSurfaceElement convertedElement = surfaceElements.get(i);
+            double distance = surfaceElements.get(i).getDistance(transformer, POSITION_WEIGHT, ANGLE_WEIGHT);
 
             double squareOfInput = 0.0;
             for (double value : values.toArray())
@@ -269,7 +256,7 @@ public class OctreeSLAM extends IhmcSLAM
          if (assumeFlatGround)
             snappingScore = 0.0;
          else
-            snappingScore = 1 - (double) cnt / convertedElements.size();
+            snappingScore = 1 - (double) cnt / surfaceElements.size();
          cost = cost + snappingScore * SNAPPING_PARALLEL_WEIGHT;
 
          return cost;
