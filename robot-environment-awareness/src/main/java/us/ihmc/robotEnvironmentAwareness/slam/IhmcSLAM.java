@@ -41,7 +41,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
-   public static boolean ENABLE_ORIENTATION_CORRECTION = true;
+   public static boolean ENABLE_ORIENTATION_CORRECTION = false;
 
    static
    {
