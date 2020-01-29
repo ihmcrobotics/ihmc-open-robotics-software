@@ -45,9 +45,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private boolean isSeeking = false;
 
    private final YoVariableExporter exporter;
-   
-   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableHandshakeParser parser, YoVariableLogPlaybackRobot robot,
-         SimulationConstructionSet scs)
+
+   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableHandshakeParser parser,
+                                     YoVariableLogPlaybackRobot robot, SimulationConstructionSet scs)
    {
       super();
 
@@ -56,10 +56,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.scs = scs;
       this.directory = directory;
 
-      
-      if(properties.getVariables().getCompressed())
+      if (properties.getVariables().getCompressed())
       {
-         yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);         
+         yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);
          exporter = new YoVariableExporter(scs, directory, properties, parser.getYoVariablesList());
       }
       else
@@ -67,7 +66,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          yoVariableLogCropper = null;
          exporter = null;
       }
-      
+
       setLayout(new GridLayout(1, 2));
 
       addGUIElements(directory, properties);
@@ -88,7 +87,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          if (!isSeeking && !scs.isSimulating())
          {
-            if(newValue > 0)
+            if (newValue > 0)
             {
                newValue -= 1;
             }
@@ -153,7 +152,6 @@ public class YoVariableLogVisualizerGUI extends JPanel
          }
       }
    }
-   
 
    private void exportGraphs(int start, int end)
    {
@@ -161,7 +159,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          return;
       }
-      if(exporter != null)
+      if (exporter != null)
       {
          final long startTimestamp = robot.getTimestamp(start);
          final long endTimestamp = robot.getTimestamp(end);
@@ -170,12 +168,12 @@ public class YoVariableLogVisualizerGUI extends JPanel
             @Override
             public void run()
             {
-               if(exporter != null)
+               if (exporter != null)
                {
                   FileDialog fd = new FileDialog((Frame) null, "Select .mat file to save to", FileDialog.SAVE);
                   fd.setFilenameFilter(new FilenameFilter()
                   {
-                     
+
                      @Override
                      public boolean accept(File dir, String name)
                      {
@@ -186,7 +184,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
                   fd.setFile("*.mat");
                   fd.setVisible(true);
                   String filename = fd.getFile();
-                  if(filename == null)
+                  if (filename == null)
                   {
                      System.out.println("No file selected, not exporting data.");
                   }
@@ -195,9 +193,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
                      File file = new File(fd.getDirectory(), filename);
                      try
                      {
-                        if(file.canWrite() || file.createNewFile())
+                        if (file.canWrite() || file.createNewFile())
                         {
-                           exporter.exportGraphs(file, startTimestamp,endTimestamp);
+                           exporter.exportGraphs(file, startTimestamp, endTimestamp);
                            return;
                         }
                      }
@@ -245,8 +243,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
       else
       {
          JOptionPane.showMessageDialog(null,
-               "Cannot crop this data file. Only compressed log files are supported. Use LogCompressor to compress this log file.", "Cannot crop",
-               JOptionPane.ERROR_MESSAGE);
+                                       "Cannot crop this data file. Only compressed log files are supported. Use LogCompressor to compress this log file.",
+                                       "Cannot crop",
+                                       JOptionPane.ERROR_MESSAGE);
       }
    }
 
@@ -299,7 +298,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          public void stateChanged(ChangeEvent e)
          {
             int sliderValue = slider.getValue();
-            
+
             final String val = String.valueOf(sliderValue);
             SwingUtilities.invokeLater(new Runnable()
             {
@@ -385,17 +384,17 @@ public class YoVariableLogVisualizerGUI extends JPanel
             crop(slider.getStart(), slider.getEnd());
          }
       });
-      
+
       final JButton exportData = new JButton("Export graphed variables");
       exportData.setToolTipText("Export variables that are graphed in the main window from the in point till the out point");
       exportData.addActionListener(new ActionListener()
       {
-         
+
          @Override
          public void actionPerformed(ActionEvent arg0)
          {
             exportGraphs(slider.getStart(), slider.getEnd());
-            
+
          }
 
       });
