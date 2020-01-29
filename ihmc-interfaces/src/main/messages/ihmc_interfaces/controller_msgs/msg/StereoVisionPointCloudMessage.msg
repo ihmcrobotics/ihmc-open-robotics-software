@@ -15,5 +15,5 @@ float64 sensor_pose_confidence 1.0
 # The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
 # The confidence of the point cloud represents the quality of the collected point cloud data.
 float64 point_cloud_confidence 1.0
-float32[<=600000] point_cloud
-int32[<=200000] colors
+float32[<=1200000] point_cloud
+int32[<=400000] colors

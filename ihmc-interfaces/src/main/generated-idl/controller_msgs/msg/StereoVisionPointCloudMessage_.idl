@@ -37,8 +37,8 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double point_cloud_confidence;
-        sequence<float, 600000> point_cloud;
-        sequence<long, 200000> colors;
+        sequence<float, 1200000> point_cloud;
+        sequence<long, 400000> colors;
       };
     };
   };

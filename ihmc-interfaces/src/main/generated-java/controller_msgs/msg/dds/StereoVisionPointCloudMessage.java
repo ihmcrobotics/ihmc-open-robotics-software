@@ -37,9 +37,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    {
       sensor_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       sensor_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      point_cloud_ = new us.ihmc.idl.IDLSequence.Float (600000, "type_5");
+      point_cloud_ = new us.ihmc.idl.IDLSequence.Float (1200000, "type_5");
 
-      colors_ = new us.ihmc.idl.IDLSequence.Integer (200000, "type_2");
+      colors_ = new us.ihmc.idl.IDLSequence.Integer (400000, "type_2");
 
    }
 

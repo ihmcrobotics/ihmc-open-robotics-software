@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -39,7 +40,7 @@ public class StereoVisionPointCloudPublisher
 
    private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
-   private static final int MAX_NUMBER_OF_POINTS = 1000;
+   private static final int MAX_NUMBER_OF_POINTS = 400000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -92,14 +93,18 @@ public class StereoVisionPointCloudPublisher
       String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageType);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
          pointcloudRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = null;
          pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
@@ -242,7 +247,9 @@ public class StereoVisionPointCloudPublisher
             return;
       }
 
-      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
+      Predicate<Point3D> maxDistanceFitler = scanPoint -> scanPoint.distanceSquared(sensorPose.getPosition()) < maxDistanceSquared;
+
+      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(maxDistanceFitler);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
 
@@ -253,6 +260,8 @@ public class StereoVisionPointCloudPublisher
       else
          pointcloudRealtimePublisher.publish(message);
    }
+
+   private final double maxDistanceSquared = 2.5 * 2.5;
 
    public void enableFilter(boolean enable)
    {

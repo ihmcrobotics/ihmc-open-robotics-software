@@ -1,15 +1,14 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.util.Random;
+import java.util.function.Predicate;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class ColorPointCloudData
 {
@@ -73,25 +72,30 @@ public class ColorPointCloudData
 
    public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
    {
-      long timestamp = this.timestamp;
-      float[] pointCloudBuffer = new float[3 * numberOfPoints];
-      int[] colorsInteger;
+      return toStereoVisionPointCloudMessage(p -> true);
+   }
 
-      if (colors.length == numberOfPoints)
-         colorsInteger = colors;
-      else
-         colorsInteger = Arrays.copyOf(colors, numberOfPoints);
+   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(Predicate<Point3D> filter)
+   {
+      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
+      message.setTimestamp(timestamp);
+      message.setSensorPoseConfidence(1.0);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D scanPoint = pointCloud[i];
+         int color = colors[i];
 
-         pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
-         pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
-         pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
+         if (filter.test(scanPoint))
+         {
+            message.getPointCloud().add(scanPoint.getX32());
+            message.getPointCloud().add(scanPoint.getY32());
+            message.getPointCloud().add(scanPoint.getZ32());
+            message.getColors().add(color);
+         }
       }
 
-      return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
+      return message;
    }
 
    public void applyTransform(RigidBodyTransform transform)
