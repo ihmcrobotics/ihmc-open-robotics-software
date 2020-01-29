@@ -120,7 +120,7 @@ public class KSTStreamingState implements State
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
       defaultLinearRateLimit.set(1.5);
-      defaultAngularRateLimit.set(10.0);
+      defaultAngularRateLimit.set(5.0);
       outputJointVelocityScale.set(0.75);
 
       streamingBlendingDuration.set(defautlInitialBlendDuration);
@@ -176,6 +176,7 @@ public class KSTStreamingState implements State
       FramePose3D pelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
       pelvisPose.changeFrame(worldFrame);
       defaultPelvisMessage.getDesiredPositionInWorld().set(pelvisPose.getPosition());
+      defaultPelvisMessage.getDesiredPositionInWorld().subZ(0.10);
       defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(pelvisPose.getYaw());
       FrameQuaternion chestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
       chestOrientation.changeFrame(worldFrame);
