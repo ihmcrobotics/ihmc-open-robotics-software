@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RateLimitedYoFrameOrientationTest
 {
-   private static final double EPSILON = 1.0e-11;
+   private static final double EPSILON = 2.0e-11;
 
    @AfterEach
    public void tearDown()
