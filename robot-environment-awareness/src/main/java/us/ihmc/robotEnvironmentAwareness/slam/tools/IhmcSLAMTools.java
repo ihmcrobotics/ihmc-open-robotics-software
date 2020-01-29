@@ -28,6 +28,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationPa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
+import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 
 public class IhmcSLAMTools
@@ -241,6 +242,8 @@ public class IhmcSLAMTools
       if (firstNode != null)
       {
          Point3D firstPoint = new Point3D(firstNode.getX(), firstNode.getY(), firstNode.getZ());
+         if(RandomICPSLAM.DEBUG)
+            closestOctreePoints.add(firstPoint);
          return firstPoint.distance(point);
       }
 
@@ -259,7 +262,6 @@ public class IhmcSLAMTools
 
                Point3D candidatePoint = new Point3D(searchNode.getX(), searchNode.getY(), searchNode.getZ());
 
-               //double distance = candidatePoint.distanceSquared(point);
                double distance = candidatePoint.distance(point);
                if (distance < minDistance)
                {
@@ -277,8 +279,8 @@ public class IhmcSLAMTools
             break;
          }
       }
-
-      closestOctreePoints.add(closestPoint);
+      if(RandomICPSLAM.DEBUG)
+         closestOctreePoints.add(closestPoint);
 
       return minDistance;
    }
@@ -351,16 +353,16 @@ public class IhmcSLAMTools
 
       Point3D[] octreePointMapToSensorPose = createConvertedPointsToSensorPose(frame.getInitialSensorPoseToWorld(), octreePointMapToWorld);
       double[][] vertex = new double[octreePointMapToSensorPose.length][2];
-      
+
       for (int i = 0; i < octreePointMapToSensorPose.length; i++)
       {
          vertex[i][0] = octreePointMapToSensorPose[i].getX();
          vertex[i][1] = octreePointMapToSensorPose[i].getY();
       }
-      double fixedWindowMargin = -0.05;
+      double fixedWindowMargin = -0.1;
       Vertex2DSupplier supplier = Vertex2DSupplier.asVertex2DSupplier(vertex);
       ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
-      
+
       Point3DReadOnly[] newPointCloudToSensorPose = frame.getOriginalPointCloudToSensorPose();
       boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
       int numberOfPointsInWindow = 0;

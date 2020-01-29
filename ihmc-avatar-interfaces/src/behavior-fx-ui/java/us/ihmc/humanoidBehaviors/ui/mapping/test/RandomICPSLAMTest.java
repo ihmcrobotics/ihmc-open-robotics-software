@@ -172,7 +172,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
-   public void testSourcePointsInKinematicOverlappedArea()
+   public void testSourcePoints()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
@@ -258,7 +258,7 @@ public class RandomICPSLAMTest
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  true);
 
-      double octreeResolution = 0.01;
+      double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
 
       slam.addFirstFrame(messageOne);
@@ -326,8 +326,8 @@ public class RandomICPSLAMTest
    @Test
    public void testRandomICPSLAMEndToEnd()
    {
-      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
-      String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
+      String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 

@@ -4,7 +4,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,7 +23,7 @@ public class RandomICPSLAM extends IhmcSLAM
 {
    public static final boolean DEBUG = true;
 
-   private static final int NUMBER_OF_SOURCE_POINTS = 1000;
+   private static final int NUMBER_OF_SOURCE_POINTS = 300;
 
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
@@ -169,21 +168,19 @@ public class RandomICPSLAM extends IhmcSLAM
          }
          else
          {
-//            int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
-//            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
-//            {
-//               if (DEBUG)
-//                  System.out.println("close enough. many inliers.");
-//               return new RigidBodyTransform();
-//            }
+            int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
+            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
+            {
+               if (DEBUG)
+                  System.out.println("close enough. many inliers.");
+               return new RigidBodyTransform();
+            }
 
             GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
-
             int maxIterations = 300;
             double convergenceThreshold = 1 * 10E-5;
             double optimizerStepSize = -1.0;
             double optimizerPerturbationSize = 0.00001;
-
             optimizer.setInputLowerLimit(LOWER_LIMIT);
             optimizer.setInputUpperLimit(UPPER_LIMIT);
             optimizer.setMaximumIterations(maxIterations);
@@ -191,16 +188,13 @@ public class RandomICPSLAM extends IhmcSLAM
             optimizer.setStepSize(optimizerStepSize);
             optimizer.setPerturbationSize(optimizerPerturbationSize);
             optimizer.setReducingStepSizeRatio(2);
-
             int run = optimizer.run();
             if (DEBUG)
                System.out.println("optimization result # [" + run + "], #" + optimizer.getComputationTime() + " sec # " + "Init Q: " + initialQuery
                      + ", Opt Q: " + optimizer.getOptimalQuery());
             TDoubleArrayList optimalInput = optimizer.getOptimalInput();
-
             RigidBodyTransform transformer = new RigidBodyTransform();
             costFunction.convertToSensorPoseMultiplier(optimalInput, transformer);
-
             if (DEBUG)
             {
                RigidBodyTransform optimizedSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
@@ -209,6 +203,7 @@ public class RandomICPSLAM extends IhmcSLAM
             }
 
             return transformer;
+
          }
       }
    }
@@ -253,19 +248,25 @@ public class RandomICPSLAM extends IhmcSLAM
             }
 
             totalDistance = totalDistance + distance;
-
-            if (distance > octree.getResolution())
-            {
-               totalOutliersDistance = totalOutliersDistance + distance;
-               numberOfOutliers++;
-            }
-            else
+            if (distance < 1.0 * octree.getResolution())
             {
                numberOfInliers++;
             }
+            else
+            {
+               numberOfOutliers++;
+            }
          }
 
-         return totalDistance / sourcePointsToSensor.length;
+         double squareOfInput = 0.0;
+         for (double value : values.toArray())
+         {
+            squareOfInput = squareOfInput + value * value;
+         }
+
+         double cost = 1 * totalDistance / sourcePointsToSensor.length + 0 * ((double) numberOfOutliers / sourcePointsToSensor.length) + 0 * squareOfInput;
+
+         return cost;
       }
    }
 }
