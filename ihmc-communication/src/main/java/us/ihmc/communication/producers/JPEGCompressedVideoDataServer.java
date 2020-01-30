@@ -38,9 +38,9 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
          ByteBuffer buffer;
          synchronized (hackyLockBecauseJPEGEncoderIsNotThreadsafe)
          {
-            buffer = encoder.encode(picture, 75);
+            buffer = encoder.encode(picture, 25);
          }
-         byte[] data =  new byte[buffer.remaining()];
+         byte[] data = new byte[buffer.remaining()];
          buffer.get(data);
          handler.onFrame(videoSource, data, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
       }
