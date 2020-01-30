@@ -15,10 +15,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -28,6 +24,9 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -35,14 +34,15 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.FootstepPlanForUI;
 
 public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
+
+   private final LookAndStepBehaviorParameters parameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
@@ -60,6 +60,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       rea = helper.getOrCreateREAInterface();
       robot = helper.getOrCreateRobotInterface();
       takeStep = helper.createUINotification(TakeStep);
+      helper.createUICallback(Parameters, parameters::setAllFromStrings);
       mainThread = helper.createPausablePeriodicThread(getClass(), 0.1, this::lookAndStep);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
    }
@@ -83,8 +84,8 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       FramePose3D targetFootstepPose = new FramePose3D();
       targetFootstepPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      targetFootstepPose.changeFrame(latestHumanoidRobotState.getFootFrame(RobotSide.LEFT));
-      targetFootstepPose.prependTranslation(0.2, 0.0, 0.0);
+      targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
+      targetFootstepPose.prependTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
       targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       RobotSide initialStanceFootSide = null;
@@ -96,14 +97,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
       rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double idealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth();
+      double idealFootstepWidth = parameters.get(LookAndStepBehaviorParameters.stepWidth);// footstepPlannerParameters.getIdealFootstepWidth();
 
       if (leftSolePose.getPosition().distance(targetFootstepPose.getPosition()) <= rightSolePose.getPosition().distance(targetFootstepPose.getPosition()))
       {
          initialStanceFootSide = RobotSide.LEFT;
          initialStanceFootPose = leftSolePose;
 
-         targetFootstepPose.changeFrame(latestHumanoidRobotState.getFootFrame(RobotSide.LEFT));
+         targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
          targetFootstepPose.prependTranslation(0.0, -idealFootstepWidth, 0.0);
          targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
@@ -112,7 +113,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootSide = RobotSide.RIGHT;
          initialStanceFootPose = rightSolePose;
 
-         targetFootstepPose.changeFrame(latestHumanoidRobotState.getFootFrame(RobotSide.LEFT));
+         targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
          targetFootstepPose.prependTranslation(0.0, idealFootstepWidth, 0.0);
          targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
@@ -123,6 +124,9 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                    initialStanceFootSide.getOppositeSide());
 
       PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
+
+      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
+
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapper.setPlanarRegions(latestPlanarRegionList);
       FootstepNodeSnapData footstepNodeSnapData = snapper.snapFootstepNode(targetFootstepNode);
@@ -130,13 +134,17 @@ public class LookAndStepBehavior implements BehaviorInterface
       FramePose3D framePose3D = new FramePose3D();
       framePose3D.set(footstepNodeSnapData.getSnapTransform());
 
+      FootstepPlan footstepPlan = new FootstepPlan();
+
       SimpleFootstep simpleFootstep = new SimpleFootstep();
-//      simpleFootstep.setFoothold(footstepNodeSnapData.getCroppedFoothold());
-//      simpleFootstep.getSoleFramePose(framePose3D);
+      simpleFootstep.setFoothold(footstepNodeSnapData.getCroppedFoothold());
+      simpleFootstep.getSoleFramePose(framePose3D);
+      simpleFootstep.setRobotSide(initialStanceFootSide.getOppositeSide());
+      footstepPlan.addFootstep(simpleFootstep);
+
+      simpleFootstep = new SimpleFootstep();
       simpleFootstep.setSoleFramePose(targetFootstepPose);
       simpleFootstep.setRobotSide(initialStanceFootSide.getOppositeSide());
-
-      FootstepPlan footstepPlan = new FootstepPlan();
       footstepPlan.addFootstep(simpleFootstep);
 
 
@@ -169,13 +177,15 @@ public class LookAndStepBehavior implements BehaviorInterface
    public static class LookAndStepBehaviorAPI
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
-      private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
+      private static final Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
+      private static final CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
-      public static final MessagerAPIFactory.Topic<Object> TakeStep = topic("TakeStep");
-      public static final MessagerAPIFactory.Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
+      public static final Topic<Object> TakeStep = topic("TakeStep");
+      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
+      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
+      public static final Topic<List<String>> Parameters = topic("Parameters");
 
-      private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
+      private static final <T> Topic<T> topic(String name)
       {
          return RootCategory.child(LookAndStepTheme).topic(apiFactory.createTypedTopicTheme(name));
       }
