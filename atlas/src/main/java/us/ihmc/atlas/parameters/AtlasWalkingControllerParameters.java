@@ -146,7 +146,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean allowAutomaticManipulationAbort()
    {
-      return true;
+      return false;
    }
 
    @Override
