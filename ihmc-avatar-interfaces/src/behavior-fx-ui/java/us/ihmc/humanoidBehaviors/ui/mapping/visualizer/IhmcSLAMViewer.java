@@ -77,7 +77,12 @@ public class IhmcSLAMViewer
 
    public void addOctree(NormalOcTree octree, Color color, double octreeResolution)
    {
-      normalOctreeGraphic.addMesh(octree, octreeResolution, color);
+      normalOctreeGraphic.addMesh(octree, octreeResolution, color, false);
+   }
+   
+   public void addOctree(NormalOcTree octree, Color color, double octreeResolution, boolean dot)
+   {
+      normalOctreeGraphic.addMesh(octree, octreeResolution, color, dot);
    }
 
    public void addOctree(List<Plane3D> octreePlanes, Color color, double octreeResolution)

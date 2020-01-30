@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -32,6 +33,7 @@ public class NormalOctreeGraphic extends Group
    private List<Node> lastNodes = null;
    private volatile List<Node> updatePointCloudMeshViews;
 
+   private static final float SCAN_POINT_SIZE = 0.005f;
    private static final int palleteSizeForMeshBuilder = 2048;
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
 
@@ -141,7 +143,7 @@ public class NormalOctreeGraphic extends Group
       }
    }
 
-   public void addMesh(NormalOcTree octree, double octreeResolution, Color colorToViz)
+   public void addMesh(NormalOcTree octree, double octreeResolution, Color colorToViz, boolean vizWithDot)
    {
       NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
       UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
@@ -186,8 +188,15 @@ public class NormalOctreeGraphic extends Group
             normals[j] = new Vector3D32(planeNormal);
          }
 
-         MeshDataHolder octreePlaneMeshDataHolder = new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
-         meshBuilder.addMesh(octreePlaneMeshDataHolder, colorToViz);
+         if(vizWithDot)
+         {
+            meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), pointOnPlane, colorToViz);
+         }
+         else
+         {
+            MeshDataHolder octreePlaneMeshDataHolder = new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
+            meshBuilder.addMesh(octreePlaneMeshDataHolder, colorToViz);
+         }
       }
    }
 
@@ -196,7 +205,7 @@ public class NormalOctreeGraphic extends Group
       initialize();
       for (int i = 0; i < octreeMap.size(); i++)
       {
-         addMesh(octreeMap.get(i), octreeResolution, Color.BEIGE);
+         addMesh(octreeMap.get(i), octreeResolution, Color.BEIGE, false);
       }
 
       generateMeshes();
