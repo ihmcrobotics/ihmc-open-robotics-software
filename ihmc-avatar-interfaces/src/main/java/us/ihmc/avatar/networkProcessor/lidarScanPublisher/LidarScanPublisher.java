@@ -122,7 +122,7 @@ public class LidarScanPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 25L, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
