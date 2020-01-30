@@ -113,7 +113,7 @@ public class StereoVisionPointCloudPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1000L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1500L, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
