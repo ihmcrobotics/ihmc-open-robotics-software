@@ -60,7 +60,7 @@ public class PointCloudGraphic extends Group
    public void generateMeshes()
    {
       int numberOfPoints = sensorPoseTrajectory.size();
-      if (numberOfPoints != 0)
+      if (numberOfPoints > 1)
       {
          Point3D[] sensorPoseTrajectoryPoints = new Point3D[numberOfPoints];
          for (int i = 0; i < numberOfPoints; i++)
