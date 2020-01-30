@@ -3,16 +3,15 @@ package us.ihmc.robotEnvironmentAwareness.slam.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -30,6 +29,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParamet
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class IhmcSLAMTools
 {
@@ -242,7 +243,7 @@ public class IhmcSLAMTools
       if (firstNode != null)
       {
          Point3D firstPoint = new Point3D(firstNode.getX(), firstNode.getY(), firstNode.getZ());
-         if(RandomICPSLAM.DEBUG)
+         if (RandomICPSLAM.DEBUG)
             closestOctreePoints.add(firstPoint);
          return firstPoint.distance(point);
       }
@@ -279,7 +280,7 @@ public class IhmcSLAMTools
             break;
          }
       }
-      if(RandomICPSLAM.DEBUG)
+      if (RandomICPSLAM.DEBUG)
          closestOctreePoints.add(closestPoint);
 
       return minDistance;
@@ -502,5 +503,49 @@ public class IhmcSLAMTools
          }
       }
       return numberOfInliers;
+   }
+
+   public static List<ConvexPolygon2D> createConvexPolygon2DToSensorPose(RigidBodyTransformReadOnly sensorPose, PlanarRegion planarRegion)
+   {
+      RigidBodyTransform inverseTransformer = new RigidBodyTransform(sensorPose);
+      inverseTransformer.invert();
+
+      Point3D vertexToWorld = new Point3D();
+      Point3D convertedVertexToSensor = new Point3D();
+
+      List<ConvexPolygon2D> convertedConvexPolygonsToSensor = new ArrayList<>();
+      for (int j = 0; j < planarRegion.getNumberOfConvexPolygons(); j++)
+      {
+         ConvexPolygon2D convexPolygonToSensor = new ConvexPolygon2D();
+         ConvexPolygon2D convexPolygonToWorld = planarRegion.getConvexPolygon(j);
+         for (int k = 0; k < convexPolygonToWorld.getNumberOfVertices(); k++)
+         {
+            Point2DReadOnly vertex = convexPolygonToWorld.getVertex(k);
+            vertexToWorld.set(vertex.getX(), vertex.getY(), 0.0);
+            planarRegion.getTransformToWorld().transform(vertexToWorld);
+            inverseTransformer.transform(vertexToWorld, convertedVertexToSensor);
+
+            convexPolygonToSensor.addVertex(convertedVertexToSensor.getX(), convertedVertexToSensor.getY());
+         }
+         convexPolygonToSensor.update();
+
+         convertedConvexPolygonsToSensor.add(convexPolygonToSensor);
+      }
+
+      return convertedConvexPolygonsToSensor;
+   }
+
+   public static double computeOverlappedArea(List<ConvexPolygon2D> polygons, List<ConvexPolygon2D> otherPolygons)
+   {
+      double area = 0;
+      ConvexPolygonTools calculator = new ConvexPolygonTools();
+      for (int i = 0; i < polygons.size(); i++)
+      {
+         for (int j = 0; j < otherPolygons.size(); j++)
+         {
+            area += calculator.computeIntersectionAreaOfPolygons(polygons.get(i), otherPolygons.get(j));
+         }
+      }
+      return area;
    }
 }
