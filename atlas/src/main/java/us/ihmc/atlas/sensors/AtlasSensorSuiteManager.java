@@ -39,7 +39,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
    private final AtlasPointCloudSensorManager pointCloudSensorManager;
 
-   private static final boolean ENABLE_LIDAR_PUBLISHER = false;
+   private static final boolean ENABLE_LIDAR_PUBLISHER = true;
    private static final boolean ENABLE_STEREO_PUBLISHER = true;
    private static final boolean ENABLE_DEPTH_PUBLISHER = false;
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
