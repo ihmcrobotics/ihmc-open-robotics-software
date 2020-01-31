@@ -390,6 +390,8 @@ public class LogVisualizer
       }
 
       LogVisualizer visualizer = new LogVisualizer(bufferSize);
+      if (visualizer.scs == null)
+         return;
       if (varGroups != null && !varGroups.isEmpty())
          varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
 
