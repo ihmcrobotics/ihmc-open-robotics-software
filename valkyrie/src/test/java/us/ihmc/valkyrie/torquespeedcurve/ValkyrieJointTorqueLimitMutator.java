@@ -18,13 +18,23 @@ public class ValkyrieJointTorqueLimitMutator implements SDFDescriptionMutator
 {
    private final Map<String, Double> customJointTorqueLimitMap = new HashMap<>();
 
-   public ValkyrieJointTorqueLimitMutator(ValkyrieJointMap jointMap)
+   public ValkyrieJointTorqueLimitMutator(ValkyrieJointMap jointMap, String jointName, double torqueLimit)
    {
-      // Example how to setup custom joint torque limit:
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         customJointTorqueLimitMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 350.0);
-      }
+	   // Example how to setup custom joint torque limit:
+	   for (RobotSide robotSide : RobotSide.values)
+	   {
+		   String fullJointName = robotSide.getCamelCaseNameForStartOfExpression() + jointName; 
+			   System.out.printf("Adding mutator torque limit of %s to %f\n", fullJointName, torqueLimit);
+    		   customJointTorqueLimitMap.put(fullJointName, torqueLimit);
+	   }
+   }
+
+   public ValkyrieJointTorqueLimitMutator(ValkyrieJointMap jointMap) {
+	   // Example how to setup custom joint torque limit:
+	   for (RobotSide robotSide : RobotSide.values)
+	   {
+		   customJointTorqueLimitMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 350.0);
+	   }
    }
 
    @Override
