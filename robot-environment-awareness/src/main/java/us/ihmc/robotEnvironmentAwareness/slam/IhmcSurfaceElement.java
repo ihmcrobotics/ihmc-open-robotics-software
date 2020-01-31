@@ -110,7 +110,10 @@ public class IhmcSurfaceElement
       
       Plane3D planarRegionPlane = mergeablePlanarRegion.getPlane();
       double positionDistance = planarRegionPlane.distance(newCenter);
-      double angleDistance = Math.abs(Math.acos(Math.abs(mergeablePlanarRegion.getNormal().dot(newNormal))));
+      double dotValue = Math.abs(mergeablePlanarRegion.getNormal().dot(newNormal));
+      if(dotValue > 1.0)
+         dotValue = 1.0;
+      double angleDistance = Math.abs(Math.acos(dotValue));
 
       return positionWeight * positionDistance + angleWeight * angleDistance;
    }
