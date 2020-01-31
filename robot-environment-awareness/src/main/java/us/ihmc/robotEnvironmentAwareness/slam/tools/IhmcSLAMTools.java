@@ -242,7 +242,7 @@ public class IhmcSLAMTools
       NormalOcTreeNode firstNode = octree.search(occupiedKey);
       if (firstNode != null)
       {
-         Point3D firstPoint = new Point3D(firstNode.getX(), firstNode.getY(), firstNode.getZ());
+         Point3D firstPoint = new Point3D(firstNode.getHitLocationCopy());
          if (RandomICPSLAM.DEBUG)
             closestOctreePoints.add(firstPoint);
          return firstPoint.distance(point);
@@ -260,9 +260,8 @@ public class IhmcSLAMTools
             {
                if (minDistance < 0.0)
                   minDistance = Double.MAX_VALUE;
-
-               Point3D candidatePoint = new Point3D(searchNode.getX(), searchNode.getY(), searchNode.getZ());
-
+               
+               Point3D candidatePoint = new Point3D(searchNode.getHitLocationCopy());
                double distance = candidatePoint.distance(point);
                if (distance < minDistance)
                {

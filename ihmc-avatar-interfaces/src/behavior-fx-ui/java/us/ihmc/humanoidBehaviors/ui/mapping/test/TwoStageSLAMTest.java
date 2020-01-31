@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
@@ -24,10 +25,9 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
+import us.ihmc.robotEnvironmentAwareness.slam.FristStageSLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSurfaceElement;
-import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.TwoStageSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SimulatedStereoVisionPointCloudMessageLibrary;
@@ -64,8 +64,16 @@ public class TwoStageSLAMTest
       sensorPoseOne.setTranslation(0.0, 0.0, fixedHeight);
       sensorPoseOne.appendPitchRotation(sensorPitchAngle);
       sensorPoseOne.appendYawRotation(Math.toRadians(-90.0));
-      messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne, new RigidBodyTransform(), stairHeight, stairWidth,
-                                                                                            stairLength, stairLength, true);
+
+      if (useRealData)
+      {
+         messageOne = messages.get(47);
+      }
+      else
+      {
+         messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne, new RigidBodyTransform(), stairHeight, stairWidth,
+                                                                                               stairLength, stairLength, true);
+      }
 
       double translationX = movingForward / 2;
       double translationY = 0.0;
@@ -85,20 +93,19 @@ public class TwoStageSLAMTest
       preMultiplier.multiply(randomTransformer);
       sensorPoseTwo.multiply(randomTransformer);
 
-      driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier, stairHeight, stairWidth,
-                                                                                                   stairLength - movingForward, stairLength + movingForward,
-                                                                                                   true);
-
       if (useRealData)
       {
-         frameOne = new IhmcSLAMFrame(messages.get(47));
-         frameTwo = new IhmcSLAMFrame(frameOne, messages.get(48));
+         driftedMessageTwo = messages.get(48);
       }
       else
       {
-         frameOne = new IhmcSLAMFrame(messageOne);
-         frameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
+         driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier, stairHeight, stairWidth,
+                                                                                                      stairLength - movingForward, stairLength + movingForward,
+                                                                                                      true);
       }
+
+      frameOne = new IhmcSLAMFrame(messageOne);
+      frameTwo = new IhmcSLAMFrame(frameOne, driftedMessageTwo);
    }
 
    @Test
@@ -183,7 +190,7 @@ public class TwoStageSLAMTest
       }
 
       // Define optimization cost function.
-      FistStageSLAMFrameOptimizerCostFunction costFunction = new FistStageSLAMFrameOptimizerCostFunction(sensorPose, surfaceElements);
+      FristStageSLAMFrameOptimizerCostFunction costFunction = new FristStageSLAMFrameOptimizerCostFunction(sensorPose, surfaceElements);
 
       TDoubleArrayList orientingInitialInput = new TDoubleArrayList();
       TDoubleArrayList orientingLowerLimit = new TDoubleArrayList();
@@ -223,8 +230,8 @@ public class TwoStageSLAMTest
 
       slamViewer.addPointCloud(frameTwo.getPointCloud(), Color.GREEN);
 
-      //      slamViewer.addPlanarRegions(planarRegionsMap);
-      //      slamViewer.addPlanarRegions(planarRegionsFrame);
+      slamViewer.addPlanarRegions(planarRegionsMap);
+      slamViewer.addPlanarRegions(planarRegionsFrame);
 
       slamViewer.start("testFirstStage");
 
@@ -309,24 +316,84 @@ public class TwoStageSLAMTest
    }
 
    @Test
-   public void testOptimizationForSimulatedPointCloud()
+   public void testOptimization()
    {
       double octreeResolution = 0.02;
       TwoStageSLAM slam = new TwoStageSLAM(octreeResolution);
 
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
       slam.addFirstFrame(messageOne);
+      slamViewer.addOctree(slam.getOctree(), Color.YELLOW, octreeResolution, true);
+
       slam.addFrame(driftedMessageTwo);
 
-      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
       slamViewer.addPointCloud(slam.getSLAMFrame(0).getOriginalPointCloud(), Color.BLUE);
+      slamViewer.addSensorPose(slam.getSLAMFrame(0).getOriginalSensorPose(), Color.BLUE);
       slamViewer.addPointCloud(slam.getSLAMFrame(1).getOriginalPointCloud(), Color.BLACK);
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getOriginalSensorPose(), Color.BLACK);
 
       slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
       slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
-      slamViewer.start("testOptimizationForSimulatedPointCloud");
+      Point3D[] closestPoints = new Point3D[IhmcSLAMTools.closestOctreePoints.size()];
+      System.out.println("closestPoints " + closestPoints.length);
+      for (int i = 0; i < closestPoints.length; i++)
+         closestPoints[i] = new Point3D(IhmcSLAMTools.closestOctreePoints.get(i));
+      slamViewer.addPointCloud(closestPoints, Color.RED);
 
+      Point3D[] ruler = new Point3D[50];
+      for (int i = 0; i < 50; i++)
+         ruler[i] = new Point3D(0.15, 0.0, (double) i * octreeResolution);
+      slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
+
+      slamViewer.start("testOptimization");
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testEndToEnd()
+   {
+      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
+      String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      double octreeResolution = 0.02;
+      TwoStageSLAM slam = new TwoStageSLAM(octreeResolution);
+      slam.addFirstFrame(messages.get(0));
+      for (int i = 1; i < messages.size(); i++)
+      {
+         System.out.println();
+         System.out.println(" ## add frame " + i);
+         slam.addFrame(messages.get(i));
+      }
+      System.out.println(slam.getPointCloudMap().size());
+
+      slam.updatePlanarRegionsMap();
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+      {
+         slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
+         slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
+      }
+      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+
+      slamViewer.start("testEndToEnd slamViewer");
+
+      IhmcSLAMViewer originalViewer = new IhmcSLAMViewer();
+
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+      {
+         originalViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.GREEN);
+         originalViewer.addSensorPose(slam.getOriginalSensorPoses().get(i), Color.GREEN);
+      }
+
+      originalViewer.start("testEndToEnd originalViewer");
       ThreadTools.sleepForever();
    }
 
@@ -356,70 +423,5 @@ public class TwoStageSLAMTest
       System.out.println("angleAxis " + angleAxis + " " + Math.toDegrees(randomAngle));
 
       return randomTransform;
-   }
-
-   class FistStageSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
-   {
-      final List<IhmcSurfaceElement> surfaceElements;
-      static final double POSITION_WEIGHT = 5.0;
-      static final double ANGLE_WEIGHT = 5.0;
-      static final double SNAPPING_PARALLEL_WEIGHT = 5.0;
-
-      static final double LEAST_SQUARE_WEIGHT = 0.1;
-
-      FistStageSLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose, List<IhmcSurfaceElement> surfaceElements)
-      {
-         super(transformWorldToSensorPose);
-         this.surfaceElements = surfaceElements;
-      }
-
-      @Override
-      public double getQuery(TDoubleArrayList values)
-      {
-         /**
-          * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
-          */
-         RigidBodyTransform transformer = new RigidBodyTransform();
-         convertToPointCloudTransformer(values, transformer);
-
-         double cost = 0;
-         for (int i = 0; i < surfaceElements.size(); i++)
-         {
-            double distance = surfaceElements.get(i).getDistance(transformer, POSITION_WEIGHT, ANGLE_WEIGHT);
-
-            double squareOfInput = 0.0;
-            for (double value : values.toArray())
-            {
-               squareOfInput = squareOfInput + value * value;
-            }
-
-            double distanceCost = distance + LEAST_SQUARE_WEIGHT * squareOfInput;
-            {
-               cost = cost + distanceCost;
-            }
-         }
-
-         return cost;
-      }
-
-      /**
-       * newSensorPose = originalSensorPose * transformToPack;
-       */
-      @Override
-      public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
-      {
-         transformToPack.setRotationYawPitchRoll(input.get(0) / ANGLE_SCALER, input.get(1) / ANGLE_SCALER, input.get(2) / ANGLE_SCALER);
-      }
-
-      @Override
-      public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
-      {
-         RigidBodyTransform preMultiplier = new RigidBodyTransform();
-         convertToSensorPoseMultiplier(input, preMultiplier);
-
-         transformToPack.set(transformWorldToSensorPose);
-         transformToPack.multiply(preMultiplier);
-         transformToPack.multiplyInvertOther(transformWorldToSensorPose);
-      }
    }
 }
