@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.yaml.snakeyaml.Yaml;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
@@ -94,12 +96,26 @@ public class TorqueSpeedTestRunner {
 		public FootstepDataListMessage getFootsteps() {
 		    FootstepDataListMessage footsteps = null;
 			if (footstepsFile != null) {
-				
-				try {
-					FileInputStream reader = new FileInputStream(footstepsFile);
-	
+
+				try (FileInputStream reader = new FileInputStream(footstepsFile)) {
 					ObjectMapper objectMapper = new ObjectMapper();
-					JsonNode jsonNode = objectMapper.readTree(reader);
+					JsonNode jsonNode = null;
+
+					if (footstepsFile.endsWith(".yaml")) {
+						Yaml yaml = new Yaml();
+						@SuppressWarnings("unchecked")
+						Map<String, Object> map = (Map<String, Object>) yaml.load(reader);
+						System.out.print(yaml.toString());
+						jsonNode = objectMapper.valueToTree(map);
+
+					} else if (footstepsFile.endsWith(".json")) {
+						jsonNode = objectMapper.readTree(reader);
+						System.out.print(jsonNode.toString());
+
+					} else {
+						throw new IllegalArgumentException(String.format("Cannot determine the type of the footsteps file: %s\n", footstepsFile));
+					}
+
 					// By default the deserializer expects the class name as the root node
 					// with the value being the class contents. But it is simpler for us
 					// for the file content just to be the class content. Setting
