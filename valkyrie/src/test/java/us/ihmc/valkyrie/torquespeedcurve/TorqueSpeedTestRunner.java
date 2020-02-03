@@ -1,26 +1,41 @@
 package us.ihmc.valkyrie.torquespeedcurve;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -28,6 +43,8 @@ import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+
+import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class TorqueSpeedTestRunner {
 
@@ -37,7 +54,7 @@ public class TorqueSpeedTestRunner {
 	// fields not specified in the parameter file to null/0.
 	static class TestConfig {
 		enum TestType {
-			STAIRS, SQUARE_UP_STEP;
+			STAIRS, STEP, SQUARE_UP_STEP;
 		}
 
 		public double stepStartingDistance;
@@ -46,7 +63,11 @@ public class TorqueSpeedTestRunner {
 		public HashMap<String, Double> torqueLimits;
 		public boolean showGui;
 		public TestType testType;
-
+		public String footstepsFile;
+		
+		@Expose (serialize=false, deserialize=false)
+		private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
+		
 		// Default constructor
 		public TestConfig() {
 			stepStartingDistance = 1.0 * 100.0 / 2.54; // 1m in inches
@@ -55,15 +76,45 @@ public class TorqueSpeedTestRunner {
 			torqueLimits = new HashMap<String, Double>();
 			showGui = true;
 			testType = TestType.STAIRS;
+			footstepsFile = null;
 		}
 
 		public String toString() {
 			String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\n",
 					testType, stepStartingDistance, stepHeight, numberOfSteps, showGui);
+			if (footstepsFile != null) {
+				value += String.format("Footsteps Filename: %s\n", footstepsFile);
+			}
 			for (String joint : torqueLimits.keySet()) {
 				value += String.format("%s joint torque limit: %f\n", joint, torqueLimits.get(joint).doubleValue());
 			}
 			return value;
+		}
+		
+		public FootstepDataListMessage getFootsteps() {
+		    FootstepDataListMessage footsteps = null;
+			if (footstepsFile != null) {
+				
+				try {
+					FileInputStream reader = new FileInputStream(footstepsFile);
+	
+					ObjectMapper objectMapper = new ObjectMapper();
+					JsonNode jsonNode = objectMapper.readTree(reader);
+					// By default the deserializer expects the class name as the root node
+					// with the value being the class contents. But it is simpler for us
+					// for the file content just to be the class content. Setting
+					// AddTypeAsRootNode to false accomplishes this.
+					FootstepDataListMessageSerializer.setAddTypeAsRootNode(false);
+					footsteps = FootstepDataListMessageSerializer.deserialize(jsonNode.toString());
+				
+				} catch (FileNotFoundException e) {
+					System.err.println("Footstep file not found: " + footstepsFile);
+				} catch (IOException e) {
+					System.err.println("Exception encountered while deserializing footstep file");
+					e.printStackTrace();
+				}
+			}
+			return footsteps;
 		}
 	}
 
@@ -127,6 +178,10 @@ public class TorqueSpeedTestRunner {
 		}
 		System.out.println(config.toString());
 
+		// If the config file specifies footsteps, read them in here. Otherwise
+		// recordedFootsteps will be null.
+		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
+		
 		ValkyrieRobotModel robot = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
 
 		// Set walking parameters
@@ -179,6 +234,10 @@ public class TorqueSpeedTestRunner {
 				outputResultsDirectory = tester.testStepUpWithSquareUp(robot, config.stepStartingDistance, 
 						config.stepHeight, walkingParameters, outputPrefixDirectory);
 				break;
+			case STEP:
+				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance, 
+						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
+				break;				
 			}
 
 		} catch (SimulationExceededMaximumTimeException e) {
