@@ -196,18 +196,24 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			double stepLength = steppingParameters.getDefaultStepLength();
 			double stepWidth = steppingParameters.getInPlaceWidth();
 			double footLength = steppingParameters.getFootLength();
+			// Sole foot frame to front of foot =~ 0.12; sole foot frame to back of foot =~ 0.13
+			//double footFrameToFrontOfFoot = 0.12;
+			double fudgeFactor = -0.01; // Fudge factor to make sim robot look like real robot
+			double footFrameToFrontOfFoot = steppingParameters.getFootForwardOffset() + fudgeFactor; 
 
-			final double inchesToMeters = 2.54 / 100.0;
-			double stepStart = inchesToMeters * stepStartInches + footLength;
-			double stepHeight = inchesToMeters * stepHeightInches;
+			final double INCHESTOMETERS = 2.54 / 100.0;
+			double stepStart = INCHESTOMETERS * stepStartInches + footFrameToFrontOfFoot;
+			double stepHeight = INCHESTOMETERS * stepHeightInches;
 			StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
 			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-			scs.setCameraFix(1.0, 0.0, 0.8);
-			scs.setCameraPosition(1.0, -8.0, 1.0);
+			//scs.setCameraFix(1.0, 0.0, 0.8);
+			scs.setCameraFix(stepStart, 0.0, 1.0);
+			//scs.setCameraPosition(1.0, -8.0, 1.0);
+			scs.setCameraPosition(stepStart, -6.0, 1.0);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 			assertTrue(success);
