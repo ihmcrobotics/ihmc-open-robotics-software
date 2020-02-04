@@ -1,6 +1,5 @@
 package us.ihmc.valkyrie.torquespeedcurve;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static us.ihmc.avatar.testTools.EndToEndTestTools.computeWalkingDuration;
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -9,18 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -40,12 +35,9 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
@@ -63,7 +55,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -73,13 +64,13 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 
 	private SimulationTestingParameters simulationTestingParameters;
 	private DRCSimulationTestHelper drcSimulationTestHelper;
-	private ValkyrieRobotModel simRobotModel, realRobotModel, smallSimRobotModel, smallRealRobotModel;
-	private double smallModelSizeScale = 0.934; // => for size of 1m70 (5'7")
-	private double smallModelMassScale = 0.717; // => for total mass of 90kg (200lbs)
-	private String simDataFolder = "SimParams";
-	private String realDataFolder = "RealRobotParams";
-	private String smallSimDataFolder = "SmallSimParams";
-	private String smallRealDataFolder = "SmallRealRobotParams";
+//	private ValkyrieRobotModel simRobotModel, realRobotModel, smallSimRobotModel, smallRealRobotModel;
+//	private double smallModelSizeScale = 0.934; // => for size of 1m70 (5'7")
+//	private double smallModelMassScale = 0.717; // => for total mass of 90kg (200lbs)
+//	private String simDataFolder = "SimParams";
+//	private String realDataFolder = "RealRobotParams";
+//	private String smallSimDataFolder = "SmallSimParams";
+//	private String smallRealDataFolder = "SmallRealRobotParams";
 	private static boolean showGui = true; // Must be static because it is referenced in a static function
 
 	public void setGuiEnabled(boolean val) {
@@ -149,31 +140,39 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			scs.setCameraPosition(1.0, -8.0, 1.0);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-			assertTrue(success);
 
-			double xGoal = 2.0;
+			if (success) {
 
-			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-			double stepLength = steppingParameters.getDefaultStepLength();
-			double stepWidth = steppingParameters.getInPlaceWidth();
+				double xGoal = 2.0;
 
-			double footLength = steppingParameters.getFootLength();
-			HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
+				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+				double stepLength = steppingParameters.getDefaultStepLength();
+				double stepWidth = steppingParameters.getInPlaceWidth();
 
-			FootstepDataListMessage footsteps;
-			footsteps = stepTo(0.0, stepStart - 0.5 * footLength - 0.05, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, false, true);
-			setTimings(footsteps, walkingControllerParameters);
-			drcSimulationTestHelper.publishToController(footsteps);
-			assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25));
-			scs.setInPoint();
+				double footLength = steppingParameters.getFootLength();
+				HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
 
-			footsteps = stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, true, true);
-			setTimings(footsteps, walkingControllerParameters);
-			drcSimulationTestHelper.publishToController(footsteps);
-			assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25));
+				FootstepDataListMessage footsteps;
+				footsteps = stepTo(0.0, stepStart - 0.5 * footLength - 0.05, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, false, true);
+				setTimings(footsteps, walkingControllerParameters);
+				drcSimulationTestHelper.publishToController(footsteps);
+				assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25));
+				scs.setInPoint();
+
+				footsteps = stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, RobotSide.LEFT, heightMap, null, true, true);
+				setTimings(footsteps, walkingControllerParameters);
+				drcSimulationTestHelper.publishToController(footsteps);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(computeWalkingDuration(footsteps, walkingControllerParameters) + 0.25);
+			}
 
 			String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
 			String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
+
+			if (!success) {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
 			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 		}
 		finally
@@ -216,39 +215,46 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			scs.setCameraPosition(stepStart, -6.0, 1.0);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-			assertTrue(success);
-			scs.setInPoint();
-
-			FootstepDataListMessage footsteps = null;
 			
-			if (recordedFootsteps == null) {
+			if (success) {
+				scs.setInPoint();
 
-				double xGoal = stepStart + 0.5; // 0.5m on to the step
-				footsteps = new FootstepDataListMessage();
-	
-	
-				HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
-	
-				RobotSide firstSide = RobotSide.LEFT;
-				if (stepStart > stepLength) { // If more than a footstep away
-					stepTo(0.0, stepStart - 0.5 * footLength - 0.15, stepLength, stepWidth, firstSide, heightMap, footsteps, false, false);
-					firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
+				FootstepDataListMessage footsteps = null;
+
+				if (recordedFootsteps == null) {
+
+					double xGoal = stepStart + 0.5; // 0.5m on to the step
+					footsteps = new FootstepDataListMessage();
+
+
+					HeightMapWithNormals heightMap = stepUp.getTerrainObject3D().getHeightMapIfAvailable();
+
+					RobotSide firstSide = RobotSide.LEFT;
+					if (stepStart > stepLength) { // If more than a footstep away
+						stepTo(0.0, stepStart - 0.5 * footLength - 0.15, stepLength, stepWidth, firstSide, heightMap, footsteps, false, false);
+						firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
+						stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+					}
 					stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+					setTimings(footsteps, walkingControllerParameters);
+				} else {
+					footsteps = recordedFootsteps;
 				}
-				stepTo(stepStart + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
-				setTimings(footsteps, walkingControllerParameters);
-			} else {
-				footsteps = recordedFootsteps;
+
+				drcSimulationTestHelper.publishToController(footsteps);
+
+				double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
 			}
 
-			drcSimulationTestHelper.publishToController(footsteps);
-
-			double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
-			assertTrue(success);
-
-			String dataNameSuffix = "StepUpWithoutSquareUp" + stepHeightInches;
+			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
+
+			if (!success) {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
 			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 		}
 		finally
@@ -280,31 +286,38 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			scs.setCameraPosition(cameraX, -8.0, cameraZ);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-			assertTrue(success);
-			scs.setInPoint();
 
-			FootstepDataListMessage footsteps = new FootstepDataListMessage();
+			if (success) {
+				scs.setInPoint();
 
-			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-			double stepWidth = steppingParameters.getInPlaceWidth();
+				FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-			HeightMapWithNormals heightMap = slope.getTerrainObject3D().getHeightMapIfAvailable();
+				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+				double stepWidth = steppingParameters.getInPlaceWidth();
 
-			stepTo(0.2, 5.0, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, true, true);
-			setTimings(footsteps, walkingControllerParameters);
-			footsteps.getFootstepDataList().forEach(footstep -> footstep.getOrientation().setToPitchOrientation(slopeAngle));
-			footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
-			computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75}, 0.075);
-			footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+				HeightMapWithNormals heightMap = slope.getTerrainObject3D().getHeightMapIfAvailable();
 
-			drcSimulationTestHelper.publishToController(footsteps);
+				stepTo(0.2, 5.0, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, true, true);
+				setTimings(footsteps, walkingControllerParameters);
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.getOrientation().setToPitchOrientation(slopeAngle));
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
+				computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75}, 0.075);
+				footsteps.setOffsetFootstepsHeightWithExecutionError(true);
 
-			double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
-			assertTrue(success);
+				drcSimulationTestHelper.publishToController(footsteps);
+
+				double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+			}
 
 			String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + "Deg";
 			String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
+			
+			if (!success) {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
 			exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 		}
 		finally
@@ -342,39 +355,47 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			scs.setCameraPosition(cameraX, -8.0, cameraZ);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-			assertTrue(success);
+			
+			if (success) {
 
-			FramePoint3D pelvisPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
-			pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-			double desiredHeight = pelvisPosition.getZ() + 0.01;
-			PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
-			drcSimulationTestHelper.publishToController(pelvisHeightMessage);
-			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-			assertTrue(success);
-			scs.setInPoint();
+				FramePoint3D pelvisPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
+				pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+				double desiredHeight = pelvisPosition.getZ() + 0.01;
+				PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
+				drcSimulationTestHelper.publishToController(pelvisHeightMessage);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+				assertTrue(success);
+				scs.setInPoint();
 
-			FootstepDataListMessage footsteps = new FootstepDataListMessage();
+				FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-			double stepLength = steppingParameters.getDefaultStepLength();
-			double stepWidth = steppingParameters.getInPlaceWidth();
+				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+				double stepLength = steppingParameters.getDefaultStepLength();
+				double stepWidth = steppingParameters.getInPlaceWidth();
 
-			HeightMapWithNormals heightMap = staircase.getTerrainObject3D().getHeightMapIfAvailable();
+				HeightMapWithNormals heightMap = staircase.getTerrainObject3D().getHeightMapIfAvailable();
 
-			double firstStep = 0.6;
-			stepTo(0.0, firstStep - 0.5 * stairStepLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
-			RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
-			stepTo(firstStep + 0.5 * stairStepLength, xGoal, stairStepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
-			setTimings(footsteps, walkingControllerParameters);
+				double firstStep = 0.6;
+				stepTo(0.0, firstStep - 0.5 * stairStepLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
+				RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
+				stepTo(firstStep + 0.5 * stairStepLength, xGoal, stairStepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+				setTimings(footsteps, walkingControllerParameters);
 
-			drcSimulationTestHelper.publishToController(footsteps);
+				drcSimulationTestHelper.publishToController(footsteps);
 
-			double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
-			assertTrue(success);
+				double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
+			}
 
 			String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
 			String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
+			
+			if (!success) {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
+			
 			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 		}
 		finally
