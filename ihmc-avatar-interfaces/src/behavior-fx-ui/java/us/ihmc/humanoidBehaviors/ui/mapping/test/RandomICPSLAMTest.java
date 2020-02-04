@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.ui.mapping.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +18,6 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
@@ -249,9 +247,9 @@ public class RandomICPSLAMTest
       sensorPoseTwo.appendYawRotation(Math.toRadians(-90.0));
 
       RigidBodyTransform driftingTransformer = new RigidBodyTransform();
-      driftingTransformer.appendTranslation(0.0, 0.03, 0.03);
-      driftingTransformer.prependYawRotation(Math.toRadians(5.0));
-      
+      driftingTransformer.appendTranslation(0.0, 0.05, 0.05);
+      driftingTransformer.prependYawRotation(Math.toRadians(3.0));
+
       preMultiplier.multiply(driftingTransformer);
       sensorPoseTwo.multiply(driftingTransformer);
 
@@ -290,7 +288,7 @@ public class RandomICPSLAMTest
       for (int i = 0; i < 50; i++)
          ruler[i] = new Point3D(0.15, 0.0, (double) i * octreeResolution);
       slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
-      
+
       slamViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, slam.getOctreeResolution(), true);
 
       slamViewer.start("testOptimizationForSimulatedPointCloud");
@@ -331,14 +329,15 @@ public class RandomICPSLAMTest
    @Test
    public void testRandomICPSLAMEndToEnd()
    {
-      String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
-      //String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
+      String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
-      IhmcSLAM slam = new RandomICPSLAM(octreeResolution);
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.addFirstFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {
@@ -358,7 +357,6 @@ public class RandomICPSLAMTest
          slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       }
       slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
-
       slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
 
       IhmcSLAMViewer originalViewer = new IhmcSLAMViewer();
@@ -368,8 +366,12 @@ public class RandomICPSLAMTest
          originalViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.GREEN);
          originalViewer.addSensorPose(slam.getOriginalSensorPoses().get(i), Color.GREEN);
       }
-
       originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
+
+      IhmcSLAMViewer octreeViewer = new IhmcSLAMViewer();
+      octreeViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, slam.getOctreeResolution(), true);
+      octreeViewer.start("octreeViewer");
+
       ThreadTools.sleepForever();
    }
 }

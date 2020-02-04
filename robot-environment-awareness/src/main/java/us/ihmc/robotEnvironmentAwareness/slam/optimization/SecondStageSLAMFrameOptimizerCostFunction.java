@@ -7,6 +7,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SecondStageSLAMFrameOptimizerCostFunction implements SingleQueryFunction
 {
+   private static final double TRANSLATION_TO_ANGLE_RATIO = 2.0;
    protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
    private final boolean enableYaw;
    private final RigidBodyTransform yawRotator = new RigidBodyTransform();
@@ -35,7 +36,7 @@ public abstract class SecondStageSLAMFrameOptimizerCostFunction implements Singl
       if (enableYaw)
       {
          yawRotator.setIdentity();
-         yawRotator.appendYawRotation(input.get(3) * 5);
+         yawRotator.appendYawRotation(input.get(3) * TRANSLATION_TO_ANGLE_RATIO);
          sensorPoseToPack.preMultiply(yawRotator);
       }
    }
