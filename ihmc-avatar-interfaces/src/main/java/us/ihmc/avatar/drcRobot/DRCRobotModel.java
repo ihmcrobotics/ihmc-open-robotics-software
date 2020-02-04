@@ -1,7 +1,5 @@
 package us.ihmc.avatar.drcRobot;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
@@ -17,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -40,13 +39,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract HandModel getHandModel();
 
-   public abstract Transform getJmeTransformWristToHand(RobotSide side);
-
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-
-   public abstract double getStandPrepAngle(String jointName);
 
    public default RobotROSClockCalculator getROSClockCalculator()
    {
@@ -118,6 +113,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public default FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   {
+      return null;
+   }
+
+   public default FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
    {
       return null;
    }

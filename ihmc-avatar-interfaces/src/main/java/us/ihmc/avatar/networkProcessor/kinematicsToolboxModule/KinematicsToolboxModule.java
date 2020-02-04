@@ -27,11 +27,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 {
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
-   {
-      this(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-   }
-
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,

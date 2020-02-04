@@ -54,6 +54,7 @@
                     <children>
                         <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
                         <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                        <Button fx:id="postProcess" mnemonicParsing="false" onAction="#postProcess" prefWidth="130.0" text="Post Process" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                         <Button onAction="#clearFlat" prefWidth="130.0" text="Clear Flat" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
@@ -62,9 +63,11 @@
                         <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                         <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                         <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                        <Label text="Horizon Length" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label text="Best Effort Timeout" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label text="Horizon Length" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                         <Spinner fx:id="timeout" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Spinner fx:id="horizonLength" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Spinner fx:id="bestEffortTimeout" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Spinner fx:id="horizonLength" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                         <Label text="initialSupport" textAlignment="RIGHT" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                     </children>

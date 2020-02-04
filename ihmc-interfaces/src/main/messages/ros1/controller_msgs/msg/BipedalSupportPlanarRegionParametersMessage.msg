@@ -1,3 +1,5 @@
+# This message sets the parameters of the BipedalSupportPlanarRegionPublisher
+
 # Enables the BipedalSupportPlanarRegionPublish module
 bool enable
 

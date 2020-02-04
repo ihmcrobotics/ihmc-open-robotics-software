@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
 import org.ejml.data.DenseMatrix64F;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -13,18 +14,14 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -43,8 +40,6 @@ import java.util.function.Consumer;
 
    public ExternalForceEstimationSimulation()
    {
-//      robot = setupDoublePendulum();
-//      robot = setupMultiPendulum(7);
 //      robot = setupFixedBaseArmRobot();
       robot = setupMovingBaseRobotArm();
 
@@ -52,18 +47,18 @@ import java.util.function.Consumer;
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalForceEstimator externalForceEstimator = new ExternalForceEstimator(joints, endEffector, externalForcePointOffset, controlDT, dynamicMatrixSetter, tauSetter, null);
-      robot.setController(externalForceEstimator);
+      ExternalWrenchEstimator externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
+      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
+      robot.setController(externalWrenchEstimator);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), externalForceEstimator.getEstimatedForceVectorGraphic().getScale(), YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), 0.001, YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.01, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
-      yoGraphicsListRegistry.registerYoGraphic("estimatedForceGraphic", externalForceEstimator.getEstimatedForceVectorGraphic());
 
       scs.setFastSimulate(true, 15);
       scs.addYoVariableRegistry(registry);
@@ -81,74 +76,15 @@ import java.util.function.Consumer;
       scs.startOnAThread();
    }
 
-   private void setupDynamicMatrixSolverWithoutControllerCoreToolbox()
-   {
-      double gravity = 9.81;
-      GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(joints[0].getPredecessor(), new ArrayList<>(), gravity);
-      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(joints[0].getPredecessor());
-
-      this.dynamicMatrixSetter = (m, c) ->
-      {
-         m.set(massMatrixCalculator.getMassMatrix());
-
-         gravityCoriolisExternalWrenchMatrixCalculator.compute();
-         for (int i = 0; i < joints.length; i++)
-         {
-            gravityCoriolisExternalWrenchMatrixCalculator.getJointCoriolisMatrix(joints[i], c, i);
-         }
-      };
-   }
-
    private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
    {
-      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, toolbox.getWrenchMatrixCalculator());
+      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
       this.dynamicMatrixSetter = (m, c) ->
       {
          dynamicsMatrixCalculator.compute();
          dynamicsMatrixCalculator.getBodyMassMatrix(m);
          dynamicsMatrixCalculator.getBodyCoriolisMatrix(c);
       };
-   }
-
-   private Robot setupDoublePendulum()
-   {
-      externalForcePointOffset.set(0.0, 0.1, -0.5);
-
-      DoublePendulumRobot robot = new DoublePendulumRobot("doublePendulum", controlDT);
-      DoublePendulumController controller = new DoublePendulumController(robot);
-      robot.setController(controller);
-
-      controller.setSetpoints(0.3, 0.7);
-      robot.setInitialState(-0.2, 0.1, 0.6, -0.3);
-      robot.getScsJoint2().addExternalForcePoint(externalForcePoint);
-
-      joints = new OneDoFJointBasics[2];
-      joints[0] = robot.getJoint1();
-      joints[1] = robot.getJoint2();
-
-      setupDynamicMatrixSolverWithoutControllerCoreToolbox();
-
-      return robot;
-   }
-
-   private Robot setupMultiPendulum(int N)
-   {
-      externalForcePointOffset.set(0.0, 0.1, -0.5);
-
-      MultiPendulumRobot robot = new MultiPendulumRobot(N + "_pendulum", N);
-      MultiPendulumController controller = new MultiPendulumController(robot);
-      robot.setController(controller);
-
-      Random random = new Random(2930);
-      controller.setSetpoints(random.doubles(N,-1.0, 2.0).toArray());
-      robot.setInitialState(random.doubles(N,-1.0, 2.0).toArray());
-      robot.getScsJoints()[N - 1].addExternalForcePoint(externalForcePoint);
-
-      joints = robot.getJoints();
-
-      setupDynamicMatrixSolverWithoutControllerCoreToolbox();
-
-      return robot;
    }
 
    private Robot setupFixedBaseArmRobot()

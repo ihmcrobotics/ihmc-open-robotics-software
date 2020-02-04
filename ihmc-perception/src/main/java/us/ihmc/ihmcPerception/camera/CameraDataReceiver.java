@@ -19,12 +19,13 @@ import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class CameraDataReceiver extends Thread
+public class CameraDataReceiver extends Thread implements CloseableAndDisposable
 {
    private static final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;
-   private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
+   private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<>();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
 
    private final FullRobotModel fullRobotModel;
@@ -42,12 +43,12 @@ public class CameraDataReceiver extends Thread
    private boolean useTimestamps = true;
 
    public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         CompressedVideoHandler compressedVideoHandler, LongUnaryOperator robotMonotonicTimeCalculator)
+                             CompressedVideoHandler compressedVideoHandler, LongUnaryOperator robotMonotonicTimeCalculator)
    {
-      this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       this.robotMonotonicTimeCalculator = robotMonotonicTimeCalculator;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
+      cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
 
       compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
    }
@@ -81,11 +82,11 @@ public class CameraDataReceiver extends Thread
                }
                long robotTimestamp = robotMonotonicTimeCalculator.applyAsLong(data.timestamp);
 
-               if(useTimestamps)
+               if (useTimestamps)
                {
                   if (robotConfigurationDataBuffer.updateFullRobotModel(false, robotTimestamp, fullRobotModel, null) < 0)
                   {
-                     if(DEBUG)
+                     if (DEBUG)
                      {
                         System.out.println("Cannot update full robot model, skipping frame");
                      }
@@ -135,5 +136,11 @@ public class CameraDataReceiver extends Thread
    public void registerCameraListener(DRCStereoListener drcStereoListener)
    {
       stereoListeners.add(drcStereoListener);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      running = false;
    }
 }

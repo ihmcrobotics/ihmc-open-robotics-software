@@ -26,7 +26,7 @@ public class ValkyrieToeOffTest extends AvatarToeOffTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false);
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override

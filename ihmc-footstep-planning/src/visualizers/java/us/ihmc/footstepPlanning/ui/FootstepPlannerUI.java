@@ -14,6 +14,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
@@ -23,31 +24,19 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
-import us.ihmc.footstepPlanning.ui.components.NodeCheckerEditor;
-import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
-import us.ihmc.footstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.footstepPlanning.ui.controllers.BodyCollisionCheckingUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepNodeCheckingUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerCostsUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerDataExporterAnchorPaneController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.MainTabController;
-import us.ihmc.footstepPlanning.ui.controllers.UIRobotController;
-import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
-import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.FootstepPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.NodeCheckerRenderer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
-import us.ihmc.footstepPlanning.ui.viewers.VisibilityGraphsRenderer;
+import us.ihmc.footstepPlanning.ui.components.*;
+import us.ihmc.footstepPlanning.ui.controllers.*;
+import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
@@ -85,12 +74,15 @@ public class FootstepPlannerUI
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
+   private final FootstepPostProcessingMeshViewer postProcessingViewer;
    private final StartGoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final OccupancyMapRenderer graphRenderer;
+   private final OccupancyMapRenderer occupancyMapRenderer;
+   private final ExpandedNodesRenderer expandedNodesRenderer;
+   private final FullGraphRenderer fullGraphRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
 
@@ -107,6 +99,8 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
    @FXML
+   private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
+   @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
    private MainTabController mainTabController;
@@ -116,27 +110,32 @@ public class FootstepPlannerUI
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
-   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParametersBasics plannerParameters, VisibilityGraphsParametersBasics visibilityGraphsParameters) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, FootstepPlannerParametersBasics plannerParameters, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters) throws Exception
    {
-      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters, null, null, null);
+      this(primaryStage, new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API), plannerParameters, visibilityGraphsParameters,
+           footstepPostProcessingParameters, null, null, null);
       messager.startMessager();
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      this(primaryStage, messager, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), null, null, null);
+      this(primaryStage, messager, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), new DefaultFootstepPostProcessingParameters(),
+           null, null, null);
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
-                            VisibilityGraphsParametersBasics visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
    {
-      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, null, contactPointParameters,
-           walkingControllerParameters);
+      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, footstepPostProcessingParameters, fullHumanoidRobotModelFactory, null,
+           contactPointParameters, walkingControllerParameters);
    }
 
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
-                            VisibilityGraphsParametersBasics visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters,
                             WalkingControllerParameters walkingControllerParameters) throws Exception
    {
@@ -152,12 +151,14 @@ public class FootstepPlannerUI
       footstepPlannerCostsUIController.setPlannerParameters(plannerParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
+      footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
       bodyCollisionCheckingUIController.setPlannerParameters(plannerParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
+      footstepPostProcessingParametersUIController.attachMessager(messager);
       bodyCollisionCheckingUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
@@ -170,6 +171,7 @@ public class FootstepPlannerUI
       mainTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
+      footstepPostProcessingParametersUIController.bindControls();
       bodyCollisionCheckingUIController.bindControls();
       footstepPlannerCostsUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
@@ -197,26 +199,33 @@ public class FootstepPlannerUI
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
                                                                  StartPosition, LowLevelGoalPosition, GoalPosition);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      this.startGoalOrientationViewer.setPlannerParameters(plannerParameters);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
                                                          StartPosition, GoalPosition, PlanarRegionData, SelectedRegion,
                                                          StartOrientationEditModeEnabled, GoalOrientationEditModeEnabled);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
+      this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
-      this.graphRenderer = new OccupancyMapRenderer(messager);
+      this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
+      this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
+      this.fullGraphRenderer = new FullGraphRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
+      view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
-      view3dFactory.addNodeToView(graphRenderer.getRoot());
+      view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
+      view3dFactory.addNodeToView(expandedNodesRenderer.getRoot());
+      view3dFactory.addNodeToView(fullGraphRenderer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -256,6 +265,9 @@ public class FootstepPlannerUI
       {
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
+         startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
+         expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
+         fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
       }
 
       planarRegionViewer.start();
@@ -264,11 +276,14 @@ public class FootstepPlannerUI
       startGoalEditor.start();
       orientationEditor.start();
       pathViewer.start();
+      postProcessingViewer.start();
       nodeCheckerRenderer.start();
       nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
-      graphRenderer.start();
+      occupancyMapRenderer.start();
+      expandedNodesRenderer.start();
+      fullGraphRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -319,6 +334,11 @@ public class FootstepPlannerUI
       uiRobotController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
+   public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
+   {
+      uiRobotController.setREAStateRequestPublisher(reaStateRequestPublisher);
+   }
+
    public JavaFXMessager getMessager()
    {
       return messager;
@@ -337,11 +357,14 @@ public class FootstepPlannerUI
       startGoalEditor.stop();
       orientationEditor.stop();
       pathViewer.stop();
+      postProcessingViewer.stop();
       nodeCheckerRenderer.stop();
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      graphRenderer.stop();
+      occupancyMapRenderer.stop();
+      expandedNodesRenderer.stop();
+      fullGraphRenderer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
@@ -354,13 +377,14 @@ public class FootstepPlannerUI
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
                                                     VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                                    FootstepPostProcessingParametersBasics postProcessingParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters)
          throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory, previewModelFactory,
-                                   contactPointParameters, walkingControllerParameters);
+      return new FootstepPlannerUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, postProcessingParameters,
+                                   fullHumanoidRobotModelFactory, previewModelFactory, contactPointParameters, walkingControllerParameters);
    }
 }

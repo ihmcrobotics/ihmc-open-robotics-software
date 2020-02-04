@@ -64,6 +64,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -83,8 +85,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -149,6 +149,9 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -197,9 +200,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -226,6 +226,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       cdr.write_type_6(data.getObstacleExtrusionDistanceIfNotTooHighToStep());
 
       cdr.write_type_6(data.getTooHighToStepDistance());
+
+      cdr.write_type_6(data.getHeightForMaxAvoidance());
 
       cdr.write_type_6(data.getClusterResolution());
 
@@ -265,8 +267,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getWeightForNonPreferredEdge());
 
-      cdr.write_type_6(data.getCostForNonPreferredNode());
-
       cdr.write_type_7(data.getReturnBestEffortSolution());
 
    }
@@ -290,6 +290,8 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setObstacleExtrusionDistanceIfNotTooHighToStep(cdr.read_type_6());
       	
       data.setTooHighToStepDistance(cdr.read_type_6());
+      	
+      data.setHeightForMaxAvoidance(cdr.read_type_6());
       	
       data.setClusterResolution(cdr.read_type_6());
       	
@@ -329,8 +331,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       	
       data.setWeightForNonPreferredEdge(cdr.read_type_6());
       	
-      data.setCostForNonPreferredNode(cdr.read_type_6());
-      	
       data.setReturnBestEffortSolution(cdr.read_type_7());
       	
 
@@ -348,6 +348,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("preferred_obstacle_extrusion_distance", data.getPreferredObstacleExtrusionDistance());
       ser.write_type_6("obstacle_extrusion_distance_if_not_too_high_to_step", data.getObstacleExtrusionDistanceIfNotTooHighToStep());
       ser.write_type_6("too_high_to_step_distance", data.getTooHighToStepDistance());
+      ser.write_type_6("height_for_max_avoidance", data.getHeightForMaxAvoidance());
       ser.write_type_6("cluster_resolution", data.getClusterResolution());
       ser.write_type_6("exploration_distance_from_start_goal", data.getExplorationDistanceFromStartGoal());
       ser.write_type_6("planar_region_min_area", data.getPlanarRegionMinArea());
@@ -367,7 +368,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       ser.write_type_6("occluded_goal_edge_weight", data.getOccludedGoalEdgeWeight());
       ser.write_type_6("weight_for_inter_region_edge", data.getWeightForInterRegionEdge());
       ser.write_type_6("weight_for_non_preferred_edge", data.getWeightForNonPreferredEdge());
-      ser.write_type_6("cost_for_non_preferred_node", data.getCostForNonPreferredNode());
       ser.write_type_7("return_best_effort_solution", data.getReturnBestEffortSolution());
    }
 
@@ -383,6 +383,7 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setPreferredObstacleExtrusionDistance(ser.read_type_6("preferred_obstacle_extrusion_distance"));
       data.setObstacleExtrusionDistanceIfNotTooHighToStep(ser.read_type_6("obstacle_extrusion_distance_if_not_too_high_to_step"));
       data.setTooHighToStepDistance(ser.read_type_6("too_high_to_step_distance"));
+      data.setHeightForMaxAvoidance(ser.read_type_6("height_for_max_avoidance"));
       data.setClusterResolution(ser.read_type_6("cluster_resolution"));
       data.setExplorationDistanceFromStartGoal(ser.read_type_6("exploration_distance_from_start_goal"));
       data.setPlanarRegionMinArea(ser.read_type_6("planar_region_min_area"));
@@ -402,7 +403,6 @@ public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsu
       data.setOccludedGoalEdgeWeight(ser.read_type_6("occluded_goal_edge_weight"));
       data.setWeightForInterRegionEdge(ser.read_type_6("weight_for_inter_region_edge"));
       data.setWeightForNonPreferredEdge(ser.read_type_6("weight_for_non_preferred_edge"));
-      data.setCostForNonPreferredNode(ser.read_type_6("cost_for_non_preferred_node"));
       data.setReturnBestEffortSolution(ser.read_type_7("return_best_effort_solution"));
    }
 

@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +20,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -28,9 +28,10 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 {
    private final HeightQuadTreeToolboxController controller;
 
-   public HeightQuadTreeToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider) throws IOException
+   public HeightQuadTreeToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
+                                      PubSubImplementation pubSubImplementation)
    {
-      super(robotName, desiredFullRobotModel, modelProvider, false, 50);
+      super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
 
       controller = new HeightQuadTreeToolboxController(fullRobotModel, commandInputManager, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(3.0);

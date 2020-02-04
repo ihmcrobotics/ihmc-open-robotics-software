@@ -34,9 +34,15 @@ public class ConcaveHullViewer extends AnimationTimer
    private final ViewerGraphicObject graphicPriorityQueue = new ViewerGraphicObject("viewPriorityQueue", false);
    private final ViewerGraphicObject graphicConcaveHull = new ViewerGraphicObject("viewConcaveHull", false);
    private final ViewerGraphicObject graphicConcavePockets = new ViewerGraphicObject("viewConcavePockets", false);
-   private final List<ViewerGraphicObject> graphics = Arrays.asList(graphicDelaunayTriangulation, graphicBorderVertices, graphicBorderEdges,
-                                                                    graphicBorderTriangles, graphicConstraintEdges, graphicOrderedBorderEdges,
-                                                                    graphicPriorityQueue, graphicConcaveHull, graphicConcavePockets);
+   private final List<ViewerGraphicObject> graphics = Arrays.asList(graphicDelaunayTriangulation,
+                                                                    graphicBorderVertices,
+                                                                    graphicBorderEdges,
+                                                                    graphicBorderTriangles,
+                                                                    graphicConstraintEdges,
+                                                                    graphicOrderedBorderEdges,
+                                                                    graphicPriorityQueue,
+                                                                    graphicConcaveHull,
+                                                                    graphicConcavePockets);
 
    private final Group rootNode = new Group();
 
@@ -87,16 +93,23 @@ public class ConcaveHullViewer extends AnimationTimer
       ConcaveHullFactoryResult concaveHullFactoryResult = latestInput.concaveHullFactoryResult;
 
       graphicDelaunayTriangulation.submitForRendering(delaunayTrianglesToRainbowTriangles(transformToWorld, concaveHullFactoryResult, random));
-      graphicBorderVertices.submitForRendering(borderVerticesToMultiSpheres(transformToWorld, concaveHullFactoryResult, defaultColor,
+      graphicBorderVertices.submitForRendering(borderVerticesToMultiSpheres(transformToWorld,
+                                                                            concaveHullFactoryResult,
+                                                                            defaultColor,
                                                                             borderVerticesSize.get()));
       graphicBorderEdges.submitForRendering(borderEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, defaultColor, borderEdgesSize.get()));
       graphicBorderTriangles.submitForRendering(borderTrianglesToRainbowMultiTriangles(transformToWorld, concaveHullFactoryResult, random));
-      graphicConstraintEdges.submitForRendering(constraintEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, constraintEdgeColor.get(),
+      graphicConstraintEdges.submitForRendering(constraintEdgesToMultiLine(transformToWorld,
+                                                                           concaveHullFactoryResult,
+                                                                           constraintEdgeColor.get(),
                                                                            constraintEdgeSize.get()));
       graphicOrderedBorderEdges.submitForRendering(orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult));
       // TODO Implement priority queue viz
-      graphicConcaveHull.submitForRendering(multiLine(transformToWorld, concaveHullFactoryResult.getConcaveHullCollection(), defaultColor,
-                                                      borderEdgesSize.get()));
+      if (concaveHullFactoryResult != null)
+         graphicConcaveHull.submitForRendering(multiLine(transformToWorld,
+                                                         concaveHullFactoryResult.getConcaveHullCollection(),
+                                                         defaultColor,
+                                                         borderEdgesSize.get()));
       // TODO Implement concave pockets viz
    }
 

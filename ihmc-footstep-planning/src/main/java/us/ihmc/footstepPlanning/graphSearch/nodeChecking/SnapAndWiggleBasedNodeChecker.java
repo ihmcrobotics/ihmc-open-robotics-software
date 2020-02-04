@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -40,7 +40,7 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public void addFootstepGraph(FootstepGraph graph)
+   public void addFootstepGraph(DirectedGraph graph)
    {
       nodeChecker.addFootstepGraph(graph);
    }

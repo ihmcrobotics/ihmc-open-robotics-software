@@ -1,3 +1,6 @@
+# General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
+# Main usage is for the IHMC KinematicsToolbox.
+
 # Nothing reported by the toolbox.
 int8 CURRENT_TOOLBOX_STATE_NO_STATUS=0
 

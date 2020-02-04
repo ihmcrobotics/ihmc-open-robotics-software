@@ -1,3 +1,6 @@
+# This message is part of the IHMC robot environment awareness module (REA).
+# This provides access to a few filters used in REA.
+
 # Lower-bound of the bounding box inside which sensor data will be processed into planar regions.
 # Note that the coordinates are relative to the sensor position and yaw:
 # - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.

@@ -14,14 +14,14 @@ public class RobotJointLimitWatcher implements RobotController
    protected final YoVariableLimitChecker[] limitCheckers;
    
    protected final OneDoFJointBasics[] oneDoFJoints;
-   private SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
+   private SensorOutputMapReadOnly rawSensorOutputMap;
    
    protected YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
 
-   public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly)
+   public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints, SensorOutputMapReadOnly rawSensorOutputMap)
    {
       this.oneDoFJoints = oneDoFJoints;
-      this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
+      this.rawSensorOutputMap = rawSensorOutputMap;
       
       int numberOfJoints = oneDoFJoints.length;
 
@@ -55,9 +55,9 @@ public class RobotJointLimitWatcher implements RobotController
          // If created with sensorRawOutputMapReadOnly use those rather than the oneDoFJoint values.
          // Otherwise, various filtering and elasticity compensation might get in the way
          // and you get a wrong output.
-         if (sensorRawOutputMapReadOnly != null)
+         if (rawSensorOutputMap != null)
          {
-            double jointPositionRawOutput = sensorRawOutputMapReadOnly.getJointPositionRawOutput(oneDoFJoints[i]);
+            double jointPositionRawOutput = rawSensorOutputMap.getOneDoFJointOutput(oneDoFJoints[i]).getPosition();
             variablesToTrack[i].set(jointPositionRawOutput);
             limitCheckers[i].update();
          }

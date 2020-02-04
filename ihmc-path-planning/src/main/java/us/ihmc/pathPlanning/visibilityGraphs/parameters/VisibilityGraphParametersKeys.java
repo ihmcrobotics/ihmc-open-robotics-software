@@ -24,6 +24,7 @@ public class VisibilityGraphParametersKeys
    public static final DoubleStoredPropertyKey regionOrthogonalAngle                       = keys.addDoubleKey("Region orthogonal angle", Math.toRadians(75.0));
    public static final DoubleStoredPropertyKey searchHostRegionEpsilon                     = keys.addDoubleKey("Search host region epsilon", 0.03);
    public static final DoubleStoredPropertyKey canDuckUnderHeight                          = keys.addDoubleKey("Can duck under height", 2.0);
+   public static final DoubleStoredPropertyKey heightForMaxAvoidance                       = keys.addDoubleKey("Height for max avoidance", 1.0);
    public static final DoubleStoredPropertyKey canEasilyStepOverHeight                     = keys.addDoubleKey("Can easily step over height", 0.03);
    public static final DoubleStoredPropertyKey lengthForLongInterRegionEdge                = keys.addDoubleKey("Length for long inter region edge", 0.3);
 
@@ -33,12 +34,11 @@ public class VisibilityGraphParametersKeys
    public static final BooleanStoredPropertyKey returnBestEffortSolution                   = keys.addBooleanKey("Return best effort solution", true);
    public static final BooleanStoredPropertyKey includePreferredExtrusions                 = keys.addBooleanKey("Include preferred extrusions", true);
 
-   public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 2.0);
+   public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 1.25);
    public static final DoubleStoredPropertyKey distanceWeight                              = keys.addDoubleKey("Distance weight", 1.0);
    public static final DoubleStoredPropertyKey elevationWeight                             = keys.addDoubleKey("Elevation weight", 0.0);
    public static final DoubleStoredPropertyKey occludedGoalEdgeWeight                      = keys.addDoubleKey("Occluded goal edge weight", 50.0);
-   public static final DoubleStoredPropertyKey weightForInterRegionEdge                    = keys.addDoubleKey("Weight for inter region edge", 2.0);
-   public static final DoubleStoredPropertyKey weightForNonPreferredEdge                   = keys.addDoubleKey("Weight for non preferred edge", 5.0);
-   public static final DoubleStoredPropertyKey costForNonPreferredNode                     = keys.addDoubleKey("Cost for non preferred node", 1.0);
+   public static final DoubleStoredPropertyKey weightForInterRegionEdge                    = keys.addDoubleKey("Weight for inter region edge", 1.0);
+   public static final DoubleStoredPropertyKey weightForNonPreferredEdge                   = keys.addDoubleKey("Weight for non preferred edge", 1.5);
 
 }

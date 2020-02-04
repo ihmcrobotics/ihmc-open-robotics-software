@@ -26,7 +26,7 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setReturnBestEffortPlan(false);
       setBodyBoxBaseX(0.03);
       setBodyBoxBaseY(0.2);
-      setBodyBoxBaseZ(0.1);
+      setBodyBoxBaseZ(0.3);
       setBodyBoxWidth(0.85);
       setBodyBoxDepth(0.4);
       setMinimumStepsForBestEffortPlan(3);
@@ -38,7 +38,6 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setWiggleIntoConvexHullOfPlanarRegions(true);
       setMaximumXYWiggleDistance(0.04);
       setMaximumYawWiggle(0.3);
-      setRejectIfCannotFullyWiggleInside(false);
       setMaximumStepZWhenSteppingUp(0.05);
       setMaximumStepReachWhenSteppingUp(0.32);
       setMaximumStepZWhenForwardAndDown(0.05);

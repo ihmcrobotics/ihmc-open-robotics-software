@@ -12,7 +12,6 @@ import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -29,6 +28,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -118,7 +118,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       fullRobotModel = drcRobotModel.createFullRobotModel();
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), null);
 
-      PrintTools.info("Starting server");
+      LogTools.info("Starting server");
       yoVariableServer.start();
       
       try
@@ -136,7 +136,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
    {
       if (!packetCommunicator.isConnected())
       {
-         PrintTools.info("Packet communicator isn't registered, ignoring MOCAP data");
+         LogTools.info("Packet communicator isn't registered, ignoring MOCAP data");
          return;
       }
 
@@ -146,7 +146,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       }
       else if (latestRobotConfigurationData == null)
       {
-         PrintTools.info("Waiting for robot configuration data");
+         LogTools.info("Waiting for robot configuration data");
          return;
       }
             

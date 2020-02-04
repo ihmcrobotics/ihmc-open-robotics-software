@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ContactWrenchMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
@@ -22,6 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -29,6 +31,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -52,8 +55,21 @@ public class WholeBodyControlCoreToolbox
    private final double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
+   // TODO The mass-matrix calculator (when created) should be used for computing the momentum stuff. Probably need some interface and API improvements.
+   private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   /**
+    * Calculator used to formulate the torque minimization objective. Allows to evaluate the joint
+    * efforts due to: gravity, Coriolis, and centrifugal accelerations and external wrenches that are
+    * not part of the optimization.
+    */
+   private GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator;
+   /**
+    * Calculator used to formulate the torque minimization objective. Allows to evaluates the Jacobian
+    * from joint efforts to &rho;s.
+    */
+   private ContactWrenchMatrixCalculator contactWrenchMatrixCalculator;
 
    private RigidBodyBasics vmcMainBody;
 
@@ -264,6 +280,11 @@ public class WholeBodyControlCoreToolbox
       return enableVirtualModelControlModule;
    }
 
+   public MultiBodySystemBasics getMultiBodySystemInput()
+   {
+      return multiBodySystemInput;
+   }
+
    public MotionQPInputCalculator getMotionQPInputCalculator()
    {
       if (motionQPInputCalculator == null)
@@ -332,6 +353,23 @@ public class WholeBodyControlCoreToolbox
       return inverseDynamicsCalculator;
    }
 
+   public GravityCoriolisExternalWrenchMatrixCalculator getGravityCoriolisExternalWrenchMatrixCalculator()
+   {
+      if (gravityCoriolisExternalWrenchMatrixCalculator == null)
+      {
+         gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(multiBodySystemInput);
+         gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-Math.abs(gravityZ));
+      }
+      return gravityCoriolisExternalWrenchMatrixCalculator;
+   }
+
+   public ContactWrenchMatrixCalculator getContactWrenchMatrixCalculator()
+   {
+      if (contactWrenchMatrixCalculator == null)
+         contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(this);
+      return contactWrenchMatrixCalculator;
+   }
+
    /**
     * <b>Important note</b>: the {@code CentroidalMomentumRateCalculator} is updated every control tick
     * in {@link MotionQPInputCalculator#initialize()}.
@@ -354,6 +392,13 @@ public class WholeBodyControlCoreToolbox
    public CentroidalMomentumRateCalculator getCentroidalMomentumRateCalculator()
    {
       return centroidalMomentumRateCalculator;
+   }
+
+   public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
+   {
+      if (massMatrixCalculator == null)
+         massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(multiBodySystemInput);
+      return massMatrixCalculator;
    }
 
    public FloatingJointBasics getRootJoint()

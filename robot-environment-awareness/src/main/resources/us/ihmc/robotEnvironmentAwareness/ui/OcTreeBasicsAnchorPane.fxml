@@ -28,6 +28,7 @@
                   <Button fx:id="clearButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
                   <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
                   <Button alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#setParametersForStereo" text="Set for Stereo" />
+                  <Button alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#setParametersForDepth" text="Set for Depth" />
                </children>
             </VBox>
             <VBox prefHeight="150.0" prefWidth="266.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
@@ -126,7 +127,7 @@
                         <ToggleButton fx:id="preserveOcTreeHistoryButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="Preserve Buffer History" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <ToggleButton fx:id="enableSurfaceNormalButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Filter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" GridPane.rowIndex="3" />
-                        <ToggleButton fx:id="showInputStereoPointCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input pointcloud" GridPane.rowIndex="4" />
+                        <ToggleButton fx:id="enableDepthCloudBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Depth Buffer" GridPane.rowIndex="4" />
                      </children>
                   </GridPane>
                </children>

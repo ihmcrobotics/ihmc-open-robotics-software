@@ -1,3 +1,4 @@
+
 # This message can be used as a general image.
 # Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
 # Unique ID used to identify this message, should preferably be consecutively increasing.

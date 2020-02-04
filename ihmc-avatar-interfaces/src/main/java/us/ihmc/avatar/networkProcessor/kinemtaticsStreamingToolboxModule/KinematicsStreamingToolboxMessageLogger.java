@@ -14,17 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.base.CaseFormat;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
@@ -34,10 +24,10 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class KinematicsStreamingToolboxMessageLogger
+public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisposable
 {
-   private static final PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
    private static final long recordPeriodMillis = 5;
    private static final double maximumRecordTimeSeconds = 300.0;
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -76,7 +66,7 @@ public class KinematicsStreamingToolboxMessageLogger
    private Runnable loggerRunnable = null;
    private ScheduledFuture<?> loggerTaskScheduled = null;
 
-   public KinematicsStreamingToolboxMessageLogger(String robotName)
+   public KinematicsStreamingToolboxMessageLogger(String robotName, PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
@@ -114,11 +104,11 @@ public class KinematicsStreamingToolboxMessageLogger
 
    private void processToolboxStateMessage(ToolboxStateMessage message)
    {
-      boolean requestLogging = message.getRequestLogging();
-
-      if (requestLogging)
+      boolean loggingRequested = message.getRequestLogging();
+      boolean sleepRequested = message.getRequestedToolboxState() == ToolboxStateMessage.SLEEP;
+      if (!sleepRequested && loggingRequested)
          startLogging();
-      else if (requestLogging)
+      else
          stopLogging();
    }
 
@@ -222,9 +212,11 @@ public class KinematicsStreamingToolboxMessageLogger
 
    private void shutdown()
    {
-      loggerTaskScheduled.cancel(true);
-
-      loggerTaskScheduled = null;
+      if (loggerTaskScheduled != null)
+      {
+         loggerTaskScheduled.cancel(true);
+         loggerTaskScheduled = null;
+      }
       loggerRunnable = null;
       printStream = null;
       outputStream = null;
@@ -243,10 +235,18 @@ public class KinematicsStreamingToolboxMessageLogger
       printStream.write(serializer.serializeToBytes(message));
    }
 
+   @Override
+   public void closeAndDispose()
+   {
+      shutdown();
+      ros2Node.destroy();
+      executorService.shutdownNow();
+   }
+
    public static void main(String[] args)
    {
       String robotName = "Valkyrie"; // "Atlas"; //
 
-      new KinematicsStreamingToolboxMessageLogger(robotName);
+      new KinematicsStreamingToolboxMessageLogger(robotName, PubSubImplementation.FAST_RTPS);
    }
 }

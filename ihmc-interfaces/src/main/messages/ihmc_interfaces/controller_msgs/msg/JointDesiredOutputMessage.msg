@@ -4,6 +4,8 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+string joint_name
+
 byte CONTROL_MODE_POSITION = 0
 byte CONTROL_VELOCITY = 1
 byte CONTROL_EFFORT = 2

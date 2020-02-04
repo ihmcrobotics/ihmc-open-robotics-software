@@ -4,6 +4,8 @@ package us.ihmc.robotics.linearAlgebra;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.matrixlib.MatrixTools;
+
 public class MatrixOfCofactorsCalculatorInefficient
 {
    public static DenseMatrix64F computeMatrixOfCoFactors(DenseMatrix64F mat)

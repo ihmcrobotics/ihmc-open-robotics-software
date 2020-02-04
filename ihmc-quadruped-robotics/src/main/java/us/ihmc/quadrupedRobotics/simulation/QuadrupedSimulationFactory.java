@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,14 +28,11 @@ import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDF
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.model.*;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
@@ -52,10 +48,10 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
@@ -63,22 +59,10 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.ground.RotatablePlaneTerrainProfile;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
-import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
-import us.ihmc.simulationconstructionset.CameraMount;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.ViewportConfiguration;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.*;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.systemIdentification.frictionId.simulators.CoulombViscousStribeckFrictionParameters;
 import us.ihmc.systemIdentification.frictionId.simulators.SimulatedFrictionController;
@@ -130,6 +114,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<HighLevelControllerName> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
+   private final OptionalFactoryField<DCMPlannerInterface> customCoMTrajectoryPlanner = new OptionalFactoryField<>("customCoMTrajectoryPlanner");
 
 
    // TO CONSTRUCT
@@ -146,7 +131,7 @@ public class QuadrupedSimulationFactory
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeRos2Node realtimeRos2Node;
    private QuadrupedControllerManager controllerManager;
-   private DRCPoseCommunicator poseCommunicator;
+   private RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private GroundProfile3D groundProfile3D;
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
@@ -199,7 +184,10 @@ public class QuadrupedSimulationFactory
       }
       else
       {
-         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), stateEstimatorFootSwitches);
+         SDFQuadrupedPerfectSimulatedSensor perfectSensors = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), stateEstimatorFootSwitches);
+         for (IMUDefinition imuDefinition : fullRobotModel.get().getIMUDefinitions())
+            perfectSensors.addIMUSensor(imuDefinition);
+         sensorReader = perfectSensors;
       }
 
       if (this.sensorReaderWrapper != null)
@@ -273,7 +261,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setFullRobotModel(fullRobotModel.get());
          stateEstimatorFactory.setGravity(gravity.get());
          stateEstimatorFactory.setSensorInformation(sensorInformation.get());
-         stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getSensorOutputMapReadOnly());
+         stateEstimatorFactory.setSensorOutputMapReadOnly(sensorReader.getProcessedSensorOutputMap());
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -318,22 +306,21 @@ public class QuadrupedSimulationFactory
                                                                                        highLevelControllerParameters.get(), dcmPlannerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
                                                                                        fallDetectionParameters.get(), robotMotionStatusFromController);
+      if (customCoMTrajectoryPlanner.hasValue())
+         runtimeEnvironment.setComTrajectoryPlanner(customCoMTrajectoryPlanner.get());
 
       controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get(), null);
    }
 
    private void createPoseCommunicator()
    {
-      JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(fullRobotModel.get());
-      MessageTopicNameGenerator publisherTopicNameGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName());
-      poseCommunicator = new DRCPoseCommunicator(fullRobotModel.get(),
-                                                 jointConfigurationGathererAndProducer,
-                                                 publisherTopicNameGenerator,
-                                                 realtimeRos2Node,
-                                                 timestampProvider.get(),
-                                                 sensorReader.getSensorRawOutputMapReadOnly(),
-                                                 controllerManager.getMotionStatusHolder(),
-                                                 null);
+      RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
+      factory.setDefinitionsToPublish(fullRobotModel.get());
+      factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
+      factory.setRobotMotionStatusHolder(controllerManager.getMotionStatusHolder());
+      factory.setROS2Info(realtimeRos2Node, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(sdfRobot.get().getName()));
+
+      robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
    }
 
    private void createControllerNetworkSubscriber()
@@ -393,7 +380,7 @@ public class QuadrupedSimulationFactory
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
-                                                               poseCommunicator, yoVariableServer);
+                                                               robotConfigurationDataPublisher, yoVariableServer);
       simulationController.getYoVariableRegistry().addChild(factoryRegistry);
    }
 
@@ -772,6 +759,11 @@ public class QuadrupedSimulationFactory
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
       this.createYoVariableServer.set(createYoVariableServer);
+   }
+
+   public void setCustomCoMTrajectoryPlanner(DCMPlannerInterface dcmPlannerInterface)
+   {
+      this.customCoMTrajectoryPlanner.set(dcmPlannerInterface);
    }
 
    public void close()

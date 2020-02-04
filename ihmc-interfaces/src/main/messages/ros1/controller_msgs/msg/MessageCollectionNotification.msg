@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# Notifies the user that a MessageCollection has been received.
+# This is used to know when the controller is ready to start collecting the actual collection of messages.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

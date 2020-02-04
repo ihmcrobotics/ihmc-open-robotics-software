@@ -19,16 +19,20 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    public byte extrusion_side_ = (byte) 255;
    public byte type_ = (byte) 255;
    public us.ihmc.euclid.geometry.Pose3D pose_in_world_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  raw_points_in_local_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  navigable_extrusions_in_local_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  non_navigable_extrusions_in_local_;
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage raw_points_in_local_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage>  preferred_navigable_extrusions_in_local_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage>  preferred_non_navigable_extrusions_in_local_;
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage navigable_extrusions_in_local_;
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage non_navigable_extrusions_in_local_;
 
    public VisibilityClusterMessage()
    {
       pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
-      raw_points_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
-      navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
-      non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (25, new geometry_msgs.msg.dds.PointPubSubType());
+      raw_points_in_local_ = new controller_msgs.msg.dds.VisibilityClusterPointsMessage();
+      preferred_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage> (25, new controller_msgs.msg.dds.VisibilityClusterPointsMessagePubSubType());
+      preferred_non_navigable_extrusions_in_local_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage> (25, new controller_msgs.msg.dds.VisibilityClusterPointsMessagePubSubType());
+      navigable_extrusions_in_local_ = new controller_msgs.msg.dds.VisibilityClusterPointsMessage();
+      non_navigable_extrusions_in_local_ = new controller_msgs.msg.dds.VisibilityClusterPointsMessage();
 
    }
 
@@ -45,9 +49,11 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       type_ = other.type_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_in_world_, pose_in_world_);
-      raw_points_in_local_.set(other.raw_points_in_local_);
-      navigable_extrusions_in_local_.set(other.navigable_extrusions_in_local_);
-      non_navigable_extrusions_in_local_.set(other.non_navigable_extrusions_in_local_);
+      controller_msgs.msg.dds.VisibilityClusterPointsMessagePubSubType.staticCopy(other.raw_points_in_local_, raw_points_in_local_);
+      preferred_navigable_extrusions_in_local_.set(other.preferred_navigable_extrusions_in_local_);
+      preferred_non_navigable_extrusions_in_local_.set(other.preferred_non_navigable_extrusions_in_local_);
+      controller_msgs.msg.dds.VisibilityClusterPointsMessagePubSubType.staticCopy(other.navigable_extrusions_in_local_, navigable_extrusions_in_local_);
+      controller_msgs.msg.dds.VisibilityClusterPointsMessagePubSubType.staticCopy(other.non_navigable_extrusions_in_local_, non_navigable_extrusions_in_local_);
    }
 
    public void setExtrusionSide(byte extrusion_side)
@@ -75,19 +81,31 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getRawPointsInLocal()
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage getRawPointsInLocal()
    {
       return raw_points_in_local_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getNavigableExtrusionsInLocal()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage>  getPreferredNavigableExtrusionsInLocal()
+   {
+      return preferred_navigable_extrusions_in_local_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.VisibilityClusterPointsMessage>  getPreferredNonNavigableExtrusionsInLocal()
+   {
+      return preferred_non_navigable_extrusions_in_local_;
+   }
+
+
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage getNavigableExtrusionsInLocal()
    {
       return navigable_extrusions_in_local_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getNonNavigableExtrusionsInLocal()
+   public controller_msgs.msg.dds.VisibilityClusterPointsMessage getNonNavigableExtrusionsInLocal()
    {
       return non_navigable_extrusions_in_local_;
    }
@@ -115,27 +133,23 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
 
       if (!this.pose_in_world_.epsilonEquals(other.pose_in_world_, epsilon)) return false;
-      if (this.raw_points_in_local_.size() != other.raw_points_in_local_.size()) { return false; }
+      if (!this.raw_points_in_local_.epsilonEquals(other.raw_points_in_local_, epsilon)) return false;
+      if (this.preferred_navigable_extrusions_in_local_.size() != other.preferred_navigable_extrusions_in_local_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.raw_points_in_local_.size(); i++)
-         {  if (!this.raw_points_in_local_.get(i).epsilonEquals(other.raw_points_in_local_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.preferred_navigable_extrusions_in_local_.size(); i++)
+         {  if (!this.preferred_navigable_extrusions_in_local_.get(i).epsilonEquals(other.preferred_navigable_extrusions_in_local_.get(i), epsilon)) return false; }
       }
 
-      if (this.navigable_extrusions_in_local_.size() != other.navigable_extrusions_in_local_.size()) { return false; }
+      if (this.preferred_non_navigable_extrusions_in_local_.size() != other.preferred_non_navigable_extrusions_in_local_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.navigable_extrusions_in_local_.size(); i++)
-         {  if (!this.navigable_extrusions_in_local_.get(i).epsilonEquals(other.navigable_extrusions_in_local_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.preferred_non_navigable_extrusions_in_local_.size(); i++)
+         {  if (!this.preferred_non_navigable_extrusions_in_local_.get(i).epsilonEquals(other.preferred_non_navigable_extrusions_in_local_.get(i), epsilon)) return false; }
       }
 
-      if (this.non_navigable_extrusions_in_local_.size() != other.non_navigable_extrusions_in_local_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.non_navigable_extrusions_in_local_.size(); i++)
-         {  if (!this.non_navigable_extrusions_in_local_.get(i).epsilonEquals(other.non_navigable_extrusions_in_local_.get(i), epsilon)) return false; }
-      }
-
+      if (!this.navigable_extrusions_in_local_.epsilonEquals(other.navigable_extrusions_in_local_, epsilon)) return false;
+      if (!this.non_navigable_extrusions_in_local_.epsilonEquals(other.non_navigable_extrusions_in_local_, epsilon)) return false;
 
       return true;
    }
@@ -155,6 +169,8 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
 
       if (!this.pose_in_world_.equals(otherMyClass.pose_in_world_)) return false;
       if (!this.raw_points_in_local_.equals(otherMyClass.raw_points_in_local_)) return false;
+      if (!this.preferred_navigable_extrusions_in_local_.equals(otherMyClass.preferred_navigable_extrusions_in_local_)) return false;
+      if (!this.preferred_non_navigable_extrusions_in_local_.equals(otherMyClass.preferred_non_navigable_extrusions_in_local_)) return false;
       if (!this.navigable_extrusions_in_local_.equals(otherMyClass.navigable_extrusions_in_local_)) return false;
       if (!this.non_navigable_extrusions_in_local_.equals(otherMyClass.non_navigable_extrusions_in_local_)) return false;
 
@@ -175,6 +191,10 @@ public class VisibilityClusterMessage extends Packet<VisibilityClusterMessage> i
       builder.append(this.pose_in_world_);      builder.append(", ");
       builder.append("raw_points_in_local=");
       builder.append(this.raw_points_in_local_);      builder.append(", ");
+      builder.append("preferred_navigable_extrusions_in_local=");
+      builder.append(this.preferred_navigable_extrusions_in_local_);      builder.append(", ");
+      builder.append("preferred_non_navigable_extrusions_in_local=");
+      builder.append(this.preferred_non_navigable_extrusions_in_local_);      builder.append(", ");
       builder.append("navigable_extrusions_in_local=");
       builder.append(this.navigable_extrusions_in_local_);      builder.append(", ");
       builder.append("non_navigable_extrusions_in_local=");

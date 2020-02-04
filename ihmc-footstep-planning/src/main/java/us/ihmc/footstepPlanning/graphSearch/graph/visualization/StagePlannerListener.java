@@ -1,47 +1,40 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.*;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
-import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-
 public class StagePlannerListener implements BipedalFootstepPlannerListener
 {
-   private final FootstepNodeSnapperReadOnly snapper;
-   private final HashMap<FootstepNode, BipedalFootstepPlannerNodeRejectionReason> rejectionReasons = new HashMap<>();
-   private final HashMap<FootstepNode, List<FootstepNode>> childMap = new HashMap<>();
-   private final HashSet<PlannerCell> exploredCells = new HashSet<>();
+   private final FootstepNodeSnapper snapper;
+
+   private final HashSet<PlannerCell> occupancyMapCellsThisTick = new HashSet<>();
+   private final ConcurrentSet<PlannerCell> occupancyMapCellsSinceLastReportReference = new ConcurrentSet<>();
+
    private final List<FootstepNode> lowestCostPlan = new ArrayList<>();
 
-   private final FootstepPlannerOccupancyMapMessage occupancyMapMessage = new FootstepPlannerOccupancyMapMessage();
-   private final FootstepNodeDataListMessage nodeDataListMessage = new FootstepNodeDataListMessage();
+   private final HashMap<FootstepNode, List<PlannerNodeData>> rejectedNodeData = new HashMap<>();
 
-   private final RecyclingArrayList<FootstepNodeDataMessage> nodeDataMessageList = new RecyclingArrayList<>(FootstepNodeDataMessage::new);
-   private final RecyclingArrayList<FootstepPlannerCellMessage> cellMessages = new RecyclingArrayList<>(FootstepPlannerCellMessage::new);
+   private final ConcurrentCopier<PlannerNodeDataList> concurrentLowestCostNodeDataList = new ConcurrentCopier<>(PlannerNodeDataList::new);
 
-   private final ConcurrentList<FootstepPlannerCellMessage> occupiedCells = new ConcurrentList<>();
-   private final ConcurrentList<FootstepNodeDataMessage> nodeData = new ConcurrentList<>();
-
-   private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(true);
-   private final AtomicBoolean hasNodeData = new AtomicBoolean(true);
+   private final AtomicBoolean hasOccupiedCells = new AtomicBoolean(false);
+   private final AtomicBoolean hasLowestCostPlan = new AtomicBoolean(false);
 
    private final long occupancyMapUpdateDt;
    private long lastUpdateTime = -1;
    private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
    private int totalNodeCount = 0;
 
-   public StagePlannerListener(FootstepNodeSnapperReadOnly snapper, long occupancyMapUpdateDt)
+   public StagePlannerListener(FootstepNodeSnapper snapper, long occupancyMapUpdateDt)
    {
       this.snapper = snapper;
       this.occupancyMapUpdateDt = occupancyMapUpdateDt;
@@ -56,26 +49,22 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    public void addNode(FootstepNode node, FootstepNode previousNode)
    {
       if (previousNode == null)
-      {
          reset();
-      }
-      else
-      {
-         childMap.computeIfAbsent(previousNode, n -> new ArrayList<>()).add(node);
-         PlannerCell plannerCell = new PlannerCell(node.getXIndex(), node.getYIndex());
 
-         exploredCells.add(plannerCell);
-         totalNodeCount++;
-      }
+      node.setNodeIndex(totalNodeCount);
+
+      occupancyMapCellsThisTick.add(new PlannerCell(node.getXIndex(), node.getYIndex()));
+      totalNodeCount++;
    }
 
    public void reset()
    {
-      rejectionReasons.clear();
-      childMap.clear();
-      exploredCells.clear();
+      rejectedNodeData.clear();
+
+      occupancyMapCellsSinceLastReportReference.clear();
+
       lowestCostPlan.clear();
-      totalNodeCount = 1;
+      totalNodeCount = 0;
       rejectionCount.values().forEach(count -> count.setValue(0));
    }
 
@@ -89,7 +78,28 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      rejectionReasons.put(rejectedNode, reason);
+      if (parentNode == null)
+      {
+         LogTools.warn("Rejecting the initial node, because the parent is null.");
+         return;
+      }
+
+      RigidBodyTransform nodePose;
+      if (reason != BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP && snapper != null)
+      {
+         nodePose = snapper.snapFootstepNode(rejectedNode).getOrComputeSnappedNodeTransform(rejectedNode);
+      }
+      else
+      {
+         nodePose = new RigidBodyTransform();
+         nodePose.setTranslation(rejectedNode.getX(), rejectedNode.getY(), 0.0);
+         nodePose.setRotationYaw(rejectedNode.getYaw());
+      }
+      PlannerNodeData nodeData = new PlannerNodeData(parentNode.getNodeIndex(), rejectedNode, nodePose, reason);
+
+      if (rejectedNodeData.get(parentNode) == null)
+         rejectedNodeData.put(parentNode, new ArrayList<>());
+      rejectedNodeData.get(parentNode).add(nodeData);
       rejectionCount.get(reason).increment();
    }
 
@@ -106,7 +116,7 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
          return;
 
       updateOccupiedCells();
-      updateNodeData();
+      updateLowestCostPlan();
 
       lastUpdateTime = currentTime;
    }
@@ -119,34 +129,30 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
    private void updateOccupiedCells()
    {
-      occupiedCells.clear();
-      cellMessages.clear();
-      PlannerCell[] plannerCells = exploredCells.toArray(new PlannerCell[0]);
-      for (int i = 0; i < plannerCells.length; i++)
-      {
-         FootstepPlannerCellMessage plannerCell = cellMessages.add();
-         plannerCell.setXIndex(plannerCells[i].xIndex);
-         plannerCell.setYIndex(plannerCells[i].yIndex);
-      }
-      occupiedCells.addAll(cellMessages);
-
-      hasOccupiedCells.set(true);
+      occupancyMapCellsSinceLastReportReference.addAll(occupancyMapCellsThisTick);
+      hasOccupiedCells.set(hasOccupiedCells.get() || !occupancyMapCellsThisTick.isEmpty());
+      occupancyMapCellsThisTick.clear();
    }
 
-   private void updateNodeData()
+   private void updateLowestCostPlan()
    {
-      nodeData.clear();
+      PlannerNodeDataList concurrentNodeDataList = this.concurrentLowestCostNodeDataList.getCopyForWriting();
+      concurrentNodeDataList.clear();
       for (int i = 0; i < lowestCostPlan.size(); i++)
       {
          FootstepNode node = lowestCostPlan.get(i);
-         FootstepNodeDataMessage nodeDataMessage = nodeDataMessageList.add();
-         setNodeDataMessage(nodeDataMessage, node, -1);
+         RigidBodyTransform nodePose;
+         if (snapper == null)
+            nodePose = new RigidBodyTransform(new Quaternion(node.getYaw(), 0.0, 0.0), new Vector3D(node.getX(), node.getY(), 0.0));
+         else
+            nodePose = snapper.snapFootstepNode(node).getOrComputeSnappedNodeTransform(node);
+         int parentNodeIndex = i > 0 ? lowestCostPlan.get(i - 1).getNodeIndex() : -1;
+         concurrentNodeDataList.addNode(parentNodeIndex, node, nodePose, null);
       }
-      nodeData.addAll(nodeDataMessageList);
-
+      this.concurrentLowestCostNodeDataList.commit();
       lowestCostPlan.clear();
 
-      hasNodeData.set(true);
+      hasLowestCostPlan.set(!concurrentNodeDataList.getNodeData().isEmpty());
    }
 
    public boolean hasOccupiedCells()
@@ -154,66 +160,28 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return hasOccupiedCells.get();
    }
 
-   public boolean hasNodeData()
+   public boolean hasLowestCostPlan()
    {
-      return hasNodeData.get();
+      return hasLowestCostPlan.get();
    }
 
-   FootstepPlannerOccupancyMapMessage packOccupancyMapMessage()
+   PlannerOccupancyMap getOccupancyMap()
    {
-      if (occupiedCells.isEmpty())
-         return null;
-
-      Object<FootstepPlannerCellMessage> occupiedCellsForMessage = occupancyMapMessage.getOccupiedCells();
-      occupiedCellsForMessage.clear();
-
-      List<FootstepPlannerCellMessage> occupiedCells = this.occupiedCells.getCopyForReading();
-      for (int i = 0; i < occupiedCells.size(); i++)
-         occupiedCellsForMessage.add().set(occupiedCells.get(i));
+      PlannerOccupancyMap occupancyMap = new PlannerOccupancyMap();
+      for (PlannerCell plannerCell : occupancyMapCellsSinceLastReportReference.getCopyForReading())
+         occupancyMap.addOccupiedCell(plannerCell);
 
       hasOccupiedCells.set(false);
+      occupancyMapCellsSinceLastReportReference.clear();
 
-      return occupancyMapMessage;
+      return occupancyMap;
    }
 
-   FootstepNodeDataListMessage packLowestCostPlanMessage()
+   PlannerNodeDataList getLowestCostPlan()
    {
-      if (nodeData.isEmpty())
-         return null;
+      hasLowestCostPlan.set(false);
 
-      Object<FootstepNodeDataMessage> nodeDataListForMessage = nodeDataListMessage.getNodeData();
-      nodeDataListForMessage.clear();
-
-      List<FootstepNodeDataMessage> nodeData = this.nodeData.getCopyForReading();
-      for (int i = 0; i < nodeData.size(); i++)
-         nodeDataListForMessage.add().set(nodeData.get(i));
-
-      nodeDataListMessage.setIsFootstepGraph(false);
-
-      hasNodeData.set(false);
-
-      return nodeDataListMessage;
-   }
-
-   private void setNodeDataMessage(FootstepNodeDataMessage nodeDataMessage, FootstepNode node, int parentNodeIndex)
-   {
-      nodeDataMessage.setParentNodeId(parentNodeIndex);
-
-      byte rejectionReason = rejectionReasons.containsKey(node) ? rejectionReasons.get(node).toByte() : (byte) 255;
-      nodeDataMessage.setBipedalFootstepPlannerNodeRejectionReason(rejectionReason);
-
-      nodeDataMessage.setRobotSide(node.getRobotSide().toByte());
-      nodeDataMessage.setXIndex(node.getXIndex());
-      nodeDataMessage.setYIndex(node.getYIndex());
-      nodeDataMessage.setYawIndex(node.getYawIndex());
-
-      if(snapper != null)
-      {
-         FootstepNodeSnapData snapData = snapper.getSnapData(node);
-         Point3D snapTranslationToSet = nodeDataMessage.getSnapTranslation();
-         Quaternion snapRotationToSet = nodeDataMessage.getSnapRotation();
-         snapData.getSnapTransform().get(snapRotationToSet, snapTranslationToSet);
-      }
+      return concurrentLowestCostNodeDataList.getCopyForReading();
    }
 
    public int getTotalNodeCount()
@@ -226,11 +194,17 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
       return rejectionCount.get(rejectionReason).getValue();
    }
 
-   private class ConcurrentList<T> extends ConcurrentCopier<List<T>>
+   @Override
+   public HashMap<FootstepNode, List<PlannerNodeData>> getRejectedNodeData()
    {
-      public ConcurrentList()
+      return rejectedNodeData;
+   }
+
+   private class ConcurrentSet<T> extends ConcurrentCopier<Set<T>>
+   {
+      public ConcurrentSet()
       {
-         super(ArrayList::new);
+         super(HashSet::new);
       }
 
       public void clear()
@@ -241,8 +215,8 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
       public void addAll(Collection<? extends T> collection)
       {
-         List<T> currentSet = getCopyForReading();
-         List<T> updatedSet = getCopyForWriting();
+         Set<T> currentSet = getCopyForReading();
+         Set<T> updatedSet = getCopyForWriting();
          updatedSet.clear();
          if (currentSet != null)
             updatedSet.addAll(currentSet);
@@ -252,13 +226,13 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
       public T[] toArray(T[] ts)
       {
-         List<T> currentSet = getCopyForReading();
+         Set<T> currentSet = getCopyForReading();
          return currentSet.toArray(ts);
       }
 
       public boolean isEmpty()
       {
-         List<T> currentList = getCopyForReading();
+         Set<T> currentList = getCopyForReading();
          if (currentList == null)
             return true;
 
@@ -267,12 +241,11 @@ public class StagePlannerListener implements BipedalFootstepPlannerListener
 
       public int size()
       {
-         List<T> currentList = getCopyForReading();
+         Set<T> currentList = getCopyForReading();
          if (currentList == null)
             return 0;
 
          return currentList.size();
       }
-
    }
 }

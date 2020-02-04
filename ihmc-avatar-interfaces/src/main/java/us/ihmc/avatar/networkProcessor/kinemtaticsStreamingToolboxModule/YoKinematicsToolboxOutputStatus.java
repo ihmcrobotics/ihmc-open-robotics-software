@@ -76,6 +76,17 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointVelocity = new YoFixedFrameSpatialVector(namePrefix + "DesiredVelocity" + rootJoint.getName(), ReferenceFrame.getWorldFrame(), registry);
    }
 
+   public void setToNaN()
+   {
+      currentToolboxState.set(null);
+      for (YoDouble desiredJointAngle : desiredJointAngles)
+         desiredJointAngle.setToNaN();
+      for (YoDouble desiredJointVelocity : desiredJointVelocities)
+         desiredJointVelocity.setToNaN();
+      desiredRootJointPose.setToNaN();
+      desiredRootJointVelocity.setToNaN();
+   }
+
    public void set(KinematicsToolboxOutputStatus status)
    {
       if (status.getJointNameHash() != jointNameHash.getValue())

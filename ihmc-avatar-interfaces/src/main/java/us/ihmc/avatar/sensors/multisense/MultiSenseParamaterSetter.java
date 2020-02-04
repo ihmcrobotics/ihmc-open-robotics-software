@@ -19,11 +19,11 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -64,29 +64,36 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       String rosPrefix = "/opt/ros";
       if (useRosHydro(rosPrefix))
       {
-         PrintTools.info(this, "Using ROS Hydro");
+         LogTools.info("Using ROS Hydro");
          String[] hydroSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
                + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
       }
       else if (useRosGroovy(rosPrefix))
       {
-         PrintTools.info(this, "Using ROS Groovy");
+         LogTools.info("Using ROS Groovy");
          String[] groovySpindleSpeedShellString = {"sh", "-c", ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
                + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
       }
       else if (useRosFuerte(rosPrefix))
       {
-         PrintTools.info(this, "Using ROS Fuerte");
+         LogTools.info("Using ROS Fuerte");
          String[] fuerteSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
                + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
       }
       else if (useRosIndigo(rosPrefix))
       {
-         PrintTools.info(this, "Using ROS Indigo");
+         LogTools.info("Using ROS Indigo");
          String[] indigoSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
+               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         return shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
+      }
+      else if (useRosKinetic(rosPrefix))
+      {
+         LogTools.info("Using ROS Kinetic");
+         String[] indigoSpindleSpeedShellString = {"sh", "-c", ". /opt/ros/kinetic/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
                + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          return shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
       }
@@ -103,23 +110,23 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          PrintStream printStream = new PrintStream(byteArrayOutputStream);
 
          Process process = builder.start();
-         PrintTools.info(this, "Spindle speed shellout process started");
+         LogTools.info("Spindle speed shellout process started");
          new ProcessStreamGobbler("ROS spindle speed shellout err", process.getErrorStream(), System.err).start();
          new ProcessStreamGobbler("ROS spindle speed shellout out", process.getInputStream(), printStream).start();
          process.waitFor();
-         PrintTools.info(this, "Spindle speed shellout process finished");
+         LogTools.info("Spindle speed shellout process finished");
 
          String errorString = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
          System.out.println(errorString);
 
          if (!errorString.contains("Unable to register"))
          {
-            PrintTools.info("ROS appears to be running and spindle is started");
+            LogTools.info("ROS appears to be running and spindle is started");
             return true;
          }
          else
          {
-            PrintTools.info("Unable to register to ROS master. Trying again...");
+            LogTools.info("Unable to register to ROS master. Trying again...");
             return false;
          }
       }
@@ -153,6 +160,11 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private boolean useRosIndigo(String rosPrefix)
    {
       return new File(rosPrefix + "/indigo").exists();
+   }
+
+   private boolean useRosKinetic(String rosPrefix)
+   {
+      return new File(rosPrefix + "/kinetic").exists();
    }
 
    public void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)

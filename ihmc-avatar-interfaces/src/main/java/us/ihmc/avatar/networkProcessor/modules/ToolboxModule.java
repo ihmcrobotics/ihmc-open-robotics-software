@@ -37,6 +37,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as
  * an example.
  */
-public abstract class ToolboxModule
+public abstract class ToolboxModule implements CloseableAndDisposable
 {
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
@@ -184,14 +185,7 @@ public abstract class ToolboxModule
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
    {
-      new Thread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            yoVariableServer.start();
-         }
-      }).start();
+      new Thread(yoVariableServer::start).start();
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
@@ -310,11 +304,11 @@ public abstract class ToolboxModule
       if (DEBUG)
          LogTools.debug("Waking up");
 
-      createToolboxRunnable();
-      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
-      getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
       reinitialize();
       receivedInput.set(true);
+      getToolboxController().setFutureToListenTo(toolboxTaskScheduled);
+      createToolboxRunnable();
+      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
 
    private void reinitialize()
@@ -349,6 +343,12 @@ public abstract class ToolboxModule
       }
    }
 
+   @Override
+   public void closeAndDispose()
+   {
+      destroy();
+   }
+
    public void destroy()
    {
       sleep();
@@ -380,32 +380,28 @@ public abstract class ToolboxModule
          return;
       }
 
-      toolboxRunnable = new Runnable()
+      toolboxRunnable = () ->
       {
-         @Override
-         public void run()
+         if (Thread.interrupted())
+            return;
+
+         try
          {
-            if (Thread.interrupted())
-               return;
+            getToolboxController().update();
+            yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
 
-            try
-            {
-               getToolboxController().update();
-               yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
-
-               if (receivedInput.getAndSet(false))
-                  timeOfLastInput.set(yoTime.getDoubleValue());
-               if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
-                  sleep();
-               else if (getToolboxController().isDone())
-                  sleep();
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
+            if (receivedInput.getAndSet(false))
+               timeOfLastInput.set(yoTime.getDoubleValue());
+            if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
                sleep();
-               throw e;
-            }
+            else if (getToolboxController().isDone())
+               sleep();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+            sleep();
+            throw e;
          }
       };
    }

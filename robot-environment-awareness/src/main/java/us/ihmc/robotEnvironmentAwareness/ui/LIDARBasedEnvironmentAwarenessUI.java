@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,8 +30,8 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorP
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
 public class LIDARBasedEnvironmentAwarenessUI
 {
@@ -42,6 +43,8 @@ public class LIDARBasedEnvironmentAwarenessUI
    private final REAMeshViewer reaMeshViewer;
    private final SensorFrameViewer<LidarScanMessage> lidarFrameViewer;
    private final SensorFrameViewer<StereoVisionPointCloudMessage> stereoFrameViewer;
+   private final SensorFrameViewer<StereoVisionPointCloudMessage> depthFrameViewer;
+   private final SensorFrameViewer<StampedPosePacket> trackingFrameViewer;
 
    @FXML
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
@@ -78,10 +81,16 @@ public class LIDARBasedEnvironmentAwarenessUI
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
       lidarFrameViewer = new SensorFrameViewer<LidarScanMessage>(uiMessager, REAModuleAPI.LidarScanState, null,
-                                                                         SensorFrameViewer.createLidarScanSensorFrameExtractor());
+                                                                 SensorFrameViewer.createLidarScanSensorFrameExtractor());
       stereoFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager, REAModuleAPI.StereoVisionPointCloudState,
-                                                                                       REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                                       SensorFrameViewer.createStereoVisionSensorFrameExtractor());
+                                                                               REAModuleAPI.UISensorPoseHistoryFrames,
+                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor());
+      depthFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager, REAModuleAPI.DepthPointCloudState,
+                                                                              REAModuleAPI.UISensorPoseHistoryFrames,
+                                                                              SensorFrameViewer.createStereoVisionSensorFrameExtractor());
+      trackingFrameViewer = new SensorFrameViewer<StampedPosePacket>(uiMessager, REAModuleAPI.TrackingCameraMessageState,
+                                                                     REAModuleAPI.UISensorPoseHistoryFrames,
+                                                                     SensorFrameViewer.createStampedPosePacketSensorFrameExtractor());
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new StereoVisionPointCloudDataExporter(uiMessager);
@@ -96,6 +105,8 @@ public class LIDARBasedEnvironmentAwarenessUI
       view3dFactory.addNodeToView(reaMeshViewer.getRoot());
       view3dFactory.addNodeToView(lidarFrameViewer.getRoot());
       view3dFactory.addNodeToView(stereoFrameViewer.getRoot());
+      view3dFactory.addNodeToView(depthFrameViewer.getRoot());
+      view3dFactory.addNodeToView(trackingFrameViewer.getRoot());
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
       uiConnectionHandler.start();

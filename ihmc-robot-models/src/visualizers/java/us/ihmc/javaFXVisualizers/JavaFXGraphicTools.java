@@ -5,8 +5,8 @@ import javafx.scene.transform.Affine;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 public class JavaFXGraphicTools
 {
-   public static void setNodeTransformFromPose(Node node, FramePose3DBasics pose)
+   public static void setNodeTransformFromPose(Node node, Pose3DReadOnly pose)
    {
       node.getTransforms().clear();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
@@ -32,7 +32,7 @@ public class JavaFXGraphicTools
       node.getTransforms().add(affine);
    }
 
-   public static void setNodeTransformFromPose(Node node, FramePose3DBasics pose, double scale)
+   public static void setNodeTransformFromPose(Node node, Pose3DReadOnly pose, double scale)
    {
       node.getTransforms().clear();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();

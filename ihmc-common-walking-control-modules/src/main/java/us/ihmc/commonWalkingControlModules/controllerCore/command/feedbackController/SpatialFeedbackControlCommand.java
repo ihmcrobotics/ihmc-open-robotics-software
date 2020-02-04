@@ -27,7 +27,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -78,7 +78,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final FrameVector3D referenceForce = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+   private final ZeroablePIDSE3Gains gains = new ZeroablePIDSE3Gains();
    /**
     * This is the reference frame in which the angular part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.

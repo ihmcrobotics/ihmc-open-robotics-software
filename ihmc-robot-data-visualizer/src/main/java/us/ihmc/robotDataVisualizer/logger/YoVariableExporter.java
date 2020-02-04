@@ -4,46 +4,56 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
-import com.jmatio.types.MLInt32;
 import com.jmatio.types.MLInt64;
 import com.jmatio.types.MLNumericArray;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.dataBuffer.DataEntry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
-import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.YoGraph;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
+import us.ihmc.yoVariables.variable.*;
 
 public class YoVariableExporter extends YoVariableLogReader
 {
-   private final StandardSimulationGUI gui;
    private final List<YoVariable<?>> variables;
+   private final Map<String, YoVariable<?>> fullnameToVariableMap;
+   private final Map<String, List<YoVariable<?>>> nameToVariablesMap = new HashMap<>();
 
    public YoVariableExporter(SimulationConstructionSet scs, File logDirectory, LogProperties logProperties, List<YoVariable<?>> variables)
    {
       super(logDirectory, logProperties);
-      this.gui = scs.getGUI();
       this.variables = variables;
+      fullnameToVariableMap = variables.stream().collect(Collectors.toMap(YoVariable::getFullNameWithNameSpace, Function.identity()));
+      for (YoVariable<?> variable : variables)
+      {
+         String name = variable.getName();
+         List<YoVariable<?>> variableList = nameToVariablesMap.get(name);
+
+         if (variableList == null)
+         {
+            variableList = new ArrayList<>();
+            nameToVariablesMap.put(name, variableList);
+         }
+
+         variableList.add(variable);
+      }
    }
 
-   public void exportGraphs(File file, long start, long end)
+   public void exportMatlabData(File file, long start, long end, VarGroup vargroup)
    {
       ProgressMonitorInterface monitor = new CustomProgressMonitor("Export data to Matlab", "Reading variable data", 0, 100);
 
-      
       if (!initialize())
       {
          return;
@@ -56,91 +66,45 @@ public class YoVariableExporter extends YoVariableLogReader
          int elements = endPosition - startPosition + 1;
 
          // Time element
-         MLInt64 timestamp = new MLInt64("timestamp", new int[] { elements, 1 });
-         MLDouble robotTime = new MLDouble("robotTime", new int[] { elements, 1 });
-         
-         ArrayList<DataEntry> graphEntries = new ArrayList<>();
-         
-         for (YoGraph graph : gui.getGraphArrayPanel().getGraphsOnThisPanel())
-         {
-            for (DataEntry entry : graph.getEntriesOnThisGraph())
-            {
-               graphEntries.add(entry);
-            }
-         }
-         
-         for(GraphArrayWindow graphArrayWindow : gui.getGraphArrayWindows())
-         {
-            for (YoGraph graph : graphArrayWindow.getGraphArrayPanel().getGraphsOnThisPanel())
-            {
-               for (DataEntry entry : graph.getEntriesOnThisGraph())
-               {
-                  graphEntries.add(entry);
-               }
-            }   
-         }
-         
-         
-         ArrayList<DataHolder<?>> dataHolders = new ArrayList<>();
-         
-         for (DataEntry entry : graphEntries)
-         {
-            YoVariable<?> variable = entry.getVariable();
-            int offset = variables.indexOf(variable);
-            if (offset == -1)
-            {
-               System.err.println("Cannot export variable " + variable.getName() + " as it is calculated by the visualizer.");
-               continue;
-            }
-            int dataBufferOffset = offset + 1;
-            dataHolders.add(createDataHolder(dataBufferOffset, elements, variable));
-         }
-         
-         
-         
+         MLInt64 timestamp = new MLInt64("timestamp", new int[] {elements, 1});
+         MLDouble robotTime = new MLDouble("robotTime", new int[] {elements, 1});
+
+         List<DataHolder<?>> dataHolders = toDataHolders(elements, vargroup);
+
          int step = elements / 90;
-         
+
          long firstTimestamp = -1;
          for (int i = startPosition; i <= endPosition; i++)
          {
-            if((i - startPosition) % step == 0) 
+            if ((i - startPosition) % step == 0)
             {
                monitor.setProgress((i - startPosition) / step);
             }
-            
+
             ByteBuffer data = readData(i);
             LongBuffer dataAsLong = data.asLongBuffer();
 
-            
             long entryTimestamp = dataAsLong.get();
-            
-            if(firstTimestamp == -1)
+
+            if (firstTimestamp == -1)
             {
                firstTimestamp = entryTimestamp;
             }
-            
+
             timestamp.setReal(entryTimestamp, i - startPosition);
             robotTime.setReal(Conversions.nanosecondsToSeconds(entryTimestamp - firstTimestamp), i - startPosition);
-            
-            for (int dh = 0; dh < dataHolders.size(); dh++)
-            {
-               DataHolder<?> dataHolder = dataHolders.get(dh);
-               dataHolder.addEntry(dataAsLong);
-            }
+            dataHolders.forEach(dataHolder -> dataHolder.addEntry(dataAsLong));
          }
-         
+
          monitor.setNote("Writing data to disk");
-         ArrayList<MLArray>  matlabData = new ArrayList<>();
-         
+         ArrayList<MLArray> matlabData = new ArrayList<>();
+
          matlabData.add(timestamp);
          matlabData.add(robotTime);
-         for (int dh = 0; dh < dataHolders.size(); dh++)
-         {
-            matlabData.add(dataHolders.get(dh).getData());
-         }
-         
+         dataHolders.forEach(dataHolder -> matlabData.add(dataHolder.getData()));
+
          new MatFileWriter(file, matlabData);
-         
+
          monitor.close();
 
       }
@@ -150,19 +114,73 @@ public class YoVariableExporter extends YoVariableLogReader
       }
    }
 
+   private List<DataHolder<?>> toDataHolders(int elements, VarGroup vargroup)
+   {
+      List<DataHolder<?>> dataHolders = new ArrayList<>();
+
+      if (vargroup == null)
+      {
+         for (int i = 0; i < variables.size(); i++)
+         {
+            dataHolders.add(createDataHolder(i + 1, elements, variables.get(i)));
+         }
+      }
+      else
+      {
+         for (String varname : vargroup.getVars())
+         {
+            List<YoVariable<?>> variableList = findVariable(varname);
+
+            if (variableList == null || variableList.isEmpty())
+            {
+               LogTools.warn("Could not find variable for " + varname);
+               continue;
+            }
+
+            if (variableList.size() > 1)
+            {
+               LogTools.info("Found multiple variables for " + varname);
+            }
+
+            for (YoVariable<?> variable : variableList)
+            {
+               int offset = variables.indexOf(variable);
+               if (offset == -1)
+                  throw new IllegalStateException("Should not get here");
+               offset++;
+               dataHolders.add(createDataHolder(offset, elements, variable));
+            }
+         }
+      }
+
+      if (dataHolders.isEmpty())
+         return null;
+      else
+         return dataHolders;
+   }
+
+   private List<YoVariable<?>> findVariable(String varName)
+   {
+      YoVariable<?> variable = fullnameToVariableMap.get(varName);
+
+      if (variable != null)
+         return Collections.singletonList(variable);
+      else
+         return nameToVariablesMap.get(varName);
+   }
+
    private DataHolder<?> createDataHolder(int offset, int elements, YoVariable<?> variable)
    {
-      int[] dims = { elements, 1 };
-      String name =  variable.getName();
+      int[] dims = {elements, 1};
+      String name = variable.getName();
       if (variable instanceof YoEnum<?>)
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
-
             @Override
             public void set(long entryAsLong)
             {
-               set((Long) (entryAsLong));
+               set((Long) entryAsLong);
             }
 
          };
@@ -171,7 +189,6 @@ public class YoVariableExporter extends YoVariableLogReader
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
-
             @Override
             public void set(long entryAsLong)
             {
@@ -184,7 +201,6 @@ public class YoVariableExporter extends YoVariableLogReader
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
-
             @Override
             public void set(long entryAsLong)
             {
@@ -197,11 +213,10 @@ public class YoVariableExporter extends YoVariableLogReader
       {
          return new DataHolder<Double>(offset, new MLDouble(name, dims))
          {
-
             @Override
             public void set(long entryAsLong)
             {
-               set((Double) Double.longBitsToDouble(entryAsLong));
+               set(Double.longBitsToDouble(entryAsLong));
             }
 
          };
@@ -210,13 +225,11 @@ public class YoVariableExporter extends YoVariableLogReader
       {
          return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
-
             @Override
             public void set(long entryAsLong)
             {
-               set((Long) (entryAsLong == 0L ? 0L : 1L));   // Force true to equal 1L in all cases
+               set((Long) (entryAsLong == 0L ? 0L : 1L)); // Force true to equal 1L in all cases
             }
-
          };
       }
       else

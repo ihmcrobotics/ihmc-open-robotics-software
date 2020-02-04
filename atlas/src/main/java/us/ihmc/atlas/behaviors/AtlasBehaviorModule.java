@@ -3,7 +3,7 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
@@ -15,7 +15,7 @@ public class AtlasBehaviorModule
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean START_FOOTSTEP_PLANNING_TOOLBOX = false;
 
-   private MultiStageFootstepPlanningModule multiStageFootstepPlanningModule;
+   private FootstepPlanningToolboxModule footstepPlanningModule;
 
    public AtlasBehaviorModule()
    {
@@ -24,19 +24,22 @@ public class AtlasBehaviorModule
          ThreadTools.startAsDaemon(() ->
          {
             LogTools.info("Creating footstep toolbox");
-            multiStageFootstepPlanningModule = new MultiStageFootstepPlanningModule(createRobotModel(),
-                                                                                    null,
-                                                                                    false,
-                                                                                    DomainFactory.PubSubImplementation.FAST_RTPS);
+            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(),
+                                                                       null,
+                                                                       false,
+                                                                       DomainFactory.PubSubImplementation.FAST_RTPS);
          }, "MultiStageFootstepPlanningModule");
       }
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createForBackpack(createRobotModel());
 
-      Runtime.getRuntime().addShutdownHook(ThreadTools.startAThread(() ->
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
       { // add cleanup actions here
-         multiStageFootstepPlanningModule.destroy();
+         if (START_FOOTSTEP_PLANNING_TOOLBOX)
+         {
+            footstepPlanningModule.destroy();
+         }
       }, "Cleanup"));
    }
 

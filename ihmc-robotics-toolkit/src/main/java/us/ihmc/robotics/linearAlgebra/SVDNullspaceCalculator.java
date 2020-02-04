@@ -4,9 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.SingularOps;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.MatrixTools;
 
 public class SVDNullspaceCalculator implements NullspaceCalculator
 {

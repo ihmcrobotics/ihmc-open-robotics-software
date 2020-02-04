@@ -11,6 +11,7 @@ import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
+import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
@@ -78,7 +79,7 @@ public class SDFCollisionBoxProvider implements CollisionBoxProvider
          }
          else
          {
-            PrintTools.error("Cannot create collision box for " + holder);
+            LogTools.debug("Cannot create collision box for " + holder);
             continue;
          }
          meshes.add(mesh);

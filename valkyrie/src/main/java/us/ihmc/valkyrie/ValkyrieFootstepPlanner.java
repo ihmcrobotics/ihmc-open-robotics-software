@@ -7,24 +7,22 @@ import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class ValkyrieFootstepPlanner
 {
    public ValkyrieFootstepPlanner()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
       
       
       tryToStartModule(() -> startFootstepModule(robotModel)); 
    }
    
-   private void startFootstepModule(DRCRobotModel robotModel) throws IOException
+   private void startFootstepModule(DRCRobotModel robotModel)
    {
-      //new FootstepPlanningToolboxModule(robotModel, null, true);
-      new MultiStageFootstepPlanningModule(robotModel, null, true, PubSubImplementation.FAST_RTPS);
+      new FootstepPlanningToolboxModule(robotModel, null, true);
    }
    
    private void tryToStartModule(ModuleStarter runnable)
