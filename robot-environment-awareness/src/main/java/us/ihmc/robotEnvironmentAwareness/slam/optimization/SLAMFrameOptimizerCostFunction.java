@@ -3,7 +3,6 @@ package us.ihmc.robotEnvironmentAwareness.slam.optimization;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction
@@ -22,8 +21,7 @@ public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunct
    public void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
    {
       transformToPack.setTranslation(input.get(0), input.get(1), input.get(2));
-      if(IhmcSLAM.ENABLE_ORIENTATION_CORRECTION)
-         transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER);
+      transformToPack.setRotationYawPitchRoll(input.get(5) / ANGLE_SCALER, input.get(4) / ANGLE_SCALER, input.get(3) / ANGLE_SCALER);
    }
 
    public void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
