@@ -28,6 +28,7 @@ class ValkyrieTorqueSpeedTestConfig {
 	public boolean showGui;
 	public TestType testType;
 	public String footstepsFile;
+	public boolean disableAnkleLimits;
 	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
@@ -41,11 +42,12 @@ class ValkyrieTorqueSpeedTestConfig {
 		showGui = true;
 		testType = TestType.STAIRS;
 		footstepsFile = null;
+		disableAnkleLimits = false;
 	}
 
 	public String toString() {
-		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\n",
-				testType, stepStartingDistance, stepHeight, numberOfSteps, showGui);
+		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\nDisable Ankle Limits: %b\n",
+				testType, stepStartingDistance, stepHeight, numberOfSteps, showGui, disableAnkleLimits);
 		if (footstepsFile != null) {
 			value += String.format("Footsteps Filename: %s\n", footstepsFile);
 		}

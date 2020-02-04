@@ -38,7 +38,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
@@ -46,6 +48,7 @@ import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
@@ -78,6 +81,31 @@ public class TorqueSpeedTestRunner {
 		}
 
 		return argumentParser;
+	}
+	
+	public void disableAnkleLimits(ValkyrieRobotModel robotModel)
+	{
+		robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true)
+		{
+			@Override
+			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
+			{
+				if (jointHolder.getName().contains("AnklePitch"))
+					jointHolder.setLimits(-Math.PI, Math.PI);
+			}
+		});
+	}	
+	
+	private ValkyrieSDFDescriptionMutator getAnkleLimitMutator(ValkyrieRobotModel robot)
+	{ 
+		return new ValkyrieSDFDescriptionMutator(robot.getJointMap(), true) {
+			@Override
+			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
+			{
+				if (jointHolder.getName().contains("AnklePitch"))
+					jointHolder.setLimits(-Math.PI, Math.PI);
+			}
+		};
 	}
 
 	public static void main(String[] args) {
@@ -132,7 +160,7 @@ public class TorqueSpeedTestRunner {
 				validJointNames.add(joint.getPascalCaseName());
 			}
 		}
-
+		
 		// Add a mutator for each joint torque limit specified in the parameter file
 		for (String joint : config.torqueLimits.keySet()) {
 			if (!validJointNames.contains(joint)) {
@@ -143,14 +171,23 @@ public class TorqueSpeedTestRunner {
 			mutator.addMutator(
 					new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), joint, config.torqueLimits.get(joint)));
 		}
-		robot.setSDFDescriptionMutator(mutator);
 
 		// Create test runner and test case class
 		TorqueSpeedTestRunner runner = new TorqueSpeedTestRunner();
 		ValkyrieTorqueSpeedCurveEndToEndTestNasa tester = new ValkyrieTorqueSpeedCurveEndToEndTestNasa();
 
+		// Disable ankle limits on the robot
+		if (config.disableAnkleLimits) {
+			mutator.addMutator(runner.getAnkleLimitMutator(robot));
+		}		
+
+		robot.setSDFDescriptionMutator(mutator);
+		
 		// Set whether tester should show a GUI
 		tester.setGuiEnabled(config.showGui);
+		
+
+
 
 		// Set up output directories for test results
 		File outputPrefixDirectory = runner.getOutputDirectory("capped_torque");

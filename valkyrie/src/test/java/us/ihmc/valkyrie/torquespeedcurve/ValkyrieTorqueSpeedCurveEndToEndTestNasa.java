@@ -54,7 +54,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
+
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -533,18 +533,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		stepToPack.getLocation().set(x, y, heightMap.heightAt(x, y, 50.0));
 	}
 
-	private void disableAnkleLimits(ValkyrieRobotModel robotModel)
-	{
-		robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true)
-		{
-			@Override
-			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-			{
-				if (jointHolder.getName().contains("AnklePitch"))
-					jointHolder.setLimits(-Math.PI, Math.PI);
-			}
-		});
-	}
+
 
 	// Pattern-matched from TorqueSpeedDataExporter
 	private static File exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
@@ -629,10 +618,4 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		}
 	}
 
-	private static File getDataOutputFolder(String folderName) throws IOException
-	{
-		Path path = Paths.get("D:/DataAndVideos/Valkyrie/" + folderName);
-		FileTools.ensureDirectoryExists(path);
-		return path.toFile();
-	}
 }
