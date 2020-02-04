@@ -248,9 +248,12 @@ public class RandomICPSLAMTest
       sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
       sensorPoseTwo.appendYawRotation(Math.toRadians(-90.0));
 
-      RigidBodyTransform randomTransformer = createRandomDriftedTransform(new Random(0612L), 0.1, 10.0);
-      preMultiplier.multiply(randomTransformer);
-      sensorPoseTwo.multiply(randomTransformer);
+      RigidBodyTransform driftingTransformer = new RigidBodyTransform();
+      driftingTransformer.appendTranslation(0.0, 0.03, 0.03);
+      driftingTransformer.prependYawRotation(Math.toRadians(5.0));
+      
+      preMultiplier.multiply(driftingTransformer);
+      sensorPoseTwo.multiply(driftingTransformer);
 
       StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
                                                                                                                                  stairHeight, stairWidth,
@@ -287,6 +290,8 @@ public class RandomICPSLAMTest
       for (int i = 0; i < 50; i++)
          ruler[i] = new Point3D(0.15, 0.0, (double) i * octreeResolution);
       slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
+      
+      slamViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, slam.getOctreeResolution(), true);
 
       slamViewer.start("testOptimizationForSimulatedPointCloud");
 
@@ -366,33 +371,5 @@ public class RandomICPSLAMTest
 
       originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
       ThreadTools.sleepForever();
-   }
-
-   private RigidBodyTransform createRandomDriftedTransform(Random random, double positionBound, double angleBoundDegree)
-   {
-      RigidBodyTransform randomTransform = new RigidBodyTransform();
-      int positionAxis = random.nextInt(2);
-      int angleAxis = random.nextInt(2);
-
-      double randomAngle = 2 * Math.toRadians(angleBoundDegree) * (random.nextDouble() - 0.5);
-      if (angleAxis == 0)
-         randomTransform.appendRollRotation(randomAngle);
-      if (angleAxis == 1)
-         randomTransform.appendPitchRotation(randomAngle);
-      else
-         randomTransform.appendYawRotation(randomAngle);
-
-      double randomTranslation = 2 * positionBound * (random.nextDouble() - 0.5);
-      if (positionAxis == 0)
-         randomTransform.appendTranslation(randomTranslation, 0.0, 0.0);
-      if (positionAxis == 1)
-         randomTransform.appendTranslation(0.0, randomTranslation, 0.0);
-      else
-         randomTransform.appendTranslation(0.0, 0.0, randomTranslation);
-
-      System.out.println("positionAxis " + positionAxis + " " + randomTranslation);
-      System.out.println("angleAxis " + angleAxis + " " + Math.toDegrees(randomAngle));
-
-      return randomTransform;
    }
 }
