@@ -265,6 +265,7 @@ public class BodyPathAndFootstepPlannerWrapper implements BodyPathAndFootstepPla
       listOfStatistics.clear();
 
       listOfStatistics.addStatistics(waypointPathPlanner.getPlannerStatistics());
+      listOfStatistics.addStatistics(footstepPlanner.getPlannerStatistics());
 
       return listOfStatistics;
    }

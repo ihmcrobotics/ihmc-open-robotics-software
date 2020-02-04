@@ -1,15 +1,14 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
-import us.ihmc.tools.io.WorkspacePathTools;
 
-import java.nio.file.Path;
 import java.util.Random;
 
 public class BehaviorPlanarRegionEnvironments
@@ -232,8 +231,7 @@ public class BehaviorPlanarRegionEnvironments
 
    private static PlanarRegionsList loadDataSet(String dataSetName)
    {
-      Path openRobotics = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path path = openRobotics.resolve("robot-environment-awareness/Data/PlanarRegion/20190710_SLAM_PlanarRegionFittingExamples/").resolve(dataSetName);
-      return PlanarRegionFileTools.importPlanarRegionData(path.toFile());
+      return PlanarRegionFileTools.importPlanarRegionData(ClassLoader.getSystemClassLoader(),
+                                                          DataSetIOTools.DATA_SET_DIRECTORY_PATH + "/20190710_SLAM_PlanarRegionFittingExamples/" + dataSetName);
    }
 }

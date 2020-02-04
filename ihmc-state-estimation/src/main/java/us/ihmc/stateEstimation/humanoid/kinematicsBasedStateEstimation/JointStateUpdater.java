@@ -1,11 +1,11 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -23,7 +23,6 @@ public class JointStateUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBodyBasics rootBody;
 
    private OneDoFJointBasics[] oneDoFJoints;
@@ -35,7 +34,6 @@ public class JointStateUpdater
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
          StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
    {
-      spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       rootBody = inverseDynamicsStructure.getElevator();
 
       this.sensorMap = sensorOutputMapReadOnly;
@@ -74,9 +72,9 @@ public class JointStateUpdater
       String pelvisIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft();
       String chestIMUName = stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight();
 
-      for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
+      for (int i = 0; i < sensorOutputMapReadOnly.getIMUOutputs().size(); i++)
       {
-         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
+         IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUOutputs().get(i);
          if (sensorReadOnly.getSensorName().equals(pelvisIMUName))
             pelvisIMU = sensorReadOnly;
 
@@ -91,15 +89,15 @@ public class JointStateUpdater
       }
       else
       {
-         PrintTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
+         LogTools.warn("Could not find the given pelvis and/or chest IMUs: pelvisIMU = " + pelvisIMUName + ", chestIMU = " + chestIMUName);
          if(pelvisIMU == null)
          {
-            PrintTools.warn("Pelvis IMU is null.");
+            LogTools.warn("Pelvis IMU is null.");
          }
 
          if(chestIMU == null)
          {
-            PrintTools.warn("Chest IMU is null.");
+            LogTools.warn("Chest IMU is null.");
          }
 
          return null;
@@ -121,10 +119,11 @@ public class JointStateUpdater
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics oneDoFJoint = oneDoFJoints[i];
+         OneDoFJointStateReadOnly jointSensorOutput = sensorMap.getOneDoFJointOutput(oneDoFJoint);
 
-         double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
-         double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
-         double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
+         double positionSensorData = jointSensorOutput.getPosition();
+         double velocitySensorData = jointSensorOutput.getVelocity();
+         double torqueSensorData = jointSensorOutput.getEffort();
 
          if (enableIMUBasedJointVelocityEstimator.getValue() && iMUBasedJointStateEstimator != null)
          {
@@ -143,6 +142,5 @@ public class JointStateUpdater
       }
 
       rootBody.updateFramesRecursively();
-      spatialAccelerationCalculator.reset();
    }
 }

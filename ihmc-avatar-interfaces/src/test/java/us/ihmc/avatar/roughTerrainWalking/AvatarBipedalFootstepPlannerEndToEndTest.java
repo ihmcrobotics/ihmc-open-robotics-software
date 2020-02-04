@@ -7,20 +7,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -126,7 +115,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(true);
-      networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableNetworkProcessor(true);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
@@ -208,19 +196,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
    }
 
-   @Disabled
-   @Test
-   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner()
-   {
-      double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
-
-      setupSimulation(cinderBlockField, startingLocation);
-      drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, goalPose);
-   }
-
    @Tag("video")
    @Test
    public void testSteppingStonesWithAStar()
@@ -232,19 +207,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       setupSimulation(steppingStoneField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
       runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
-   }
-
-   @Disabled
-   @Test
-   public void testSteppingStonesWithPlanarRegionBipedalPlanner()
-   {
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                             new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
-
-      setupSimulation(steppingStoneField, startingLocation);
-      drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, goalPose);
    }
 
    @Disabled

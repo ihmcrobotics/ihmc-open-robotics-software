@@ -264,6 +264,7 @@ public class KinematicsToolboxController extends ToolboxController
     * burden.
     */
    private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   private final YoDouble maxCollisionResolutionVelocity = new YoDouble("maxCollisionResolutionVelocity", registry);
    /** Sets the maximum number of collisions to create YoVariables for. */
    private final int numberOfCollisionsToVisualize = 20;
    /** Debug variable. */
@@ -335,6 +336,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       enableCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
+      maxCollisionResolutionVelocity.set(0.10);
       setupCollisionVisualization();
    }
 
@@ -352,11 +354,14 @@ public class KinematicsToolboxController extends ToolboxController
          YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
          YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
 
-         AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions",
-                                                  new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         if (yoGraphicsListRegistry != null)
+         {
+            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions",
+                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         }
 
          yoCollisionDistances[i] = collisionDistance;
          yoCollisionPointAs[i] = collisionPointA;
@@ -861,10 +866,14 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsCollidable collidableA = collision.getCollidableA();
          KinematicsCollidable collidableB = collision.getCollidableB();
 
+         if (collision.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+            continue;
+
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
          double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
+         sigmaDot = Math.min(sigmaDot, maxCollisionResolutionVelocity.getValue());
 
          KinematicsCollisionFrame collisionFrame = collisionFrames.add();
          collisionFrame.update(collision, true);

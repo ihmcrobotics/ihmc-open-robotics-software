@@ -39,6 +39,20 @@ public class FootstepNodeSnapData
       return snappedNodeTransform;
    }
 
+   public void set(FootstepNodeSnapData other)
+   {
+      this.snapTransform.set(other.snapTransform);
+      this.croppedFoothold.set(other.croppedFoothold);
+      this.snappedNodeTransform = null;
+   }
+
+   public void clear()
+   {
+      this.snapTransform.setToNaN();
+      this.croppedFoothold.setToNaN();
+      this.snappedNodeTransform = null;
+   }
+
    private static RigidBodyTransform computeSnappedNodeTransform(FootstepNode node, FootstepNodeSnapData snapData)
    {
       RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();

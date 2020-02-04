@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# Request the controller to use a hand to help supporting the robot weight.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

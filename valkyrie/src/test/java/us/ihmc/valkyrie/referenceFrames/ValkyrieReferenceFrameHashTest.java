@@ -14,7 +14,7 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, true);
+      return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
    @Override

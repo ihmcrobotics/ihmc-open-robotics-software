@@ -8,8 +8,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -41,12 +41,18 @@
                   </HBox>
                   <VBox prefHeight="70.0" prefWidth="615.0" spacing="10.0">
                      <children>
-                        <HBox prefHeight="74.0" prefWidth="615.0">
+                        <HBox prefHeight="74.0" prefWidth="615.0" spacing="10.0">
                            <children>
                               <VBox alignment="CENTER" prefHeight="0.0" prefWidth="110.0" spacing="10.0">
                                  <children>
                                     <ToggleButton fx:id="enableStereoButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo" />
                                     <Button fx:id="clearStereoButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearStereo" text="Clear" />
+                                 </children>
+                              </VBox>
+                              <VBox alignment="CENTER" prefHeight="0.0" prefWidth="110.0" spacing="10.0">
+                                 <children>
+                                    <ToggleButton fx:id="enableDepthButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Depth" />
+                                    <Button fx:id="clearDepthButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearDepth" text="Clear" />
                                  </children>
                               </VBox>
                               <GridPane prefHeight="70.0" prefWidth="283.0">
@@ -63,7 +69,7 @@
 	                          	      <opaqueInsets>
 	                          	        <Insets />
 	                                	</opaqueInsets>
-	                            	 </Spinner>
+	                               </Spinner>
 	                          	</children>
                               </GridPane>
                            </children>
@@ -82,7 +88,7 @@
                   <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="79.0" text="Frames" textAlignment="CENTER" />
-                        <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" min="1" max="200.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="20.0">
+                        <Slider fx:id="navigationFramesSlider" blockIncrement="1.0" majorTickUnit="5.0" max="200.0" min="1" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="20.0">
                            <tooltip>
                               <Tooltip text="Set number of frames to visualize" />
                            </tooltip>

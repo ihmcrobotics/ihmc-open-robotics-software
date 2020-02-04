@@ -30,11 +30,6 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
-   public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer) throws IOException
-   {
-      this(drcRobotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-   }
-
    public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
          throws IOException
    {

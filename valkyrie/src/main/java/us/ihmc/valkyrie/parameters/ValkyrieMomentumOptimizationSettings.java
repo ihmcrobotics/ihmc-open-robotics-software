@@ -16,6 +16,12 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
+   // defaults for unscaled model:
+   private static final double defaultRhoWeight = 0.00001;
+   private static final double defaultRhoMin = 4.0;
+   private static final double defaultRhoRateDefaultWeight = 5E-8;
+   private static final double defaultRhoRateHighWeight = 8.0E-7;
+
    private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
@@ -33,10 +39,10 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    private final double jointAccelerationWeight = 0.005;
    private final double jointJerkWeight = 1.6E-6;
-   private final double rhoWeight = 0.00001;
-   private final double rhoMin = 4.0;
-   private final double rhoRateDefaultWeight = 5E-8;
-   private final double rhoRateHighWeight = 8.0E-7;
+   private final double rhoWeight;
+   private final double rhoMin;
+   private final double rhoRateDefaultWeight;
+   private final double rhoRateHighWeight;
    private final Vector2D copWeight = new Vector2D(200.0, 200.0);
    private final Vector2D copRateDefaultWeight = new Vector2D(0.32, 0.32);
    private final Vector2D copRateHighWeight = new Vector2D(0.0004, 0.0016);
@@ -61,6 +67,15 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
 
    public ValkyrieMomentumOptimizationSettings(ValkyrieJointMap jointMap)
    {
+      double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
+
+      linearMomentumWeight.scale(1.0 / scale);
+      angularMomentumWeight.scale(1.0 / scale);
+      rhoWeight = defaultRhoWeight / scale;
+      rhoMin = defaultRhoMin * scale;
+      rhoRateDefaultWeight = defaultRhoRateDefaultWeight / (scale * scale);
+      rhoRateHighWeight = defaultRhoRateHighWeight / (scale * scale);
+
       for (SpineJointName jointName : jointMap.getSpineJointNames())
       {
          configureBehavior(jointspaceWeights, jointMap, jointName, spineJointspaceWeight);

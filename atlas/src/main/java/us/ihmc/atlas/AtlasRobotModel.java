@@ -3,12 +3,11 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 import java.util.List;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPostProcessorParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -46,9 +45,9 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -262,6 +261,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return atlasPhysicalProperties;
    }
 
+   public RobotTarget getTarget()
+   {
+      return target;
+   }
+
    @Override
    public AtlasJointMap getJointMap()
    {
@@ -271,14 +275,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public AtlasRobotVersion getAtlasVersion()
    {
       return selectedVersion;
-   }
-
-   @Override
-   public Transform getJmeTransformWristToHand(RobotSide side)
-   {
-      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
-      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
-      return jmeAttachmentPlateToPalm;
    }
 
    @Override
@@ -431,7 +427,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public UIParameters getUIParameters()
    {
-      return new AtlasUIParameters(atlasPhysicalProperties);
+      return new AtlasUIParameters(selectedVersion, atlasPhysicalProperties);
    }
 
    @Override
@@ -486,13 +482,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new AtlasCollisionBoxProvider(loader, getJointMap());
-   }
-
-   @Override
-   public double getStandPrepAngle(String jointName)
-   {
-      System.err.println("Need to add access to stand prep joint angles.");
-      return 0;
    }
 
    @Override
@@ -876,6 +865,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return new AtlasFootstepPlannerParameters();
+   }
+
+   @Override
+   public FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
+   {
+      return new AtlasFootstepPostProcessorParameters();
    }
 
    @Override

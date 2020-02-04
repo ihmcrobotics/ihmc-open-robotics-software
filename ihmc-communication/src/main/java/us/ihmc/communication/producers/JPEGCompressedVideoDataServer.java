@@ -28,7 +28,11 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
+      if (bufferedImage == null)
+         return;
+
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
+
       try
       {
          ByteBuffer buffer;

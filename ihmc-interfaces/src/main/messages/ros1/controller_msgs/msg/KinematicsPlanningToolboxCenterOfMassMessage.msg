@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body inverse kinematics module.
+# It holds all the information needed for detailing the type of constraint to apply to the center of mass.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

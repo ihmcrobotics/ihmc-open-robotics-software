@@ -12,7 +12,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController">
+<AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController">
     <children>
       <SplitPane dividerPositions="0.04006541291905151, 0.5" layoutY="7.0" prefHeight="407.0" prefWidth="1508.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -29,11 +29,12 @@
                <children>
                     <GridPane>
                         <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="240.0" minWidth="235.0" prefWidth="240.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="105.0" prefWidth="110.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="130.0" prefWidth="130.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="240.0" minWidth="124.0" prefWidth="124.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="356.0" minWidth="109.0" prefWidth="128.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="357.0" minWidth="105.0" prefWidth="135.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="326.0" minWidth="90.0" prefWidth="120.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="323.0" minWidth="130.0" prefWidth="236.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.0" minWidth="90.0" prefWidth="197.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="160.0" minWidth="140.0" prefWidth="140.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="90.0" prefWidth="110.0" />
                         </columnConstraints>
@@ -42,62 +43,78 @@
                             <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                        <RowConstraints />
                         <RowConstraints />
                         <RowConstraints />
                         <RowConstraints />
                         <RowConstraints />
                         </rowConstraints>
                         <children>
-                            <CheckBox fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" />
+                            <CheckBox fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" GridPane.columnSpan="2" />
             
-                            <CheckBox fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.rowIndex="1" />
+                            <CheckBox fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.columnSpan="2" GridPane.rowIndex="1" />
 
-                            <Label text="Max step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
-                            <Label text="Max step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                            <Label text="Min step width" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                            <Label text="Cliff height" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                            <Label text="Max xy wiggle" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                            <Label text="Max yaw wiggle" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                            <Label text="Wiggle inside delta" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Label text="Ideal step length" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label text="Ideal step width" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
 
-                            <Label text="Min step length" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                            <Label text="Max step z" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
-                            <Label text="Max surface incline" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                            <Label text="Max step up X" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                            <Label text="Step up height" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                            <Label text="Max step down X" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                            <Label text="Step down height" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Label text="Max step length" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
+                            <Label text="Min step length" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Max step width" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label text="Min step width" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label text="Cliff height" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Max xy wiggle" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Label text="Max yaw wiggle" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Label text="Wiggle inside delta" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
 
-                            <Label text="Max step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
-                            <Label text="Min step yaw" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                            <Label text="Min foothold percent" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-            
-                            <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="2" />
-                            <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                            <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                            <Spinner fx:id="cliffHeightSpinner" editable="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                            <Spinner fx:id="maxXYWiggleSpinner" editable="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                            <Spinner fx:id="maxYawWiggleSpinner" editable="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                            <Spinner fx:id="wiggleInsideDeltaSpinner" editable="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Label text="Max step yaw" GridPane.columnIndex="4" GridPane.halignment="RIGHT" />
+                            <Label text="Min step yaw" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Step yaw fraction at full length" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label layoutX="734.0" layoutY="77.0" text="Min X Clearance" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label layoutX="714.0" layoutY="113.0" text="Min Y Clearance" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label layoutX="714.0" layoutY="113.0" text="Cliff clearance" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
 
-                            <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="6" />
-                            <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                            <Spinner fx:id="maxStepUpX" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                            <Spinner fx:id="maxStepDownX" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                            <Spinner fx:id="stepDownHeight" editable="true" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Label text="Max step z" GridPane.columnIndex="6" GridPane.halignment="RIGHT" />
+                            <Label text="Min foothold percent" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                            <Label text="Max surface incline" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                            <Label text="Step up Max X" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Label text="Step up Max Y" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Label text="Step up height" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Label text="Step down Max X" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Label text="Step down Max Y" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Label text="Step down height" GridPane.columnIndex="6" GridPane.halignment="RIGHT" GridPane.rowIndex="8" />
 
-                            <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="4" />
-                            <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                            <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                        <Spinner fx:id="cliffClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
 
-                        <Label layoutX="734.0" layoutY="77.0" text="Min X Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <Label layoutX="714.0" layoutY="113.0" text="Min Y Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                        <Label layoutX="714.0" layoutY="113.0" text="Cliff clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Spinner fx:id="idealStepLength" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Spinner fx:id="idealStepWidth" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                            <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="3" />
+                            <Spinner fx:id="minStepLength" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                            <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                            <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                            <Spinner fx:id="cliffHeightSpinner" editable="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Spinner fx:id="maxXYWiggleSpinner" editable="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Spinner fx:id="maxYawWiggleSpinner" editable="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Spinner fx:id="wiggleInsideDeltaSpinner" editable="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+
+                            <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="5" />
+                            <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                            <Spinner fx:id="stepYawReductionFactor" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                            <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                            <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                            <Spinner fx:id="cliffClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+
+                            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="7" />
+                            <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1" />
+                            <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                            <Spinner fx:id="maxStepUpX" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                            <Spinner fx:id="maxStepUpY" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                            <Spinner fx:id="maxStepDownX" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                            <Spinner fx:id="maxStepDownY" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                            <Spinner fx:id="stepDownHeight" editable="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="8" />
+
+
                         </children>
                     </GridPane>
                </children>

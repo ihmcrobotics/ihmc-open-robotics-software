@@ -15,7 +15,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
-   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

@@ -94,7 +94,7 @@ public class AtlasBehaviorSimulation
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
       if (scs.getGUI() != null )
-         scs.getGUI().getFrame().setSize(AWTTools.getDimensionForSmallestScreen());
+         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
 
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()

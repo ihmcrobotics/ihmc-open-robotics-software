@@ -1,13 +1,16 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -37,17 +40,21 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
    public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
+   public static final Topic<Boolean> ShowPostProcessingInfo = topic("ShowPostProcessingInfo");
 
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
+   public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
    public static final Topic<Boolean> RequestPlannerStatistics = topic("RequestPlannerStatistics");
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
+
+   public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
+   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
 
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
 
-   public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
    public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");
    public static final Topic<Double> PlannerTimeTaken = topic("PlannerTimeTaken");
@@ -76,6 +83,13 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
+
+   public static final Topic<Point3D> LeftFootStartPosition = topic("LeftFootStartPosition");
+   public static final Topic<Point3D> RightFootStartPosition = topic("RightFootStartPosition");
+   public static final Topic<Quaternion> LeftFootStartOrientation = topic("LeftFootStartOrientation");
+   public static final Topic<Quaternion> RightFootStartOrientation = topic("RightFootStartOrientation");
+   public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
+   public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
 
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 
@@ -111,10 +125,17 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowInterRegionVisibilityMap = topic("ShowInterRegionVisibilityMap");
 
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
-   public static final Topic<FootstepNodeDataListMessage> NodeData = topic("NodeData");
+   public static final Topic<PlannerNodeDataList> NodeData = topic("NodeData");
+   public static final Topic<PlannerNodeDataList> FootstepGraphPart = topic("FootstepGraphPart");
    public static final Topic<Boolean> ShowNodeData = topic("ShowNodeData");
-   public static final Topic<FootstepPlannerOccupancyMapMessage> OccupancyMap = topic("OccupancyMap");
+   public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
+   public static final Topic<PlannerLatticeMap> ExpandedNodesMap = topic("ExpandedNodesMap");
    public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
+   public static final Topic<Boolean> ShowExpandedNodes = topic("ShowExpandedNodes");
+   public static final Topic<Boolean> ShowFullGraph = topic("ShowFullGraph");
+   public static final Topic<Double> ExpansionFractionToShow = topic("ExpansionFractionToShow");
+   public static final Topic<RejectionReasonToVisualize> RejectionReasonToShow = topic("RejectionReasonToShow");
+   public static final Topic<Boolean> ShowRejectedNodes = topic("ShowRejectedNodes");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");

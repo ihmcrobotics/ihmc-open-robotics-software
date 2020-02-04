@@ -7,11 +7,7 @@ import java.util.Collections;
 
 import org.ros.internal.message.Message;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.*;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
@@ -40,7 +36,6 @@ public class OpenHumanoidsSimulator
 {
    private static final String ROBOT_NAME = "valkyrie";
    private static final String DEFAULT_PREFIX = "/ihmc_ros";
-   private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
    private static final String DEFAULT_TF_PREFIX = null;
    private SDFEnvironment environment = null;
@@ -78,7 +73,9 @@ public class OpenHumanoidsSimulator
             simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, false, true);
             System.out.println("Added extra foot contact points.");
          }
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, model, simulationContactPoints);
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+	      robotModel.setCustomModel(model);
+	      robotModel.setSimulationContactPoints(simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
@@ -101,18 +98,11 @@ public class OpenHumanoidsSimulator
 
 		  PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList());
 
-		  networkProcessorParameters.enableROSAPICommunicator(true);
 		  if (runAutomaticDiagnosticRoutine)
 		  {
 		     networkProcessorParameters.enableBehaviorModule(true);
 		     networkProcessorParameters.enableBehaviorVisualizer(true);
 		     networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
-		  }
-
-		  if (START_UI)
-		  {
-		     networkProcessorParameters.enableUiModule(true);
-		     System.err.println("Cannot start UI automatically from open source projects. Start UI Manually");
 		  }
 
 		  if(disableViz)

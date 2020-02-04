@@ -8,14 +8,18 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 
+import java.util.function.DoubleSupplier;
+
 public class LinearHeightCost implements FootstepCost
 {
-   private final FootstepPlannerParametersReadOnly costParameters;
+   private final DoubleSupplier stepUpWeight;
+   private final DoubleSupplier stepDownWeight;
    private final FootstepNodeSnapperReadOnly snapper;
 
-   public LinearHeightCost(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper)
+   public LinearHeightCost(DoubleSupplier stepUpWeight, DoubleSupplier stepDownWeight, FootstepNodeSnapperReadOnly snapper)
    {
-      this.costParameters = parameters;
+      this.stepUpWeight = stepUpWeight;
+      this.stepDownWeight = stepDownWeight;
       this.snapper = snapper;
    }
 
@@ -34,8 +38,8 @@ public class LinearHeightCost implements FootstepCost
       double heightChange = snappedEndNodeTransform.getTranslationZ() - snappedStartNodeTransform.getTranslationZ();
 
       if (heightChange > 0.0)
-         return costParameters.getStepUpWeight() * heightChange;
+         return stepUpWeight.getAsDouble() * heightChange;
       else
-         return -costParameters.getStepDownWeight() * heightChange;
+         return -stepDownWeight.getAsDouble() * heightChange;
    }
 }

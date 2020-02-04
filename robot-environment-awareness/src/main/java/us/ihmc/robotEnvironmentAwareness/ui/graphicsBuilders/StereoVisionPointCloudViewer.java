@@ -18,9 +18,9 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
 {
    private final AtomicReference<Integer> sizeOfPointCloud;
 
-   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager)
+   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic)
    {
-      super(messageState, uiMessager);
+      super(messageState, uiMessager, enableTopic, clearTopic);
       sizeOfPointCloud = uiMessager.createInput(REAModuleAPI.UIStereoVisionSize, PointCloudAnchorPaneController.initialSizeOfPointCloud);
    }
 
@@ -70,18 +70,6 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       scanMeshView.setMaterial(meshBuilder.generateMaterial());
       scanMeshToRender.set(scanMeshView);
       meshBuilder.clear();
-   }
-
-   @Override
-   protected Topic<Boolean> createEnableInput()
-   {
-      return REAModuleAPI.UIStereoVisionShow;
-   }
-
-   @Override
-   protected Topic<Boolean> createClearInput()
-   {
-      return REAModuleAPI.UIStereoVisionClear;
    }
 
    public static javafx.scene.paint.Color intToColor(int value)

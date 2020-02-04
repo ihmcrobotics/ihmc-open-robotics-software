@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -486,7 +486,7 @@ public class InverseDynamicsQPSolver
       MatrixTools.multAddInner(jointTorqueWeight.getDoubleValue(), torqueJacobian, solverInput_H);
 
       // Compute: f += - J^T W Objective
-      CommonOps.multTransA(-jointTorqueWeight.getDoubleValue(), torqueJacobian, torqueObjective, solverInput_f);
+      CommonOps.multAddTransA(-jointTorqueWeight.getDoubleValue(), torqueJacobian, torqueObjective, solverInput_f);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueQddotJacobian, DenseMatrix64F torqueRhoJacobian, DenseMatrix64F torqueObjective)
@@ -520,7 +520,7 @@ public class InverseDynamicsQPSolver
     *           constant wrenches usually used for compensating for the weight of an object that the
     *           robot is holding.
     * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
-    *           the wieght of the robot.
+    *           the weight of the robot.
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
                                                   DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)

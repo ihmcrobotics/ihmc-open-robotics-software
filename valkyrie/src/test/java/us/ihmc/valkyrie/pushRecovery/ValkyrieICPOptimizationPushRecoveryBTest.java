@@ -17,12 +17,12 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
    @Override
    protected DRCRobotModel getRobotModel()
    {
-      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), RobotTarget.SCS)
             {
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()

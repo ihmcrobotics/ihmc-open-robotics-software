@@ -49,9 +49,9 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -76,6 +76,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private HumanoidFloatingRootJointRobot sdfRobot;
    private HighLevelHumanoidControllerFactory controllerFactory;
    private AvatarSimulation avatarSimulation;
+   private DRCNetworkProcessor networkProcessor;
    private SimulationConstructionSet simulationConstructionSet;
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
@@ -92,7 +93,10 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private RealtimeRos2Node realtimeRos2Node;
 
-   /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
+   /**
+    * The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.)
+    * and is used as input of the network processor.
+    */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
 
    private boolean setupControllerNetworkSubscriber = true;
@@ -110,6 +114,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
+
+   private PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
    public DRCSimulationStarter(DRCRobotModel robotModel, GroundProfile3D groundProfile3D)
    {
@@ -137,7 +143,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
       this.scsInitialSetup.setRunMultiThreaded(true);
 
-
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
@@ -149,10 +154,18 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return environment;
    }
 
+   public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
+   {
+      this.pubSubImplementation = pubSubImplementation;
+   }
+
    /**
-    * Register a controller to be created in addition to the walking controller.
-    * For instance, the CarIngressEgressController can be created by passing its factory, i.e. CarIngressEgressControllerFactory.
-    * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
+    * Register a controller to be created in addition to the walking controller. For instance, the
+    * CarIngressEgressController can be created by passing its factory, i.e.
+    * CarIngressEgressControllerFactory. The active controller can then be switched by either changing
+    * the variable {@code requestedHighLevelState} from SCS or by sending a
+    * {@link HighLevelStateMessage} to the controller.
+    * 
     * @param controllerFactory a factory to create an additional controller.
     */
    public void registerHighLevelControllerState(HighLevelControllerStateFactory controllerFactory)
@@ -183,8 +196,15 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          controllerFactory.attachControllerFailureListener(listener);
    }
 
+   public PubSubImplementation getPubSubImplementation()
+   {
+      return pubSubImplementation;
+   }
+
    /**
-    * Returns the SRCSCSInitialSetup. Can use that object to directly change things in the sim. But need to make those changes before calling createAvatarSimulation().
+    * Returns the SRCSCSInitialSetup. Can use that object to directly change things in the sim. But
+    * need to make those changes before calling createAvatarSimulation().
+    * 
     * @return SRCSCSInitialSetup
     */
    public DRCSCSInitialSetup getSCSInitialSetup()
@@ -193,8 +213,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Sets whether the estimator and the controller are running on the same thread or multiThreaded. Defaults to multiThreaded.
-    * Need to set to false if you want the simulation to be rewindable.
+    * Sets whether the estimator and the controller are running on the same thread or multiThreaded.
+    * Defaults to multiThreaded. Need to set to false if you want the simulation to be rewindable.
+    * 
     * @param runMultiThreaded
     */
    public void setRunMultiThreaded(boolean runMultiThreaded)
@@ -210,8 +231,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Set whether state estimation as on the the real robot or perfect sensors coming from the simulated robot should be used.
-    * By default the state estimator is used.
+    * Set whether state estimation as on the the real robot or perfect sensors coming from the
+    * simulated robot should be used. By default the state estimator is used.
+    * 
     * @param usePerfectSensors
     */
    public void setUsePerfectSensors(boolean usePerfectSensors)
@@ -221,8 +243,10 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Indicates if the state estimator should be aware of the robot starting location.
-    * It is set to false by default, meaning that independently from the robot starting location, the state estimator will think that the robot started at (0, 0) in world but will be aware of the initial yaw.
+    * Indicates if the state estimator should be aware of the robot starting location. It is set to
+    * false by default, meaning that independently from the robot starting location, the state
+    * estimator will think that the robot started at (0, 0) in world but will be aware of the initial
+    * yaw.
     */
    public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
    {
@@ -231,7 +255,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Provide a subscriber for receiving pelvis poses (for instance from the iterative closest point module) to be accounted for in the state estimator.
+    * Provide a subscriber for receiving pelvis poses (for instance from the iterative closest point
+    * module) to be accounted for in the state estimator.
+    * 
     * @param externalPelvisCorrectorSubscriber
     */
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
@@ -260,6 +286,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    /**
     * Set a robot initial setup to use instead of the one in DRCRobotModel.
+    * 
     * @param robotInitialSetup
     */
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
@@ -269,7 +296,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Set a specific starting location. By default, the robot will start at (0, 0) in world with no yaw.
+    * Set a specific starting location. By default, the robot will start at (0, 0) in world with no
+    * yaw.
     */
    @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
@@ -279,7 +307,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
+    * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with
+    * no yaw.
     */
    public void setStartingLocationOffset(OffsetAndYawRobotInitialSetup startingLocationOffset)
    {
@@ -290,7 +319,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
+    * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with
+    * no yaw.
     */
    public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
    {
@@ -300,6 +330,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    /**
     * Sets the initial SCS camera position.
+    * 
     * @param positionX
     * @param positionY
     * @param positionZ
@@ -312,6 +343,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    /**
     * Sets the initial fix point that the SCS camera looks at.
+    * 
     * @param fixX
     * @param fixY
     * @param fixZ
@@ -331,8 +363,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean alreadyCreatedCommunicator = false;
 
    /**
-    * Creates a default output PacketCommunicator for the network processor.
-    * This PacketCommunicator is also set to be used as input for the controller.
+    * Creates a default output PacketCommunicator for the network processor. This PacketCommunicator is
+    * also set to be used as input for the controller.
+    * 
     * @param networkParameters
     */
    private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
@@ -342,12 +375,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (alreadyCreatedCommunicator)
          return;
       alreadyCreatedCommunicator = true;
-
-      PubSubImplementation pubSubImplementation;
-      if (networkParameters.isLocalControllerCommunicatorEnabled())
-         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-      else
-         pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
    }
@@ -363,9 +390,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Creates and starts the simulation and automatically starts the network processor if required.
-    * All the specific requirements (environment, robot initial setup, etc.) have to be set before calling this method.
-    * @param networkParameters if true the network processor is created and started.
+    * Creates and starts the simulation and automatically starts the network processor if required. All
+    * the specific requirements (environment, robot initial setup, etc.) have to be set before calling
+    * this method.
+    * 
+    * @param networkParameters     if true the network processor is created and started.
     * @param automaticallySimulate if true SCS will be simulating when it shows up.
     * @return
     */
@@ -421,7 +450,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
                                                        contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i),
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                            additionaContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
@@ -429,8 +459,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-                                                                 highLevelControllerParameters, walkingControllerParameters, capturePointPlannerParameters);
+      controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                                 feetForceSensorNames,
+                                                                 feetContactSensorNames,
+                                                                 wristForceSensorNames,
+                                                                 highLevelControllerParameters,
+                                                                 walkingControllerParameters,
+                                                                 capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
@@ -527,8 +562,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
             int framesPerSecond = 25;
             RawVideoDataServer drcRenderedSceneVideoHandler = new RawVideoDataServer(scsSensorOutputPacketCommunicator);
-            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height,
-                                                              new VideoDataServerImageCallback(drcRenderedSceneVideoHandler), timeStampProvider,
+            simulationConstructionSet.startStreamingVideoData(cameraConfiguration,
+                                                              width,
+                                                              height,
+                                                              new VideoDataServerImageCallback(drcRenderedSceneVideoHandler),
+                                                              timeStampProvider,
                                                               framesPerSecond);
          }
 
@@ -548,9 +586,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Creates and starts the network processor.
-    * The network processor is necessary to run the behavior module and/or the operator interface.
-    * It has to be created after the simulation.
+    * Creates and starts the network processor. The network processor is necessary to run the behavior
+    * module and/or the operator interface. It has to be created after the simulation.
+    * 
     * @param networkModuleParams
     */
    private void startNetworkProcessor(DRCNetworkModuleParameters networkModuleParams)
@@ -561,7 +599,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
 
-      new DRCNetworkProcessor(robotModel, networkModuleParams);
+      networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams, pubSubImplementation);
    }
 
    public AvatarSimulation getAvatarSimulation()
@@ -594,6 +632,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (realtimeRos2Node != null)
       {
          realtimeRos2Node.destroy();
+      }
+
+      if (networkProcessor != null)
+      {
+         networkProcessor.closeAndDispose();
+         networkProcessor = null;
       }
    }
 

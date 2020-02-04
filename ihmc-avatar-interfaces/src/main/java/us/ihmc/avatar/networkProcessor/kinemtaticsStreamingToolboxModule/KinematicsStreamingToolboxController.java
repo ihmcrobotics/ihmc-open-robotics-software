@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
@@ -132,21 +133,35 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       {
          try
          {
-            ControllerCrashNotificationPacket errorMessage = new ControllerCrashNotificationPacket();
-            StringBuilder stacktrace = errorMessage.getStacktrace();
-            stacktrace.append(StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()));
-            stacktrace.append(' ');
-            stacktrace.append(e.getMessage());
-            if (stacktrace.length() > 255) // TODO We need to make that upper limit configurable.
-               stacktrace.delete(255, stacktrace.length());
-            reportMessage(errorMessage);
+            reportMessage(toCrashNotification(0, StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()) + " " + e.getMessage()));
+            ThreadTools.sleep(10);
+
+            for (int i = 0; i < e.getStackTrace().length; i++)
+            {
+               reportMessage(toCrashNotification(i + 1, e.getStackTrace()[i].toString()));
+               ThreadTools.sleep(10);
+            }
          }
          catch (Exception e1)
          {
             e1.printStackTrace();
          }
+
+         e.printStackTrace();
          isDone.set(true);
       }
+   }
+
+   private static ControllerCrashNotificationPacket toCrashNotification(int index, String message)
+   {
+      ControllerCrashNotificationPacket errorMessage = new ControllerCrashNotificationPacket();
+      errorMessage.setSequenceId(index);
+      StringBuilder stacktrace = errorMessage.getStacktrace();
+      if (message.length() < 255)
+         stacktrace.append(message);
+      else
+         stacktrace.append(message.substring(message.length() - 255, message.length()));
+      return errorMessage;
    }
 
    @Override
