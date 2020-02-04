@@ -18,6 +18,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
+import us.ihmc.robotEnvironmentAwareness.slam.optimization.FristStageSLAMFrameOptimizerCostFunction;
+import us.ihmc.robotEnvironmentAwareness.slam.optimization.SecondStageSLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.geometry.PlanarRegion;

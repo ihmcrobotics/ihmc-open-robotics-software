@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.slam.optimization.SLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;

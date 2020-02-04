@@ -1,10 +1,11 @@
-package us.ihmc.robotEnvironmentAwareness.slam;
+package us.ihmc.robotEnvironmentAwareness.slam.optimization;
 
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSurfaceElement;
 
 public class FristStageSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
 {
