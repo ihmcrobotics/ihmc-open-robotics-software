@@ -157,7 +157,7 @@ public class RandomICPSLAM extends IhmcSLAM
    {
       // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
       // see the overlapped area.
-      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPoseWithKinematicGuess(frame, octree, NUMBER_OF_SOURCE_POINTS,
+      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, NUMBER_OF_SOURCE_POINTS,
                                                                                                       MINIMUM_OVERLAPPED_RATIO);
 
       if (sourcePointsToSensor == null)
@@ -187,7 +187,7 @@ public class RandomICPSLAM extends IhmcSLAM
          else
          {
             int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
-            if (numberOfInliers > 0.99 * sourcePointsToSensor.length)
+            if (numberOfInliers > 0.95 * sourcePointsToSensor.length)
             {
                if (DEBUG)
                   System.out.println("close enough. many inliers.");

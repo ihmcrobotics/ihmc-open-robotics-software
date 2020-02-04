@@ -99,7 +99,7 @@ public class RandomICPSLAMTest
       double minimumOverlappedRatio = 0.3;
 
       NormalOcTree octree = slam.getOctree();
-      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPoseWithKinematicGuess(frame, octree, numberOfSourcePoints,
+      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints,
                                                                                                           minimumOverlappedRatio);
       Point3D[] sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getSensorPose(), sourcePointsToSensorPose);
 

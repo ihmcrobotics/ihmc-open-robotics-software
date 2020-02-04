@@ -34,6 +34,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class IhmcSLAMTools
 {
+   private static OcTreeHitLocationExtractor ocTreeHitLocationExtractor = new OcTreeHitLocationExtractor();
+   
    public static Point3D[] extractPointsFromMessage(StereoVisionPointCloudMessage message)
    {
       int numberOfPoints = message.getColors().size();
@@ -260,7 +262,7 @@ public class IhmcSLAMTools
             {
                if (minDistance < 0.0)
                   minDistance = Double.MAX_VALUE;
-               
+
                Point3D candidatePoint = new Point3D(searchNode.getHitLocationCopy());
                double distance = candidatePoint.distance(point);
                if (distance < minDistance)
@@ -326,30 +328,67 @@ public class IhmcSLAMTools
 
       return candidates;
    }
-
-   private static int index = 0;
-
-   public static Point3DReadOnly[] extractHitLocationsToWorld(NormalOcTree octree)
+   
+   static class OcTreeHitLocationExtractor
    {
-      int numberOfNodes = octree.getNumberOfLeafNodes();
-      Point3D[] hitLocations = new Point3D[numberOfNodes];
+      private int index = 0;
+      
+      OcTreeHitLocationExtractor()
+      {
+         
+      }
+      
+      Point3DReadOnly[] extractHitLocationsToWorld(NormalOcTree octree)
+      {
+         int numberOfNodes = octree.getNumberOfLeafNodes();
+         Point3D[] hitLocations = new Point3D[numberOfNodes];
 
-      index = 0;
-      octree.forEach(child -> packHipLocation(child, hitLocations));
+         index = 0;
+         octree.forEach(child -> packHitLocation(child, hitLocations));
 
-      return hitLocations;
+         return hitLocations;
+      }
+      
+      void clear()
+      {
+         index = 0;
+      }
+      
+      void packHitLocation(NormalOcTreeNode child, Point3D[] hitLocations)
+      {
+         hitLocations[index] = new Point3D(child.getHitLocationCopy());
+         index++;
+      }
    }
 
-   private static void packHipLocation(NormalOcTreeNode child, Point3D[] hitLocations)
-   {
-      hitLocations[index] = new Point3D(child.getHitLocationCopy());
-      index++;
-   }
+//   private static int index = 0;
+//
+//   public static Point3DReadOnly[] extractHitLocationsToWorld(NormalOcTree octree)
+//   {
+//      int numberOfNodes = octree.getNumberOfLeafNodes();
+//      Point3D[] hitLocations = new Point3D[numberOfNodes];
+//
+//      index = 0;
+//      octree.forEach(child -> packHipLocation(child, hitLocations));
+//
+//      return hitLocations;
+//   }
+//
+//   private static void packHipLocation(NormalOcTreeNode child, Point3D[] hitLocations)
+//   {
+//      hitLocations[index] = new Point3D(child.getHitLocationCopy());
+//      index++;
+//   }
 
-   public static Point3D[] createSourcePointsToSensorPoseWithKinematicGuess(IhmcSLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints,
+   /**
+    * if there is not enough source points, think this frame is key frame.
+    * return null.
+    */
+   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints,
                                                                             double minimumOverlappedRatio)
    {
-      Point3DReadOnly[] octreePointMapToWorld = extractHitLocationsToWorld(octree);
+      ocTreeHitLocationExtractor.clear();
+      Point3DReadOnly[] octreePointMapToWorld = ocTreeHitLocationExtractor.extractHitLocationsToWorld(octree);
 
       Point3D[] octreePointMapToSensorPose = createConvertedPointsToSensorPose(frame.getInitialSensorPoseToWorld(), octreePointMapToWorld);
       double[][] vertex = new double[octreePointMapToSensorPose.length][2];
@@ -413,70 +452,6 @@ public class IhmcSLAMTools
             indexOfSourcePoints.add(selectedIndex);
          }
       }
-
-      return sourcePoints;
-   }
-
-   /**
-    * if there is not enough source points, think this frame is key frame.
-    * return null.
-    */
-   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, int numberOfSourcePoints, ConvexPolygon2D previousWindow,
-                                                          double windowMinimumDepth, double windowMaximumDepth, double minimumOverlappedRatio)
-   {
-      IhmcSLAMFrame previousFrame = frame.getPreviousFrame();
-
-      //List<Point3DReadOnly> pointsOutOfPreviousWindow = new ArrayList<>();
-      List<Point3DReadOnly> pointsInPreviousWindow = new ArrayList<>();
-
-      RigidBodyTransformReadOnly previousSensorPoseToWorld = previousFrame.getSensorPose();
-      Point3DReadOnly[] originalPointCloudToSensorPose = frame.getOriginalPointCloudToSensorPose();
-      Point3DReadOnly[] convertedPointsToPreviousSensorPose = IhmcSLAMTools.createConvertedPointsToOtherSensorPose(frame.getInitialSensorPoseToWorld(),
-                                                                                                                   previousSensorPoseToWorld,
-                                                                                                                   originalPointCloudToSensorPose);
-
-      int numberOfPointsInPreviousView = 0;
-      for (int i = 0; i < convertedPointsToPreviousSensorPose.length; i++)
-      {
-         Point3DReadOnly pointInPreviousView = convertedPointsToPreviousSensorPose[i];
-         if (previousWindow.isPointInside(pointInPreviousView.getX(), pointInPreviousView.getY()))
-         {
-            if (pointInPreviousView.getZ() > windowMinimumDepth && pointInPreviousView.getZ() < windowMaximumDepth)
-               pointsInPreviousWindow.add(originalPointCloudToSensorPose[i]);
-            numberOfPointsInPreviousView++;
-         }
-         else
-         {
-            //pointsOutOfPreviousWindow.add(originalPointCloudToSensorPose[i]);
-         }
-      }
-      double overlappedRatio = (double) numberOfPointsInPreviousView / convertedPointsToPreviousSensorPose.length;
-      if (overlappedRatio < minimumOverlappedRatio)
-      {
-         return null;
-      }
-      if (pointsInPreviousWindow.size() < numberOfSourcePoints)
-      {
-         return null;
-      }
-
-      TIntArrayList indexOfSourcePoints = new TIntArrayList();
-      int index = 0;
-      Point3D[] sourcePoints = new Point3D[numberOfSourcePoints];
-      Random randomSelector = new Random(0612L);
-      while (indexOfSourcePoints.size() != numberOfSourcePoints)
-      {
-         int selectedIndex = randomSelector.nextInt(pointsInPreviousWindow.size());
-         if (!indexOfSourcePoints.contains(selectedIndex))
-         {
-            Point3DReadOnly selectedPoint = pointsInPreviousWindow.get(selectedIndex);
-            sourcePoints[index] = new Point3D(selectedPoint);
-            index++;
-            indexOfSourcePoints.add(selectedIndex);
-         }
-      }
-
-      //System.out.println(convertedPointsToPreviousSensorPose.length + " " + numberOfPointsInPreviousView + " " + overlappedRatio);
 
       return sourcePoints;
    }
