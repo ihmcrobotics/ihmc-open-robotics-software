@@ -34,34 +34,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
    protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
-   private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
-   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
-
-   protected static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
-   protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
-   protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
-
-   public static boolean ENABLE_ORIENTATION_CORRECTION = false; //TODO CHANGE
-
-   static
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         INITIAL_INPUT.add(0.0);
-         LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
-         UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
-      }
-      if (ENABLE_ORIENTATION_CORRECTION)
-      {
-         for (int i = 0; i < 3; i++)
-         {
-            INITIAL_INPUT.add(0.0);
-            LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
-            UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
-         }
-      }
-   }
-
    public IhmcSLAM(double octreeResolution)
    {
       this.octreeResolution = octreeResolution;

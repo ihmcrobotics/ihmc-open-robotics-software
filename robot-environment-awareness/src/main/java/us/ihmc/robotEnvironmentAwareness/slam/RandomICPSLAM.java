@@ -15,7 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.optimization.SLAMFrameOptimizerCostFunction;
+import us.ihmc.robotEnvironmentAwareness.slam.optimization.SecondStageSLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
@@ -36,6 +36,28 @@ public class RandomICPSLAM extends IhmcSLAM
 
    private final NormalOcTree octree;
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
+
+   private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
+   private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
+
+   protected static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
+   protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
+   protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
+
+   public static boolean ENABLE_ORIENTATION_CORRECTION = true;
+
+   static
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         INITIAL_INPUT.add(0.0);
+         LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
+         UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
+      }
+      INITIAL_INPUT.add(0.0);
+      LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
+      UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+   }
 
    // debugging variables.
    public Point3D[] sourcePointsToWorld;
@@ -133,17 +155,12 @@ public class RandomICPSLAM extends IhmcSLAM
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
    {
-      // if this frame is detected as a key frame, return new RigidBodyTransform();
-      // if this frame needs drift correction, return optimized transform;
-      // if this frame should not be mergeable, return null;
       // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
-      // put credit to trust slam. when it exceed, the frame is key frame.
-
       // see the overlapped area.
       Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPoseWithKinematicGuess(frame, octree, NUMBER_OF_SOURCE_POINTS,
                                                                                                       MINIMUM_OVERLAPPED_RATIO);
 
-      if (sourcePointsToSensor == null) // if it is too small overlapped,
+      if (sourcePointsToSensor == null)
       {
          if (DEBUG)
             System.out.println("small overlapped area");
@@ -155,7 +172,7 @@ public class RandomICPSLAM extends IhmcSLAM
             this.sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
 
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
-         SLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
+         RandomICPSLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
 
          double initialQuery = costFunction.getQuery(INITIAL_INPUT);
          if (DEBUG)
@@ -209,13 +226,13 @@ public class RandomICPSLAM extends IhmcSLAM
       }
    }
 
-   class RandomICPSLAMFrameOptimizerCostFunction extends SLAMFrameOptimizerCostFunction
+   class RandomICPSLAMFrameOptimizerCostFunction extends SecondStageSLAMFrameOptimizerCostFunction
    {
       final Point3DReadOnly[] sourcePointsToSensor;
 
       RandomICPSLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose, Point3DReadOnly[] sourcePointsToSensor)
       {
-         super(transformWorldToSensorPose);
+         super(transformWorldToSensorPose, true);
          this.sourcePointsToSensor = sourcePointsToSensor;
       }
 
@@ -225,16 +242,10 @@ public class RandomICPSLAM extends IhmcSLAM
          /**
           * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
           */
-         RigidBodyTransform sensorPoseMultiplier = new RigidBodyTransform();
-         convertToSensorPoseMultiplier(values, sensorPoseMultiplier);
-
-         RigidBodyTransform newSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
-         newSensorPose.multiply(sensorPoseMultiplier);
+         RigidBodyTransform newSensorPose = new RigidBodyTransform();
+         convertToSensorPose(values, newSensorPose);
 
          double totalDistance = 0;
-         double totalOutliersDistance = 0;
-         int numberOfInliers = 0; // TODO: will be used in future.
-         int numberOfOutliers = 0;
          Point3D newSourcePointToWorld = new Point3D();
          for (Point3DReadOnly sourcePoint : sourcePointsToSensor)
          {
@@ -249,14 +260,6 @@ public class RandomICPSLAM extends IhmcSLAM
             }
 
             totalDistance = totalDistance + distance;
-            if (distance < 1.0 * octree.getResolution())
-            {
-               numberOfInliers++;
-            }
-            else
-            {
-               numberOfOutliers++;
-            }
          }
 
          double squareOfInput = 0.0;
@@ -265,7 +268,7 @@ public class RandomICPSLAM extends IhmcSLAM
             squareOfInput = squareOfInput + value * value;
          }
 
-         double cost = 1 * totalDistance / sourcePointsToSensor.length + 0 * ((double) numberOfOutliers / sourcePointsToSensor.length) + 0 * squareOfInput;
+         double cost = 1 * totalDistance / sourcePointsToSensor.length + 0 * squareOfInput;
 
          return cost;
       }
