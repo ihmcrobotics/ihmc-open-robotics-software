@@ -15,10 +15,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.optimization.SecondStageSLAMFrameOptimizerCostFunction;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
+import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
@@ -226,14 +226,46 @@ public class RandomICPSLAM extends IhmcSLAM
       }
    }
 
-   class RandomICPSLAMFrameOptimizerCostFunction extends SecondStageSLAMFrameOptimizerCostFunction
+   class RandomICPSLAMFrameOptimizerCostFunction implements SingleQueryFunction
    {
       final Point3DReadOnly[] sourcePointsToSensor;
+      private static final double TRANSLATION_TO_ANGLE_RATIO = 2.0;
+      protected final RigidBodyTransformReadOnly transformWorldToSensorPose;
+      private final RigidBodyTransform yawRotator = new RigidBodyTransform();
 
       RandomICPSLAMFrameOptimizerCostFunction(RigidBodyTransformReadOnly transformWorldToSensorPose, Point3DReadOnly[] sourcePointsToSensor)
       {
-         super(transformWorldToSensorPose, true);
+         this.transformWorldToSensorPose = transformWorldToSensorPose;
          this.sourcePointsToSensor = sourcePointsToSensor;
+      }
+
+      void convertToSensorPoseMultiplier(TDoubleArrayList input, RigidBodyTransform transformToPack)
+      {
+         RigidBodyTransform newSensorPose = new RigidBodyTransform();
+         convertToSensorPose(input, newSensorPose);
+
+         newSensorPose.normalizeRotationPart();
+         newSensorPose.preMultiplyInvertOther(transformWorldToSensorPose);
+
+         transformToPack.set(newSensorPose);
+      }
+
+      void convertToSensorPose(TDoubleArrayList input, RigidBodyTransform sensorPoseToPack)
+      {
+         sensorPoseToPack.set(transformWorldToSensorPose);
+         sensorPoseToPack.appendTranslation(input.get(0), input.get(1), input.get(2));
+         yawRotator.setIdentity();
+         yawRotator.appendYawRotation(input.get(3) * TRANSLATION_TO_ANGLE_RATIO);
+         sensorPoseToPack.preMultiply(yawRotator);
+      }
+
+      void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
+      {
+         RigidBodyTransform newSensorPose = new RigidBodyTransform();
+         convertToSensorPose(input, newSensorPose);
+
+         transformToPack.set(newSensorPose);
+         transformToPack.multiplyInvertOther(transformWorldToSensorPose);
       }
 
       @Override
