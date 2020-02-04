@@ -1,8 +1,9 @@
-package us.ihmc.robotEnvironmentAwareness.slam;
+package us.ihmc.robotEnvironmentAwareness.slam.optimization;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public abstract class SLAMFrameOptimizerCostFunction implements SingleQueryFunction

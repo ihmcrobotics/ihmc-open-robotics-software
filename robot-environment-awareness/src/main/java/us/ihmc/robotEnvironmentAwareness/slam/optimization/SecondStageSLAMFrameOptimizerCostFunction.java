@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.slam;
+package us.ihmc.robotEnvironmentAwareness.slam.optimization;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
