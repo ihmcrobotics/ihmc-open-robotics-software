@@ -15,7 +15,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final CrossRobotCommandResolver controllerResolver;
    private final CrossRobotCommandResolver masterResolver;
 
-   private final AvatarControllerThread controllerThread;
+   private final AvatarControllerThreadInterface controllerThread;
 
    private final long divisor;
    private final ThreadTimer timer;
@@ -24,7 +24,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public ControllerTask(AvatarControllerThread controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public ControllerTask(AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
