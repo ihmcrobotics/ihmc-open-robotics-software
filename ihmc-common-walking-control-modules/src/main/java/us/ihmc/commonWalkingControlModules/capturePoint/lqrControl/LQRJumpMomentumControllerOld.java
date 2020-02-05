@@ -211,7 +211,7 @@ public class LQRJumpMomentumControllerOld
          Trajectory3D relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-1.0, finalVRPState);
+         relativeTrajectory.offsetTrajectoryPosition(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
 
          this.contactStateProviders.add().set(contactStateProviders.get(i));
       }
