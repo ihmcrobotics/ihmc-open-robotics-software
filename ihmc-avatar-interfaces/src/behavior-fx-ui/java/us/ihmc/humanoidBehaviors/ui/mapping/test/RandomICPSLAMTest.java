@@ -330,9 +330,10 @@ public class RandomICPSLAMTest
    public void testRandomICPSLAMEndToEnd()
    {
       //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
-      String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
+      String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -353,6 +354,7 @@ public class RandomICPSLAMTest
 
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
       {
+         slamViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.GREEN);
          slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
          slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       }

@@ -300,7 +300,7 @@ public class RandomICPSLAM extends IhmcSLAM
             squareOfInput = squareOfInput + value * value;
          }
 
-         double cost = 1 * totalDistance / sourcePointsToSensor.length + 0 * squareOfInput;
+         double cost = 1 * totalDistance / sourcePointsToSensor.length + 1 * squareOfInput;
 
          return cost;
       }
