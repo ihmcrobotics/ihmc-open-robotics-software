@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 public enum CoPPointName
 {
-   MIDFEET_COP, ENTRY_COP, MIDFOOT_COP, EXIT_COP, START_COP, FINAL_COP, FLAMINGO_STANCE_FINAL_COP;
+   MIDFEET_COP, ENTRY_COP, MIDFOOT_COP, EXIT_COP, START_COP, FINAL_COP, FLAMINGO_STANCE_FINAL_COP, TOE_COP;
 
    public static final EnumSet<CoPPointName> set = EnumSet.allOf(CoPPointName.class);
    public static final CoPPointName[] values = values();
@@ -19,6 +19,8 @@ public enum CoPPointName
          return "MidfootCoP";
       case EXIT_COP:
          return "ExitCoP";
+      case TOE_COP:
+         return "ToeCoP";
       case MIDFEET_COP:
          return "MidFeetCoP";
       case FINAL_COP:
