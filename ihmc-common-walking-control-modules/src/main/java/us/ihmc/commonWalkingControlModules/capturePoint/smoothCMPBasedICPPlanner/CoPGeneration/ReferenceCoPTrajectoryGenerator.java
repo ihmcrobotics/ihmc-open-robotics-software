@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CoPPointPlanningParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
+import us.ihmc.commonWalkingControlModules.configurations.CoPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
@@ -1136,9 +1137,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else if (putExitCoPOnToes.getBooleanValue() && MathTools
             .isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue(), Epsilons.ONE_HUNDREDTH))
       {
+         CoPPointPlanningParameters copPlannerParameters;
+         if (copPointParametersMap.containsKey(CoPPointName.TOE_COP))
+            copPlannerParameters = copPointParametersMap.get(CoPPointName.TOE_COP);
+         else
+            copPlannerParameters = copPointParametersMap.get(exitCoPName);
+         
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
-                              copPointParametersMap.get(exitCoPName).getCoPOffsets(supportSide).getY(), 0.0);
+                              copPlannerParameters.getCoPOffsets(supportSide).getY(), 0.0);
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
@@ -1148,8 +1155,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             .isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
                                         Epsilons.ONE_HUNDREDTH))
       {
+         CoPPointPlanningParameters copPlannerParameters;
+         if (copPointParametersMap.containsKey(CoPPointName.TOE_COP))
+            copPlannerParameters = copPointParametersMap.get(CoPPointName.TOE_COP);
+         else
+            copPlannerParameters = copPointParametersMap.get(exitCoPName);
+
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
-         framePointToPack.add(supportFootPolygon.getMaxX(), 0.0, 0.0);
+         framePointToPack.add(supportFootPolygon.getMaxX(),// - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
+                              copPlannerParameters.getCoPOffsets(supportSide).getY(), 0.0);
          constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());
          framePointToPack.changeFrame(worldFrame);
          return true;
