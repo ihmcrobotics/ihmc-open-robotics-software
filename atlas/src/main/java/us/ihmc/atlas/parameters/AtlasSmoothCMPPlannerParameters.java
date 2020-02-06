@@ -36,6 +36,7 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
       copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
       copOffsetsInFootFrame.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, new Vector2D(0.0, 0.000));
+      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.04));
 
       copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
       copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
