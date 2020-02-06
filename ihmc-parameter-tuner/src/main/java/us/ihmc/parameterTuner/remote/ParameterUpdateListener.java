@@ -15,6 +15,7 @@ import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.listener.ParameterChangedListener;
 import us.ihmc.yoVariables.parameters.YoParameter;
@@ -75,7 +76,10 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
+   public void start(YoVariableClientInterface yoVariableClientInterface,
+                     LogHandshake handshake,
+                     YoVariableHandshakeParser handshakeParser,
+                     DebugRegistry debugRegistry)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
       yoRootRegistry = handshakeParser.getRootRegistry();

@@ -172,7 +172,7 @@ public class SphereNewICPController implements GenericSphereController
       desiredCapturePointVelocity2d.set(desiredCapturePointVelocity);
       finalDesiredCapturePoint2d.set(finalDesiredCapturePoint);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
       FramePoint2D desiredCMP = icpController.doProportionalControl(previousPerfectCMP, capturePoint2d, desiredCapturePoint2d, finalDesiredCapturePoint2d,
                                                                     desiredCapturePointVelocity2d, perfectCMP, omega0);
       previousPerfectCMP.setIncludingFrame(perfectCMP);

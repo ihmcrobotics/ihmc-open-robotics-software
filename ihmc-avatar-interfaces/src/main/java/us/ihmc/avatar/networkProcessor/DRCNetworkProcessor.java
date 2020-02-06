@@ -6,8 +6,8 @@ import java.util.List;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -22,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -43,6 +44,7 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    private final String[] programArgs;
    private final PubSubImplementation pubSubImplementation;
    private final List<CloseableAndDisposable> modules = new ArrayList<>();
+   private final Ros2Node ros2Node;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params, PubSubImplementation pubSubImplementation)
    {
@@ -53,6 +55,7 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    {
       this.programArgs = programArgs;
       this.pubSubImplementation = pubSubImplementation;
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "network_processor");
 
       tryToStartModule(() -> setupRosModule(robotModel, params));
       tryToStartModule(() -> setupSensorModule(robotModel, params));
@@ -71,6 +74,15 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
       tryToStartModule(() -> setupHumanoidAvatarREAStateUpdater(robotModel, params));
+
+      LogTools.info("All modules in network processor are up and running!");
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         LogTools.info("Shutting down network processor modules.");
+         closeAndDispose();
+         ThreadTools.sleep(10);
+      }));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -114,10 +126,10 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       modules.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), pubSubImplementation));
    }
 
-   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       if (params.isFootstepPlanningToolboxEnabled())
-         modules.add(new MultiStageFootstepPlanningModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled(), pubSubImplementation));
+         modules.add(new FootstepPlanningToolboxModule(robotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled(), pubSubImplementation));
    }
 
    private void setupFootstepPostProcessingToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
@@ -137,7 +149,6 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_mocap_localization_node");
          ROS2Tools.createCallbackSubscription(ros2Node,
                                               PlanarRegionsListMessage.class,
                                               REACommunicationProperties.publisherTopicNameGenerator,
@@ -155,28 +166,30 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+         IHMCHumanoidBehaviorManager behaviorManager;
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
-                                                                                   robotModel.getFootstepPlannerParameters(),
-                                                                                   robotModel,
-                                                                                   robotModel,
-                                                                                   logModelProvider,
-                                                                                   params.isBehaviorVisualizerEnabled(),
-                                                                                   sensorInformation,
-                                                                                   params.getTimeToWaitBeforeStartingDiagnostics());
+            behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),
+                                                                                                     robotModel.getFootstepPlannerParameters(),
+                                                                                                     robotModel,
+                                                                                                     robotModel,
+                                                                                                     logModelProvider,
+                                                                                                     params.isBehaviorVisualizerEnabled(),
+                                                                                                     sensorInformation,
+                                                                                                     params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
-                                            robotModel.getFootstepPlannerParameters(),
-                                            robotModel,
-                                            robotModel,
-                                            logModelProvider,
-                                            params.isBehaviorVisualizerEnabled(),
-                                            sensorInformation);
+            behaviorManager = new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
+                                                              robotModel.getFootstepPlannerParameters(),
+                                                              robotModel,
+                                                              robotModel,
+                                                              logModelProvider,
+                                                              params.isBehaviorVisualizerEnabled(),
+                                                              sensorInformation);
          }
+         modules.add(behaviorManager);
 
          String methodName = "setupBehaviorModule ";
          printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
@@ -186,7 +199,13 @@ public class DRCNetworkProcessor implements CloseableAndDisposable
    private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isRosModuleEnabled())
+      {
          modules.add(new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator(), pubSubImplementation));
+      }
+      else if (params.getRosModuleLauncherClass() != null)
+      {
+         modules.add(new ClosableAndDisposableSpawnedProcess(params.getRosModuleLauncherClass()));
+      }
    }
 
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

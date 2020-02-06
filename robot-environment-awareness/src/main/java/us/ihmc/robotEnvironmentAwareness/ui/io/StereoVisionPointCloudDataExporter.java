@@ -37,7 +37,7 @@ public class StereoVisionPointCloudDataExporter
 
    public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager)
    {
-      stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.StereoVisionPointCloudState);
+      stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.DepthPointCloudState);
       dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIStereoDataExporterDirectory, new File("Data/").getAbsolutePath());
 
       enableRecording = uiMessager.createInput(REAModuleAPI.UIStereoDataExportRequest, false);

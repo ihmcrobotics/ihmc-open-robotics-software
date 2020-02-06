@@ -32,11 +32,12 @@ public class IHMCROS2Publisher<T>
 
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, String moduleTopicQualifier, ROS2TopicQualifier ioTopicQualifier)
    {
-      ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
-                                                                       ROS2Tools.generateDefaultTopicName(messageType,
-                                                                                                          robotName,
-                                                                                                          moduleTopicQualifier,
-                                                                                                          ioTopicQualifier)),
+      this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier));
+   }
+
+   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   {
+      ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2Tools.newMessageTopicDataTypeInstance(messageType), topicName),
                             DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 

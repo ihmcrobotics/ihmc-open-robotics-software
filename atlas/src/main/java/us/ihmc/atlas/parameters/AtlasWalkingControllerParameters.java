@@ -48,6 +48,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;// = 0.625;
+   private boolean doPrepareManipulationForLocomotion = true;
    private double nominalHeightAboveGround;// = 0.705;
    private final double maximumHeightAboveGround;// = 0.765 + 0.08;
 
@@ -59,13 +60,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
-   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final LegConfigurationParameters legConfigurationParameters;
-   private final ToeOffParameters toeOffParameters;
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
-   private final ICPOptimizationParameters icpOptimizationParameters;
-   private final AtlasSteppingParameters steppingParameters;
-   private final LeapOfFaithParameters leapOfFaithParameters;
+   private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private LegConfigurationParameters legConfigurationParameters;
+   private ToeOffParameters toeOffParameters;
+   private SwingTrajectoryParameters swingTrajectoryParameters;
+   private ICPOptimizationParameters icpOptimizationParameters;
+   private AtlasSteppingParameters steppingParameters;
+   private LeapOfFaithParameters leapOfFaithParameters;
 
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -371,6 +372,17 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return doPrepareManipulationForLocomotion;
+   }
+
+   public void setDoPrepareManipulationForLocomotion(boolean doPrepareManipulationForLocomotion)
+   {
+      this.doPrepareManipulationForLocomotion = doPrepareManipulationForLocomotion;
+   }
+
+   @Override
    public double getDefaultTransferTime()
    {
       return (runningOnRealRobot ? 0.8 : 0.25); //Math.sqrt(jointMap.getModelScale()) *
@@ -558,5 +570,42 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return 0.15;
+   }
+
+   // Setters for overriding parameters with extended classes
+
+   public void setJointPrivilegedConfigurationParameters(JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
+   {
+      this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
+   }
+
+   public void setLegConfigurationParameters(LegConfigurationParameters legConfigurationParameters)
+   {
+      this.legConfigurationParameters = legConfigurationParameters;
+   }
+
+   public void setToeOffParameters(ToeOffParameters toeOffParameters)
+   {
+      this.toeOffParameters = toeOffParameters;
+   }
+
+   public void setSwingTrajectoryParameters(SwingTrajectoryParameters swingTrajectoryParameters)
+   {
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
+   }
+
+   public void setIcpOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
+   {
+      this.icpOptimizationParameters = icpOptimizationParameters;
+   }
+
+   public void setSteppingParameters(AtlasSteppingParameters steppingParameters)
+   {
+      this.steppingParameters = steppingParameters;
+   }
+
+   public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
+   {
+      this.leapOfFaithParameters = leapOfFaithParameters;
    }
 }

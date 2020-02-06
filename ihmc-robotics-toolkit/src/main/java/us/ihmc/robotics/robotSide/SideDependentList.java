@@ -67,6 +67,14 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       }
    }
 
+   public void set(Function<RobotSide, V> valueFunction)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         put(robotSide, valueFunction.apply(robotSide));
+      }
+   }
+
    public RobotSide[] sides()
    {
       fillSideArray();
@@ -113,8 +121,6 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
    {
       return new Itr();
    }
-
-
 
    private class Itr implements Iterator<V>
    {
