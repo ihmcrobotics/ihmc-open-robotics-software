@@ -157,7 +157,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       this.forceSensorData = forceSensorData;
 
-      this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), null);
+      this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), (ReferenceFrame) null);
 
       this.footMinX = computeMinX(contactablePlaneBody);
 

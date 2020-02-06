@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -25,6 +26,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -36,6 +38,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<List<? extends IMUSensorReadOnly>> imuSensorData = new OptionalFactoryField<>("imuSensorData");
    private final OptionalFactoryField<ForceSensorDataHolderReadOnly> forceSensorDataHolder = new OptionalFactoryField<>("forceSensorDataHolder");
    private final OptionalFactoryField<SensorTimestampHolder> timestampHolder = new OptionalFactoryField<>("timestampHolder");
+   private final OptionalFactoryField<Long> publishPeriod = new OptionalFactoryField<>("publishPeriod");
 
    private final RequiredFactoryField<OneDoFJointBasics[]> jointsField = new RequiredFactoryField<>("joints");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
@@ -52,6 +55,7 @@ public class RobotConfigurationDataPublisherFactory
       forceSensorDefinitionsField.setDefaultValue(new ForceSensorDefinition[0]);
 
       robotMotionStatusHolderField.setDefaultValue(new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN));
+      publishPeriod.setDefaultValue(0L);
    }
 
    /**
@@ -182,6 +186,16 @@ public class RobotConfigurationDataPublisherFactory
    }
 
    /**
+    * Publish period of RobotConfigurationData.
+    *
+    * @param publishPeriod
+    */
+   public void setPublishPeriod(long publishPeriod)
+   {
+      this.publishPeriod.set(publishPeriod);
+   }
+
+   /**
     * Instantiates a new publisher and disposes of this factory.
     * 
     * @return the new publisher ready to use.
@@ -201,7 +215,8 @@ public class RobotConfigurationDataPublisherFactory
                                                                                       imuSensorDataToPublish,
                                                                                       forceSensorDataToPublish,
                                                                                       timestampHolder.get(),
-                                                                                      robotMotionStatusHolderField.get());
+                                                                                      robotMotionStatusHolderField.get(),
+                                                                                      publishPeriod.get());
 
       FactoryTools.disposeFactory(this);
 

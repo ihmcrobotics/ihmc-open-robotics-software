@@ -22,6 +22,9 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
+
+import java.util.function.Consumer;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -33,43 +36,46 @@ public class ValkyrieAStarFootstepPlannerTest
    @Test
    public void testEODCinders()
    {
-      testDataSet(DataSetName._20190220_172417_EOD_Cinders, 4.0);
+      testDataSet(DataSetName._20190220_172417_EOD_Cinders, 4.0, null);
    }
 
    @Test
    public void testSteppingStones()
    {
-      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0);
+      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0, p -> {p.setMinimumFootholdPercent(0.8); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
    public void testStepAfterPitchDown()
    {
-      testDataSet(DataSetName._20190219_182005_StepAfterPitchDown, 4.0);
+      testDataSet(DataSetName._20190219_182005_StepAfterPitchDown, 4.0, null);
    }
 
    @Test
    public void testRandomField()
    {
-      testDataSet(DataSetName._20190219_182005_Random, 6.0);
+      testDataSet(DataSetName._20190219_182005_Random, 7.0, p -> {p.setIdealFootstepLength(0.45); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
    public void testLargeCinderBlockField()
    {
-      testDataSet(DataSetName._20171215_214730_CinderBlockField, 6.0);
+      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> {p.setFlatGroundLowerThreshold(-0.2); p.setMaximumStepZ(0.2);});
    }
 
    @Test
    public void testSimpleGaps()
    {
-      testDataSet(DataSetName._20190219_182005_SimpleGaps, 6.0);
+      testDataSet(DataSetName._20190219_182005_SimpleGaps, 6.0, null);
    }
 
-   private void testDataSet(DataSetName dataSetName, double timeout)
+   private void testDataSet(DataSetName dataSetName, double timeout, Consumer<ValkyrieAStarFootstepPlannerParameters> parameterMutator)
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
+
+      if(parameterMutator != null)
+         parameterMutator.accept(planner.getParameters());
 
       if (visualize)
       {

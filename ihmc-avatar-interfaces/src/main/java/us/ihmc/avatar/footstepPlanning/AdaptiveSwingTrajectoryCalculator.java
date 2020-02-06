@@ -1,23 +1,14 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 /**
@@ -26,10 +17,12 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class AdaptiveSwingTrajectoryCalculator
 {
    private static final double boxHeight = 0.5;
-   private static final double boxGroundClearance = 0.02;
+   private static final double boxGroundClearance = 0.04;
 
    private final AdaptiveSwingParameters adaptiveSwingParameters;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+   private PlanarRegionsList planarRegionsList;
 
    public AdaptiveSwingTrajectoryCalculator(AdaptiveSwingParameters adaptiveSwingParameters, WalkingControllerParameters walkingControllerParameters)
    {
@@ -64,35 +57,39 @@ public class AdaptiveSwingTrajectoryCalculator
       return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingHeight(), adaptiveSwingParameters.getMaximumSwingHeight(), alpha);
    }
 
-   public void getWaypointProportions(Pose3DReadOnly startPose, Pose3DReadOnly endPose, PlanarRegionsList planarRegionsList, double[] waypointProportions)
-   {
-      setToDefaultProportions(waypointProportions);
-
-      double minHeightDifferenceForStepUpOrDown = walkingControllerParameters.getSwingTrajectoryParameters().getMinHeightDifferenceForStepUpOrDown();
-      double stepHeightDifference = endPose.getPosition().getZ() - startPose.getPosition().getZ();
-
-      if(Math.abs(stepHeightDifference) < minHeightDifferenceForStepUpOrDown)
+   public boolean checkForFootCollision(Pose3DReadOnly startPose, FootstepDataMessage step)
+   {      
+      if(planarRegionsList == null)
       {
-         return;
+         return false;
       }
 
-      boolean stepUp = stepHeightDifference > 0.0;
-      Pose3DReadOnly stepAtRiskOfStubbing = stepUp ? startPose : endPose;
-
-      if(checkForToeStub(stepAtRiskOfStubbing, stepUp, planarRegionsList))
+      double[] waypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();      
+      Pose3D endPose = new Pose3D(step.getLocation(), step.getOrientation());
+      
+      boolean toeIsClose = checkForToeOrHeelStub(startPose, true);
+      boolean heelIsClose = checkForToeOrHeelStub(endPose, false);
+            
+      if(toeIsClose)
       {
-         if(stepUp)
-         {
-            waypointProportions[0] = waypointProportions[0] - adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
-         }
-         else
-         {
-            waypointProportions[1] = waypointProportions[1] + adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
-         }
+         waypointProportions[0] = waypointProportions[0] - adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
       }
+
+      if(heelIsClose)
+      {
+         waypointProportions[1] = waypointProportions[1] + adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
+      }
+
+      if(toeIsClose || heelIsClose)
+      {
+         step.setSwingHeight(adaptiveSwingParameters.getMaximumSwingHeight());
+         step.getCustomWaypointProportions().add(waypointProportions);
+      }
+
+      return toeIsClose || heelIsClose;
    }
 
-   private boolean checkForToeStub(Pose3DReadOnly stepAtRiskOfToeStubbing, boolean stepUp, PlanarRegionsList planarRegionsList)
+   private boolean checkForToeOrHeelStub(Pose3DReadOnly stepAtRiskOfToeStubbing, boolean checkToeStub)
    {
       Box3D footStubBox = new Box3D();
       double stubClearance = adaptiveSwingParameters.getFootStubClearance();
@@ -101,66 +98,21 @@ public class AdaptiveSwingTrajectoryCalculator
       Pose3D boxCenter = new Pose3D(stepAtRiskOfToeStubbing);
 
       double footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      double xDirection = stepUp ? 1.0 : -1.0;
-      boxCenter.appendTranslation(xDirection * 0.5 * (footLength + stubClearance), 0.0, 0.0);
-
-      double zOffset = boxGroundClearance + 0.5 * boxHeight;
-      boxCenter.appendTranslation(0.0, 0.0, zOffset);
+      double xDirection = checkToeStub ? 1.0 : -1.0;
+      boxCenter.appendTranslation(xDirection * 0.5 * (footLength + stubClearance), 0.0, boxGroundClearance + 0.5 * boxHeight);
       footStubBox.getPose().set(boxCenter);
 
-      ConvexPolytope3D bodyBoxPolytope = new ConvexPolytope3D();
-      Point3DBasics[] vertices = footStubBox.getVertices();
-
-      for (int i = 0; i < vertices.length; i++)
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
-         bodyBoxPolytope.addVertex(vertices[i]);
-      }
-
-      List<ConvexPolytope3D> planarRegionPolytopes = createPlanarRegionPolytopeList(planarRegionsList);
-      GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
-
-      for (int i = 0; i < planarRegionPolytopes.size(); i++)
-      {
-         EuclidShape3DCollisionResult result = collisionDetector.evaluateCollision(planarRegionPolytopes.get(i), bodyBoxPolytope);
-         if(result.areShapesColliding())
+         if(collisionDetector.evaluateCollision(footStubBox, planarRegionsList.getPlanarRegion(i)).areShapesColliding())
             return true;
       }
 
       return false;
    }
-
-   private List<ConvexPolytope3D> createPlanarRegionPolytopeList(PlanarRegionsList planarRegions)
+   
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      List<ConvexPolytope3D> planarRegionPolytopes = new ArrayList<>();
-      RigidBodyTransform transform = new RigidBodyTransform();
-      FramePoint3D framePoint = new FramePoint3D();
-
-      List<PlanarRegion> planarRegionsList = planarRegions.getPlanarRegionsAsList();
-      for (int i = 0; i < planarRegionsList.size(); i++)
-      {
-         PlanarRegion planarRegion = planarRegionsList.get(i);
-         ConvexPolytope3D planarRegionPolytope = new ConvexPolytope3D();
-
-         List<? extends Point2DReadOnly> pointsInPlanarRegion = planarRegion.getConvexHull().getVertexBufferView();
-         planarRegion.getTransformToWorld(transform);
-
-         for (Point2DReadOnly point : pointsInPlanarRegion)
-         {
-            framePoint.set(point.getX(), point.getY(), 0.0);
-            framePoint.applyTransform(transform);
-            planarRegionPolytope.addVertex(framePoint);
-         }
-
-         planarRegionPolytopes.add(planarRegionPolytope);
-      }
-
-      return planarRegionPolytopes;
-   }
-
-   private void setToDefaultProportions(double[] waypointProportions)
-   {
-      double[] defaultWaypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
-      waypointProportions[0] = defaultWaypointProportions[0];
-      waypointProportions[1] = defaultWaypointProportions[1];
+      this.planarRegionsList = planarRegionsList;
    }
 }

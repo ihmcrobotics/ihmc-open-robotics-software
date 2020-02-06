@@ -41,7 +41,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    private static final boolean ENABLE_STEREO_PUBLISHER = false;
    private static final boolean ENABLE_DEPTH_PUBLISHER = true;
-   private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = true;
+   private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
 
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
@@ -53,6 +53,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private SCSCameraDataReceiver cameraDataReceiver;
 
    private RosMainNode rosMainNode;
+
+   private MultiSenseSensorManager multiSenseSensorManager;
 
    public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
                                   RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
@@ -128,7 +130,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (ENABLE_DEPTH_PUBLISHER)
          pointCloudSensorManager.receiveDataFromROS1(rosMainNode);
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory,
+      multiSenseSensorManager = new MultiSenseSensorManager(modelFactory,
                                                                                     robotConfigurationDataBuffer,
                                                                                     rosMainNode,
                                                                                     ros2Node,
@@ -191,7 +193,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          pointCloudSensorManager.shutdown();
       if (cameraDataReceiver != null)
          cameraDataReceiver.closeAndDispose();
+      if (multiSenseSensorManager != null)
+         multiSenseSensorManager.closeAndDispose();
       if (rosMainNode != null)
          rosMainNode.shutdown();
+      ros2Node.destroy();
    }
 }

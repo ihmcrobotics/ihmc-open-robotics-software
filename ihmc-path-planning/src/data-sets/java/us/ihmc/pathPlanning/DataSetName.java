@@ -4,6 +4,7 @@ public enum DataSetName
 {
 	_20191127_101625_StairsJSC,
 	_20191127_101625_JSC_Stairs,
+   _20191213_134839_Cinders,
 	_20191122_122216_MultiRegionFlatGround,
 	_20191119_135944_RobotPlatform,
 	_20191114_155310_SimplePlatform,

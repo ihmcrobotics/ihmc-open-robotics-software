@@ -30,6 +30,7 @@ import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotDataLogger.util.DebugRegistry;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.robotics.robotDescription.modelLoaders.LogModelLoader;
 import us.ihmc.simulationconstructionset.ExitActionListener;
@@ -274,7 +275,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
+   public final void start(YoVariableClientInterface yoVariableClientInterface,
+                           LogHandshake handshake,
+                           YoVariableHandshakeParser handshakeParser,
+                           DebugRegistry debugRegistry)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
 
@@ -382,7 +386,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
-      this.registry.addChild(yoVariableClientInterface.getDebugRegistry());
+      this.registry.addChild(debugRegistry.getYoVariableRegistry());
       scs.setParameterRootPath(yoVariableRegistry);
 
       List<JointState> jointStates = handshakeParser.getJointStates();

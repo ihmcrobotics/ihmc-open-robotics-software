@@ -15,12 +15,26 @@ import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.RepeatedlyWalkFootstepListBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SimplifiedWalkThroughDoorBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestDoorOpenBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.*;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehaviorAutomated;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior;
@@ -51,6 +65,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,7 +73,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
-public class IHMCHumanoidBehaviorManager
+public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.01;
 
@@ -71,6 +86,8 @@ public class IHMCHumanoidBehaviorManager
 
    private YoVariableServer yoVariableServer = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
+
+   private final BehaviorDispatcher<HumanoidBehaviorType> dispatcher;
 
    public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
@@ -117,17 +134,17 @@ public class IHMCHumanoidBehaviorManager
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
-      BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(robotName,
-                                                                                     yoTime,
-                                                                                     robotDataReceiver,
-                                                                                     desiredBehaviorControlSubscriber,
-                                                                                     desiredBehaviorSubscriber,
-                                                                                     ros2Node,
-                                                                                     yoVariableServer,
-                                                                                     HumanoidBehaviorType.class,
-                                                                                     HumanoidBehaviorType.STOP,
-                                                                                     registry,
-                                                                                     yoGraphicsListRegistry);
+      dispatcher = new BehaviorDispatcher<>(robotName,
+                                            yoTime,
+                                            robotDataReceiver,
+                                            desiredBehaviorControlSubscriber,
+                                            desiredBehaviorSubscriber,
+                                            ros2Node,
+                                            yoVariableServer,
+                                            HumanoidBehaviorType.class,
+                                            HumanoidBehaviorType.STOP,
+                                            registry,
+                                            yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscription(ros2Node,
@@ -321,6 +338,18 @@ public class IHMCHumanoidBehaviorManager
                                                          wholeBodyControllerParameters,
                                                          atlasPrimitiveActions,
                                                          yoGraphicsListRegistry));
+      dispatcher.addBehavior(HumanoidBehaviorType.SIMPLE_WALK_THROUGH_DOOR,
+                             new SimplifiedWalkThroughDoorBehavior(robotName,
+                                                         "VRWalkDoor",
+                                                         ros2Node,
+                                                         yoTime,
+                                                         yoDoubleSupport,
+                                                         fullRobotModel,
+                                                         referenceFrames,
+                                                         wholeBodyControllerParameters,
+                                                         atlasPrimitiveActions,
+                                                         yoGraphicsListRegistry));
+
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
@@ -520,5 +549,12 @@ public class IHMCHumanoidBehaviorManager
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE, ROS2TopicQualifier.INPUT);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      dispatcher.closeAndDispose();
+      ros2Node.destroy();
    }
 }

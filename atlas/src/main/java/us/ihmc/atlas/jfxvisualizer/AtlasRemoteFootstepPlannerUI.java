@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -33,7 +33,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
    private FootstepPlannerUI ui;
 
-   private MultiStageFootstepPlanningModule planningModule;
+   private FootstepPlanningToolboxModule planningModule;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -59,7 +59,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningModule = new MultiStageFootstepPlanningModule(drcRobotModel, null, false);
+         planningModule = new FootstepPlanningToolboxModule(drcRobotModel, null, false);
       }
    }
 
