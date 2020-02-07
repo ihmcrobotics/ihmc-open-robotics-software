@@ -12,7 +12,7 @@ public class BarrierSchedulerTools
     * @param controllerThread to provide timing information.
     * @return Runnable that updates the output processor.
     */
-   public static Runnable createProcessorUpdater(DRCOutputProcessor drcOutputProcessor, AvatarControllerThread controllerThread)
+   public static Runnable createProcessorUpdater(DRCOutputProcessor drcOutputProcessor, AvatarControllerThreadInterface controllerThread)
    {
       return new Runnable()
       {
