@@ -45,7 +45,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -64,6 +66,7 @@ public class LinearMomentumRateControlModule
    private final Vector3DReadOnly recoveryLinearMomentumRateWeight;
    private final Vector3DReadOnly angularMomentumRateWeight;
 
+   private final BooleanProvider allowMomentumRecoveryWeight;
    private final YoBoolean useRecoveryMomentumWeight;
    private final YoDouble maxMomentumRateWeightChangeRate;
    private final RateLimitedYoFrameVector desiredLinearMomentumRateWeight;
@@ -163,6 +166,7 @@ public class LinearMomentumRateControlModule
       recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight", momentumOptimizationSettings.getRecoveryLinearMomentumWeight(), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
+      allowMomentumRecoveryWeight = new BooleanParameter("allowMomentumRecoveryWeight", registry, false);
       maxMomentumRateWeightChangeRate = new YoDouble("maxMomentumRateWeightChangeRate", registry);
       useRecoveryMomentumWeight = new YoBoolean("useRecoveryMomentumWeight", registry);
       useRecoveryMomentumWeight.set(false);
@@ -336,7 +340,7 @@ public class LinearMomentumRateControlModule
 
       checkAndPackOutputs();
 
-      if (useRecoveryMomentumWeight.getBooleanValue())
+      if (allowMomentumRecoveryWeight.getValue() && useRecoveryMomentumWeight.getBooleanValue())
          desiredLinearMomentumRateWeight.update(recoveryLinearMomentumRateWeight);
       else
          desiredLinearMomentumRateWeight.update(linearMomentumRateWeight);
