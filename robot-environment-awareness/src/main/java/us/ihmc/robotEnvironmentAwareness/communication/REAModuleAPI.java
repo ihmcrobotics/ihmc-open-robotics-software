@@ -188,13 +188,13 @@ public class REAModuleAPI
 
    public static final Topic<IhmcSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
 
-   //public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
+   public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).child(Custom).topic(Enable);
    public static final Topic<Boolean> ShowSLAMOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
    public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
-   //public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
+   public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).child(Custom).topic(Enable);
    public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
 
-   public static final Topic<Integer> StackedBuffers = SLAMCategory.child(SLAMFrame).topic(Size);
+   public static final Topic<Integer> QueuedBuffers = SLAMCategory.child(SLAMFrame).topic(Size);
    public static final Topic<Double> AverageReducedCost = SLAMCategory.child(SLAMFrame).topic(Resolution);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
