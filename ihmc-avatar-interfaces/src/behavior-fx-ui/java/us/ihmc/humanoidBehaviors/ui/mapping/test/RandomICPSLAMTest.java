@@ -24,6 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SimulatedStereoVisionPointCloudMessageLibrary;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
+import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class RandomICPSLAMTest
 {
@@ -333,7 +334,9 @@ public class RandomICPSLAMTest
       //String stereoPath = "E:\\Data\\Walking11-kinematic\\PointCloud\\";
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
-      String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
+      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200205_Tour4\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -358,7 +361,7 @@ public class RandomICPSLAMTest
          slamViewer.addPointCloud(slam.getPointCloudMap().get(i), Color.BLUE);
          slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       }
-      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+      //slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
       slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
 
       IhmcSLAMViewer originalViewer = new IhmcSLAMViewer();
@@ -371,7 +374,12 @@ public class RandomICPSLAMTest
       originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
 
       IhmcSLAMViewer octreeViewer = new IhmcSLAMViewer();
-      octreeViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, slam.getOctreeResolution(), true);
+      
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+         octreeViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
+      
+      octreeViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+      octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
       octreeViewer.start("octreeViewer");
 
       ThreadTools.sleepForever();

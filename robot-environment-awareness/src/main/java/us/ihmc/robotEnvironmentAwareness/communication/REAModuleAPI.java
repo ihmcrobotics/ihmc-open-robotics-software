@@ -20,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessa
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.IhmcSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -58,6 +59,7 @@ public class REAModuleAPI
    private static final CategoryTheme SurfaceNormal = apiFactory.createCategoryTheme("SurfaceNormal");
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
    private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
+   private static final CategoryTheme SLAMFrame = apiFactory.createCategoryTheme("SLAMFrame");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -83,6 +85,7 @@ public class REAModuleAPI
    private static final Category ModuleCategory = Root.child(Module);
    private static final Category OcTreeCategory = ModuleCategory.child(OcTree);
    private static final Category PlanarRegionsCategory = ModuleCategory.child(PlanarRegions);
+   private static final Category SLAMCategory = ModuleCategory.child(SLAM);
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
@@ -176,13 +179,23 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
 
-   public static final Topic<Boolean> SLAMEnable = ModuleCategory.child(SLAM).topic(Enable);
-   public static final Topic<Boolean> SLAMOcTreeEnable = OcTreeCategory.child(SLAM).topic(Enable);
-   public static final Topic<DisplayType> SLAMOcTreeDisplayType = Root.child(SLAM).child(OcTree).topic(Display);
-   public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = ModuleCategory.child(SLAM).child(Buffer).topic(Data);
-   public static final Topic<Boolean> RequestSLAMBuildMap = ModuleCategory.child(SLAM).child(Request).topic(Data);
-   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = PlanarRegionsCategory.child(SLAM).topic(Data);
-   public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = OcTreeCategory.child(SLAM).topic(Data);
+   public static final Topic<Boolean> SLAMEnable = SLAMCategory.topic(Enable);
+   public static final Topic<Boolean> SLAMOcTreeEnable = SLAMCategory.child(OcTree).topic(Enable);//
+   public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
+   public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
+   public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
+   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = SLAMCategory.child(PlanarRegions).topic(Data);
+
+   public static final Topic<IhmcSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
+
+   //public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
+   public static final Topic<Boolean> ShowSLAMOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
+   public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
+   //public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
+   public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
+
+   public static final Topic<Integer> StackedBuffers = SLAMCategory.child(SLAMFrame).topic(Size);
+   public static final Topic<Double> AverageReducedCost = SLAMCategory.child(SLAMFrame).topic(Resolution);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

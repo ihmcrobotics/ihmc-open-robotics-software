@@ -74,6 +74,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    public void buildPlanarRegions()
    {
-      uiMessager.submitMessageToModule(REAModuleAPI.RequestSLAMBuildMap, true);
+      //uiMessager.submitMessageToModule(REAModuleAPI.RequestSLAMBuildMap, true);
    }
 }

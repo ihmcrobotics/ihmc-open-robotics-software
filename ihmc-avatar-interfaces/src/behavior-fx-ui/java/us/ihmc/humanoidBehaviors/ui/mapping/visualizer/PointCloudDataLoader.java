@@ -18,7 +18,7 @@ public class PointCloudDataLoader extends Application
 {
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
-   private static final boolean SHOW_PLANAR_REGIONS = false;
+   private static final boolean SHOW_PLANAR_REGIONS = true;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
 
    private static final boolean BUILD_PLANAR_REGIONS = false;

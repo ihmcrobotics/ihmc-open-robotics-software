@@ -46,7 +46,7 @@ public class IhmcSLAMModule
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
 
-      reaMessager.registerTopicListener(REAModuleAPI.RequestSLAMBuildMap, (content) -> buildAndSubmitPlanarRegionsMap());
+      //reaMessager.registerTopicListener(REAModuleAPI.RequestSLAMBuildMap, (content) -> buildAndSubmitPlanarRegionsMap());
    }
 
    public void start() throws IOException
@@ -128,6 +128,7 @@ public class IhmcSLAMModule
       reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
       System.out.println("# Octree " + octreeMap.getNumberOfNodes());
 
+      slam.updatePlanarRegionsMap();
       PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
       reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
    }
