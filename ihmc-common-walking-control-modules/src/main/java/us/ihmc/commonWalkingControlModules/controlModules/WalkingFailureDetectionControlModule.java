@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -133,7 +134,7 @@ public class WalkingFailureDetectionControlModule
    {
       return fallingDirection2D;
    }
-   
+
    public FrameVector3D getFallingDirection3D()
    {
       return fallingDirection3D;
@@ -142,5 +143,10 @@ public class WalkingFailureDetectionControlModule
    public FrameConvexPolygon2D getCombinedFootPolygon()
    {
       return combinedFootPolygon;
+   }
+
+   public FrameConvexPolygon2DReadOnly getCombinedFootPolygonWithNextFootstep()
+   {
+      return combinedFootPolygonWithNextFootstep;
    }
 }

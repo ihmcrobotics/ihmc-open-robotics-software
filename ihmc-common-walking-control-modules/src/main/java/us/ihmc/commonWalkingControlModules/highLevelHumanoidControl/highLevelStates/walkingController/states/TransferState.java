@@ -132,9 +132,14 @@ public abstract class TransferState extends WalkingState
       {
          balanceManager.getCapturePoint(capturePoint2d);
          FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-         boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
+         FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
 
-         if (!isICPInsideSupportPolygon || balanceManager.getNormalizedEllipticICPError() < 1.0)
+         boolean isICPInsideCurrentSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
+         boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
+
+         if (!isICPInsideCurrentSupportPolygon && isICPInsideNextSupportPolygon)
+            return true;
+         else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
          else
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
