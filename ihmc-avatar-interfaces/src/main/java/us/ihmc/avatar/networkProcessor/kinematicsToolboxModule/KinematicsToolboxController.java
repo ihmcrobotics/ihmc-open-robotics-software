@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
@@ -65,6 +66,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
@@ -540,7 +542,9 @@ public class KinematicsToolboxController extends ToolboxController
       else
          rigidBodies = rootBody.subtreeList();
 
-      rigidBodies.stream().map(this::createFeedbackControlCommand).forEach(template::addCommand);
+      rigidBodies.stream().map(this::createRigidBodyFeedbackControlCommand).forEach(template::addCommand);
+
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).map(this::createJointFeedbackControlCommand).forEach(template::addCommand);
       return template;
    }
 
@@ -548,10 +552,21 @@ public class KinematicsToolboxController extends ToolboxController
     * Convenience method for pure laziness. Should only be used for
     * {@link #createControllerCoreTemplate()}.
     */
-   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBodyBasics endEffector)
+   private SpatialFeedbackControlCommand createRigidBodyFeedbackControlCommand(RigidBodyBasics endEffector)
    {
       SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
       command.set(rootBody, endEffector);
+      return command;
+   }
+
+   /**
+    * Convenience method for pure laziness. Should only be used for
+    * {@link #createControllerCoreTemplate()}.
+    */
+   private OneDoFJointFeedbackControlCommand createJointFeedbackControlCommand(OneDoFJointBasics joint)
+   {
+      OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
+      command.setJoint(joint);
       return command;
    }
 
