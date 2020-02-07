@@ -160,7 +160,7 @@ public class LinearMomentumRateControlModule
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
-      recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight", new Vector3D(0.5, 0.5, 0.5), registry);
+      recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight", momentumOptimizationSettings.getRecoveryLinearMomentumWeight(), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
       maxMomentumRateWeightChangeRate = new YoDouble("maxMomentumRateWeightChangeRate", registry);
