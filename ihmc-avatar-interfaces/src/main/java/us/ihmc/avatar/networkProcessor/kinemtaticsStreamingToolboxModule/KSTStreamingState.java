@@ -83,7 +83,7 @@ public class KSTStreamingState implements State
    private final AlphaFilteredYoVariable inputFrequency;
    private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
 
-   private final YoPIDSE3Gains ikSolverGains;
+   private final YoPIDSE3Gains ikSolverSpatialGains;
 
    private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint> filteredInputPositions = new HashMap<>();
    private final Map<RigidBodyBasics, AlphaFilteredYoFrameQuaternion> filteredInputOrientations = new HashMap<>();
@@ -92,7 +92,7 @@ public class KSTStreamingState implements State
    {
       this.tools = tools;
       HumanoidKinematicsToolboxController ikController = tools.getIKController();
-      ikSolverGains = ikController.getDefaultGains();
+      ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
@@ -164,10 +164,10 @@ public class KSTStreamingState implements State
       isStreaming.set(false);
       wasStreaming.set(false);
       timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
-      ikSolverGains.setPositionProportionalGains(50.0);
-      ikSolverGains.setOrientationProportionalGains(50.0);
-      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverSpatialGains.setPositionProportionalGains(50.0);
+      ikSolverSpatialGains.setOrientationProportionalGains(50.0);
+      ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
       configurationMessage.setEnableJointVelocityLimits(true);
       ikCommandInputManager.submitMessage(configurationMessage);
@@ -282,8 +282,8 @@ public class KSTStreamingState implements State
          timeSinceLastInput.set(timeInState - timeOfLastInput.getValue());
       }
 
-      ikSolverGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       tools.getIKController().updateInternal();
       ikRobotState.set(tools.getIKController().getSolution());
 
