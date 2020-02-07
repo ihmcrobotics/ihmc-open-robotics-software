@@ -113,6 +113,9 @@ public abstract class TransferState extends WalkingState
             feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading, rhoMin.getValue());
          }
       }
+
+      if (balanceManager.getNormalizedEllipticICPError() > 2.0)
+         balanceManager.setUseMomentumRecoveryModeForBalance(true);
    }
 
    @Override
@@ -132,15 +135,9 @@ public abstract class TransferState extends WalkingState
          boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
          if (!isICPInsideSupportPolygon || balanceManager.getNormalizedEllipticICPError() < 1.0)
-         {
-            balanceManager.setUseMomentumRecoveryModeForBalance(false);
             return true;
-         }
          else
-         {
             balanceManager.setUseMomentumRecoveryModeForBalance(true);
-            return false;
-         }
       }
 
       return false;
@@ -234,5 +231,6 @@ public abstract class TransferState extends WalkingState
          feetManager.resetLoadConstraints(transferToSide.getOppositeSide());
       }
       feetManager.reset();
+      balanceManager.setUseMomentumRecoveryModeForBalance(false);
    }
 }
