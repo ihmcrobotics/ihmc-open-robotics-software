@@ -52,8 +52,7 @@ public abstract class TransferState extends WalkingState
    private final DoubleProvider unloadFraction;
    private final DoubleProvider rhoMin;
 
-   public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
-                        WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public TransferState(WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
                         DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
    {
@@ -114,7 +113,7 @@ public abstract class TransferState extends WalkingState
          }
       }
 
-      if (balanceManager.getNormalizedEllipticICPError() > 2.0)
+      if (balanceManager.getNormalizedEllipticICPError() > balanceManager.getEllipticICPErrorForMomentumRecovery())
          balanceManager.setUseMomentumRecoveryModeForBalance(true);
    }
 
