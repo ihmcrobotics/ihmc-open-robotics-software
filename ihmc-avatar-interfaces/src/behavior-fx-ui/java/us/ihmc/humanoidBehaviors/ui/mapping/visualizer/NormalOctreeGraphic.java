@@ -33,7 +33,7 @@ public class NormalOctreeGraphic extends Group
    private List<Node> lastNodes = null;
    private volatile List<Node> updatePointCloudMeshViews;
 
-   private static final float SCAN_POINT_SIZE = 0.005f;
+   private static final float SCAN_POINT_SIZE = 0.01f;
    private static final int palleteSizeForMeshBuilder = 2048;
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
 
