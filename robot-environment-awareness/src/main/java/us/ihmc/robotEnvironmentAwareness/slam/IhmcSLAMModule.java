@@ -31,7 +31,7 @@ public class IhmcSLAMModule
 
    private final Topic<PlanarRegionsListMessage> planarRegionsStateTopicToSubmit;
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   private final LinkedList<StereoVisionPointCloudMessage> stackedPointCloud = new LinkedList<StereoVisionPointCloudMessage>();
+   private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
 
    private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -102,12 +102,12 @@ public class IhmcSLAMModule
       if (isSLAMThreadInterrupted())
          return;
 
-      if (stackedPointCloud.size() == 0)
+      if (pointCloudQueue.size() == 0)
          return;
 
-      StereoVisionPointCloudMessage pointCloudToCompute = stackedPointCloud.getFirst();
+      StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
 
-      System.out.println("stacked point cloud data set = [" + stackedPointCloud.size() + "].");
+      System.out.println("queued point cloud data set = [" + pointCloudQueue.size() + "].");
       if (slam.isEmpty())
       {
          slam.addFirstFrame(pointCloudToCompute);
@@ -116,10 +116,10 @@ public class IhmcSLAMModule
       else
       {
          boolean success = slam.addFrame(pointCloudToCompute);
-         System.out.println("add frame " + success + " [" + stackedPointCloud.size() + "].");
+         System.out.println("add frame " + success + " [" + pointCloudQueue.size() + "].");
       }
-      stackedPointCloud.removeFirst();
-      System.out.println("SLAM Computation is done [" + stackedPointCloud.size() + "].");
+      pointCloudQueue.removeFirst();
+      System.out.println("SLAM Computation is done [" + pointCloudQueue.size() + "].");
 
       reaMessager.submitMessage(REAModuleAPI.SLAMOcTreeEnable, true);
 
@@ -144,14 +144,14 @@ public class IhmcSLAMModule
          if (pointCloud == null)
             return;
 
-         stackedPointCloud.add(pointCloud);
-         System.out.println("New point cloud is stacked [" + stackedPointCloud.size() + "].");
+         pointCloudQueue.add(pointCloud);
+         System.out.println("New point cloud is queued [" + pointCloudQueue.size() + "].");
       }
    }
 
    public void clearSLAM()
    {
-      stackedPointCloud.clear();
+      pointCloudQueue.clear();
       slam.clear();
       newPointCloud.set(null);
    }
