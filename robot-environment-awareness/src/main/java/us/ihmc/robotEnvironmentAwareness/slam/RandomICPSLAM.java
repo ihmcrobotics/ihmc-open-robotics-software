@@ -31,6 +31,8 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double MINIMUM_OVERLAPPED_RATIO = 0.4;
 
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
+   
+   private static final double MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
    private static final int MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
 
@@ -44,7 +46,7 @@ public class RandomICPSLAM extends IhmcSLAM
    protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
-   public static boolean ENABLE_ORIENTATION_CORRECTION = true;
+   public static boolean ENABLE_YAW_CORRECTION = false;
 
    static
    {
@@ -54,9 +56,12 @@ public class RandomICPSLAM extends IhmcSLAM
          LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
          UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
       }
-      INITIAL_INPUT.add(0.0);
-      LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
-      UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
+      if(ENABLE_YAW_CORRECTION)
+      {
+         INITIAL_INPUT.add(0.0);
+         LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
+         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);   
+      }
    }
 
    // debugging variables.
@@ -187,7 +192,7 @@ public class RandomICPSLAM extends IhmcSLAM
          else
          {
             int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, MAXIMUM_OCTREE_SEARCHING_SIZE);
-            if (numberOfInliers > 0.95 * sourcePointsToSensor.length)
+            if (numberOfInliers > MINIMUM_INLIERS_RATIO_OF_KEY_FRAME * sourcePointsToSensor.length)
             {
                if (DEBUG)
                   System.out.println("close enough. many inliers.");
@@ -254,9 +259,12 @@ public class RandomICPSLAM extends IhmcSLAM
       {
          sensorPoseToPack.set(transformWorldToSensorPose);
          sensorPoseToPack.appendTranslation(input.get(0), input.get(1), input.get(2));
-         yawRotator.setIdentity();
-         yawRotator.appendYawRotation(input.get(3) * TRANSLATION_TO_ANGLE_RATIO);
-         sensorPoseToPack.preMultiply(yawRotator);
+         if(ENABLE_YAW_CORRECTION)
+         {
+            yawRotator.setIdentity();
+            yawRotator.appendYawRotation(input.get(3) * TRANSLATION_TO_ANGLE_RATIO);
+            sensorPoseToPack.preMultiply(yawRotator);   
+         }
       }
 
       void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
