@@ -127,6 +127,8 @@ public class BalanceManager
    private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
    private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
 
+   private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
+
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
@@ -679,6 +681,11 @@ public class BalanceManager
    public double getNormalizedEllipticICPError()
    {
       return normalizedICPError.getValue();
+   }
+
+   public double getEllipticICPErrorForMomentumRecovery()
+   {
+      return ellipticICPErrorForMomentumRecovery.getValue();
    }
 
    public double getICPErrorMagnitude()
