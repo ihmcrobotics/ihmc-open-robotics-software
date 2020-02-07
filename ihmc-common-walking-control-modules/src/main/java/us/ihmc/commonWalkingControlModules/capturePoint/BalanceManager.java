@@ -91,6 +91,8 @@ public class BalanceManager
 
    private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
+   private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
+
    private final YoDouble yoTime;
 
    private final ReferenceFrame centerOfMassFrame;
@@ -252,6 +254,11 @@ public class BalanceManager
       yoPerfectCoP.setToNaN();
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setUseMomentumRecoveryModeForBalance(boolean useMomentumRecoveryModeForBalance)
+   {
+      this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
@@ -420,6 +427,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
+      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
