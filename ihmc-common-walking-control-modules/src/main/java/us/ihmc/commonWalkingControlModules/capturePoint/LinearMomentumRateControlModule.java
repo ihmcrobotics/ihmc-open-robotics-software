@@ -68,7 +68,7 @@ public class LinearMomentumRateControlModule
 
    private final BooleanProvider allowMomentumRecoveryWeight;
    private final YoBoolean useRecoveryMomentumWeight;
-   private final YoDouble maxMomentumRateWeightChangeRate;
+   private final DoubleParameter maxMomentumRateWeightChangeRate;
    private final RateLimitedYoFrameVector desiredLinearMomentumRateWeight;
 
    private final YoBoolean minimizingAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
@@ -167,10 +167,9 @@ public class LinearMomentumRateControlModule
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
       allowMomentumRecoveryWeight = new BooleanParameter("allowMomentumRecoveryWeight", registry, false);
-      maxMomentumRateWeightChangeRate = new YoDouble("maxMomentumRateWeightChangeRate", registry);
+      maxMomentumRateWeightChangeRate = new DoubleParameter("maxMomentumRateWeightChangeRate", registry, 10.0);
       useRecoveryMomentumWeight = new YoBoolean("useRecoveryMomentumWeight", registry);
       useRecoveryMomentumWeight.set(false);
-      maxMomentumRateWeightChangeRate.set(0.5);
       desiredLinearMomentumRateWeight = new RateLimitedYoFrameVector("desiredLinearMomentumRateWeight", "", registry, maxMomentumRateWeightChangeRate, controlDT, worldFrame);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -213,7 +212,7 @@ public class LinearMomentumRateControlModule
 
    public void reset()
    {
-      desiredLinearMomentumRateWeight.set(linearMomentumRateOfChange);
+      desiredLinearMomentumRateWeight.set(linearMomentumRateWeight);
 
       capturePointVelocity.reset();
       icpOptimizationController.clearPlan();
