@@ -5,11 +5,12 @@
             <registry name="HumanoidHighLevelControllerManager">
                 <registry name="WalkingControllerState">
                     <registry name="LinearMomentumRateControlModule">
+                        <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                        <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
-                        <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                        <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         <parameter name="RecoveryLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
@@ -211,7 +212,7 @@
                             <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
-                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.012"/>
                         </registry>
                     </registry>
                 </registry>
