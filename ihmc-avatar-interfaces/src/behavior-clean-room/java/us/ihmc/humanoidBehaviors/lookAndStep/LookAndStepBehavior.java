@@ -9,12 +9,14 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -83,9 +85,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D targetFootstepPose = new FramePose3D();
-      targetFootstepPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
-      targetFootstepPose.prependTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
+//      targetFootstepPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+      targetFootstepPose.setToZero(latestHumanoidRobotState.getPelvisFrame());
+      targetFootstepPose.appendTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
       targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       RobotSide initialStanceFootSide = null;
@@ -105,7 +107,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootPose = leftSolePose;
 
          targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
-         targetFootstepPose.prependTranslation(0.0, -idealFootstepWidth, 0.0);
+         targetFootstepPose.appendTranslation(0.0, -idealFootstepWidth, 0.0);
          targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
       else
@@ -114,42 +116,36 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootPose = rightSolePose;
 
          targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
-         targetFootstepPose.prependTranslation(0.0, idealFootstepWidth, 0.0);
+         targetFootstepPose.appendTranslation(0.0, idealFootstepWidth, 0.0);
          targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      FootstepNode targetFootstepNode = new FootstepNode(targetFootstepPose.getX(),
-                                                   targetFootstepPose.getY(),
-                                                   targetFootstepPose.getYaw(),
-                                                   initialStanceFootSide.getOppositeSide());
+      FootstepNode targetFootstepNodeToSnap = new FootstepNode(targetFootstepPose.getX(),
+                                                               targetFootstepPose.getY(),
+                                                               targetFootstepPose.getYaw(),
+                                                               initialStanceFootSide.getOppositeSide());
 
       PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
-
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapper.setPlanarRegions(latestPlanarRegionList);
-      FootstepNodeSnapData footstepNodeSnapData = snapper.snapFootstepNode(targetFootstepNode);
-
-      FramePose3D framePose3D = new FramePose3D();
-      framePose3D.set(footstepNodeSnapData.getSnapTransform());
+      FootstepNodeSnapData footstepNodeSnapData = snapper.snapFootstepNode(targetFootstepNodeToSnap);
 
       FootstepPlan footstepPlan = new FootstepPlan();
 
-      SimpleFootstep simpleFootstep = new SimpleFootstep();
-      simpleFootstep.setFoothold(footstepNodeSnapData.getCroppedFoothold());
-      simpleFootstep.getSoleFramePose(framePose3D);
-      simpleFootstep.setRobotSide(initialStanceFootSide.getOppositeSide());
-      footstepPlan.addFootstep(simpleFootstep);
+      RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(targetFootstepNodeToSnap, footstepNodeSnapData.getSnapTransform(), snappedNodeTransform);
 
-      simpleFootstep = new SimpleFootstep();
-      simpleFootstep.setSoleFramePose(targetFootstepPose);
-      simpleFootstep.setRobotSide(initialStanceFootSide.getOppositeSide());
-      footstepPlan.addFootstep(simpleFootstep);
-
+      FramePose3D snappedSoleFramePose = new FramePose3D();
+      snappedSoleFramePose.set(snappedNodeTransform);
+      SimpleFootstep snappedSimpleFoostep = new SimpleFootstep();
+      snappedSimpleFoostep.setFoothold(footstepNodeSnapData.getCroppedFoothold());
+      snappedSimpleFoostep.setSoleFramePose(snappedSoleFramePose);
+      snappedSimpleFoostep.setRobotSide(initialStanceFootSide.getOppositeSide());
+      footstepPlan.addFootstep(snappedSimpleFoostep);
 
 //      FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-//
 //
 //      // nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
 //      FootstepNodeCheckerOfCheckers nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
