@@ -441,7 +441,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
          feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
+         feedbackControlCommand.resetControlFrame();
+         feedbackControlCommand.resetControlBaseFrame();
          feedbackControlCommand.setGains(getDefaultSpatialGains());
+         feedbackControlCommand.setSelectionMatrixToIdentity();
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.setInverseKinematics(footPoseToHold, KinematicsToolboxHelper.zeroVector6D);
       }
