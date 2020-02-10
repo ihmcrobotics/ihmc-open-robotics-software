@@ -99,13 +99,17 @@ public class AtlasSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI / 4.0;
+      //increased atlas turn speed defaults
+      // return Math.PI / 4.0;
+      return 0.6;
    }
 
    @Override
    public double getMaxAngleTurnInwards()
    {
-      return 0;
+      //increased atlas turn speed defaults
+      //  return 0;
+      return -0.1;
    }
 
    @Override

@@ -18,7 +18,7 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       endCoPName = CoPPointName.MIDFEET_COP;
       entryCoPName = CoPPointName.ENTRY_COP;
       exitCoPName = CoPPointName.EXIT_COP;
-      swingCopPointsToPlan = new CoPPointName[]{CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
+      swingCopPointsToPlan = new CoPPointName[]{CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP, CoPPointName.TOE_COP};
       transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
 
       stepLengthToCoPOffsetFactor.clear();
@@ -36,12 +36,14 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
       copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
       copOffsetsInFootFrame.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, new Vector2D(0.0, 0.000));
+      copOffsetsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.03));
 
       copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
       copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
       copOffsetBoundsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.055));
       copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
-      copOffsetBoundsInFootFrame.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, new Vector2D(0.0, 0.00));
+      copOffsetBoundsInFootFrame.put(CoPPointName.FLAMINGO_STANCE_FINAL_COP, new Vector2D(0.0, 0.0));
+      copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.0));
    }
 
    @Override

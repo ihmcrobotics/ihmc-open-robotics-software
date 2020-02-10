@@ -44,25 +44,25 @@ public class AtlasNetworkProcessor
 
          DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
          networkModuleParams.enableBehaviorModule(true);
-         networkModuleParams.enableBehaviorVisualizer(true);
+//         networkModuleParams.enableBehaviorVisualizer(true);
          networkModuleParams.enableSensorModule(true);
-         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
-         networkModuleParams.enableHeightQuadTreeToolbox(true);
-         networkModuleParams.enableMocapModule(false);
-         networkModuleParams.enableFootstepPlanningToolbox(false);
-         networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-         networkModuleParams.enableKinematicsToolbox(true);
-         networkModuleParams.enableKinematicsToolboxVisualizer(false);
+//         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
+//         networkModuleParams.enableHeightQuadTreeToolbox(true);
+//         networkModuleParams.enableMocapModule(false);
+//         networkModuleParams.enableFootstepPlanningToolbox(false);
+//         networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
+//         networkModuleParams.enableKinematicsToolbox(true);
+//         networkModuleParams.enableKinematicsToolboxVisualizer(false);
          networkModuleParams.enableKinematicsStreamingToolbox(true, AtlasKinematicsStreamingToolboxModule.class);
          networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
          networkModuleParams.enableAutoREAStateUpdater(true);
-         networkModuleParams.enableWalkingPreviewToolbox(true);
-         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
+//         networkModuleParams.enableWalkingPreviewToolbox(true);
+//         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 
          URI rosuri = NetworkParameters.getROSURI();
          if (rosuri != null)
          {
-            networkModuleParams.enableRosModule(AtlasRosModule.class);
+            networkModuleParams.enableRosModule(true);
             networkModuleParams.setRosUri(rosuri);
             LogTools.info("ROS_MASTER_URI = " + rosuri);
 

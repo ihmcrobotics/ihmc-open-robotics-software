@@ -354,11 +354,14 @@ public class KinematicsToolboxController extends ToolboxController
          YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
          YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
 
-         AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions",
-                                                  new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         if (yoGraphicsListRegistry != null)
+         {
+            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions",
+                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         }
 
          yoCollisionDistances[i] = collisionDistance;
          yoCollisionPointAs[i] = collisionPointA;
