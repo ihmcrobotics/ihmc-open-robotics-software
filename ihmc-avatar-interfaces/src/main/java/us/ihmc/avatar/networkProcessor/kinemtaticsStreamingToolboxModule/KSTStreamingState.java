@@ -2,9 +2,13 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
@@ -16,15 +20,20 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -55,8 +64,11 @@ public class KSTStreamingState implements State
 
    private final KinematicsToolboxRigidBodyMessage defaultPelvisMessage = new KinematicsToolboxRigidBodyMessage();
    private final KinematicsToolboxRigidBodyMessage defaultChestMessage = new KinematicsToolboxRigidBodyMessage();
+   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> defaultArmJointMessages = new SideDependentList<>();
    private final RigidBodyBasics pelvis;
    private final RigidBodyBasics chest;
+   private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
+   private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
    private final YoDouble defaultPelvisMessageLinearWeight = new YoDouble("defaultPelvisMessageLinearWeight", registry);
    private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
    private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
@@ -84,6 +96,7 @@ public class KSTStreamingState implements State
    private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
 
    private final YoPIDSE3Gains ikSolverSpatialGains;
+   private final YoPIDGains ikSolverJointGains;
 
    private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint> filteredInputPositions = new HashMap<>();
    private final Map<RigidBodyBasics, AlphaFilteredYoFrameQuaternion> filteredInputOrientations = new HashMap<>();
@@ -93,6 +106,7 @@ public class KSTStreamingState implements State
       this.tools = tools;
       HumanoidKinematicsToolboxController ikController = tools.getIKController();
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
+      ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
@@ -109,6 +123,16 @@ public class KSTStreamingState implements State
       defaultChestMessage.getDesiredOrientationInWorld().setToZero();
       defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
       defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         hands.put(robotSide, hand);
+         armJoints.put(robotSide, joints);
+         defaultArmJointMessages.put(robotSide,
+                                     Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
+                                           .collect(Collectors.toList()));
+      }
 
       defaultPelvisMessageLinearWeight.set(2.5);
       defaultPelvisMessageAngularWeight.set(1.0);
@@ -138,14 +162,17 @@ public class KSTStreamingState implements State
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
-      DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(), tools.getToolboxControllerPeriod());
+      DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
+                                                                                                                 tools.getToolboxControllerPeriod());
       inputsFilterBreakFrequency.set(2.0);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
          String namePrefix = rigidBody.getName() + "Input";
-         AlphaFilteredYoFramePoint filteredInputPosition = new AlphaFilteredYoFramePoint(namePrefix + "Position", "", registry, inputsAlphaProvider, worldFrame);
-         AlphaFilteredYoFrameQuaternion filteredInputOrientation = new AlphaFilteredYoFrameQuaternion(namePrefix + "Orientation", "", inputsAlphaProvider, worldFrame, registry);
+         AlphaFilteredYoFramePoint filteredInputPosition = new AlphaFilteredYoFramePoint(namePrefix
+               + "Position", "", registry, inputsAlphaProvider, worldFrame);
+         AlphaFilteredYoFrameQuaternion filteredInputOrientation = new AlphaFilteredYoFrameQuaternion(namePrefix
+               + "Orientation", "", inputsAlphaProvider, worldFrame, registry);
          filteredInputPositions.put(rigidBody, filteredInputPosition);
          filteredInputOrientations.put(rigidBody, filteredInputOrientation);
       }
@@ -168,6 +195,8 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setOrientationProportionalGains(50.0);
       ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverJointGains.setKp(50.0);
+      ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       configurationMessage.setJointVelocityWeight(1.0);
       configurationMessage.setEnableJointVelocityLimits(true);
       ikCommandInputManager.submitMessage(configurationMessage);
@@ -180,6 +209,14 @@ public class KSTStreamingState implements State
       FrameQuaternion chestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics[] joints = armJoints.get(robotSide);
+         List<KinematicsToolboxOneDoFJointMessage> messages = defaultArmJointMessages.get(robotSide);
+
+         for (int i = 0; i < joints.length; i++)
+            messages.get(i).setDesiredPosition(joints[i].getQ());
+      }
       resetFilter = true;
       streamingStartTime.set(Double.NaN);
 
@@ -251,6 +288,12 @@ public class KSTStreamingState implements State
          if (!latestInput.hasInputFor(chest))
             ikCommandInputManager.submitMessage(defaultChestMessage);
 
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (!latestInput.hasInputFor(hands.get(robotSide)))
+               ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
+         }
+
          isStreaming.set(latestInput.getStreamToController());
          if (latestInput.getStreamInitialBlendDuration() > 0.0)
             streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
@@ -284,8 +327,28 @@ public class KSTStreamingState implements State
 
       ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
+      ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       tools.getIKController().updateInternal();
       ikRobotState.set(tools.getIKController().getSolution());
+
+      /*
+       * Updating the desired default position for the arms only if the corresponding is controlled. This
+       * allows to improve continuity in case the user stops controlling a hand.
+       */
+      if (latestInput != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (latestInput.hasInputFor(hands.get(robotSide)))
+            {
+               OneDoFJointBasics[] joints = armJoints.get(robotSide);
+               List<KinematicsToolboxOneDoFJointMessage> messages = defaultArmJointMessages.get(robotSide);
+
+               for (int i = 0; i < joints.length; i++)
+                  messages.get(i).setDesiredPosition(joints[i].getQ());
+            }
+         }
+      }
 
       if (resetFilter)
       {
