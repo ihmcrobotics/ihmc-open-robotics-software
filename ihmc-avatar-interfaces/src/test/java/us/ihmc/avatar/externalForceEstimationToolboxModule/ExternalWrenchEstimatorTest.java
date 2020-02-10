@@ -1,9 +1,16 @@
 package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -29,13 +36,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExternalWrenchEstimatorTest
 {
@@ -72,18 +72,16 @@ public class ExternalWrenchEstimatorTest
    public void setupEstimator()
    {
       double gravity = 9.81;
-      GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(joints[0].getPredecessor(), new ArrayList<>(), gravity);
-      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(joints[0].getPredecessor());
+      RigidBodyBasics rootBody = joints[0].getPredecessor();
+      GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(rootBody);
+      gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-gravity);
+      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
 
       this.dynamicMatrixSetter = (m, c) ->
       {
          m.set(massMatrixCalculator.getMassMatrix());
-
          gravityCoriolisExternalWrenchMatrixCalculator.compute();
-         for (int i = 0; i < joints.length; i++)
-         {
-            gravityCoriolisExternalWrenchMatrixCalculator.getJointCoriolisMatrix(joints[i], c, i);
-         }
+         c.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
       };
 
       Consumer<DenseMatrix64F> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);

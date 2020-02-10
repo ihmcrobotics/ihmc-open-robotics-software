@@ -41,6 +41,7 @@ public class ReachabilityMapSolver
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
+   private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoDouble solutionQualityThreshold = new YoDouble("solutionQualityThreshold", registry);
    private final YoDouble solutionStabilityThreshold = new YoDouble("solutionStabilityThreshold", registry);
    private final YoDouble solutionMinimumProgression = new YoDouble("solutionProgressionThreshold", registry);
@@ -102,8 +103,8 @@ public class ReachabilityMapSolver
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition, desiredOrientation);
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotation());
       message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(angularSelection));
       commandInputManager.submitMessage(message);
 
@@ -117,8 +118,8 @@ public class ReachabilityMapSolver
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector, desiredPosition);
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getRotation());
       commandInputManager.submitMessage(message);
 
       return solveAndRetry(50);
@@ -126,12 +127,13 @@ public class ReachabilityMapSolver
 
    private boolean solveAndRetry(int maximumNumberOfIterations)
    {
-      int tryNumber = 0;
+      numberOfIterations.set(0);
       boolean success = false;
-      while (!success && tryNumber++ < numberOfTrials)
+      while (!success && numberOfIterations.getValue() < numberOfTrials)
       {
          MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, robotArmJoints);
          success = solveOnce(maximumNumberOfIterations);
+         numberOfIterations.increment();
       }
       return success;
    }

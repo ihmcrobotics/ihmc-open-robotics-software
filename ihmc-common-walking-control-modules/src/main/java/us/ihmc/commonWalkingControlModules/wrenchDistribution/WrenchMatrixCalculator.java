@@ -144,9 +144,12 @@ public class WrenchMatrixCalculator
          rigidBodies.add(rigidBody);
 
          FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
-         PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
-                                                                                                  maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint,
-                                                                                                  frictionConeRotation, registry);
+         PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody,
+                                                                                                  centerOfMassFrame,
+                                                                                                  maxNumberOfContactPoints,
+                                                                                                  numberOfBasisVectorsPerContactPoint,
+                                                                                                  frictionConeRotation,
+                                                                                                  registry);
          helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
          bodyRhoOffsets.put(rigidBody, rhoOffset);
@@ -338,7 +341,13 @@ public class WrenchMatrixCalculator
          weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
          weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
       }
-      selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, planeFrame, tempTaskJacobian, tempTaskObjective, taskJacobian, taskObjective,
+      selectionCalculator.applySelectionToTask(selectionMatrix,
+                                               weightMatrix,
+                                               planeFrame,
+                                               tempTaskJacobian,
+                                               tempTaskObjective,
+                                               taskJacobian,
+                                               taskObjective,
                                                taskWeight);
    }
 
@@ -437,6 +446,20 @@ public class WrenchMatrixCalculator
       }
 
       return wrenchesFromRho;
+   }
+
+   /**
+    * Gets the list of rigid-bodies that are registered as contactable.
+    * <p>
+    * The ordering of the list indicate the ordering of &rho;s in the matrices.
+    * </p>
+    * 
+    * @return the list of rigid-bodies that can contact with environment and are part of the
+    *         optimization.
+    */
+   public List<RigidBodyBasics> getRigidBodies()
+   {
+      return rigidBodies;
    }
 
    public DenseMatrix64F getRhoJacobianMatrix()
