@@ -1,12 +1,22 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
+import java.io.IOException;
+import java.net.URL;
+
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.UIConnectionHandler;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
 {
@@ -54,7 +64,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIDepthCloudShow, enableDepthButton.selectedProperty(), true);
-      
+
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
    }
@@ -70,7 +80,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
       uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionClear, true);
    }
-   
+
    @FXML
    public void clearDepth()
    {
@@ -84,7 +94,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       saveUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
    }
-   
+
    @FXML
    public void clearNavigation()
    {
@@ -104,5 +114,67 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       int max = maximumSizeOfPointCloud;
       int amountToStepBy = minimumSizeOfPointCloud;
       return new IntegerSpinnerValueFactory(min, max, initialValue, amountToStepBy);
+   }
+
+   @FXML
+   private SLAMAnchorPaneController slamAnchorPaneController;
+   private IhmcSLAMMeshViewer ihmcSLAMViewer;
+   private UIConnectionHandler uiConnectionHandler;
+   
+   @FXML
+   public void openSLAM() throws IOException
+   {
+      System.out.println("open slam");
+
+      FXMLLoader loader = new FXMLLoader();
+      loader.setController(slamAnchorPaneController);
+      URL url = getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml");
+      loader.setLocation(url);
+
+      if (url == null)
+      {
+         System.out.println(getClass());
+         System.out.println(getClass().getName());
+         System.out.println(getClass().getResource("../ui/SLAMVisualizerMainPane" + ".fxml"));
+         System.out.println(getClass().getResource("../../SLAMVisualizerMainPane" + ".fxml"));
+         System.out.println(getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml"));
+      }
+      else
+      {
+         System.out.println("we have. " + url);
+         
+         ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
+         
+         BorderPane mainPane = loader.load();
+
+         View3DFactory view3dFactory = View3DFactory.createSubscene();
+         view3dFactory.addCameraController(true);
+         view3dFactory.addWorldCoordinateSystem(0.3);
+         view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
+         mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
+
+         Stage stage = new Stage();
+         Scene mainScene = new Scene(mainPane, 600, 400);
+         stage.setScene(mainScene);
+         stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
+
+         uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
+         uiConnectionHandler.start();
+
+         stage.show();
+
+         if (slamAnchorPaneController == null)
+            System.out.println("controller is null");
+         if (uiMessager == null)
+            System.out.println("uiMessager is null");
+
+         
+         //TODO:
+         slamAnchorPaneController.attachREAMessager(uiMessager);
+         slamAnchorPaneController.bindControls();
+      }
+
+      
+
    }
 }

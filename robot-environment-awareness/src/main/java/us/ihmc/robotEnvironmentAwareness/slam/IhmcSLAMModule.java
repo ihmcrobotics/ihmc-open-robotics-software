@@ -121,7 +121,7 @@ public class IhmcSLAMModule
       pointCloudQueue.removeFirst();
       System.out.println("SLAM Computation is done [" + pointCloudQueue.size() + "].");
 
-      reaMessager.submitMessage(REAModuleAPI.SLAMOcTreeEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.ShowSLAMOctreeMap, true);
 
       NormalOcTree octreeMap = slam.getOctree();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);

@@ -60,6 +60,11 @@ public class REAModuleAPI
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
    private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
    private static final CategoryTheme SLAMFrame = apiFactory.createCategoryTheme("SLAMFrame");
+   private static final CategoryTheme Points = apiFactory.createCategoryTheme("Points");
+   private static final CategoryTheme ICP = apiFactory.createCategoryTheme("ICP");
+   private static final CategoryTheme Window = apiFactory.createCategoryTheme("Window");
+   private static final CategoryTheme Overlapped = apiFactory.createCategoryTheme("Overlapped");
+   private static final CategoryTheme Inlier = apiFactory.createCategoryTheme("Inlier");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -72,6 +77,8 @@ public class REAModuleAPI
    private static final TypedTopicTheme<Double> Resolution = apiFactory.createTypedTopicTheme("Resolution");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
    private static final TypedTopicTheme<Integer> Capacity = apiFactory.createTypedTopicTheme("Capacity");
+   private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
+   private static final TypedTopicTheme<Double> Ratio = apiFactory.createTypedTopicTheme("Ratio");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Min = apiFactory.createTopicTheme("Min");
@@ -180,7 +187,6 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
 
    public static final Topic<Boolean> SLAMEnable = SLAMCategory.topic(Enable);
-   public static final Topic<Boolean> SLAMOcTreeEnable = SLAMCategory.child(OcTree).topic(Enable);//
    public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
    public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
@@ -188,14 +194,20 @@ public class REAModuleAPI
 
    public static final Topic<IhmcSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
 
+   public static final Topic<Boolean> ShowLatestFrame = SLAMCategory.child(UI).child(DepthCloud).child(Buffer).topic(Enable);
    public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).child(Custom).topic(Enable);
    public static final Topic<Boolean> ShowSLAMOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
-   public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).child(Custom).topic(Enable);
    public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
+   public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
 
-   public static final Topic<Integer> QueuedBuffers = SLAMCategory.child(SLAMFrame).topic(Size);
-   public static final Topic<Double> AverageReducedCost = SLAMCategory.child(SLAMFrame).topic(Resolution);
+   public static final Topic<Integer> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Size);
+   public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
+   public static final Topic<Integer> SLAMSourcePoints = SLAMCategory.child(Points).topic(Size);
+   public static final Topic<Integer> SLAMSearchingSize = SLAMCategory.child(ICP).topic(Size);
+   public static final Topic<Double> SLAMMinimumOverlappedRatio = SLAMCategory.child(Overlapped).topic(Ratio);
+   public static final Topic<Double> SLAMWindowMargin = SLAMCategory.child(Window).topic(Resolution);
+   public static final Topic<Double> SLAMMinimumInlierRatio = SLAMCategory.child(Inlier).topic(Ratio);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

@@ -83,16 +83,7 @@
                      </children>
                   </AnchorPane>
                </content>
-            </Tab>
-            <Tab text="SLAM">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="slamAnchorPane" source="SLAMAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
+            </Tab>            
          </tabs>
       </TabPane>
    </bottom>

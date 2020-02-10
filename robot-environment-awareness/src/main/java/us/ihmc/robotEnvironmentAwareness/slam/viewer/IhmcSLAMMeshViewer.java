@@ -44,7 +44,7 @@ public class IhmcSLAMMeshViewer
       //      ihmcSLAMFrameViewer = new IhmcSLAMFrameViewer(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState);
 
-      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.SLAMOcTreeEnable, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
+      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.ShowSLAMOctreeMap, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
 
       //      Node ihmcSLAMRootNode = ihmcSLAMFrameViewer.getRoot();
       //      ihmcSLAMRootNode.setMouseTransparent(true);

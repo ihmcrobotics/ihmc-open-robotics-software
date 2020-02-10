@@ -63,8 +63,6 @@ public class LIDARBasedEnvironmentAwarenessUI
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
    @FXML
    private DataExporterAnchorPaneController dataExporterAnchorPaneController;
-   @FXML
-   private SLAMAnchorPaneController slamAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -76,6 +74,8 @@ public class LIDARBasedEnvironmentAwarenessUI
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
+      System.out.println(getClass().getName());
+      System.out.println(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       mainPane = loader.load();
 
       // Client
@@ -180,10 +180,9 @@ public class LIDARBasedEnvironmentAwarenessUI
       dataExporterAnchorPaneController.attachREAMessager(uiMessager);
       dataExporterAnchorPaneController.setMainWindow(primaryStage);
       dataExporterAnchorPaneController.bindControls();
-
-      slamAnchorPaneController.setConfigurationFile(configurationFile);
-      slamAnchorPaneController.attachREAMessager(uiMessager);
-      slamAnchorPaneController.bindControls();
+      
+      if (dataExporterAnchorPaneController == null)
+         System.out.println("dataExporterAnchorPaneController is null");
    }
 
    public void show() throws IOException
