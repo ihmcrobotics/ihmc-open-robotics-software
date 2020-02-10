@@ -101,7 +101,7 @@ public class RandomICPSLAMTest
 
       NormalOcTree octree = slam.getOctree();
       Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints,
-                                                                                                          minimumOverlappedRatio);
+                                                                                                          minimumOverlappedRatio, 0.1);
       Point3D[] sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getSensorPose(), sourcePointsToSensorPose);
 
       // compute distance.
@@ -335,7 +335,7 @@ public class RandomICPSLAMTest
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
-      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";
+      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";      
       //String stereoPath = "E:\\Data\\20200205_Tour4\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
@@ -378,8 +378,16 @@ public class RandomICPSLAMTest
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
          octreeViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
       
-      octreeViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+
+      String path = "E:\\Data\\20200205_Tour2\\20200205_174253_PlanarRegion\\";
+      File file = new File(path);
+      octreeViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(file));
+      //octreeViewer.addPlanarRegions(slam.getPlanarRegionsMap());
       octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+      {
+         octreeViewer.addPointCloud(slam.getOriginalPointCloudMap().get(i), Color.GREEN);
+      }
       octreeViewer.start("octreeViewer");
 
       ThreadTools.sleepForever();

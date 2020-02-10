@@ -29,6 +29,8 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
    private static final double MINIMUM_OVERLAPPED_RATIO = 0.4;
+   
+   private static final double WINDOW_MARGIN = 0.1;
 
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
    
@@ -163,7 +165,7 @@ public class RandomICPSLAM extends IhmcSLAM
       // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
       // see the overlapped area.
       Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, NUMBER_OF_SOURCE_POINTS,
-                                                                                                      MINIMUM_OVERLAPPED_RATIO);
+                                                                                                      MINIMUM_OVERLAPPED_RATIO, WINDOW_MARGIN);
 
       if (sourcePointsToSensor == null)
       {

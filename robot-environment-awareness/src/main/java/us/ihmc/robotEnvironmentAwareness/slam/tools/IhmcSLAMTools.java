@@ -361,31 +361,12 @@ public class IhmcSLAMTools
       }
    }
 
-//   private static int index = 0;
-//
-//   public static Point3DReadOnly[] extractHitLocationsToWorld(NormalOcTree octree)
-//   {
-//      int numberOfNodes = octree.getNumberOfLeafNodes();
-//      Point3D[] hitLocations = new Point3D[numberOfNodes];
-//
-//      index = 0;
-//      octree.forEach(child -> packHipLocation(child, hitLocations));
-//
-//      return hitLocations;
-//   }
-//
-//   private static void packHipLocation(NormalOcTreeNode child, Point3D[] hitLocations)
-//   {
-//      hitLocations[index] = new Point3D(child.getHitLocationCopy());
-//      index++;
-//   }
-
    /**
     * if there is not enough source points, think this frame is key frame.
     * return null.
     */
    public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints,
-                                                                            double minimumOverlappedRatio)
+                                                                            double minimumOverlappedRatio, double windowMargin)
    {
       ocTreeHitLocationExtractor.clear();
       Point3DReadOnly[] octreePointMapToWorld = ocTreeHitLocationExtractor.extractHitLocationsToWorld(octree);
@@ -398,7 +379,6 @@ public class IhmcSLAMTools
          vertex[i][0] = octreePointMapToSensorPose[i].getX();
          vertex[i][1] = octreePointMapToSensorPose[i].getY();
       }
-      double fixedWindowMargin = -0.1;
       Vertex2DSupplier supplier = Vertex2DSupplier.asVertex2DSupplier(vertex);
       ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
 
@@ -409,7 +389,7 @@ public class IhmcSLAMTools
       {
          Point3DReadOnly point = newPointCloudToSensorPose[i];
          isInPreviousView[i] = false;
-         if (windowForMap.isPointInside(point.getX(), point.getY(), fixedWindowMargin))
+         if (windowForMap.isPointInside(point.getX(), point.getY(), -windowMargin))
          {
             isInPreviousView[i] = true;
             numberOfPointsInWindow++;
