@@ -66,6 +66,7 @@ public class KinematicsSolutionQualityCalculator
                break;
             case JOINTSPACE:
                error += calculateCommandQuality((OneDoFJointFeedbackControlCommand) command, feedbackControllerDataHolder);
+               break;
             default:
                throw new RuntimeException("The following command is not handled: " + command.getClass());
          }
