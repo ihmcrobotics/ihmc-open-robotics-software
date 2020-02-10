@@ -97,6 +97,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       List<OneDoFJointBasics> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
 
       forceMotorBasedPositionSwitch = new YoBoolean("forceMotorBasedPositionSwitch", registry);
+      forceMotorBasedPositionSwitch.set(true); // The finger joint encoders are too unreliable, ignore them.
       doZeroFingerCalibrationNow = new YoEnum<>("doZeroFingerCalibrationNow", registry, RobotSide.class, true);
       doZeroFingerCalibrationNow.set(null);
       startFingerCalibration = new YoBoolean("startFingerCalibration", registry);
