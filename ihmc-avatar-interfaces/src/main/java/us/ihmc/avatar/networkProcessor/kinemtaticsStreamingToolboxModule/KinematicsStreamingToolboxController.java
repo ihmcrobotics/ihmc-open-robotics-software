@@ -131,6 +131,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       }
       catch (Throwable e)
       {
+         e.printStackTrace();
+
          try
          {
             reportMessage(toCrashNotification(0, StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()) + " " + e.getMessage()));
@@ -147,7 +149,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
             e1.printStackTrace();
          }
 
-         e.printStackTrace();
          isDone.set(true);
       }
    }
