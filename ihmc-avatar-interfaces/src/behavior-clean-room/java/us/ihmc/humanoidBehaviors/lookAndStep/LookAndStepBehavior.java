@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -126,7 +127,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                                initialStanceFootSide.getOppositeSide());
 
       PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
-      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
+//      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       snapper.setPlanarRegions(latestPlanarRegionList);
@@ -135,7 +136,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       FootstepPlan footstepPlan = new FootstepPlan();
 
       RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(targetFootstepNodeToSnap, footstepNodeSnapData.getSnapTransform(), snappedNodeTransform);
+      try
+      {
+         FootstepNodeTools.getSnappedNodeTransform(targetFootstepNodeToSnap, footstepNodeSnapData.getSnapTransform(), snappedNodeTransform);
+      }
+      catch (NotARotationMatrixException e)
+      {
+         return;
+      }
 
       FramePose3D snappedSoleFramePose = new FramePose3D();
       snappedSoleFramePose.set(snappedNodeTransform);
@@ -144,6 +152,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       snappedSimpleFoostep.setSoleFramePose(snappedSoleFramePose);
       snappedSimpleFoostep.setRobotSide(initialStanceFootSide.getOppositeSide());
       footstepPlan.addFootstep(snappedSimpleFoostep);
+
+
 
 //      FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
 //
@@ -164,7 +174,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                footstepPlan,
                1.0,
                0.5,
-               ExecutionMode.OVERRIDE));
+               ExecutionMode.OVERRIDE), robot.pollHumanoidRobotState(), true, latestPlanarRegionList);
 
          walkingStatusNotification.blockingPoll();
       }
@@ -178,7 +188,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       public static final Topic<Object> TakeStep = topic("TakeStep");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
+//      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> Parameters = topic("Parameters");
 
       private static final <T> Topic<T> topic(String name)
