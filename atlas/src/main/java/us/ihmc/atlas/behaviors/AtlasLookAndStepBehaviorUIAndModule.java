@@ -5,19 +5,25 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.log.LogTools;
 
 public class AtlasLookAndStepBehaviorUIAndModule
 {
    public AtlasLookAndStepBehaviorUIAndModule()
    {
-      ThreadTools.startAThread(() -> new AtlasBehaviorModule(), AtlasLookAndStepBehaviorUIAndModule.class.getSimpleName());
+      DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
-      BehaviorUI.createInterprocess(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION), drcRobotModel, "localhost");
+      LogTools.info("Creating behavior module");
+      ThreadTools.startAThread(() -> BehaviorModule.createInterprocess(behaviorRegistry, drcRobotModel), "Module");
+
+      BehaviorUI.createInterprocess(behaviorRegistry, drcRobotModel, "localhost");
    }
 
    public static void main(String[] args)
