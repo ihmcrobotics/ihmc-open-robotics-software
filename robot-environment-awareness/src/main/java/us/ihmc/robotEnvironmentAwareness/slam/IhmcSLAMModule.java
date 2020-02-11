@@ -18,7 +18,6 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.IhmcSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -167,8 +166,7 @@ public class IhmcSLAMModule
    private void updateSLAMParameters()
    {
       IhmcSLAMParameters parameters = ihmcSLAMParameters.get();
-
-      // TODO: set on slam.
+      slam.updateParameters(parameters);
    }
 
    public void clearSLAM()

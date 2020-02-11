@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.planarRegion;
+package us.ihmc.robotEnvironmentAwareness.slam;
 
 public class IhmcSLAMParameters
 {
@@ -8,6 +8,7 @@ public class IhmcSLAMParameters
    private double minimumDepth;
    private double minimumOverlappedRatio;
 
+   private double windowMargin;
    private int maximumICPSearchingSize;
 
    private double minimumInliersRatioOfKeyFrame;
@@ -15,10 +16,11 @@ public class IhmcSLAMParameters
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
    private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 300;
-   private static final double DEFAULT_MAXIMUM_DEPTH = 0.5;
-   private static final double DEFAULT_MINIMUM_DEPTH = 1.5;
+   private static final double DEFAULT_MINIMUM_DEPTH = 0.5;
+   private static final double DEFAULT_MAXIMUM_DEPTH = 1.5;
    private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
    private static final int DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE = 5;
+   private static final double DEFAULT_WINDOW_MARGIN = 0.1;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
    public IhmcSLAMParameters()
@@ -30,7 +32,7 @@ public class IhmcSLAMParameters
    {
       set(other);
    }
-   
+
    public void set(IhmcSLAMParameters other)
    {
       octreeResolution = other.octreeResolution;
@@ -38,10 +40,11 @@ public class IhmcSLAMParameters
       maximumDepth = other.maximumDepth;
       minimumDepth = other.minimumDepth;
       minimumOverlappedRatio = other.minimumOverlappedRatio;
+      windowMargin = other.windowMargin;
       maximumICPSearchingSize = other.maximumICPSearchingSize;
       minimumInliersRatioOfKeyFrame = other.minimumInliersRatioOfKeyFrame;
    }
-   
+
    public void setDefaultParameters()
    {
       octreeResolution = DEFAULT_OCTREE_RESOLUTION;
@@ -51,6 +54,7 @@ public class IhmcSLAMParameters
       minimumDepth = DEFAULT_MINIMUM_DEPTH;
       minimumOverlappedRatio = DEFAULT_MINIMUM_OVERLAPPED_RATIO;
 
+      windowMargin = DEFAULT_WINDOW_MARGIN;
       maximumICPSearchingSize = DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE;
       minimumInliersRatioOfKeyFrame = DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME;
    }
@@ -78,6 +82,11 @@ public class IhmcSLAMParameters
    public double getMinimumOverlappedRatio()
    {
       return minimumOverlappedRatio;
+   }
+
+   public double getWindowMargin()
+   {
+      return windowMargin;
    }
 
    public int getMaximumICPSearchingSize()
@@ -110,9 +119,14 @@ public class IhmcSLAMParameters
       this.minimumDepth = minimumDepth;
    }
 
-   public void setMinimumOverlappedRatio(double minimumOverlappedRatio)
+   public void setMinimumOverlappedRatioPercentage(double minimumOverlappedRatio)
    {
       this.minimumOverlappedRatio = minimumOverlappedRatio;
+   }
+
+   public void setWindowMargin(double windowMargin)
+   {
+      this.windowMargin = windowMargin;
    }
 
    public void setMaximumICPSearchingSize(int maximumICPSearchingSize)
@@ -120,7 +134,7 @@ public class IhmcSLAMParameters
       this.maximumICPSearchingSize = maximumICPSearchingSize;
    }
 
-   public void setMinimumInliersRatioOfKeyFrame(double minimumInliersRatioOfKeyFrame)
+   public void setMinimumInliersRatioOfKeyFramePercentage(double minimumInliersRatioOfKeyFrame)
    {
       this.minimumInliersRatioOfKeyFrame = minimumInliersRatioOfKeyFrame;
    }

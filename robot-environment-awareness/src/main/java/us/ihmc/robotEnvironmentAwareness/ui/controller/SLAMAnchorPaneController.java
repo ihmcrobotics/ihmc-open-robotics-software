@@ -38,10 +38,10 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private Slider searchingSizeSlider;
 
    @FXML
-   private Slider windowMarginSlider;
+   private Slider minimumOverlappedRatioSlider;
 
    @FXML
-   private Slider minimumOverlappedRatioSlider;
+   private Slider windowMarginSlider;
 
    @FXML
    private Slider minimumInliersRatioSlider;
@@ -96,11 +96,17 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowPlanarRegionsMap, planarRegionsEnable.selectedProperty());
 
+      ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
+      ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
+      ihmcSLAMParametersProperty.bindBidirectionalMinimumOverlappedRatio(minimumOverlappedRatioSlider.valueProperty());
+      ihmcSLAMParametersProperty.bindBidirectionalWindowSize(windowMarginSlider.valueProperty());
+      ihmcSLAMParametersProperty.bindBidirectionalMinimumInliersRatioOfKeyFrame(minimumInliersRatioSlider.valueProperty());
+
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMParameters, ihmcSLAMParametersProperty);
 
       initializeSetup();
    }
-   
+
    private void initializeSetup()
    {
       uiMessager.submitMessageToModule(REAModuleAPI.SLAMEnable, true);
@@ -108,7 +114,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.submitMessageToModule(REAModuleAPI.ShowSLAMOctreeMap, true);
       uiMessager.submitMessageToModule(REAModuleAPI.ShowSLAMSensorTrajectory, true);
       uiMessager.submitMessageToModule(REAModuleAPI.ShowPlanarRegionsMap, true);
-      
+
       uiMessager.submitMessageInternal(REAModuleAPI.SLAMEnable, true);
       uiMessager.submitMessageInternal(REAModuleAPI.ShowLatestFrame, true);
       uiMessager.submitMessageInternal(REAModuleAPI.ShowSLAMOctreeMap, true);

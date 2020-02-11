@@ -46,11 +46,11 @@
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="icp searching size" textAlignment="CENTER" />
                         <Slider fx:id="searchingSizeSlider" blockIncrement="1.0" majorTickUnit="2.0" max="10.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" />
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum overlapped ratio (%)" textAlignment="CENTER" />
-                        <Slider fx:id="minimumOverlappedRatioSlider" majorTickUnit="10.0" min="10.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="40.0" />
+                        <Slider fx:id="minimumOverlappedRatioSlider" majorTickUnit="0.1" max="1.0" min="0.1" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" />
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="window margin (m)" textAlignment="CENTER" />
                         <Slider fx:id="windowMarginSlider" blockIncrement="0.1" majorTickUnit="0.1" max="0.5" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.1" />
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum inliers ratio (%)" textAlignment="CENTER" />
-                        <Slider fx:id="minimumInliersRatioSlider" majorTickUnit="10.0" min="50.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="95.0" />
+                        <Slider fx:id="minimumInliersRatioSlider" majorTickUnit="0.1" max="1.0" min="0.5" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.95" />
                      </children>
                   </VBox>
                </children>

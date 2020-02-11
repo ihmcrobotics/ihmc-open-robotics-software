@@ -1,31 +1,26 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.Property;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.IhmcSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMParameters;
 
 public class IhmcSLAMParametersProperty extends ParametersProperty<IhmcSLAMParameters>
 {
-   private final DoubleField octreeResolution = new DoubleField(IhmcSLAMParameters::getOctreeResolution, IhmcSLAMParameters::setOctreeResolution);
    private final IntegerField numberOfSourcePoints = new IntegerField(IhmcSLAMParameters::getNumberOfSourcePoints, IhmcSLAMParameters::setNumberOfSourcePoints);
-   private final DoubleField maximumDepth = new DoubleField(IhmcSLAMParameters::getMaximumDepth, IhmcSLAMParameters::setMaximumDepth);
-   private final DoubleField minimumDepth = new DoubleField(IhmcSLAMParameters::getMinimumDepth, IhmcSLAMParameters::setMinimumDepth);
-   private final DoubleField minimumOverlappedRatio = new DoubleField(IhmcSLAMParameters::getMinimumOverlappedRatio,
-                                                                      IhmcSLAMParameters::setMinimumOverlappedRatio);
 
    private final IntegerField maximumICPSearchingSize = new IntegerField(IhmcSLAMParameters::getMaximumICPSearchingSize,
                                                                          IhmcSLAMParameters::setMaximumICPSearchingSize);
 
+   private final DoubleField minimumOverlappedRatio = new DoubleField(IhmcSLAMParameters::getMinimumOverlappedRatio,
+                                                                      IhmcSLAMParameters::setMinimumOverlappedRatioPercentage);
+
+   private final DoubleField windowSize = new DoubleField(IhmcSLAMParameters::getWindowMargin, IhmcSLAMParameters::setWindowMargin);
+
    private final DoubleField minimumInliersRatioOfKeyFrame = new DoubleField(IhmcSLAMParameters::getMinimumInliersRatioOfKeyFrame,
-                                                                             IhmcSLAMParameters::setMinimumInliersRatioOfKeyFrame);
+                                                                             IhmcSLAMParameters::setMinimumInliersRatioOfKeyFramePercentage);
 
    public IhmcSLAMParametersProperty(Object bean, String name)
    {
       super(bean, name, new IhmcSLAMParameters());
-   }
-
-   public void bindBidirectionalOctreeResolution(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, octreeResolution);
    }
 
    public void bindBidirectionalNumberOfSourcePoints(Property<? extends Number> property)
@@ -33,15 +28,14 @@ public class IhmcSLAMParametersProperty extends ParametersProperty<IhmcSLAMParam
       bindFieldBidirectionalToNumberProperty(property, numberOfSourcePoints);
    }
 
-   public void bindBidirectionalDepthBoundary(Property<? extends Number> lower, Property<? extends Number> upper)
-   {
-      bindFieldBidirectionalToNumberProperty(lower, minimumDepth);
-      bindFieldBidirectionalToNumberProperty(upper, maximumDepth);
-   }
-
    public void bindBidirectionalMinimumOverlappedRatio(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minimumOverlappedRatio);
+   }
+
+   public void bindBidirectionalWindowSize(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, windowSize);
    }
 
    public void bindBidirectionalMaximumICPSearchingSize(Property<? extends Number> property)
