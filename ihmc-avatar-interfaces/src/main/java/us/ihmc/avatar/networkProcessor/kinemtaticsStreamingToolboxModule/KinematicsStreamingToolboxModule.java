@@ -43,6 +43,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
+      controller.setInitialRobotConfiguration(robotModel);
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();

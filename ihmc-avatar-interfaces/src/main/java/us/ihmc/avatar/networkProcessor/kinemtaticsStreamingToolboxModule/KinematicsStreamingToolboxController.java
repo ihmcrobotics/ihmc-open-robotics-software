@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
@@ -79,6 +80,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
       stateMachine = createStateMachine(time);
       isDone.set(false);
+   }
+
+   public void setInitialRobotConfiguration(DRCRobotModel robotModel)
+   {
+      tools.getIKController().setInitialRobotConfiguration(robotModel);
    }
 
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
