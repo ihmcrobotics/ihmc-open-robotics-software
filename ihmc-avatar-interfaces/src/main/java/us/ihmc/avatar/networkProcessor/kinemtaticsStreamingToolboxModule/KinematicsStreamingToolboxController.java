@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
+import java.util.Map;
+
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -85,6 +87,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void setInitialRobotConfiguration(DRCRobotModel robotModel)
    {
       tools.getIKController().setInitialRobotConfiguration(robotModel);
+   }
+
+   public void setInitialRobotConfigurationNamedMap(Map<String, Double> initialConfiguration)
+   {
+      tools.getIKController().setInitialRobotConfigurationNamedMap(initialConfiguration);
    }
 
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
