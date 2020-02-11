@@ -88,8 +88,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
    {
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty());
 
-      //      uiMessager.bindBidirectionalGlobal(REAModuleAPI.QueuedBuffers, queuedBufferSize.valueProperty(), numberToIntegerConverter);
-      //      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMStatus, slamStatus.valueProperty(), numberToIntegerConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.QueuedBuffers, queuedBufferSize.textProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMStatus, slamStatus.textProperty());
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowLatestFrame, latestFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());

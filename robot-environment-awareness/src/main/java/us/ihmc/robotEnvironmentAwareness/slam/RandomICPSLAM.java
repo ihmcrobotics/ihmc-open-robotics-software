@@ -2,6 +2,8 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -29,11 +31,11 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double WINDOW_MAXIMUM_DEPTH = 1.5;
    private static final double MINIMUM_OVERLAPPED_RATIO = 0.4;
-   
+
    private static final double WINDOW_MARGIN = 0.1;
 
    private static final double MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
-   
+
    private static final double MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
    private static final int MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
@@ -48,6 +50,8 @@ public class RandomICPSLAM extends IhmcSLAM
    protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
+   private final AtomicDouble latestComputationTime = new AtomicDouble();
+
    public static boolean ENABLE_YAW_CORRECTION = false;
 
    static
@@ -58,11 +62,11 @@ public class RandomICPSLAM extends IhmcSLAM
          LOWER_LIMIT.add(-OPTIMIZER_POSITION_LIMIT);
          UPPER_LIMIT.add(OPTIMIZER_POSITION_LIMIT);
       }
-      if(ENABLE_YAW_CORRECTION)
+      if (ENABLE_YAW_CORRECTION)
       {
          INITIAL_INPUT.add(0.0);
          LOWER_LIMIT.add(-OPTIMIZER_ANGLE_LIMIT);
-         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);   
+         UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
       }
    }
 
@@ -164,8 +168,8 @@ public class RandomICPSLAM extends IhmcSLAM
    {
       // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
       // see the overlapped area.
-      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, NUMBER_OF_SOURCE_POINTS,
-                                                                                                      MINIMUM_OVERLAPPED_RATIO, WINDOW_MARGIN);
+      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, NUMBER_OF_SOURCE_POINTS, MINIMUM_OVERLAPPED_RATIO,
+                                                                                    WINDOW_MARGIN);
 
       if (sourcePointsToSensor == null)
       {
@@ -214,6 +218,7 @@ public class RandomICPSLAM extends IhmcSLAM
             optimizer.setPerturbationSize(optimizerPerturbationSize);
             optimizer.setReducingStepSizeRatio(2);
             int run = optimizer.run();
+            latestComputationTime.set((double) Math.round(optimizer.getComputationTime() * 100) / 100);
             if (DEBUG)
                System.out.println("optimization result # [" + run + "], #" + optimizer.getComputationTime() + " sec # " + "Init Q: " + initialQuery
                      + ", Opt Q: " + optimizer.getOptimalQuery());
@@ -231,6 +236,11 @@ public class RandomICPSLAM extends IhmcSLAM
 
          }
       }
+   }
+
+   public double getComputationTimeForLatestFrame()
+   {
+      return latestComputationTime.get();
    }
 
    class RandomICPSLAMFrameOptimizerCostFunction implements SingleQueryFunction
@@ -261,11 +271,11 @@ public class RandomICPSLAM extends IhmcSLAM
       {
          sensorPoseToPack.set(transformWorldToSensorPose);
          sensorPoseToPack.appendTranslation(input.get(0), input.get(1), input.get(2));
-         if(ENABLE_YAW_CORRECTION)
+         if (ENABLE_YAW_CORRECTION)
          {
             yawRotator.setIdentity();
             yawRotator.appendYawRotation(input.get(3) * TRANSLATION_TO_ANGLE_RATIO);
-            sensorPoseToPack.preMultiply(yawRotator);   
+            sensorPoseToPack.preMultiply(yawRotator);
          }
       }
 

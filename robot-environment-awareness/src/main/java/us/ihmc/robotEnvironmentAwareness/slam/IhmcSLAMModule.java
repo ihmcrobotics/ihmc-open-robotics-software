@@ -16,7 +16,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IhmcSLAMParameters;
@@ -113,10 +112,10 @@ public class IhmcSLAMModule
          return;
 
       updateSLAMParameters();
-      
+
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
 
-      System.out.println("queued point cloud data set = [" + pointCloudQueue.size() + "].");
+      String stringToReport = "";
       boolean success;
       if (slam.isEmpty())
       {
@@ -128,7 +127,9 @@ public class IhmcSLAMModule
          success = slam.addFrame(pointCloudToCompute);
       }
       pointCloudQueue.removeFirst();
-      System.out.println("SLAM Computation is done [" + pointCloudQueue.size() + "].");
+      reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getPointCloudMap().size() + "]");
+      stringToReport = stringToReport + success + " " + slam.getPointCloudMap().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(REAModuleAPI.SLAMStatus, stringToReport);
 
       if (success)
       {
@@ -160,14 +161,13 @@ public class IhmcSLAMModule
             return;
 
          pointCloudQueue.add(pointCloud);
-         System.out.println("New point cloud is queued [" + pointCloudQueue.size() + "].");
       }
    }
 
    private void updateSLAMParameters()
    {
       IhmcSLAMParameters parameters = ihmcSLAMParameters.get();
-      
+
       // TODO: set on slam.
    }
 
