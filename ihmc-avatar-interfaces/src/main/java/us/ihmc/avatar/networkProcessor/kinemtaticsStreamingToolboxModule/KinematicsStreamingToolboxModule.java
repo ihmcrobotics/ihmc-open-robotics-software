@@ -1,13 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -17,8 +20,10 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class KinematicsStreamingToolboxModule extends ToolboxModule
@@ -43,7 +48,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
-      controller.setInitialRobotConfiguration(robotModel);
+      controller.setInitialRobotConfigurationNamedMap(fromStandPrep(robotModel));
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
@@ -52,6 +57,19 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
          jvmStatisticsGenerator.start();
       }
+   }
+
+   private static Map<String, Double> fromStandPrep(DRCRobotModel robotModel)
+   {
+      Map<String, Double> initialConfigurationMap = new HashMap<>();
+      WholeBodySetpointParameters standPrepParameters = robotModel.getHighLevelControllerParameters().getStandPrepParameters();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      {
+         initialConfigurationMap.put(joint.getName(), standPrepParameters.getSetpoint(joint.getName()));
+      }
+      return initialConfigurationMap;
    }
 
    @Override
