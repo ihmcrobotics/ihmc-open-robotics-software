@@ -1,34 +1,22 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
-import java.io.IOException;
-
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.UIConnectionHandler;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
    @FXML
    private ToggleButton enableSLAMButton;
 
-//   private IhmcSLAMMeshViewer ihmcSLAMViewer;
+   @FXML
+   private TextField queuedBufferSize;
 
-//   private UIConnectionHandler uiConnectionHandler;
-
-//   @FXML
-//   private TextField queuedBufferSize;
-//   
-//   @FXML
-//   private TextField slamStatus;
+   @FXML
+   private TextField slamStatus;
 
    @FXML
    private ToggleButton latestFrameEnable;
@@ -60,11 +48,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
    public SLAMAnchorPaneController()
    {
 
-   }
-   
-   public void initialize()
-   {
-      
    }
 
    private final PropertyToMessageTypeConverter<Integer, Number> numberToIntegerConverter = new PropertyToMessageTypeConverter<Integer, Number>()
@@ -100,12 +83,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @Override
    public void bindControls()
    {
-//      ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty());
 
-//      uiMessager.bindBidirectionalGlobal(REAModuleAPI.QueuedBuffers, queuedBufferSize.valueProperty(), numberToIntegerConverter);
-//      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMStatus, slamStatus.valueProperty(), numberToIntegerConverter);
-      
+      //      uiMessager.bindBidirectionalGlobal(REAModuleAPI.QueuedBuffers, queuedBufferSize.valueProperty(), numberToIntegerConverter);
+      //      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMStatus, slamStatus.valueProperty(), numberToIntegerConverter);
+
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowLatestFrame, latestFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
@@ -119,48 +101,18 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    }
 
-//   public void openMap() throws IOException
-//   {
-//      FXMLLoader loader = new FXMLLoader();
-//      loader.setController(this);
-//      loader.setLocation(getClass().getResource("../SLAMVisualizerMainPane" + ".fxml"));
-//
-//      BorderPane mainPane = loader.load();
-//
-//      View3DFactory view3dFactory = View3DFactory.createSubscene();
-//      view3dFactory.addCameraController(true);
-//      view3dFactory.addWorldCoordinateSystem(0.3);
-//      view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
-//      mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
-//
-//      Stage stage = new Stage();
-//      Scene mainScene = new Scene(mainPane, 600, 400);
-//      stage.setScene(mainScene);
-//      stage.setOnCloseRequest(event -> stop());
-//
-//      uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
-//      uiConnectionHandler.start();
-//
-//      stage.show();
-//   }
-
-   public void stop()
-   {
-      try
-      {
-//         uiConnectionHandler.stop();
-//         ihmcSLAMViewer.stop();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
-
    @FXML
    public void clear()
    {
-      System.out.println("Clear");
+      System.out.println("Clear from controller");
+      uiMessager.submitMessageToModule(REAModuleAPI.SLAMClear, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.SLAMClear, true);
    }
 
+   @FXML
+   public void initialize()
+   {
+      attachREAMessager(PointCloudAnchorPaneController.uiStaticMessager);
+      bindControls();
+   }
 }

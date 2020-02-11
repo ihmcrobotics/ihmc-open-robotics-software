@@ -9,17 +9,19 @@ import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.UIConnectionHandler;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
 {
+   public static REAUIMessager uiStaticMessager;
    @FXML
    private ToggleButton enableLidarButton;
    @FXML
@@ -67,6 +69,8 @@ public class PointCloudAnchorPaneController extends REABasicUIController
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
+
+      ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
    }
 
    @FXML
@@ -120,31 +124,18 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private SLAMAnchorPaneController slamAnchorPaneController;
    private IhmcSLAMMeshViewer ihmcSLAMViewer;
    private UIConnectionHandler uiConnectionHandler;
-   
+
    @FXML
    public void openSLAM() throws IOException
    {
-      System.out.println("open slam");
+      uiStaticMessager = uiMessager;
 
       FXMLLoader loader = new FXMLLoader();
-      loader.setController(slamAnchorPaneController);
       URL url = getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml");
       loader.setLocation(url);
 
-      if (url == null)
+      if (url != null)
       {
-         System.out.println(getClass());
-         System.out.println(getClass().getName());
-         System.out.println(getClass().getResource("../ui/SLAMVisualizerMainPane" + ".fxml"));
-         System.out.println(getClass().getResource("../../SLAMVisualizerMainPane" + ".fxml"));
-         System.out.println(getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml"));
-      }
-      else
-      {
-         System.out.println("we have. " + url);
-         
-         ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
-         
          BorderPane mainPane = loader.load();
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -154,7 +145,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
          mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
          Stage stage = new Stage();
-         Scene mainScene = new Scene(mainPane, 600, 400);
+         Scene mainScene = new Scene(mainPane, 800, 800);
          stage.setScene(mainScene);
          stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
 
@@ -162,19 +153,6 @@ public class PointCloudAnchorPaneController extends REABasicUIController
          uiConnectionHandler.start();
 
          stage.show();
-
-         if (slamAnchorPaneController == null)
-            System.out.println("controller is null");
-         if (uiMessager == null)
-            System.out.println("uiMessager is null");
-
-         
-         //TODO:
-         slamAnchorPaneController.attachREAMessager(uiMessager);
-         slamAnchorPaneController.bindControls();
       }
-
-      
-
    }
 }

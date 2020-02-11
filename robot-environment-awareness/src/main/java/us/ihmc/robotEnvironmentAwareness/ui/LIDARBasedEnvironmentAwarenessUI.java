@@ -74,8 +74,6 @@ public class LIDARBasedEnvironmentAwarenessUI
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-      System.out.println(getClass().getName());
-      System.out.println(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       mainPane = loader.load();
 
       // Client
