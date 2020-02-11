@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
@@ -42,28 +43,9 @@ public class AtlasNavigationBehaviorDemo
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      new Thread(() -> {
-         LogTools.info("Creating simulated REA module");
-         SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
-         simulatedREAModule.start();
-      }).start();
-
-      new Thread(() ->
-      {
-         LogTools.info("Creating planar regions mapping module");
-         PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
-         slamUpdated = planarRegionsMappingModule.getSlamUpdated();
-      }).start();
-
-      new Thread(() ->
-      {
-         LogTools.info("Creating simulation");
-         HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-         kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
-         kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
-         kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
-         AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
-      }).start();
+      ThreadTools.startAThread(this::simulatedREAModule, "SimulatedREAModule");
+      ThreadTools.startAThread(this::planarRegionsMappingModule, "PlanarRegionsMappingModule");
+      ThreadTools.startAThread(this::kinematicsSimulation, "KinematicsSimulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
 
@@ -71,6 +53,30 @@ public class AtlasNavigationBehaviorDemo
 
       LogTools.info("Creating behavior user interface");
       BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+   }
+
+   private void simulatedREAModule()
+   {
+      LogTools.info("Creating simulated REA module");
+      SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
+      simulatedREAModule.start();
+   }
+
+   private void planarRegionsMappingModule()
+   {
+      LogTools.info("Creating planar regions mapping module");
+      PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
+      slamUpdated = planarRegionsMappingModule.getSlamUpdated();
+   }
+
+   private void kinematicsSimulation()
+   {
+      LogTools.info("Creating simulation");
+      HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+      kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
+      kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
+      kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
+      AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
    }
 
    private AtlasRobotModel createRobotModel()
