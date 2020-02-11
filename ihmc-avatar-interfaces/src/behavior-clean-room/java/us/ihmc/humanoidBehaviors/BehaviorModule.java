@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -51,14 +52,14 @@ public class BehaviorModule
          messager = KryoMessager.createServer(messagerAPI,
                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                               new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
-         ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
       }
       else // intraprocess
       {
          pubSubImplementation = PubSubImplementation.INTRAPROCESS;
          messager = new SharedMemoryMessager(messagerAPI);
-         ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
       }
+
+      ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
@@ -74,6 +75,11 @@ public class BehaviorModule
             behavior.getRight().setEnabled(behavior.getLeft().getName().equals(selection));
          }
       });
+   }
+
+   private void kryoStarter()
+   {
+      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public Messager getMessager()
