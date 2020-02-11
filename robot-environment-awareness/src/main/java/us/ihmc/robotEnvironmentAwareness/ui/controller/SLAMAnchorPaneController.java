@@ -6,6 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.IhmcSLAMParametersProperty;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
@@ -44,6 +45,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    @FXML
    private Slider minimumInliersRatioSlider;
+
+   private final IhmcSLAMParametersProperty ihmcSLAMParametersProperty = new IhmcSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
    {
@@ -93,18 +96,29 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.ShowPlanarRegionsMap, planarRegionsEnable.selectedProperty());
 
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMSourcePoints, sourcePointsSlider.valueProperty(), numberToIntegerConverter);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMSearchingSize, searchingSizeSlider.valueProperty(), numberToIntegerConverter);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMMinimumOverlappedRatio, minimumOverlappedRatioSlider.valueProperty(), numberToDoubleConverter);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMWindowMargin, windowMarginSlider.valueProperty(), numberToDoubleConverter);
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMMinimumInlierRatio, minimumInliersRatioSlider.valueProperty(), numberToDoubleConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMParameters, ihmcSLAMParametersProperty);
 
+      initializeSetup();
+   }
+   
+   private void initializeSetup()
+   {
+      uiMessager.submitMessageToModule(REAModuleAPI.SLAMEnable, true);
+      uiMessager.submitMessageToModule(REAModuleAPI.ShowLatestFrame, true);
+      uiMessager.submitMessageToModule(REAModuleAPI.ShowSLAMOctreeMap, true);
+      uiMessager.submitMessageToModule(REAModuleAPI.ShowSLAMSensorTrajectory, true);
+      uiMessager.submitMessageToModule(REAModuleAPI.ShowPlanarRegionsMap, true);
+      
+      uiMessager.submitMessageInternal(REAModuleAPI.SLAMEnable, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.ShowLatestFrame, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.ShowSLAMOctreeMap, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.ShowSLAMSensorTrajectory, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.ShowPlanarRegionsMap, true);
    }
 
    @FXML
    public void clear()
    {
-      System.out.println("Clear from controller");
       uiMessager.submitMessageToModule(REAModuleAPI.SLAMClear, true);
       uiMessager.submitMessageInternal(REAModuleAPI.SLAMClear, true);
    }

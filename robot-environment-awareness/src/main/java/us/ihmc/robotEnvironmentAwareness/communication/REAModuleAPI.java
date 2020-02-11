@@ -190,8 +190,9 @@ public class REAModuleAPI
    public static final Topic<Boolean> SLAMClear = SLAMCategory.topic(Clear);
    public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
-   public static final Topic<IhmcSLAMFrame> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
+   public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = SLAMCategory.child(PlanarRegions).topic(Data);
+   public static final Topic<Pose3D> SLAMSensorFrameState = SLAMCategory.child(SensorFrame).topic(Data);
 
    public static final Topic<IhmcSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
 
@@ -204,11 +205,6 @@ public class REAModuleAPI
 
    public static final Topic<Integer> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Size);
    public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
-   public static final Topic<Integer> SLAMSourcePoints = SLAMCategory.child(Points).topic(Size);
-   public static final Topic<Integer> SLAMSearchingSize = SLAMCategory.child(ICP).topic(Size);
-   public static final Topic<Double> SLAMMinimumOverlappedRatio = SLAMCategory.child(Overlapped).topic(Ratio);
-   public static final Topic<Double> SLAMWindowMargin = SLAMCategory.child(Window).topic(Resolution);
-   public static final Topic<Double> SLAMMinimumInlierRatio = SLAMCategory.child(Inlier).topic(Ratio);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

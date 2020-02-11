@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.control.*?>
@@ -12,9 +13,9 @@
       <AnchorPane prefHeight="900.0" prefWidth="1200.0" BorderPane.alignment="CENTER" />
    </center>
    <right>
-      <AnchorPane prefHeight="500.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="500.0" BorderPane.alignment="TOP_CENTER">
          <children>
-            <VBox alignment="CENTER" layoutX="-5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="20.0">
+            <VBox alignment="TOP_CENTER" layoutX="-5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <VBox prefWidth="150.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
                      <children>
@@ -23,14 +24,14 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <ToggleButton fx:id="enableSLAMButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
+                        <ToggleButton fx:id="enableSLAMButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable" />
                         <TextField fx:id="queuedBufferSize" alignment="CENTER" editable="false" text="0" />
                         <TextField fx:id="slamStatus" alignment="CENTER" editable="false" />
                         <ToggleButton fx:id="latestFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Latest Frame" textAlignment="CENTER" />
                         <ToggleButton fx:id="octreeMapEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Octree Map" textAlignment="CENTER" />
                         <ToggleButton fx:id="sensorFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Sensor Frame" textAlignment="CENTER" />
                         <ToggleButton fx:id="planarRegionsEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Planar Regions" textAlignment="CENTER" />
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
+                        <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
                      </children>
                   </VBox>
                   <VBox prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
@@ -53,8 +54,14 @@
                      </children>
                   </VBox>
                </children>
+               <padding>
+                  <Insets left="5.0" right="5.0" top="10.0" />
+               </padding>
             </VBox>
          </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
       </AnchorPane>
    </right>
 </BorderPane>
