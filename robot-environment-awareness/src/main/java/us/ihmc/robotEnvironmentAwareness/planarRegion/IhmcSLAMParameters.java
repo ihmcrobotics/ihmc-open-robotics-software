@@ -21,6 +21,27 @@ public class IhmcSLAMParameters
    private static final int DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE = 5;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
+   public IhmcSLAMParameters()
+   {
+      setDefaultParameters();
+   }
+
+   public IhmcSLAMParameters(IhmcSLAMParameters other)
+   {
+      set(other);
+   }
+   
+   public void set(IhmcSLAMParameters other)
+   {
+      octreeResolution = other.octreeResolution;
+      numberOfSourcePoints = other.numberOfSourcePoints;
+      maximumDepth = other.maximumDepth;
+      minimumDepth = other.minimumDepth;
+      minimumOverlappedRatio = other.minimumOverlappedRatio;
+      maximumICPSearchingSize = other.maximumICPSearchingSize;
+      minimumInliersRatioOfKeyFrame = other.minimumInliersRatioOfKeyFrame;
+   }
+   
    public void setDefaultParameters()
    {
       octreeResolution = DEFAULT_OCTREE_RESOLUTION;

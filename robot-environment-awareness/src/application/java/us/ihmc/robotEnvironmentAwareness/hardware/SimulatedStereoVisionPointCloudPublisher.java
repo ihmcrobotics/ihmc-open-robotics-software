@@ -21,7 +21,7 @@ import us.ihmc.ros2.Ros2Node;
 
 public class SimulatedStereoVisionPointCloudPublisher extends Application
 {
-   private static long DEFAULT_PUBLISHING_PERIOD_MS = 500;
+   private static long DEFAULT_PUBLISHING_PERIOD_MS = 100;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node,

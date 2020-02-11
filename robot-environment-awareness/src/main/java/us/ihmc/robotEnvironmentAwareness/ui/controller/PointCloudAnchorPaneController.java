@@ -145,7 +145,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
          mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
          Stage stage = new Stage();
-         Scene mainScene = new Scene(mainPane, 800, 800);
+         Scene mainScene = new Scene(mainPane, 1000, 800);
          stage.setScene(mainScene);
          stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
 

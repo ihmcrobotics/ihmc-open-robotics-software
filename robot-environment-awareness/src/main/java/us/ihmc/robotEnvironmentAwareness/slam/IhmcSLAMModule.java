@@ -10,13 +10,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.IhmcSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -40,15 +43,19 @@ public class IhmcSLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
+   private final AtomicReference<IhmcSLAMParameters> ihmcSLAMParameters;
+
    public IhmcSLAMModule(Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
    {
       this.reaMessager = reaMessager;
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
 
+      ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new IhmcSLAMParameters());
+
       reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
    }
-   
+
    public void start() throws IOException
    {
       if (scheduledMain == null)
@@ -105,32 +112,40 @@ public class IhmcSLAMModule
       if (pointCloudQueue.size() == 0)
          return;
 
+      updateSLAMParameters();
+      
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
 
       System.out.println("queued point cloud data set = [" + pointCloudQueue.size() + "].");
+      boolean success;
       if (slam.isEmpty())
       {
          slam.addFirstFrame(pointCloudToCompute);
-         System.out.println("add first frame.");
+         success = true;
       }
       else
       {
-         boolean success = slam.addFrame(pointCloudToCompute);
-         System.out.println("add frame " + success + " [" + pointCloudQueue.size() + "].");
+         success = slam.addFrame(pointCloudToCompute);
       }
       pointCloudQueue.removeFirst();
       System.out.println("SLAM Computation is done [" + pointCloudQueue.size() + "].");
 
-      reaMessager.submitMessage(REAModuleAPI.ShowSLAMOctreeMap, true);
+      if (success)
+      {
+         NormalOcTree octreeMap = slam.getOctree();
+         NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
+         reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
 
-      NormalOcTree octreeMap = slam.getOctree();
-      NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-      reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
-      System.out.println("# Octree " + octreeMap.getNumberOfNodes());
+         slam.updatePlanarRegionsMap();
+         PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
+         reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
 
-      slam.updatePlanarRegionsMap();
-      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
+         // TODO:
+         reaMessager.submitMessage(REAModuleAPI.SLAMSensorFrameState, new Pose3D());
+      }
+
+      // TODO: latest frame. set colors for source points or windows.
+      reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, new StereoVisionPointCloudMessage());
    }
 
    public void updateMain()
@@ -147,6 +162,13 @@ public class IhmcSLAMModule
          pointCloudQueue.add(pointCloud);
          System.out.println("New point cloud is queued [" + pointCloudQueue.size() + "].");
       }
+   }
+
+   private void updateSLAMParameters()
+   {
+      IhmcSLAMParameters parameters = ihmcSLAMParameters.get();
+      
+      // TODO: set on slam.
    }
 
    public void clearSLAM()
