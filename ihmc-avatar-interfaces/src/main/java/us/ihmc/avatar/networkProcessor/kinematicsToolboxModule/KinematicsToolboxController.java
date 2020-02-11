@@ -40,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -285,6 +286,9 @@ public class KinematicsToolboxController extends ToolboxController
    /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
 
+   private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
+   private final MomentumCommand angularMomentumCommand = new MomentumCommand();
+
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
     *                                messages or commands to be processed to the
@@ -343,6 +347,8 @@ public class KinematicsToolboxController extends ToolboxController
       preserveUserCommandHistory.set(true);
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
+
+      angularMomentumCommand.setSelectionMatrixForAngularControl();
 
       enableCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
@@ -685,6 +691,9 @@ public class KinematicsToolboxController extends ToolboxController
       // Save all commands used for this control tick for computing the solution quality.
       allFeedbackControlCommands.clear();
       allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
+
+      angularMomentumCommand.setWeight(angularMomentumWeight.getValue());
+      inverseKinematicsCommandBuffer.addMomentumCommand().set(angularMomentumCommand);
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
