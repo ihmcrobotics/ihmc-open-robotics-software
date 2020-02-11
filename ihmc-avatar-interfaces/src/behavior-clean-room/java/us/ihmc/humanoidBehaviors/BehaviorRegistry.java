@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.LinkedHashSet;
@@ -37,7 +36,7 @@ public class BehaviorRegistry
       definitionEntries.add(definition);
    }
 
-   public MessagerAPI getMessagerAPI()
+   public synchronized MessagerAPI getMessagerAPI()
    {
       if (messagerAPI == null) // MessagerAPI can only be created once
       {
