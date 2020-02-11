@@ -203,7 +203,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
    public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
 
-   public static final Topic<Integer> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Size);
+   public static final Topic<String> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Status);
    public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
