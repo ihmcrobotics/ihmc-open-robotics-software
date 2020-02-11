@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -35,21 +36,8 @@ public class AtlasLookAndStepBehaviorDemo
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      new Thread(() -> {
-         LogTools.info("Creating simulated REA module");
-         SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
-         simulatedREAModule.start();
-      }).start();
-
-      new Thread(() ->
-      {
-         LogTools.info("Creating simulation");
-         HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-         kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
-         kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
-         kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
-         AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
-      }).start();
+      ThreadTools.startAThread(this::reaModule, "REAModule");
+      ThreadTools.startAThread(this::kinematicSimulation, "KinematicsSimulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
@@ -57,6 +45,23 @@ public class AtlasLookAndStepBehaviorDemo
 
       LogTools.info("Creating behavior user interface");
       BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+   }
+
+   private void reaModule()
+   {
+      LogTools.info("Creating simulated REA module");
+      SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
+      simulatedREAModule.start();
+   }
+
+   private void kinematicSimulation()
+   {
+      LogTools.info("Creating simulation");
+      HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
+      kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
+      kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
+      kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
+      AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
    }
 
    private AtlasRobotModel createRobotModel()

@@ -4,9 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -21,7 +19,7 @@ public class AtlasLookAndStepBehaviorUIAndModule
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
       LogTools.info("Creating behavior module");
-      ThreadTools.startAThread(() -> BehaviorModule.createInterprocess(behaviorRegistry, drcRobotModel), "Module");
+      BehaviorModule.createInterprocess(behaviorRegistry, drcRobotModel);
 
       BehaviorUI.createInterprocess(behaviorRegistry, drcRobotModel, "localhost");
    }

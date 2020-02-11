@@ -20,28 +20,23 @@ public class AtlasBehaviorModule
 
    public AtlasBehaviorModule()
    {
-      if (START_FOOTSTEP_PLANNING_TOOLBOX)
-      {
-         ThreadTools.startAsDaemon(() ->
-         {
-            LogTools.info("Creating footstep toolbox");
-            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(),
-                                                                       null,
-                                                                       false,
-                                                                       DomainFactory.PubSubImplementation.FAST_RTPS);
-         }, "MultiStageFootstepPlanningModule");
-      }
+      if (START_FOOTSTEP_PLANNING_TOOLBOX) ThreadTools.startAsDaemon(this::footstepPlanningToolbox, "FootstepPlanningToolbox");
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createInterprocess(BehaviorRegistry.DEFAULT_BEHAVIORS, createRobotModel());
 
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      { // add cleanup actions here
-         if (START_FOOTSTEP_PLANNING_TOOLBOX)
-         {
-            footstepPlanningModule.destroy();
-         }
-      }, "Cleanup"));
+      Runtime.getRuntime().addShutdownHook(ThreadTools.startAThread(this::shutdown, "Cleanup"));
+   }
+
+   private void footstepPlanningToolbox()
+   {
+      LogTools.info("Creating footstep toolbox");
+      footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
+
+   private void shutdown() // add cleanup actions here
+   {
+      if (START_FOOTSTEP_PLANNING_TOOLBOX) footstepPlanningModule.destroy();
    }
 
    private AtlasRobotModel createRobotModel()

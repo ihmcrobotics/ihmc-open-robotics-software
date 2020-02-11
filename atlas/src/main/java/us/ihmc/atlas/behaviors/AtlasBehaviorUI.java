@@ -14,11 +14,6 @@ public class AtlasBehaviorUI
 {
    public AtlasBehaviorUI()
    {
-      //      new Thread(() -> {
-      //         LogTools.info("Spawning parameter tuner");
-      //         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
-      //      }).start();
-
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
 
       JavaFXApplicationCreator.createAJavaFXApplication();
