@@ -46,9 +46,9 @@ public class IhmcSLAMModule
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
 
-      //reaMessager.registerTopicListener(REAModuleAPI.RequestSLAMBuildMap, (content) -> buildAndSubmitPlanarRegionsMap());
+      reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
    }
-
+   
    public void start() throws IOException
    {
       if (scheduledMain == null)
