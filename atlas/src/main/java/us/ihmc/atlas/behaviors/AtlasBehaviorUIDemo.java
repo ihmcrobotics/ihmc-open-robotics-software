@@ -32,8 +32,6 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 /**
  * Runs self contained behavior demo.
- *
- * Should be fixed to not extend application.
  */
 public class AtlasBehaviorUIDemo
 {
