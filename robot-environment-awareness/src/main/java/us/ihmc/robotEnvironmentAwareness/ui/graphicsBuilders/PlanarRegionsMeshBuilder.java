@@ -34,16 +34,27 @@ public class PlanarRegionsMeshBuilder implements Runnable
 
    public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate)
    {
+      this(uiMessager, planarregionsstate, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear);
+   }
+
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate, Topic<Boolean> enableTopic,
+                                   Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic)
+   {
       this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
-      clear = uiMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
-      clearOcTree = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      enable = uiMessager.createInput(enableTopic, false);
+      clear = uiMessager.createInput(clearTopic, false);
+      clearOcTree = uiMessager.createInput(octreeClearTopic, false);
 
       planarRegionsListMessage = uiMessager.createInput(planarregionsstate);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+   }
+
+   public void clear()
+   {
+      meshAndMaterialToRender.set(new Pair<>(null, null));
    }
 
    @Override

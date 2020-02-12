@@ -6,11 +6,11 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessa
 
 public class SLAMOcTreeMeshBuilder extends OcTreeMeshBuilder
 {
-   public SLAMOcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<NormalOcTreeMessage> octreeStateTopic,
-                                Topic<DisplayType> displayTypeTopic)
+   public SLAMOcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<Boolean> clearTopic,
+                                Topic<NormalOcTreeMessage> octreeStateTopic, Topic<DisplayType> displayTypeTopic)
    {
-      super(uiMessager, octreeEnableTopic, octreeStateTopic, displayTypeTopic);
-      coloringType.setValue(ColoringType.NORMAL);
+      super(uiMessager, octreeEnableTopic, clearTopic, octreeStateTopic, displayTypeTopic);
+      coloringType.setValue(ColoringType.HAS_CENTER);
       displayType.setValue(DisplayType.HIT_LOCATION);
       treeDepthForDisplay.setValue(15);
       hidePlanarRegionNodes.setValue(false);

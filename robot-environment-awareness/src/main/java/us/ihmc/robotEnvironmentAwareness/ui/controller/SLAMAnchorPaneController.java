@@ -127,6 +127,9 @@ public class SLAMAnchorPaneController extends REABasicUIController
    {
       uiMessager.submitMessageToModule(REAModuleAPI.SLAMClear, true);
       uiMessager.submitMessageInternal(REAModuleAPI.SLAMClear, true);
+      
+      uiMessager.submitMessageToModule(REAModuleAPI.SLAMVizClear, true);
+      uiMessager.submitMessageInternal(REAModuleAPI.SLAMVizClear, true);
    }
 
    @FXML

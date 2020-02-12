@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders;
 
-import static us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory.*;
+import static us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory.createLeafIterable;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -60,6 +60,8 @@ public class OcTreeMeshBuilder implements Runnable
    {
       HIDE, CELL, PLANE, HIT_LOCATION
    }
+   
+   private static final double DEFAULT_HIT_LOCATION_SIZE = 0.02;
 
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> clear;
@@ -90,12 +92,17 @@ public class OcTreeMeshBuilder implements Runnable
    private final REAUIMessager uiMessager;
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
 
-   public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<NormalOcTreeMessage> octreeStateTopic,
+   public OcTreeMeshBuilder(REAUIMessager uiMessager)
+   {
+      this(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeClear, REAModuleAPI.OcTreeState, REAModuleAPI.UIOcTreeDisplayType);
+   }
+
+   public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<Boolean> clearTopic, Topic<NormalOcTreeMessage> octreeStateTopic,
                             Topic<DisplayType> displayTypeTopic)
    {
       this.uiMessager = uiMessager;
       enable = uiMessager.createInput(octreeEnableTopic, false);
-      clear = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      clear = uiMessager.createInput(clearTopic, false);
 
       treeDepthForDisplay = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeDepth, Integer.MAX_VALUE);
       treeDepthForDisplay.addListener(this::setProcessChange);
@@ -140,7 +147,9 @@ public class OcTreeMeshBuilder implements Runnable
 
       if (newMeshViews != null)
       {
-         List<Node> newChildren = children.stream().filter(newMeshViews::contains).collect(Collectors.toList());
+         List<Node> newChildren = children.stream()
+                                          .filter(newMeshViews::contains)
+                                          .collect(Collectors.toList());
 
          children.clear();
          children.addAll(newChildren);
@@ -241,12 +250,12 @@ public class OcTreeMeshBuilder implements Runnable
          {
             Point3D hitLocation = new Point3D();
             node.getHitLocation(hitLocation);
-            meshBuilder.addTetrahedron(0.0075, hitLocation, color);
+            meshBuilder.addTetrahedron(DEFAULT_HIT_LOCATION_SIZE, hitLocation, color);
          }
          break;
       default:
          throw new RuntimeException("Unexpected value for display type: " + displayType);
-      }
+      }      
    }
 
    private Color getNodeColor(ColoringType coloringType, UIOcTreeNode node)
