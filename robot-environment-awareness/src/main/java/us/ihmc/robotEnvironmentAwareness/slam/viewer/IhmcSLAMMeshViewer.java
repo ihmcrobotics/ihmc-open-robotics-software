@@ -1,12 +1,16 @@
 package us.ihmc.robotEnvironmentAwareness.slam.viewer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Material;
@@ -37,15 +41,26 @@ public class IhmcSLAMMeshViewer
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final SLAMOcTreeMeshBuilder ocTreeViewer;
 
+   private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
+   private final Map<AtomicReference<Boolean>, Node> enableTopicToNode = new HashMap<>();
+
    public IhmcSLAMMeshViewer(REAUIMessager uiMessager)
    {
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState, REAModuleAPI.ShowPlanarRegionsMap,
                                                               REAModuleAPI.SLAMVizClear, REAModuleAPI.SLAMClear);
 
-      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.ShowSLAMOctreeMap, REAModuleAPI.SLAMClear, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
+      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.ShowSLAMOctreeMap, REAModuleAPI.SLAMClear, REAModuleAPI.SLAMOctreeMapState,
+                                               REAModuleAPI.SLAMOcTreeDisplayType);
 
       ocTreeViewer.getRoot().setMouseTransparent(true);
       root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot());
+
+      AtomicReference<Boolean> planarRegionEnable = uiMessager.createInput(REAModuleAPI.ShowPlanarRegionsMap, false);
+      AtomicReference<Boolean> ocTreeEnable = uiMessager.createInput(REAModuleAPI.ShowSLAMOctreeMap, false);
+      enableTopicToNode.put(planarRegionEnable, planarRegionMeshView);
+      enableTopicToNode.put(ocTreeEnable, ocTreeViewer.getRoot());
+      enableTopicList.add(planarRegionEnable);
+      enableTopicList.add(ocTreeEnable);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -65,15 +80,42 @@ public class IhmcSLAMMeshViewer
          else
             stop();
       });
-
-      uiMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clear());
    }
 
-   public void clear()
+   private Runnable createViewersController()
    {
-      System.out.println("clear viewer");
-      //      ocTreeViewer.clear();
-      //      planarRegionsMeshBuilder.clear();
+      return new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            Platform.runLater(new Runnable()
+            {
+               @Override
+               public void run()
+               {
+                  for (int i = 0; i < enableTopicList.size(); i++)
+                  {
+                     AtomicReference<Boolean> enable = enableTopicList.get(i);
+                     Node node = enableTopicToNode.get(enable);
+                     if (enable.get())
+                     {
+                        if (!root.getChildren().contains(node))
+                           root.getChildren().addAll(node);
+                     }
+                     else
+                     {
+                        if (root.getChildren().contains(node))
+                           root.getChildren().removeAll(node);
+                     }
+                  }
+               }
+
+            });
+
+         }
+
+      };
    }
 
    public void start()
@@ -83,6 +125,7 @@ public class IhmcSLAMMeshViewer
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
 
    public void sleep()
