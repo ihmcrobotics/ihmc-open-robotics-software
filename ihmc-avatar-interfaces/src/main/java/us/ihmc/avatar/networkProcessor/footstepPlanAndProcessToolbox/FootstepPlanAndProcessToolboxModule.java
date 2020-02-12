@@ -24,12 +24,15 @@ import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FootstepPlanAndProcessToolboxModule extends ToolboxModule
 {
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
    private final FootstepPlanPostProcessingToolboxController postProcessingToolboxController;
    private IHMCRealtimeROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+
+   private final AtomicBoolean runningPlanning = new AtomicBoolean(true);
 
    public FootstepPlanAndProcessToolboxModule(DRCRobotModel drcRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
    {
@@ -66,7 +69,8 @@ public class FootstepPlanAndProcessToolboxModule extends ToolboxModule
    {
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(), s -> {
          footstepPlanningToolboxController.processRequest(s.takeNextData());
-         footstepPlanningToolboxController.updateInternal();
+         runningPlanning.set(true);
+         wakeUp();
       });
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> footstepPlanningToolboxController.processFootstepPlannerParameters(s.takeNextData()));
@@ -77,7 +81,8 @@ public class FootstepPlanAndProcessToolboxModule extends ToolboxModule
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPostProcessingPacket.class, getSubscriberTopicNameGenerator(), s -> {
          postProcessingToolboxController.processPostProcessingPacket(s.takeNextData());
-         postProcessingToolboxController.updateInternal();
+         runningPlanning.set(false);
+         wakeUp();
       });
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPostProcessingParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> postProcessingToolboxController.processFootstepPostProcessingParameters(s.takeNextData()));
@@ -88,15 +93,20 @@ public class FootstepPlanAndProcessToolboxModule extends ToolboxModule
    @Override
    public void sleep()
    {
-      footstepPlanningToolboxController.finishUp();
-      postProcessingToolboxController.finishUp();
+      if (runningPlanning.get())
+         footstepPlanningToolboxController.finishUp();
+      else
+         postProcessingToolboxController.finishUp();
       super.sleep();
    }
 
    @Override
    public ToolboxController getToolboxController()
    {
-      return footstepPlanningToolboxController;
+      if (runningPlanning.get())
+         return footstepPlanningToolboxController;
+      else
+         return footstepPlanningToolboxController;
    }
 
    @Override
