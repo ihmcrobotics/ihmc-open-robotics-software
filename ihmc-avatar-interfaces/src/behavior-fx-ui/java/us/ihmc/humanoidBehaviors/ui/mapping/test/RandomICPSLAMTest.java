@@ -19,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
+import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SimulatedStereoVisionPointCloudMessageLibrary;
@@ -100,8 +101,7 @@ public class RandomICPSLAMTest
       double minimumOverlappedRatio = 0.3;
 
       NormalOcTree octree = slam.getOctree();
-      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints,
-                                                                                                          minimumOverlappedRatio, 0.1);
+      Point3D[] sourcePointsToSensorPose = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints, minimumOverlappedRatio, 0.1);
       Point3D[] sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getSensorPose(), sourcePointsToSensorPose);
 
       // compute distance.
@@ -303,9 +303,13 @@ public class RandomICPSLAMTest
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
+      IhmcSLAMParameters parameters = new IhmcSLAMParameters();
+      parameters.setNumberOfSourcePoints(1000);
+
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      slam.updateParameters(parameters);
       slam.addFirstFrame(messages.get(47));
       slam.addFrame(messages.get(48));
 
@@ -335,7 +339,7 @@ public class RandomICPSLAMTest
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
-      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";      
+      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200205_Tour4\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
@@ -374,10 +378,9 @@ public class RandomICPSLAMTest
       originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
 
       IhmcSLAMViewer octreeViewer = new IhmcSLAMViewer();
-      
+
       for (int i = 0; i < slam.getPointCloudMap().size(); i++)
          octreeViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
-      
 
       String path = "E:\\Data\\20200205_Tour2\\20200205_174253_PlanarRegion\\";
       File file = new File(path);
