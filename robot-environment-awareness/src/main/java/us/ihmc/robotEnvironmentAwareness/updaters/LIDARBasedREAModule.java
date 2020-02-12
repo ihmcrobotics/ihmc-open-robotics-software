@@ -137,7 +137,7 @@ public class LIDARBasedREAModule
       preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
-      
+
       slamModule = new IhmcSLAMModule(reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
       slamModule.start();
    }
@@ -155,8 +155,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
-      mainUpdater.handleStereoVisionPointCloudMessage(message);   // TODO: remove and think better way.
-      slamModule.handlePointCloud(message);
+      slamModule.handlePointCloud(message);  // TODO: this is for off line test.
    }
 
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
@@ -164,6 +163,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      slamModule.handlePointCloud(message);
    }
 
    private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
