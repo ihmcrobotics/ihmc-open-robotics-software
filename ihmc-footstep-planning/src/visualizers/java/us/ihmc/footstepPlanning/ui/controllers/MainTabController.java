@@ -72,6 +72,8 @@ public class MainTabController
    @FXML
    private CheckBox ignorePartialFootholds;
    @FXML
+   private CheckBox autoPostProcess;
+   @FXML
    private Spinner<Double> timeout;
    @FXML
    private Spinner<Double> bestEffortTimeout;
@@ -305,6 +307,7 @@ public class MainTabController
       initialSupportSide.setValue(RobotSide.LEFT);
 
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
+      messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
    }
 
    public void bindControls()
