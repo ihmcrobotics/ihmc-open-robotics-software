@@ -188,6 +188,7 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> SLAMEnable = SLAMCategory.topic(Enable);
    public static final Topic<Boolean> SLAMClear = SLAMCategory.topic(Clear);
+   public static final Topic<Boolean> SLAMVizClear = SLAMCategory.child(UI).topic(Clear);
    public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);

@@ -39,9 +39,10 @@ public class IhmcSLAMMeshViewer
 
    public IhmcSLAMMeshViewer(REAUIMessager uiMessager)
    {
-      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState);
+      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState, REAModuleAPI.ShowPlanarRegionsMap,
+                                                              REAModuleAPI.SLAMVizClear, REAModuleAPI.SLAMClear);
 
-      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.ShowSLAMOctreeMap, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
+      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager, REAModuleAPI.ShowSLAMOctreeMap, REAModuleAPI.SLAMClear, REAModuleAPI.SLAMOctreeMapState, REAModuleAPI.SLAMOcTreeDisplayType);
 
       ocTreeViewer.getRoot().setMouseTransparent(true);
       root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot());
@@ -71,6 +72,8 @@ public class IhmcSLAMMeshViewer
    public void clear()
    {
       System.out.println("clear viewer");
+      //      ocTreeViewer.clear();
+      //      planarRegionsMeshBuilder.clear();
    }
 
    public void start()
