@@ -132,7 +132,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
    }
 
    @Test
-   public void testOnlyQueuedSteps() throws SimulationExceededMaximumTimeException
+   public void testOnlyQueuedStepsAllAtOnce() throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
@@ -177,6 +177,69 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
          side = side.getOppositeSide();
 
          drcSimulationTestHelper.publishToController(footMessage);
+
+         stepX += stepLength;
+      }
+
+      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+
+
+      double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      assertEquals(firstNumberofSteps, stepCounter.get());
+   }
+
+   @Test
+   public void testOnlyQueuedStepsWithTinySims() throws SimulationExceededMaximumTimeException
+   {
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      String className = getClass().getSimpleName();
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation(className);
+
+      AtomicInteger stepCounter = new AtomicInteger();
+      ROS2Tools.createCallbackSubscription(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()), (p) -> {
+               if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+               {
+                  stepCounter.incrementAndGet();
+               }
+            });
+
+      DRCRobotModel robotModel = getRobotModel();
+
+      double stepLength = getStepLength();
+      double stepWidth = getStepWidth();
+
+      ThreadTools.sleep(1000);
+
+      setupCameraSideView();
+
+      RobotSide side = RobotSide.LEFT;
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+
+      int firstNumberofSteps = 4;
+      double stepX = 0.0;
+      for (int currentStep = 0; currentStep < firstNumberofSteps; currentStep++)
+      {
+         FootstepDataListMessage footMessage = new FootstepDataListMessage();
+         footMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+
+         Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
+         Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+         addFootstep(footLocation, footOrientation, side, footMessage);
+         side = side.getOppositeSide();
+
+         drcSimulationTestHelper.publishToController(footMessage);
+         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
 
          stepX += stepLength;
       }
