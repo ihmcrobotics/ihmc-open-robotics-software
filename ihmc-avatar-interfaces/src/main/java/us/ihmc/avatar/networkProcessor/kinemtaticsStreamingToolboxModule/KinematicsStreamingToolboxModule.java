@@ -30,7 +30,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
-   private final KinematicsStreamingToolboxController controller;
+   protected final KinematicsStreamingToolboxController controller;
    private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
