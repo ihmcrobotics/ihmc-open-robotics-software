@@ -161,6 +161,13 @@ public class KSTTools
       return latestInput;
    }
 
+   public void flushInputCommands()
+   {
+      latestInput = null;
+      commandInputManager.clearAllCommands();
+      hasNewInputCommand = false;
+   }
+
    public boolean hasNewInputCommand()
    {
       return hasNewInputCommand;
