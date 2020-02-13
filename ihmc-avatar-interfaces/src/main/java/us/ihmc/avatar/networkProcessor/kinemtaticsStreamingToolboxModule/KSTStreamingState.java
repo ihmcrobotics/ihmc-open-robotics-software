@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
 import us.ihmc.commons.MathTools;
@@ -79,6 +80,9 @@ public class KSTStreamingState implements State
    private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
    private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
 
+   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
+   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
+
    private final YoDouble inputDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
    /**
@@ -109,6 +113,7 @@ public class KSTStreamingState implements State
    private final AlphaFilteredYoVariable inputFrequency;
    private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
 
+   private final HumanoidKinematicsToolboxController ikController;
    private final YoPIDSE3Gains ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
@@ -118,7 +123,7 @@ public class KSTStreamingState implements State
    public KSTStreamingState(KSTTools tools)
    {
       this.tools = tools;
-      HumanoidKinematicsToolboxController ikController = tools.getIKController();
+      ikController = tools.getIKController();
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
@@ -158,6 +163,15 @@ public class KSTStreamingState implements State
 
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
+      preferredArmConfigWeight.set(0.1);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics[] joints = armJoints.get(robotSide);
+         preferredArmJointMessages.put(robotSide,
+                                       Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
+                                             .collect(Collectors.toList()));
+      }
 
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
@@ -232,13 +246,31 @@ public class KSTStreamingState implements State
       FrameQuaternion chestOrientation = new FrameQuaternion(chest.getBodyFixedFrame());
       chestOrientation.changeFrame(worldFrame);
       defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(chestOrientation.getYaw());
+
       for (RobotSide robotSide : RobotSide.values)
       {
          OneDoFJointBasics[] joints = armJoints.get(robotSide);
-         List<KinematicsToolboxOneDoFJointMessage> messages = defaultArmJointMessages.get(robotSide);
+         List<KinematicsToolboxOneDoFJointMessage> defaultMessages = defaultArmJointMessages.get(robotSide);
 
          for (int i = 0; i < joints.length; i++)
-            messages.get(i).setDesiredPosition(joints[i].getQ());
+            defaultMessages.get(i).setDesiredPosition(joints[i].getQ());
+      }
+
+      TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = ikController.getInitialRobotConfigurationMap();
+
+      if (initialRobotConfigurationMap != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            OneDoFJointBasics[] joints = armJoints.get(robotSide);
+            List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
+
+            for (int i = 0; i < joints.length; i++)
+            {
+               OneDoFJointBasics joint = joints[i];
+               preferredMessages.get(i).setDesiredPosition(initialRobotConfigurationMap.get(joint.getName()));
+            }
+         }
       }
       resetFilter = true;
       streamingStartTime.set(Double.NaN);
@@ -327,7 +359,19 @@ public class KSTStreamingState implements State
          for (RobotSide robotSide : RobotSide.values)
          {
             if (!latestInput.hasInputFor(hands.get(robotSide)))
+            {
                ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
+            }
+            else
+            {
+               List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
+               for (int i = 0; i < preferredMessages.size(); i++)
+               {
+                  KinematicsToolboxOneDoFJointMessage preferredMessage = preferredMessages.get(i);
+                  preferredMessage.setWeight(preferredArmConfigWeight.getValue());
+                  ikCommandInputManager.submitMessage(preferredMessage);
+               }
+            }
          }
 
          isStreaming.set(latestInput.getStreamToController());
@@ -530,5 +574,6 @@ public class KSTStreamingState implements State
    @Override
    public void onExit()
    {
+      tools.flushInputCommands();
    }
 }
