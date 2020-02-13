@@ -1,15 +1,19 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class ColorPointCloudData
 {
@@ -17,6 +21,7 @@ public class ColorPointCloudData
    private final int numberOfPoints;
    private final Point3D[] pointCloud;
    private final int[] colors;
+   private final List<Integer> collidingPointIndices = new ArrayList<>();
 
    public ColorPointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
    {
@@ -74,21 +79,45 @@ public class ColorPointCloudData
    public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
    {
       long timestamp = this.timestamp;
-      float[] pointCloudBuffer = new float[3 * numberOfPoints];
+      int numberOfPointsToAdd = numberOfPoints - collidingPointIndices.size();
+      float[] pointCloudBuffer = new float[3 * numberOfPointsToAdd];
       int[] colorsInteger;
 
-      if (colors.length == numberOfPoints)
+      if (colors.length == numberOfPointsToAdd)
+      {
          colorsInteger = colors;
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            Point3D scanPoint = pointCloud[i];
+
+            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
+            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
+            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
+         }
+      }
       else
+      {
+         int bufferIndex = 0;
          colorsInteger = Arrays.copyOf(colors, numberOfPoints);
 
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D scanPoint = pointCloud[i];
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            if (collidingPointIndices.contains(i))
+            {
+               continue;
+            }
+            Point3D scanPoint = pointCloud[i];
 
-         pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
-         pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
-         pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
+            pointCloudBuffer[3 * bufferIndex + 0] = (float) scanPoint.getX();
+            pointCloudBuffer[3 * bufferIndex + 1] = (float) scanPoint.getY();
+            pointCloudBuffer[3 * bufferIndex + 2] = (float) scanPoint.getZ();
+            bufferIndex++;
+         }
+
+         if (bufferIndex != numberOfPointsToAdd)
+         {
+            LogTools.info("bufferIndex is different with numberOfPointsToAdd!!!!!!!!!!!!!!!!!!!!!");
+         }
       }
 
       return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
@@ -99,6 +128,19 @@ public class ColorPointCloudData
       for (int i = 0; i < numberOfPoints; i++)
       {
          pointCloud[i].applyTransform(transform);
+      }
+   }
+
+   public void updateCollisionBox(CollisionShapeTester collisionBoxNode)
+   {
+      if (collisionBoxNode != null)
+      {
+         collidingPointIndices.clear();
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            if (collisionBoxNode.contains(pointCloud[i]))
+               collidingPointIndices.add(i);
+         }
       }
    }
 }
