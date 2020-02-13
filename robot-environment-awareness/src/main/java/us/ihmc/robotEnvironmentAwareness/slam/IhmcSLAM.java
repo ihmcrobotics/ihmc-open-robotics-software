@@ -163,11 +163,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
       return slamFrames.get(slamFrames.size() - 1);
    }
 
-   public Point3DReadOnly[] getLatestOriginalPointCloud()
-   {
-      return originalPointCloudMap.get(originalPointCloudMap.size() - 1);
-   }
-
    public double getOctreeResolution()
    {
       return octreeResolution;

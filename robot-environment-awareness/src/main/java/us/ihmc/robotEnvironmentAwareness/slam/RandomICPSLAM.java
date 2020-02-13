@@ -27,7 +27,7 @@ public class RandomICPSLAM extends IhmcSLAM
 {
    public static final boolean DEBUG = true;
 
-   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 200;
+   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 700;
 
    private static final double DEFAULT_WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double DEFAULT_WINDOW_MAXIMUM_DEPTH = 1.5;

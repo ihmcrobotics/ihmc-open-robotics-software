@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
@@ -32,8 +31,9 @@ public class IhmcSLAMModule
 
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
-   private static final Color LATEST_POINT_CLOUD_COLOR = Color.GREEN;
-   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.RED;
+   private static final Color LATEST_ORIGINAL_POINT_CLOUD_COLOR = Color.BEIGE;
+   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.BLACK;
+   private static final Color LATEST_POINT_CLOUD_COLOR = Color.LIME;
 
    private final AtomicReference<Boolean> enable;
 
@@ -147,22 +147,22 @@ public class IhmcSLAMModule
          PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
          reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
 
-         // TODO:
-         reaMessager.submitMessage(REAModuleAPI.SLAMSensorFrameState, new Pose3D());
+         Point3DReadOnly[] originalPointCloud = slam.getLatestFrame().getOriginalPointCloud();
+         Point3DReadOnly[] correctedPointCloud = slam.getLatestFrame().getPointCloud();
+         Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+         if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
+            return;
+         StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud, sourcePointsToWorld,
+                                                                                                            correctedPointCloud);
+         reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       }
-
-      Point3DReadOnly[] originalPointCloud = slam.getLatestOriginalPointCloud();
-      Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
-      if (originalPointCloud == null || sourcePointsToWorld == null)
-         return;
-      StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud, sourcePointsToWorld);
-      reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
    }
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
-                                                                                        Point3DReadOnly[] sourcePointsToWorld)
+                                                                                        Point3DReadOnly[] sourcePointsToWorld,
+                                                                                        Point3DReadOnly[] correctedPointCloud)
    {
-      int numberOfPointsToPack = originalPointCloud.length + sourcePointsToWorld.length;
+      int numberOfPointsToPack = originalPointCloud.length + sourcePointsToWorld.length + correctedPointCloud.length;
 
       float[] pointCloudBuffer = new float[numberOfPointsToPack * 3];
       int[] colorBuffer = new int[numberOfPointsToPack * 3];
@@ -171,14 +171,21 @@ public class IhmcSLAMModule
          pointCloudBuffer[3 * i + 0] = (float) originalPointCloud[i].getX();
          pointCloudBuffer[3 * i + 1] = (float) originalPointCloud[i].getY();
          pointCloudBuffer[3 * i + 2] = (float) originalPointCloud[i].getZ();
-         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
+         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_ORIGINAL_POINT_CLOUD_COLOR);
       }
-      for (int i = originalPointCloud.length; i < numberOfPointsToPack; i++)
+      for (int i = originalPointCloud.length; i < originalPointCloud.length + sourcePointsToWorld.length; i++)
       {
          pointCloudBuffer[3 * i + 0] = (float) sourcePointsToWorld[i - originalPointCloud.length].getX();
          pointCloudBuffer[3 * i + 1] = (float) sourcePointsToWorld[i - originalPointCloud.length].getY();
          pointCloudBuffer[3 * i + 2] = (float) sourcePointsToWorld[i - originalPointCloud.length].getZ();
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(SOURCE_POINT_CLOUD_COLOR);
+      }
+      for (int i = originalPointCloud.length + sourcePointsToWorld.length; i < numberOfPointsToPack; i++)
+      {
+         pointCloudBuffer[3 * i + 0] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getX();
+         pointCloudBuffer[3 * i + 1] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getY();
+         pointCloudBuffer[3 * i + 2] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getZ();
+         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
       }
       return MessageTools.createStereoVisionPointCloudMessage(19870612L, pointCloudBuffer, colorBuffer);
    }
@@ -214,12 +221,5 @@ public class IhmcSLAMModule
    public void handlePointCloud(StereoVisionPointCloudMessage message)
    {
       newPointCloud.set(message);
-   }
-
-   public void buildAndSubmitPlanarRegionsMap()
-   {
-      slam.updatePlanarRegionsMap();
-      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
    }
 }
