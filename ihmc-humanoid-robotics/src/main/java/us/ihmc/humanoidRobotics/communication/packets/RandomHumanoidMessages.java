@@ -484,17 +484,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepPlanRequestPacket nextFootstepPlanRequestPacket(Random random)
-   {
-      FootstepPlanRequestPacket next = new FootstepPlanRequestPacket();
-      next.getStartFootstep().set(nextFootstepDataMessage(random));
-      next.setThetaStart(random.nextDouble());
-      next.setMaxSubOptimality(random.nextDouble());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getGoals());
-      next.setFootstepPlanRequestType(RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte());
-      return next;
-   }
-
    public static HeatMapPacket nextHeatMapPacket(Random random)
    {
       HeatMapPacket next = new HeatMapPacket();
@@ -649,24 +638,6 @@ public final class RandomHumanoidMessages
       next.getGroundQuadTreeSupport().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
       next.getDecayingWorldScan().add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
       next.setDefaultGroundHeight(random.nextFloat());
-      return next;
-   }
-
-   public static FootstepPathPlanPacket nextFootstepPathPlanPacket(Random random)
-   {
-      FootstepPathPlanPacket next = new FootstepPathPlanPacket();
-      next.setGoalsValid(random.nextBoolean());
-      next.getStart().set(nextFootstepDataMessage(random));
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getOriginalGoals());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getPathPlan());
-      int size = Math.abs(random.nextInt(1000));
-      for (int i = 0; i < size; i++)
-      {
-         next.getFootstepUnknown().add((byte) random.nextInt(2));
-      }
-      next.setSubOptimality(random.nextDouble());
-      next.setPathCost(random.nextDouble());
-
       return next;
    }
 
