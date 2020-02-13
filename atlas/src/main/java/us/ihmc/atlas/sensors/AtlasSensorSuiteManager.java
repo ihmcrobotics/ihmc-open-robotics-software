@@ -81,6 +81,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                                                  rcdTopicName,
                                                                  rosClockCalculator,
                                                                  USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
+      pointCloudSensorManager.setCollisionBoxProvider(collisionBoxProvider);
    }
 
    @Override
