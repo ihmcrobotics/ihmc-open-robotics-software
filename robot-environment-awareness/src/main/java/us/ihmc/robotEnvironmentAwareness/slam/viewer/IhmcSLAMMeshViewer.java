@@ -110,11 +110,8 @@ public class IhmcSLAMMeshViewer
                      }
                   }
                }
-
             });
-
          }
-
       };
    }
 
@@ -141,12 +138,6 @@ public class IhmcSLAMMeshViewer
    public void stop()
    {
       sleep();
-
-      if (executorService != null)
-      {
-         executorService.shutdownNow();
-         executorService = null;
-      }
    }
 
    private void updateMeshView(MeshView meshViewToUpdate, Pair<Mesh, Material> meshMaterial)

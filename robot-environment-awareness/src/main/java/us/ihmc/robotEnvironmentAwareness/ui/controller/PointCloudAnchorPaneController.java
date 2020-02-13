@@ -71,6 +71,33 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
 
       ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
+
+      uiStaticMessager = uiMessager;
+      FXMLLoader loader = new FXMLLoader();
+      URL url = getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml");
+      loader.setLocation(url);
+
+      try
+      {
+         BorderPane mainPane = loader.load();
+         View3DFactory view3dFactory = View3DFactory.createSubscene();
+         view3dFactory.addCameraController(true);
+         view3dFactory.addWorldCoordinateSystem(0.3);
+         view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
+         mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
+
+         stage = new Stage();
+         Scene mainScene = new Scene(mainPane, 1000, 800);
+         stage.setScene(mainScene);
+         stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
+
+         uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
+         uiConnectionHandler.start();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    @FXML
@@ -124,34 +151,15 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    private SLAMAnchorPaneController slamAnchorPaneController;
    private IhmcSLAMMeshViewer ihmcSLAMViewer;
    private UIConnectionHandler uiConnectionHandler;
+   private Stage stage;
 
    @FXML
    public void openSLAM() throws IOException
    {
-      uiStaticMessager = uiMessager;
-
-      FXMLLoader loader = new FXMLLoader();
-      URL url = getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml");
-      loader.setLocation(url);
-
-      if (url != null)
+      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      if (stage != null)
       {
-         BorderPane mainPane = loader.load();
-
-         View3DFactory view3dFactory = View3DFactory.createSubscene();
-         view3dFactory.addCameraController(true);
-         view3dFactory.addWorldCoordinateSystem(0.3);
-         view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
-         mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
-
-         Stage stage = new Stage();
-         Scene mainScene = new Scene(mainPane, 1000, 800);
-         stage.setScene(mainScene);
-         stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
-
-         uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
-         uiConnectionHandler.start();
-
+         ihmcSLAMViewer.start();
          stage.show();
       }
    }
