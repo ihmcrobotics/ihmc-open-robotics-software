@@ -147,13 +147,16 @@ public class IhmcSLAMModule
          PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
          reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
 
-         Point3DReadOnly[] originalPointCloud = slam.getLatestFrame().getOriginalPointCloud();
-         Point3DReadOnly[] correctedPointCloud = slam.getLatestFrame().getPointCloud();
+         IhmcSLAMFrame latestFrame = slam.getLatestFrame();
+         Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
+         Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
          Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
          if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
             return;
          StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud, sourcePointsToWorld,
                                                                                                             correctedPointCloud);
+         latestStereoMessage.getSensorPosition().set(latestFrame.getSensorPose().getTranslation());
+         latestStereoMessage.getSensorOrientation().set(latestFrame.getSensorPose().getRotation());
          reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       }
    }
