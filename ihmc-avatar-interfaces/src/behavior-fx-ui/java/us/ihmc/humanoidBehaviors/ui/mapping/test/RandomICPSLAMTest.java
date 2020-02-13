@@ -395,4 +395,43 @@ public class RandomICPSLAMTest
 
       ThreadTools.sleepForever();
    }
+
+   @Test
+   public void testRandomICPSLAMRoundTripEndToEnd()
+   {
+      String stereoPath = "E:\\Data\\20200213_Round_2\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      double octreeResolution = 0.02;
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      slam.addFirstFrame(messages.get(0));
+      for (int i = 1; i < messages.size(); i++)
+      {
+         System.out.println();
+         System.out.println(" ## add frame " + i);
+         slam.addFrame(messages.get(i));
+      }
+      System.out.println(slam.getPointCloudMap().size());
+
+      slam.updatePlanarRegionsMap();
+
+      String path1 = "E:\\Data\\20200213_Round_2\\20200213_153657_PlanarRegion\\";
+      String path2 = "E:\\Data\\20200213_Round_2\\20200213_154007_PlanarRegion\\";
+      String path3 = "E:\\Data\\20200213_Round_2\\20200213_154146_PlanarRegion\\";
+
+      IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
+
+      slamViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+         slamViewer.addSensorPose(slam.getOriginalSensorPoses().get(i), Color.GREEN);
+      for (int i = 0; i < slam.getPointCloudMap().size(); i++)
+         slamViewer.addSensorPose(slam.getSensorPoses().get(i), Color.BLUE);
+      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path1)));
+      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path2)));
+      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path3)));
+      slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
+
+      ThreadTools.sleepForever();
+   }
 }
