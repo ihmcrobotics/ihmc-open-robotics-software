@@ -9,8 +9,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import javafx.scene.paint.Color;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -20,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class IhmcSLAMModule
@@ -27,6 +31,9 @@ public class IhmcSLAMModule
    private final Messager reaMessager;
 
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
+
+   private static final Color LATEST_POINT_CLOUD_COLOR = Color.GREEN;
+   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.RED;
 
    private final AtomicReference<Boolean> enable;
 
@@ -144,8 +151,36 @@ public class IhmcSLAMModule
          reaMessager.submitMessage(REAModuleAPI.SLAMSensorFrameState, new Pose3D());
       }
 
-      // TODO: latest frame. set colors for source points or windows.
-      reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, new StereoVisionPointCloudMessage());
+      Point3DReadOnly[] originalPointCloud = slam.getLatestOriginalPointCloud();
+      Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+      if (originalPointCloud == null || sourcePointsToWorld == null)
+         return;
+      StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud, sourcePointsToWorld);
+      reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+   }
+
+   private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
+                                                                                        Point3DReadOnly[] sourcePointsToWorld)
+   {
+      int numberOfPointsToPack = originalPointCloud.length + sourcePointsToWorld.length;
+
+      float[] pointCloudBuffer = new float[numberOfPointsToPack * 3];
+      int[] colorBuffer = new int[numberOfPointsToPack * 3];
+      for (int i = 0; i < originalPointCloud.length; i++)
+      {
+         pointCloudBuffer[3 * i + 0] = (float) originalPointCloud[i].getX();
+         pointCloudBuffer[3 * i + 1] = (float) originalPointCloud[i].getY();
+         pointCloudBuffer[3 * i + 2] = (float) originalPointCloud[i].getZ();
+         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
+      }
+      for (int i = originalPointCloud.length; i < numberOfPointsToPack; i++)
+      {
+         pointCloudBuffer[3 * i + 0] = (float) sourcePointsToWorld[i - originalPointCloud.length].getX();
+         pointCloudBuffer[3 * i + 1] = (float) sourcePointsToWorld[i - originalPointCloud.length].getY();
+         pointCloudBuffer[3 * i + 2] = (float) sourcePointsToWorld[i - originalPointCloud.length].getZ();
+         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(SOURCE_POINT_CLOUD_COLOR);
+      }
+      return MessageTools.createStereoVisionPointCloudMessage(19870612L, pointCloudBuffer, colorBuffer);
    }
 
    public void updateMain()

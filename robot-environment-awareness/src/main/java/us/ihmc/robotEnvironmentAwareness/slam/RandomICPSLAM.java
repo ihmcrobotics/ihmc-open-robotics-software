@@ -27,7 +27,7 @@ public class RandomICPSLAM extends IhmcSLAM
 {
    public static final boolean DEBUG = true;
 
-   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 300;
+   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 200;
 
    private static final double DEFAULT_WINDOW_MINIMUM_DEPTH = 0.5;
    private static final double DEFAULT_WINDOW_MAXIMUM_DEPTH = 1.5;
@@ -55,6 +55,7 @@ public class RandomICPSLAM extends IhmcSLAM
    protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
+   private Point3D[] sourcePointsToWorld;
 
    public static boolean ENABLE_YAW_CORRECTION = false;
 
@@ -73,9 +74,8 @@ public class RandomICPSLAM extends IhmcSLAM
          UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
       }
    }
-
+   
    // debugging variables.
-   public Point3D[] sourcePointsToWorld;
    public Point3D[] correctedSourcePointsToWorld;
 
    public RandomICPSLAM(double octreeResolution)
@@ -183,8 +183,7 @@ public class RandomICPSLAM extends IhmcSLAM
       }
       else
       {
-         if (DEBUG)
-            this.sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
+         this.sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
 
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
          RandomICPSLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
@@ -244,6 +243,11 @@ public class RandomICPSLAM extends IhmcSLAM
    public double getComputationTimeForLatestFrame()
    {
       return latestComputationTime.get();
+   }
+   
+   public Point3DReadOnly[] getSourcePointsToWorldLatestFrame()
+   {
+      return sourcePointsToWorld;
    }
 
    public void updateParameters(IhmcSLAMParameters parameters)

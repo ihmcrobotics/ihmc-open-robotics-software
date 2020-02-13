@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -39,9 +38,9 @@ public class IhmcSLAM implements IhmcSLAMInterface
       this.octreeResolution = octreeResolution;
 
       //TODO: tune.
-//      planarRegionSegmentationParameters.setSearchRadius(0.03);
+      //      planarRegionSegmentationParameters.setSearchRadius(0.03);
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
-//      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
+      //      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
       planarRegionSegmentationParameters.setMinRegionSize(100);
    }
 
@@ -162,6 +161,11 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected IhmcSLAMFrame getLatestFrame()
    {
       return slamFrames.get(slamFrames.size() - 1);
+   }
+
+   public Point3DReadOnly[] getLatestOriginalPointCloud()
+   {
+      return originalPointCloudMap.get(originalPointCloudMap.size() - 1);
    }
 
    public double getOctreeResolution()
