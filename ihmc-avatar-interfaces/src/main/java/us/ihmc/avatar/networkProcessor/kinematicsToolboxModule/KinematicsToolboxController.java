@@ -317,6 +317,8 @@ public class KinematicsToolboxController extends ToolboxController
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      angularMomentumWeight.set(0.125);
+
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
 
@@ -1132,5 +1134,10 @@ public class KinematicsToolboxController extends ToolboxController
    public double getUpdateDT()
    {
       return updateDT;
+   }
+
+   public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
+   {
+      return initialRobotConfigurationMap;
    }
 }
