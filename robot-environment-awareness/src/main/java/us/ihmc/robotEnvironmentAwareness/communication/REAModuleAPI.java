@@ -60,11 +60,6 @@ public class REAModuleAPI
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
    private static final CategoryTheme SLAM = apiFactory.createCategoryTheme("SLAM");
    private static final CategoryTheme SLAMFrame = apiFactory.createCategoryTheme("SLAMFrame");
-   private static final CategoryTheme Points = apiFactory.createCategoryTheme("Points");
-   private static final CategoryTheme ICP = apiFactory.createCategoryTheme("ICP");
-   private static final CategoryTheme Window = apiFactory.createCategoryTheme("Window");
-   private static final CategoryTheme Overlapped = apiFactory.createCategoryTheme("Overlapped");
-   private static final CategoryTheme Inlier = apiFactory.createCategoryTheme("Inlier");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
