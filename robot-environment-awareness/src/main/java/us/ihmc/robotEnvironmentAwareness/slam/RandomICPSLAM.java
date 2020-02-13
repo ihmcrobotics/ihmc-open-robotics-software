@@ -25,7 +25,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class RandomICPSLAM extends IhmcSLAM
 {
-   public static final boolean DEBUG = true;
+   public static final boolean DEBUG = false;
 
    private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 700;
 
