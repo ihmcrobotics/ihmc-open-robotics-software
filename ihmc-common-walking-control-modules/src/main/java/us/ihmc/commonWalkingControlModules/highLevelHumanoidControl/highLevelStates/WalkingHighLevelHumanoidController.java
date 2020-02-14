@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubSuppToSingSuppCond4DistRecov;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
@@ -92,6 +93,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final LegConfigurationManager legConfigurationManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+
+   private final TouchdownErrorCompensator touchdownErrorCompensator;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
@@ -226,6 +229,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
                                                    registry);
 
+      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler);
       stateMachine = setupStateMachine();
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
@@ -283,8 +287,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide supportSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingSingleSupportState(supportSide);
-         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory,
-                                                                                      walkingControllerParameters, failureDetectionControlModule, registry);
+         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                                                                                      controllerToolbox, managerFactory, walkingControllerParameters,
+                                                                                      failureDetectionControlModule, registry);
          walkingSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
