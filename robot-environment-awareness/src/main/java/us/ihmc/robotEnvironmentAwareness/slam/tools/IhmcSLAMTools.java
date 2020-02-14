@@ -189,7 +189,7 @@ public class IhmcSLAMTools
       PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(false);
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
