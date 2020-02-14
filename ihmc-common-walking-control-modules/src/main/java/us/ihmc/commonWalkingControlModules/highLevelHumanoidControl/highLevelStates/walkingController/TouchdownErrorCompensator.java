@@ -8,6 +8,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -27,6 +28,7 @@ public class TouchdownErrorCompensator
 
    private final DoubleParameter spatialVelocityThreshold = new DoubleParameter("spatialVelocityThresholdForSupportConfidence", registry,
                                                                                 Double.POSITIVE_INFINITY);
+   private final DoubleParameter touchdownErrorCorrectionScale = new DoubleParameter("touchdownErrorCorrectionScale", registry, 1.0);
    private final FrameVector3D linearVelocity = new FrameVector3D();
 
    public TouchdownErrorCompensator(WalkingMessageHandler walkingMessageHandler, SideDependentList<MovingReferenceFrame> soleFrames,
@@ -78,6 +80,8 @@ public class TouchdownErrorCompensator
          return;
 
       touchdownErrorVector.sub(actualFootPosition, desiredFootstepPositions.get(robotSide));
+      touchdownErrorVector.scale(touchdownErrorCorrectionScale.getValue());
+
       walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
       planShouldBeOffsetFromStep.get(robotSide).set(false);
    }
