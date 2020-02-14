@@ -1,8 +1,11 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -10,17 +13,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.variable.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class FootMotionOnTouchdownSlipper extends ModularRobotController
 {
-   private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
    private final SideDependentList<List<GroundContactPoint>> groundContactPointsMap = new SideDependentList<>();
+   private final HashMap<GroundContactPoint, YoFramePoint3D> groundContactTouchdownMap = new HashMap<>();
 
    private final YoDouble time = new YoDouble("time", registry);
    private final SideDependentList<YoDouble> timesAtContact = new SideDependentList<>();
@@ -43,10 +44,23 @@ public class FootMotionOnTouchdownSlipper extends ModularRobotController
       {
          groundContactPointsMap.put(robotSide, robot.getFootGroundContactPoints(robotSide));
          YoDouble timeAtContact = new YoDouble(robotSide.getCamelCaseName() + "TimeAtContact", registry);
+
+         for (GroundContactPoint groundContactPoint : robot.getFootGroundContactPoints(robotSide))
+         {
+            groundContactTouchdownMap.put(groundContactPoint, new YoFramePoint3D(groundContactPoint.getName() + "AtTouchdown", ReferenceFrame.getWorldFrame(),
+                                                                                 getYoVariableRegistry()));
+         }
+
          YoBoolean footIsInContact = new YoBoolean(robotSide.getCamelCaseName() + "FootIsInContact", registry);
          footIsInContact.addVariableChangedListener((v) -> {
             if (footIsInContact.getBooleanValue())
+            {
                timeAtContact.set(time.getDoubleValue());
+               for (GroundContactPoint groundContactPoint : robot.getFootGroundContactPoints(robotSide))
+               {
+                  groundContactTouchdownMap.get(groundContactPoint).set(groundContactPoint.getYoTouchdownLocation());
+               }
+            }
          });
 
          timesAtContact.put(robotSide, timeAtContact);
@@ -59,8 +73,6 @@ public class FootMotionOnTouchdownSlipper extends ModularRobotController
 
       GroundContactPointsSlipper leftSlipper = new GroundContactPointsSlipper("left");
       GroundContactPointsSlipper rightSlipper = new GroundContactPointsSlipper("right");
-
-      groundContactPointsSlippers = new SideDependentList<>(leftSlipper, rightSlipper);
 
       this.addRobotController(leftSlipper);
       this.addRobotController(rightSlipper);
@@ -96,35 +108,57 @@ public class FootMotionOnTouchdownSlipper extends ModularRobotController
 
    private void updateSlipping(RobotSide robotSide)
    {
-      GroundContactPointsSlipper slipper = groundContactPointsSlippers.get(robotSide);
-      if (!footIsInContacts.get(robotSide).getBooleanValue())
-      {
-         slipper.setDoSlip(false);
-      }
-      else
+      if (footIsInContacts.get(robotSide).getBooleanValue())
       {
          double timeInState = time.getDoubleValue() - timesAtContact.get(robotSide).getDoubleValue();
-         if (timeInState > slipDuration.getDoubleValue())
+         if (timeInState < slipDuration.getDoubleValue())
          {
-            slipper.setDoSlip(false);
-         }
-         else
-         {
-            double slips = slipDuration.getDoubleValue() / deltaT;
-            slipper.setGroundContactPoints(groundContactPointsMap.get(robotSide));
+            double alpha = MathTools.clamp(timeInState / slipDuration.getDoubleValue(), 0.0, 1.0);
+            List<GroundContactPoint> groundContactPointsToSlip = groundContactPointsMap.get(robotSide);
 
-            Vector3D translationIncrement = new Vector3D(translationMagnitudes);
-            Vector3D rotationIncrement = new Vector3D(rotationMagnitudesYawPitchRoll.getYaw(), rotationMagnitudesYawPitchRoll.getPitch(),
-                                                      rotationMagnitudesYawPitchRoll.getRoll());
-            translationIncrement.scale(1.0 / slips);
-            rotationIncrement.scale(1.0 / slips);
+            Vector3D translationAmount = new Vector3D(translationMagnitudes);
+            Vector3D rotationAmount = new Vector3D(rotationMagnitudesYawPitchRoll.getYaw(), rotationMagnitudesYawPitchRoll.getPitch(),
+                                                   rotationMagnitudesYawPitchRoll.getRoll());
+            translationAmount.scale(alpha);
+            rotationAmount.scale(alpha);
 
-            slipper.setDoSlip(true);
-            slipper.setSlipTranslation(translationIncrement);
-            slipper.setSlipRotationEulerAngles(rotationIncrement);
-            slipper.setPercentToSlipPerTick(1.0);
+            Point3D touchdownCoM = computeTouchdownCoM(groundContactPointsToSlip);
+            touchdownCoM.add(translationAmount);
+
+            for (int i = 0; i < groundContactPointsToSlip.size(); i++)
+            {
+               GroundContactPoint groundContactPointToSlip = groundContactPointsToSlip.get(i);
+
+               Point3D touchdownLocation = new Point3D(groundContactTouchdownMap.get(groundContactPointToSlip));
+               touchdownLocation.add(translationAmount);
+//               touchdownLocation.sub(touchdownCoM);
+
+//               RotationMatrix deltaRotation = new RotationMatrix(rotationAmount);
+//               deltaRotation.transform(touchdownLocation);
+
+//               touchdownLocation.add(touchdownCoM);
+               groundContactPointToSlip.setTouchdownLocation(touchdownLocation);
+               groundContactPointToSlip.setInContact();
+            }
          }
       }
+   }
+
+   private Point3D computeTouchdownCoM(List<GroundContactPoint> groundContactPointsToSlip)
+   {
+      int touchdownCount = 0;
+      Point3D touchdownCoM = new Point3D();
+
+      for (int i = 0; i < groundContactPointsToSlip.size(); i++)
+      {
+         GroundContactPoint groundContactPointToSlip = groundContactPointsToSlip.get(i);
+
+         touchdownCoM.add(groundContactTouchdownMap.get(groundContactPointToSlip));
+         touchdownCount++;
+      }
+
+      touchdownCoM.scale(1.0 / touchdownCount);
+      return touchdownCoM;
    }
 
    private void updateFootContactState(RobotSide robotSide)
