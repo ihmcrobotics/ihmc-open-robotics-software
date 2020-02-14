@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -10,26 +9,38 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class TouchdownErrorCompensator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final SideDependentList<FramePoint3DReadOnly> desiredFootstepPositions = new SideDependentList<>();
-   private final SideDependentList<FramePoint3DReadOnly> actualFootstepPositions = new SideDependentList<>();
-   private final SideDependentList<Boolean> footstepHasBeenOffset = new SideDependentList<>(true, true);
+
+   private final SideDependentList<YoBoolean> planShouldBeOffsetFromStep = new SideDependentList<>();
 
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final WalkingMessageHandler walkingMessageHandler;
 
-   private final DoubleParameter spatialVelocityThreshold = new DoubleParameter("spatialVelocityThresholdForSupportConfidence", registry, Double.POSITIVE_INFINITY);
+   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+   private final DoubleParameter spatialVelocityThreshold = new DoubleParameter("spatialVelocityThresholdForSupportConfidence", registry,
+                                                                                Double.POSITIVE_INFINITY);
    private final FrameVector3D linearVelocity = new FrameVector3D();
 
-   public TouchdownErrorCompensator(WalkingMessageHandler walkingMessageHandler, SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry)
+   public TouchdownErrorCompensator(WalkingMessageHandler walkingMessageHandler, SideDependentList<MovingReferenceFrame> soleFrames,
+                                    YoVariableRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
       this.soleFrames = soleFrames;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoBoolean planShouldBeOffsetFromStep = new YoBoolean("planShouldBeOffsetFromStep" + robotSide.getPascalCaseName(), registry);
+         planShouldBeOffsetFromStep.set(false);
+         this.planShouldBeOffsetFromStep.put(robotSide, planShouldBeOffsetFromStep);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -37,7 +48,9 @@ public class TouchdownErrorCompensator
    public void clear()
    {
       desiredFootstepPositions.clear();
-      actualFootstepPositions.clear();
+
+      for (RobotSide robotSide : RobotSide.values)
+         planShouldBeOffsetFromStep.get(robotSide).set(false);
    }
 
    public boolean isFootPositionTrusted(RobotSide robotSide)
@@ -48,31 +61,24 @@ public class TouchdownErrorCompensator
       return linearVelocity.getZ() < spatialVelocityThreshold.getValue();
    }
 
-   public boolean hasOffsetBeenAddedFromLastStep(RobotSide robotSide)
+   public boolean planShouldBeOffsetFromStep(RobotSide robotSide)
    {
-      return footstepHasBeenOffset.get(robotSide);
+      return planShouldBeOffsetFromStep.get(robotSide).getBooleanValue();
    }
 
    public void registerDesiredFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly desiredFootstepPosition)
    {
       desiredFootstepPositions.put(robotSide, desiredFootstepPosition);
-      footstepHasBeenOffset.set(robotSide, false);
+      planShouldBeOffsetFromStep.get(robotSide).set(true);
    }
 
-   public void registerActualFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly actualFootstepPosition)
+   public void addOffsetVectorFromTouchdownError(RobotSide robotSide, FramePoint3DReadOnly actualFootPosition)
    {
-      actualFootstepPositions.put(robotSide, actualFootstepPosition);
-   }
-
-   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-
-   public void addOffsetVectorFromTouchdownError(RobotSide robotSide)
-   {
-      if (footstepHasBeenOffset.get(robotSide))
+      if (!planShouldBeOffsetFromStep.get(robotSide).getBooleanValue())
          return;
 
-      touchdownErrorVector.sub(actualFootstepPositions.get(robotSide), desiredFootstepPositions.get(robotSide));
+      touchdownErrorVector.sub(actualFootPosition, desiredFootstepPositions.get(robotSide));
       walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
-      footstepHasBeenOffset.set(robotSide, true);
+      planShouldBeOffsetFromStep.get(robotSide).set(false);
    }
 }
