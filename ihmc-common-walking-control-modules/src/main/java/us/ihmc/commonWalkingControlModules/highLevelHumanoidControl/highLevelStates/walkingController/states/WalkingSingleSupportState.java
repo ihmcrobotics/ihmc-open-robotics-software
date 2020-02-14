@@ -337,8 +337,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       actualFootPoseInWorld.changeFrame(worldFrame);
 
       touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
-      touchdownErrorCompensator.registerActualFootstepPosition(swingSide, actualFootPoseInWorld.getPosition());
-      touchdownErrorCompensator.addOffsetVectorFromTouchdownError(swingSide);
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);

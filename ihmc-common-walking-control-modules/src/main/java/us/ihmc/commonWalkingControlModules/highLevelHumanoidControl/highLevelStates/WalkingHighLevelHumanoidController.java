@@ -229,7 +229,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
                                                    registry);
 
-      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler);
+      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getReferenceFrames().getSoleFrames(), registry);
       stateMachine = setupStateMachine();
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
@@ -260,9 +260,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       StateMachineFactory<WalkingStateEnum, WalkingState> factory = new StateMachineFactory<>(WalkingStateEnum.class);
       factory.setNamePrefix("walking").setRegistry(registry).buildYoClock(yoTime);
 
-      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, controllerToolbox, managerFactory,
+      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
                                                       failureDetectionControlModule, walkingControllerParameters, registry);
-      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, controllerToolbox, managerFactory,
+      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
                                                                             failureDetectionControlModule, registry);
       factory.addState(WalkingStateEnum.TO_STANDING, toStandingState);
       factory.addState(WalkingStateEnum.STANDING, standingState);
@@ -274,8 +274,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide transferToSide : RobotSide.values)
       {
          WalkingStateEnum stateEnum = WalkingStateEnum.getWalkingTransferState(transferToSide);
-         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, controllerToolbox,
-                                                                                                     managerFactory, walkingControllerParameters,
+         TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                                                                                                     controllerToolbox, managerFactory, walkingControllerParameters,
                                                                                                      failureDetectionControlModule, minimumTransferTime,
                                                                                                      unloadFraction, rhoMin, registry);
          walkingTransferStates.put(transferToSide, transferState);
