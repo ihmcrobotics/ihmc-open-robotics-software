@@ -8,6 +8,7 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUI;
 import us.ihmc.log.LogTools;
 
 public class AtlasLookAndStepBehaviorUIAndModule
@@ -16,7 +17,7 @@ public class AtlasLookAndStepBehaviorUIAndModule
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
+      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, PatrolBehaviorUI.DEFINITION);
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createInterprocess(behaviorRegistry, drcRobotModel);

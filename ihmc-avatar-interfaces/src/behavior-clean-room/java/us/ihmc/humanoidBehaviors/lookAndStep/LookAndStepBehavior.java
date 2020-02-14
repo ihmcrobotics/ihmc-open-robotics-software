@@ -11,14 +11,21 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -35,8 +42,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
@@ -80,16 +89,17 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void lookAndStep()
    {
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
+      PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
 
-      FramePose3D midFeetZUp = new FramePose3D();
-      midFeetZUp.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose3D goalPoseBetweenFeet = new FramePose3D();
+      goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+      goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+      double midFeetZ = goalPoseBetweenFeet.getZ();
 
-      FramePose3D targetFootstepPose = new FramePose3D();
-//      targetFootstepPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      targetFootstepPose.setToZero(latestHumanoidRobotState.getPelvisFrame());
-      targetFootstepPose.appendTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
-      targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
+      goalPoseBetweenFeet.appendTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
+      goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPoseBetweenFeet.setZ(midFeetZ);
 
       RobotSide initialStanceFootSide = null;
       FramePose3D initialStanceFootPose = null;
@@ -100,70 +110,65 @@ public class LookAndStepBehavior implements BehaviorInterface
       rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
       rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double idealFootstepWidth = parameters.get(LookAndStepBehaviorParameters.stepWidth);// footstepPlannerParameters.getIdealFootstepWidth();
-
-      if (leftSolePose.getPosition().distance(targetFootstepPose.getPosition()) <= rightSolePose.getPosition().distance(targetFootstepPose.getPosition()))
+      if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
       {
          initialStanceFootSide = RobotSide.LEFT;
          initialStanceFootPose = leftSolePose;
-
-         targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
-         targetFootstepPose.appendTranslation(0.0, -idealFootstepWidth, 0.0);
-         targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
       else
       {
          initialStanceFootSide = RobotSide.RIGHT;
          initialStanceFootPose = rightSolePose;
-
-         targetFootstepPose.changeFrame(latestHumanoidRobotState.getPelvisFrame());
-         targetFootstepPose.appendTranslation(0.0, idealFootstepWidth, 0.0);
-         targetFootstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
-      FootstepNode targetFootstepNodeToSnap = new FootstepNode(targetFootstepPose.getX(),
-                                                               targetFootstepPose.getY(),
-                                                               targetFootstepPose.getYaw(),
-                                                               initialStanceFootSide.getOppositeSide());
 
-      PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
-//      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
+      footstepPlannerParameters.setReturnBestEffortPlan(true);
+      footstepPlannerParameters.setMaximumStepYaw(1.5);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-      snapper.setPlanarRegions(latestPlanarRegionList);
-      FootstepNodeSnapData footstepNodeSnapData = snapper.snapFootstepNode(targetFootstepNodeToSnap);
+      FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
+      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
+      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
+      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
+      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      //      FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
+      FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
+      FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(footstepPlannerParameters);
+      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(snapper,
+                                                                                   footstepPlannerParameters.getAStarHeuristicsWeight(),
+                                                                                   footstepPlannerParameters);
 
-      FootstepPlan footstepPlan = new FootstepPlan();
+      YoVariableRegistry registry = new YoVariableRegistry("footstepPlannerRegistry");
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,
+                                                              nodeChecker,
+                                                              heuristics,
+                                                              nodeExpansion,
+                                                              stepCostCalculator,
+                                                              snapper,
+                                                              registry);
 
-      RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
-      try
+
+
+//      planner.setPlanningHorizonLength(100.0); // ??
+      FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
+      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      footstepPlannerGoal.setGoalPoseBetweenFeet(goalPoseBetweenFeet);
+      planner.setPlanarRegions(latestPlanarRegionList);
+      planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
+      planner.setGoal(footstepPlannerGoal);
+      planner.setBestEffortTimeout(2.0); // TODO tune
+
+      FootstepPlanningResult result = planner.plan(); // TODO time and store or display
+      FootstepPlan footstepPlan = planner.getPlan();
+
+      FootstepPlan shortenedFootstepPlan = new FootstepPlan();
+      if (footstepPlan.getNumberOfSteps() > 0)
       {
-         FootstepNodeTools.getSnappedNodeTransform(targetFootstepNodeToSnap, footstepNodeSnapData.getSnapTransform(), snappedNodeTransform);
+         shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(0));
       }
-      catch (NotARotationMatrixException e)
-      {
-         return;
-      }
-
-      FramePose3D snappedSoleFramePose = new FramePose3D();
-      snappedSoleFramePose.set(snappedNodeTransform);
-      SimpleFootstep snappedSimpleFoostep = new SimpleFootstep();
-      snappedSimpleFoostep.setFoothold(footstepNodeSnapData.getCroppedFoothold());
-      snappedSimpleFoostep.setSoleFramePose(snappedSoleFramePose);
-      snappedSimpleFoostep.setRobotSide(initialStanceFootSide.getOppositeSide());
-      footstepPlan.addFootstep(snappedSimpleFoostep);
-
-
-
-//      FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-//
-//      // nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-//      FootstepNodeCheckerOfCheckers nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
-
 
       // send footstep plan to UI
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlan));
-
 
       if (takeStep.poll())
       {
@@ -171,7 +176,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
          LogTools.info("Requesting walk");
          TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
-               footstepPlan,
+               shortenedFootstepPlan,
                1.0,
                0.5,
                ExecutionMode.OVERRIDE), robot.pollHumanoidRobotState(), true, latestPlanarRegionList);
