@@ -282,6 +282,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(MultisenseParameterPacketPubSubType.class);
       registerPacketField(PoseArrayPubSubType.class);
       registerPacketField(WeightMatrix3DMessagePubSubType.class);
+      registerPacketField(FootstepPlanRequestPacketPubSubType.class);
       registerPacketField(ReachingManifoldMessagePubSubType.class);
       registerPacketField(PolygonPubSubType.class);
       registerPacketField(ParameterDescriptorPubSubType.class);
@@ -376,6 +377,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);
+      registerPacketField(FootstepPathPlanPacketPubSubType.class);
       registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(BytePubSubType.class);
       registerPacketField(DiagnosticArrayPubSubType.class);
@@ -736,6 +738,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(WalkToGoalBehaviorPacket.class);
       registerPacketField(WalkToGoalAction.class);
+      registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepDataMessage[].class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
@@ -748,6 +751,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(CurrentBehaviorStatus.class);
 
       registerPacketClass(CapturabilityBasedStatus.class);
+
+      // Planning
+      registerPacketClass(FootstepPathPlanPacket.class);
 
       // Localization
       registerPacketClass(LocalizationPacket.class);
