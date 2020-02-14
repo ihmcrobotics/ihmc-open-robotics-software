@@ -4,10 +4,12 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,6 +33,13 @@ public class AtlasEnvironmentSimulatorForBehaviors
    {
       ThreadTools.startAThread(this::reaModule, "REAModule");
       ThreadTools.startAThread(this::kinematicSimulation, "KinematicsSimulation");
+      ThreadTools.startAThread(this::footstepPlanningToolbox, "FootstepPlanningToolbox");
+   }
+
+   private void footstepPlanningToolbox()
+   {
+      LogTools.info("Starting footstep toolbox");
+      new FootstepPlanningToolboxModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    private void reaModule()
