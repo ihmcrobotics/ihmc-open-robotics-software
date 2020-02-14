@@ -115,9 +115,9 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
    private static void createFootSlipper(SimulationConstructionSet simulationConstructionSet, HumanoidFloatingRootJointRobot robot)
    {
       int ticksPerPerturbation = 10;
-      FootMotionOnTouchdownSlipper oscillateFeetPerturber = new FootMotionOnTouchdownSlipper(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      FootMotionOnTouchdownSlipper oscillateFeetPerturber = new FootMotionOnTouchdownSlipper(robot, simulationConstructionSet.getDT());
       oscillateFeetPerturber.setSlipDuration(0.1);
-      oscillateFeetPerturber.setTranslationMagnitudes(new double[] { 0.05, 0.05, -0.1});
+      oscillateFeetPerturber.setTranslationMagnitudes(new double[] { 0.0, 0.0, -0.05});
       oscillateFeetPerturber.setRotationMagnitudesYawPitchRoll(new double[] { 0.0, 0.0, 0.0 });
 
 
