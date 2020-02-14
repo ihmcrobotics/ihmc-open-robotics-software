@@ -166,13 +166,12 @@ public class TransferToStandingState extends WalkingState
 
       RobotSide previousSwingSide = previousStateEnum.getTransferToSide();
 
-      if (touchdownErrorCompensator.hasOffsetBeenAddedFromLastStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
+      if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
       {
          actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
          actualFootPositionInWorld.changeFrame(worldFrame);
 
-         touchdownErrorCompensator.registerActualFootstepPosition(previousSwingSide, actualFootPositionInWorld);
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide);
+         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
    }
 

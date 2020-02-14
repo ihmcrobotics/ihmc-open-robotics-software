@@ -246,13 +246,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (previousSwingSide == null)
          return;
 
-      if (touchdownErrorCompensator.hasOffsetBeenAddedFromLastStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
+      if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
       {
          actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
          actualFootPositionInWorld.changeFrame(worldFrame);
 
-         touchdownErrorCompensator.registerActualFootstepPosition(previousSwingSide, actualFootPositionInWorld);
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide);
+         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
    }
 }
