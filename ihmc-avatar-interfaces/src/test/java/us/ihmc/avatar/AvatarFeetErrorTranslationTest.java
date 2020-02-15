@@ -37,29 +37,12 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestInterface
 {
+   private static final int numberOfSteps = 10;
+   private static final double stepLength = 0.25;
+   private static final double stepWidth = 0.25;
+
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private DRCRobotModel robotModel;
-
-   protected int getNumberOfSteps()
-   {
-      return 10;
-   }
-
-   protected double getStepLength()
-   {
-      return 0.25;
-   }
-
-   protected double getStepWidth()
-   {
-      return 0.08;
-   }
-
-   protected FootstepDataListMessage getFootstepDataListMessage()
-   {
-      return new FootstepDataListMessage();
-   }
 
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
@@ -98,9 +81,6 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       earlyTouchdownController.setFractionToTriggerTouchdown(0.75);
       drcSimulationTestHelper.getRobot().setController(earlyTouchdownController);
 
-      int numberOfSteps = getNumberOfSteps();
-      double stepLength = getStepLength();
-      double stepWidth = getStepWidth();
 
       ThreadTools.sleep(1000);
 
@@ -108,7 +88,9 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
 
       RobotSide side = RobotSide.LEFT;
 
-      FootstepDataListMessage footMessage = getFootstepDataListMessage();
+      FootstepDataListMessage footMessage = new FootstepDataListMessage();
+      footMessage.setOffsetFootstepsWithExecutionError(true);
+      footMessage.setOffsetFootstepsHeightWithExecutionError(true);
       ArrayList<Point3D> rootLocations = new ArrayList<>();
 
       PelvisCheckpointChecker controllerSpy = new PelvisCheckpointChecker(drcSimulationTestHelper);
@@ -131,7 +113,7 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       int steps = footMessage.getFootstepDataList().size();
 
-      controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
+      controllerSpy.setFootStepCheckPoints(rootLocations, stepLength, stepWidth);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.publishToController(footMessage);
       double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
