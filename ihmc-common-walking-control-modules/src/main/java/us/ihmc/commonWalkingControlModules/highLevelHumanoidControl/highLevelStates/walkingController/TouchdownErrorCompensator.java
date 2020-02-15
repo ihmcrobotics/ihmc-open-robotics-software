@@ -26,8 +26,7 @@ public class TouchdownErrorCompensator
 
    private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   private final DoubleParameter spatialVelocityThreshold = new DoubleParameter("spatialVelocityThresholdForSupportConfidence", registry,
-                                                                                Double.POSITIVE_INFINITY);
+   private final DoubleParameter spatialVelocityThreshold = new DoubleParameter("spatialVelocityThresholdForSupportConfidence", registry, Double.POSITIVE_INFINITY);
    private final DoubleParameter touchdownErrorCorrectionScale = new DoubleParameter("touchdownErrorCorrectionScale", registry, 1.0);
    private final FrameVector3D linearVelocity = new FrameVector3D();
 
@@ -60,7 +59,7 @@ public class TouchdownErrorCompensator
       linearVelocity.setIncludingFrame(soleFrames.get(robotSide).getTwistOfFrame().getLinearPart());
       linearVelocity.changeFrame(soleFrames.get(robotSide));
 
-      return linearVelocity.getZ() < spatialVelocityThreshold.getValue();
+      return Math.abs(linearVelocity.getZ()) < spatialVelocityThreshold.getValue();
    }
 
    public boolean planShouldBeOffsetFromStep(RobotSide robotSide)
