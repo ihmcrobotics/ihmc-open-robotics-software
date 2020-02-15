@@ -25,15 +25,6 @@ public class AtlasFeetErrorTranslationTest extends AvatarFeetErrorTranslationTes
    private final RobotTarget target = RobotTarget.SCS;
    private final AtlasRobotModel robotModel = new AtlasRobotModel(version, target, false);
 
-
-   private static final int numberOfSteps = 8;
-   private static final double stepWidth = 0.25;
-   private static final double stepLength = 0.5;
-
-   private static final double swingTime = 0.6;
-   private static final double transferTime = 0.2;
-   private static final double finalTransferTime = 1.0;
-
    @Override
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
@@ -51,29 +42,5 @@ public class AtlasFeetErrorTranslationTest extends AvatarFeetErrorTranslationTes
    public String getSimpleRobotName()
    {
       return robotModel.getSimpleRobotName();
-   }
-
-   @Override
-   public int getNumberOfSteps()
-   {
-      return numberOfSteps;
-   }
-
-   @Override
-   public double getStepWidth()
-   {
-      return stepWidth;
-   }
-
-   @Override
-   public double getStepLength()
-   {
-      return stepLength;
-   }
-
-   @Override
-   protected FootstepDataListMessage getFootstepDataListMessage()
-   {
-      return HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime, finalTransferTime);
    }
 }
