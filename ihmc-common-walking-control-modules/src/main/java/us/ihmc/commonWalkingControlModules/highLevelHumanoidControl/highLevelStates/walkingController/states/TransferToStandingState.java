@@ -164,7 +164,10 @@ public class TransferToStandingState extends WalkingState
       if (previousStateEnum == null)
          return;
 
-      RobotSide previousSwingSide = previousStateEnum.getTransferToSide();
+      if (previousStateEnum.getSupportSide() == null)
+         return;
+
+      RobotSide previousSwingSide = previousStateEnum.getSupportSide().getOppositeSide();
 
       if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
       {
