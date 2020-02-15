@@ -242,10 +242,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (previousStateEnum == null)
          return;
 
-      RobotSide previousSwingSide = previousStateEnum.getTransferToSide();
-      if (previousSwingSide == null)
+      RobotSide previousSupportSide = previousStateEnum.getSupportSide();
+      if (previousSupportSide == null)
          return;
 
+      RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
       if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
       {
          actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
