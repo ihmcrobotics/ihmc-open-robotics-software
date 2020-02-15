@@ -7,18 +7,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.FootMotionOnTouchdownSlipper;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 
@@ -29,7 +40,6 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
-
 
    protected int getNumberOfSteps()
    {
@@ -46,8 +56,6 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       return 0.08;
    }
 
-
-
    protected FootstepDataListMessage getFootstepDataListMessage()
    {
       return new FootstepDataListMessage();
@@ -63,9 +71,32 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.createSimulation(className);
-      robotModel = getRobotModel();
+      DRCRobotModel robotModel = getRobotModel();
 
-      createFootSlipper(drcSimulationTestHelper.getSimulationConstructionSet(), drcSimulationTestHelper.getRobot());
+      SideDependentList<SingleSupportStartCondition> singleSupportStartConditions = new SideDependentList<>();
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         @SuppressWarnings("unchecked") final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs
+               .getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState");
+         String prefix = robotSide.getSideNameFirstLowerCaseLetter();
+         YoBoolean trustFootSwitch = ((YoBoolean) scs.getVariable(prefix + "_footTrustFootSwitch"));
+         YoBoolean trustStateEstimatorFootSwitch = ((YoBoolean) scs.getVariable(prefix + "_footStateEstimatorTrustFootSwitch"));
+         trustFootSwitch.set(false);
+         trustStateEstimatorFootSwitch.set(false);
+         YoBoolean controllerDetectedTouchdown = ((YoBoolean) scs.getVariable(prefix + "_footControllerDetectedTouchdown"));
+         YoBoolean controllerStateEstimatorDetectedTouchdown = ((YoBoolean) scs.getVariable(prefix + "_footStateEstimatorControllerDetectedTouchdown"));
+         singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType, controllerDetectedTouchdown,
+                                                                                     controllerStateEstimatorDetectedTouchdown));
+      }
+
+      YoDouble time = drcSimulationTestHelper.getRobot().getYoTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      EarlyTouchdownController earlyTouchdownController = new EarlyTouchdownController(singleSupportStartConditions, swing, time);
+      earlyTouchdownController.setFractionToTriggerTouchdown(0.75);
+      drcSimulationTestHelper.getRobot().setController(earlyTouchdownController);
 
       int numberOfSteps = getNumberOfSteps();
       double stepLength = getStepLength();
@@ -84,53 +115,29 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
 
       for (int currentStep = 0; currentStep < numberOfSteps; currentStep++)
       {
-         if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
-         {
-            Point3D footLocation = new Point3D(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
-            rootLocations.add(new Point3D(stepLength * currentStep, 0.0, 0.0));
-            Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-            addFootstep(footLocation, footOrientation, side, footMessage);
-            side = side.getOppositeSide();
-         }
-      }
-      Point3D footLocation = new Point3D(stepLength * (numberOfSteps - 1), side.negateIfRightSide(stepWidth / 2), 0.0);
-      rootLocations.add(new Point3D(stepLength * (numberOfSteps - 1), 0.0, 0.0));
-      Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      addFootstep(footLocation, footOrientation, side, footMessage);
+         FootstepDataMessage footstepData = new FootstepDataMessage();
+         footstepData.getLocation().set(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
+         footstepData.setRobotSide(side.toByte());
+         footMessage.getFootstepDataList().add().set(footstepData);
 
-      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+         side = side.getOppositeSide();
+      }
+      FootstepDataMessage footstepData = new FootstepDataMessage();
+      footstepData.getLocation().set(stepLength * (numberOfSteps - 1), side.negateIfRightSide(stepWidth / 2), 0.0);
+      footstepData.setRobotSide(side.toByte());
+      footMessage.getFootstepDataList().add().set(footstepData);
+
+      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       int steps = footMessage.getFootstepDataList().size();
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.publishToController(footMessage);
-      double simulationTime = intitialTransfer + (transfer + swing) * steps + 1.0;
+      double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       controllerSpy.assertCheckpointsReached();
-   }
-
-   private static void createFootSlipper(SimulationConstructionSet simulationConstructionSet, HumanoidFloatingRootJointRobot robot)
-   {
-      int ticksPerPerturbation = 10;
-      FootMotionOnTouchdownSlipper oscillateFeetPerturber = new FootMotionOnTouchdownSlipper(robot, simulationConstructionSet.getDT());
-      oscillateFeetPerturber.setSlipDuration(0.1);
-      oscillateFeetPerturber.setTranslationMagnitudes(new double[] { 0.0, 0.0, -0.05});
-      oscillateFeetPerturber.setRotationMagnitudesYawPitchRoll(new double[] { 0.0, 0.0, 0.0 });
-
-
-      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
-   }
-
-   private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
-   {
-      FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.getLocation().set(stepLocation);
-      footstepData.getOrientation().set(orient);
-      footstepData.setRobotSide(robotSide.toByte());
-      message.getFootstepDataList().add().set(footstepData);
    }
 
    private void setupCameraSideView()
@@ -138,6 +145,32 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+
+   private class SingleSupportStartCondition implements StateTransitionCondition
+   {
+      private final YoEnum<FootControlModule.ConstraintType> footConstraintType;
+      private final YoBoolean touchdownDetected;
+      private final YoBoolean estimatorTouchdownDetection;
+
+      public SingleSupportStartCondition(YoEnum<FootControlModule.ConstraintType> footConstraintType, YoBoolean touchdownDetected, YoBoolean estimatorTouchdownDetection)
+      {
+         this.footConstraintType = footConstraintType;
+         this.touchdownDetected = touchdownDetected;
+         this.estimatorTouchdownDetection = estimatorTouchdownDetection;
+      }
+
+      @Override
+      public boolean testCondition(double time)
+      {
+         return footConstraintType.getEnumValue() == FootControlModule.ConstraintType.SWING;
+      }
+
+      public void triggerTouchdown()
+      {
+         touchdownDetected.set(true);
+         estimatorTouchdownDetection.set(true);
+      }
    }
 
    @BeforeEach
@@ -164,5 +197,71 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   private class EarlyTouchdownController implements RobotController
+   {
+      private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      private final SideDependentList<SingleSupportStartCondition> startConditions;
+      private final double swingDuration;
+
+      private final YoDouble time;
+      private final SideDependentList<YoDouble> timeAtSwitchStart = new SideDependentList<>();
+      private final SideDependentList<YoBoolean> lastTickInSwing = new SideDependentList<>();
+
+      private final YoDouble fractionToTriggerTouchdown = new YoDouble("FractionToTriggerTouchdown", registry);
+
+      public EarlyTouchdownController(SideDependentList<SingleSupportStartCondition> startConditions, double swingDuration, YoDouble time)
+      {
+         this.startConditions = startConditions;
+         this.swingDuration = swingDuration;
+         this.time = time;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            timeAtSwitchStart.put(robotSide, new YoDouble(robotSide.getCamelCaseName() + "TImeAtSwingStart", registry));
+            lastTickInSwing.put(robotSide, new YoBoolean(robotSide.getCamelCaseName() + "LastTickInSwing", registry));
+         }
+
+         fractionToTriggerTouchdown.set(1.0);
+      }
+
+      public void setFractionToTriggerTouchdown(double fractionToTriggerTouchdown)
+      {
+         this.fractionToTriggerTouchdown.set(fractionToTriggerTouchdown);
+      }
+
+      @Override
+      public void doControl()
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            boolean inSwing = startConditions.get(robotSide).testCondition(0.0);
+
+            if (inSwing && !lastTickInSwing.get(robotSide).getBooleanValue())
+            {
+               timeAtSwitchStart.get(robotSide).set(time.getDoubleValue());
+            }
+            lastTickInSwing.get(robotSide).set(inSwing);
+
+            double timeInState = time.getDoubleValue() - timeAtSwitchStart.get(robotSide).getDoubleValue();
+            if (inSwing && timeInState > fractionToTriggerTouchdown.getDoubleValue() * swingDuration)
+            {
+               startConditions.get(robotSide).triggerTouchdown();
+            }
+         }
+      }
+
+      @Override
+      public void initialize()
+      {
+
+      }
+
+      @Override
+      public YoVariableRegistry getYoVariableRegistry()
+      {
+         return registry;
+      }
    }
 }
