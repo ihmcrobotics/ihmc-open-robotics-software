@@ -2,13 +2,11 @@ package us.ihmc.robotics.statistics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -16,30 +14,31 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Uses the Welford's online algorithm
  * https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
  */
-public class Vector2DStandardDeviationCalculator
+public class Vector2DHeadingStandardDeviationCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private final YoDouble heading;
+
+   private final Vector2DReadOnly variable;
 
    private final YoDouble variance;
    private final YoDouble populationVariance;
    private final YoDouble standardDeviation;
-   private final YoFrameVector2D mean;
+   private final YoDouble mean;
    private final YoDouble sumOfSquare;
    private final YoInteger numberOfSamples;
 
-   private final Vector2DReadOnly variable;
-
-   private final Vector2D previousMean = new Vector2D();
-   private final Vector2D totalValue = new Vector2D();
-
-   public Vector2DStandardDeviationCalculator(String prefix, Vector2DReadOnly variable, YoVariableRegistry registry)
+   public Vector2DHeadingStandardDeviationCalculator(String prefix, Vector2DReadOnly variable, YoVariableRegistry registry)
    {
       this.variable = variable;
 
+      heading = new YoDouble(prefix + "_Heading", registry);
+
       variance = new YoDouble(prefix + "_Variance", registry);
-      populationVariance = new YoDouble(prefix + "_PopulationVariance", registry);
-      standardDeviation = new YoDouble(prefix + "_StandardDeviation", registry);
-      mean = new YoFrameVector2D(prefix + "_Mean", worldFrame, registry);
+      populationVariance = new YoDouble(prefix + "_HeadingPopulationVariance", registry);
+      standardDeviation = new YoDouble(prefix + "_HeadingStandardDeviation", registry);
+      mean = new YoDouble(prefix + "_HeadingMean", registry);
       sumOfSquare = new YoDouble(prefix + "_SumOfSquare", registry);
       numberOfSamples = new YoInteger(prefix + "_NumberOfSamples", registry);
    }
@@ -48,33 +47,27 @@ public class Vector2DStandardDeviationCalculator
    {
       standardDeviation.set(0.0);
       variance.set(0.0);
-      mean.setToZero();
+      mean.set(0.0);
       sumOfSquare.set(0.0);
       numberOfSamples.set(0);
    }
 
    public void update()
    {
-      totalValue.set(mean);
-      totalValue.scale(numberOfSamples.getIntegerValue());
-      totalValue.add(variable);
+      heading.set(calculateHeading(variable));
 
-      previousMean.set(mean);
+      double totalValue = numberOfSamples.getIntegerValue() * mean.getDoubleValue() + heading.getDoubleValue();
+
+      double previousMean = mean.getDoubleValue();
 
       numberOfSamples.increment();
-      mean.set(totalValue);
-      mean.scale(1.0 / numberOfSamples.getIntegerValue());
+      mean.set(totalValue / numberOfSamples.getIntegerValue());
 
-      if (numberOfSamples.getIntegerValue() == 1)
+      if (numberOfSamples.getIntegerValue() > 1)
       {
-         // FIXME this is wrong
-         sumOfSquare.add(MathTools.square(variable.dot(mean) - mean.length()));
-         populationVariance.set(sumOfSquare.getDoubleValue() / (numberOfSamples.getIntegerValue()));
-         variance.set(populationVariance.getDoubleValue());
-      }
-      else
-      {
-         sumOfSquare.add((variable.dot(previousMean) - previousMean.length()) * (variable.dot(mean) - mean.length()));
+         double difference = AngleTools.computeAngleDifferenceMinusPiToPi(heading.getDoubleValue(), mean.getDoubleValue());
+         double previousDifference = AngleTools.computeAngleDifferenceMinusPiToPi(heading.getDoubleValue(), previousMean);
+         sumOfSquare.add(difference * previousDifference);
          populationVariance.set(sumOfSquare.getDoubleValue() / (numberOfSamples.getIntegerValue() - 1));
          variance.set(sumOfSquare.getDoubleValue() / numberOfSamples.getIntegerValue());
       }
@@ -95,8 +88,18 @@ public class Vector2DStandardDeviationCalculator
       return variance.getDoubleValue();
    }
 
-   public Vector2DReadOnly getMean()
+   public double getMean()
    {
-      return mean;
+      return mean.getDoubleValue();
+   }
+
+   private static double calculateHeading(Vector2DReadOnly direction)
+   {
+      return calculateHeading(direction.getX(), direction.getY());
+   }
+
+   private static double calculateHeading(double deltaX, double deltaY)
+   {
+      return Math.atan2(deltaY, deltaX);
    }
 }
