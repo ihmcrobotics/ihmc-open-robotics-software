@@ -18,6 +18,8 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.statistics.Point2DStandardDeviationCalculator;
+import us.ihmc.robotics.statistics.Vector2DHeadingStandardDeviationCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -35,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
  * the angular velocity of the foot to be sufficiently large. A threshold determines if that is the case. The speed of
  * rotation is the integrated using a leak rate. If the integral which is a measure of absolute foot rotation exceeds
  * a second threshold the foot is assumed to rotate.]
- * 
+ *
  * @author Georg Wiedebach
  */
 public class FootRotationDetector
@@ -60,6 +62,9 @@ public class FootRotationDetector
    private final DoubleProvider decayBreakFrequency;
    private final DoubleProvider filterBreakFrequency;
    private final DoubleProvider rotationThreshold;
+
+   private final Point2DStandardDeviationCalculator pointOfRotationStandardDeviation;
+   private final Vector2DHeadingStandardDeviationCalculator axisOfRotationStandardDeviation;
 
    public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
                                YoGraphicsListRegistry graphicsRegistry)
@@ -86,6 +91,11 @@ public class FootRotationDetector
       YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
+
+      pointOfRotationStandardDeviation = new Point2DStandardDeviationCalculator(side.getLowerCaseName() + "PointOfRotation", lineOfRotationInSole.getPoint(),
+                                                                                registry);
+      axisOfRotationStandardDeviation = new Vector2DHeadingStandardDeviationCalculator(side.getLowerCaseName() + "AxisOfRotation",
+                                                                                       lineOfRotationInSole.getDirection(), registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
@@ -132,12 +142,23 @@ public class FootRotationDetector
          filteredAxisOfRotation.update(lineOfRotationInSole.getDirection());
          lineOfRotationInSole.set(filteredPointOfRotation, filteredAxisOfRotation);
          lineOfRotationInSole.getDirection().normalize();
+
+         pointOfRotationStandardDeviation.update();
+         axisOfRotationStandardDeviation.update();
       }
       else if (!isRotating.getValue())
       {
          filteredPointOfRotation.reset();
          filteredAxisOfRotation.reset();
          lineOfRotationInSole.setToZero();
+
+         pointOfRotationStandardDeviation.reset();
+         axisOfRotationStandardDeviation.reset();
+      }
+      else
+      {
+         pointOfRotationStandardDeviation.reset();
+         axisOfRotationStandardDeviation.reset();;
       }
 
       if (!isRotating.getValue())
