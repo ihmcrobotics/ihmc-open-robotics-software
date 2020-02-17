@@ -95,7 +95,7 @@ public class Line2DStandardDeviationCalculatorTest
       {
          Point2D modifiedPosition = new Point2D(position);
          Vector2D positionModification = new Vector2D(direction);
-         position.scale(RandomNumbers.nextDouble(random, 10.0));
+         positionModification.scale(RandomNumbers.nextDouble(random, 10.0));
          modifiedPosition.add(positionModification);
 
          valueProvider.setPoint(modifiedPosition);
@@ -104,9 +104,9 @@ public class Line2DStandardDeviationCalculatorTest
       }
 
       EuclidGeometryTestTools.assertLine2DGeometricallyEquals(originalValue, calculator.getLineMean(), epsilon);
+      assertEquals(0.0, calculator.getPositionVariance(), epsilon);
+      assertEquals(0.0, calculator.getDirectionVariance(), epsilon);
       assertEquals(0.0, calculator.getDirectionStandardDeviation(), epsilon);
       assertEquals(0.0, calculator.getPositionStandardDeviation(), epsilon);
-      assertEquals(0.0, calculator.getDirectionVariance(), epsilon);
-      assertEquals(0.0, calculator.getPositionVariance(), epsilon);
    }
 }
