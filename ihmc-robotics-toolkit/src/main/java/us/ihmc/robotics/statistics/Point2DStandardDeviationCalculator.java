@@ -28,7 +28,6 @@ public class Point2DStandardDeviationCalculator
    private final Point2DReadOnly variable;
 
    private final Point2D previousMean = new Point2D();
-   private final Point2D totalValue = new Point2D();
 
    public Point2DStandardDeviationCalculator(String prefix, Point2DReadOnly variable, YoVariableRegistry registry)
    {
@@ -54,15 +53,10 @@ public class Point2DStandardDeviationCalculator
 
    public void update()
    {
-      totalValue.set(mean);
-      totalValue.scale(numberOfSamples.getIntegerValue());
-      totalValue.add(variable);
-
       previousMean.set(mean);
 
       numberOfSamples.increment();
-      mean.set(totalValue);
-      mean.scale(1.0 / numberOfSamples.getIntegerValue());
+      mean.interpolate(previousMean, variable, 1.0 / numberOfSamples.getIntegerValue());
 
       if (numberOfSamples.getIntegerValue() == 1)
       {
