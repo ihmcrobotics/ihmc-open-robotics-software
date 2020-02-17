@@ -83,4 +83,14 @@ public class OnlineLeastSquaresRegression
    {
       return outputStandardDeviationCalculator.getStandardDeviation();
    }
+
+   public double getXMean()
+   {
+      return covarianceCalculator.getXMean();
+   }
+
+   public double getYMean()
+   {
+      return covarianceCalculator.getYMean();
+   }
 }
