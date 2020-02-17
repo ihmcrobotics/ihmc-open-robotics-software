@@ -20,7 +20,7 @@ public class StandardDeviationCalculatorTest
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
       YoDouble valueProvider = new YoDouble("valueProvider", testRegistry);
-      StandardDeviationCalculator calculator = new StandardDeviationCalculator("value", valueProvider, testRegistry);
+      OnlineStandardDeviationCalculator calculator = new OnlineStandardDeviationCalculator("value", valueProvider, testRegistry);
 
       int numberOfValues = 100;
       double value = 17.3;
@@ -41,7 +41,7 @@ public class StandardDeviationCalculatorTest
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
       YoDouble valueProvider = new YoDouble("valueProvider", testRegistry);
-      StandardDeviationCalculator calculator = new StandardDeviationCalculator("value", valueProvider, testRegistry);
+      OnlineStandardDeviationCalculator calculator = new OnlineStandardDeviationCalculator("value", valueProvider, testRegistry);
 
       int numberOfValues = 100;
       Random random = new Random(1738L);
