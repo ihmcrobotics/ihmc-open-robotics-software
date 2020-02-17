@@ -170,7 +170,6 @@ public class RandomICPSLAM extends IhmcSLAM
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
    {
-      // TODO: FB-347: if the angle distance between original sensor pose orientation and new one, think it is key frame.
       // see the overlapped area.
       Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints.get(), minimumOverlappedRatio.get(),
                                                                                     windowMargin.get());

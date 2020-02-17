@@ -155,7 +155,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
-      slamModule.handlePointCloud(message);  // TODO: this is for off line test.
+      slamModule.handlePointCloud(message);
    }
 
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
