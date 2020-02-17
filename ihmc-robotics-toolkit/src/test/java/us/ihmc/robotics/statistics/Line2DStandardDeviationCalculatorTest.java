@@ -11,7 +11,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
 
 import java.util.Random;
-import java.util.Vector;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -24,7 +23,7 @@ public class Line2DStandardDeviationCalculatorTest
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
-      Line2DStandardDeviationCalculator calculator = new Line2DStandardDeviationCalculator("value", valueProvider, testRegistry);
+      Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 
       int numberOfValues = 100;
       Vector2D direction = new Vector2D(17.3, 5.6);
@@ -50,7 +49,7 @@ public class Line2DStandardDeviationCalculatorTest
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
-      Line2DStandardDeviationCalculator calculator = new Line2DStandardDeviationCalculator("value", valueProvider, testRegistry);
+      Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 
       int numberOfValues = 100;
       Vector2D direction = new Vector2D(17.3, 5.6);
@@ -78,7 +77,7 @@ public class Line2DStandardDeviationCalculatorTest
    {
       YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
-      Line2DStandardDeviationCalculator calculator = new Line2DStandardDeviationCalculator("value", valueProvider, testRegistry);
+      Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 
       int numberOfValues = 100;
       Vector2D direction = new Vector2D(17.3, 5.6);

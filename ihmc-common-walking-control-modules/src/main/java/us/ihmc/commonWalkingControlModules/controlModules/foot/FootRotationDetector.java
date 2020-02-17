@@ -18,8 +18,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.statistics.Line2DStandardDeviationCalculator;
-import us.ihmc.robotics.statistics.Point2DStandardDeviationCalculator;
+import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -63,7 +62,7 @@ public class FootRotationDetector
    private final DoubleProvider filterBreakFrequency;
    private final DoubleProvider rotationThreshold;
 
-   private final Line2DStandardDeviationCalculator lineOfRotationStandardDeviation;
+   private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
    public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
                                YoGraphicsListRegistry graphicsRegistry)
@@ -91,7 +90,7 @@ public class FootRotationDetector
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
 
-      lineOfRotationStandardDeviation = new Line2DStandardDeviationCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
+      lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);

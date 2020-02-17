@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Uses the Welford's online algorithm
  * https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
  */
-public class Line2DStandardDeviationCalculator
+public class Line2DStatisticsCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -42,7 +42,7 @@ public class Line2DStandardDeviationCalculator
 
    private final Point2D previousPositionMean = new Point2D();
 
-   public Line2DStandardDeviationCalculator(String prefix, Line2DReadOnly lineVariable, YoVariableRegistry registry)
+   public Line2DStatisticsCalculator(String prefix, Line2DReadOnly lineVariable, YoVariableRegistry registry)
    {
       this.lineVariable = lineVariable;
 
