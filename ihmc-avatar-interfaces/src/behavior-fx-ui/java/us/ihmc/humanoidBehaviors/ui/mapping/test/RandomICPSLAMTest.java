@@ -176,13 +176,10 @@ public class RandomICPSLAMTest
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
-      // 49 - 50. 0.4 0.3 0.0 is the best. 50-53 0.4 0.4 -0.1 is good
-      // 54-58 check merge immediately enough part.
-      // 45-49 with 0.4 0.3 0.0 is the good test set.
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(40));
+      slam.addFirstFrame(messages.get(46));
       slam.addFrame(messages.get(47));
       slam.addFrame(messages.get(48));
       slam.addFrame(messages.get(49));

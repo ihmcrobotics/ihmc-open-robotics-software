@@ -37,11 +37,8 @@ public class IhmcSLAM implements IhmcSLAMInterface
    {
       this.octreeResolution = octreeResolution;
 
-      //TODO: tune.
-      //      planarRegionSegmentationParameters.setSearchRadius(0.03);
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
-      //      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(15.0));
-      planarRegionSegmentationParameters.setMinRegionSize(100);
+      planarRegionSegmentationParameters.setMinRegionSize(150);
    }
 
    @Override

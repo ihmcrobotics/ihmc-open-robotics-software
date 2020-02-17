@@ -27,7 +27,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneCon
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
@@ -178,9 +177,6 @@ public class LIDARBasedEnvironmentAwarenessUI
       dataExporterAnchorPaneController.attachREAMessager(uiMessager);
       dataExporterAnchorPaneController.setMainWindow(primaryStage);
       dataExporterAnchorPaneController.bindControls();
-      
-      if (dataExporterAnchorPaneController == null)
-         System.out.println("dataExporterAnchorPaneController is null");
    }
 
    public void show() throws IOException

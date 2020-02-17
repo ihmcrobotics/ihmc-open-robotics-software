@@ -191,7 +191,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, false);
-      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false); // TODO: will be replaced with true. This was for multisense stereo.
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
       uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
       uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }
