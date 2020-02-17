@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Uses the Welford's online algorithm
  * https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
  */
-public class StandardDeviationCalculator
+public class OnlineStandardDeviationCalculator
 {
    private final YoDouble variance;
    private final YoDouble populationVariance;
@@ -21,7 +21,12 @@ public class StandardDeviationCalculator
 
    private final DoubleProvider variable;
 
-   public StandardDeviationCalculator(String prefix, DoubleProvider variable, YoVariableRegistry registry)
+   public OnlineStandardDeviationCalculator(String prefix, YoVariableRegistry registry)
+   {
+      this(prefix, null, registry);
+   }
+
+   public OnlineStandardDeviationCalculator(String prefix, DoubleProvider variable, YoVariableRegistry registry)
    {
       this.variable = variable;
 
@@ -45,8 +50,16 @@ public class StandardDeviationCalculator
 
    public void update()
    {
+      if (variable == null)
+         throw new RuntimeException("Variable was never set.");
+
+      update(variable.getValue());
+   }
+
+   public void update(double variableValue)
+   {
       double totalValue = numberOfSamples.getIntegerValue() * mean.getDoubleValue();
-      totalValue += variable.getValue();
+      totalValue += variableValue;
 
       double previousMean = mean.getDoubleValue();
 
@@ -55,13 +68,13 @@ public class StandardDeviationCalculator
 
       if (numberOfSamples.getIntegerValue() == 1)
       {
-         sumOfSquare.add((variable.getValue() - mean.getDoubleValue()) * (variable.getValue() - mean.getDoubleValue()));
+         sumOfSquare.add(MathTools.square(variableValue - mean.getDoubleValue()));
          populationVariance.set(sumOfSquare.getDoubleValue() / (numberOfSamples.getIntegerValue()));
          variance.set(populationVariance.getDoubleValue());
       }
       else
       {
-         sumOfSquare.add((variable.getValue() - previousMean) * (variable.getValue() - mean.getDoubleValue()));
+         sumOfSquare.add((variableValue - previousMean) * (variableValue - mean.getDoubleValue()));
          populationVariance.set(sumOfSquare.getDoubleValue() / (numberOfSamples.getIntegerValue() - 1));
          variance.set(sumOfSquare.getDoubleValue() / numberOfSamples.getIntegerValue());
       }
@@ -70,6 +83,11 @@ public class StandardDeviationCalculator
          standardDeviation.set(0.0);
       else
          standardDeviation.set(Math.sqrt(variance.getDoubleValue()));
+   }
+
+   public int getNumberOfSamples()
+   {
+      return numberOfSamples.getIntegerValue();
    }
 
    public double getStandardDeviation()
