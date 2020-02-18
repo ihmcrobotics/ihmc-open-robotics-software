@@ -47,7 +47,7 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testPatrolBehavior() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningToolboxModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);

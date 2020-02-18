@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory;
 
 public class ValkyrieFootstepPlanner
 {
@@ -22,7 +23,7 @@ public class ValkyrieFootstepPlanner
    
    private void startFootstepModule(DRCRobotModel robotModel)
    {
-      new FootstepPlanningToolboxModule(robotModel, null, true);
+      new FootstepPlanningToolboxModule(robotModel).setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
    }
    
    private void tryToStartModule(ModuleStarter runnable)

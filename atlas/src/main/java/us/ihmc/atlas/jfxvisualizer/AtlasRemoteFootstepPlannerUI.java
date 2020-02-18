@@ -61,7 +61,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningModule = new FootstepPlanningToolboxModule(drcRobotModel, null, false);
+         planningModule = new FootstepPlanningToolboxModule(drcRobotModel);
+         planningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
          postProcessingModule = new FootstepPlanPostProcessingToolboxModule(drcRobotModel, null, false);
       }
    }
@@ -77,7 +78,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (planningModule != null)
       {
-         planningModule.destroy();
+         planningModule.closeAndDispose();
          postProcessingModule.destroy();
       }
 
