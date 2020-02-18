@@ -1,6 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import java.io.IOException;
 import java.net.URI;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -178,7 +177,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public void connect() throws IOException
+   public void connect()
    {
 
    }
