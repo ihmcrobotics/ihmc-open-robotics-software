@@ -98,7 +98,8 @@ public class ColorPointCloudData
       else
       {
          int bufferIndex = 0;
-         colorsInteger = Arrays.copyOf(colors, numberOfPoints);
+         //colorsInteger = Arrays.copyOf(colors, numberOfPoints);
+         colorsInteger = new int[numberOfPointsToAdd];
 
          for (int i = 0; i < numberOfPoints; i++)
          {
@@ -106,6 +107,8 @@ public class ColorPointCloudData
             {
                continue;
             }
+
+            colorsInteger[bufferIndex] = colors[i];
             Point3D scanPoint = pointCloud[i];
 
             pointCloudBuffer[3 * bufferIndex + 0] = (float) scanPoint.getX();
