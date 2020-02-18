@@ -34,74 +34,81 @@ import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private static final boolean ENABLE_STEREO_PUBLISHER = true;
-
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
 
+   private final String robotName;
+   private final CollisionBoxProvider collisionBoxProvider;
    private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
-   private final LidarScanPublisher lidarScanPublisher;
-   private final StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
-
-   private final String robotName;
 
    private CameraDataReceiver cameraDataReceiver;
-
    private MultiSenseSensorManager multiSenseSensorManager;
+   private LidarScanPublisher lidarScanPublisher;
+   private StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
 
    private RosMainNode rosMainNode;
+
+   private boolean enableVideoPublisher = true;
+   private boolean enableLidarScanPublisher = true;
+   private boolean enableStereoVisionPointCloudPublisher = true;
 
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
                                      RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap,
                                      RobotTarget target)
    {
       this.robotName = robotName;
+      this.collisionBoxProvider = collisionBoxProvider;
       this.rosClockCalculator = rosClockCalculator;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
+   }
 
-      AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
-      String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
-      lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
-      lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
-      lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
+   public void setEnableVideoPublisher(boolean enableVideoPublisher)
+   {
+      this.enableVideoPublisher = enableVideoPublisher;
+   }
 
-      if (ENABLE_STEREO_PUBLISHER)
-      {
-         stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
-         stereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
-         stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());
-      }
-      else
-      {
-         stereoVisionPointCloudPublisher = null;
-      }
+   public void setEnableLidarScanPublisher(boolean enableLidarScanPublisher)
+   {
+      this.enableLidarScanPublisher = enableLidarScanPublisher;
+   }
+
+   public void setEnableStereoVisionPointCloudPublisher(boolean enableStereoVisionPointCloudPublisher)
+   {
+      this.enableStereoVisionPointCloudPublisher = enableStereoVisionPointCloudPublisher;
    }
 
    @Override
    public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      if (enableVideoPublisher)
+      {
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
-      AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
-      cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(),
-                                                     fullRobotModelFactory,
-                                                     multisenseLeftEyeCameraParameters.getSensorNameInSdf(),
-                                                     robotConfigurationDataBuffer,
-                                                     scsSensorsCommunicator,
-                                                     ros2Node,
-                                                     rosClockCalculator::computeRobotMonotonicTime);
-      cameraDataReceiver.start();
+         AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
 
-      lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
-      lidarScanPublisher.setScanFrameToLidarSensorFrame();
-      lidarScanPublisher.start();
+         cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(),
+                                                        fullRobotModelFactory,
+                                                        multisenseLeftEyeCameraParameters.getSensorNameInSdf(),
+                                                        robotConfigurationDataBuffer,
+                                                        scsSensorsCommunicator,
+                                                        ros2Node,
+                                                        rosClockCalculator::computeRobotMonotonicTime);
+         cameraDataReceiver.start();
+      }
+
+      if (enableLidarScanPublisher)
+      {
+         lidarScanPublisher = createLidarScanPublisher();
+         lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
+         lidarScanPublisher.setScanFrameToLidarSensorFrame();
+         lidarScanPublisher.start();
+      }
    }
 
    @Override
@@ -111,49 +118,87 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       {
          throw new IllegalArgumentException("The ros uri was null, val's physical sensors require a ros uri to be set! Check your Network Parameters.ini file");
       }
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
       rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");
 
-      AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
-      AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
-      AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
-      boolean shouldUseRosParameterSetters = sensorInformation.setupROSParameterSetters();
-
-      multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory,
-                                                            robotConfigurationDataBuffer,
-                                                            rosMainNode,
-                                                            ros2Node,
-                                                            rosClockCalculator,
-                                                            multisenseLeftEyeCameraParameters,
-                                                            multisenseLidarParameters,
-                                                            multisenseStereoParameters,
-                                                            shouldUseRosParameterSetters);
-
-      lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
-      lidarScanPublisher.setScanFrameToWorldFrame();
-      lidarScanPublisher.start();
-
-      if (ENABLE_STEREO_PUBLISHER)
+      if (enableVideoPublisher)
       {
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+
+         AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
+         AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
+         AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
+         boolean shouldUseRosParameterSetters = sensorInformation.setupROSParameterSetters();
+
+         multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory,
+                                                               robotConfigurationDataBuffer,
+                                                               rosMainNode,
+                                                               ros2Node,
+                                                               rosClockCalculator,
+                                                               multisenseLeftEyeCameraParameters,
+                                                               multisenseLidarParameters,
+                                                               multisenseStereoParameters,
+                                                               shouldUseRosParameterSetters);
+      }
+
+      if (enableLidarScanPublisher)
+      {
+         AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
+         lidarScanPublisher = createLidarScanPublisher();
+         lidarScanPublisher.receiveLidarFromROS(multisenseLidarParameters.getRosTopic(), rosMainNode);
+         lidarScanPublisher.setPublisherPeriodInMillisecond(25L);
+         lidarScanPublisher.setScanFrameToWorldFrame();
+      }
+
+      if (enableStereoVisionPointCloudPublisher)
+      {
+         AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
+         stereoVisionPointCloudPublisher = createStereoPointCloudPublisher();
          stereoVisionPointCloudPublisher.setFilterThreshold(ValkyrieSensorInformation.linearVelocityThreshold,
                                                             ValkyrieSensorInformation.angularVelocityThreshold);
          stereoVisionPointCloudPublisher.enableFilter(true);
          stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
-         stereoVisionPointCloudPublisher.start();
       }
 
-      multiSenseSensorManager.initializeParameterListeners();
       rosClockCalculator.setROSMainNode(rosMainNode);
-      rosMainNode.execute();
    }
 
    @Override
    public void connect()
    {
+      if (enableVideoPublisher)
+         multiSenseSensorManager.initializeParameterListeners();
+      if (enableLidarScanPublisher)
+         lidarScanPublisher.start();
+      if (enableStereoVisionPointCloudPublisher)
+         stereoVisionPointCloudPublisher.start();
+
+      rosMainNode.execute();
+   }
+
+   private StereoVisionPointCloudPublisher createStereoPointCloudPublisher()
+   {
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+
+      StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
+      publisher.setROSClockCalculator(rosClockCalculator);
+      publisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());
+      return publisher;
+   }
+
+   private LidarScanPublisher createLidarScanPublisher()
+   {
+      AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
+      String sensorName = multisenseLidarParameters.getSensorNameInSdf();
+      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+
+      LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
+      publisher.setROSClockCalculator(rosClockCalculator);
+      publisher.setCollisionBoxProvider(collisionBoxProvider);
+      return publisher;
    }
 
    private StereoVisionWorldTransformCalculator createCustomStereoTransformCalculator()
@@ -176,8 +221,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void closeAndDispose()
    {
-      lidarScanPublisher.shutdown();
-      if (ENABLE_STEREO_PUBLISHER)
+      if (lidarScanPublisher != null)
+         lidarScanPublisher.shutdown();
+      if (stereoVisionPointCloudPublisher != null)
          stereoVisionPointCloudPublisher.shutdown();
       if (cameraDataReceiver != null)
          cameraDataReceiver.closeAndDispose();
