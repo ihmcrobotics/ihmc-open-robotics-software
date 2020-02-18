@@ -2,6 +2,7 @@ package us.ihmc.robotics.functionApproximation;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.statistics.OnlineStandardDeviationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
@@ -17,6 +18,7 @@ public class OnlineLeastSquaresRegressionTest
    {
 
       OnlineLeastSquaresRegression linearRegression = new OnlineLeastSquaresRegression("", new YoVariableRegistry("testRegistry"));
+      OnlineStandardDeviationCalculator residualStats = new OnlineStandardDeviationCalculator("", new YoVariableRegistry("testRegistry"));
       int functionsToEstimate = 10;
       int valuesToUse = 200;
       Random random = new Random(1738L);
@@ -30,6 +32,10 @@ public class OnlineLeastSquaresRegressionTest
             double x = RandomNumbers.nextDouble(random, 10.0);
             double y = a0 + a1 * x;
             linearRegression.update(x, y);
+
+            double residual = y - linearRegression.computeY(x);
+            if (!Double.isNaN(residual))
+               residualStats.update(residual);
          }
 
          for (int value= 0; value < valuesToUse; value++)
@@ -38,8 +44,8 @@ public class OnlineLeastSquaresRegressionTest
             assertEquals(a0 + a1 * x, linearRegression.computeY(x), epsilon);
          }
          assertEquals(1.0, linearRegression.getRSquared(), epsilon);
-         assertEquals(0.0, linearRegression.getStandardDeviation(), epsilon);
-         assertEquals(0.0, linearRegression.getVariance(), epsilon);
+         assertEquals(0.0, residualStats.getStandardDeviation(), epsilon);
+         assertEquals(0.0, residualStats.getVariance(), epsilon);
       }
    }
 }
