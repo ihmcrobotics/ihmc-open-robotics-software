@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -27,11 +26,9 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import javax.swing.*;
@@ -55,7 +52,8 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       scsVisualizer.setShowOverheadView(true);
 
       // ----- Toolbox Output Display -----//
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieRobotVersion version = ValkyrieExternalForceEstimationModule.version;
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       subTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
