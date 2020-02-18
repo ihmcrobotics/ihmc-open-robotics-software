@@ -1,6 +1,5 @@
 package us.ihmc.valkyrie.sensors;
 
-import java.io.IOException;
 import java.net.URI;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -153,7 +152,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public void connect() throws IOException
+   public void connect()
    {
    }
 
