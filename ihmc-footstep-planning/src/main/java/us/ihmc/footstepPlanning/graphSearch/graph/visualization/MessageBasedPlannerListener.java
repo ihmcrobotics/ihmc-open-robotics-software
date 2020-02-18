@@ -41,7 +41,7 @@ public abstract class MessageBasedPlannerListener implements BipedalFootstepPlan
       totalNodeCount++;
    }
 
-   private void reset()
+   public void reset()
    {
       lowestNodeDataList.clear();
       rejectedNodeData.clear();

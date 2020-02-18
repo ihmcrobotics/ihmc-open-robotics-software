@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -230,7 +229,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
          footstepPlannerParameters = getTestFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
-      footstepPlanningModule = new FootstepPlanningToolboxModule(robotModel, null, true, pubSubImplementation);
+      footstepPlanningModule = new FootstepPlanningToolboxModule(robotModel);
+      footstepPlanningModule.setupWithRos(pubSubImplementation);
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
@@ -284,7 +284,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    public void tearDown() throws Exception
    {
       messager.closeMessager();
-      footstepPlanningModule.destroy();
+      footstepPlanningModule.closeAndDispose();
       continuousPlanningModule.destroy();
       if (ui != null)
          ui.stop();

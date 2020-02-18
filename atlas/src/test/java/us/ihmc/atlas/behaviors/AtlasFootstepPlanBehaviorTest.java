@@ -66,7 +66,7 @@ public class AtlasFootstepPlanBehaviorTest
    @Test
    public void testWalkNegativePiToPi() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningToolboxModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
@@ -153,7 +153,7 @@ public class AtlasFootstepPlanBehaviorTest
 
    private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningToolboxModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 

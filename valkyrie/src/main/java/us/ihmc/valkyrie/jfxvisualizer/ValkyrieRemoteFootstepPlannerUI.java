@@ -48,7 +48,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
 
       if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
       {
-         new FootstepPlanningToolboxModule(model, model.getLogModelProvider(), false);
+         new FootstepPlanningToolboxModule(model).setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
       }
    }
 

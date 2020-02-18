@@ -608,6 +608,9 @@ public class MainTabController
 
       messager.registerTopicListener(PlannerStatistics, statisticsMessage ->
       {
+         if(statisticsMessage.getRejectionFractions().isEmpty())
+            return;
+
          String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getFractionOfRejectedSteps());
          rejectionPercentage.setText(percentageRejectionSteps);
 

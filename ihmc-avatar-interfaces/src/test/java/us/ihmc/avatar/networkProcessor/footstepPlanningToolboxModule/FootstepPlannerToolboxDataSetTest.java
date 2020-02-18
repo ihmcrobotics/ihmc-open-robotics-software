@@ -223,7 +223,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       messager.closeMessager();
       messageConverter.destroy();
-      toolboxModule.destroy();
+      toolboxModule.closeAndDispose();
 
       if (ui != null)
          ui.stop();
@@ -281,7 +281,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
-      toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, pubSubImplementation);
+      toolboxModule = new FootstepPlanningToolboxModule(getRobotModel());
+      toolboxModule.setupWithRos(pubSubImplementation);
    }
 
    private DRCRobotModel getRobotModel()

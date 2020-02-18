@@ -14,6 +14,6 @@ public class AtlasFootstepPlanningToolbox
    public static void main(String[] args)
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
-      new FootstepPlanningToolboxModule(robotModel, null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+      new FootstepPlanningToolboxModule(robotModel).setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 }

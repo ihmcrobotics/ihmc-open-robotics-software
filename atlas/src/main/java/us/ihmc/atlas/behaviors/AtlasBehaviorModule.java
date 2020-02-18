@@ -24,10 +24,8 @@ public class AtlasBehaviorModule
          ThreadTools.startAsDaemon(() ->
          {
             LogTools.info("Creating footstep toolbox");
-            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(),
-                                                                       null,
-                                                                       false,
-                                                                       DomainFactory.PubSubImplementation.FAST_RTPS);
+            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel());
+            footstepPlanningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
          }, "MultiStageFootstepPlanningModule");
       }
 
@@ -38,7 +36,7 @@ public class AtlasBehaviorModule
       { // add cleanup actions here
          if (START_FOOTSTEP_PLANNING_TOOLBOX)
          {
-            footstepPlanningModule.destroy();
+            footstepPlanningModule.closeAndDispose();
          }
       }, "Cleanup"));
    }
