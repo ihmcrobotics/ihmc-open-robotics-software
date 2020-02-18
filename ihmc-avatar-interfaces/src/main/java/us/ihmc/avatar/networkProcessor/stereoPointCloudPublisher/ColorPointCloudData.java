@@ -98,13 +98,16 @@ public class ColorPointCloudData
       else
       {
          int bufferIndex = 0;
-         //colorsInteger = Arrays.copyOf(colors, numberOfPoints);
          colorsInteger = new int[numberOfPointsToAdd];
-
+         int collisionNumber = 0;
+         int collisionIndex = collidingPointIndices.get(collisionNumber);
          for (int i = 0; i < numberOfPoints; i++)
          {
-            if (collidingPointIndices.contains(i))
+            if (i == collisionIndex)
             {
+               collisionNumber++;
+               if (collisionNumber < collidingPointIndices.size())
+                  collisionIndex = collidingPointIndices.get(collisionNumber);
                continue;
             }
 

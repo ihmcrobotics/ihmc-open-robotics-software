@@ -53,7 +53,6 @@ public class StereoVisionPointCloudDataExporter
 
          int numberOfPoints = message.getColors().size();
          Point3D[] pointCloud = new Point3D[numberOfPoints];
-         System.out.println(message.getColors().size() + " " + message.getPointCloud().size());
          for (int i = 0; i < numberOfPoints; i++)
          {
             pointCloud[i] = new Point3D();
