@@ -90,6 +90,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
+      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       FramePose3D goalPoseBetweenFeet = new FramePose3D();
       goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
@@ -193,7 +194,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       public static final Topic<Object> TakeStep = topic("TakeStep");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-//      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
+      public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> Parameters = topic("Parameters");
 
       private static final <T> Topic<T> topic(String name)
