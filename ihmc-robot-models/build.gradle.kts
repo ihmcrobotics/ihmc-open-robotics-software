@@ -18,9 +18,9 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:ihmc-yovariables:0.3.11")
-   api("us.ihmc:ihmc-robot-description:0.12.8")
-   api("us.ihmc:ihmc-graphics-description:0.12.13")
+   api("us.ihmc:ihmc-yovariables:0.4.0")
+   api("us.ihmc:ihmc-robot-description:0.13.0")
+   api("us.ihmc:ihmc-graphics-description:0.13.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
@@ -34,5 +34,5 @@ visualizersDependencies {
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:simulation-construction-set:0.12.16")
+   api("us.ihmc:simulation-construction-set:0.13.0")
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.net.util.SubnetUtils;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -80,14 +81,23 @@ public class RTPSCommunicationFactory
                short netmaskAsShort = interfaceAddress.getNetworkPrefixLength();
 
                String interfaceHost = address.getHostAddress();
-               SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + Short.toString(netmaskAsShort)).getInfo();
+               SubnetInfo interfaceSubnetInfo = new SubnetUtils(interfaceHost + "/" + netmaskAsShort).getInfo();
 
                LogTools.debug("Interface Subnet Info: " + interfaceSubnetInfo);
                LogTools.debug("Interface address: " + interfaceSubnetInfo.getAddress());
                LogTools.debug("Interface netmask: " + interfaceSubnetInfo.getNetmask());
 
-//               boolean inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress()); -- This worked on Windows, but not Linux: Doug
-               boolean inRange = restrictionSubnetInfo.isInRange(interfaceSubnetInfo.getAddress()); // This works on Linux. Hopefully works on Windows?
+               boolean inRange;
+               if (SystemUtils.IS_OS_WINDOWS)
+               {
+                  inRange = interfaceSubnetInfo.isInRange(restrictionSubnetInfo.getAddress()); // This worked on Windows, but not Linux: Doug
+               }
+               else // Linux and others
+               {
+                  // This works on Linux. Does not work on Windows. Not tested on Mac.
+                  inRange = restrictionSubnetInfo.isInRange(interfaceSubnetInfo.getAddress());
+               }
+
                if (inRange)
                {
                   LogTools.info("Found address in range: " + address);
