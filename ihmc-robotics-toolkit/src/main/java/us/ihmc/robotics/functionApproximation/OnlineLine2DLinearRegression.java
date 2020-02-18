@@ -38,6 +38,11 @@ public class OnlineLine2DLinearRegression
       residual.set(0.0);
    }
 
+   public void update(Point2DReadOnly point)
+   {
+      update(point.getX(), point.getY());
+   }
+
    public void update(double x, double y)
    {
       onlineLeastSquaresRegression.update(x, y);

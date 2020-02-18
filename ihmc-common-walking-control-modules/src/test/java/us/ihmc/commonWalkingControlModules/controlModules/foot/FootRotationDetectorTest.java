@@ -34,7 +34,7 @@ public class FootRotationDetectorTest
       Twist soleTwist = new Twist();
       MovingReferenceFrame soleFrame = new TestSoleFrame(soleTwist);
       soleTwist.setToZero(soleFrame, ReferenceFrame.getWorldFrame(), soleFrame);
-      FootRotationDetector footRotationDetector = new FootRotationDetector(side, soleFrame, dt, registry, null);
+      KinematicFootRotationDetector footRotationDetector = new KinematicFootRotationDetector(side, soleFrame, dt, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       // Test for planar measurement:
