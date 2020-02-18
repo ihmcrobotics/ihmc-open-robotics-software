@@ -126,7 +126,7 @@ public class SupportState extends AbstractFootControlState
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
-   private final FootRotationDetector footRotationDetector;
+   private final KinematicFootRotationDetector footRotationDetector;
 
    private final YoBoolean liftOff;
    private final YoBoolean touchDown;
@@ -210,7 +210,7 @@ public class SupportState extends AbstractFootControlState
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
-      footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
+      footRotationDetector = new KinematicFootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
