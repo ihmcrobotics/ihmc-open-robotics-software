@@ -258,38 +258,28 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
       if (DEBUG)
          LogTools.info("Received a state message.");
-      
-      if (toolboxTaskScheduled != null)
+
+      ToolboxState requestedState = ToolboxState.fromByte(message.getRequestedToolboxState());
+      if(requestedState == null)
       {
          return;
       }
 
-      switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
+      boolean isAwake = toolboxRunnable != null;
+      if (requestedState == ToolboxState.WAKE_UP && !isAwake)
       {
-      case WAKE_UP:
          wakeUp();
-         break;
-      case REINITIALIZE:
+      }
+      else if(requestedState == ToolboxState.REINITIALIZE && isAwake)
+      {
          reinitialize();
-         break;
-      case SLEEP:
+      }
+      else if(requestedState == ToolboxState.SLEEP && isAwake)
+      {
          sleep();
-         break;
       }
 
-      if (toolboxTaskScheduled != null)
-      {
-         if(message.getRequestLogging() && !isLogging.getValue())
-         {
-            startLogging();
-            isLogging.set(true);
-         }
-         else if(!message.getRequestLogging() && isLogging.getValue())
-         {
-            stopLogging();
-            isLogging.set(false);
-         }
-      }
+      handleLoggingRequest(message);
    }
 
    public void wakeUp()
@@ -340,6 +330,24 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       if(isLogging.getValue())
       {
          stopLogging();
+      }
+   }
+
+   private void handleLoggingRequest(ToolboxStateMessage message)
+   {
+      boolean isAwake = toolboxRunnable != null;
+      if (!isAwake)
+         return;
+
+      if (message.getRequestLogging() && !isLogging.getValue())
+      {
+         startLogging();
+         isLogging.set(true);
+      }
+      else if (!message.getRequestLogging() && isLogging.getValue())
+      {
+         stopLogging();
+         isLogging.set(false);
       }
    }
 
