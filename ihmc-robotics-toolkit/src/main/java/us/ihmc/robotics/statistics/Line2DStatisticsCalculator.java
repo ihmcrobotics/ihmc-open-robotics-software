@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.functionApproximation.ProbabilityDensityFunction;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -156,5 +157,11 @@ public class Line2DStatisticsCalculator
       if (angle < 0.0)
          angle += Math.PI;
       return angle;
+   }
+
+   public double getProbabilityPointIsOnLine(Point2DReadOnly point)
+   {
+      double distanceToMean = getLineMean().distance(point);
+      return ProbabilityDensityFunction.getProbabilityUsingNormalDistribution(distanceToMean, 0.0, getPositionStandardDeviation());
    }
 }

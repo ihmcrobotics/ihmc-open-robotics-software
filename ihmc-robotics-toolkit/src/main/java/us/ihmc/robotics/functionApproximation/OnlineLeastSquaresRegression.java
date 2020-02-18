@@ -16,11 +16,7 @@ public class OnlineLeastSquaresRegression
    private final YoDouble intercept;
    private final YoDouble slope;
 
-   private final YoDouble residual;
-
    private final OnlineCovarianceCalculator covarianceCalculator;
-   private final OnlineStandardDeviationCalculator outputStandardDeviationCalculator;
-
 
    public OnlineLeastSquaresRegression(String prefix, YoVariableRegistry parentRegistry)
    {
@@ -28,22 +24,16 @@ public class OnlineLeastSquaresRegression
 
       intercept = new YoDouble(prefix + "_Intercept", registry);
       slope = new YoDouble(prefix + "_Slope", registry);
-      residual = new YoDouble(prefix + "_Residual", registry);
       covarianceCalculator = new OnlineCovarianceCalculator(prefix, registry);
-      outputStandardDeviationCalculator = new OnlineStandardDeviationCalculator(prefix, registry);
-
 
       parentRegistry.addChild(registry);
    }
-
 
    public void reset()
    {
       intercept.set(0.0);
       slope.set(0.0);
-      residual.set(0.0);
 
-      outputStandardDeviationCalculator.reset();
       covarianceCalculator.reset();
    }
 
@@ -63,25 +53,11 @@ public class OnlineLeastSquaresRegression
 
       slope.set(covarianceCalculator.getCorrelation() * covarianceCalculator.getYStandardDeviation() / covarianceCalculator.getXStandardDeviation());
       intercept.set(covarianceCalculator.getYMean() - slope.getDoubleValue() * covarianceCalculator.getXMean());
-
-      residual.set(computeY(x) - y);
-      if (!residual.isNaN())
-         outputStandardDeviationCalculator.update(residual.getDoubleValue());
    }
 
    public double getRSquared()
    {
       return MathTools.square(covarianceCalculator.getCorrelation());
-   }
-
-   public double getVariance()
-   {
-      return outputStandardDeviationCalculator.getVariance();
-   }
-
-   public double getStandardDeviation()
-   {
-      return outputStandardDeviationCalculator.getStandardDeviation();
    }
 
    public double getXMean()
