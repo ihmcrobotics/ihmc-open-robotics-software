@@ -37,7 +37,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       LivePlanarRegionsGraphic livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
       getChildren().add(livePlanarRegionsGraphic);
-//      behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
+      behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
       JavaFXStoredPropertyTable javaFXStoredPropertyTable = new JavaFXStoredPropertyTable(parameterTable);
       javaFXStoredPropertyTable.setup(parameters, LookAndStepBehaviorParameters.keys, this::publishParameters);
