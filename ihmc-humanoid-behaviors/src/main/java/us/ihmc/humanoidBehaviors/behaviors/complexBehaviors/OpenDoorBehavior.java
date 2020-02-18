@@ -207,8 +207,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             //otherwise the robot stops the arm motion because it is to fast
             setAutomaticArmAbort(false);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455, 0.218, 1.154, 1.7318790859631, 0.9163508562370669, -0.2253954188985998,
-                                                                               RobotSide.LEFT, "Pushing Door", 1));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455, 0.15, 1.154, 1.7318790859631, 0.9163508562370669, -0.2253954188985998,
+                                                                               RobotSide.LEFT, "Pushing Door", 2));
          }
 
       };

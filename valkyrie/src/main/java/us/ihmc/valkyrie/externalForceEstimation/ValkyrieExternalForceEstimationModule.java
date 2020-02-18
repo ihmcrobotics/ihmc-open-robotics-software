@@ -4,12 +4,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimationToolboxModule
 {
+   public static final ValkyrieRobotVersion version = ValkyrieRosControlController.VERSION; // ValkyrieRobotVersion.ARM_MASS_SIM; //
+
    public ValkyrieExternalForceEstimationModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel, startYoVariableServer, pubSubImplementation);
@@ -17,7 +19,7 @@ public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimati
    
    public static void main(String[] args)
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, version);
 
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
