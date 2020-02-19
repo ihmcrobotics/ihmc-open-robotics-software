@@ -35,12 +35,10 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.pathPlanners.WaypointsForFootstepsPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
@@ -65,7 +63,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class FootstepPlanningToolboxModule implements CloseableAndDisposable
+public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private static final double defaultStatusPublishPeriod = 1.0;
 
@@ -79,7 +77,7 @@ public class FootstepPlanningToolboxModule implements CloseableAndDisposable
    private final FootstepNodeChecker checker;
    private final CostToGoHeuristics distanceAndYawHeuristics;
    private final FootstepCost stepCost;
-   
+
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
    private final BodyPathHeuristics bodyPathHeuristics;
@@ -106,12 +104,12 @@ public class FootstepPlanningToolboxModule implements CloseableAndDisposable
    public static final String MODULE_NAME = "footstep_planner";
    private Ros2Node ros2Node;
 
-   public FootstepPlanningToolboxModule(DRCRobotModel robotModel)
+   public FootstepPlanningModule(DRCRobotModel robotModel)
    {
       this(robotModel, defaultStatusPublishPeriod);
    }
 
-   public FootstepPlanningToolboxModule(DRCRobotModel robotModel, double statusPublishPeriod)
+   public FootstepPlanningModule(DRCRobotModel robotModel, double statusPublishPeriod)
    {
       this.robotModel = robotModel;
       this.statusPublishPeriod = statusPublishPeriod;

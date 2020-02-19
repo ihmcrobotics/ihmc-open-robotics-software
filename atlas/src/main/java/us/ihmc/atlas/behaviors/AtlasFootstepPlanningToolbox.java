@@ -3,7 +3,7 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningModule;
 import us.ihmc.pubsub.DomainFactory;
 
 public class AtlasFootstepPlanningToolbox
@@ -14,6 +14,6 @@ public class AtlasFootstepPlanningToolbox
    public static void main(String[] args)
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
-      new FootstepPlanningToolboxModule(robotModel).setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
+      new FootstepPlanningModule(robotModel).setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 }
