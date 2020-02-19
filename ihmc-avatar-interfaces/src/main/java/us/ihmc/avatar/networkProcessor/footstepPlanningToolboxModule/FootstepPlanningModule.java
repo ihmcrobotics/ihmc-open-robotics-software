@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
@@ -33,6 +34,7 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuris
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -42,6 +44,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -67,8 +70,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private static final double defaultStatusPublishPeriod = 1.0;
 
+   private final String name;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DRCRobotModel robotModel;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
@@ -104,19 +107,27 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public static final String MODULE_NAME = "footstep_planner";
    private Ros2Node ros2Node;
 
-   public FootstepPlanningModule(DRCRobotModel robotModel)
+   public FootstepPlanningModule(String name)
    {
-      this(robotModel, defaultStatusPublishPeriod);
+      this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons(), defaultStatusPublishPeriod);
    }
 
-   public FootstepPlanningModule(DRCRobotModel robotModel, double statusPublishPeriod)
+   public FootstepPlanningModule(DRCRobotModel robotModel)
    {
-      this.robotModel = robotModel;
-      this.statusPublishPeriod = statusPublishPeriod;
-      this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      this.visibilityGraphParameters = robotModel.getVisibilityGraphsParameters();
+      this(robotModel.getSimpleRobotName(), robotModel.getFootstepPlannerParameters(), robotModel.getVisibilityGraphsParameters(), createFootPolygons(robotModel), defaultStatusPublishPeriod);
+   }
 
-      SideDependentList<ConvexPolygon2D> footPolygons = robotModel.getContactPointParameters() == null ? PlannerTools.createDefaultFootPolygons() : createFootPolygons(robotModel);
+   public FootstepPlanningModule(String name,
+                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 SideDependentList<ConvexPolygon2D> footPolygons,
+                                 double statusPublishPeriod)
+   {
+      this.name = name;
+      this.statusPublishPeriod = statusPublishPeriod;
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      this.visibilityGraphParameters = visibilityGraphParameters;
+
       this.snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       this.snapAndWiggler  = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
@@ -143,6 +154,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       this.heuristicsSupplier = () -> bodyPathPlanRequested.getAsBoolean() ? bodyPathHeuristics : distanceAndYawHeuristics;
       this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCost::compute, node -> heuristicsSupplier.get().compute(node));
+      checker.addFootstepGraph(footstepPlanner.getGraph());
    }
 
    public void handleRequestPacket(FootstepPlanningRequestPacket requestPacket)
@@ -156,7 +168,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.requestPacket.set(requestPacket);
       isPlanning.set(true);
       haltRequested.set(false);
-      result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+      result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
       bodyPathPlanHolder.getPlan().clear();
       requestCallback.accept(requestPacket);
 
@@ -197,18 +209,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          bodyPathPlanner.setInitialStanceFoot(stanceFootPose, stanceFootSide);
          FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
          footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
+         footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
          bodyPathPlanner.setGoal(footstepPlannerGoal);
 
-         result = bodyPathPlanner.planWaypoints();
-         if (!result.validForExecution())
+         FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
+         if (!bodyPathPlannerResult.validForExecution())
          {
+            result = bodyPathPlannerResult;
             isPlanning.set(false);
             reportStatus();
             return;
          }
 
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
-
          if (waypoints.size() < 2)
          {
             if (footstepPlannerParameters.getReturnBestEffortPlan())
@@ -242,7 +255,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       // Start planning loop
-      while(true)
+      while (true)
       {
          if (stopwatch.totalElapsed() >= requestPacket.getTimeout() || haltRequested.get())
          {
@@ -260,7 +273,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
          if (checkIfGoalIsReached(goalNodes, iterationData))
          {
-            result = FootstepPlanningResult.OPTIMAL_SOLUTION;
+            result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
             break;
          }
          if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), requestPacket.getTimeout(), 0.1))
@@ -392,9 +405,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return;
 
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
-      String robotName = robotModel.getSimpleRobotName();
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerParametersPacket.class, subscriberTopicNameGenerator, s -> footstepPlannerParameters.set(s.readNextData()));
@@ -408,9 +420,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       });
 
       // Body path plan publisher
-      IHMCROS2Publisher<BodyPathPlanMessage> bodyPathPlanPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                               BodyPathPlanMessage.class,
-                                                                                               publisherTopicNameGenerator);
+      IHMCROS2Publisher<BodyPathPlanMessage> bodyPathPlanPublisher = ROS2Tools.createPublisher(ros2Node, BodyPathPlanMessage.class, publisherTopicNameGenerator);
       addBodyPathPlanCallback(bodyPathPlanPublisher::publish);
 
       // Status publisher
@@ -502,6 +512,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public static SideDependentList<ConvexPolygon2D> createFootPolygons(DRCRobotModel robotModel)
    {
+      if (robotModel.getContactPointParameters() == null)
+      {
+         return PlannerTools.createDefaultFootPolygons();
+      }
+
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       return new SideDependentList<>(side ->
                                      {
