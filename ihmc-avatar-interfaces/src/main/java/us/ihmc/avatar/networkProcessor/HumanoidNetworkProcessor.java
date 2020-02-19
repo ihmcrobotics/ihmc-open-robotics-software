@@ -23,6 +23,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -108,6 +109,16 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.pubSubImplementation = pubSubImplementation;
    }
 
+   public void setupShutdownHook()
+   {
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         LogTools.info("Shutting down network processor modules.");
+         closeAndDispose();
+         ThreadTools.sleep(10);
+      }));
+   }
+
    public void setRosURI(URI rosURI)
    {
       if (this.rosURI != null)
@@ -125,7 +136,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    public Ros2Node getRos2Node()
    {
       if (ros2Node == null)
+      {
          ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
+         modulesToClose.add(ros2Node::destroy);
+      }
       return ros2Node;
    }
 

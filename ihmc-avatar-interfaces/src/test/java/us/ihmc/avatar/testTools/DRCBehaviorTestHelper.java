@@ -12,7 +12,7 @@ import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
@@ -99,7 +99,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                 SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)
+                                HumanoidNetworkProcessorParameters networkModuleParameters, boolean automaticallySimulate)
    {
       super(simulationTestingParameters, robotModel);
       super.setTestEnvironment(commonAvatarEnvironmentInterface);
