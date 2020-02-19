@@ -79,6 +79,12 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
       javaFXStoredPropertyTable.setup(parameters, ExploreAreaBehaviorParameters.keys, this::publishParameters);
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+      
+   }
+
    private void publishParameters()
    {
       behaviorMessager.submitMessage(ExploreAreaBehaviorAPI.Parameters, parameters.getAllAsStrings());

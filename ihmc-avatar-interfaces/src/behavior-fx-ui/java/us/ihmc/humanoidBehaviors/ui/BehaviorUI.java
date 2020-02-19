@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui;
 
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
@@ -25,7 +26,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -33,6 +35,8 @@ import java.util.ArrayList;
 public class BehaviorUI
 {
    private BorderPane mainPane;
+   private final Messager behaviorMessager;
+   private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
@@ -54,6 +58,8 @@ public class BehaviorUI
 
    private BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
+      this.behaviorMessager = behaviorMessager;
+
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
@@ -71,11 +77,10 @@ public class BehaviorUI
          BorderPane bottom = (BorderPane) mainPane.getBottom();
          TabPane tabPane = (TabPane) bottom.getCenter();
 
-         ArrayList<BehaviorUIInterface> behaviorUIInterfaces = new ArrayList<>();
          for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
          {
             BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
-            behaviorUIInterfaces.add(behaviorUIInterface);
+            behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
             Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
             tabPane.getTabs().add(tab);
          }
@@ -93,14 +98,14 @@ public class BehaviorUI
          {
             behaviorSelector.getItems().add(behaviorDefinition.getName());
          }
-         behaviorSelector.valueProperty().addListener(
-               (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
 
-         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces)
+         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
             behaviorUIInterface.init(subScene, behaviorMessager, robotModel);
             view3dFactory.addNodeToView(behaviorUIInterface);
          }
+
+         behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
          directRobotUIController.init(subScene, ros2Node, robotModel);
          view3dFactory.addNodeToView(directRobotUIController);
@@ -116,6 +121,23 @@ public class BehaviorUI
          primaryStage.show();
          primaryStage.toFront();
       });
+   }
+
+   private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)
+   {
+      behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue);
+
+      for (String behaviorName : behaviorUIInterfaces.keySet())
+      {
+         if (newValue.equals(behaviorName))
+         {
+            behaviorUIInterfaces.get(behaviorName).setEnabled(true);
+         }
+         else
+         {
+            behaviorUIInterfaces.get(behaviorName).setEnabled(false);
+         }
+      }
    }
 
    public static void claimEditing(Object claimingEditor)

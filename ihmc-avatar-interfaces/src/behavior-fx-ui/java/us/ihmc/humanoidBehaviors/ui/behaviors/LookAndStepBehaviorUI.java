@@ -43,6 +43,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       javaFXStoredPropertyTable.setup(parameters, LookAndStepBehaviorParameters.keys, this::publishParameters);
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    private void publishParameters()
    {
       behaviorMessager.submitMessage(Parameters, parameters.getAllAsStrings());

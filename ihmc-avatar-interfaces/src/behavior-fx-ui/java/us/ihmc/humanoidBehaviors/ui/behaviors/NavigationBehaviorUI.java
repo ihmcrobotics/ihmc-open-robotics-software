@@ -39,6 +39,12 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    @FXML public void step()
    {
       behaviorMessager.submitMessage(StepThroughAlgorithm, new Object());
