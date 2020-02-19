@@ -1,9 +1,6 @@
 package us.ihmc.valkyrie;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
@@ -12,6 +9,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieNetworkProcessor
 {
@@ -21,9 +19,9 @@ public class ValkyrieNetworkProcessor
 
       public static NetworkProcessorVersion fromEnvironment()
       {
-         String rosDistro = System.getenv("NETWORK_PROCESSOR_VERSION");
+         String valueFromEnvironment = System.getenv("IHMC_VALKYRIE_CONFIGURATION");
 
-         if (rosDistro != null && (rosDistro.trim().toLowerCase().contains("jsc")))
+         if (valueFromEnvironment != null && (valueFromEnvironment.trim().toLowerCase().contains("jsc")))
             return JSC;
          else
             return IHMC;
@@ -84,45 +82,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.start();
    }
 
-   /**
-    * Valid arguments are:
-    * <ul>
-    * <li>Valkyrie robot model, example: <tt>--model="DEFAULT"</tt> see {@link ValkyrieRobotVersion}
-    * for available options.
-    * </ul>
-    */
    public static void main(String[] args) throws JSAPException
    {
-
-      JSAP jsap = new JSAP();
-
-      FlaggedOption robotModelFlag = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false)
-                                                                    .setStringParser(JSAP.STRING_PARSER);
-
-      jsap.registerParameter(robotModelFlag);
-
-      JSAPResult config = jsap.parse(args);
-
-      ValkyrieRobotVersion robotVersion = ValkyrieRobotVersion.DEFAULT;
+      ValkyrieRobotVersion robotVersion = ValkyrieRosControlController.VERSION;
+      LogTools.info("Valkyrie robot version: " + robotVersion);
       NetworkProcessorVersion netProcVersion = NetworkProcessorVersion.fromEnvironment();
       LogTools.info("Configuring network processor for " + netProcVersion.name());
-
-      if (config.success())
-      {
-         String robotModelArg = config.getString(robotModelFlag.getID());
-         if (robotModelArg != null)
-         {
-            try
-            {
-               robotVersion = ValkyrieRobotVersion.valueOf(robotModelArg);
-            }
-            catch (IllegalArgumentException e)
-            {
-               LogTools.error("Invalid robotModel argument: " + robotModelArg + ", using DEFAULT.");
-               robotVersion = ValkyrieRobotVersion.DEFAULT;
-            }
-         }
-      }
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, robotVersion);
 
