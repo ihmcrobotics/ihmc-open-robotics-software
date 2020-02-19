@@ -5,13 +5,7 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -33,18 +27,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -78,11 +64,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -286,6 +268,16 @@ public class KinematicsToolboxController extends ToolboxController
    /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
 
+   /**
+    * When {@code true}, the solver will add an objective to minimize the overall angular momentum
+    * generated. This is not recommended when using this toolbox as an IK solver as it'll increase the
+    * number of iterations before converging.
+    */
+   private final YoBoolean minimizeAngularMomentum = new YoBoolean("minimizeAngularMomentum", registry);
+   /**
+    * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that
+    * is about 130kg.
+    */
    private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
    private final MomentumCommand angularMomentumCommand = new MomentumCommand();
 
@@ -316,8 +308,6 @@ public class KinematicsToolboxController extends ToolboxController
       this.controllableRigidBodies = controllableRigidBodies;
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-
-      angularMomentumWeight.set(0.125);
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
@@ -350,6 +340,8 @@ public class KinematicsToolboxController extends ToolboxController
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
+      minimizeAngularMomentum.set(false);
+      angularMomentumWeight.set(0.125);
       angularMomentumCommand.setSelectionMatrixForAngularControl();
 
       enableCollisionAvoidance.set(true);
@@ -694,8 +686,11 @@ public class KinematicsToolboxController extends ToolboxController
       allFeedbackControlCommands.clear();
       allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
 
-      angularMomentumCommand.setWeight(angularMomentumWeight.getValue());
-      inverseKinematicsCommandBuffer.addMomentumCommand().set(angularMomentumCommand);
+      if (minimizeAngularMomentum.getValue())
+      {
+         angularMomentumCommand.setWeight(angularMomentumWeight.getValue());
+         inverseKinematicsCommandBuffer.addMomentumCommand().set(angularMomentumCommand);
+      }
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
@@ -1129,6 +1124,11 @@ public class KinematicsToolboxController extends ToolboxController
    public void setPreserveUserCommandHistory(boolean value)
    {
       preserveUserCommandHistory.set(value);
+   }
+
+   public void minimizeAngularMomentum(boolean enable)
+   {
+      minimizeAngularMomentum.set(enable);
    }
 
    public double getUpdateDT()

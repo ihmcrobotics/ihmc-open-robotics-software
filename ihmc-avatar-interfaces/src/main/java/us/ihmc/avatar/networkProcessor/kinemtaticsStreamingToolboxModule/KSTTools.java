@@ -97,6 +97,7 @@ public class KSTTools
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
       ikController.setPreserveUserCommandHistory(false);
+      ikController.minimizeAngularMomentum(true);
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
