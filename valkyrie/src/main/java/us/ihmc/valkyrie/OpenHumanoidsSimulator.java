@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -14,13 +13,12 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -91,18 +89,13 @@ public class OpenHumanoidsSimulator
 	      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
 	      simulationStarter.setRunMultiThreaded(true);
 
-		  DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-
-		  URI rosUri = NetworkParameters.getROSURI();
-		  networkProcessorParameters.setRosUri(rosUri);
+		  HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
 		  PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList());
 
 		  if (runAutomaticDiagnosticRoutine)
 		  {
-		     networkProcessorParameters.enableBehaviorModule(true);
-		     networkProcessorParameters.enableBehaviorVisualizer(true);
-		     networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
+		     networkProcessorParameters.setUseAutomaticDiagnostic(true, true, 5.0);
 		  }
 
 		  if(disableViz)
@@ -132,7 +125,7 @@ public class OpenHumanoidsSimulator
 		  java.util.Map.Entry<String,RosTopicSubscriberInterface<? extends Message>> pair=new java.util.AbstractMap.SimpleEntry<String,RosTopicSubscriberInterface<? extends Message>>(nameSpace+"/api_command", sub);
 		  subscribers.add(pair);
 
-		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, rosClockCalculator, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
+		  new ThePeoplesGloriousNetworkProcessor(networkProcessorParameters.getRosURI(), rosAPI_communicator, sensorCommunicator, rosClockCalculator, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
 
 		  avatarSimulation = simulationStarter.getAvatarSimulation();
    }

@@ -3,12 +3,12 @@ package us.ihmc.avatar.networkProcessor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.LocalObjectCommunicator;
 
 public class HumanoidNetworkProcessorParameters
 {
    private URI rosURI;
-   private ObjectCommunicator simulatedSensorCommunicator;
+   private LocalObjectCommunicator simulatedSensorCommunicator;
 
    private boolean useTextToSpeechEngine;
    private boolean useZeroPoseRobotConfigurationPublisherModule;
@@ -48,7 +48,7 @@ public class HumanoidNetworkProcessorParameters
       }
    }
 
-   public void setSimulatedSensorCommunicator(ObjectCommunicator simulatedSensorCommunicator)
+   public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
@@ -211,7 +211,7 @@ public class HumanoidNetworkProcessorParameters
       return rosURI;
    }
 
-   public ObjectCommunicator getSimulatedSensorCommunicator()
+   public LocalObjectCommunicator getSimulatedSensorCommunicator()
    {
       return simulatedSensorCommunicator;
    }
@@ -354,23 +354,5 @@ public class HumanoidNetworkProcessorParameters
    public boolean isUseHumanoidAvatarREAStateUpdater()
    {
       return useHumanoidAvatarREAStateUpdater;
-   }
-
-   public void enableBehaviorModule(boolean b)
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
-   public void enableSensorModule(boolean b)
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
-   public void enableFootstepPlanningToolbox(boolean b)
-   {
-      // TODO Auto-generated method stub
-      
    }
 }
