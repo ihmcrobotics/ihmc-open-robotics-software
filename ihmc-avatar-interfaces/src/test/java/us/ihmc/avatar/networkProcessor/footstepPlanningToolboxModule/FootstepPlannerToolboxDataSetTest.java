@@ -133,7 +133,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    private final AtomicReference<FootstepPlanningResult> actualResult = new AtomicReference<>(null);
 
    private static final String robotName = "testBot";
-   private FootstepPlanningToolboxModule toolboxModule;
+   private FootstepPlanningModule toolboxModule;
 
    private RealtimeRos2Node ros2Node;
 
@@ -281,7 +281,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private void setupFootstepPlanningToolboxModule() throws IOException
    {
-      toolboxModule = new FootstepPlanningToolboxModule(getRobotModel());
+      toolboxModule = new FootstepPlanningModule(getRobotModel());
       toolboxModule.setupWithRos(pubSubImplementation);
    }
 

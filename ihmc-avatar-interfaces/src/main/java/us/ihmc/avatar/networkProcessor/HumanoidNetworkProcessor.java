@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -280,13 +280,14 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public FootstepPlanningToolboxModule setupFootstepPlanningToolboxModule(boolean enableYoVariableServer)
+   public FootstepPlanningModule setupFootstepPlanningToolboxModule(boolean enableYoVariableServer)
    {
-      checkIfModuleCanBeCreated(FootstepPlanningToolboxModule.class);
+      checkIfModuleCanBeCreated(FootstepPlanningModule.class);
 
       try
       {
-         FootstepPlanningToolboxModule module = new FootstepPlanningToolboxModule(robotModel, null, enableYoVariableServer, pubSubImplementation);
+         FootstepPlanningModule module = new FootstepPlanningModule(robotModel);
+         module.setupWithRos(PubSubImplementation.FAST_RTPS);
          modulesToClose.add(module);
          return module;
       }

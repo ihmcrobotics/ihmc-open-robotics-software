@@ -20,7 +20,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -97,7 +97,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
    private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
 
-   private FootstepPlanningToolboxModule footstepToolboxModule;
+   private FootstepPlanningModule footstepToolboxModule;
    private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
 
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -115,7 +115,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel());
+      footstepToolboxModule = new FootstepPlanningModule(getRobotModel());
       footstepToolboxModule.setupWithRos(DomainFactory.PubSubImplementation.INTRAPROCESS);
       postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
 
