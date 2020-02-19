@@ -48,7 +48,9 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
-      controller.setInitialRobotConfigurationNamedMap(fromStandPrep(robotModel));
+      Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
+      if (initialConfiguration != null)
+         controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
       controller.setOutputPublisher(outputPublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
@@ -61,13 +63,17 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    private static Map<String, Double> fromStandPrep(DRCRobotModel robotModel)
    {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
       WholeBodySetpointParameters standPrepParameters = robotModel.getHighLevelControllerParameters().getStandPrepParameters();
+      if (standPrepParameters == null)
+         return null;
+
+      Map<String, Double> initialConfigurationMap = new HashMap<>();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         initialConfigurationMap.put(joint.getName(), standPrepParameters.getSetpoint(joint.getName()));
+         String jointName = joint.getName();
+         initialConfigurationMap.put(jointName, standPrepParameters.getSetpoint(jointName));
       }
       return initialConfigurationMap;
    }
