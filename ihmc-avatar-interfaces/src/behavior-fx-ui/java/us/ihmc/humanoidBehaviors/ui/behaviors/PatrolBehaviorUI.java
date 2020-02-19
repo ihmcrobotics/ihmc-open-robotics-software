@@ -78,6 +78,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
 
    private int currentInsertIndex; // TODO this should be in extracted functionality
 
+   @Override
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
@@ -221,6 +222,12 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
+   }
+
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
    }
 
    private void goToNextWaypointPositionEdit()

@@ -20,6 +20,12 @@ public class StepInPlaceBehaviorUI extends BehaviorUIInterface
       this.behaviorMessager = behaviorMessager;
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    @FXML public void startStepping()
    {
       behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);

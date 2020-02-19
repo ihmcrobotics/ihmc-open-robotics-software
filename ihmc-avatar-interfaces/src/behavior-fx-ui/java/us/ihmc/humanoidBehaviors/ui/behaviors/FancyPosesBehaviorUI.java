@@ -20,6 +20,12 @@ public class FancyPosesBehaviorUI extends BehaviorUIInterface
       this.behaviorMessager = behaviorMessager;
    }
 
+   @Override
+   public void setEnabled(boolean enabled)
+   {
+
+   }
+
    @FXML
    public void requestSingleSupport()
    {
