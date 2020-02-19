@@ -44,6 +44,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    private static final String NETWORK_PROCESSOR_ROS2_NODE_NAME = "network_processor";
    private static final String DEFAULT_REA_CONFIG_FILE_PATH = System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt";
 
+   private boolean hasStarted = false;
+   private boolean isShutdownHookSetup = false;
    private final List<Runnable> modulesToStart = new ArrayList<>();
    private final List<CloseableAndDisposable> modulesToClose = new ArrayList<>();
 
@@ -111,6 +113,14 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public void setupShutdownHook()
    {
+      if (isShutdownHookSetup)
+      {
+         LogTools.info("Shutdown hook already setup.");
+         return;
+      }
+
+      isShutdownHookSetup = true;
+
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
          LogTools.info("Shutting down network processor modules.");
@@ -133,7 +143,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
 
-   public Ros2Node getRos2Node()
+   public Ros2Node getOrCreateRos2Node()
    {
       if (ros2Node == null)
       {
@@ -143,7 +153,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       return ros2Node;
    }
 
-   public URI getRosURI()
+   public URI getOrCreateRosURI()
    {
       if (rosURI == null)
          rosURI = NetworkParameters.getROSURI();
@@ -159,6 +169,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public TextToSpeechNetworkModule setupTextToSpeechEngine()
    {
+      checkIfModuleCanBeCreated(TextToSpeechNetworkModule.class);
+
       try
       {
          TextToSpeechNetworkModule module = new TextToSpeechNetworkModule(pubSubImplementation);
@@ -174,6 +186,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public ZeroPoseMockRobotConfigurationDataPublisherModule setupZeroPoseRobotConfigurationPublisherModule()
    {
+      checkIfModuleCanBeCreated(ZeroPoseMockRobotConfigurationDataPublisherModule.class);
+
       try
       {
          ZeroPoseMockRobotConfigurationDataPublisherModule module = new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel, pubSubImplementation);
@@ -189,6 +203,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public WholeBodyTrajectoryToolboxModule setupWholeBodyTrajectoryToolboxModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(WholeBodyTrajectoryToolboxModule.class);
+
       try
       {
          WholeBodyTrajectoryToolboxModule module = new WholeBodyTrajectoryToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
@@ -204,6 +220,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public KinematicsToolboxModule setupKinematicsToolboxModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(KinematicsToolboxModule.class);
+
       try
       {
          KinematicsToolboxModule module = new KinematicsToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
@@ -219,6 +237,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public KinematicsPlanningToolboxModule setupKinematicsPlanningToolboxModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(KinematicsPlanningToolboxModule.class);
+
       try
       {
          KinematicsPlanningToolboxModule module = new KinematicsPlanningToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
@@ -233,7 +253,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    }
 
    public KinematicsStreamingToolboxModule setupKinematicsStreamingToolboxModule(Class<?> launcherClass, String[] programArgs, boolean enableYoVariableServer)
-
    {
       try
       {
@@ -241,6 +260,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
          if (launcherClass == null)
          {
+            checkIfModuleCanBeCreated(KinematicsStreamingToolboxModule.class);
+
             KinematicsStreamingToolboxModule module = new KinematicsStreamingToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
             modulesToClose.add(module);
             return module;
@@ -261,6 +282,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public FootstepPlanningToolboxModule setupFootstepPlanningToolboxModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(FootstepPlanningToolboxModule.class);
+
       try
       {
          FootstepPlanningToolboxModule module = new FootstepPlanningToolboxModule(robotModel, null, enableYoVariableServer, pubSubImplementation);
@@ -276,6 +299,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public FootstepPlanPostProcessingToolboxModule setupFootstepPostProcessingToolboxModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(FootstepPlanPostProcessingToolboxModule.class);
+
       try
       {
          FootstepPlanPostProcessingToolboxModule module = new FootstepPlanPostProcessingToolboxModule(robotModel,
@@ -294,11 +319,13 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public IHMCMOCAPLocalizationModule setupMocapModule()
    {
+      checkIfModuleCanBeCreated(IHMCMOCAPLocalizationModule.class);
+
       try
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         ROS2Tools.createCallbackSubscription(getRos2Node(),
+         ROS2Tools.createCallbackSubscription(getOrCreateRos2Node(),
                                               PlanarRegionsListMessage.class,
                                               REACommunicationProperties.publisherTopicNameGenerator,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
@@ -312,8 +339,9 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    }
 
    public IHMCHumanoidBehaviorManager setupBehaviorModule(boolean enableYoVariableServer, boolean automaticDiagnostic, double diagnosticInitialDelay)
-
    {
+      checkIfModuleCanBeCreated(IHMCHumanoidBehaviorManager.class);
+
       try
       {
          HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
@@ -353,9 +381,11 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public RosModule setupRosModule()
    {
+      checkIfModuleCanBeCreated(RosModule.class);
+
       try
       {
-         RosModule rosModule = new RosModule(robotModel, getRosURI(), simulatedSensorCommunicator, pubSubImplementation);
+         RosModule rosModule = new RosModule(robotModel, getOrCreateRosURI(), simulatedSensorCommunicator, pubSubImplementation);
          modulesToClose.add(rosModule);
          return rosModule;
       }
@@ -371,13 +401,16 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+
+         checkIfModuleCanBeCreated(sensorSuiteManager.getClass());
+
          if (robotModel.getTarget() == RobotTarget.SCS)
          {
             sensorSuiteManager.initializeSimulatedSensors(simulatedSensorCommunicator);
          }
          else
          {
-            sensorSuiteManager.initializePhysicalSensors(getRosURI());
+            sensorSuiteManager.initializePhysicalSensors(getOrCreateRosURI());
          }
          modulesToClose.add(sensorSuiteManager);
          modulesToStart.add(sensorSuiteManager::connect);
@@ -392,6 +425,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public HeightQuadTreeToolboxModule setupHeightQuadTreeToolboxModule()
    {
+      checkIfModuleCanBeCreated(HeightQuadTreeToolboxModule.class);
+
       try
       {
          HeightQuadTreeToolboxModule module = new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(),
@@ -410,6 +445,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public LIDARBasedREAModule setupRobotEnvironmentAwerenessModule(String reaConfigurationFilePath)
    {
+      checkIfModuleCanBeCreated(LIDARBasedREAModule.class);
+
       try
       {
          LIDARBasedREAModule module;
@@ -430,6 +467,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public BipedalSupportPlanarRegionPublisher setupBipedalSupportPlanarRegionPublisherModule()
    {
+      checkIfModuleCanBeCreated(BipedalSupportPlanarRegionPublisher.class);
+
       try
       {
          BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel, pubSubImplementation);
@@ -446,6 +485,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public WalkingControllerPreviewToolboxModule setupWalkingPreviewModule(boolean enableYoVariableServer)
    {
+      checkIfModuleCanBeCreated(WalkingControllerPreviewToolboxModule.class);
+
       try
       {
          WalkingControllerPreviewToolboxModule module = new WalkingControllerPreviewToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
@@ -461,6 +502,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public HumanoidAvatarREAStateUpdater setupHumanoidAvatarREAStateUpdater()
    {
+      checkIfModuleCanBeCreated(HumanoidAvatarREAStateUpdater.class);
+
       try
       {
          HumanoidAvatarREAStateUpdater module = new HumanoidAvatarREAStateUpdater(robotModel, pubSubImplementation);
@@ -480,8 +523,23 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       e.printStackTrace();
    }
 
+   private void checkIfModuleCanBeCreated(Class<?> moduleType)
+   {
+      if (hasModuleBeenSetup(moduleType))
+         throw new IllegalStateException("Attempting to instantiate a second time the module: " + moduleType.getSimpleName());
+      if (hasStarted)
+         throw new IllegalStateException("Attempting to instantiate a module but the network processor has already started.");
+   }
+
+   private boolean hasModuleBeenSetup(Class<?> moduleType)
+   {
+      return modulesToClose.stream().anyMatch(module -> module.getClass().equals(moduleType));
+   }
+
    public void start()
    {
+      hasStarted = true;
+
       for (Runnable module : modulesToStart)
       {
          try
