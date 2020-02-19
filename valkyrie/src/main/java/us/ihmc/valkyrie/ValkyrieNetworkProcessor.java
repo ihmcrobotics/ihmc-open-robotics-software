@@ -52,7 +52,7 @@ public class ValkyrieNetworkProcessor
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(true);
 
-      LogTools.info("ROS_MASTER_URI=" + networkProcessor.getRosURI());
+      LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
       networkProcessor.setupShutdownHook();
       networkProcessor.start();
@@ -78,7 +78,7 @@ public class ValkyrieNetworkProcessor
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(false);
 
-      LogTools.info("ROS_MASTER_URI=" + networkProcessor.getRosURI());
+      LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
       networkProcessor.setupShutdownHook();
       networkProcessor.start();

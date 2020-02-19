@@ -66,7 +66,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         System.out.println("Using the " + model + " model");
         
         HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
-        LogTools.info("ROS_MASTER_URI = " + networkProcessor.getRosURI());
+        LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
         networkProcessor.setupRosModule();
         networkProcessor.setupBehaviorModule(true, true, 15.0);
         networkProcessor.setupShutdownHook();

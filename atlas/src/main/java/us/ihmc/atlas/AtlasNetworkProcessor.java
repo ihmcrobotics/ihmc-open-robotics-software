@@ -66,7 +66,7 @@ public class AtlasNetworkProcessor
          LogTools.info("Selected model: {}", model);
 
          HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
-         LogTools.info("ROS_MASTER_URI = " + networkProcessor.getRosURI());
+         LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
          networkProcessor.setupRosModule();
          networkProcessor.setupSensorModule();
          networkProcessor.setupBehaviorModule(false, false, 0);
