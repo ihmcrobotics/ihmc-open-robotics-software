@@ -33,7 +33,7 @@ public class PlanarRegionsMappingModule
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE.getNodeName());
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.MAPPING_MODULE);
 
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA, this::process);
    }
