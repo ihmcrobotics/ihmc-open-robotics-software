@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.VelocityRotationEdgeCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -37,7 +38,7 @@ public class NewKinematicFootRotationDetector
    private final DoubleProvider decayBreakFrequency;
    private final DoubleProvider rotationThreshold;
 
-   private final KinematicsRotationEdgeCalculator edgeCalculator;
+   private final VelocityRotationEdgeCalculator edgeCalculator;
 
    public NewKinematicFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsRegistry)
@@ -45,7 +46,7 @@ public class NewKinematicFootRotationDetector
       this.soleFrame = soleFrame;
       this.dt = dt;
 
-      edgeCalculator = new KinematicsRotationEdgeCalculator(side, soleFrame, dt, parentRegistry, graphicsRegistry);
+      edgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, dt, parentRegistry, graphicsRegistry);
 
       registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);

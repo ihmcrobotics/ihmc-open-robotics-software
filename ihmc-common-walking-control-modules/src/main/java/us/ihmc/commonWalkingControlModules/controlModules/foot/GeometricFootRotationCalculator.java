@@ -135,7 +135,6 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);
       lineOfRotationInSoleFrame.changeFrameAndProjectToXYPlane(soleFrame);
-      lineOfRotationInSoleFrame.setPoint(measuredCoP);
 
       intersectLineOfRotationWithFootPolygon();
    }
