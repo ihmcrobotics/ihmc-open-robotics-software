@@ -10,6 +10,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -27,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -86,6 +89,14 @@ public class KinematicsToolboxHelper
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
       feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPose(), zeroVector6D);
       feedbackControlCommandToPack.setControlFrameFixedInEndEffector(command.getControlFramePose());
+   }
+
+   public static void consumeJointCommand(KinematicsToolboxOneDoFJointCommand command, OneDoFJointBasics joint, PIDGainsReadOnly gains, OneDoFJointFeedbackControlCommand feedbackControlCommandToPack)
+   {
+      feedbackControlCommandToPack.setJoint(joint);
+      feedbackControlCommandToPack.setGains(gains);
+      feedbackControlCommandToPack.setWeightForSolver(command.getWeight());
+      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), 0.0);
    }
 
    /**
