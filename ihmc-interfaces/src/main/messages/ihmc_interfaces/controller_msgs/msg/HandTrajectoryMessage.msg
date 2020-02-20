@@ -13,5 +13,3 @@ uint32 sequence_id
 byte robot_side 255
 # The position/orientation trajectory information.
 SE3TrajectoryMessage se3_trajectory
-# The trajectory information for the force/moment to be achieved by the end-effector.
-WrenchTrajectoryMessage wrench_trajectory
