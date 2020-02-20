@@ -19,6 +19,8 @@ public class SequenceNode extends BehaviorTreeControlFlowNodeBasics
          {
             return FAILURE;
          }
+
+         // SUCCESS, continue
       }
 
       return SUCCESS;
