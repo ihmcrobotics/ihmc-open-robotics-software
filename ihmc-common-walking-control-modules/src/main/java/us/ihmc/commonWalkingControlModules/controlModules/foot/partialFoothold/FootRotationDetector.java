@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 public interface FootRotationDetector
 {

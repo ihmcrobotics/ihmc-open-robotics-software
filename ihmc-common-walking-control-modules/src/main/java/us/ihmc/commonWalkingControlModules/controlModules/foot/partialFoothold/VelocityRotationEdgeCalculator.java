@@ -1,10 +1,12 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -26,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 import java.awt.*;
 
-public class KinematicsRotationEdgeCalculator implements RotationEdgeCalculator
+public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
    private final YoVariableRegistry registry;
 
@@ -44,8 +46,8 @@ public class KinematicsRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
-   public KinematicsRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
-                                           YoGraphicsListRegistry graphicsListRegistry)
+   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
+                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
@@ -140,5 +142,10 @@ public class KinematicsRotationEdgeCalculator implements RotationEdgeCalculator
       linePointB.set(tempLineOfRotationInWorld.getDirection());
       linePointB.scale(0.05);
       linePointB.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
+   }
+
+   public FrameLine2DReadOnly getLineOfRotation()
+   {
+      return lineOfRotationInSole;
    }
 }
