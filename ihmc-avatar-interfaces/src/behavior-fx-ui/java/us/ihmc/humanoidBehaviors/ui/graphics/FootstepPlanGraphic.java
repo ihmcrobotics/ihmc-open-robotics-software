@@ -121,4 +121,9 @@ public class FootstepPlanGraphic extends Group
          meshView.setMaterial(material);
       }
    }
+
+   public void clear()
+   {
+      generateMeshes(new ArrayList<>());
+   }
 }
