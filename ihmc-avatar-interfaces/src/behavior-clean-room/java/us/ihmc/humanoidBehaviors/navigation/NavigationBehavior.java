@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.navigation;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -15,10 +14,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -44,10 +41,7 @@ import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.NeverFailsAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.RunAndSucceedEverytimeAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.SequenceNode;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -68,7 +62,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
@@ -93,7 +86,7 @@ public class NavigationBehavior implements BehaviorInterface
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
 
    private final FramePose3D robotPose = new FramePose3D();
-   private final SequenceNode sequence;
+   private final NonReactiveLoopSequenceNode sequence;
    private final Notification stepThroughAlgorithm;
    private final PausablePeriodicThread mainThread;
 
@@ -118,18 +111,15 @@ public class NavigationBehavior implements BehaviorInterface
 
       stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
 
-      sequence = new SequenceNode();
-      ArrayList<BehaviorTreeAction> resetableActions = new ArrayList<>();
-      // store these actions to reset them at the end? a task should do that?
-      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("aquire map"))));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(this::aquireMap)));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("plan body path"))));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(this::planBodyPath)));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps"))));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(this::planBodyOrientationTrajectoryAndFootsteps)));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it"))));
-      resetableActions.add(sequence.addChild(new NeverFailsAction(this::shortenFootstepPlanAndWalkIt)));
-      sequence.addChild(new RunAndSucceedEverytimeAction(() -> resetableActions.forEach(BehaviorTreeAction::reset)));
+      sequence = new NonReactiveLoopSequenceNode();
+      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("aquire map")));
+      sequence.addChild(new AlwaysSucessfulAction(this::aquireMap));
+      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("plan body path")));
+      sequence.addChild(new AlwaysSucessfulAction(this::planBodyPath));
+      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("plan body orientation trajectory and footsteps")));
+      sequence.addChild(new AlwaysSucessfulAction(this::planBodyOrientationTrajectoryAndFootsteps));
+      sequence.addChild(new AlwaysSucessfulAction(() -> stepThroughAlgorithm("shorten footstep plan and walk it")));
+      sequence.addChild(new AlwaysSucessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
    }
