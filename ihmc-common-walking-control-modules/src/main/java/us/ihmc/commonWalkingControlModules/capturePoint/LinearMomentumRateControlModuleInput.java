@@ -30,6 +30,11 @@ public class LinearMomentumRateControlModuleInput
    private double omega0;
 
    /**
+    * Boolean saying whether or not to use the momentum recovery mode. If this is set to yes, a higher momentum rate weight is used.
+    */
+   private boolean useMomentumRecoveryMode;
+
+   /**
     * The desired capture point that the ICP controller should track.
     */
    private final FramePoint2D desiredCapturePoint = new FramePoint2D();
@@ -176,6 +181,16 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
+   }
+
+   public void setUseMomentumRecoveryMode(boolean useMomentumRecoveryMode)
+   {
+      this.useMomentumRecoveryMode = useMomentumRecoveryMode;
+   }
+
+   public boolean getUseMomentumRecoveryMode()
+   {
+      return useMomentumRecoveryMode;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
