@@ -232,6 +232,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    @Override
    protected void init()
    {
+      LogTools.info("Valkyrie robot version: " + VERSION);
       /*
        * Create joints
        */
