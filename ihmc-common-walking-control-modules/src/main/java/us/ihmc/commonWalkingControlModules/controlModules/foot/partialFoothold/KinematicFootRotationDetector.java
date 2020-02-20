@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class KinematicFootRotationCalculator implements FootRotationDetector
+public class KinematicFootRotationDetector implements FootRotationDetector
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -52,8 +52,8 @@ public class KinematicFootRotationCalculator implements FootRotationDetector
 
    private final MovingReferenceFrame soleFrame;
 
-   public KinematicFootRotationCalculator(String namePrefix, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double controllerDt,
-                                          YoVariableRegistry parentRegistry)
+   public KinematicFootRotationDetector(String namePrefix, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double controllerDt,
+                                        YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
