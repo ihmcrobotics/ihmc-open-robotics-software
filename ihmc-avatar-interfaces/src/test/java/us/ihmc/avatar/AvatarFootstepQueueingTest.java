@@ -19,6 +19,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +35,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -92,7 +94,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       {
          Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         addFootstep(footLocation, footOrientation, side, footMessage);
+         footMessage.getFootstepDataList().add().set(createFootstepDataMessage(footLocation, footOrientation, side));
          side = side.getOppositeSide();
 
          stepX += stepLength;
@@ -117,7 +119,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       {
          Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         addFootstep(footLocation, footOrientation, side, footMessage);
+         footMessage.getFootstepDataList().add().set(createFootstepDataMessage(footLocation, footOrientation, side));
          side = side.getOppositeSide();
 
          stepX += stepLength;
@@ -173,7 +175,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
          Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         addFootstep(footLocation, footOrientation, side, footMessage);
+         footMessage.getFootstepDataList().add().set(createFootstepDataMessage(footLocation, footOrientation, side));
          side = side.getOppositeSide();
 
          drcSimulationTestHelper.publishToController(footMessage);
@@ -192,6 +194,90 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       assertEquals(firstNumberofSteps, stepCounter.get());
    }
+   
+   
+   @Test
+   public void testQueuedStepsSequentialWithMessageTools() throws SimulationExceededMaximumTimeException
+   {
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      String className = getClass().getSimpleName();
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation(className);
+
+      AtomicInteger stepCounter = new AtomicInteger();
+      ROS2Tools.createCallbackSubscription(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()), (p) -> {
+               if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+               {
+                  stepCounter.incrementAndGet();
+               }
+            });
+
+      DRCRobotModel robotModel = getRobotModel();
+
+      double stepLength = getStepLength();
+      double stepWidth = getStepWidth();
+
+      ThreadTools.sleep(1000);
+
+      setupCameraSideView();
+
+      RobotSide side = RobotSide.LEFT;
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+
+      int firstNumberofSteps = 4;
+      double stepX = 0.0;
+      for (int currentStep = 0; currentStep < firstNumberofSteps; currentStep++)
+      {
+         
+         ExecutionMode currentExecutionMode = ExecutionMode.QUEUE;
+         if(currentStep == 0)
+         {
+            currentExecutionMode = ExecutionMode.OVERRIDE;
+         }
+         
+         Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
+         Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+         
+         //make a single foot step
+         FootstepDataMessage currentFootStep = createFootstepDataMessage(footLocation, footOrientation, side);
+         //add that single foot step to a footstep list
+         ArrayList<FootstepDataMessage> currentFootStepList = new ArrayList<FootstepDataMessage>();
+         currentFootStepList.add(currentFootStep);
+         
+         //use the HumanoidMessageTools to generate footstep data list message
+         FootstepDataListMessage footStepToSend = HumanoidMessageTools.createFootstepDataListMessage(currentFootStepList, swing, transfer, currentExecutionMode);
+
+         side = side.getOppositeSide();
+
+         drcSimulationTestHelper.publishToController(footStepToSend);
+
+         stepX += stepLength;
+         
+         // send a new footstep when the current footstep is halfway done
+         double simulationTime = (transfer + swing);
+
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+         
+      }
+
+      double simulationTime = intitialTransfer - transfer + (transfer + swing) * (firstNumberofSteps - 1) - (((transfer + swing))*firstNumberofSteps - 1);
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      assertEquals(firstNumberofSteps, stepCounter.get());
+   }
+   
+   
+   
+   
 
    @Test
    public void testOnlyQueuedStepsWithTinySims() throws SimulationExceededMaximumTimeException
@@ -235,7 +321,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
          Point3D footLocation = new Point3D(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         addFootstep(footLocation, footOrientation, side, footMessage);
+         footMessage.getFootstepDataList().add().set(createFootstepDataMessage(footLocation, footOrientation, side));
          side = side.getOppositeSide();
 
          drcSimulationTestHelper.publishToController(footMessage);
@@ -256,13 +342,13 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       assertEquals(firstNumberofSteps, stepCounter.get());
    }
 
-   private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
+   private FootstepDataMessage createFootstepDataMessage(Point3D stepLocation, Quaternion orient, RobotSide robotSide)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
       footstepData.getLocation().set(stepLocation);
       footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.getFootstepDataList().add().set(footstepData);
+      return footstepData;
    }
 
    private void setupCameraSideView()
