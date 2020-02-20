@@ -227,7 +227,13 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-
+      if (!enabled)
+      {
+         stopWalking();
+         removeAllWaypointGraphics();
+         waypointManager.clearWaypoints();
+         footstepPlanGraphic.clear();
+      }
    }
 
    private void goToNextWaypointPositionEdit()
