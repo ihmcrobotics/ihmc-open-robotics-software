@@ -71,8 +71,6 @@ public class TransferToStandingState extends WalkingState
    {
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
-
-      updateFootPlanOffset();
    }
 
    @Override
@@ -139,7 +137,7 @@ public class TransferToStandingState extends WalkingState
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
 
-      updateFootPlanOffset();
+      touchdownErrorCompensator.clear();
 
       if (previousSupportSide != null)
       {
@@ -155,26 +153,6 @@ public class TransferToStandingState extends WalkingState
             legConfigurationManager.setFullyExtendLeg(robotSide, false);
             legConfigurationManager.setStraight(robotSide);
          }
-      }
-   }
-
-   private void updateFootPlanOffset()
-   {
-      WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
-      if (previousStateEnum == null)
-         return;
-
-      if (previousStateEnum.getSupportSide() == null)
-         return;
-
-      RobotSide previousSwingSide = previousStateEnum.getSupportSide().getOppositeSide();
-
-      if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
-      {
-         actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
-         actualFootPositionInWorld.changeFrame(worldFrame);
-
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
       }
    }
 
