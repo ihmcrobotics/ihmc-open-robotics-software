@@ -1189,6 +1189,29 @@ public class WalkingMessageHandler
 
    private final FrameVector3D footstepOffsetVector = new FrameVector3D();
 
+   private final SideDependentList<FramePoint3DReadOnly> desiredFootstepPositions = new SideDependentList<>();
+   private final SideDependentList<FramePoint3DReadOnly> actualFootstepPositions = new SideDependentList<>();
+
+   public void registerDesiredFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly desiredFootstepPosition)
+   {
+      desiredFootstepPositions.put(robotSide, desiredFootstepPosition);
+   }
+
+   public void registerActualFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly actualFootstepPosition)
+   {
+      actualFootstepPositions.put(robotSide, actualFootstepPosition);
+   }
+
+
+   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+   public void addOffsetVectorFromTouchdownError(RobotSide robotSide)
+   {
+      touchdownErrorVector.sub(actualFootstepPositions.get(robotSide), desiredFootstepPositions.get(robotSide));
+
+      addOffsetVectorOnTouchdown(touchdownErrorVector);
+   }
+
    public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
       if (!offsettingXYPlanWithFootstepError.getValue() && !offsettingHeightPlanWithFootstepError.getValue())
