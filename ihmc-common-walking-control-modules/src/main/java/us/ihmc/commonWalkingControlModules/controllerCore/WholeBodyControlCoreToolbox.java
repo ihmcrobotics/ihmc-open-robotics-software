@@ -4,6 +4,7 @@ import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.cr
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
@@ -147,6 +148,14 @@ public class WholeBodyControlCoreToolbox
       this.centerOfMassFrame = centerOfMassFrame;
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+
+      if (rootJoint != null && Stream.of(controlledJoints).noneMatch(joint -> joint == rootJoint))
+      {
+         JointBasics[] controlledJointsWithRoot = new JointBasics[controlledJoints.length + 1];
+         System.arraycopy(controlledJoints, 0, controlledJointsWithRoot, 1, controlledJoints.length);
+         controlledJointsWithRoot[0] = rootJoint;
+         controlledJoints = controlledJointsWithRoot;
+      }
 
       multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       jointIndexHandler = new JointIndexHandler(controlledJoints);

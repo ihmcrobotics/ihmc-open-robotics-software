@@ -28,6 +28,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -82,10 +83,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private FootContactPoints<RobotSide> simulationContactPoints = null;
    private GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
+   private SDFDescriptionMutator sdfDescriptionMutator;
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
-   private ValkyrieContactPointParameters contactPointParameters;
+   private RobotContactPointParameters<RobotSide> contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
@@ -221,13 +223,27 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.modelSizeScale = modelSizeScale;
    }
 
+   public void setSDFDescriptionMutator(SDFDescriptionMutator sdfDescriptionMutator)
+   {
+      if (generalizedRobotModel != null)
+         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+      this.sdfDescriptionMutator = sdfDescriptionMutator;
+   }
+
+   public SDFDescriptionMutator getSDFDescriptionMutator()
+   {
+      if (sdfDescriptionMutator == null)
+         sdfDescriptionMutator = new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics);
+      return sdfDescriptionMutator;
+   }
+
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       if (generalizedRobotModel == null)
       {
          JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(),
                                                                getSDFModelInputStream(),
-                                                               new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics));
+                                                               getSDFDescriptionMutator());
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
@@ -558,6 +574,16 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (capturePointPlannerParameters == null)
          capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(getRobotPhysicalProperties(), target);
       return capturePointPlannerParameters;
+   }
+
+   public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
+   {
+      this.walkingControllerParameters = walkingControllerParameters;
+   }
+
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      this.contactPointParameters = contactPointParameters;
    }
 
    @Override
