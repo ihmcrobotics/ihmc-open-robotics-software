@@ -1,11 +1,14 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.JButton;
+
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commons.thread.ThreadTools;
@@ -32,9 +35,6 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-import javax.swing.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class ValkyrieExternalForceEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
@@ -48,8 +48,7 @@ public class ValkyrieExternalForceEstimationSimulation
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new FlatGroundProfile());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      simulationStarter.createSimulation(networkModuleParameters, false, false);
+      simulationStarter.createSimulation(null, false, false);
 
       double controllerDT = robotModel.getControllerDT();
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");

@@ -1,16 +1,15 @@
 package us.ihmc.atlas.sensors;
 
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+
+import java.net.URI;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.communication.configuration.NetworkParameters;
-
-import java.io.IOException;
-import java.net.URI;
-
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class AtlasSensorSuiteLauncher
 {
@@ -26,14 +25,7 @@ public class AtlasSensorSuiteLauncher
 
       new BipedalSupportPlanarRegionPublisher(atlasRobotModel, FAST_RTPS).start();
 
-      try
-      {
-         atlasSensorSuiteManager.connect();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      atlasSensorSuiteManager.connect();
    }
 
    public static void main(String[] args)

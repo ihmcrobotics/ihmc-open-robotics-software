@@ -1,7 +1,6 @@
 package us.ihmc.atlas.multisenseMocapExperiments;
 
 import java.io.IOException;
-import java.net.URI;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -11,9 +10,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 /**
@@ -26,14 +23,11 @@ public class MultisenseHeadOnAStickManualTestNetworkProcessor
 
    public MultisenseHeadOnAStickManualTestNetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
-      URI rosUri = NetworkParameters.getROSURI();
-      
-      DRCNetworkModuleParameters params = new DRCNetworkModuleParameters();
-      params.setRosUri(rosUri);
-      params.enableRosModule(true);
-      params.enableSensorModule(true);
-      
-      new DRCNetworkProcessor(robotModel, params, PubSubImplementation.FAST_RTPS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
+      networkProcessor.setupShutdownHook();
+      networkProcessor.start();
    }
    
    public static void main(String[] args) throws JSAPException, IOException

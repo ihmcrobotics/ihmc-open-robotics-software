@@ -33,6 +33,11 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
+   public default RobotTarget getTarget()
+   {
+      return null;
+   }
+
    public abstract DRCRobotJointMap getJointMap();
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
