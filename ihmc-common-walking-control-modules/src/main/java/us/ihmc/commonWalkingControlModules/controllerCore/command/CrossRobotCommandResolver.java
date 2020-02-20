@@ -787,6 +787,7 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleInput(LinearMomentumRateControlModuleInput in, LinearMomentumRateControlModuleInput out)
    {
       out.setOmega0(in.getOmega0());
+      out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
