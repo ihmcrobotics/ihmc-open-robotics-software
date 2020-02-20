@@ -5,19 +5,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
@@ -31,7 +26,6 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -54,7 +48,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
-   private final LookAndStepBehaviorParameters parameters = new LookAndStepBehaviorParameters();
+   private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
@@ -72,9 +66,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       rea = helper.getOrCreateREAInterface();
       robot = helper.getOrCreateRobotInterface();
       takeStep = helper.createUINotification(TakeStep);
-      helper.createUICallback(Parameters, parameters::setAllFromStrings);
+      helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       mainThread = helper.createPausablePeriodicThread(getClass(), 0.1, this::lookAndStep);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
+      helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
    }
 
    @Override
@@ -98,7 +93,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       double midFeetZ = goalPoseBetweenFeet.getZ();
 
       goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
-      goalPoseBetweenFeet.appendTranslation(parameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
+      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
       goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       goalPoseBetweenFeet.setZ(midFeetZ);
 
@@ -195,7 +190,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> TakeStep = topic("TakeStep");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
-      public static final Topic<List<String>> Parameters = topic("Parameters");
+      public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
+      public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
 
       private static final <T> Topic<T> topic(String name)
       {

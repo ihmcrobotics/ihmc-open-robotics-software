@@ -82,7 +82,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      
+
    }
 
    private void publishParameters()
