@@ -261,6 +261,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return atlasPhysicalProperties;
    }
 
+   @Override
    public RobotTarget getTarget()
    {
       return target;

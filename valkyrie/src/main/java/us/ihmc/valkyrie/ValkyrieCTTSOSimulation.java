@@ -3,7 +3,7 @@ package us.ihmc.valkyrie;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -25,27 +25,19 @@ public class ValkyrieCTTSOSimulation
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw()));
+      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(),
+                                                                                    dataSet.getPlannerInput().getStartYaw()));
 
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
-      networkProcessorParameters.enableFootstepPlanningToolbox(true);
-      networkProcessorParameters.enableWalkingPreviewToolbox(true);
-      networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
+      networkProcessorParameters.setUseFootstepPlanningToolboxModule(true);
+      networkProcessorParameters.setUseWalkingPreviewModule(true);
+      networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(true);
 
       // disable everything else
-      networkProcessorParameters.enableBehaviorModule(false);
-      networkProcessorParameters.enableBehaviorVisualizer(false);
-      networkProcessorParameters.enableSensorModule(true);
-      networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(false);
-      networkProcessorParameters.enableRosModule(false);
-      networkProcessorParameters.enableKinematicsToolbox(false);
-      networkProcessorParameters.enableWholeBodyTrajectoryToolbox(false);
-      networkProcessorParameters.enableKinematicsPlanningToolbox(false);
-      networkProcessorParameters.enableRobotEnvironmentAwerenessModule(false);
-      networkProcessorParameters.enableMocapModule(false);
-      networkProcessorParameters.enableAutoREAStateUpdater(true);
+      networkProcessorParameters.setUseSensorModule(true);
+      networkProcessorParameters.setUseHumanoidAvatarREAStateUpdater(true);
 
       // start sim
       simulationStarter.startSimulation(networkProcessorParameters, false);
