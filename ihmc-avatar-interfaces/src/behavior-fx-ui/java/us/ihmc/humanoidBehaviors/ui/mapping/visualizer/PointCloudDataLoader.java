@@ -10,18 +10,13 @@ import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAM;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class PointCloudDataLoader extends Application
 {
-   private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
-
    private static final boolean SHOW_PLANAR_REGIONS = true;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;
-
-   private static final boolean BUILD_PLANAR_REGIONS = false;
 
    private static final String PLANAR_REGIONS_FILE_NAME = "PlanarRegion";
    private static final String POINT_CLOUD_FILE_NAME = "PointCloud";
@@ -96,22 +91,6 @@ public class PointCloudDataLoader extends Application
             stereoVisionPointCloudGraphic.update();
             view3dFactory.addNodeToView(stereoVisionPointCloudGraphic);
             System.out.println("are rendered.");
-
-            if (BUILD_PLANAR_REGIONS)
-            {
-               System.out.println("Building planar regions map.");
-               List<Long> timestamps = StereoVisionPointCloudDataLoader.extractTimestamps(pointCloudFile);
-               IhmcSLAM slam = new IhmcSLAM(DEFAULT_OCTREE_RESOLUTION);
-               slam.addFirstFrame(messagesFromFile.get(0));
-               for (int i = 1; i < messagesFromFile.size(); i++)
-                  slam.addFrame(messagesFromFile.get(i));
-
-               slam.updatePlanarRegionsMap();
-
-               regionsGraphic.generateMeshes(slam.getPlanarRegionsMap());
-               regionsGraphic.update();
-               view3dFactory.addNodeToView(regionsGraphic);
-            }
          }
       }
 
