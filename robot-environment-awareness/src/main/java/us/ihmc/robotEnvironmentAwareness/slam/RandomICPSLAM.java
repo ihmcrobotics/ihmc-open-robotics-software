@@ -23,7 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
-public class RandomICPSLAM extends SLAM
+public class RandomICPSLAM extends SLAMBasics
 {
    // debugging variables.
    public static final boolean DEBUG = true;
@@ -129,9 +129,9 @@ public class RandomICPSLAM extends SLAM
    }
 
    @Override
-   public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      super.addFirstFrame(pointCloudMessage);
+      super.addKeyFrame(pointCloudMessage);
 
       SLAMFrame firstFrame = getLatestFrame();
 
@@ -155,7 +155,6 @@ public class RandomICPSLAM extends SLAM
       return success;
    }
 
-   @Override
    public void updatePlanarRegionsMap()
    {
       octree.updateNormals();
@@ -169,7 +168,6 @@ public class RandomICPSLAM extends SLAM
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       RandomICPSLAMParameters parameters = this.parameters.get();
-      // see the overlapped area.
       Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame, octree, parameters.getNumberOfSourcePoints(),
                                                                                 parameters.getMinimumOverlappedRatio(), parameters.getWindowMargin());
 

@@ -38,7 +38,7 @@ public class RandomICPSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(42));
+      slam.addKeyFrame(messages.get(42));
       slam.addFrame(messages.get(43));
       slam.addFrame(messages.get(44));
 
@@ -65,7 +65,7 @@ public class RandomICPSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(50));
+      slam.addKeyFrame(messages.get(50));
       slam.addFrame(messages.get(51));
 
       SLAMViewer slamViewer = new SLAMViewer();
@@ -94,7 +94,7 @@ public class RandomICPSLAMTest
 
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(49));
+      slam.addKeyFrame(messages.get(49));
 
       // source points.
       int numberOfSourcePoints = 500;
@@ -179,7 +179,7 @@ public class RandomICPSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(46));
+      slam.addKeyFrame(messages.get(46));
       slam.addFrame(messages.get(47));
       slam.addFrame(messages.get(48));
       slam.addFrame(messages.get(49));
@@ -260,7 +260,7 @@ public class RandomICPSLAMTest
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
 
-      slam.addFirstFrame(messageOne);
+      slam.addKeyFrame(messageOne);
       slam.addFrame(driftedMessageTwo);
 
       SLAMViewer slamViewer = new SLAMViewer();
@@ -306,7 +306,7 @@ public class RandomICPSLAMTest
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       slam.updateParameters(parameters);
-      slam.addFirstFrame(messages.get(47));
+      slam.addKeyFrame(messages.get(47));
       slam.addFrame(messages.get(48));
 
       SLAMViewer slamViewer = new SLAMViewer();
@@ -342,7 +342,7 @@ public class RandomICPSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {
          System.out.println();
@@ -404,7 +404,7 @@ public class RandomICPSLAMTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      slam.addFirstFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {
          System.out.println();

@@ -5,19 +5,15 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class SLAM implements SLAMInterface
+public class SLAMBasics implements SLAMInterface
 {
    private final double octreeResolution;
 
@@ -31,7 +27,7 @@ public class SLAM implements SLAMInterface
    protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
    protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
-   public SLAM(double octreeResolution)
+   public SLAMBasics(double octreeResolution)
    {
       this.octreeResolution = octreeResolution;
 
@@ -40,18 +36,13 @@ public class SLAM implements SLAMInterface
    }
 
    @Override
-   public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       latestSlamFrame.set(frame);
 
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
-
-      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(frame.getOriginalPointCloud(),
-                                                                                               frame.getInitialSensorPoseToWorld().getTranslation(),
-                                                                                               octreeResolution, planarRegionSegmentationParameters);
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override
@@ -68,7 +59,7 @@ public class SLAM implements SLAMInterface
       else
       {
          frame.updateOptimizedCorrection(optimizedMultiplier);
-         
+
          latestSlamFrame.set(frame);
 
          pointCloudMap.add(frame.getPointCloud());
@@ -76,28 +67,6 @@ public class SLAM implements SLAMInterface
 
          return true;
       }
-   }
-
-   @Override
-   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
-   {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
-      latestSlamFrame.set(frame);
-      
-      RigidBodyTransformReadOnly optimizedMultiplier = new RigidBodyTransform();
-
-      frame.updateOptimizedCorrection(optimizedMultiplier);
-
-      pointCloudMap.add(frame.getPointCloud());
-      sensorPoses.add(frame.getSensorPose());
-   }
-
-   @Override
-   public void updatePlanarRegionsMap()
-   {
-      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, octreeResolution,
-                                                                                               planarRegionSegmentationParameters);
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override

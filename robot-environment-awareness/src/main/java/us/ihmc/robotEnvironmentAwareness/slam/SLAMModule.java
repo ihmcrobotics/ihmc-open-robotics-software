@@ -125,7 +125,7 @@ public class SLAMModule
       boolean success;
       if (slam.isEmpty())
       {
-         slam.addFirstFrame(pointCloudToCompute);
+         slam.addKeyFrame(pointCloudToCompute);
          success = true;
       }
       else
