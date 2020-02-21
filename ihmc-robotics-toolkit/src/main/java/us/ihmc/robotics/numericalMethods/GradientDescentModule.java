@@ -47,6 +47,11 @@ public class GradientDescentModule
          this.inputLowerLimit.add(Double.NEGATIVE_INFINITY);
       }
    }
+   
+   public void redefineModule(SingleQueryFunction function)
+   {
+      this.function = function;
+   }
 
    private void reduceStepSize()
    {

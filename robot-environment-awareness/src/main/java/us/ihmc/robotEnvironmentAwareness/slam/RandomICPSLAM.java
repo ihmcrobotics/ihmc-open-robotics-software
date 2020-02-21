@@ -25,19 +25,22 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class RandomICPSLAM extends SLAM
 {
-   public static final boolean DEBUG = false;
+   // debugging variables.
+   public static final boolean DEBUG = true;
+   public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
 
    private final NormalOcTree octree;
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
 
+   private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
    private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
 
-   protected static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
-   protected static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
-   protected static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
+   private static final TDoubleArrayList INITIAL_INPUT = new TDoubleArrayList();
+   private static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
+   private static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
    private Point3D[] sourcePointsToWorld;
@@ -60,9 +63,6 @@ public class RandomICPSLAM extends SLAM
       }
    }
 
-   // debugging variables.
-   public Point3D[] correctedSourcePointsToWorld;
-
    public RandomICPSLAM(double octreeResolution)
    {
       super(octreeResolution);
@@ -80,6 +80,18 @@ public class RandomICPSLAM extends SLAM
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
       segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
 
+      optimizer = new GradientDescentModule(null, INITIAL_INPUT);
+      int maxIterations = 300;
+      double convergenceThreshold = 1 * 10E-5;
+      double optimizerStepSize = -1.0;
+      double optimizerPerturbationSize = 0.00001;
+      optimizer.setInputLowerLimit(LOWER_LIMIT);
+      optimizer.setInputUpperLimit(UPPER_LIMIT);
+      optimizer.setMaximumIterations(maxIterations);
+      optimizer.setConvergenceThreshold(convergenceThreshold);
+      optimizer.setStepSize(optimizerStepSize);
+      optimizer.setPerturbationSize(optimizerPerturbationSize);
+      optimizer.setReducingStepSizeRatio(2);
    }
 
    public NormalOcTree getOctree()
@@ -195,18 +207,8 @@ public class RandomICPSLAM extends SLAM
                return new RigidBodyTransform();
             }
 
-            GradientDescentModule optimizer = new GradientDescentModule(costFunction, INITIAL_INPUT);
-            int maxIterations = 300;
-            double convergenceThreshold = 1 * 10E-5;
-            double optimizerStepSize = -1.0;
-            double optimizerPerturbationSize = 0.00001;
-            optimizer.setInputLowerLimit(LOWER_LIMIT);
-            optimizer.setInputUpperLimit(UPPER_LIMIT);
-            optimizer.setMaximumIterations(maxIterations);
-            optimizer.setConvergenceThreshold(convergenceThreshold);
-            optimizer.setStepSize(optimizerStepSize);
-            optimizer.setPerturbationSize(optimizerPerturbationSize);
-            optimizer.setReducingStepSizeRatio(2);
+            optimizer.redefineModule(costFunction);
+            optimizer.setStepSize(-1.0);
             int run = optimizer.run();
             latestComputationTime.set((double) Math.round(optimizer.getComputationTime() * 100) / 100);
             if (DEBUG)
@@ -278,21 +280,9 @@ public class RandomICPSLAM extends SLAM
          }
       }
 
-      void convertToPointCloudTransformer(TDoubleArrayList input, RigidBodyTransform transformToPack)
-      {
-         RigidBodyTransform newSensorPose = new RigidBodyTransform();
-         convertToSensorPose(input, newSensorPose);
-
-         transformToPack.set(newSensorPose);
-         transformToPack.multiplyInvertOther(transformWorldToSensorPose);
-      }
-
       @Override
       public double getQuery(TDoubleArrayList values)
       {
-         /**
-          * values are difference in 6 dimensions : dx, dy, dz, du, dv, dw
-          */
          RigidBodyTransform newSensorPose = new RigidBodyTransform();
          convertToSensorPose(values, newSensorPose);
 

@@ -300,7 +300,7 @@ public class RandomICPSLAMTest
       File pointCloudFile = new File(stereoPath);
 
       RandomICPSLAMParameters parameters = new RandomICPSLAMParameters();
-      parameters.setNumberOfSourcePoints(1000);
+      parameters.setNumberOfSourcePoints(100);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
