@@ -7,6 +7,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -17,10 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -40,6 +38,7 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlan
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanState;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
@@ -65,6 +64,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static us.ihmc.footstepPlanning.FootstepPlannerStatus.*;
 
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
@@ -424,10 +425,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       addBodyPathPlanCallback(bodyPathPlanPublisher::publish);
 
       // Status publisher
-      IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> statusPublisher = ROS2Tools.createPublisher(ros2Node,
+      IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                          FootstepPlanningToolboxOutputStatus.class,
                                                                                                          publisherTopicNameGenerator);
-      addStatusCallback(statusPublisher::publish);
+      addStatusCallback(resultPublisher::publish);
 
       // planner listener
       long updateFrequency = 500;
@@ -451,6 +452,42 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  plannerListener.addNode(iterationData.getInvalidChildNodes().get(i), iterationData.getParentNode());
                               plannerListener.tickAndUpdate();
                            });
+
+      // status publisher
+      IHMCROS2Publisher<FootstepPlannerStatusMessage> statusPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                                                                  FootstepPlannerStatusMessage.class,
+                                                                                                  publisherTopicNameGenerator);
+      addRequestCallback(requestPacket ->
+                         {
+                            FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
+                            boolean planningPath = FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath();
+                            statusMessage.setFootstepPlannerStatus((planningPath ? PLANNING_PATH : PLANNING_STEPS).toByte());
+                            statusPublisher.publish(statusMessage);
+                         });
+      addBodyPathPlanCallback(bodyPathPlanMessage ->
+                         {
+                            FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
+                            boolean planningSteps = FootstepPlanningResult.fromByte(bodyPathPlanMessage.getFootstepPlanningResult()).validForExecution();
+                            statusMessage.setFootstepPlannerStatus((planningSteps ? PLANNING_STEPS : IDLE).toByte());
+                            statusPublisher.publish(statusMessage);
+                         });
+      addStatusCallback(outputStatus ->
+                        {
+                           FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
+                           boolean plannerTerminated = FootstepPlanningResult.fromByte(outputStatus.getFootstepPlanningResult()) != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+                           if (plannerTerminated)
+                           {
+                              statusMessage.setFootstepPlannerStatus((IDLE).toByte());
+                              statusPublisher.publish(statusMessage);
+                           }
+                        });
+
+      // cancel planning request
+      ROS2Tools.createCallbackSubscription(ros2Node, ToolboxStateMessage.class, subscriberTopicNameGenerator, s ->
+      {
+         if(ToolboxState.fromByte(s.takeNextData().getRequestedToolboxState()) == ToolboxState.SLEEP)
+            halt();
+      });
    }
 
    @Override
