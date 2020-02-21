@@ -36,7 +36,7 @@ public class ValkyrieAStarPlannerEndToEndTest
    @Test
    public void testCinders()
    {
-      runTest(DataSetName._20190220_172417_EOD_Cinders, 4.0, 30.0, true);
+      runTest(DataSetName._20190220_172417_EOD_Cinders, 8.0, 45.0, true);
    }
 
    @Test
