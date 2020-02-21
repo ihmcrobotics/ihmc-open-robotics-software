@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -27,22 +27,7 @@ public class RandomICPSLAM extends SLAM
 {
    public static final boolean DEBUG = false;
 
-   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 300;
-
-   private static final double DEFAULT_WINDOW_MINIMUM_DEPTH = 0.5;
-   private static final double DEFAULT_WINDOW_MAXIMUM_DEPTH = 1.5;
-   private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
-
-   private static final double DEFAULT_WINDOW_MARGIN = 0.1;
-   private static final double DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO = 2.0;
-   private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
-   private static final int DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
-
-   private final AtomicInteger numberOfSourcePoints = new AtomicInteger(DEFAULT_NUMBER_OF_SOURCE_POINTS);
-   private final AtomicInteger searchingSize = new AtomicInteger(DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE);
-   private final AtomicDouble minimumOverlappedRatio = new AtomicDouble(DEFAULT_MINIMUM_OVERLAPPED_RATIO);
-   private final AtomicDouble windowMargin = new AtomicDouble(DEFAULT_WINDOW_MARGIN);
-   private final AtomicDouble minimumInliersRatio = new AtomicDouble(DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME);
+   private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
 
    private final NormalOcTree octree;
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
@@ -74,7 +59,7 @@ public class RandomICPSLAM extends SLAM
          UPPER_LIMIT.add(OPTIMIZER_ANGLE_LIMIT);
       }
    }
-   
+
    // debugging variables.
    public Point3D[] correctedSourcePointsToWorld;
 
@@ -117,7 +102,8 @@ public class RandomICPSLAM extends SLAM
       int numberOfPoints = getLatestFrame().getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), DEFAULT_WINDOW_MINIMUM_DEPTH, DEFAULT_WINDOW_MAXIMUM_DEPTH));
+      RandomICPSLAMParameters parameters = this.parameters.get();
+      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), parameters.getMinimumDepth(), parameters.getMaximumDepth()));
 
       octree.insertScanCollection(scanCollection, false);
 
@@ -170,9 +156,10 @@ public class RandomICPSLAM extends SLAM
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
+      RandomICPSLAMParameters parameters = this.parameters.get();
       // see the overlapped area.
-      Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints.get(), minimumOverlappedRatio.get(),
-                                                                                    windowMargin.get());
+      Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame, octree, parameters.getNumberOfSourcePoints(),
+                                                                                parameters.getMinimumOverlappedRatio(), parameters.getWindowMargin());
 
       if (sourcePointsToSensor == null)
       {
@@ -191,7 +178,7 @@ public class RandomICPSLAM extends SLAM
          if (DEBUG)
             System.out.println("frame distance " + initialQuery);
 
-         if (initialQuery > DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO * getOctreeResolution())
+         if (initialQuery > parameters.getMaximumInitialDistanceRatio() * getOctreeResolution())
          {
             if (DEBUG)
                System.out.println("too far. will not be merged.");
@@ -199,8 +186,9 @@ public class RandomICPSLAM extends SLAM
          }
          else
          {
-            int numberOfInliers = SLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, searchingSize.get());
-            if (numberOfInliers > minimumInliersRatio.get() * sourcePointsToSensor.length)
+            int numberOfInliers = SLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor,
+                                                                 parameters.getMaximumICPSearchingSize());
+            if (numberOfInliers > parameters.getMinimumInliersRatioOfKeyFrame() * sourcePointsToSensor.length)
             {
                if (DEBUG)
                   System.out.println("close enough. many inliers.");
@@ -243,7 +231,7 @@ public class RandomICPSLAM extends SLAM
    {
       return latestComputationTime.get();
    }
-   
+
    public Point3DReadOnly[] getSourcePointsToWorldLatestFrame()
    {
       return sourcePointsToWorld;
@@ -251,11 +239,7 @@ public class RandomICPSLAM extends SLAM
 
    public void updateParameters(RandomICPSLAMParameters parameters)
    {
-      numberOfSourcePoints.set(parameters.getNumberOfSourcePoints());
-      searchingSize.set(parameters.getMaximumICPSearchingSize());
-      minimumOverlappedRatio.set(parameters.getMinimumOverlappedRatio());
-      windowMargin.set(parameters.getWindowMargin());
-      minimumInliersRatio.set(parameters.getMinimumInliersRatioOfKeyFrame());
+      this.parameters.set(parameters);
    }
 
    class RandomICPSLAMFrameOptimizerCostFunction implements SingleQueryFunction
@@ -319,11 +303,12 @@ public class RandomICPSLAM extends SLAM
             newSourcePointToWorld.set(sourcePoint);
             newSensorPose.transform(newSourcePointToWorld);
 
-            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE);
+            int maximumICPSearchingSize = parameters.get().getMaximumICPSearchingSize();
+            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumICPSearchingSize);
 
             if (distance < 0)
             {
-               distance = DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE * getOctreeResolution();
+               distance = maximumICPSearchingSize * getOctreeResolution();
             }
 
             totalDistance = totalDistance + distance;
