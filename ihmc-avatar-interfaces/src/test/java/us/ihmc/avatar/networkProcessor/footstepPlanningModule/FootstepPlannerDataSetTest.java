@@ -1,8 +1,6 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
+package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +47,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -104,7 +101,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public abstract class FootstepPlannerToolboxDataSetTest
+public abstract class FootstepPlannerDataSetTest
 {
    private static final double bambooTimeScaling = 4.0;
 

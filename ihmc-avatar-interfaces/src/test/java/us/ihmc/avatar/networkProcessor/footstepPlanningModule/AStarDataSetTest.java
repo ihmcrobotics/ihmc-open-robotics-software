@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
+package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pubsub.DomainFactory;
 
-public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
+public class AStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -84,7 +84,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 
    public static void main(String[] args) throws Exception
    {
-      AStarToolboxDataSetTest test = new AStarToolboxDataSetTest();
+      AStarDataSetTest test = new AStarDataSetTest();
 
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;

@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.pubsub.DomainFactory;
 
 public class ValkyrieStandaloneFootstepPlanningToolbox

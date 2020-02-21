@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
+package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import us.ihmc.pubsub.DomainFactory;
 
 import java.util.List;
 
-public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
+public class VisGraphWithAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
    public FootstepPlannerType getPlannerType()
@@ -47,7 +47,7 @@ public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxD
 
    public static void main(String[] args) throws Exception
    {
-      VisGraphWithAStarToolboxDataSetTest test = new VisGraphWithAStarToolboxDataSetTest();
+      VisGraphWithAStarDataSetTest test = new VisGraphWithAStarDataSetTest();
 
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;

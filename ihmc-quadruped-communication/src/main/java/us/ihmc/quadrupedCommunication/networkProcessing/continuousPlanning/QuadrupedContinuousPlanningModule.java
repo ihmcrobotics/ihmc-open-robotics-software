@@ -63,7 +63,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
@@ -85,7 +85,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedTimedStepListMessage.class, getPublisherTopicNameGenerator());
 
-      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT);
       messages.put(PawStepPlanningRequestPacket.class, plannerSubGenerator);
       messages.put(ToolboxStateMessage.class, plannerSubGenerator);
 
