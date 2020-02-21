@@ -7,6 +7,7 @@ public class RandomICPSLAMParameters
    private double maximumDepth;
    private double minimumDepth;
    private double minimumOverlappedRatio;
+   private double maximumInitialDistanceRatio;
 
    private double windowMargin;
    private int maximumICPSearchingSize;
@@ -19,6 +20,7 @@ public class RandomICPSLAMParameters
    private static final double DEFAULT_MINIMUM_DEPTH = 0.5;
    private static final double DEFAULT_MAXIMUM_DEPTH = 1.5;
    private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
+   private static final double DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO = 2.0;
    private static final int DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE = 5;
    private static final double DEFAULT_WINDOW_MARGIN = 0.1;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
@@ -40,6 +42,7 @@ public class RandomICPSLAMParameters
       maximumDepth = other.maximumDepth;
       minimumDepth = other.minimumDepth;
       minimumOverlappedRatio = other.minimumOverlappedRatio;
+      maximumInitialDistanceRatio = other.maximumInitialDistanceRatio;
       windowMargin = other.windowMargin;
       maximumICPSearchingSize = other.maximumICPSearchingSize;
       minimumInliersRatioOfKeyFrame = other.minimumInliersRatioOfKeyFrame;
@@ -53,6 +56,7 @@ public class RandomICPSLAMParameters
       maximumDepth = DEFAULT_MAXIMUM_DEPTH;
       minimumDepth = DEFAULT_MINIMUM_DEPTH;
       minimumOverlappedRatio = DEFAULT_MINIMUM_OVERLAPPED_RATIO;
+      maximumInitialDistanceRatio = DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO;
 
       windowMargin = DEFAULT_WINDOW_MARGIN;
       maximumICPSearchingSize = DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE;
@@ -82,6 +86,11 @@ public class RandomICPSLAMParameters
    public double getMinimumOverlappedRatio()
    {
       return minimumOverlappedRatio;
+   }
+
+   public double getMaximumInitialDistanceRatio()
+   {
+      return maximumInitialDistanceRatio;
    }
 
    public double getWindowMargin()
