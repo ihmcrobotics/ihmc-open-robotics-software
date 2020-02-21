@@ -1,17 +1,16 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.MismatchedSizeException;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import gnu.trove.list.array.TIntArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
-import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -21,7 +20,7 @@ public class ColorPointCloudData
    private final int numberOfPoints;
    private final Point3D[] pointCloud;
    private final int[] colors;
-   private final List<Integer> collidingPointIndices = new ArrayList<>();
+   private final TIntArrayList collidingPointIndices = new TIntArrayList();
 
    public ColorPointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
    {
@@ -122,7 +121,7 @@ public class ColorPointCloudData
 
          if (bufferIndex != numberOfPointsToAdd)
          {
-            LogTools.info("bufferIndex is different with numberOfPointsToAdd!!!!!!!!!!!!!!!!!!!!!");
+            throw new MismatchedSizeException("bufferIndex is different with numberOfPointsToAdd. " + bufferIndex + " " + numberOfPointsToAdd);
          }
       }
 
