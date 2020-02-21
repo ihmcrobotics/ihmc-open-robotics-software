@@ -264,12 +264,11 @@ public class RandomICPSLAMTest
       slam.addFrame(driftedMessageTwo);
 
       IhmcSLAMViewer slamViewer = new IhmcSLAMViewer();
-      slamViewer.addPointCloud(slam.getSLAMFrame(0).getOriginalPointCloud(), Color.BLUE);
-      slamViewer.addPointCloud(slam.getSLAMFrame(1).getOriginalPointCloud(), Color.BLACK);
-      slamViewer.addSensorPose(slam.getSLAMFrame(1).getOriginalSensorPose(), Color.BLACK);
+      slamViewer.addStereoMessage(messageOne, Color.BLUE);
+      slamViewer.addStereoMessage(driftedMessageTwo, Color.BLACK);
 
-      slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
-      slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
+      //slamViewer.addPointCloud(slam.getSLAMFrame(1).getPointCloud(), Color.GREEN);
+      //slamViewer.addSensorPose(slam.getSLAMFrame(1).getSensorPose(), Color.GREEN);
 
       if (RandomICPSLAM.DEBUG)
          slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
