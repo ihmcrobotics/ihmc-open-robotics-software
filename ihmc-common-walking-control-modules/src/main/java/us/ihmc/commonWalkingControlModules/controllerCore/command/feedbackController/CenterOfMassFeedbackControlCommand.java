@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -271,7 +271,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     *
     * @param weight the weight to use for each direction. Not modified.
     */
-   public void setWeightsForSolver(Vector3D weight)
+   public void setWeightsForSolver(Vector3DReadOnly weight)
    {
       momentumRateCommand.setLinearWeights(weight);
       momentumRateCommand.setAngularWeightsToZero();

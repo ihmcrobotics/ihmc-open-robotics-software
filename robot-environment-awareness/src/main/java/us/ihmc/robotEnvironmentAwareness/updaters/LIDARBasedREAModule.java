@@ -13,13 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -294,7 +288,7 @@ public class LIDARBasedREAModule
       return Thread.interrupted() || scheduled == null || scheduled.isCancelled();
    }
 
-   public void start() throws IOException
+   public void start()
    {
       if (scheduled == null)
       {
@@ -305,11 +299,18 @@ public class LIDARBasedREAModule
       }
    }
 
-   public void stop() throws Exception
+   public void stop()
    {
       LogTools.info("REA Module is going down.");
 
-      reaMessager.closeMessager();
+      try
+      {
+         reaMessager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
       ros2Node.destroy();
 
       if (scheduled != null)

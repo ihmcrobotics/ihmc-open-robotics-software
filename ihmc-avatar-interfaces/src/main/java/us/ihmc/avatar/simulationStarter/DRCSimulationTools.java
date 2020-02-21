@@ -19,7 +19,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.avatar.DRCStartingLocation;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
@@ -47,24 +47,23 @@ public abstract class DRCSimulationTools
          return;
 
       boolean automaticallyStartSimulation = true;
-      DRCNetworkModuleParameters networkProcessorParameters;
+      HumanoidNetworkProcessorParameters networkProcessorParameters;
       if (modulesToStart.contains(Modules.NETWORK_PROCESSOR))
       {
-         networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.enableBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-         networkProcessorParameters.enableBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-         networkProcessorParameters.enableSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
-         networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
-         networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
-         networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
-         networkProcessorParameters.enableKinematicsStreamingToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
-         networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
-         networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
-         networkProcessorParameters.enableKinematicsPlanningToolbox(true);
+         networkProcessorParameters = new HumanoidNetworkProcessorParameters();
+         networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE), modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+         networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+         networkProcessorParameters.setUseZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
+         networkProcessorParameters.setUseROSModule(modulesToStart.contains(Modules.ROS_MODULE));
+         networkProcessorParameters.setUseKinematicsToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
+         networkProcessorParameters.setUseKinematicsStreamingToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
+         networkProcessorParameters.setUseFootstepPlanningToolboxModule(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
+         networkProcessorParameters.setUseWholeBodyTrajectoryToolboxModule(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
+         networkProcessorParameters.setUseKinematicsPlanningToolboxModule(true);
          boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE) && !modulesToStart.contains(Modules.REA_UI);
-         networkProcessorParameters.enableRobotEnvironmentAwerenessModule(startREAModule);
-         networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(modulesToStart.contains(Modules.SENSOR_MODULE));
-         networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
+         networkProcessorParameters.setUseRobotEnvironmentAwerenessModule(startREAModule);
+         networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+         networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }
       else
       {

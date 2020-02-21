@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
+import java.util.List;
+
 import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -60,6 +62,12 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       linearRateLimitation = message.getLinearRateLimitation();
    }
 
+   public void addInputs(List<KinematicsToolboxRigidBodyCommand> inputs)
+   {
+      for (int i = 0; i < inputs.size(); i++)
+         this.inputs.add().set(inputs.get(i));
+   }
+
    public int getNumberOfInputs()
    {
       return inputs.size();
@@ -68,6 +76,11 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    public KinematicsToolboxRigidBodyCommand getInput(int index)
    {
       return inputs.get(index);
+   }
+
+   public List<KinematicsToolboxRigidBodyCommand> getInputs()
+   {
+      return inputs;
    }
 
    public boolean hasInputFor(RigidBodyBasics endEffector)

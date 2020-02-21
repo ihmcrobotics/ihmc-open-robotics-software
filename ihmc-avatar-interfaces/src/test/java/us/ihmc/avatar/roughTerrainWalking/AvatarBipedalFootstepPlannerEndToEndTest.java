@@ -14,7 +14,7 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -65,7 +65,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private static final int timeout = 120000; // to easily keep scs up. unfortunately can't be set programmatically, has to be a constant
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
-   private DRCNetworkModuleParameters networkModuleParameters;
+   private HumanoidNetworkProcessorParameters networkModuleParameters;
    protected HumanoidRobotDataReceiver humanoidRobotDataReceiver;
 
    private FootstepPlanningToolboxModule toolboxModule;
@@ -113,9 +113,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       generator.addRectangle(5.0, 5.0);
       flatGround = generator.getPlanarRegionsList();
 
-      networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
-      networkModuleParameters.enableNetworkProcessor(true);
+      networkModuleParameters = new HumanoidNetworkProcessorParameters();
+      networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
       toolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, true, PubSubImplementation.INTRAPROCESS);

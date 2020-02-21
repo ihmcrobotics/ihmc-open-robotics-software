@@ -1,11 +1,14 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.JButton;
+
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,7 +18,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -29,9 +35,6 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-import javax.swing.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class ValkyrieExternalForceEstimationSimulation
 {
    private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
@@ -39,13 +42,13 @@ public class ValkyrieExternalForceEstimationSimulation
 
    public ValkyrieExternalForceEstimationSimulation()
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
+      ValkyrieRobotVersion version = ValkyrieExternalForceEstimationModule.version;
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new FlatGroundProfile());
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      simulationStarter.createSimulation(networkModuleParameters, false, false);
+      simulationStarter.createSimulation(null, false, false);
 
       double controllerDT = robotModel.getControllerDT();
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");

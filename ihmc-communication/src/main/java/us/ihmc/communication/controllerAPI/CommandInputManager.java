@@ -272,7 +272,7 @@ public class CommandInputManager
     * @param messages list of messages to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
-   public <M extends Settable<M>> void submitMessages(List<Settable<?>> messages)
+   public <M extends Settable<M>> void submitMessages(List<? extends Settable<?>> messages)
    {
       for (int i = 0; i < messages.size(); i++)
          submitMessage((M) messages.get(i));
