@@ -21,7 +21,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
 {
    private final double octreeResolution;
 
-   private final List<IhmcSLAMFrame> slamFrames = new ArrayList<>();
+   private final AtomicReference<IhmcSLAMFrame> latestSlamFrame = new AtomicReference<>(null);
    private final List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
 
@@ -43,8 +43,8 @@ public class IhmcSLAM implements IhmcSLAMInterface
    public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(pointCloudMessage);
+      latestSlamFrame.set(frame);
 
-      slamFrames.add(frame);
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
 
@@ -68,8 +68,9 @@ public class IhmcSLAM implements IhmcSLAMInterface
       else
       {
          frame.updateOptimizedCorrection(optimizedMultiplier);
+         
+         latestSlamFrame.set(frame);
 
-         slamFrames.add(frame);
          pointCloudMap.add(frame.getPointCloud());
          sensorPoses.add(frame.getSensorPose());
 
@@ -81,12 +82,12 @@ public class IhmcSLAM implements IhmcSLAMInterface
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
-
+      latestSlamFrame.set(frame);
+      
       RigidBodyTransformReadOnly optimizedMultiplier = new RigidBodyTransform();
 
       frame.updateOptimizedCorrection(optimizedMultiplier);
 
-      slamFrames.add(frame);
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
    }
@@ -102,14 +103,14 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public void clear()
    {
-      slamFrames.clear();
+      latestSlamFrame.set(null);
       pointCloudMap.clear();
       sensorPoses.clear();
    }
 
    public boolean isEmpty()
    {
-      if (slamFrames.size() == 0)
+      if (latestSlamFrame.get() == null)
          return true;
       else
          return false;
@@ -130,14 +131,9 @@ public class IhmcSLAM implements IhmcSLAMInterface
       return planarRegionsMap;
    }
 
-   public IhmcSLAMFrame getSLAMFrame(int i)
-   {
-      return slamFrames.get(i);
-   }
-
    protected IhmcSLAMFrame getLatestFrame()
    {
-      return slamFrames.get(slamFrames.size() - 1);
+      return latestSlamFrame.get();
    }
 
    public double getOctreeResolution()
