@@ -16,7 +16,7 @@ public interface SLAMInterface
 
    abstract void clear();
 
-   abstract List<Point3DReadOnly[]> getPointCloudMap();
+   //abstract List<Point3DReadOnly[]> getPointCloudMap();
 
    abstract List<RigidBodyTransformReadOnly> getSensorPoses();
 
