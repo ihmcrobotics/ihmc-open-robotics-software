@@ -14,7 +14,6 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSurfaceElement;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -79,7 +78,7 @@ public class IhmcSLAMViewer
    {
       normalOctreeGraphic.addMesh(octree, octreeResolution, color, false);
    }
-   
+
    public void addOctree(NormalOcTree octree, Color color, double octreeResolution, boolean dot)
    {
       normalOctreeGraphic.addMesh(octree, octreeResolution, color, dot);
@@ -88,11 +87,6 @@ public class IhmcSLAMViewer
    public void addOctree(List<Plane3D> octreePlanes, Color color, double octreeResolution)
    {
       normalOctreeGraphic.addMesh(octreePlanes, octreeResolution, color);
-   }
-   
-   public void addOctree(List<IhmcSurfaceElement> surfaceElements, Color color)
-   {
-      normalOctreeGraphic.addMesh(surfaceElements, color);
    }
 
    public void addPlanarRegions(PlanarRegionsList planarRegions)
