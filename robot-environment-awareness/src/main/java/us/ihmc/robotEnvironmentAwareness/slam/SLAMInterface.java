@@ -10,14 +10,10 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public interface SLAMInterface
 {
-   abstract void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage);
+   abstract void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage);
 
    abstract boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage);
 
-   abstract void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage);
-
-   abstract void updatePlanarRegionsMap();
-   
    abstract void clear();
 
    abstract List<Point3DReadOnly[]> getPointCloudMap();
