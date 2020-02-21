@@ -34,7 +34,7 @@ public class RandomICPSLAM extends IhmcSLAM
    private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
 
    private static final double DEFAULT_WINDOW_MARGIN = 0.1;
-   private static final double DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO = 10.0;
+   private static final double DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO = 2.0;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
    private static final int DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE = 5;
 
