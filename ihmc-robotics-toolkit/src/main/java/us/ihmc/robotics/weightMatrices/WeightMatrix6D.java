@@ -7,19 +7,21 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
- * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 
+ * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which
+ * typically make up the main diagonal of a matrix.
  * <p>
- * Given the set of weights about particular axis of interest and a reference frame to which these axes refer to, the
- * {@code WeightMatrix3D} is then able compute the corresponding 6-by-6 weight matrix.
+ * Given the set of weights about particular axis of interest and a reference frame to which these
+ * axes refer to, the {@code WeightMatrix3D} is then able compute the corresponding 6-by-6 weight
+ * matrix.
  * </p>
  * <p>
- * The principal use-case of this class is to help users define the QP weights of each axis for a given end-effector and what frame they should be 
- * expressed in. 
+ * The principal use-case of this class is to help users define the QP weights of each axis for a
+ * given end-effector and what frame they should be expressed in.
  * </p>
  * <p>
- * Note that the {@link #weightFrame} is optional. It is preferable to provide it when possible,
- * but when it is absent, i.e. equal to {@code null}, the weight matrix will then be generated
- * assuming the destination frame is the same as the weight frame.
+ * Note that the {@link #weightFrame} is optional. It is preferable to provide it when possible, but
+ * when it is absent, i.e. equal to {@code null}, the weight matrix will then be generated assuming
+ * the destination frame is the same as the weight frame.
  * </p>
  */
 public class WeightMatrix6D
@@ -34,8 +36,8 @@ public class WeightMatrix6D
    private final WeightMatrix3D linearWeights = new WeightMatrix3D();
 
    /**
-    * Creates a new weight matrix. This weight matrix is initialized with all the weights set to NAN. Until the weights are changed, this weight matrix is independent from its
-    * weight frame.
+    * Creates a new weight matrix. This weight matrix is initialized with all the weights set to NAN.
+    * Until the weights are changed, this weight matrix is independent from its weight frame.
     */
    public WeightMatrix6D()
    {
@@ -54,8 +56,8 @@ public class WeightMatrix6D
    /**
     * Sets the weight frame of both the angular and linear parts to {@code null}.
     * <p>
-    * When the weight frame is {@code null}, the conversion into a 6-by-6 weight matrix will
-    * be done regardless of the destination frame.
+    * When the weight frame is {@code null}, the conversion into a 6-by-6 weight matrix will be done
+    * regardless of the destination frame.
     * </p>
     */
    public void clearWeightFrame()
@@ -107,7 +109,7 @@ public class WeightMatrix6D
     * Sets the weight frame for the angular and linear parts separately.
     * 
     * @param angularWeightFrame the new frame to which the angular weights are referring to.
-    * @param linearWeightFrame the new frame to which the linear weights are referring to.
+    * @param linearWeightFrame  the new frame to which the linear weights are referring to.
     */
    public void setWeightFrames(ReferenceFrame angularWeightFrame, ReferenceFrame linearWeightFrame)
    {
@@ -319,16 +321,30 @@ public class WeightMatrix6D
    }
 
    /**
-    * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Scales the individual of this weight matrix to the given {@code scalar}.
     * <p>
-    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
-    * set to represent this.
+    * This operation modifies both angular and linear weight values.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param weightMatrixToPack the dense-matrix is first reshaped to a 6-by-6 matrix and then
-    *           set to represent this. Modified.
+    * @param scalar the scale factor to apply to each weight.
+    */
+   public void scale(double scalar)
+   {
+      angularWeights.scale(scalar);
+      linearWeights.scale(scalar);
+   }
+
+   /**
+    * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
+    * <p>
+    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be set to
+    * represent this.
+    * </p>
+    * 
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param weightMatrixToPack the dense-matrix is first reshaped to a 6-by-6 matrix and then set to
+    *                           represent this. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
@@ -341,22 +357,22 @@ public class WeightMatrix6D
    }
 
    /**
-    * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)}
-    * does, this method also removes the zero-rows of the given weight matrix. This will help to
-    * improve performance especially when the resulting weight matrix is to be multiplied to a
-    * large matrix.
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)} does,
+    * this method also removes the zero-rows of the given weight matrix. This will help to improve
+    * performance especially when the resulting weight matrix is to be multiplied to a large matrix.
     * </p>
     * <p>
-    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be
-    * set to represent this.
+    * The given {@code weightMatrixToPack} is first reshaped to be a 6-by-6 matrix which will be set to
+    * represent this.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param weightMatrixToPack the dense-matrix is first reshaped to a 6-by-6 matrix and then
-    *           set to represent this. The zero-rows of the resulting matrix are removed. Modified.
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param weightMatrixToPack the dense-matrix is first reshaped to a 6-by-6 matrix and then set to
+    *                           represent this. The zero-rows of the resulting matrix are removed.
+    *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)

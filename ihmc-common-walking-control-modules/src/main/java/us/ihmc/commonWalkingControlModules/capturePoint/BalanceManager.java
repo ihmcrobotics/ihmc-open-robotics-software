@@ -127,6 +127,7 @@ public class BalanceManager
    private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
    private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
 
+   private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
    private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
@@ -686,6 +687,11 @@ public class BalanceManager
    public double getEllipticICPErrorForMomentumRecovery()
    {
       return ellipticICPErrorForMomentumRecovery.getValue();
+   }
+
+   public double getICPDistanceOutsideSupportForStep()
+   {
+      return icpDistanceOutsideSupportForStep.getValue();
    }
 
    public double getICPErrorMagnitude()

@@ -4,6 +4,12 @@
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
                 <registry name="WalkingControllerState">
+                    <registry name="WalkingHighLevelHumanoidController">
+                        <registry name="TouchdownErrorCompensator">
+                            <parameter name="spatialVelocityThresholdForSupportConfidence" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                            <parameter name="touchdownErrorCorrectionScale" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                        </registry>
+                    </registry>
                     <registry name="LinearMomentumRateControlModule">
                         <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>

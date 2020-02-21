@@ -62,17 +62,17 @@ public enum RobotSide implements RobotSegment<RobotSide>
       else
          return "Left";
    }
-   
+
    public String getCamelCaseName()
    {
       return getCamelCaseNameForStartOfExpression();
    }
-   
+
    public String getPascalCaseName()
    {
       return getCamelCaseNameForMiddleOfExpression();
    }
-   
+
    public String getLowerCaseName()
    {
       if (this == RIGHT)
@@ -95,6 +95,14 @@ public enum RobotSide implements RobotSegment<RobotSide>
          return "R";
       else
          return "L";
+   }
+
+   public String getSideNameFirstLowerCaseLetter()
+   {
+      if (this == RIGHT)
+         return "r";
+      else
+         return "l";
    }
 
    public String getSideStringInRobonetFormat()
@@ -162,37 +170,37 @@ public enum RobotSide implements RobotSegment<RobotSide>
          super();
       }
    }
-   
+
    public static RobotSide getSideFromString(String robotSideName)
    {
       RobotSide[] sides = RobotSide.values;
-      
-      
+
+
       for(RobotSide side : sides)
       {
          if (robotSideName.equals(side.getSideNameFirstLetter()))
             return side;
       }
-      
+
       return null;
    }
-   
+
    public static void main(String[] args)
    {
       String testString = RobotSide.LEFT.toString();
-      
+
       RobotSide side = RobotSide.getSideFromString(testString);
-      
+
       System.out.println(side.toString());
-      
+
       testString = RobotSide.RIGHT.toString();
       side = RobotSide.getSideFromString(testString);
-      
+
       System.out.println(side.toString());
-      
+
       testString = "junk";
       side = RobotSide.getSideFromString(testString);
-      
+
       System.out.println(side.toString());
    }
 

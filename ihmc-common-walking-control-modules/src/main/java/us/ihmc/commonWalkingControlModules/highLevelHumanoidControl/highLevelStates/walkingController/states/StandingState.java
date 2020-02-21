@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -24,6 +25,7 @@ public class StandingState extends WalkingState
    private final WalkingMessageHandler walkingMessageHandler;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
+   private final TouchdownErrorCompensator touchdownErrorCompensator;
 
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
@@ -31,7 +33,7 @@ public class StandingState extends WalkingState
    private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler,
+   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                         WalkingFailureDetectionControlModule failureDetectionControlModule, WalkingControllerParameters walkingControllerParameters,
                         YoVariableRegistry parentRegistry)
@@ -42,6 +44,7 @@ public class StandingState extends WalkingState
       this.walkingMessageHandler = walkingMessageHandler;
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
+      this.touchdownErrorCompensator = touchdownErrorCompensator;
 
       RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
       if (chest != null)
@@ -76,6 +79,8 @@ public class StandingState extends WalkingState
    public void onEntry()
    {
       commandInputManager.clearAllCommands();
+
+      touchdownErrorCompensator.clear();
 
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
