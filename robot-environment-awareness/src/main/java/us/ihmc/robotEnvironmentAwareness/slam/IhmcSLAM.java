@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,9 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class IhmcSLAM implements IhmcSLAMInterface
 {
    private final double octreeResolution;
-
-   private final List<Point3DReadOnly[]> originalPointCloudMap = new ArrayList<>();
-   private final List<RigidBodyTransformReadOnly> originalSensorPoses = new ArrayList<>();
 
    private final List<IhmcSLAMFrame> slamFrames = new ArrayList<>();
    private final List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
@@ -45,8 +43,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
    public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(pointCloudMessage);
-      originalPointCloudMap.add(frame.getOriginalPointCloud());
-      originalSensorPoses.add(frame.getOriginalSensorPose());
 
       slamFrames.add(frame);
       pointCloudMap.add(frame.getPointCloud());
@@ -62,8 +58,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
-      originalPointCloudMap.add(frame.getOriginalPointCloud());
-      originalSensorPoses.add(frame.getOriginalSensorPose());
 
       RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
 
@@ -87,8 +81,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
       IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
-      originalPointCloudMap.add(frame.getOriginalPointCloud());
-      originalSensorPoses.add(frame.getOriginalSensorPose());
 
       RigidBodyTransformReadOnly optimizedMultiplier = new RigidBodyTransform();
 
@@ -107,11 +99,9 @@ public class IhmcSLAM implements IhmcSLAMInterface
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
+   @Override
    public void clear()
    {
-      originalPointCloudMap.clear();
-      originalSensorPoses.clear();
-
       slamFrames.clear();
       pointCloudMap.clear();
       sensorPoses.clear();
@@ -123,16 +113,6 @@ public class IhmcSLAM implements IhmcSLAMInterface
          return true;
       else
          return false;
-   }
-
-   public List<Point3DReadOnly[]> getOriginalPointCloudMap()
-   {
-      return originalPointCloudMap;
-   }
-
-   public List<RigidBodyTransformReadOnly> getOriginalSensorPoses()
-   {
-      return originalSensorPoses;
    }
 
    public List<Point3DReadOnly[]> getPointCloudMap()

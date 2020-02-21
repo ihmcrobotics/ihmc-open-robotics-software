@@ -17,10 +17,8 @@ public interface IhmcSLAMInterface
    abstract void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage);
 
    abstract void updatePlanarRegionsMap();
-
-   abstract List<Point3DReadOnly[]> getOriginalPointCloudMap();
-
-   abstract List<RigidBodyTransformReadOnly> getOriginalSensorPoses();
+   
+   abstract void clear();
 
    abstract List<Point3DReadOnly[]> getPointCloudMap();
 
