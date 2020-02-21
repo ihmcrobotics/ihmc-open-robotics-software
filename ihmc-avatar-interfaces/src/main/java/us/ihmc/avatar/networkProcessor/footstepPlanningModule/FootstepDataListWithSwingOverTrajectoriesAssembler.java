@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
+package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import java.util.ArrayList;
 import java.util.List;

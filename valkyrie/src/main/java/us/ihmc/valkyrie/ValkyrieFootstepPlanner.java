@@ -7,7 +7,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 
