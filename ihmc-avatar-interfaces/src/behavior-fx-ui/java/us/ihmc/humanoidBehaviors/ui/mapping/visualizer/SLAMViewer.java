@@ -14,10 +14,10 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class IhmcSLAMViewer
+public class SLAMViewer
 {
    private static final Color DEFAULT_SENSOR_POSE_COLOR = Color.GREEN;
    private static final Color DEFAULT_POINT_CLOUD_COLOR = Color.BLUE;
@@ -27,7 +27,7 @@ public class IhmcSLAMViewer
    private final PointCloudGraphic stereoVisionPointCloudGraphic = new PointCloudGraphic(true);
    private final NormalOctreeGraphic normalOctreeGraphic = new NormalOctreeGraphic();
 
-   public IhmcSLAMViewer()
+   public SLAMViewer()
    {
       stereoVisionPointCloudGraphic.initializeMeshes();
       normalOctreeGraphic.initialize();
@@ -70,8 +70,8 @@ public class IhmcSLAMViewer
 
    public void addStereoMessage(StereoVisionPointCloudMessage message, Color sensorPoseColor, Color pointCloudColor)
    {
-      stereoVisionPointCloudGraphic.addPointsMeshes(IhmcSLAMTools.extractPointsFromMessage(message), pointCloudColor);
-      stereoVisionPointCloudGraphic.addSensorPoseMesh(IhmcSLAMTools.extractSensorPoseFromMessage(message), sensorPoseColor);
+      stereoVisionPointCloudGraphic.addPointsMeshes(SLAMTools.extractPointsFromMessage(message), pointCloudColor);
+      stereoVisionPointCloudGraphic.addSensorPoseMesh(SLAMTools.extractSensorPoseFromMessage(message), sensorPoseColor);
    }
 
    public void addOctree(NormalOcTree octree, Color color, double octreeResolution)

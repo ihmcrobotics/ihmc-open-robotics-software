@@ -25,11 +25,11 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 
-public class IhmcSLAMTools
+public class SLAMTools
 {
    private static OcTreeHitLocationExtractor ocTreeHitLocationExtractor = new OcTreeHitLocationExtractor();
 
@@ -349,7 +349,7 @@ public class IhmcSLAMTools
     * if there is not enough source points, think this frame is key frame.
     * return null.
     */
-   public static Point3D[] createSourcePointsToSensorPose(IhmcSLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints, double minimumOverlappedRatio,
+   public static Point3D[] createSourcePointsToSensorPose(SLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints, double minimumOverlappedRatio,
                                                           double windowMargin)
    {
       ocTreeHitLocationExtractor.clear();
@@ -430,7 +430,7 @@ public class IhmcSLAMTools
          newSourcePointToWorld.set(sourcePoint);
          sensorPoseToWorld.transform(newSourcePointToWorld);
 
-         double distance = IhmcSLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
+         double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
 
          if (distance >= 0)
          {

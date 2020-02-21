@@ -38,7 +38,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMModule;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -81,7 +81,7 @@ public class LIDARBasedREAModule
 
    private final AtomicReference<Boolean> preserveOcTreeHistory;
 
-   private final IhmcSLAMModule slamModule;
+   private final SLAMModule slamModule;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
@@ -138,7 +138,7 @@ public class LIDARBasedREAModule
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
 
-      slamModule = new IhmcSLAMModule(reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
+      slamModule = new SLAMModule(reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
       slamModule.start();
    }
 

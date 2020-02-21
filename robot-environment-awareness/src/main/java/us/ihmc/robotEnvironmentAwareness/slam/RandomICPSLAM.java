@@ -18,12 +18,12 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
-public class RandomICPSLAM extends IhmcSLAM
+public class RandomICPSLAM extends SLAM
 {
    public static final boolean DEBUG = false;
 
@@ -108,7 +108,7 @@ public class RandomICPSLAM extends IhmcSLAM
       octree.clear();
    }
 
-   private void insertNewPointCloud(IhmcSLAMFrame frame)
+   private void insertNewPointCloud(SLAMFrame frame)
    {
       Point3DReadOnly[] pointCloud = frame.getPointCloud();
       RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
@@ -117,7 +117,7 @@ public class RandomICPSLAM extends IhmcSLAM
       int numberOfPoints = getLatestFrame().getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(IhmcSLAMTools.toScan(pointCloud, sensorPose.getTranslation(), DEFAULT_WINDOW_MINIMUM_DEPTH, DEFAULT_WINDOW_MAXIMUM_DEPTH));
+      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), DEFAULT_WINDOW_MINIMUM_DEPTH, DEFAULT_WINDOW_MAXIMUM_DEPTH));
 
       octree.insertScanCollection(scanCollection, false);
 
@@ -135,7 +135,7 @@ public class RandomICPSLAM extends IhmcSLAM
    {
       super.addFirstFrame(pointCloudMessage);
 
-      IhmcSLAMFrame firstFrame = getLatestFrame();
+      SLAMFrame firstFrame = getLatestFrame();
 
       insertNewPointCloud(firstFrame);
    }
@@ -147,7 +147,7 @@ public class RandomICPSLAM extends IhmcSLAM
 
       if (success)
       {
-         IhmcSLAMFrame newFrame = getLatestFrame();
+         SLAMFrame newFrame = getLatestFrame();
          insertNewPointCloud(newFrame);
 
          octree.updateNormals();
@@ -168,10 +168,10 @@ public class RandomICPSLAM extends IhmcSLAM
    }
 
    @Override
-   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       // see the overlapped area.
-      Point3D[] sourcePointsToSensor = IhmcSLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints.get(), minimumOverlappedRatio.get(),
+      Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame, octree, numberOfSourcePoints.get(), minimumOverlappedRatio.get(),
                                                                                     windowMargin.get());
 
       if (sourcePointsToSensor == null)
@@ -182,7 +182,7 @@ public class RandomICPSLAM extends IhmcSLAM
       }
       else
       {
-         this.sourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
+         this.sourcePointsToWorld = SLAMTools.createConvertedPointsToWorld(frame.getInitialSensorPoseToWorld(), sourcePointsToSensor);
 
          RigidBodyTransformReadOnly transformWorldToSensorPose = frame.getInitialSensorPoseToWorld();
          RandomICPSLAMFrameOptimizerCostFunction costFunction = new RandomICPSLAMFrameOptimizerCostFunction(transformWorldToSensorPose, sourcePointsToSensor);
@@ -199,7 +199,7 @@ public class RandomICPSLAM extends IhmcSLAM
          }
          else
          {
-            int numberOfInliers = IhmcSLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, searchingSize.get());
+            int numberOfInliers = SLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor, searchingSize.get());
             if (numberOfInliers > minimumInliersRatio.get() * sourcePointsToSensor.length)
             {
                if (DEBUG)
@@ -231,7 +231,7 @@ public class RandomICPSLAM extends IhmcSLAM
             {
                RigidBodyTransform optimizedSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
                optimizedSensorPose.multiply(transformer);
-               correctedSourcePointsToWorld = IhmcSLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
+               correctedSourcePointsToWorld = SLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
             }
 
             return transformer;
@@ -249,7 +249,7 @@ public class RandomICPSLAM extends IhmcSLAM
       return sourcePointsToWorld;
    }
 
-   public void updateParameters(IhmcSLAMParameters parameters)
+   public void updateParameters(RandomICPSLAMParameters parameters)
    {
       numberOfSourcePoints.set(parameters.getNumberOfSourcePoints());
       searchingSize.set(parameters.getMaximumICPSearchingSize());
@@ -319,7 +319,7 @@ public class RandomICPSLAM extends IhmcSLAM
             newSourcePointToWorld.set(sourcePoint);
             newSensorPose.transform(newSourcePointToWorld);
 
-            double distance = IhmcSLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE);
+            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, DEFAULT_MAXIMUM_OCTREE_SEARCHING_SIZE);
 
             if (distance < 0)
             {

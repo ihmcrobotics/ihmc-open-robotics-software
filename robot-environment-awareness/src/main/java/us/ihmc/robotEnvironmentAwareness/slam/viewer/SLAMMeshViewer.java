@@ -28,7 +28,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.SLAMOcTreeMeshBuild
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
-public class IhmcSLAMMeshViewer
+public class SLAMMeshViewer
 {
    private static final int SLOW_PACE_UPDATE_PERIOD = 2000;
    private static final int MEDIUM_PACE_UPDATE_PERIOD = 100;
@@ -50,7 +50,7 @@ public class IhmcSLAMMeshViewer
    private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
    private final Map<AtomicReference<Boolean>, Node> enableTopicToNode = new HashMap<>();
 
-   public IhmcSLAMMeshViewer(REAUIMessager uiMessager)
+   public SLAMMeshViewer(REAUIMessager uiMessager)
    {
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.SLAMPlanarRegionsState, REAModuleAPI.ShowPlanarRegionsMap,
                                                               REAModuleAPI.SLAMVizClear, REAModuleAPI.SLAMClear);

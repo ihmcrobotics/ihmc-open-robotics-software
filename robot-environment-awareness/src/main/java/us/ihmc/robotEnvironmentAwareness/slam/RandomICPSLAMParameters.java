@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-public class IhmcSLAMParameters
+public class RandomICPSLAMParameters
 {
    private double octreeResolution;
    private int numberOfSourcePoints;
@@ -23,17 +23,17 @@ public class IhmcSLAMParameters
    private static final double DEFAULT_WINDOW_MARGIN = 0.1;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
-   public IhmcSLAMParameters()
+   public RandomICPSLAMParameters()
    {
       setDefaultParameters();
    }
 
-   public IhmcSLAMParameters(IhmcSLAMParameters other)
+   public RandomICPSLAMParameters(RandomICPSLAMParameters other)
    {
       set(other);
    }
 
-   public void set(IhmcSLAMParameters other)
+   public void set(RandomICPSLAMParameters other)
    {
       octreeResolution = other.octreeResolution;
       numberOfSourcePoints = other.numberOfSourcePoints;

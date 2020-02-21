@@ -12,7 +12,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.IhmcSLAMViewer;
+import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.SLAMViewer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
@@ -21,7 +21,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SimulatedStereoVisionPointCloudMessageLibrary;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -31,7 +31,7 @@ public class SimulatedPointCloudTest
    @Test
    public void testViewer()
    {
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       String pointCloudPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       File pointCloudFile = new File(pointCloudPath);
       List<StereoVisionPointCloudMessage> messagesFromFile = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -51,7 +51,7 @@ public class SimulatedPointCloudTest
       double stairLength = 0.25;
 
       StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength);
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       viewer.addStereoMessage(message);
       viewer.start("testSimulatedPointCloudFrameForStair");
 
@@ -81,7 +81,7 @@ public class SimulatedPointCloudTest
                                                                                                                           stairWidth,
                                                                                                                           stairLength - movingForward,
                                                                                                                           stairLength + movingForward, true);
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       viewer.addStereoMessage(messageOne, Color.BLUE);
       viewer.addStereoMessage(messageTwo, Color.GREEN);
       viewer.start("testSimulatedContinuousFramesForStair");
@@ -108,7 +108,7 @@ public class SimulatedPointCloudTest
       StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, stairHeight,
                                                                                                                           stairWidth, stairLength);
 
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       viewer.addStereoMessage(messageOne, Color.BLUE);
       viewer.addStereoMessage(messageTwo, Color.GREEN);
       viewer.start("testSimulatedBadFrame");
@@ -132,14 +132,14 @@ public class SimulatedPointCloudTest
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.02);
 
       StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength);
-      Point3DReadOnly[] pointCloud = IhmcSLAMTools.extractPointsFromMessage(message);
-      RigidBodyTransformReadOnly sensorPose = IhmcSLAMTools.extractSensorPoseFromMessage(message);
+      Point3DReadOnly[] pointCloud = SLAMTools.extractPointsFromMessage(message);
+      RigidBodyTransformReadOnly sensorPose = SLAMTools.extractSensorPoseFromMessage(message);
 
-      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
+      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
                                                                                                planarRegionSegmentationParameters);
       PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
 
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       viewer.addPlanarRegions(planarRegionsMap);
       viewer.start("testPlanarRegionsForSimulatedPointCloudFrame");
 
@@ -166,11 +166,11 @@ public class SimulatedPointCloudTest
 
       StereoVisionPointCloudMessage firstMessage = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(0.0, groundWidth, stairLength,
                                                                                                                             stairLength, false);
-      Point3DReadOnly[] firstPointCloud = IhmcSLAMTools.extractPointsFromMessage(firstMessage);
-      RigidBodyTransformReadOnly firstSensorPose = IhmcSLAMTools.extractSensorPoseFromMessage(firstMessage);
+      Point3DReadOnly[] firstPointCloud = SLAMTools.extractPointsFromMessage(firstMessage);
+      RigidBodyTransformReadOnly firstSensorPose = SLAMTools.extractSensorPoseFromMessage(firstMessage);
       pointCloudMap.add(firstPointCloud);
 
-      List<PlanarRegionSegmentationRawData> firstRawData = IhmcSLAMTools.computePlanarRegionRawData(firstPointCloud, firstSensorPose.getTranslation(),
+      List<PlanarRegionSegmentationRawData> firstRawData = SLAMTools.computePlanarRegionRawData(firstPointCloud, firstSensorPose.getTranslation(),
                                                                                                     octreeResolution, planarRegionSegmentationParameters);
       PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(firstRawData, concaveHullFactoryParameters, polygonizerParameters);
 
@@ -181,17 +181,17 @@ public class SimulatedPointCloudTest
          StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, 0.0, groundWidth,
                                                                                                                           stairLength, stairLength, false);
 
-         Point3DReadOnly[] pointCloud = IhmcSLAMTools.extractPointsFromMessage(message);
-         RigidBodyTransformReadOnly sensorPose = IhmcSLAMTools.extractSensorPoseFromMessage(message);
+         Point3DReadOnly[] pointCloud = SLAMTools.extractPointsFromMessage(message);
+         RigidBodyTransformReadOnly sensorPose = SLAMTools.extractSensorPoseFromMessage(message);
          pointCloudMap.add(pointCloud);
 
-         List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
+         List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
                                                                                                   planarRegionSegmentationParameters);
 
          planarRegionsMap = buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters, polygonizerParameters);
       }
 
-      IhmcSLAMViewer viewer = new IhmcSLAMViewer();
+      SLAMViewer viewer = new SLAMViewer();
       viewer.addPlanarRegions(planarRegionsMap);
       for (int i = 0; i < pointCloudMap.size(); i++)
       {

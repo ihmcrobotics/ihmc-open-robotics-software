@@ -14,14 +14,14 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class IhmcSLAM implements IhmcSLAMInterface
+public class SLAM implements SLAMInterface
 {
    private final double octreeResolution;
 
-   private final AtomicReference<IhmcSLAMFrame> latestSlamFrame = new AtomicReference<>(null);
+   private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
    private final List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
 
@@ -31,7 +31,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
    protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
-   public IhmcSLAM(double octreeResolution)
+   public SLAM(double octreeResolution)
    {
       this.octreeResolution = octreeResolution;
 
@@ -42,13 +42,13 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      IhmcSLAMFrame frame = new IhmcSLAMFrame(pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       latestSlamFrame.set(frame);
 
       pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
 
-      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(frame.getOriginalPointCloud(),
+      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(frame.getOriginalPointCloud(),
                                                                                                frame.getInitialSensorPoseToWorld().getTranslation(),
                                                                                                octreeResolution, planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
@@ -57,7 +57,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
 
       RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
 
@@ -81,7 +81,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
-      IhmcSLAMFrame frame = new IhmcSLAMFrame(getLatestFrame(), pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
       latestSlamFrame.set(frame);
       
       RigidBodyTransformReadOnly optimizedMultiplier = new RigidBodyTransform();
@@ -95,7 +95,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
    @Override
    public void updatePlanarRegionsMap()
    {
-      List<PlanarRegionSegmentationRawData> rawData = IhmcSLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, octreeResolution,
+      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloudMap, sensorPoses, octreeResolution,
                                                                                                planarRegionSegmentationParameters);
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
@@ -131,7 +131,7 @@ public class IhmcSLAM implements IhmcSLAMInterface
       return planarRegionsMap;
    }
 
-   protected IhmcSLAMFrame getLatestFrame()
+   protected SLAMFrame getLatestFrame()
    {
       return latestSlamFrame.get();
    }

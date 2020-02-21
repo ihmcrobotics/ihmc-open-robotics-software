@@ -25,7 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHan
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class IhmcSLAMModule
+public class SLAMModule
 {
    private final Messager reaMessager;
 
@@ -48,15 +48,15 @@ public class IhmcSLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   private final AtomicReference<IhmcSLAMParameters> ihmcSLAMParameters;
+   private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
 
-   public IhmcSLAMModule(Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
+   public SLAMModule(Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
    {
       this.reaMessager = reaMessager;
       enable = reaMessager.createInput(slamEnableTopic, true);
       planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
 
-      ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new IhmcSLAMParameters());
+      ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
    }
@@ -147,7 +147,7 @@ public class IhmcSLAMModule
          PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
          reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
 
-         IhmcSLAMFrame latestFrame = slam.getLatestFrame();
+         SLAMFrame latestFrame = slam.getLatestFrame();
          Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
          Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
          Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
@@ -210,7 +210,7 @@ public class IhmcSLAMModule
 
    private void updateSLAMParameters()
    {
-      IhmcSLAMParameters parameters = ihmcSLAMParameters.get();
+      RandomICPSLAMParameters parameters = ihmcSLAMParameters.get();
       slam.updateParameters(parameters);
    }
 
