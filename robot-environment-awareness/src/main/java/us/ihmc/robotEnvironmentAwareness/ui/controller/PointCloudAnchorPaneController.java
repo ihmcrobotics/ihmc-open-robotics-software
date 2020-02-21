@@ -16,7 +16,7 @@ import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMess
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.slam.viewer.IhmcSLAMMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.UIConnectionHandler;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
@@ -70,7 +70,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
 
-      ihmcSLAMViewer = new IhmcSLAMMeshViewer(uiMessager);
+      ihmcSLAMViewer = new SLAMMeshViewer(uiMessager);
 
       uiStaticMessager = uiMessager;
       FXMLLoader loader = new FXMLLoader();
@@ -149,7 +149,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
 
    @FXML
    private SLAMAnchorPaneController slamAnchorPaneController;
-   private IhmcSLAMMeshViewer ihmcSLAMViewer;
+   private SLAMMeshViewer ihmcSLAMViewer;
    private UIConnectionHandler uiConnectionHandler;
    private Stage stage;
 

@@ -5,7 +5,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.IhmcSLAMParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.RandomICPSLAMParametersProperty;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
@@ -45,7 +45,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @FXML
    private Slider minimumInliersRatioSlider;
 
-   private final IhmcSLAMParametersProperty ihmcSLAMParametersProperty = new IhmcSLAMParametersProperty(this, "ihmcSLAMParameters");
+   private final RandomICPSLAMParametersProperty ihmcSLAMParametersProperty = new RandomICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
    {

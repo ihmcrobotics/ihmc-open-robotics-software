@@ -24,8 +24,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationPara
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMFrame;
-import us.ihmc.robotEnvironmentAwareness.slam.IhmcSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
+import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -190,7 +190,7 @@ public class REAModuleAPI
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = SLAMCategory.child(PlanarRegions).topic(Data);
    public static final Topic<Pose3D> SLAMSensorFrameState = SLAMCategory.child(SensorFrame).topic(Data);
 
-   public static final Topic<IhmcSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
+   public static final Topic<RandomICPSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
 
    public static final Topic<Boolean> ShowLatestFrame = SLAMCategory.child(UI).child(DepthCloud).child(Buffer).topic(Enable);
    public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).child(Custom).topic(Enable);

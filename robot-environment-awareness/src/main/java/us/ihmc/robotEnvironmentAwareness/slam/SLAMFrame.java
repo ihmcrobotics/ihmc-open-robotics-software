@@ -5,11 +5,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.IhmcSLAMTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
-public class IhmcSLAMFrame
+public class SLAMFrame
 {
-   protected final IhmcSLAMFrame previousFrame;
+   protected final SLAMFrame previousFrame;
 
    // from message.
    private final RigidBodyTransformReadOnly originalSensorPoseToWorld;
@@ -30,18 +30,18 @@ public class IhmcSLAMFrame
    protected final Point3DReadOnly[] pointCloudToSensorFrame;
    protected final Point3D[] optimizedPointCloudToWorld;
 
-   public IhmcSLAMFrame(StereoVisionPointCloudMessage message)
+   public SLAMFrame(StereoVisionPointCloudMessage message)
    {
       previousFrame = null;
 
-      originalSensorPoseToWorld = IhmcSLAMTools.extractSensorPoseFromMessage(message);
+      originalSensorPoseToWorld = SLAMTools.extractSensorPoseFromMessage(message);
 
       transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
       optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
-      originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
+      originalPointCloudToWorld = SLAMTools.extractPointsFromMessage(message);
+      pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
          optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
@@ -49,11 +49,11 @@ public class IhmcSLAMFrame
       updateOptimizedPointCloudAndSensorPose();
    }
 
-   public IhmcSLAMFrame(IhmcSLAMFrame frame, StereoVisionPointCloudMessage message)
+   public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
       previousFrame = frame;
 
-      originalSensorPoseToWorld = IhmcSLAMTools.extractSensorPoseFromMessage(message);
+      originalSensorPoseToWorld = SLAMTools.extractSensorPoseFromMessage(message);
 
       RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
       transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
@@ -63,8 +63,8 @@ public class IhmcSLAMFrame
       transformToWorld.multiply(transformFromPreviousFrame);
       sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
 
-      originalPointCloudToWorld = IhmcSLAMTools.extractPointsFromMessage(message);
-      pointCloudToSensorFrame = IhmcSLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
+      originalPointCloudToWorld = SLAMTools.extractPointsFromMessage(message);
+      pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
          optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
@@ -129,7 +129,7 @@ public class IhmcSLAMFrame
          return false;
    }
    
-   public IhmcSLAMFrame getPreviousFrame()
+   public SLAMFrame getPreviousFrame()
    {
       return previousFrame;
    }

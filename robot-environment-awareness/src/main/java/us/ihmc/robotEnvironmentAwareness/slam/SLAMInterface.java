@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public interface IhmcSLAMInterface
+public interface SLAMInterface
 {
    abstract void addFirstFrame(StereoVisionPointCloudMessage pointCloudMessage);
 
@@ -31,7 +31,7 @@ public interface IhmcSLAMInterface
       if this frame needs drift correction, return optimized transform;
       if this frame should not be mergeable, return null;
     */
-   default RigidBodyTransformReadOnly computeFrameCorrectionTransformer(IhmcSLAMFrame frame)
+   default RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       return new RigidBodyTransform();
    }
