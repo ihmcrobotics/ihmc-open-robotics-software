@@ -133,8 +133,8 @@ public class SLAMModule
          success = slam.addFrame(pointCloudToCompute);
       }
       pointCloudQueue.removeFirst();
-      reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getPointCloudMap().size() + "]");
-      stringToReport = stringToReport + success + " " + slam.getPointCloudMap().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
+      stringToReport = stringToReport + success + " " + slam.getSensorPoses().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(REAModuleAPI.SLAMStatus, stringToReport);
 
       if (success)

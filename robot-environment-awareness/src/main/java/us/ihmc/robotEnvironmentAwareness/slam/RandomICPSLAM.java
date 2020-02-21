@@ -30,8 +30,7 @@ public class RandomICPSLAM extends SLAMBasics
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
-
-   private final NormalOcTree octree;
+   
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
 
    private final GradientDescentModule optimizer;
@@ -66,8 +65,6 @@ public class RandomICPSLAM extends SLAMBasics
    public RandomICPSLAM(double octreeResolution)
    {
       super(octreeResolution);
-
-      octree = new NormalOcTree(octreeResolution);
 
       segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
