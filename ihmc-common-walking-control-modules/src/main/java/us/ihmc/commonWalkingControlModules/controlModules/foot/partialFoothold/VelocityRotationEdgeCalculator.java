@@ -30,12 +30,7 @@ import java.awt.*;
 
 public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
-   private final YoVariableRegistry registry;
-
    private final MovingReferenceFrame soleFrame;
-
-   private final YoFramePoint2D linePointA;
-   private final YoFramePoint2D linePointB;
 
    private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
    private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
@@ -46,14 +41,14 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
+   private final EdgeVisualizer edgeVisualizer;
+
    public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
-      linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
-      linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
       YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
@@ -69,15 +64,14 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
-      parentRegistry.addChild(registry);
+      if (graphicsListRegistry != null)
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Velocity", registry, graphicsListRegistry);
+      else
+         edgeVisualizer = null;
 
       reset();
 
-      if (graphicsListRegistry != null)
-      {
-         Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "LineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
-      }
+      parentRegistry.addChild(registry);
    }
 
    private final FrameVector3D tempPointOfRotation = new FrameVector3D();
@@ -111,37 +105,20 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       lineOfRotationStandardDeviation.update();
 
-      updateGraphics();
+      if (edgeVisualizer != null)
+         edgeVisualizer.updateGraphics(lineOfRotationInSole);
    }
 
    public void reset()
    {
-      linePointA.setToNaN();
-      linePointB.setToNaN();
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
 
       filteredPointOfRotation.reset();
       filteredAxisOfRotation.reset();
       lineOfRotationInSole.setToZero();
 
       lineOfRotationStandardDeviation.reset();
-   }
-
-   private final FrameLine3DBasics tempLineOfRotationInWorld = new FrameLine3D();
-
-   private void updateGraphics()
-   {
-      tempLineOfRotationInWorld.setToZero(soleFrame);
-      tempLineOfRotationInWorld.getPoint().set(lineOfRotationInSole.getPoint());
-      tempLineOfRotationInWorld.getDirection().set(lineOfRotationInSole.getDirection());
-      tempLineOfRotationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-
-      linePointA.set(tempLineOfRotationInWorld.getDirection());
-      linePointA.scale(-0.05);
-      linePointA.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
-
-      linePointB.set(tempLineOfRotationInWorld.getDirection());
-      linePointB.scale(0.05);
-      linePointB.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
    }
 
    public FrameLine2DReadOnly getLineOfRotation()
