@@ -17,10 +17,13 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.awt.*;
 
+/**
+ * This class aims to calculate the edge of rotation of the foot by fitting a line to the the CoP history when the foot is rotating.
+ * It likely will not produce a good estimate of the actual direction of the rotation, because the measured CoP is likely going to be similar
+ * to the same location, unless the foot rotates for a while. However, it will provide a good estimate of the location of the line.
+ */
 public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 {
-   private final YoVariableRegistry registry;
-
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
 
@@ -30,7 +33,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
       linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
 

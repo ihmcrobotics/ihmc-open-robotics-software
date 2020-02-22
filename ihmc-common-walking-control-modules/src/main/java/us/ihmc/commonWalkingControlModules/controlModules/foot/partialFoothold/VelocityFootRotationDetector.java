@@ -11,10 +11,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * This class aims at detecting whether or not the foot is rotating. It uses that by integrating up the angular velocity of the foot in order to compute
+ * the total angle of rotation.
+ */
 public class VelocityFootRotationDetector implements FootRotationDetector
 {
-   private final YoVariableRegistry registry;
-
    private final double dt;
    private final MovingReferenceFrame soleFrame;
 
@@ -31,7 +33,7 @@ public class VelocityFootRotationDetector implements FootRotationDetector
       this.soleFrame = soleFrame;
       this.dt = dt;
 
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
@@ -62,6 +64,7 @@ public class VelocityFootRotationDetector implements FootRotationDetector
       absoluteFootOmega.set(Math.sqrt(omegaSquared));
       if (absoluteFootOmega.getValue() > omegaThresholdForEstimation.getValue())
       {
+         // TODO does the account for rotating back the other direction
          double omega = Math.sqrt(omegaSquared);
          integratedRotationAngle.add(dt * omega);
       }
