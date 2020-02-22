@@ -10,4 +10,9 @@ public interface RotationEdgeCalculator
    void reset();
 
    FrameLine2DReadOnly getLineOfRotation();
+
+   static double getLineVizWidth()
+   {
+      return 0.1;
+   }
 }

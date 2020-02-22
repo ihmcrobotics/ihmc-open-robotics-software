@@ -24,28 +24,25 @@ import java.awt.*;
  */
 public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 {
-   private final YoFramePoint2D linePointA;
-   private final YoFramePoint2D linePointB;
-
    private final OnlineLine2DLinearRegression lineCalculator;
    private final FrameLine2D lineOfRotationInWorld = new FrameLine2D();
    private final YoFrameLine2D lineOfRotationInSole;
 
+   private final EdgeVisualizer edgeVisualizer;
+
    public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
-      linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
-      linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
 
       lineCalculator = new OnlineLine2DLinearRegression("FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(side.getCamelCaseName() + "LineOfRotation", "", soleFrame, registry);
 
-      parentRegistry.addChild(registry);
       if (graphicsListRegistry != null)
-      {
-         Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "LineOfRotation", linePointA, linePointB, Color.RED, 0.005, 0.01);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
-      }
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "CoPHistory", registry, graphicsListRegistry);
+      else
+         edgeVisualizer = null;
+
+      parentRegistry.addChild(registry);
    }
 
    private final FramePoint2D tempPoint = new FramePoint2D();
@@ -57,27 +54,16 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationInWorld.set(ReferenceFrame.getWorldFrame(), lineCalculator.getMeanLine());
       lineOfRotationInSole.setMatchingFrame(lineOfRotationInWorld);
 
-      updateGraphics();
+      if (edgeVisualizer != null)
+         edgeVisualizer.updateGraphics(lineOfRotationInSole);
    }
 
    public void reset()
    {
-      linePointA.setToNaN();
-      linePointB.setToNaN();
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
 
       lineCalculator.reset();
-   }
-
-
-   private void updateGraphics()
-   {
-      linePointA.set(lineOfRotationInWorld.getDirection());
-      linePointA.scale(-0.05);
-      linePointA.add(lineOfRotationInWorld.getPoint());
-
-      linePointB.set(lineOfRotationInWorld.getDirection());
-      linePointB.scale(0.05);
-      linePointB.add(lineOfRotationInWorld.getPoint());
    }
 
    public FrameLine2DReadOnly getLineOfRotation()

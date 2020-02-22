@@ -17,10 +17,12 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.awt.Color;
 
+/**
+ * This calculates the edge by looking at the direction of rotation as the cross product between the foot normal and the ground plane normal. The location of
+ * the line is then centered on the measured Center of Pressure. The problem with this approach is that it assumes that the ground plane normal is vertical.
+ */
 public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
 {
-   private final YoVariableRegistry registry;
-
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final MovingReferenceFrame soleFrame;
@@ -29,52 +31,46 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
    private final FrameVector3D footNormal = new FrameVector3D();
    private final YoFrameVector3D groundPlaneNormal;
 
-   private final YoFramePoint2D linePointA;
-   private final YoFramePoint2D linePointB;
-
    private final FrameLine2D lineOfRotationInWorldFrame = new FrameLine2D();
 
    private final YoFrameLine2D lineOfRotationInSole;
 
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
+   private final EdgeVisualizer edgeVisualizer;
+
    public GeometricRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
-      linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
-      linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
       YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
 
       groundPlaneNormal = new YoFrameVector3D(side.getShortLowerCaseName() + "PlaneNormal", worldFrame, registry);
+      groundPlaneNormal.setZ(1.0);
 
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
-      parentRegistry.addChild(registry);
+      if (graphicsListRegistry != null)
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Geometric", registry, graphicsListRegistry);
+      else
+         edgeVisualizer = null;
 
       reset();
 
-      if (graphicsListRegistry != null)
-      {
-         Artifact lineArtifact = new YoArtifactLineSegment2d(side.getLowerCaseName() + "LineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
-         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
-      }
+      parentRegistry.addChild(registry);
    }
 
    private final FramePoint3D tempPointOfRotation = new FramePoint3D();
 
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      groundPlaneNormal.set(worldFrame, 0.0, 0.0, 1.0);
-
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
-      footNormal.normalize();
       footNormal.changeFrame(worldFrame);
       lineOfContact.cross(groundPlaneNormal, footNormal);
 
@@ -83,28 +79,17 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationInWorldFrame.set(tempPointOfRotation, lineOfContact);
       lineOfRotationInSole.setMatchingFrame(lineOfRotationInWorldFrame);
 
-      updateGraphics();
+      if (edgeVisualizer != null)
+         edgeVisualizer.updateGraphics(lineOfRotationInSole);
    }
 
    public void reset()
    {
-      linePointA.setToNaN();
-      linePointB.setToNaN();
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
 
       lineOfRotationInSole.setToZero();
-
       lineOfRotationStandardDeviation.reset();
-   }
-
-   private void updateGraphics()
-   {
-      linePointA.set(lineOfRotationInWorldFrame.getDirection());
-      linePointA.scale(-0.05);
-      linePointA.add(lineOfRotationInWorldFrame.getPoint());
-
-      linePointB.set(lineOfRotationInWorldFrame.getDirection());
-      linePointB.scale(0.05);
-      linePointB.add(lineOfRotationInWorldFrame.getPoint());
    }
 
    public FrameLine2DReadOnly getLineOfRotation()
