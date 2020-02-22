@@ -13,6 +13,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+/**
+ * This class is designed to detect whether or not a foot is rotating. It does this by detecting if the angular velocity of the foot is above a certain
+ * threshold, and also if a certain point on the foot has lifted or dropped above a certain threshold.
+ */
 public class KinematicFootRotationDetector implements FootRotationDetector
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

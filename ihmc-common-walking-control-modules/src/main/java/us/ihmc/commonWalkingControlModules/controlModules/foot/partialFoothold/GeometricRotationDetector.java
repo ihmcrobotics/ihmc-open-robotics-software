@@ -8,6 +8,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
+/**
+ * This class is designed to detect whether or not the foot is rotating. It does this by looking at the orientation of the foot with respect
+ * to the world, finding the angle between the ground plane normal and the foot sole normal. The problem with this approach is that it assumes
+ * that the ground plane is flat.
+ */
 public class GeometricRotationDetector implements FootRotationDetector
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -24,6 +29,7 @@ public class GeometricRotationDetector implements FootRotationDetector
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
+      groundPlaneNormal.setZ(1.0);
 
       angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
       angleThreshold = explorationParameters.getGeometricDetectionAngleThreshold();
@@ -38,8 +44,6 @@ public class GeometricRotationDetector implements FootRotationDetector
 
    public boolean compute()
    {
-      groundPlaneNormal.set(worldFrame, 0.0, 0.0, 1.0);
-
       double cosAlpha = Math.abs(groundPlaneNormal.dot(footNormal));
       double alpha = Math.acos(cosAlpha);
       angleFootGround.set(alpha);
