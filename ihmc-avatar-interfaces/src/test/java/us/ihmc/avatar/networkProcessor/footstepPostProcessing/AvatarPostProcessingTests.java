@@ -20,7 +20,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -50,6 +50,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
@@ -97,7 +98,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
    private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
 
-   private FootstepPlanningToolboxModule footstepToolboxModule;
+   private FootstepPlanningModule footstepToolboxModule;
    private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
 
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -115,7 +116,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepToolboxModule = new FootstepPlanningToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
+      footstepToolboxModule = new FootstepPlanningModule(getRobotModel());
+      footstepToolboxModule.setupWithRos(DomainFactory.PubSubImplementation.INTRAPROCESS);
       postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       plannerOutputStatus = new AtomicReference<>();
@@ -165,7 +167,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       plannerOutputStatus = null;
       postProcessingOutputStatus = null;
 
-      footstepToolboxModule.destroy();
+      footstepToolboxModule.closeAndDispose();
       postProcessingToolboxModule.destroy();
       footstepToolboxModule = null;
       postProcessingToolboxModule = null;
@@ -469,8 +471,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.getGoalOrientationInWorld().set(goalPose.getOrientation());
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-
       request.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+
+      double timeout = 12.0;
+      request.setTimeout(timeout);
 
       return request;
    }
@@ -494,7 +498,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       double maxTimeToWait = 20.0;
       long startTime = System.nanoTime();
-      while (plannerOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
+      while ((plannerOutputStatus.get() == null
+              || FootstepPlanningResult.fromByte(plannerOutputStatus.get().getFootstepPlanningResult()) == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+             && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
       {
          ThreadTools.sleep(100);
       }
