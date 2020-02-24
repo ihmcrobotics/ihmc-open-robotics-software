@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -39,8 +40,10 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final EdgeVisualizer edgeVisualizer;
 
-   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
-                                         YoGraphicsListRegistry graphicsListRegistry)
+   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
+
+   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
@@ -67,6 +70,9 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       else
          edgeVisualizer = null;
 
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+
       reset();
 
       parentRegistry.addChild(registry);
@@ -74,7 +80,22 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final FrameVector3D tempPointOfRotation = new FrameVector3D();
 
+   @Override
+   public void reset()
+   {
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
 
+      filteredPointOfRotation.reset();
+      filteredAxisOfRotation.reset();
+      lineOfRotationInSole.setToZero();
+
+      stabilityEvaluator.reset();
+
+      lineOfRotationStandardDeviation.reset();
+   }
+
+   @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
@@ -101,24 +122,24 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       lineOfRotationStandardDeviation.update();
 
+      stabilityEvaluator.update();
+
       if (edgeVisualizer != null)
+      {
+         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
+      }
    }
 
-   public void reset()
-   {
-      if (edgeVisualizer != null)
-         edgeVisualizer.reset();
-
-      filteredPointOfRotation.reset();
-      filteredAxisOfRotation.reset();
-      lineOfRotationInSole.setToZero();
-
-      lineOfRotationStandardDeviation.reset();
-   }
-
+   @Override
    public FrameLine2DReadOnly getLineOfRotation()
    {
       return lineOfRotationInSole;
+   }
+
+   @Override
+   public boolean isRotationEdgeTrusted()
+   {
+      return stabilityEvaluator.isEdgeVelocityStable();
    }
 }

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,15 +29,22 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    private final FrameLine2D lineOfRotationInWorld = new FrameLine2D();
    private final YoFrameLine2D lineOfRotationInSole;
 
+   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
 
-   public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   private final FramePoint2D tempPoint = new FramePoint2D();
+
+   public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                           YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
+
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
 
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);
@@ -46,8 +54,17 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint2D tempPoint = new FramePoint2D();
+   @Override
+   public void reset()
+   {
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
 
+      stabilityEvaluator.reset();
+      lineCalculator.reset();
+   }
+
+   @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
       tempPoint.setMatchingFrame(measuredCoP);
@@ -55,21 +72,24 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationInWorld.set(ReferenceFrame.getWorldFrame(), lineCalculator.getMeanLine());
       lineOfRotationInSole.setMatchingFrame(lineOfRotationInWorld);
 
+      stabilityEvaluator.update();
+
       if (edgeVisualizer != null)
+      {
+         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
+      }
    }
 
-   public void reset()
-   {
-      if (edgeVisualizer != null)
-         edgeVisualizer.reset();
-
-      lineCalculator.reset();
-   }
-
+   @Override
    public FrameLine2DReadOnly getLineOfRotation()
    {
       return lineOfRotationInSole;
    }
 
+   @Override
+   public boolean isRotationEdgeTrusted()
+   {
+      return stabilityEvaluator.isEdgeVelocityStable();
+   }
 }
