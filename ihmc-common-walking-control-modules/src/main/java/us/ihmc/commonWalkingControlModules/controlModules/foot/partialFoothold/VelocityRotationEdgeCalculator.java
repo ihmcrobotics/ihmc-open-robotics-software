@@ -2,17 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -32,7 +25,10 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 {
    private final MovingReferenceFrame soleFrame;
 
+   private final FixedFramePoint2DBasics pointOfRotation;
    private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
+
+   private final FixedFrameVector2DBasics axisOfRotation;
    private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
 
    private final FixedFrameLine2DBasics lineOfRotationInSole;
@@ -50,22 +46,24 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
-      YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
-      YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
-      lineOfRotationInSole = new YoFrameLine2D(point, direction);
+      pointOfRotation = new YoFramePoint2D(side.getLowerCaseName() + "PointOfRotation", soleFrame, registry);
+      axisOfRotation = new YoFrameVector2D(side.getLowerCaseName() + "AxisOfRotation", soleFrame, registry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
       filterBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "filterBreakFrequency", registry, 1.0);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
-      filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
-      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
+      filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
+      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);
+
+      lineOfRotationInSole = new YoFrameLine2D(filteredPointOfRotation, filteredAxisOfRotation);
+
 
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Velocity", registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Velocity", Color.GREEN, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 
@@ -87,21 +85,19 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       tempPointOfRotation.setToZero(soleFrame);
       tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
       tempPointOfRotation.scale(1.0 / omegaSquared);
-      lineOfRotationInSole.setToZero();
-      lineOfRotationInSole.getPoint().set(tempPointOfRotation);
-      lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
-      lineOfRotationInSole.getDirection().scale(1.0 / omega);
+      pointOfRotation.set(tempPointOfRotation);
 
-      if (lineOfRotationInSole.getDirection().dot(filteredAxisOfRotation) < 0.0)
+      axisOfRotation.set(soleFrameTwist.getAngularPart());
+      axisOfRotation.scale(1.0 / omega);
+
+      if (axisOfRotation.dot(filteredAxisOfRotation) < 0.0)
       {
-         lineOfRotationInSole.getDirection().negate();
+         axisOfRotation.negate();
       }
 
       // Filter the line of rotation:
-      filteredPointOfRotation.update(lineOfRotationInSole.getPoint());
-      filteredAxisOfRotation.update(lineOfRotationInSole.getDirection());
-      lineOfRotationInSole.set(filteredPointOfRotation, filteredAxisOfRotation);
-      lineOfRotationInSole.getDirection().normalize();
+      filteredPointOfRotation.update();
+      filteredAxisOfRotation.update();
 
       lineOfRotationStandardDeviation.update();
 

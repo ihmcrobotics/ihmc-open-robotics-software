@@ -56,7 +56,7 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Geometric", registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Geometric", Color.GREEN, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 
