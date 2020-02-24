@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -39,8 +40,10 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final EdgeVisualizer edgeVisualizer;
 
-   public GeometricRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry,
-                                          YoGraphicsListRegistry graphicsListRegistry)
+   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
+
+   public GeometricRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
@@ -61,6 +64,9 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       else
          edgeVisualizer = null;
 
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+
       reset();
 
       parentRegistry.addChild(registry);
@@ -68,6 +74,17 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final FramePoint3D tempPointOfRotation = new FramePoint3D();
 
+   @Override
+   public void reset()
+   {
+      if (edgeVisualizer != null)
+         edgeVisualizer.reset();
+
+      lineOfRotationInSole.setToZero();
+      lineOfRotationStandardDeviation.reset();
+   }
+
+   @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
       // intersect the foot plane and the ground plane
@@ -80,21 +97,24 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationInWorldFrame.set(tempPointOfRotation, lineOfContact);
       lineOfRotationInSole.setMatchingFrame(lineOfRotationInWorldFrame);
 
+      stabilityEvaluator.update();
+
       if (edgeVisualizer != null)
+      {
+         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
+      }
    }
 
-   public void reset()
-   {
-      if (edgeVisualizer != null)
-         edgeVisualizer.reset();
-
-      lineOfRotationInSole.setToZero();
-      lineOfRotationStandardDeviation.reset();
-   }
-
+   @Override
    public FrameLine2DReadOnly getLineOfRotation()
    {
       return lineOfRotationInSole;
+   }
+
+   @Override
+   public boolean isRotationEdgeTrusted()
+   {
+      return stabilityEvaluator.isEdgeVelocityStable();
    }
 }

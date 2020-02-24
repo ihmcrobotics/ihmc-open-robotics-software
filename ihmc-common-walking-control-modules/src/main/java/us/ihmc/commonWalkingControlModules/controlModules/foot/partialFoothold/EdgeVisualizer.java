@@ -8,6 +8,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.awt.*;
@@ -20,16 +21,23 @@ public class EdgeVisualizer
 
    private final FrameLine3DBasics tempLineOfRotationInWorld = new FrameLine3D();
 
+   private final YoBoolean visualize;
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
 
    public EdgeVisualizer(String prefix, Color color, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      visualize = new YoBoolean(prefix + "_Visualize", registry);
       linePointA = new YoFramePoint2D(prefix + "_FootRotationPointA", worldFrame, registry);
       linePointB = new YoFramePoint2D(prefix + "_FootRotationPointB", worldFrame, registry);
 
       Artifact lineArtifact = new YoArtifactLineSegment2d(prefix + "_LineOfRotation", linePointA, linePointB, color, 0.005, 0.01);
       graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
+   }
+
+   public void visualize(boolean visualize)
+   {
+      this.visualize.set(visualize);
    }
 
    public void reset()
@@ -40,16 +48,23 @@ public class EdgeVisualizer
 
    public void updateGraphics(FrameLine2DReadOnly lineOfRotation)
    {
-      tempLineOfRotationInWorld.setToZero(lineOfRotation.getReferenceFrame());
-      tempLineOfRotationInWorld.set(lineOfRotation);
-      tempLineOfRotationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      if (visualize.getBooleanValue())
+      {
+         tempLineOfRotationInWorld.setToZero(lineOfRotation.getReferenceFrame());
+         tempLineOfRotationInWorld.set(lineOfRotation);
+         tempLineOfRotationInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
-      linePointA.set(tempLineOfRotationInWorld.getDirection());
-      linePointA.scale(-0.5 * LineVizWidth);
-      linePointA.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
+         linePointA.set(tempLineOfRotationInWorld.getDirection());
+         linePointA.scale(-0.5 * LineVizWidth);
+         linePointA.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
 
-      linePointB.set(tempLineOfRotationInWorld.getDirection());
-      linePointB.scale(0.5 * LineVizWidth);
-      linePointB.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
+         linePointB.set(tempLineOfRotationInWorld.getDirection());
+         linePointB.scale(0.5 * LineVizWidth);
+         linePointB.add(tempLineOfRotationInWorld.getPointX(), tempLineOfRotationInWorld.getPointY());
+      }
+      else
+      {
+         reset();
+      }
    }
 }

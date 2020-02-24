@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -25,17 +26,20 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 
    private final boolean otherEdgesAreMembersOnly;
 
+   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
 
-   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(side, soleFrame, new CoPHistoryRotationEdgeCalculator(side, soleFrame, parentRegistry, null),
-           new VelocityRotationEdgeCalculator(side, soleFrame, dt, parentRegistry, null), false, graphicsListRegistry);
+      this(side, soleFrame, new CoPHistoryRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null),
+           new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null), explorationParameters, dt, false, parentRegistry, graphicsListRegistry);
    }
 
-   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, ReferenceFrame soleFrame, RotationEdgeCalculator copHistoryEdgeCalculator, RotationEdgeCalculator velocityEdgeCalculator,
-                                               boolean otherEdgesAreMembersOnly, YoGraphicsListRegistry graphicsListRegistry)
+   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, ReferenceFrame soleFrame, RotationEdgeCalculator copHistoryEdgeCalculator,
+                                               RotationEdgeCalculator velocityEdgeCalculator, ExplorationParameters explorationParameters, double dt,
+                                               boolean otherEdgesAreMembersOnly, YoVariableRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry)
    {
       this.copHistoryEdgeCalculator = copHistoryEdgeCalculator;
       this.velocityEdgeCalculator = velocityEdgeCalculator;
@@ -49,10 +53,17 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 
       lineOfRotationInSole = new YoFrameLine2D(pointOfRotation, axisOfRotation);
 
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
+
+      reset();
+
+      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -64,10 +75,16 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
          velocityEdgeCalculator.compute(measuredCoP);
       }
 
-      lineOfRotationInSole.set(copHistoryEdgeCalculator.getLineOfRotation().getPoint(), velocityEdgeCalculator.getLineOfRotation().getDirection());
+      pointOfRotation.set(copHistoryEdgeCalculator.getLineOfRotation().getPoint());
+      axisOfRotation.set(velocityEdgeCalculator.getLineOfRotation().getDirection());
+
+      stabilityEvaluator.update();
 
       if (edgeVisualizer != null)
+      {
+         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
+      }
    }
 
    @Override
@@ -81,6 +98,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 
       lineOfRotationInSole.setToNaN();
 
+      stabilityEvaluator.reset();
+
       if (edgeVisualizer != null)
          edgeVisualizer.reset();
    }
@@ -89,5 +108,14 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    public FrameLine2DReadOnly getLineOfRotation()
    {
       return lineOfRotationInSole;
+   }
+
+   @Override
+   public boolean isRotationEdgeTrusted()
+   {
+      if (!copHistoryEdgeCalculator.isRotationEdgeTrusted() || !velocityEdgeCalculator.isRotationEdgeTrusted())
+         return false;
+
+      return stabilityEvaluator.isEdgeVelocityStable();
    }
 }
