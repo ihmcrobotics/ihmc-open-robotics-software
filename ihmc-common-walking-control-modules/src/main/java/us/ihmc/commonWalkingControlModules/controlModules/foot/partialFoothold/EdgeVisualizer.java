@@ -23,12 +23,12 @@ public class EdgeVisualizer
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
 
-   public EdgeVisualizer(String prefix, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public EdgeVisualizer(String prefix, Color color, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       linePointA = new YoFramePoint2D(prefix + "_FootRotationPointA", worldFrame, registry);
       linePointB = new YoFramePoint2D(prefix + "_FootRotationPointB", worldFrame, registry);
 
-      Artifact lineArtifact = new YoArtifactLineSegment2d(prefix + "_LineOfRotation", linePointA, linePointB, Color.ORANGE, 0.005, 0.01);
+      Artifact lineArtifact = new YoArtifactLineSegment2d(prefix + "_LineOfRotation", linePointA, linePointB, color, 0.005, 0.01);
       graphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineArtifact);
    }
 

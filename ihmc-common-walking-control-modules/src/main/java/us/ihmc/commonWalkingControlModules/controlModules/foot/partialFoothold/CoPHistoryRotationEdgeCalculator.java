@@ -38,7 +38,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineOfRotationInSole = new YoFrameLine2D(side.getCamelCaseName() + "LineOfRotation", "", soleFrame, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "CoPHistory", registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "CoPHistory", Color.RED, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 

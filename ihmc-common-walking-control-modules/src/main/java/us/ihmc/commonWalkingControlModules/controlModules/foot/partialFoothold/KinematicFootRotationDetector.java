@@ -34,21 +34,12 @@ public class KinematicFootRotationDetector implements FootRotationDetector
    private final YoDouble angularVelocityMagnitudeThreshold;
    private final YoBoolean isAngularVelocityPastThreshold;
 
-   /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
-   //   private final YoDouble stableLoRAngularVelocityThreshold;
-   //   private final YoBoolean isLineOfRotationStable;
-
-   /** Threshold on the transversal velocity of the CoR w.r.t. the LoR to determine whether or not the CoR is stable. */
-   //   private final YoDouble stableCoRLinearVelocityThreshold;
-   //   private final YoBoolean isCenterOfRotationStable;
-
    /** Amount that the foot drops or lifts around the axis of rotation */
    private final YoDouble footDropOrLift;
    /** Threshold on the foot drop around the line of rotation. */
    private final YoDouble footDropThreshold;
    private final YoBoolean isFootDropPastThreshold;
 
-   /** Main output of this class that informs on whether or not the foot is rotating. */
    private final YoBoolean isFootRotating;
 
    private final FrameVector2D normalizedFootAngularVelocity = new FrameVector2D();
@@ -68,12 +59,6 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       angularVelocityFilterBreakFrequency = explorationParameters.getAngularVelocityFilterBreakFrequency();
       footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "", registry, () -> AlphaFilteredYoVariable
             .computeAlphaGivenBreakFrequencyProperly(angularVelocityFilterBreakFrequency.getDoubleValue(), controllerDt), soleFrame);
-
-      //      stableLoRAngularVelocityThreshold = explorationParameters.getStableLoRAngularVelocityThreshold();
-      //      isLineOfRotationStable = new YoBoolean(namePrefix + "IsLoRStable", registry);
-
-      //      stableCoRLinearVelocityThreshold = explorationParameters.getStableCoRLinearVelocityThreshold();
-      //      isCenterOfRotationStable = new YoBoolean(namePrefix + "IsCoRStable", registry);
 
       angularVelocityMagnitude = new YoDouble(namePrefix + "AngularVelocityMagnitude", registry);
       angularVelocityMagnitudeThreshold = explorationParameters.getAngularVelocityAroundLoRThreshold();
@@ -128,16 +113,8 @@ public class KinematicFootRotationDetector implements FootRotationDetector
    {
       isFootDropPastThreshold.set(footDropOrLift.getDoubleValue() < footDropThreshold.getDoubleValue());
 
-      //      isLineOfRotationStable.set(Math.abs(lineOfRotationAngularVelocityFiltered.getDoubleValue()) < stableLoRAngularVelocityThreshold.getDoubleValue());
-      //
-      //      isCenterOfRotationStable.set(Math.abs(centerOfRotationTransverseVelocity.getDoubleValue()) < stableCoRLinearVelocityThreshold.getDoubleValue());
-
       isAngularVelocityPastThreshold.set(angularVelocityMagnitude.getDoubleValue() > angularVelocityMagnitudeThreshold.getDoubleValue());
 
-      //      isFootRotating
-      //            .set(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue() && isAngularVelocityPastThreshold.getBooleanValue()
-      //                       && isFootDropPastThreshold.getBooleanValue());
-      //
       isFootRotating.set(isAngularVelocityPastThreshold.getBooleanValue() && isFootDropPastThreshold.getBooleanValue());
    }
 }
