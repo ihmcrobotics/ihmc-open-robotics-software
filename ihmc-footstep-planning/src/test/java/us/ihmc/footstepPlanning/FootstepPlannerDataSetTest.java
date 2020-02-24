@@ -252,10 +252,10 @@ public abstract class FootstepPlannerDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
 
-      if (plannerInput.hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
-      if (plannerInput.hasStartOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      double startYaw = plannerInput.hasStartOrientation() ? plannerInput.getStartYaw() : 0.0;
+      double goalYaw = plannerInput.hasGoalOrientation() ? plannerInput.getGoalYaw() : 0.0;
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startYaw, 0.0, 0.0));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(goalYaw, 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 

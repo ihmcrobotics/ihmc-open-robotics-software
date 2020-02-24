@@ -1,15 +1,11 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,11 +49,11 @@ public class FootstepPlannerCommunicationProperties
 
    public static MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
    }
 }
