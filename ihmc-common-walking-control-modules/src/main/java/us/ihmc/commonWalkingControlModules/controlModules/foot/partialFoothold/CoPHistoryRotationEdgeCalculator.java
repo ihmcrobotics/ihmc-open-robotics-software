@@ -32,13 +32,14 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      String namePrefix = side.getLowerCaseName() + "CoPHistory";
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      lineCalculator = new OnlineLine2DLinearRegression("FootRotation", registry);
-      lineOfRotationInSole = new YoFrameLine2D(side.getCamelCaseName() + "LineOfRotation", "", soleFrame, registry);
+      lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
+      lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "CoPHistory", Color.RED, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 
