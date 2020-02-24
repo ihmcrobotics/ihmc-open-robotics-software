@@ -8,11 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- *  Filter the given yoVariable using a moving average filter.
- *
- *
- *  This class is NOT REWINDABLE!
- *
+ * Filter the given yoVariable using a moving average filter. This class is NOT REWINDABLE!
  */
 public class SimpleMovingAverageFilteredYoVariable extends YoDouble
 {
@@ -74,7 +70,7 @@ public class SimpleMovingAverageFilteredYoVariable extends YoDouble
          average += previousUpdateValues.get(i, 0);
       }
 
-      this.set(average / windowSize.getIntegerValue());
+      this.set(average / ((double) windowSize.getIntegerValue()));
    }
 
    public void reset()

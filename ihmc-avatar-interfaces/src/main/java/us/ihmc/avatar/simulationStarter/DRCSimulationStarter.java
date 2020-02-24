@@ -17,8 +17,8 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -76,7 +76,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private HumanoidFloatingRootJointRobot sdfRobot;
    private HighLevelHumanoidControllerFactory controllerFactory;
    private AvatarSimulation avatarSimulation;
-   private DRCNetworkProcessor networkProcessor;
+   private HumanoidNetworkProcessor networkProcessor;
    private SimulationConstructionSet simulationConstructionSet;
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
@@ -365,10 +365,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Creates a default output PacketCommunicator for the network processor. This PacketCommunicator is
     * also set to be used as input for the controller.
-    * 
-    * @param networkParameters
     */
-   private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
+   private void createControllerCommunicator()
    {
       // Apparently this can get called more than once so somebody put a check here.
       // Had to modify it with two possible types of comms @dcalvert
@@ -399,16 +397,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * @return
     */
    @Override
-   public void startSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallySimulate)
+   public void startSimulation(HumanoidNetworkProcessorParameters networkParameters, boolean automaticallySimulate)
    {
       createSimulation(networkParameters, true, automaticallySimulate);
    }
 
-   public void createSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallySpawnSimulation, boolean automaticallySimulate)
+   public void createSimulation(HumanoidNetworkProcessorParameters networkParameters, boolean automaticallySpawnSimulation, boolean automaticallySimulate)
    {
-      if ((networkParameters != null))
+      if (networkParameters != null || setupControllerNetworkSubscriber)
       {
-         createControllerCommunicator(networkParameters);
+         createControllerCommunicator();
       }
 
       this.avatarSimulation = createAvatarSimulation();
@@ -422,7 +420,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
 
-      if ((networkParameters != null) && networkParameters.isNetworkProcessorEnabled()) //&& (networkParameters.useController()))
+      if (networkParameters != null)
       {
          startNetworkProcessor(networkParameters);
       }
@@ -591,15 +589,16 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * 
     * @param networkModuleParams
     */
-   private void startNetworkProcessor(DRCNetworkModuleParameters networkModuleParams)
+   private void startNetworkProcessor(HumanoidNetworkProcessorParameters networkModuleParams)
    {
-      if (networkModuleParams.isRosModuleEnabled() || networkModuleParams.isSensorModuleEnabled())
+      if (networkModuleParams.isUseROSModule() || networkModuleParams.isUseSensorModule())
       {
          LocalObjectCommunicator simulatedSensorCommunicator = createSimulatedSensorsPacketCommunicator();
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
 
-      networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams, pubSubImplementation);
+      networkProcessor = HumanoidNetworkProcessor.newFromParameters(robotModel, pubSubImplementation, networkModuleParams);
+      networkProcessor.start();
    }
 
    public AvatarSimulation getAvatarSimulation()

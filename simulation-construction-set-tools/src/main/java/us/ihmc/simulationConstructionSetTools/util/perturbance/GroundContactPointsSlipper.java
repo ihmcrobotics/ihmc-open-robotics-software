@@ -107,7 +107,7 @@ public class GroundContactPointsSlipper implements RobotController
       this.slipRotation.setYawPitchRoll(yaw, pitch, roll);
    }
    
-   public void setSlipRotationEulerAngles(Vector3D eulerAngles)
+   public void setSlipRotationEulerAngles(Vector3DReadOnly eulerAngles)
    {
       this.slipRotation.setEulerAngles(eulerAngles);
    }

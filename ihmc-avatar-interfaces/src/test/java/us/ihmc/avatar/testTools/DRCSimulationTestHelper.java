@@ -24,7 +24,7 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -95,7 +95,7 @@ public class DRCSimulationTestHelper
    private final FullHumanoidRobotModel fullRobotModel;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
 
-   private DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+   private HumanoidNetworkProcessorParameters networkProcessorParameters = null;
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
@@ -139,7 +139,6 @@ public class DRCSimulationTestHelper
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
 
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
-      networkProcessorParameters.enableNetworkProcessor(false);
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
@@ -175,11 +174,11 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
-      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && networkProcessorParameters != null)
       {
-         assertFalse(networkProcessorParameters.isBehaviorModuleEnabled());
-         assertFalse(networkProcessorParameters.isMocapModuleEnabled());
-         assertFalse(networkProcessorParameters.isRobotEnvironmentAwerenessModuleEnabled());
+         assertFalse(networkProcessorParameters.isUseBehaviorModule());
+         assertFalse(networkProcessorParameters.isUseMocapModule());
+         assertFalse(networkProcessorParameters.isUseRobotEnvironmentAwerenessModule());
       }
 
       simulationStarter.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
@@ -659,7 +658,7 @@ public class DRCSimulationTestHelper
       this.walkingScriptParameters = walkingScriptParameters;
    }
 
-   public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
+   public void setNetworkProcessorParameters(HumanoidNetworkProcessorParameters networkProcessorParameters)
    {
       this.networkProcessorParameters = networkProcessorParameters;
    }

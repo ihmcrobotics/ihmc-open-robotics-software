@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -80,12 +80,9 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
 
 //      jmeLidarScanVisualizer = new JMELidarScanVisualizer();
 
-      DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
-      drcNetworkModuleParameters.enableNetworkProcessor(true);
-      drcNetworkModuleParameters.enableBehaviorModule(false);
-      drcNetworkModuleParameters.enableBehaviorVisualizer(false);
-      drcNetworkModuleParameters.enableRosModule(false);
-      drcNetworkModuleParameters.enableSensorModule(true);
+      HumanoidNetworkProcessorParameters drcNetworkModuleParameters = new HumanoidNetworkProcessorParameters();
+      drcNetworkModuleParameters.setUseROSModule(false);
+      drcNetworkModuleParameters.setUseSensorModule(true);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WallAtDistanceEnvironment(WALL_DISTANCE);

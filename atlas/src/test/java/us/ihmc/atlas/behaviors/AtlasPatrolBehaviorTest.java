@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
@@ -41,7 +41,7 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testPatrolBehavior() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       LogTools.info("Creating behavior module");
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(PatrolBehavior.DEFINITION), robotModel);
