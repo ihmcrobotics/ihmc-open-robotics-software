@@ -59,7 +59,6 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       lineOfRotationInSole = new YoFrameLine2D(filteredPointOfRotation, filteredAxisOfRotation);
 
-
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
