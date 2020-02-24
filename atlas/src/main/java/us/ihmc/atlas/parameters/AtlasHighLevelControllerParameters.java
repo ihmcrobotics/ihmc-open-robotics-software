@@ -288,7 +288,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
          settings.setMaxVelocity(1.5);
-         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getSpineJointNamesAsStrings()));
+         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getLegJointNamesAsStrings()));
       }
 
       return integrationSettings;
