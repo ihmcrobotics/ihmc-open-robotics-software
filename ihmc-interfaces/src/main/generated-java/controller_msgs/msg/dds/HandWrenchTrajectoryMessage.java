@@ -8,11 +8,10 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points.
-       * A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.
-       * To execute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       * This message commands the controller to apply a wrench (force & moment) profile on a hand given a list of trajectory points.
+       * A linear interpolation is used to interpolate between trajectory points.
        */
-public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> implements Settable<HandTrajectoryMessage>, EpsilonComparable<HandTrajectoryMessage>
+public class HandWrenchTrajectoryMessage extends Packet<HandWrenchTrajectoryMessage> implements Settable<HandWrenchTrajectoryMessage>, EpsilonComparable<HandWrenchTrajectoryMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -25,28 +24,28 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * The position/orientation trajectory information.
+            * The trajectory information for the force/moment to be achieved by the end-effector.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
+   public controller_msgs.msg.dds.WrenchTrajectoryMessage wrench_trajectory_;
 
-   public HandTrajectoryMessage()
+   public HandWrenchTrajectoryMessage()
    {
-      se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
+      wrench_trajectory_ = new controller_msgs.msg.dds.WrenchTrajectoryMessage();
    }
 
-   public HandTrajectoryMessage(HandTrajectoryMessage other)
+   public HandWrenchTrajectoryMessage(HandWrenchTrajectoryMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HandTrajectoryMessage other)
+   public void set(HandWrenchTrajectoryMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
       robot_side_ = other.robot_side_;
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
+      controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.staticCopy(other.wrench_trajectory_, wrench_trajectory_);
    }
 
    /**
@@ -81,27 +80,27 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-            * The position/orientation trajectory information.
+            * The trajectory information for the force/moment to be achieved by the end-effector.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
+   public controller_msgs.msg.dds.WrenchTrajectoryMessage getWrenchTrajectory()
    {
-      return se3_trajectory_;
+      return wrench_trajectory_;
    }
 
 
-   public static Supplier<HandTrajectoryMessagePubSubType> getPubSubType()
+   public static Supplier<HandWrenchTrajectoryMessagePubSubType> getPubSubType()
    {
-      return HandTrajectoryMessagePubSubType::new;
+      return HandWrenchTrajectoryMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HandTrajectoryMessagePubSubType::new;
+      return HandWrenchTrajectoryMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HandTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(HandWrenchTrajectoryMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -110,7 +109,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!this.se3_trajectory_.epsilonEquals(other.se3_trajectory_, epsilon)) return false;
+      if (!this.wrench_trajectory_.epsilonEquals(other.wrench_trajectory_, epsilon)) return false;
 
       return true;
    }
@@ -120,15 +119,15 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HandTrajectoryMessage)) return false;
+      if(!(other instanceof HandWrenchTrajectoryMessage)) return false;
 
-      HandTrajectoryMessage otherMyClass = (HandTrajectoryMessage) other;
+      HandWrenchTrajectoryMessage otherMyClass = (HandWrenchTrajectoryMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if (!this.se3_trajectory_.equals(otherMyClass.se3_trajectory_)) return false;
+      if (!this.wrench_trajectory_.equals(otherMyClass.wrench_trajectory_)) return false;
 
       return true;
    }
@@ -138,13 +137,13 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HandTrajectoryMessage {");
+      builder.append("HandWrenchTrajectoryMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("se3_trajectory=");
-      builder.append(this.se3_trajectory_);
+      builder.append("wrench_trajectory=");
+      builder.append(this.wrench_trajectory_);
       builder.append("}");
       return builder.toString();
    }
