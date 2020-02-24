@@ -22,8 +22,6 @@ mainDependencies {
    api("com.esotericsoftware.minlog:minlog:1.2")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc.thirdparty.jinput:jinput:200128")
-   api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
-   api("org.ros.rosjava_messages:std_msgs:0.5.9")
 
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-yovariables:0.4.0")
