@@ -20,7 +20,6 @@ mainDependencies {
    api("org.apache.ant:ant:1.9.0")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("com.martiansoftware:jsap:2.1")
-   api("org.ros.rosjava_core:rosjava:0.2.1")
    api("org.ejml:core:0.30")
    api("org.ejml:dense64:0.30")
    api("org.boofcv:io:0.24.1")
@@ -28,12 +27,8 @@ mainDependencies {
    api("org.boofcv:geo:0.24.1")
    api("org.boofcv:calibration:0.24.1")
    api("org.boofcv:visualize:0.24.1")
-   api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
    api("com.github.wendykierp:JTransforms:3.1")
-   api("org.ros.rosjava_messages:sensor_msgs:1.11.7")
-   api("org.ros.rosjava_messages:multisense_ros:3.4.2")
    api("org.bytedeco:javacv-platform:1.5")
-   api("org.ros.rosjava_messages:geometry_msgs:1.11.9")
    api("org.boofcv:recognition:0.24.1")
 
    api("us.ihmc:euclid:0.12.2")
@@ -81,5 +76,4 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:simulation-construction-set-2:alpha-20191122")
 }

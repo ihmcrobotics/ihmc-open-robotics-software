@@ -190,7 +190,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       PDGainsReadOnly gains = command.getGains();
       kp.set(gains.getKp());
-      kd.set(gains.getKd());
+      if (kd != null)
+         kd.set(gains.getKd());
       maxFeedback.set(gains.getMaximumFeedback());
       maxFeedbackRate.set(gains.getMaximumFeedbackRate());
 

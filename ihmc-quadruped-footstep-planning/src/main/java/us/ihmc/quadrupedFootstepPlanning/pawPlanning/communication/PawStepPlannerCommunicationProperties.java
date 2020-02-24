@@ -47,11 +47,11 @@ public class PawStepPlannerCommunicationProperties
 
    public static MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
    }
 }
