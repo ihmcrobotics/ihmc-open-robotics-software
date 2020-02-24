@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
@@ -24,8 +24,6 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    private final YoFrameVector2D axisOfRotation;
    private final FixedFrameLine2DBasics lineOfRotationInSole;
 
-   private final boolean otherEdgesAreMembersOnly;
-
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
 
@@ -33,17 +31,16 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this(side, soleFrame, new CoPHistoryRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null),
-           new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null), explorationParameters, dt, false, parentRegistry, graphicsListRegistry);
+           new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null), explorationParameters, dt, parentRegistry,
+           graphicsListRegistry);
    }
 
    public CoPAndVelocityRotationEdgeCalculator(RobotSide side, ReferenceFrame soleFrame, RotationEdgeCalculator copHistoryEdgeCalculator,
                                                RotationEdgeCalculator velocityEdgeCalculator, ExplorationParameters explorationParameters, double dt,
-                                               boolean otherEdgesAreMembersOnly, YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry graphicsListRegistry)
+                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.copHistoryEdgeCalculator = copHistoryEdgeCalculator;
       this.velocityEdgeCalculator = velocityEdgeCalculator;
-      this.otherEdgesAreMembersOnly = otherEdgesAreMembersOnly;
 
       String namePrefix = side.getLowerCaseName() + "CoPAndVelocity";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -69,11 +66,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      if (!otherEdgesAreMembersOnly)
-      {
-         copHistoryEdgeCalculator.compute(measuredCoP);
-         velocityEdgeCalculator.compute(measuredCoP);
-      }
+      copHistoryEdgeCalculator.compute(measuredCoP);
+      velocityEdgeCalculator.compute(measuredCoP);
 
       pointOfRotation.set(copHistoryEdgeCalculator.getLineOfRotation().getPoint());
       axisOfRotation.set(velocityEdgeCalculator.getLineOfRotation().getDirection());
@@ -90,11 +84,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    @Override
    public void reset()
    {
-      if (!otherEdgesAreMembersOnly)
-      {
-         copHistoryEdgeCalculator.reset();
-         velocityEdgeCalculator.reset();
-      }
+      copHistoryEdgeCalculator.reset();
+      velocityEdgeCalculator.reset();
 
       lineOfRotationInSole.setToNaN();
 

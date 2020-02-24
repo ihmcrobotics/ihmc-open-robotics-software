@@ -21,9 +21,10 @@ public class NewPartialFootholdControlModule
    {
       GEOMETRIC, KINEMATIC, VELOCITY
    }
+
    private enum EdgeCalculatorType
    {
-      VELOCITY, COP_HISTORY, BOTH
+      VELOCITY, COP_HISTORY, GEOMETRIC, VELOCITY_AND_COP
    }
 
    private final YoEnum<EdgeCalculatorType> edgeCalculatorType;
@@ -32,18 +33,28 @@ public class NewPartialFootholdControlModule
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
 
    private final RotationDetectorType[] rotationDetectorTypes = RotationDetectorType.values();
+   private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
-   public NewPartialFootholdControlModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters,
-                                          double dt, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
+   public NewPartialFootholdControlModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
       String namePrefix = soleFrame.getName();
 
-      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, dt, registry, graphicsRegistry);
-      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, registry, graphicsRegistry);
+      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+                                                                                         graphicsRegistry);
+      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+                                                                                             graphicsRegistry);
+      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+                                                                                           graphicsRegistry);
+      RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, copHistoryEdgeCalculator,
+                                                                                                     velocityEdgeCalculator, explorationParameters, dt,
+                                                                                                     registry, graphicsRegistry);
       edgeCalculators.put(EdgeCalculatorType.VELOCITY, velocityEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.COP_HISTORY, copHistoryEdgeCalculator);
+      edgeCalculators.put(EdgeCalculatorType.GEOMETRIC, geometricEdgeCalculator);
+      edgeCalculators.put(EdgeCalculatorType.VELOCITY_AND_COP, copAndVelocityEdgeCalculator);
 
       FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(namePrefix, explorationParameters, registry);
       FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, dt, registry);
@@ -65,7 +76,7 @@ public class NewPartialFootholdControlModule
       boolean isRotating = computeIsRotating();
       if (isRotating)
       {
-         computeEdgeCalculator(measuredCoP);
+         edgeCalculators.get(edgeCalculatorType.getEnumValue()).compute(measuredCoP);
       }
       else
       {
@@ -78,25 +89,6 @@ public class NewPartialFootholdControlModule
       return rotationDetectors.get(rotationDetectorType.getEnumValue()).compute();
    }
 
-   private void computeEdgeCalculator(FramePoint2DReadOnly measuredCoP)
-   {
-      switch (edgeCalculatorType.getEnumValue())
-      {
-      case VELOCITY:
-         edgeCalculators.get(EdgeCalculatorType.VELOCITY).compute(measuredCoP);
-         break;
-      case COP_HISTORY:
-         edgeCalculators.get(EdgeCalculatorType.COP_HISTORY).compute(measuredCoP);
-         break;
-      case BOTH:
-         edgeCalculators.get(EdgeCalculatorType.VELOCITY).compute(measuredCoP);
-         edgeCalculators.get(EdgeCalculatorType.COP_HISTORY).compute(measuredCoP);
-         break;
-      default:
-         throw new IllegalArgumentException("Can't happen");
-      }
-   }
-
    private void resetRotationDetectors()
    {
       for (RotationDetectorType type : rotationDetectorTypes)
@@ -105,16 +97,14 @@ public class NewPartialFootholdControlModule
 
    private void resetEdgeCalculators()
    {
-      edgeCalculators.get(EdgeCalculatorType.VELOCITY).reset();
-      edgeCalculators.get(EdgeCalculatorType.COP_HISTORY).reset();
+      for (EdgeCalculatorType type : edgeCalculatorTypes)
+         edgeCalculators.get(type).reset();
    }
 
    public FrameLine2DReadOnly getLineOfRotation()
    {
-      // TODO figure out a way to combine all this stuff
-      return edgeCalculators.get(EdgeCalculatorType.VELOCITY).getLineOfRotation();
+      return edgeCalculators.get(edgeCalculatorType.getEnumValue()).getLineOfRotation();
    }
-
 
    public void reset()
    {
