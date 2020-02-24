@@ -16,7 +16,7 @@ public class AtlasBehaviorModule
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean START_FOOTSTEP_PLANNING_TOOLBOX = false;
 
-   private FootstepPlanningToolboxModule footstepPlanningModule;
+   private FootstepPlanningModule footstepPlanningModule;
 
    public AtlasBehaviorModule()
    {
