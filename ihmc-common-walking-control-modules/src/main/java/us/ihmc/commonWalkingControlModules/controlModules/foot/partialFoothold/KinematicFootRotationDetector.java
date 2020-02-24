@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -47,13 +48,13 @@ public class KinematicFootRotationDetector implements FootRotationDetector
 
    private final MovingReferenceFrame soleFrame;
 
-   public KinematicFootRotationDetector(String namePrefix, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double controllerDt,
+   public KinematicFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double controllerDt,
                                         YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
-      String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
+      String namePrefix = side.getLowerCaseName() + "Kinematic";
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       angularVelocityFilterBreakFrequency = explorationParameters.getAngularVelocityFilterBreakFrequency();

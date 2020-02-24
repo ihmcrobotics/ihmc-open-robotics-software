@@ -44,19 +44,20 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
    {
       this.soleFrame = soleFrame;
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      String namePrefix = side.getLowerCaseName() + "Geometric";
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
-      YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
+      YoFramePoint2D point = new YoFramePoint2D(namePrefix + "PointOfRotation", soleFrame, registry);
+      YoFrameVector2D direction = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
 
-      groundPlaneNormal = new YoFrameVector3D(side.getShortLowerCaseName() + "PlaneNormal", worldFrame, registry);
+      groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
       groundPlaneNormal.setZ(1.0);
 
-      lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
+      lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(namePrefix + "LineOfRotation", lineOfRotationInSole, registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName() + "Geometric", Color.GREEN, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.GREEN, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 

@@ -47,7 +47,7 @@ public class NewPartialFootholdControlModule
 
       FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(namePrefix, explorationParameters, registry);
       FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, dt, registry);
-      FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(namePrefix, soleFrame, explorationParameters, dt, registry);
+      FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, explorationParameters, dt, registry);
       rotationDetectors.put(RotationDetectorType.GEOMETRIC, geometricRotationDetector);
       rotationDetectors.put(RotationDetectorType.KINEMATIC, kinematicRotationDetector);
       rotationDetectors.put(RotationDetectorType.VELOCITY, velocityRotationDetector);
