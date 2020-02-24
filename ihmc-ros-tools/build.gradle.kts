@@ -21,7 +21,7 @@ mainDependencies {
    api("org.boofcv:geo:0.24.1")
    api("org.reflections:reflections:0.9.10")
    api("org.ros.rosjava_core:rosjava:0.2.1") {
-      exclude("junit:junit")
+      exclude(group = "junit", module = "junit")
    }
    api("org.ros.rosjava_bootstrap:message_generation:0.2.1")
    api("org.ros.rosjava_messages:std_msgs:0.5.9")
