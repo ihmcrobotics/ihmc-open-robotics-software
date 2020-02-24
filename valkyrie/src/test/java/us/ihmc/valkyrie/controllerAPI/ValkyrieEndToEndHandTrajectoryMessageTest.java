@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -168,9 +169,14 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       wrenchTrajectoryMessage.setUseCustomControlFrame(true);
       wrenchTrajectoryMessage.getControlFramePose().setPosition(-0.15, -0.11, 0.0);
 
-      HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, se3TrajectoryMessage);
-      rightHandTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
+      RobotSide side = RobotSide.RIGHT;
+      HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, se3TrajectoryMessage);
       drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
+
+      HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
+      handWrenchTrajectoryMessage.setRobotSide(side.toByte());
+      handWrenchTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(handWrenchTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);

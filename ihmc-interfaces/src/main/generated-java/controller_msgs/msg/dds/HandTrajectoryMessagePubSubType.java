@@ -46,8 +46,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -69,8 +67,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.getCdrSerializedSize(data.getWrenchTrajectory(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -82,7 +78,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.write_type_9(data.getRobotSide());
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
-      controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.write(data.getWrenchTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.HandTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -92,7 +87,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setRobotSide(cdr.read_type_9());
       	
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
-      controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.read(data.getWrenchTrajectory(), cdr);	
 
    }
 
@@ -103,8 +97,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
-      ser.write_type_a("wrench_trajectory", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getWrenchTrajectory());
-
    }
 
    @Override
@@ -113,8 +105,6 @@ public class HandTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
-
-      ser.read_type_a("wrench_trajectory", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getWrenchTrajectory());
 
    }
 
