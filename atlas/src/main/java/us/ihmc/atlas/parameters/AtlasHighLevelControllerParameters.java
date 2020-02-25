@@ -72,12 +72,13 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       if (runningOnRealRobot)
       {
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 25.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 60.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 100.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 100.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 0.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 0.0);
+         double maxVelocityError = 1.5;
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 25.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 60.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 100.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 100.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 0.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 0.0, maxVelocityError);
       }
       else
       {
@@ -98,7 +99,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       if (runningOnRealRobot)
       {
-         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0 * 0.4);
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 0.0, 0.0);
          //
          JointDesiredControlMode armControlMode = JointDesiredControlMode.POSITION;
          double armDamping = 0.0 * 100.0;
@@ -110,18 +111,18 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, armControlMode, 0.0, armDamping);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SECOND_WRIST_PITCH, armControlMode, 0.0, armDamping);
 
-         // The Back Z gains are typically 10% the value of the other ones...
-         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 0.0, 0.0 * 5.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 0.0, 0.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 0.0, 80.0);
          // Setting the back x high improves icp tracking when stepping side to side...
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, EFFORT, 0.0, 200.0);
 
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 25.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 60.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 100.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 100.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 15.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 15.0);
+         double maxVelocityError = 1.5;
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 25.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 60.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 100.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 100.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 20.0, maxVelocityError);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 20.0, maxVelocityError);
       }
       else
       {
@@ -280,14 +281,14 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       { // Spine joints:
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
-         settings.setMaxVelocity(1.5);
+         settings.setMaxVelocity(2.0);
          integrationSettings.add(new GroupParameter<>("SpineAccelerationIntegration", settings, jointMap.getSpineJointNamesAsStrings()));
       }
 
       { // Leg joints:
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
-         settings.setMaxVelocity(1.5);
+         settings.setMaxVelocity(5.0);
          integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getLegJointNamesAsStrings()));
       }
 
@@ -313,7 +314,15 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
                                                   LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
+      configureSymmetricBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping, Double.POSITIVE_INFINITY);
+   }
+
+   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                  double maxVelocityError)
+   {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
