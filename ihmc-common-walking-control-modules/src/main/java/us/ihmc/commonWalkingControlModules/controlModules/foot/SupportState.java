@@ -255,7 +255,8 @@ public class SupportState extends AbstractFootControlState
          frameViz.hide();
       explorationHelper.stopExploring();
       footRotationDetector.reset();
-      footRotationCalculationModule.reset();
+      if (footRotationCalculationModule != null)
+         footRotationCalculationModule.reset();
 
       liftOff.set(false);
       touchDown.set(false);
@@ -343,7 +344,8 @@ public class SupportState extends AbstractFootControlState
       boolean dampingRotations = false;
 
       footSwitch.computeAndPackCoP(cop);
-      footRotationCalculationModule.compute(cop);
+      if (footRotationCalculationModule != null)
+         footRotationCalculationModule.compute(cop);
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {

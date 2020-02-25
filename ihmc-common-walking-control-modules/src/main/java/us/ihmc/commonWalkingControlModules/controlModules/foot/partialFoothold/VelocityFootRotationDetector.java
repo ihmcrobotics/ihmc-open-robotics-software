@@ -33,6 +33,9 @@ public class VelocityFootRotationDetector implements FootRotationDetector
       this.soleFrame = soleFrame;
       this.dt = dt;
 
+      String namePrefix = side.getLowerCaseName() + "Velocity";
+
+
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
@@ -42,9 +45,9 @@ public class VelocityFootRotationDetector implements FootRotationDetector
       decayBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "decayBreakFrequency", registry, 1.0);
       rotationThreshold = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "rotationThreshold", registry, 0.2);
 
-      integratedRotationAngle = new YoDouble(side.getLowerCaseName() + "IntegratedRotationAngle", registry);
-      absoluteFootOmega = new YoDouble(side.getLowerCaseName() + "AbsoluteFootOmega", registry);
-      isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
+      integratedRotationAngle = new YoDouble(namePrefix + "IntegratedRotationAngle", registry);
+      absoluteFootOmega = new YoDouble(namePrefix + "AbsoluteFootOmega", registry);
+      isRotating = new YoBoolean(namePrefix + "IsRotating", registry);
 
       reset();
    }

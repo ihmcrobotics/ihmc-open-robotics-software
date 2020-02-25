@@ -215,6 +215,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return jointMap.getPhysicalProperties().getShinLength() + jointMap.getPhysicalProperties().getThighLength();
    }
 
+
+   @Override
+   public boolean createFootholdExplorationTools()
+   {
+      return true;
+   }
+
    @Override
    public ICPControlGains createICPControlGains()
    {
