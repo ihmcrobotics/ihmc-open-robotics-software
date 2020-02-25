@@ -117,7 +117,7 @@ public abstract class FootstepPlannerDataSetTest
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus = new AtomicReference<>();
 
    private static final String robotName = "testBot";
-   private FootstepPlanningModule toolboxModule;
+   private FootstepPlanningModule planningModule;
 
    private RealtimeRos2Node ros2Node;
 
@@ -138,7 +138,7 @@ public abstract class FootstepPlannerDataSetTest
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
       messageConverter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
-      tryToStartModule(() -> setupFootstepPlanningToolboxModule());
+      tryToStartModule(this::setupFootstepPlanningModule);
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
@@ -198,7 +198,7 @@ public abstract class FootstepPlannerDataSetTest
 
       messager.closeMessager();
       messageConverter.destroy();
-      toolboxModule.closeAndDispose();
+      planningModule.closeAndDispose();
 
       if (ui != null)
          ui.stop();
@@ -206,7 +206,7 @@ public abstract class FootstepPlannerDataSetTest
 
       pubSubImplementation = null;
       ros2Node = null;
-      toolboxModule = null;
+      planningModule = null;
 
       messageConverter = null;
       messager = null;
@@ -235,10 +235,10 @@ public abstract class FootstepPlannerDataSetTest
       void startModule() throws IOException;
    }
 
-   private void setupFootstepPlanningToolboxModule() throws IOException
+   private void setupFootstepPlanningModule() throws IOException
    {
-      toolboxModule = new FootstepPlanningModule(getRobotModel());
-      toolboxModule.setupWithRos(pubSubImplementation);
+      planningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel());
+
    }
 
    private DRCRobotModel getRobotModel()

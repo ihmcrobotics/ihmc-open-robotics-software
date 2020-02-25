@@ -35,6 +35,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -229,8 +230,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          footstepPlannerParameters = getTestFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
-      footstepPlanningModule = new FootstepPlanningModule(robotModel);
-      footstepPlanningModule.setupWithRos(pubSubImplementation);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
