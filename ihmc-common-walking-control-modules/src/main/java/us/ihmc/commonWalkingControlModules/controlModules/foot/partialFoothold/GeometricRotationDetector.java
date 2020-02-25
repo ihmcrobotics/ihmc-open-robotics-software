@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,10 +23,15 @@ public class GeometricRotationDetector implements FootRotationDetector
 
    private final YoDouble angleFootGround;
    private final YoDouble angleThreshold;
-   private final YoBoolean footRotating;
+   private final YoBoolean isRotating;
 
-   public GeometricRotationDetector(String namePrefix, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
+   private final ReferenceFrame soleFrame;
+
+   public GeometricRotationDetector(RobotSide side, ReferenceFrame soleFrame, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
    {
+      this.soleFrame = soleFrame;
+
+      String namePrefix = side.getLowerCaseName() + "Kinematic";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
@@ -33,27 +39,33 @@ public class GeometricRotationDetector implements FootRotationDetector
 
       angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
       angleThreshold = explorationParameters.getGeometricDetectionAngleThreshold();
-      footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
+      isRotating = new YoBoolean(namePrefix + "IsRotating", registry);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
+      isRotating.set(false);
+      angleFootGround.setToNaN();
    }
 
    public boolean compute()
    {
+      footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
+      footNormal.changeFrame(worldFrame);
+
       double cosAlpha = Math.abs(groundPlaneNormal.dot(footNormal));
       double alpha = Math.acos(cosAlpha);
       angleFootGround.set(alpha);
-      footRotating.set(alpha > angleThreshold.getDoubleValue());
+      if (!isRotating.getBooleanValue())
+         isRotating.set(alpha > angleThreshold.getDoubleValue());
 
-      return footRotating.getBooleanValue();
+      return isRotating.getBooleanValue();
    }
 
    public boolean isRotating()
    {
-      return footRotating.getBooleanValue();
+      return isRotating.getBooleanValue();
    }
 }

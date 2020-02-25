@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import com.sun.prism.ReadbackGraphics;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -7,6 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.EnumMap;
@@ -30,15 +32,17 @@ public class FootRotationCalculationModule
    private final EnumMap<EdgeCalculatorType, RotationEdgeCalculator> edgeCalculators = new EnumMap<>(EdgeCalculatorType.class);
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
 
-   private final RotationDetectorType[] rotationDetectorTypes = RotationDetectorType.values();
    private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
+
+   private final YoBoolean isRotating;
 
    public FootRotationCalculationModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      parentRegistry.addChild(registry);
 
-      String namePrefix = soleFrame.getName();
+      isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
       RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
                                                                                          graphicsRegistry);
@@ -54,7 +58,7 @@ public class FootRotationCalculationModule
       edgeCalculators.put(EdgeCalculatorType.GEOMETRIC, geometricEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.VELOCITY_AND_COP, copAndVelocityEdgeCalculator);
 
-      FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(namePrefix, explorationParameters, registry);
+      FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(side, soleFrame, explorationParameters, registry);
       FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, dt, registry);
       FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, explorationParameters, dt, registry);
       rotationDetectors.put(RotationDetectorType.GEOMETRIC, geometricRotationDetector);
@@ -68,14 +72,12 @@ public class FootRotationCalculationModule
       edgeCalculatorType.set(EdgeCalculatorType.VELOCITY_AND_COP);
 
       reset();
-
-      parentRegistry.addChild(registry);
    }
 
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      boolean isRotating = computeIsRotating();
-      if (isRotating)
+      isRotating.set(computeIsRotating());
+      if (isRotating.getBooleanValue())
       {
          edgeCalculators.get(edgeCalculatorType.getEnumValue()).compute(measuredCoP);
       }
@@ -91,7 +93,7 @@ public class FootRotationCalculationModule
       {
          for (RotationDetectorType type : RotationDetectorType.values)
          {
-            if (rotationDetectors.get(type).isRotating())
+            if (rotationDetectors.get(type).compute())
                return true;
          }
 
@@ -105,7 +107,7 @@ public class FootRotationCalculationModule
 
    private void resetRotationDetectors()
    {
-      for (RotationDetectorType type : rotationDetectorTypes)
+      for (RotationDetectorType type : RotationDetectorType.values)
          rotationDetectors.get(type).reset();
    }
 
@@ -122,6 +124,7 @@ public class FootRotationCalculationModule
 
    public void reset()
    {
+      isRotating.set(false);
       resetRotationDetectors();
       resetEdgeCalculators();
    }

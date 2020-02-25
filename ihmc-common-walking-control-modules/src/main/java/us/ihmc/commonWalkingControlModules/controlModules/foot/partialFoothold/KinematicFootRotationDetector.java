@@ -69,13 +69,15 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       footDropThreshold = explorationParameters.getFootDropThreshold();
       isFootDropPastThreshold = new YoBoolean(namePrefix + "IsFootDropPastThreshold", registry);
 
-      isFootRotating = new YoBoolean(namePrefix + "RotatingVelocity", registry);
+      isFootRotating = new YoBoolean(namePrefix + "IsRotating", registry);
    }
 
    public void reset()
    {
       footAngularVelocityFiltered.reset();
-      angularVelocityMagnitude.set(Double.NaN);
+      angularVelocityMagnitude.setToNaN();
+
+      footDropOrLift.setToNaN();
 
       isFootRotating.set(false);
       isFootDropPastThreshold.set(false);
@@ -100,7 +102,14 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       footDropOrLift.set(pointingBackwardVector.getZ());
       angularVelocityMagnitude.set(footAngularVelocityFiltered.length());
 
-      updateFootRotationEstimate();
+      isFootDropPastThreshold.set(Math.abs(footDropOrLift.getDoubleValue()) > Math.abs(footDropThreshold.getDoubleValue()));
+
+      isAngularVelocityPastThreshold.set(angularVelocityMagnitude.getDoubleValue() > angularVelocityMagnitudeThreshold.getDoubleValue());
+
+      if (!isFootRotating.getValue())
+      {
+         isFootRotating.set(isAngularVelocityPastThreshold.getBooleanValue() && isFootDropPastThreshold.getBooleanValue());
+      }
 
       return isFootRotating.getBooleanValue();
    }
@@ -108,14 +117,5 @@ public class KinematicFootRotationDetector implements FootRotationDetector
    public boolean isRotating()
    {
       return isFootRotating.getBooleanValue();
-   }
-
-   private void updateFootRotationEstimate()
-   {
-      isFootDropPastThreshold.set(footDropOrLift.getDoubleValue() < footDropThreshold.getDoubleValue());
-
-      isAngularVelocityPastThreshold.set(angularVelocityMagnitude.getDoubleValue() > angularVelocityMagnitudeThreshold.getDoubleValue());
-
-      isFootRotating.set(isAngularVelocityPastThreshold.getBooleanValue() && isFootDropPastThreshold.getBooleanValue());
    }
 }

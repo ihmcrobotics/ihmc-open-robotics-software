@@ -67,10 +67,12 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      tempPoint.setMatchingFrame(measuredCoP);
+      tempPoint.setIncludingFrame(measuredCoP);
+      tempPoint.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       lineCalculator.update(tempPoint);
-      lineOfRotationInWorld.set(ReferenceFrame.getWorldFrame(), lineCalculator.getMeanLine());
-      lineOfRotationInSole.setMatchingFrame(lineOfRotationInWorld);
+      lineOfRotationInWorld.setIncludingFrame(ReferenceFrame.getWorldFrame(), lineCalculator.getMeanLine());
+      lineOfRotationInWorld.changeFrameAndProjectToXYPlane(lineOfRotationInSole.getReferenceFrame());
+      lineOfRotationInSole.set(lineOfRotationInWorld);
 
       stabilityEvaluator.update();
 

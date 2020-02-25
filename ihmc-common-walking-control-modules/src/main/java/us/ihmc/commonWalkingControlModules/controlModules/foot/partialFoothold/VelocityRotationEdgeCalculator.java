@@ -52,9 +52,10 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       pointOfRotation = new YoFramePoint2D(namePrefix + "PointOfRotation", soleFrame, registry);
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
+      parentRegistry.addChild(registry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
-      String paramRegistryName = getClass().getSimpleName() + "Parameters";
+      String paramRegistryName = KinematicFootRotationDetector.class.getSimpleName() + "Parameters";
       filterBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "filterBreakFrequency", registry, 1.0);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
@@ -74,8 +75,6 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
                                                               explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
 
       reset();
-
-      parentRegistry.addChild(registry);
    }
 
    private final FrameVector3D tempPointOfRotation = new FrameVector3D();
