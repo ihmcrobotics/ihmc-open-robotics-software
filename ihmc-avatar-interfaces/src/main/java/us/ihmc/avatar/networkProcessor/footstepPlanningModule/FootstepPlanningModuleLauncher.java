@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -62,8 +63,9 @@ public class FootstepPlanningModuleLauncher
       // Planner request callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, subscriberTopicNameGenerator, s ->
       {
-         FootstepPlanningRequestPacket requestPacket = s.takeNextData();
-         new Thread(() -> footstepPlanningModule.handleRequestPacket(requestPacket)).start();
+         FootstepPlannerRequest request = new FootstepPlannerRequest();
+         request.setFromPacket(s.takeNextData());
+         new Thread(() -> footstepPlanningModule.handleRequest(request)).start();
       });
 
       // Body path plan publisher
@@ -74,7 +76,12 @@ public class FootstepPlanningModuleLauncher
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                          FootstepPlanningToolboxOutputStatus.class,
                                                                                                          publisherTopicNameGenerator);
-      footstepPlanningModule.addStatusCallback(resultPublisher::publish);
+      footstepPlanningModule.addStatusCallback(output ->
+                                               {
+                                                  FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
+                                                  output.setPacket(outputStatus);
+                                                  resultPublisher.publish(outputStatus);
+                                               });
 
       // planner listener
       long updateFrequency = 500;
@@ -103,12 +110,10 @@ public class FootstepPlanningModuleLauncher
       IHMCROS2Publisher<FootstepPlannerStatusMessage> statusPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                   FootstepPlannerStatusMessage.class,
                                                                                                   publisherTopicNameGenerator);
-      footstepPlanningModule.addRequestCallback(requestPacket ->
+      footstepPlanningModule.addRequestCallback(request ->
                                                 {
                                                    FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                   boolean planningPath = FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType())
-                                                                                             .plansPath();
-                                                   statusMessage.setFootstepPlannerStatus((planningPath ? PLANNING_PATH : PLANNING_STEPS).toByte());
+                                                   statusMessage.setFootstepPlannerStatus((request.getPlanBodyPath() ? PLANNING_PATH : PLANNING_STEPS).toByte());
                                                    statusPublisher.publish(statusMessage);
                                                 });
       footstepPlanningModule.addBodyPathPlanCallback(bodyPathPlanMessage ->
@@ -119,13 +124,12 @@ public class FootstepPlanningModuleLauncher
                                                         statusMessage.setFootstepPlannerStatus((planningSteps ? PLANNING_STEPS : IDLE).toByte());
                                                         statusPublisher.publish(statusMessage);
                                                      });
-      footstepPlanningModule.addStatusCallback(outputStatus ->
+      footstepPlanningModule.addStatusCallback(output ->
                                                {
-                                                  FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                  boolean plannerTerminated = FootstepPlanningResult.fromByte(outputStatus.getFootstepPlanningResult())
-                                                                              != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+                                                  boolean plannerTerminated = output.getResult() != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
                                                   if (plannerTerminated)
                                                   {
+                                                     FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
                                                      statusMessage.setFootstepPlannerStatus((IDLE).toByte());
                                                      statusPublisher.publish(statusMessage);
                                                   }
