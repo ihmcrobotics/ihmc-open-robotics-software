@@ -70,7 +70,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public ICPControlGainsReadOnly getICPFeedbackGains()
    {
       ICPControlGains gains = new ICPControlGains();
-      gains.setKpOrthogonalToMotion(1.5);
+      gains.setKpOrthogonalToMotion(2.0);
       gains.setKpParallelToMotion(2.5);
 
       gains.setIntegralLeakRatio(0.97);
