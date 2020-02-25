@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -68,7 +69,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private HumanoidNetworkProcessorParameters networkModuleParameters;
    protected HumanoidRobotDataReceiver humanoidRobotDataReceiver;
 
-   private FootstepPlanningModule toolboxModule;
+   private FootstepPlanningModule footstepPlanningModule;
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
@@ -117,8 +118,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
-      toolboxModule = new FootstepPlanningModule(getRobotModel());
-      toolboxModule.setupWithRos(PubSubImplementation.INTRAPROCESS);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
+
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
                                                                    FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
       footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
@@ -150,10 +151,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       networkModuleParameters = null;
 
       ros2Node.destroy();
-      toolboxModule.closeAndDispose();
+      footstepPlanningModule.closeAndDispose();
 
       ros2Node = null;
-      toolboxModule = null;
+      footstepPlanningModule = null;
 
       planCompleted = false;
 

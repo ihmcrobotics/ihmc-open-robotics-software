@@ -21,6 +21,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -98,7 +99,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private AtomicReference<FootstepPlanningToolboxOutputStatus> plannerOutputStatus;
    private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
 
-   private FootstepPlanningModule footstepToolboxModule;
+   private FootstepPlanningModule footstepPlanningModule;
    private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
 
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -116,8 +117,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepToolboxModule = new FootstepPlanningModule(getRobotModel());
-      footstepToolboxModule.setupWithRos(DomainFactory.PubSubImplementation.INTRAPROCESS);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
       postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       plannerOutputStatus = new AtomicReference<>();
@@ -167,9 +167,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       plannerOutputStatus = null;
       postProcessingOutputStatus = null;
 
-      footstepToolboxModule.closeAndDispose();
+      footstepPlanningModule.closeAndDispose();
       postProcessingToolboxModule.destroy();
-      footstepToolboxModule = null;
+      footstepPlanningModule = null;
       postProcessingToolboxModule = null;
 
       simulationTestingParameters = null;
