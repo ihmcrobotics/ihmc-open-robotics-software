@@ -1,24 +1,17 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
+package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -51,10 +44,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -475,21 +466,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                         Pose3D goalPose = new Pose3D(requestPacket.getGoalPositionInWorld(), requestPacket.getGoalOrientationInWorld());
                                         goalPose.appendTranslation(0.0, 0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()), 0.0);
                                         return new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), side);
-                                     });
-   }
-
-   public static SideDependentList<ConvexPolygon2D> createFootPolygons(DRCRobotModel robotModel)
-   {
-      if (robotModel.getContactPointParameters() == null)
-      {
-         return PlannerTools.createDefaultFootPolygons();
-      }
-
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      return new SideDependentList<>(side ->
-                                     {
-                                        ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
-                                        return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                      });
    }
 }
