@@ -15,11 +15,13 @@ import us.ihmc.yoVariables.variable.*;
 
 import java.util.EnumMap;
 
-public class NewPartialFootholdControlModule
+public class FootRotationCalculationModule
 {
    private enum RotationDetectorType
    {
-      GEOMETRIC, KINEMATIC, VELOCITY
+      GEOMETRIC, KINEMATIC, VELOCITY, ANY;
+
+      static final RotationDetectorType[] values = {GEOMETRIC, KINEMATIC, VELOCITY};
    }
 
    private enum EdgeCalculatorType
@@ -35,8 +37,8 @@ public class NewPartialFootholdControlModule
    private final RotationDetectorType[] rotationDetectorTypes = RotationDetectorType.values();
    private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
-   public NewPartialFootholdControlModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
-                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
+   public FootRotationCalculationModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
 
@@ -86,7 +88,20 @@ public class NewPartialFootholdControlModule
 
    private boolean computeIsRotating()
    {
-      return rotationDetectors.get(rotationDetectorType.getEnumValue()).compute();
+      if (rotationDetectorType.getEnumValue() == RotationDetectorType.ANY)
+      {
+         for (RotationDetectorType type : RotationDetectorType.values)
+         {
+            if (rotationDetectors.get(type).isRotating())
+               return true;
+         }
+
+         return false;
+      }
+      else
+      {
+         return rotationDetectors.get(rotationDetectorType.getEnumValue()).compute();
+      }
    }
 
    private void resetRotationDetectors()
