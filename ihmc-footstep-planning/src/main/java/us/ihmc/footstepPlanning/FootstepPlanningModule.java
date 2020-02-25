@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BodyPathPlanMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -8,10 +8,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -30,6 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlan
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
@@ -75,8 +74,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
-   private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-   private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
+   private final FootstepPlannerRequest request = new FootstepPlannerRequest();
+   private final FootstepPlannerOutput output = new FootstepPlannerOutput();
    private final Stopwatch stopwatch = new Stopwatch();
    private final double statusPublishPeriod;
 
@@ -84,13 +83,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private FootstepNode endNode = null;
    private double endNodeCost;
 
-   private final BooleanSupplier bodyPathPlanRequested = () -> FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath();
+   private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
    private final Supplier<CostToGoHeuristics> heuristicsSupplier;
 
-   private Consumer<FootstepPlanningRequestPacket> requestCallback = request -> {};
+   private Consumer<FootstepPlannerRequest> requestCallback = request -> {};
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
    private Consumer<BodyPathPlanMessage> bodyPathResultCallback = bodyPathPlanMessage -> {};
-   private Consumer<FootstepPlanningToolboxOutputStatus> statusCallback = result -> {};
+   private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
 
    public FootstepPlanningModule(String name)
    {
@@ -137,7 +136,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       checker.addFootstepGraph(footstepPlanner.getGraph());
    }
 
-   public void handleRequestPacket(FootstepPlanningRequestPacket requestPacket)
+   public void handleRequest(FootstepPlannerRequest request)
    {
       if (isPlanning.get())
       {
@@ -145,22 +144,22 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return;
       }
 
-      this.requestPacket.set(requestPacket);
+      this.request.set(request);
       isPlanning.set(true);
       haltRequested.set(false);
       result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
       bodyPathPlanHolder.getPlan().clear();
-      requestCallback.accept(requestPacket);
+      requestCallback.accept(request);
 
       // Set goal pose
-      FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), requestPacket.getGoalPositionInWorld(), requestPacket.getGoalOrientationInWorld());
+      FramePose3D goalPose = new FramePose3D(request.getGoalPose());
       heuristicsSupplier.get().setGoalPose(goalPose);
 
       // Update planar regions
       PlanarRegionsList planarRegionsList = null;
-      if (!requestPacket.getAssumeFlatGround() && !requestPacket.getPlanarRegionsListMessage().getRegionId().isEmpty())
+      if (!request.getAssumeFlatGround() && !request.getPlanarRegionsList().isEmpty())
       {
-         planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
+         planarRegionsList = request.getPlanarRegionsList();
       }
 
       snapper.setPlanarRegions(planarRegionsList);
@@ -169,11 +168,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
       // Setup planner
-      FootstepNode startNode = createStartNode(requestPacket);
+      FootstepNode startNode = createStartNode(request);
       endNode = startNode;
-      addStartPoseToSnapper(requestPacket, startNode);
+      addStartPoseToSnapper(request, startNode);
       footstepPlanner.initialize(startNode);
-      SideDependentList<FootstepNode> goalNodes = createGoalNodes(requestPacket);
+      SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
 
       // Start timer
       stopwatch.start();
@@ -182,11 +181,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       if (bodyPathPlanRequested.getAsBoolean())
       {
          bodyPathHeuristics.setGoalAlpha(1.0);
-         FramePose3D stanceFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                      requestPacket.getStanceFootPositionInWorld(),
-                                                      requestPacket.getStanceFootOrientationInWorld());
-         RobotSide stanceFootSide = RobotSide.fromByte(requestPacket.getInitialStanceRobotSide());
-         bodyPathPlanner.setInitialStanceFoot(stanceFootPose, stanceFootSide);
+         FramePose3D stanceFootPose = new FramePose3D(request.getStanceFootPose());
+         bodyPathPlanner.setInitialStanceFoot(stanceFootPose, request.getInitialStanceSide());
          FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
          footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
          footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -237,7 +233,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       // Start planning loop
       while (true)
       {
-         if (stopwatch.totalElapsed() >= requestPacket.getTimeout() || haltRequested.get())
+         if (stopwatch.totalElapsed() >= request.getTimeout() || haltRequested.get())
          {
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
             break;
@@ -256,7 +252,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), requestPacket.getTimeout(), 0.1))
+         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1))
          {
             reportStatus();
             stopwatch.lap();
@@ -269,19 +265,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private void reportStatus()
    {
-      outputStatus.setPlanId(requestPacket.getPlannerRequestId());
-      outputStatus.setFootstepPlanningResult(result.toByte());
+      output.setPlanId(request.getRequestId());
+      output.setResult(result);
 
       // Pack solution path
-      FootstepDataListMessage footstepDataList = outputStatus.getFootstepDataList();
-      footstepDataList.setOffsetFootstepsHeightWithExecutionError(true);
-      footstepDataList.getFootstepDataList().clear();
+      FootstepPlan footstepPlan = new FootstepPlan();
       List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
       for (int i = 1; i < path.size(); i++)
       {
-         FootstepDataMessage footstepDataMessage = footstepDataList.getFootstepDataList().add();
+         SimpleFootstep footstep = new SimpleFootstep();
 
-         footstepDataMessage.setRobotSide(path.get(i).getRobotSide().toByte());
+         footstep.setRobotSide(path.get(i).getRobotSide());
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
@@ -291,39 +285,29 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(path.get(i));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
-         footstepDataMessage.getLocation().set(footstepPose.getTranslation());
-         footstepDataMessage.getOrientation().set(footstepPose.getRotation());
+         footstep.getSoleFramePose().set(footstepPose);
 
-         if (requestPacket.getAssumeFlatGround() || requestPacket.getPlanarRegionsListMessage().getRegionId().isEmpty())
+         if (request.getAssumeFlatGround() || request.getPlanarRegionsList().isEmpty())
          {
-            double flatGroundHeight = requestPacket.getStanceFootPositionInWorld().getZ();
-            footstepDataMessage.getLocation().setZ(flatGroundHeight);
+            double flatGroundHeight = request.getStanceFootPose().getZ();
+            footstep.getSoleFramePose().setZ(flatGroundHeight);
          }
 
-         ConvexPolygon2D foothold = snapData.getCroppedFoothold();
-         if (!foothold.isEmpty())
-         {
-            footstepDataMessage.getPredictedContactPoints2d().clear();
-            for (int j = 0; j < foothold.getNumberOfVertices(); j++)
-            {
-               footstepDataMessage.getPredictedContactPoints2d().add().set(foothold.getVertex(j));
-            }
-         }
+         footstep.setFoothold(snapData.getCroppedFoothold());
       }
 
       BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
       if (bodyPathPlan.getNumberOfWaypoints() > 0)
       {
-         outputStatus.getBodyPath().clear();
+         output.getBodyPath().clear();
          for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
          {
-            outputStatus.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
+            output.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
          }
       }
 
-      outputStatus.getPlanarRegionsList().set(requestPacket.getPlanarRegionsListMessage());
-      outputStatus.getFootstepPlanningStatistics().setTimeTaken(stopwatch.totalElapsed());
-      statusCallback.accept(outputStatus);
+      output.setPlanarRegionsList(request.getPlanarRegionsList());
+      statusCallback.accept(output);
    }
 
    private void reportBodyPathPlan()
@@ -337,9 +321,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       bodyPathPlanMessage.getPathPlannerStartPose().set(bodyPathPlan.getStartPose());
       bodyPathPlanMessage.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
-      bodyPathPlanMessage.setPlanId(requestPacket.getPlannerRequestId());
+      bodyPathPlanMessage.setPlanId(request.getRequestId());
       bodyPathPlanMessage.setFootstepPlanningResult(result.toByte());
-      bodyPathPlanMessage.getPlanarRegionsList().set(requestPacket.getPlanarRegionsListMessage());
+      bodyPathPlanMessage.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(request.getPlanarRegionsList()));
       bodyPathResultCallback.accept(bodyPathPlanMessage);
    }
 
@@ -354,7 +338,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return true;
    }
 
-   public void addRequestCallback(Consumer<FootstepPlanningRequestPacket> callback)
+   public void addRequestCallback(Consumer<FootstepPlannerRequest> callback)
    {
       requestCallback = requestCallback.andThen(callback);
    }
@@ -369,7 +353,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathResultCallback = bodyPathResultCallback.andThen(callback);
    }
 
-   public void addStatusCallback(Consumer<FootstepPlanningToolboxOutputStatus> callback)
+   public void addStatusCallback(Consumer<FootstepPlannerOutput> callback)
    {
       statusCallback = statusCallback.andThen(callback);
    }
@@ -392,6 +376,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return name;
    }
 
+   public FootstepPlannerRequest getRequest()
+   {
+      return request;
+   }
+
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
@@ -410,6 +399,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepNodeChecker getChecker()
    {
       return checker;
+   }
+
+   public AStarPathPlanner<FootstepNode> getFootstepPlanner()
+   {
+      return footstepPlanner;
+   }
+
+   public VisibilityGraphPathPlanner getBodyPathPlanner()
+   {
+      return bodyPathPlanner;
    }
 
    @Override
@@ -444,26 +443,26 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return false;
    }
 
-   private void addStartPoseToSnapper(FootstepPlanningRequestPacket requestPacket, FootstepNode startNode)
+   private void addStartPoseToSnapper(FootstepPlannerRequest request, FootstepNode startNode)
    {
-      Pose3D footPose = new Pose3D(requestPacket.getStanceFootPositionInWorld(), new Quaternion(requestPacket.getStanceFootOrientationInWorld()));
+      Pose3D footPose = request.getStanceFootPose();
       RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, footPose);
       snapper.addSnapData(startNode, new FootstepNodeSnapData(snapTransform));
    }
 
-   private static FootstepNode createStartNode(FootstepPlanningRequestPacket requestPacket)
+   private static FootstepNode createStartNode(FootstepPlannerRequest request)
    {
-      Point3D stancePosition = requestPacket.getStanceFootPositionInWorld();
-      double stanceYaw = requestPacket.getStanceFootOrientationInWorld().getYaw();
-      RobotSide robotSide = RobotSide.fromByte(requestPacket.getInitialStanceRobotSide());
+      Point3D stancePosition = request.getStanceFootPose().getPosition();
+      double stanceYaw = request.getStanceFootPose().getOrientation().getYaw();
+      RobotSide robotSide = request.getInitialStanceSide();
       return new FootstepNode(stancePosition.getX(), stancePosition.getY(), stanceYaw, robotSide);
    }
 
-   private SideDependentList<FootstepNode> createGoalNodes(FootstepPlanningRequestPacket requestPacket)
+   private SideDependentList<FootstepNode> createGoalNodes(FootstepPlannerRequest request)
    {
       return new SideDependentList<>(side ->
                                      {
-                                        Pose3D goalPose = new Pose3D(requestPacket.getGoalPositionInWorld(), requestPacket.getGoalOrientationInWorld());
+                                        Pose3D goalPose = new Pose3D(request.getGoalPose());
                                         goalPose.appendTranslation(0.0, 0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()), 0.0);
                                         return new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), side);
                                      });
