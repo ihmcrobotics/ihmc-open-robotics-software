@@ -224,5 +224,10 @@ public class TorqueSpeedTestRunner {
 		} catch (IOException e) {
 			System.err.println("Unable to copy param file to destination: " + e.getMessage());
 		}
+		
+		// Without calling System.exit(0), the sim has non-terminating threads. Specifically, the simulation
+		// thread and the intraprocess thread (associated with ROS2 publishing) do not exit.
+		System.exit(0);
 	}
+
 }
