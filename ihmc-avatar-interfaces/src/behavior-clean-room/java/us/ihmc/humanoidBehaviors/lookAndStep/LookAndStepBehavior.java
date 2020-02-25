@@ -30,6 +30,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.TimedExpirationCondition;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -78,6 +79,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
       // regions out of date?
+
+      TimedExpirationCondition planarRegionsExpiredCondition = new TimedExpirationCondition(lookAndStepParameters::getPlanarRegionsExpiration);
       // get regions
       // footstep plan out of date?
       // footstep plan valid for execution?
