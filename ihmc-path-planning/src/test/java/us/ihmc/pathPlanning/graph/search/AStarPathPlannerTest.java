@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.graph.search;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.pathPlanning.graph.GridNode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,8 +25,8 @@ public class AStarPathPlannerTest
       for (int i = 0; i < 5; i++)
       {
          AStarIterationData<GridNode> iterationData = planner.doPlanningIteration();
-         Assertions.assertTrue(iterationData.getParentNode().x == i);
-         Assertions.assertTrue(iterationData.getParentNode().y == 0);
+         Assertions.assertTrue(iterationData.getParentNode().getX() == i);
+         Assertions.assertTrue(iterationData.getParentNode().getY() == 0);
          Assertions.assertTrue(iterationData.getValidChildNodes().size() == 4);
          Assertions.assertTrue(iterationData.getInvalidChildNodes().isEmpty());
 
@@ -48,7 +49,7 @@ public class AStarPathPlannerTest
    {
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
       BiPredicate<GridNode, GridNode> edgeChecker = (child, parent) -> !child.equals(new GridNode(0, 4));
-      ToDoubleBiFunction<GridNode, GridNode> edgeCost = (n1, n2) -> 1.0 + (n2.x < 0 ? 2.0 : 0.0);
+      ToDoubleBiFunction<GridNode, GridNode> edgeCost = (n1, n2) -> 1.0 + (n2.getX() < 0 ? 2.0 : 0.0);
       AStarPathPlanner<GridNode> planner = new AStarPathPlanner<>(this::getNeighbors, edgeChecker, edgeCost, distanceCalculator::getManhattanDistance);
 
       GridNode startNode = new GridNode(0, 0);
@@ -84,30 +85,6 @@ public class AStarPathPlannerTest
       Assertions.assertTrue(path.get(7).equals(new GridNode(0, 5)));
    }
 
-   private class GridNode
-   {
-      final int x, y;
-
-      public GridNode(int x, int y)
-      {
-         this.x = x;
-         this.y = y;
-      }
-
-      @Override
-      public int hashCode()
-      {
-         return 5 * x + 13 * y;
-      }
-
-      @Override
-      public boolean equals(Object o)
-      {
-         GridNode gridNode = (GridNode) o;
-         return (gridNode.x == x) && (gridNode.y == y);
-      }
-   }
-
    private class ManhattanDistanceCalculator
    {
       private GridNode goalNode;
@@ -119,17 +96,17 @@ public class AStarPathPlannerTest
 
       double getManhattanDistance(GridNode other)
       {
-         return (double) (Math.abs(other.x - goalNode.x) + Math.abs(other.y - goalNode.y));
+         return (Math.abs(other.getX() - goalNode.getX()) + Math.abs(other.getY() - goalNode.getY()));
       }
    }
 
    private HashSet<GridNode> getNeighbors(GridNode gridNode)
    {
       HashSet<GridNode> neighbors = new HashSet<>();
-      neighbors.add(new GridNode(gridNode.x - 1, gridNode.y));
-      neighbors.add(new GridNode(gridNode.x + 1, gridNode.y));
-      neighbors.add(new GridNode(gridNode.x, gridNode.y- 1));
-      neighbors.add(new GridNode(gridNode.x, gridNode.y+ 1));
+      neighbors.add(new GridNode(gridNode.getX() - 1, gridNode.getY()));
+      neighbors.add(new GridNode(gridNode.getX() + 1, gridNode.getY()));
+      neighbors.add(new GridNode(gridNode.getX(), gridNode.getY()- 1));
+      neighbors.add(new GridNode(gridNode.getX(), gridNode.getY()+ 1));
       return neighbors;
    }
 }
