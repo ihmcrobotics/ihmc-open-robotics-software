@@ -45,6 +45,7 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,7 +84,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private FootstepNode endNode = null;
    private double endNodeCost;
    private final FramePose3D goalPose = new FramePose3D();
-
 
    private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
    private final Supplier<CostToGoHeuristics> heuristicsSupplier;
@@ -167,8 +167,20 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
-      // Plan body path if requested
-      if (bodyPathPlanRequested.getAsBoolean())
+      if (!request.getBodyPathWaypoints().isEmpty())
+      {
+         Pose3D startPose = new Pose3D(request.getStanceFootPose());
+         double stanceOffset = request.getInitialStanceSide().negateIfLeftSide(0.5 * getFootstepPlannerParameters().getIdealFootstepWidth());
+         startPose.appendTranslation(0.0, stanceOffset, 0.0);
+
+         List<Pose3DReadOnly> waypoints = new ArrayList<>();
+         waypoints.add(startPose);
+         waypoints.addAll(request.getBodyPathWaypoints());
+         waypoints.add(new Pose3D(request.getGoalPose()));
+
+         bodyPathPlanHolder.setPoseWaypoints(waypoints);
+      }
+      else if (bodyPathPlanRequested.getAsBoolean())
       {
          bodyPathHeuristics.setGoalAlpha(1.0);
          FramePose3D stanceFootPose = new FramePose3D(request.getStanceFootPose());

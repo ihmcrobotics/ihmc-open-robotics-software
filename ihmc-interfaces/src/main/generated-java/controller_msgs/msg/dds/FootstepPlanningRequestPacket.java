@@ -83,7 +83,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    /**
             * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
             */
-   public us.ihmc.euclid.geometry.Pose3D requested_waypoints_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
 
    public FootstepPlanningRequestPacket()
    {
@@ -92,7 +92,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-      requested_waypoints_ = new us.ihmc.euclid.geometry.Pose3D();
+      body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
+
    }
 
    public FootstepPlanningRequestPacket(FootstepPlanningRequestPacket other)
@@ -128,7 +129,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       planner_request_id_ = other.planner_request_id_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.requested_waypoints_, requested_waypoints_);
+      body_path_waypoints_.set(other.body_path_waypoints_);
    }
 
    /**
@@ -330,9 +331,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    /**
             * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
             */
-   public us.ihmc.euclid.geometry.Pose3D getRequestedWaypoints()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
    {
-      return requested_waypoints_;
+      return body_path_waypoints_;
    }
 
 
@@ -378,7 +379,13 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
-      if (!this.requested_waypoints_.epsilonEquals(other.requested_waypoints_, epsilon)) return false;
+      if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.body_path_waypoints_.size(); i++)
+         {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -417,7 +424,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
-      if (!this.requested_waypoints_.equals(otherMyClass.requested_waypoints_)) return false;
+      if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
 
       return true;
    }
@@ -458,8 +465,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
-      builder.append("requested_waypoints=");
-      builder.append(this.requested_waypoints_);
+      builder.append("body_path_waypoints=");
+      builder.append(this.body_path_waypoints_);
       builder.append("}");
       return builder.toString();
    }
