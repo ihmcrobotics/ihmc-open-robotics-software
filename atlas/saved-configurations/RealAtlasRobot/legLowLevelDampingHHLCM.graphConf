@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_akxraw_ff_const</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_hpzLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_akyraw_ff_const</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_hpzLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_akx.ll_out_r_leg_akx_ff_const</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_hpxLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_aky.ll_out_r_leg_aky_ff_const</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_hpxLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_akx.ll_in_r_leg_akx_q</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_hpyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_aky.ll_in_r_leg_aky_q</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_hpyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_akx.ll_in_r_leg_akx_qd</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_knyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_aky.ll_in_r_leg_aky_qd</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_knyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_akx.ll_in_l_leg_akx_f,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_leg_akx.ll_out_l_leg_akx_f_d</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_akyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_aky.ll_in_l_leg_aky_f,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_leg_aky.ll_out_l_leg_aky_f_d</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_akyLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_akx.ll_in_r_leg_akx_f,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_akx.ll_out_r_leg_akx_f_d</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.l_leg_akxLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_aky.ll_in_r_leg_aky_f,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_leg_aky.ll_out_r_leg_aky_f_d</Variables>
+		<Variables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager.r_leg_akxLowLevelDampingHHLCM</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
