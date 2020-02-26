@@ -213,6 +213,8 @@ public class FootstepPlannerRequest
       this.timeout = other.timeout;
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
-      this.planarRegionsList = other.planarRegionsList.copy();
+
+      if(other.planarRegionsList != null)
+         this.planarRegionsList = other.planarRegionsList.copy();
    }
 }
