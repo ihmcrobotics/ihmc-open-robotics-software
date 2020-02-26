@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -9,6 +7,9 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -24,6 +25,7 @@ public class FootstepPlannerRequest
    private double horizonLength;
    private PlanarRegionsList planarRegionsList;
    private boolean assumeFlatGround;
+   private final ArrayList<Pose3DReadOnly> bodyPathWaypoints = new ArrayList<>();
 
    public FootstepPlannerRequest()
    {
@@ -43,6 +45,7 @@ public class FootstepPlannerRequest
       horizonLength = Double.POSITIVE_INFINITY;
       planarRegionsList = null;
       assumeFlatGround = false;
+      bodyPathWaypoints.clear();
    }
 
    public void setRequestId(int requestId)
@@ -165,6 +168,11 @@ public class FootstepPlannerRequest
       return assumeFlatGround;
    }
 
+   public ArrayList<Pose3DReadOnly> getBodyPathWaypoints()
+   {
+      return bodyPathWaypoints;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       setRequestId(requestPacket.getPlannerRequestId());
@@ -196,6 +204,11 @@ public class FootstepPlannerRequest
       requestPacket.setTimeout(getTimeout());
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
+      requestPacket.getRequestedWaypoints().clear();
+      for (int i = 0; i < bodyPathWaypoints.size(); i++)
+      {
+         requestPacket.getRequestedWaypoints().add().set(bodyPathWaypoints.get(i));
+      }
 
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
       requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
@@ -216,5 +229,11 @@ public class FootstepPlannerRequest
 
       if(other.planarRegionsList != null)
          this.planarRegionsList = other.planarRegionsList.copy();
+
+      this.bodyPathWaypoints.clear();
+      for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
+      {
+         this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
+      }
    }
 }
