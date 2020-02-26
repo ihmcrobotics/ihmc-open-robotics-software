@@ -19,7 +19,7 @@ mainDependencies {
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:euclid-frame:0.12.2")
    api("us.ihmc:euclid-shape:0.12.2")
-   api("us.ihmc:ihmc-javafx-toolkit:0.13.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.14.0")
    api("us.ihmc:ihmc-yovariables:0.4.0")
    api("us.ihmc:ihmc-convex-optimization:0.13.0")
    api("us.ihmc:robot-environment-awareness:source")
@@ -29,7 +29,7 @@ visualizersDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("data-sets")
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.13.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.14.0")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
