@@ -214,7 +214,10 @@ public class SupportState extends AbstractFootControlState
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
       footRotationDetector = new KinematicFootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
-      footRotationCalculationModule = new FootRotationCalculationModule(robotSide, soleFrame, explorationParameters, dt, registry, graphicsListRegistry);
+      if (explorationParameters != null)
+         footRotationCalculationModule = new FootRotationCalculationModule(robotSide, soleFrame, explorationParameters, dt, registry, graphicsListRegistry);
+      else
+         footRotationCalculationModule = null;
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
