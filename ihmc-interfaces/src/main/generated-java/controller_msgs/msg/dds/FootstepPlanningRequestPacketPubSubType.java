@@ -70,8 +70,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -125,7 +126,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getRequestedWaypoints(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getBodyPathWaypoints().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPathWaypoints().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -158,7 +162,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_2(data.getPlannerRequestId());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getRequestedWaypoints(), cdr);
+      if(data.getBodyPathWaypoints().size() <= 50)
+      cdr.write_type_e(data.getBodyPathWaypoints());else
+          throw new RuntimeException("body_path_waypoints field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
@@ -188,7 +195,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setPlannerRequestId(cdr.read_type_2());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getRequestedWaypoints(), cdr);	
+      cdr.read_type_e(data.getBodyPathWaypoints());	
 
    }
 
@@ -215,8 +222,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
-      ser.write_type_a("requested_waypoints", new geometry_msgs.msg.dds.PosePubSubType(), data.getRequestedWaypoints());
-
+      ser.write_type_e("body_path_waypoints", data.getBodyPathWaypoints());
    }
 
    @Override
@@ -242,8 +248,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
-      ser.read_type_a("requested_waypoints", new geometry_msgs.msg.dds.PosePubSubType(), data.getRequestedWaypoints());
-
+      ser.read_type_e("body_path_waypoints", data.getBodyPathWaypoints());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlanningRequestPacket src, controller_msgs.msg.dds.FootstepPlanningRequestPacket dest)

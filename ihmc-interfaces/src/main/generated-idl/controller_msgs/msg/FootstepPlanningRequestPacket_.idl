@@ -107,7 +107,7 @@ module controller_msgs
         /**
          * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
          */
-        geometry_msgs::msg::dds::Pose requested_waypoints;
+        sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
       };
     };
   };
