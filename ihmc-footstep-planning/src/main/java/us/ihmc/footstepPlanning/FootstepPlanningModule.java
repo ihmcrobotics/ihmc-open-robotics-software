@@ -183,12 +183,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else if (bodyPathPlanRequested.getAsBoolean())
       {
          bodyPathHeuristics.setGoalAlpha(1.0);
-         FramePose3D stanceFootPose = new FramePose3D(request.getStanceFootPose());
-         bodyPathPlanner.setInitialStanceFoot(stanceFootPose, request.getInitialStanceSide());
-         FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
-         footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
-         footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-         bodyPathPlanner.setGoal(footstepPlannerGoal);
+         bodyPathPlanner.setInitialStanceFoot(request.getStanceFootPose(), request.getInitialStanceSide());
+         bodyPathPlanner.setGoal(goalPose);
 
          FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          if (!bodyPathPlannerResult.validForExecution())
