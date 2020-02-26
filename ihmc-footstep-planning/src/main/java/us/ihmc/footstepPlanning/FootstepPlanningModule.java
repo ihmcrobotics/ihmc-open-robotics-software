@@ -157,7 +157,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       // Update planar regions
       PlanarRegionsList planarRegionsList = null;
-      if (!request.getAssumeFlatGround() && !request.getPlanarRegionsList().isEmpty())
+      if (!request.getAssumeFlatGround() && request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty())
       {
          planarRegionsList = request.getPlanarRegionsList();
       }
@@ -304,7 +304,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          snapTransform.transform(footstepPose);
          footstep.getSoleFramePose().set(footstepPose);
 
-         if (request.getAssumeFlatGround() || request.getPlanarRegionsList().isEmpty())
+         if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
             double flatGroundHeight = request.getStanceFootPose().getZ();
             footstep.getSoleFramePose().setZ(flatGroundHeight);
