@@ -50,7 +50,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.14.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.15.0")
    api("us.ihmc:robotiq-hand-drivers:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
