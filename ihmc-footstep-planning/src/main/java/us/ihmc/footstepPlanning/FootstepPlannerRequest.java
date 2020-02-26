@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -54,7 +55,7 @@ public class FootstepPlannerRequest
       this.initialStanceSide = initialStanceSide;
    }
 
-   public void setInitialStancePose(Pose3D stanceFootPose)
+   public void setInitialStancePose(Pose3DReadOnly stanceFootPose)
    {
       this.stanceFootPose.set(stanceFootPose);
    }
@@ -64,7 +65,7 @@ public class FootstepPlannerRequest
       this.stanceFootPose.set(stanceFootPosition, stanceFootOrientation);
    }
 
-   public void setGoalPose(Pose3D goalPose)
+   public void setGoalPose(Pose3DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
    }

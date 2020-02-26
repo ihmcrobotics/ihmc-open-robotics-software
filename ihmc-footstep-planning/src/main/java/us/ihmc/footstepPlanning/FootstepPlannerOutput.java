@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class FootstepPlannerOutput
 {
    private int planId;
-   private FootstepPlan footstepPlan;
+   private final FootstepPlan footstepPlan = new FootstepPlan();
    private FootstepPlanningResult result;
    private PlanarRegionsList planarRegionsList;
    private final ArrayList<Pose3D> bodyPath = new ArrayList<>();
@@ -20,7 +20,7 @@ public class FootstepPlannerOutput
    public void clear()
    {
       planId = -1;
-      footstepPlan = null;
+      footstepPlan.clear();
       result = null;
       planarRegionsList = null;
       bodyPath.clear();
@@ -60,11 +60,6 @@ public class FootstepPlannerOutput
    public void setPlanId(int planId)
    {
       this.planId = planId;
-   }
-
-   public void setFootstepPlan(FootstepPlan footstepPlan)
-   {
-      this.footstepPlan = footstepPlan;
    }
 
    public void setResult(FootstepPlanningResult result)

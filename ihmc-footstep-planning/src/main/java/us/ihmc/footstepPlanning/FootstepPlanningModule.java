@@ -82,6 +82,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private FootstepPlanningResult result = null;
    private FootstepNode endNode = null;
    private double endNodeCost;
+   private final FramePose3D goalPose = new FramePose3D();
+
 
    private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
    private final Supplier<CostToGoHeuristics> heuristicsSupplier;
@@ -136,12 +138,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       checker.addFootstepGraph(footstepPlanner.getGraph());
    }
 
-   public void handleRequest(FootstepPlannerRequest request)
+   public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
    {
       if (isPlanning.get())
       {
          LogTools.info("Received planning request packet but planner is currently running");
-         return;
+         return null;
       }
 
       this.request.set(request);
@@ -149,11 +151,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       haltRequested.set(false);
       result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
       bodyPathPlanHolder.getPlan().clear();
+      goalPose.set(request.getGoalPose());
       requestCallback.accept(request);
-
-      // Set goal pose
-      FramePose3D goalPose = new FramePose3D(request.getGoalPose());
-      heuristicsSupplier.get().setGoalPose(goalPose);
 
       // Update planar regions
       PlanarRegionsList planarRegionsList = null;
@@ -166,13 +165,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-
-      // Setup planner
-      FootstepNode startNode = createStartNode(request);
-      endNode = startNode;
-      addStartPoseToSnapper(request, startNode);
-      footstepPlanner.initialize(startNode);
-      SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
 
       // Start timer
       stopwatch.start();
@@ -194,7 +186,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             result = bodyPathPlannerResult;
             isPlanning.set(false);
             reportStatus();
-            return;
+            return output;
          }
 
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
@@ -210,13 +202,27 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                result = FootstepPlanningResult.PLANNER_FAILED;
                isPlanning.set(false);
                reportStatus();
-               return;
+               return output;
             }
          }
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
+         double pathLength = bodyPathPlanHolder.computePathLength(1.0);
+         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
+         {
+            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
+            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalPose);
+         }
          reportBodyPathPlan();
       }
+
+      // Setup footstep planner
+      FootstepNode startNode = createStartNode(request);
+      endNode = startNode;
+      addStartPoseToSnapper(request, startNode);
+      footstepPlanner.initialize(startNode);
+      SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
+      heuristicsSupplier.get().setGoalPose(goalPose);
 
       // Calculate end node cost
       endNodeCost = heuristicsSupplier.get().compute(endNode);
@@ -227,7 +233,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          result = FootstepPlanningResult.INVALID_GOAL;
          isPlanning.set(false);
          reportStatus();
-         return;
+         return output;
       }
 
       // Start planning loop
@@ -261,6 +267,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       reportStatus();
       isPlanning.set(false);
+      return output;
    }
 
    private void reportStatus()
@@ -269,7 +276,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setResult(result);
 
       // Pack solution path
-      FootstepPlan footstepPlan = new FootstepPlan();
+      output.getFootstepPlan().clear();
       List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
       for (int i = 1; i < path.size(); i++)
       {
@@ -294,6 +301,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          footstep.setFoothold(snapData.getCroppedFoothold());
+         output.getFootstepPlan().addFootstep(footstep);
       }
 
       BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
@@ -304,6 +312,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          {
             output.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
          }
+
+         output.getLowLevelGoal().set(goalPose);
       }
 
       output.setPlanarRegionsList(request.getPlanarRegionsList());
