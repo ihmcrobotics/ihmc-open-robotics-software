@@ -416,6 +416,7 @@ public class LinearMomentumRateControlModuleInput
    public void set(LinearMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
+      useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
       perfectCMP.setIncludingFrame(other.perfectCMP);
@@ -463,6 +464,8 @@ public class LinearMomentumRateControlModuleInput
          if (!perfectCoP.equals(other.perfectCoP))
             return false;
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
+            return false;
+         if (useMomentumRecoveryMode ^ other.useMomentumRecoveryMode)
             return false;
          if (Double.compare(desiredCoMHeightAcceleration, other.desiredCoMHeightAcceleration) != 0)
             return false;
