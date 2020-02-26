@@ -33,7 +33,7 @@ mainDependencies {
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.13.0")
    api("us.ihmc:simulation-construction-set:0.13.0")
    api("us.ihmc:ihmc-graphics-description:0.14.0")
-   api("us.ihmc:ihmc-robot-description:0.13.0")
+   api("us.ihmc:ihmc-robot-description:0.14.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")
