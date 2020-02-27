@@ -73,7 +73,7 @@ public class AtlasPointCloudSensorManager
    
    public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
    {
-      realsenseDepthPointCloudPublisher.addSelfCollisionFilter(collisionBoxProvider);
+      realsenseDepthPointCloudPublisher.setSelfCollisionFilter(collisionBoxProvider);
    }
 
    private StereoVisionWorldTransformCalculator createDepthPointCloudWorldTransformCalculator()

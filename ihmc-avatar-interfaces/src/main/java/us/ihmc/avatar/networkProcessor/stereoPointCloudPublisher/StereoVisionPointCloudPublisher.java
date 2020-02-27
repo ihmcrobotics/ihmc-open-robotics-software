@@ -148,18 +148,23 @@ public class StereoVisionPointCloudPublisher
       executorService.shutdownNow();
    }
 
-   public void addSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
+   public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
    {
+      if (collisionFilter != null)
+         return;
       collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
       activeFilters.addFilter(collisionFilter);
    }
 
-   public void addRangeFilter(double minRange, double maxRange)
+   public void setRangeFilter(double minRange, double maxRange)
    {
-      rangeFilter = new RangeScanPointFilter();
+      if (rangeFilter == null)
+      {
+         rangeFilter = new RangeScanPointFilter();
+         activeFilters.addFilter(rangeFilter);
+      }
       rangeFilter.setMinRange(minRange);
       rangeFilter.setMaxRange(minRange);
-      activeFilters.addFilter(rangeFilter);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
