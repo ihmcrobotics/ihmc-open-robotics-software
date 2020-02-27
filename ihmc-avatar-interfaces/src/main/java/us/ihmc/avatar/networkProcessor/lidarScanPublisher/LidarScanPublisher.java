@@ -46,7 +46,7 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 public class LidarScanPublisher
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final int MAX_NUMBER_OF_POINTS = 5000;
+   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 5000;
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
@@ -65,6 +65,7 @@ public class LidarScanPublisher
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanRealtimePublisher;
 
+   private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
    private ShadowScanPointFilter shadowFilter = null;
    private CollidingScanPointFilter collisionFilter = null;
@@ -120,6 +121,11 @@ public class LidarScanPublisher
          lidarScanPublisher = null;
          lidarScanRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
       }
+   }
+
+   public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
+   {
+      this.maximumNumberOfPoints = maximumNumberOfPoints;
    }
 
    public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
@@ -217,7 +223,7 @@ public class LidarScanPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, MAX_NUMBER_OF_POINTS, false));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, maximumNumberOfPoints, false));
          }
       };
    }
@@ -229,7 +235,7 @@ public class LidarScanPublisher
          @Override
          public void onNewMessage(PointCloud2WithSource pointCloud)
          {
-            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud.getCloud(), MAX_NUMBER_OF_POINTS, false));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud.getCloud(), maximumNumberOfPoints, false));
          }
       };
    }
