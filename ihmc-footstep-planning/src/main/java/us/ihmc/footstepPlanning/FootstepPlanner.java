@@ -17,6 +17,8 @@ public interface FootstepPlanner
          setPlanningHorizonLength(objective.getHorizonLength());
       if (objective.hasTimeout())
          setTimeout(objective.getTimeout());
+      if (objective.hasBestEffortTimeout())
+         setBestEffortTimeout(objective.getBestEffortTimeout());
       if (objective.hasGoal())
          setGoal(objective.getGoal());
    }
@@ -31,7 +33,7 @@ public interface FootstepPlanner
     * @param side                RobotSide of the initial stance foot
     */
    void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide side);
-   
+
    /**
     * Sets the initial foot poses at the start of the plan. The planner will determine the
     * best first step side.
@@ -65,6 +67,15 @@ public interface FootstepPlanner
    void setTimeout(double timeout);
 
    /**
+    * Sets a timeout after which the planner will give up and return its best effort solution, if it
+    * is being run in best effort mode. By default this is 0.0.
+    * @param timeout timeout of the planner.
+    */
+   default void setBestEffortTimeout(double timeout)
+   {
+   }
+
+   /**
     * Set possible stepping regions for the footstep planner. If null is passed the
     * planner will assume flat ground.
     * @param planarRegionsList   List of planar regions that describe the environment
@@ -96,6 +107,6 @@ public interface FootstepPlanner
    {
       return null;
    }
-   
+
    default void cancelPlanning(){}
 }

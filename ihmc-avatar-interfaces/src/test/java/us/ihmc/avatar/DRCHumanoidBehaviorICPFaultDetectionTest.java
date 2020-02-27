@@ -7,13 +7,14 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -253,10 +254,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       simulationStarter.setRunMultiThreaded(false);
 
       boolean automaticallyStartSimulation = true;
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.enableUiModule(automaticallyStartSimulation);
-      networkProcessorParameters.enableLocalControllerCommunicator(true);
-      simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
+      simulationStarter.startSimulation(null, automaticallyStartSimulation);
+      simulationStarter.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();

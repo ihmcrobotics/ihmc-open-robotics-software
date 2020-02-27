@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.depthData;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,15 +15,13 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.PointCloudWorldPacket;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -81,17 +80,9 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
 
 //      jmeLidarScanVisualizer = new JMELidarScanVisualizer();
 
-      DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
-      drcNetworkModuleParameters.enableNetworkProcessor(true);
-      drcNetworkModuleParameters.enableBehaviorModule(false);
-      drcNetworkModuleParameters.enableBehaviorVisualizer(false);
-      drcNetworkModuleParameters.enableROSAPICommunicator(true);
-      drcNetworkModuleParameters.enableHandModule(true);
-      drcNetworkModuleParameters.enableLocalControllerCommunicator(true);
-      drcNetworkModuleParameters.enablePerceptionModule(true);
-      drcNetworkModuleParameters.enableRosModule(false);
-      drcNetworkModuleParameters.enableSensorModule(true);
-      drcNetworkModuleParameters.enableUiModule(true);
+      HumanoidNetworkProcessorParameters drcNetworkModuleParameters = new HumanoidNetworkProcessorParameters();
+      drcNetworkModuleParameters.setUseROSModule(false);
+      drcNetworkModuleParameters.setUseSensorModule(true);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WallAtDistanceEnvironment(WALL_DISTANCE);

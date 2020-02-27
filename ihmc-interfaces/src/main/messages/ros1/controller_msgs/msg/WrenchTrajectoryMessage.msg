@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This class is used to build a wrench (force & moment) profile over time.
+# A linear interpolation is used to interpolate between trajectory points.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

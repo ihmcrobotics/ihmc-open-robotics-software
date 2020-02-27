@@ -7,9 +7,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class MatrixOfCofactorsCalculatorInefficientTest
 {
@@ -29,7 +27,7 @@ public class MatrixOfCofactorsCalculatorInefficientTest
       
       CommonOps.scale(1.0/CommonOps.det(mat), inverseViaMatrixOfCoFactors);
 
-      JUnitTools.assertMatrixEquals(inverse, inverseViaMatrixOfCoFactors, 1e-5);
+      MatrixTestTools.assertMatrixEquals(inverse, inverseViaMatrixOfCoFactors, 1e-5);
    }
 
 }

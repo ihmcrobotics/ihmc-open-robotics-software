@@ -117,8 +117,8 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
       if (timeInState > transferToSoleWaypointDuration.getValue() && !doneWithInitialTransfer.getBooleanValue())
       {
          doneWithInitialTransfer.set(true);
-         balanceManager.initializeForStepping();
          balanceManager.setHoldCurrentDesiredPosition(true);
+//         balanceManager.initializeForStepping();
       }
 
       if (doneWithInitialTransfer.getBooleanValue())

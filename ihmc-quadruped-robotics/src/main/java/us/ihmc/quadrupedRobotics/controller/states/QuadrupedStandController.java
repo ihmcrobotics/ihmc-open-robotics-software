@@ -71,6 +71,7 @@ public class QuadrupedStandController implements EventState
       bodyOrientationManager.enableBodyPitchOscillation();
 
       // initialize feedback controllers
+      balanceManager.clearStepSequence();
       balanceManager.initializeForStanding();
       balanceManager.enableBodyXYControl();
       bodyOrientationManager.initialize();

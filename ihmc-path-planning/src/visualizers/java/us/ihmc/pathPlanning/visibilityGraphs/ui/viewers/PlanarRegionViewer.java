@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -40,13 +41,17 @@ public class PlanarRegionViewer
    private final AtomicDouble opacity = new AtomicDouble(1.0);
 
    private final AnimationTimer renderMeshAnimation;
-   private final AtomicReference<Boolean> show;
+   private final AtomicBoolean show = new AtomicBoolean(true);
 
    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
+      this();
       messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-      show = messager.createInput(showPlanarRegionsTopic, true);
+      messager.registerTopicListener(showPlanarRegionsTopic, this::setVisibile);
+   }
 
+   public PlanarRegionViewer()
+   {
       renderMeshAnimation = new AnimationTimer()
       {
          @Override
@@ -87,9 +92,14 @@ public class PlanarRegionViewer
       executorService.shutdownNow();
    }
 
-   private void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
+   public void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
    {
       executorService.submit(() -> buildMeshAndMaterial(planarRegionsList));
+   }
+
+   public void setVisibile(boolean visible)
+   {
+      this.show.set(visible);
    }
 
    private void buildMeshAndMaterial(PlanarRegionsList planarRegionsList)

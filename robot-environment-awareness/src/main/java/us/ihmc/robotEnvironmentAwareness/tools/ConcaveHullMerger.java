@@ -1,7 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
 import java.util.ArrayList;
+import java.util.Random;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -31,6 +33,7 @@ public class ConcaveHullMerger
    private static final double minimumDistanceSquared = 0.002 * 0.002;
    private static final double amountToMove = 0.0025;
    private static final double maximumDotProductBetweenSkinnyEdges = Math.cos(Math.toRadians(0.5));
+   private static final Random randomForWiggling = new Random(238949L);
 
    //TODO: What should this be set to? Should we make it be a parameter?
    private static final double depthThresholdForConcaveHullDecomposition = 0.001;
@@ -123,6 +126,41 @@ public class ConcaveHullMerger
          listener.originalHulls(hullOneIn, hullTwoIn);
       }
 
+      // wiggle close points away from each other
+      double minimumDistance = 1e-5;
+      double infinitesimalDistance = 1e-14;
+      Vector2D tempVector = null;
+      for (Point2D a : hullOneIn)
+      {
+         for (Point2D b : hullTwoIn)
+         {
+            double distance = a.distance(b);
+            if (distance < infinitesimalDistance)
+            {
+               double randomAngle = randomForWiggling.nextDouble() * 2.0 * Math.PI;
+               double moveAmount = minimumDistance;
+               b.addX(moveAmount * Math.cos(randomAngle));
+               b.addY(moveAmount * Math.sin(randomAngle));
+            }
+            else if (distance < minimumDistance)
+            {
+               if (tempVector == null) tempVector = new Vector2D();
+
+               double moveAmount = (minimumDistance - distance) / 2.0;
+
+               tempVector.sub(a, b);  // moving the points directly away from each other the required amount
+               tempVector.normalize();
+               tempVector.scale(moveAmount);
+               a.addX(tempVector.getX());
+               a.addY(tempVector.getY());
+
+               tempVector.negate();
+               b.addX(tempVector.getX());
+               b.addY(tempVector.getY());
+            }
+         }
+      }
+
       ArrayList<Point2D> originalHullOne = hullOneIn;
       ArrayList<Point2D> originalHullTwo = hullTwoIn;
 
@@ -154,6 +192,7 @@ public class ConcaveHullMerger
       }
 
       hullTwoList = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullOneList, hullTwoList);
+      hullOneList = preprocessHullTwoToMoveDuplicatesOrOnEdges(hullTwoList, hullOneList);
 
       BoundingBox2D hullOneBoundingBox = createBoundingBox(hullOneList);
       BoundingBox2D hullTwoBoundingBox = createBoundingBox(hullTwoList);
@@ -365,7 +404,7 @@ public class ConcaveHullMerger
       return false;
    }
 
-   private static ArrayList<Point2D> preprocessHullByRemovingPoints(ArrayList<Point2D> hull)
+   public static ArrayList<Point2D> preprocessHullByRemovingPoints(ArrayList<Point2D> hull)
    {
       if ((hull == null) || (hull.size() < 3))
          return hull;

@@ -85,11 +85,6 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
-      for (RobotSide side : RobotSide.values)
-      {
-         footPolygons.set(side, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPointParameters.getFootContactPoints().get(side))));
-      }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 

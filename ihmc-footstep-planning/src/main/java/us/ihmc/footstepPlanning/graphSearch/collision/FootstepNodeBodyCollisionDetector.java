@@ -5,24 +5,53 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 public class FootstepNodeBodyCollisionDetector
 {
-   private final BoundingBoxCollisionDetector collisionDetector;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector();
    private final HashMap<LatticeNode, BodyCollisionData> collisionDataHolder = new HashMap<>();
+
+   private final DoubleSupplier bodyBoxDepth;
+   private final DoubleSupplier bodyBoxWidth;
+   private final DoubleSupplier bodyBoxHeight;
+   private final DoubleSupplier xyProximityCheck;
+
+   private final DoubleSupplier bodyBoxBaseX;
+   private final DoubleSupplier bodyBoxBaseY;
+   private final DoubleSupplier bodyBoxBaseZ;
 
    public FootstepNodeBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
    {
-      this.collisionDetector = new BoundingBoxCollisionDetector(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight(), 
-                                                                parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
-      this.parameters = parameters;
+      this(parameters::getBodyBoxDepth,
+           parameters::getBodyBoxWidth,
+           parameters::getBodyBoxHeight,
+           parameters::getMaximum2dDistanceFromBoundingBoxToPenalize,
+           parameters::getBodyBoxBaseX,
+           parameters::getBodyBoxBaseY,
+           parameters::getBodyBoxBaseZ);
+   }
+
+   public FootstepNodeBodyCollisionDetector(DoubleSupplier bodyBoxDepth,
+                                            DoubleSupplier bodyBoxWidth,
+                                            DoubleSupplier bodyBoxHeight,
+                                            DoubleSupplier xyProximityCheck,
+                                            DoubleSupplier bodyBoxBaseX,
+                                            DoubleSupplier bodyBoxBaseY,
+                                            DoubleSupplier bodyBoxBaseZ)
+   {
+      this.bodyBoxDepth = bodyBoxDepth;
+      this.bodyBoxWidth = bodyBoxWidth;
+      this.bodyBoxHeight = bodyBoxHeight;
+      this.xyProximityCheck = xyProximityCheck;
+      this.bodyBoxBaseX = bodyBoxBaseX;
+      this.bodyBoxBaseY = bodyBoxBaseY;
+      this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -37,6 +66,7 @@ public class FootstepNodeBodyCollisionDetector
       if(numberOfCollisionChecks < 1)
          return null;
 
+      collisionDetector.setBoxDimensions(bodyBoxDepth.getAsDouble(), bodyBoxWidth.getAsDouble(), bodyBoxHeight.getAsDouble(), xyProximityCheck.getAsDouble());
       ArrayList<BodyCollisionData> collisionDataList = new ArrayList<>();
 
       LatticeNode previousLatticeNode = createNodeForCollisionCheck(previousNode);
@@ -69,7 +99,7 @@ public class FootstepNodeBodyCollisionDetector
       }
       else
       {
-         collisionDetector.setBoxPose(latticeNode.getX(), latticeNode.getY(), snappedNodeHeight + parameters.getBodyBoxBaseZ(), latticeNode.getYaw());
+         collisionDetector.setBoxPose(latticeNode.getX(), latticeNode.getY(), snappedNodeHeight + bodyBoxBaseZ.getAsDouble(), latticeNode.getYaw());
          BodyCollisionData collisionData = collisionDetector.checkForCollision();
          collisionDataHolder.put(latticeNode, collisionData);
          return collisionData;
@@ -79,8 +109,8 @@ public class FootstepNodeBodyCollisionDetector
    private LatticeNode createNodeForCollisionCheck(FootstepNode node)
    {
       double lateralOffsetSign = node.getRobotSide().negateIfLeftSide(1.0);
-      double offsetX = parameters.getBodyBoxBaseX() * Math.cos(node.getYaw()) - lateralOffsetSign * parameters.getBodyBoxBaseY() * Math.sin(node.getYaw());
-      double offsetY = parameters.getBodyBoxBaseX() * Math.sin(node.getYaw()) + lateralOffsetSign * parameters.getBodyBoxBaseY() * Math.cos(node.getYaw());
+      double offsetX = bodyBoxBaseX.getAsDouble() * Math.cos(node.getYaw()) - lateralOffsetSign * bodyBoxBaseY.getAsDouble() * Math.sin(node.getYaw());
+      double offsetY = bodyBoxBaseX.getAsDouble() * Math.sin(node.getYaw()) + lateralOffsetSign * bodyBoxBaseY.getAsDouble() * Math.cos(node.getYaw());
       return new LatticeNode(node.getX() + offsetX, node.getY() + offsetY, node.getYaw());
    }
 }

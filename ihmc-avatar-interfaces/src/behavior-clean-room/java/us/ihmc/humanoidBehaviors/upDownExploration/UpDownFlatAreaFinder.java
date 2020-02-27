@@ -23,8 +23,8 @@ import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.*;
 
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.*;
 import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.*;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.*;
 
 public class UpDownFlatAreaFinder
 {

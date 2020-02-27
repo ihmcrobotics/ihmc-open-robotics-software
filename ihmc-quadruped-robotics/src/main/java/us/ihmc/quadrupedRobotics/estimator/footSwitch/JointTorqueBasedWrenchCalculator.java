@@ -1,20 +1,21 @@
 package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
+import java.util.List;
+
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-
-import java.util.List;
 
 public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 {

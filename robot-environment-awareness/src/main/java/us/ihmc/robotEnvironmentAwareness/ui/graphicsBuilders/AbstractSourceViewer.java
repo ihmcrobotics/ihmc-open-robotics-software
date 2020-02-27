@@ -28,13 +28,13 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Runna
    protected final AtomicReference<Boolean> enable;
    protected final AtomicReference<Boolean> clear;
 
-   public AbstractSourceViewer(Topic<T> messageState, REAUIMessager uiMessager)
+   public AbstractSourceViewer(Topic<T> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic)
    {
       newMessageToRender = uiMessager.createInput(messageState);
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(palleteSizeForMeshBuilder));
 
-      enable = uiMessager.createInput(createEnableInput(), false);
-      clear = uiMessager.createInput(createClearInput(), false);
+      enable = uiMessager.createInput(enableTopic, false);
+      clear = uiMessager.createInput(clearTopic, false);
    }
 
    @Override
@@ -62,8 +62,4 @@ public abstract class AbstractSourceViewer<T extends Packet<?>> implements Runna
    public abstract void render();
 
    public abstract void unpackPointCloud(T message);
-
-   protected abstract Topic<Boolean> createEnableInput();
-
-   protected abstract Topic<Boolean> createClearInput();
 }

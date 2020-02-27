@@ -29,6 +29,10 @@ public class MultiSenseSensorManager
 
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
+   private RosCameraCompressedImageReceiver cameraImageReceiver;
+
+   private VideoPacketHandler compressedVideoHandler;
+
    public MultiSenseSensorManager(FullRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode, Ros2Node ros2Node, RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
@@ -81,10 +85,14 @@ public class MultiSenseSensorManager
    private void registerCameraReceivers(Ros2Node ros2Node)
    {
       CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer,
-                                              new VideoPacketHandler(ros2Node), rosClockCalculator::computeRobotMonotonicTime);
+      compressedVideoHandler = new VideoPacketHandler(ros2Node);
+      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory,
+                                              cameraParameters.getPoseFrameForSdf(),
+                                              robotConfigurationDataBuffer,
+                                              compressedVideoHandler,
+                                              rosClockCalculator::computeRobotMonotonicTime);
 
-      new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
+      cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 
       cameraReceiver.start();
    }
@@ -92,6 +100,15 @@ public class MultiSenseSensorManager
    public void registerCameraListener(DRCStereoListener drcStereoListener)
    {
       cameraReceiver.registerCameraListener(drcStereoListener);
+   }
 
+   public void closeAndDispose()
+   {
+      if (compressedVideoHandler != null)
+         compressedVideoHandler.closeAndDispose();
+      if (cameraReceiver != null)
+         cameraReceiver.closeAndDispose();
+      if (cameraImageReceiver != null)
+         cameraImageReceiver.closeAndDispose();
    }
 }

@@ -102,10 +102,6 @@ public class FootstepPlannerParametersTest
       parameters.setWiggleIntoConvexHullOfPlanarRegions(wiggleIntoConvexHull);
       assertEquals(wiggleIntoConvexHull, parameters.getWiggleIntoConvexHullOfPlanarRegions());
 
-      boolean rejectIfCannotWiggleInside = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setRejectIfCannotFullyWiggleInside(rejectIfCannotWiggleInside);
-      assertEquals(rejectIfCannotWiggleInside, parameters.getRejectIfCannotFullyWiggleInside());
-
       double maximumXYWiggleDistance = RandomNumbers.nextDouble(random, 10.00);
       parameters.setMaximumXYWiggleDistance(maximumXYWiggleDistance);
       assertEquals(maximumXYWiggleDistance, parameters.getMaximumXYWiggleDistance(), epsilon);

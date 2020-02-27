@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -600,7 +601,7 @@ public class ContinuousStepGenerator implements Updatable
    {
       setFootstepAdjustment(new FootstepAdjustment()
       {
-         private final double[] yawPitchRoll = new double[3];
+         private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
          private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
@@ -610,9 +611,9 @@ public class ContinuousStepGenerator implements Updatable
             adjustedPose.setZ(currentSupportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
-               currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
-               yawPitchRoll[0] = footstepPose.getYaw();
-               adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
+               yawPitchRoll.set(currentSupportFootPose.getOrientation());
+               yawPitchRoll.setYaw(footstepPose.getYaw());
+               adjustedPose.setOrientation(yawPitchRoll);
             }
             else
             {
@@ -633,7 +634,7 @@ public class ContinuousStepGenerator implements Updatable
    {
       setFootstepAdjustment(new FootstepAdjustment()
       {
-         private final double[] yawPitchRoll = new double[3];
+         private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
          private final FramePose3D adjustedPose = new FramePose3D();
 
          @Override
@@ -641,9 +642,9 @@ public class ContinuousStepGenerator implements Updatable
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
-            currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
-            yawPitchRoll[0] = footstepPose.getYaw();
-            adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
+            yawPitchRoll.set(currentSupportFootPose.getOrientation());
+            yawPitchRoll.setYaw(footstepPose.getYaw());
+            adjustedPose.setOrientation(yawPitchRoll);
             return adjustedPose;
          }
       });

@@ -25,7 +25,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 	@Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       super.testFlatGroundWalking();
    }
 

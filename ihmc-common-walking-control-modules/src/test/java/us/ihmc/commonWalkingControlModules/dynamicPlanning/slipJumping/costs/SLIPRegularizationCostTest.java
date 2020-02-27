@@ -1,20 +1,19 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.Assert;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.trajectoryOptimization.LQCostFunction;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
 {
@@ -242,7 +241,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       expectedGradient.set(y, expectedY);
       expectedGradient.set(z, expectedZ);
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
    }
 
    @Test
@@ -400,7 +399,7 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       expectedGradient.set(yF, expectedYf);
       expectedGradient.set(k, expectedK);
 
-      JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedGradient, gradient, 1e-7);
    }
 
 }

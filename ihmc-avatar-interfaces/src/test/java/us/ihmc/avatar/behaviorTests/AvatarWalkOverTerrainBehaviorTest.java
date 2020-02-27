@@ -1,13 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT_VARIATION;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_SIZE;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_X;
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_Y;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.*;
 
 import java.io.IOException;
 
@@ -15,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -70,10 +63,9 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    @Test
    public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableLocalControllerCommunicator(true);
-      networkModuleParameters.enableBehaviorModule(true);
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
+      HumanoidNetworkProcessorParameters networkModuleParameters = new HumanoidNetworkProcessorParameters();
+      networkModuleParameters.setUseBehaviorModule(true);
+      networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
       simulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
 
       simulationTestHelper.createSimulation(getClass().getSimpleName(), !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(), true);

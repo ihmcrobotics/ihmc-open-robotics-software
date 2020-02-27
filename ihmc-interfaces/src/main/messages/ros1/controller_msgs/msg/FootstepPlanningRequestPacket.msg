@@ -1,17 +1,15 @@
+# This message is part of the IHMC footstep planning module.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
 
-int8 FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL=0
-
-int8 FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP=1
+int8 FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP=0
 
 # The recommended planner type
-int8 FOOTSTEP_PLANNER_TYPE_A_STAR=2
+int8 FOOTSTEP_PLANNER_TYPE_A_STAR=1
 
-int8 FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH=3
-
-int8 FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR=4
+int8 FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR=2
 
 int32 NO_PLAN_ID=-1
 
@@ -48,6 +46,9 @@ float64 goal_yaw_proximity
 
 # Timeout in seconds
 float64 timeout
+
+# Best effort timeout in seconds
+float64 best_effort_timeout
 
 # Max body path length if using body path
 float64 horizon_length

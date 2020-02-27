@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -34,12 +35,11 @@ import us.ihmc.simulationConstructionSetTools.util.environments.HeavyBallOnTable
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false)
+   private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS)
    {
       @Override
       public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
@@ -169,9 +169,14 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       wrenchTrajectoryMessage.setUseCustomControlFrame(true);
       wrenchTrajectoryMessage.getControlFramePose().setPosition(-0.15, -0.11, 0.0);
 
-      HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, se3TrajectoryMessage);
-      rightHandTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
+      RobotSide side = RobotSide.RIGHT;
+      HandTrajectoryMessage rightHandTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, se3TrajectoryMessage);
       drcSimulationTestHelper.publishToController(rightHandTrajectoryMessage);
+
+      HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
+      handWrenchTrajectoryMessage.setRobotSide(side.toByte());
+      handWrenchTrajectoryMessage.getWrenchTrajectory().set(wrenchTrajectoryMessage);
+      drcSimulationTestHelper.publishToController(handWrenchTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);
@@ -189,19 +194,19 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   public DRCRobotModel getRobotModel()
+   public ValkyrieRobotModel getRobotModel()
    {
       return robotModel;
    }
 
    public DRCRobotModel getRobotModelWithHandContacts()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
+      return new ValkyrieRobotModel(RobotTarget.SCS)
       {
          @Override
          public RobotContactPointParameters<RobotSide> getContactPointParameters()
          {
-            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), null);
+            ValkyrieContactPointParameters contactPointParameters = new ValkyrieContactPointParameters(getJointMap(), robotModel.getRobotPhysicalProperties(), null);
             contactPointParameters.createAdditionalHandContactPoints();
             return contactPointParameters;
          }
@@ -223,6 +228,6 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    @Override
    public double getLegLength()
    {
-      return ValkyriePhysicalProperties.getLegLength();
+      return robotModel.getRobotPhysicalProperties().getLegLength();
    }
 }

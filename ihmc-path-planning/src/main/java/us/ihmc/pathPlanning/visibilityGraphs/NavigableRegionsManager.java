@@ -1,14 +1,19 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EdgeCostCalculator;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.EstimatedCostToGoal;
+import us.ihmc.pathPlanning.visibilityGraphs.graphSearch.PathNodeComparator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.NavigableRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
@@ -20,10 +25,13 @@ import java.util.stream.Collectors;
 public class NavigableRegionsManager
 {
    private final static boolean debug = false;
+   private final static boolean fullyExpandVisibilityGraph = false;
 
    private final VisibilityGraphsParametersReadOnly parameters;
 
-   private final ObstacleAndCliffAvoidanceProcessor postProcessor;
+   private final BodyPathPostProcessor postProcessor;
+   private final EstimatedCostToGoal heuristic;
+   private final EdgeCostCalculator costCalculator;
 
    private final VisibilityMapSolution visibilityMapSolution = new VisibilityMapSolution();
 
@@ -31,7 +39,7 @@ public class NavigableRegionsManager
    private VisibilityGraphNode startNode;
    private VisibilityGraphNode goalNode;
    private VisibilityGraphNode endNode;
-   private Point3DReadOnly goalInWorld;
+   private final FramePoint3D goalInWorld = new FramePoint3D();
    private PriorityQueue<VisibilityGraphNode> stack;
    private HashSet<VisibilityGraphNode> expandedNodes;
 
@@ -47,7 +55,7 @@ public class NavigableRegionsManager
 
    public NavigableRegionsManager(List<PlanarRegion> regions)
    {
-      this(null, regions, null);
+      this(new DefaultVisibilityGraphParameters(), regions, null);
    }
 
    public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions)
@@ -55,20 +63,27 @@ public class NavigableRegionsManager
       this(parameters, regions, null);
    }
 
-   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, ObstacleAndCliffAvoidanceProcessor postProcessor)
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor)
+   {
+      this(parameters, regions, postProcessor, new EstimatedCostToGoal(parameters));
+   }
+   public NavigableRegionsManager(VisibilityGraphsParametersReadOnly parameters, List<PlanarRegion> regions, BodyPathPostProcessor postProcessor,
+                                  EstimatedCostToGoal heuristic)
    {
       visibilityMapSolution.setNavigableRegions(new NavigableRegions(parameters, regions));
       this.parameters = parameters == null ? new DefaultVisibilityGraphParameters() : parameters;
       this.postProcessor = postProcessor;
+      this.heuristic = heuristic;
+      costCalculator = new EdgeCostCalculator(parameters);
    }
 
    private static ArrayList<VisibilityMapWithNavigableRegion> createListOfVisibilityMapsWithNavigableRegions(NavigableRegions navigableRegions)
    {
       ArrayList<VisibilityMapWithNavigableRegion> list = new ArrayList<>();
 
-      List<NavigableRegion> naviableRegionsList = navigableRegions.getNaviableRegionsList();
+      List<NavigableRegion> navigableRegionsList = navigableRegions.getNavigableRegionsList();
 
-      for (NavigableRegion navigableRegion : naviableRegionsList)
+      for (NavigableRegion navigableRegion : navigableRegionsList)
       {
          VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
          list.add(visibilityMapWithNavigableRegion);
@@ -89,7 +104,6 @@ public class NavigableRegionsManager
 
    public List<Point3DReadOnly> calculateBodyPath(final Point3DReadOnly start, final Point3DReadOnly goal)
    {
-      boolean fullyExpandVisibilityGraph = false;
       return calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
    }
 
@@ -107,26 +121,51 @@ public class NavigableRegionsManager
       return planInternal();
    }
 
-   private boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   List<Point3DReadOnly> resetAndPlanToGoal(Point3DReadOnly startInWorld, Point3DReadOnly finalGoalInWorld)
    {
+      if (!resetPlannerForNewStartAndGoal(startInWorld, finalGoalInWorld))
+         return null;
+
+      return planInternal();
+   }
+
+   boolean initialize(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   {
+      // FIXME this is also done in the reset method below
       if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
          return false;
 
+      expandVisibilityGraph(startInWorld, goalInWorld, fullyExpandVisibilityGraph);
+      return resetPlannerForNewStartAndGoal(startInWorld, goalInWorld);
+   }
+
+   void expandVisibilityGraph(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld, boolean fullyExpandVisibilityGraph)
+   {
       NavigableRegions navigableRegions = visibilityMapSolution.getNavigableRegions();
       navigableRegions.filterPlanarRegionsWithBoundingCapsule(startInWorld, goalInWorld, parameters.getExplorationDistanceFromStartGoal());
 
-      navigableRegions.createNavigableRegions();
+      navigableRegions.createNavigableRegions(); // big deal; does a lot of computation and finds obstacles
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(), parameters);
+      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
+                                            parameters.getPreferredToPreferredInterRegionConnectionFilter(),
+                                            parameters.getPreferredToNonPreferredInterRegionConnectionFilter(),
+                                            parameters);
 
       if (fullyExpandVisibilityGraph)
          visibilityGraph.fullyExpandVisibilityGraph();
+   }
+
+   private boolean resetPlannerForNewStartAndGoal(Point3DReadOnly startInWorld, Point3DReadOnly goalInWorld)
+   {
+      if (!checkIfStartAndGoalAreValid(startInWorld, goalInWorld))
+         return false;
 
       double searchHostEpsilon = parameters.getSearchHostRegionEpsilon();
       startNode = visibilityGraph.setStart(startInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       goalNode = visibilityGraph.setGoal(goalInWorld, parameters.getCanDuckUnderHeight(), searchHostEpsilon);
       endNode = null;
-      this.goalInWorld = goalInWorld;
+      this.goalInWorld.set(ReferenceFrame.getWorldFrame(), goalInWorld);
+      heuristic.setGoalInWorld(this.goalInWorld);
 
       if ((startNode == null) || (goalNode == null))
       {
@@ -134,18 +173,20 @@ public class NavigableRegionsManager
          return false;
       }
 
-      PathNodeComparator comparator = new PathNodeComparator();
+      PathNodeComparator comparator = new PathNodeComparator(heuristic);
       stack = new PriorityQueue<>(comparator);
 
       startNode.setEdgesHaveBeenDetermined(true);
       startNode.setCostFromStart(0.0, null);
-      startNode.setEstimatedCostToGoal(startInWorld.distanceXY(goalInWorld));
       stack.add(startNode);
       expandedNodes = new HashSet<>();
 
       return true;
    }
 
+   /**
+    * @return plan as 3D waypoints, never null
+    */
    private List<Point3DReadOnly> planInternal()
    {
       long startBodyPathComputation = System.currentTimeMillis();
@@ -166,14 +207,15 @@ public class NavigableRegionsManager
 
          checkAndHandleBestEffortNode(nodeToExpand);
 
-         List<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
+         HashSet<VisibilityGraphEdge> neighboringEdges = expandNode(visibilityGraph, nodeToExpand);
          expandedNodesCount += neighboringEdges.size();
 
+         // A* using XY distance heuristic
          for (VisibilityGraphEdge neighboringEdge : neighboringEdges)
          {
             VisibilityGraphNode neighbor = getNeighborNode(nodeToExpand, neighboringEdge);
 
-            double connectionCost = computeEdgeCost(nodeToExpand, neighbor, neighboringEdge.getEdgeWeight());
+            double connectionCost = costCalculator.computeEdgeCost(neighboringEdge);
             double newCostFromStart = nodeToExpand.getCostFromStart() + connectionCost;
 
             double currentCostFromStart = neighbor.getCostFromStart();
@@ -182,10 +224,6 @@ public class NavigableRegionsManager
             {
                neighbor.setCostFromStart(newCostFromStart, nodeToExpand);
 
-               double heuristicCost = parameters.getHeuristicWeight() * neighbor.getPointInWorld().distanceXY(goalInWorld);
-               neighbor.setEstimatedCostToGoal(heuristicCost);
-
-               stack.remove(neighbor);
                stack.add(neighbor);
             }
          }
@@ -199,20 +237,12 @@ public class NavigableRegionsManager
       visibilityMapSolution.setStartMap(visibilityMapSolutionFromNewVisibilityGraph.getStartMap());
       visibilityMapSolution.setGoalMap(visibilityMapSolutionFromNewVisibilityGraph.getGoalMap());
 
-      List<VisibilityGraphNode> nodePath = new ArrayList<>();
-      VisibilityGraphNode nodeWalkingBack = endNode;
-
-      while (nodeWalkingBack != null)
-      {
-         nodePath.add(nodeWalkingBack);
-         nodeWalkingBack = nodeWalkingBack.getBestParentNode();
-      }
-      Collections.reverse(nodePath);
+      List<VisibilityGraphNode> nodePath = getNodePath();
 
       List<Point3DReadOnly> path;
       if (postProcessor != null)
       {
-         path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution);
+         path = postProcessor.computePathFromNodes(nodePath, visibilityMapSolution); // modifies and/or adds waypoints
       }
       else
       {
@@ -223,7 +253,26 @@ public class NavigableRegionsManager
       return path;
    }
 
-   private List<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
+   public List<VisibilityGraphNode> getNodePath()
+   {
+      List<VisibilityGraphNode> nodePath = new ArrayList<>();
+      VisibilityGraphNode nodeWalkingBack = endNode;
+
+      while (nodeWalkingBack != null)
+      {
+         nodePath.add(nodeWalkingBack);
+
+         nodeWalkingBack = nodeWalkingBack.getBestParentNode();
+      }
+      Collections.reverse(nodePath);
+
+      return nodePath;
+   }
+
+   /**
+    * This computes edge costs.
+    */
+   HashSet<VisibilityGraphEdge> expandNode(VisibilityGraph visibilityGraph, VisibilityGraphNode nodeToExpand)
    {
       if (nodeToExpand.getHasBeenExpanded())
       {
@@ -232,31 +281,12 @@ public class NavigableRegionsManager
 
       if (!nodeToExpand.getEdgesHaveBeenDetermined())
       {
+         // compute the possible edges
          visibilityGraph.computeInnerAndInterEdges(nodeToExpand);
       }
 
       nodeToExpand.setHasBeenExpanded(true);
-
       return nodeToExpand.getEdges();
-   }
-
-   private double computeEdgeCost(VisibilityGraphNode nodeToExpandInWorld, VisibilityGraphNode nextNodeInWorld, double edgeWeight)
-   {
-      Point3DReadOnly originPointInWorld = nodeToExpandInWorld.getPointInWorld();
-      Point3DReadOnly nextPointInWorld = nextNodeInWorld.getPointInWorld();
-
-      double horizontalDistance = originPointInWorld.distanceXY(nextPointInWorld);
-      if (horizontalDistance <= 0.0)
-         return 0.0;
-
-      double verticalDistance = Math.abs(nextPointInWorld.getZ() - originPointInWorld.getZ());
-
-      double angle = Math.atan(verticalDistance / horizontalDistance);
-
-      double distanceCost = parameters.getDistanceWeight() * horizontalDistance;
-      double elevationCost = parameters.getElevationWeight() * 2.0 * angle / Math.PI;
-
-      return edgeWeight * (distanceCost + elevationCost);
    }
 
    private boolean checkIfStartAndGoalAreValid(Point3DReadOnly start, Point3DReadOnly goal)
@@ -282,7 +312,7 @@ public class NavigableRegionsManager
 
    private boolean checkAndHandleNodeAtGoal(VisibilityGraphNode nodeToExpand)
    {
-      if (nodeToExpand == goalNode)
+      if (nodeToExpand.equals(goalNode))
       {
          endNode = nodeToExpand;
          return true;
@@ -295,11 +325,11 @@ public class NavigableRegionsManager
       if (!parameters.returnBestEffortSolution())
          return;
 
-      if (nodeToExpand == startNode)
+      if (nodeToExpand.equals(startNode))
          return;
 
-      double expandedTotalCost = nodeToExpand.getCostFromStart() + nodeToExpand.getEstimatedCostToGoal();
-      if (endNode == null || expandedTotalCost < endNode.getCostFromStart() + endNode.getEstimatedCostToGoal())
+      double expandedTotalCost = nodeToExpand.getCostFromStart() + heuristic.compute(nodeToExpand);
+      if (endNode == null || expandedTotalCost < endNode.getCostFromStart() + heuristic.compute(endNode))
       {
          endNode = nodeToExpand;
       }
@@ -312,11 +342,11 @@ public class NavigableRegionsManager
       VisibilityGraphNode sourceNode = neighboringEdge.getSourceNode();
       VisibilityGraphNode targetNode = neighboringEdge.getTargetNode();
 
-      if (nodeToExpand == sourceNode)
+      if (nodeToExpand.equals(sourceNode))
       {
          nextNode = targetNode;
       }
-      else if (nodeToExpand == targetNode)
+      else if (nodeToExpand.equals(targetNode))
       {
          nextNode = sourceNode;
       }
@@ -344,7 +374,7 @@ public class NavigableRegionsManager
    @Deprecated
    public List<Point3DReadOnly> calculateBodyPathWithOcclusions(Point3DReadOnly start, Point3DReadOnly goal)
    {
-      List<Point3DReadOnly> path = calculateBodyPath(start, goal);
+      List<Point3DReadOnly> path = calculateBodyPath(start, goal, fullyExpandVisibilityGraph);
 
       if (path == null)
       {
@@ -375,7 +405,7 @@ public class NavigableRegionsManager
                                                                                     closestCluster.getNavigableExtrusionsInWorld(),
                                                                                     regionContainingPoint.getHomePlanarRegion());
 
-         path = calculateBodyPath(start, closestExtrusion);
+         path = calculateBodyPath(start, closestExtrusion, fullyExpandVisibilityGraph);
          path.add(goal);
 
          return path;
@@ -384,6 +414,11 @@ public class NavigableRegionsManager
       {
          return path;
       }
+   }
+
+   public VisibilityGraph getVisibilityGraph()
+   {
+      return visibilityGraph;
    }
 
    public VisibilityMapSolution getVisibilityMapSolution()

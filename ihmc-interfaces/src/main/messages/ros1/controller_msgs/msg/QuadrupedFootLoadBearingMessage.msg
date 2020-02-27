@@ -1,3 +1,8 @@
+# This message is part of the IHMC quadruped controller API.
+# This message commands the controller to start loading a foot.
+# This message will only load the foot when the robot is in Sole Waypoint mode, which is triggered by a SoleTrajectoryMessage
+# If the robot is walking, the message is ignored
+
 int8 FRONT_LEFT=0
 
 int8 FRONT_RIGHT=1

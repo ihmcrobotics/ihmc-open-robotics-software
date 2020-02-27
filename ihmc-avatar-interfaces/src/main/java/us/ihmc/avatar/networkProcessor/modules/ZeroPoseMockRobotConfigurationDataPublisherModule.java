@@ -16,17 +16,21 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
+public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable, CloseableAndDisposable
 {
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_zero_pose_mock_node");
+   private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> publisher;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private long timeStamp = 0;
 
-   public ZeroPoseMockRobotConfigurationDataPublisherModule(final DRCRobotModel robotModel)
+   private volatile boolean running = true;
+
+   public ZeroPoseMockRobotConfigurationDataPublisherModule(final DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_zero_pose_mock_node");
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
@@ -62,7 +66,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
    @Override
    public void run()
    {
-      while (true)
+      while (running)
       {
          sendMockRobotConfiguration(timeStamp);
          timeStamp += 250L * 1000000L;
@@ -70,4 +74,10 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       }
    }
 
+   @Override
+   public void closeAndDispose()
+   {
+      running = false;
+      ros2Node.destroy();
+   }
 }

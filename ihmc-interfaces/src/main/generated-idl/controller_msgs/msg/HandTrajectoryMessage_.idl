@@ -2,7 +2,6 @@
 #define __controller_msgs__msg__HandTrajectoryMessage__idl__
 
 #include "controller_msgs/msg/./SE3TrajectoryMessage_.idl"
-#include "controller_msgs/msg/./WrenchTrajectoryMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -38,10 +37,6 @@ module controller_msgs
          * The position/orientation trajectory information.
          */
         controller_msgs::msg::dds::SE3TrajectoryMessage se3_trajectory;
-        /**
-         * The trajectory information for the force/moment to be achieved by the end-effector.
-         */
-        controller_msgs::msg::dds::WrenchTrajectoryMessage wrench_trajectory;
       };
     };
   };

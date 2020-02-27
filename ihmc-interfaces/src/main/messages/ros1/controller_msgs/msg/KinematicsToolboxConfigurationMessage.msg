@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body inverse kinematics module.
+# It contains auxiliary information that allows to further customized the behavior of the solver.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

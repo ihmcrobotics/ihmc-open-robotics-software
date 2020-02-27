@@ -5,15 +5,13 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.testing.JUnitTools;
+import us.ihmc.matrixlib.DiagonalMatrixTools;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.Assert;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ICPQPInputCalculatorTest
@@ -316,9 +314,9 @@ public class ICPQPInputCalculatorTest
       inputCalculator.computeFeedbackRateTask(icpQPInputToTestWithCMP, rateWeight, previousSolution);
 
       DenseMatrix64F zeroLinear = new DenseMatrix64F(4, 1);
-      JUnitTools.assertMatrixEquals(icpQPInputToTestWithCMP.linearTerm, zeroLinear, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputToTestWithCMP.linearTerm, zeroLinear, epsilon);
       zeroLinear.reshape(1, 1);
-      JUnitTools.assertMatrixEquals(icpQPInputToTestWithCMP.residualCost, zeroLinear, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputToTestWithCMP.residualCost, zeroLinear, epsilon);
 
       Random random = new Random(1738L);
       DenseMatrix64F solution = RandomMatrices.createRandom(4, 1, random);
@@ -333,7 +331,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(compositeSolution, tempMatrix, expectedCost);
       CommonOps.scale(0.5, expectedCost);
 
-      JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+      MatrixTestTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
       Assert.assertEquals(expectedCost.get(0, 0), icpQPInputToTestWithCMP.computeCost(solution), epsilon);
 
       // run the actual test on the cost with non-zero previous solution.
@@ -363,7 +361,7 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(compositeDelta, tempMatrix, expectedCost);
       CommonOps.scale(0.5, expectedCost);
 
-      JUnitTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
+      MatrixTestTools.assertMatrixEquals(expectedCost, computeCost(icpQPInputToTestWithCMP, solution), epsilon);
       Assert.assertEquals(expectedCost.get(0, 0), icpQPInputToTestWithCMP.computeCost(solution), epsilon);
    }
 
@@ -600,14 +598,14 @@ public class ICPQPInputCalculatorTest
       feedbackJacobianExpected.set(invertedFeedbackGain);
       feedbackObjectiveExpected.set(currentICPError);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and step adjustment
       indexHandler.setHasCMPFeedbackTask(false);
@@ -646,14 +644,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum
       indexHandler.setHasCMPFeedbackTask(true);
@@ -691,14 +689,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum and step adjustment
       indexHandler.setHasCMPFeedbackTask(true);
@@ -738,14 +736,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
    @Test
@@ -818,14 +816,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // ONLY THE FEEDBACK ONE IS ENOUGH
       // test feedback and step adjustment
@@ -865,14 +863,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // ONLY THE FEEDBACK ONE IS ENOUGH
       // test feedback and angular momentum
@@ -910,14 +908,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum and step adjustment
       indexHandler.setHasCMPFeedbackTask(true);
@@ -964,14 +962,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
    @Test
@@ -1041,14 +1039,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and step adjustment
       indexHandler.setHasCMPFeedbackTask(false);
@@ -1094,14 +1092,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1138,14 +1136,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum and step adjustment
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1193,14 +1191,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
    @Test
@@ -1273,14 +1271,14 @@ public class ICPQPInputCalculatorTest
       adjustmentJacobianExpected = new DenseMatrix64F(2, 2);
       adjustmentObjectiveExpected = new DenseMatrix64F(2, 1);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and step adjustment
       indexHandler.setHasCMPFeedbackTask(false);
@@ -1326,14 +1324,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1370,14 +1368,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(feedbackObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.mult(0.5, tmpMatrix, feedbackObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
 
       // test feedback and angular momentum and step adjustment
       indexHandler.setHasCMPFeedbackTask(true);
@@ -1424,14 +1422,14 @@ public class ICPQPInputCalculatorTest
       CommonOps.multTransA(adjustmentObjectiveExpected, weightMatrix, tmpMatrix);
       CommonOps.multAdd(0.5, tmpMatrix, adjustmentObjectiveExpected, icpQPInputExpected.residualCost);
 
-      JUnitTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
-      JUnitTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackJacobianExpected, inputCalculator.feedbackJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(feedbackObjectiveExpected, inputCalculator.feedbackObjective, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentJacobianExpected, inputCalculator.adjustmentJacobian, epsilon);
+      MatrixTestTools.assertMatrixEquals(adjustmentObjectiveExpected, inputCalculator.adjustmentObjective, epsilon);
 
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
-      JUnitTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.quadraticTerm, icpQPInputToTest.quadraticTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.linearTerm, icpQPInputToTest.linearTerm, epsilon);
+      MatrixTestTools.assertMatrixEquals(icpQPInputExpected.residualCost, icpQPInputToTest.residualCost, epsilon);
    }
 
    @Test
@@ -1480,9 +1478,9 @@ public class ICPQPInputCalculatorTest
       CommonOps.addEquals(linearExpected, feedbackRateTask.linearTerm);
       CommonOps.addEquals(scalarExpected, feedbackRateTask.residualCost);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
 
 
    }
@@ -1532,9 +1530,9 @@ public class ICPQPInputCalculatorTest
       linearExpected.set(feedbackRateTask.linearTerm);
       scalarExpected.set(feedbackRateTask.residualCost);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, epsilon);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, epsilon);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
 
       quadraticExpected = new DenseMatrix64F(4, 4);
 
@@ -1547,7 +1545,7 @@ public class ICPQPInputCalculatorTest
       quadraticExpected.set(2, 0, feedbackRateWeight.get(0, 0));
       quadraticExpected.set(3, 1, feedbackRateWeight.get(1, 1));
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
 
    }
 
@@ -1603,9 +1601,9 @@ public class ICPQPInputCalculatorTest
       linearExpected.set(dynamicsTask.linearTerm);
       scalarExpected.set(dynamicsTask.residualCost);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -1639,9 +1637,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.setMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       CommonOps.addEquals(scalarExpected, angularMomentumTask.residualCost);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -1722,9 +1720,9 @@ public class ICPQPInputCalculatorTest
       scalarExpected.set(footstepTask.residualCost);
       CommonOps.addEquals(scalarExpected, footstepRateTask.residualCost);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -1771,9 +1769,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, angularMomentumTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -1841,9 +1839,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, feedbackTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -1911,9 +1909,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRateTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRateTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -2013,9 +2011,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRateTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRateTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, 1e-7);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, 1e-7);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, 1e-7);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, 1e-7);
    }
 
    @Test
@@ -2129,9 +2127,9 @@ public class ICPQPInputCalculatorTest
       MatrixTools.addMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
       MatrixTools.addMatrixBlock(scalarExpected, 0, 0, angularMomentumTask.residualCost, 0, 0, 1, 1, 1.0);
 
-      JUnitTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
-      JUnitTools.assertMatrixEquals(linearExpected, linear, epsilon);
-      JUnitTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
+      MatrixTestTools.assertMatrixEquals(quadraticExpected, quadratic, epsilon);
+      MatrixTestTools.assertMatrixEquals(linearExpected, linear, epsilon);
+      MatrixTestTools.assertMatrixEquals(scalarExpected, scalar, epsilon);
    }
 
    @Test
@@ -2168,16 +2166,16 @@ public class ICPQPInputCalculatorTest
 
          inputCalculator.computeDynamicConstraintError(solution, errorToTest);
 
-         JUnitTools.assertMatrixEquals(errorExpected, errorToTest, epsilon);
+         MatrixTestTools.assertMatrixEquals(errorExpected, errorToTest, epsilon);
       }
 
    }
 
    private static void assertInputEquals(ICPQPInput inputA, ICPQPInput inputB, double tol)
    {
-      JUnitTools.assertMatrixEquals("Quadratic terms aren't equal.", inputA.quadraticTerm, inputB.quadraticTerm, tol);
-      JUnitTools.assertMatrixEquals("Linear terms aren't equal.", inputA.linearTerm, inputB.linearTerm, tol);
-      JUnitTools.assertMatrixEquals("Residual terms aren't equal.", inputA.residualCost, inputB.residualCost, tol);
+      MatrixTestTools.assertMatrixEquals("Quadratic terms aren't equal.", inputA.quadraticTerm, inputB.quadraticTerm, tol);
+      MatrixTestTools.assertMatrixEquals("Linear terms aren't equal.", inputA.linearTerm, inputB.linearTerm, tol);
+      MatrixTestTools.assertMatrixEquals("Residual terms aren't equal.", inputA.residualCost, inputB.residualCost, tol);
    }
 
 

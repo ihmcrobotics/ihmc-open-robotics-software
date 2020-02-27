@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
+/**
+ * Directed visibility graph edge data structure containing weight and cost information,
+ * and source and target nodes that this edge connects.
+ */
 public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdge>, LineSegment3DReadOnly
 {
    private static final double defaultEdgeWeight = 1.0;
@@ -14,12 +18,14 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    private final VisibilityGraphNode targetNode;
 
    private double edgeWeight;
+   private final int hashCode;
 
    public VisibilityGraphEdge(VisibilityGraphNode source, VisibilityGraphNode target)
    {
       this.sourceNode = source;
       this.targetNode = target;
       this.edgeWeight = defaultEdgeWeight;
+      this.hashCode = computeHashCode(this);
    }
 
    public VisibilityGraphNode getSourceNode()
@@ -42,12 +48,6 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return targetNode.getPointInWorld();
    }
 
-   public void registerEdgeWithNodes()
-   {
-      sourceNode.addEdge(this);
-      targetNode.addEdge(this);
-   }
-
    public void setEdgeWeight(double edgeWeight)
    {
       this.edgeWeight = edgeWeight;
@@ -58,9 +58,10 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
       return edgeWeight;
    }
 
-   public double percentageAlongConnection(Point3DReadOnly query)
+   public void registerEnds()
    {
-      return EuclidGeometryTools.percentageAlongLineSegment3D(query, sourceNode.getPointInWorld(), targetNode.getPointInWorld());
+      sourceNode.addEdge(this);
+      targetNode.addEdge(this);
    }
 
    @Override
@@ -71,16 +72,22 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    }
 
    @Override
-   public boolean equals(Object object)
+   public boolean equals(Object obj)
    {
-      if (object == null)
+      if (this == obj)
+         return true;
+      if (obj == null)
          return false;
+      if (getClass() != obj.getClass())
+         return false;
+      VisibilityGraphEdge other = (VisibilityGraphEdge) obj;
+      return epsilonEquals(other, 1e-8);
+   }
 
-      if (object instanceof VisibilityGraphEdge)
-      {
-         return equals((VisibilityGraphEdge) object);
-      }
-      return false;
+   @Override
+   public int hashCode()
+   {
+      return hashCode;
    }
 
    public boolean equals(VisibilityGraphEdge other)
@@ -109,5 +116,10 @@ public class VisibilityGraphEdge implements EpsilonComparable<VisibilityGraphEdg
    public Point3DReadOnly getSecondEndpoint()
    {
       return targetNode.getPointInWorld();
+   }
+
+   private static int computeHashCode(VisibilityGraphEdge edge)
+   {
+      return edge.getSourceNode().hashCode() + edge.getTargetNode().hashCode();
    }
 }

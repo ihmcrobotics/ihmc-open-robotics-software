@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -154,6 +155,24 @@ public class PointCloudTools
    private static double calculateDeterminant(Point2D ptA, Point2D ptB, Point2D refPt)
    {
       return (ptA.getX() - refPt.getX()) * (ptB.getY() - refPt.getY()) - (ptB.getX() - refPt.getX()) * (ptA.getY() - refPt.getY());
+   }
+
+   public static ExtrusionHull addPointsAlongExtrusionHull(ExtrusionHull extrusionHull, double brakeDownThreshold)
+   {
+      ExtrusionHull extrusionHullToReturn = new ExtrusionHull();
+
+      int size = extrusionHull.size();
+
+      for (int i = 0; i < size; i++)
+      {
+         Point2DReadOnly point1 = extrusionHull.get(i);
+         Point2DReadOnly point2 = extrusionHull.get((i + 1) % size);
+
+         extrusionHullToReturn.addPoint(point1);
+         doBrakeDown2D(extrusionHullToReturn.getPoints(), point1, point2, brakeDownThreshold);
+      }
+
+      return extrusionHullToReturn;
    }
 
    public static List<Point2DReadOnly> addPointsAlongPolygon(List<Point2DReadOnly> polygonPoints, double brakeDownThreshold)

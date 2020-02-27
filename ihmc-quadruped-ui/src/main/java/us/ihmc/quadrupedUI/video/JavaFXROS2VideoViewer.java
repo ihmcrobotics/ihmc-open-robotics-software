@@ -33,6 +33,7 @@ public class JavaFXROS2VideoViewer extends Application
       primaryStage.setY(0);
       primaryStage.initStyle(StageStyle.DECORATED);
       primaryStage.setScene(scene);
+      primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.show();
 
       ros2VideoView.start(ros2Node);

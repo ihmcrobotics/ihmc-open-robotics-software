@@ -31,7 +31,7 @@ public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNoth
    @Test
    public void testDoNothingGroundContactPoints() throws SimulationExceededMaximumTimeException
    {
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       super.testDoNothing1();
    }
 
@@ -39,7 +39,7 @@ public class ValkyrieObstacleCourseDoNothingTest extends DRCObstacleCourseDoNoth
    @Test
    public void testDoNothingShapeCollision() throws SimulationExceededMaximumTimeException
    {
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, true);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       super.testDoNothing1();
    }
 }

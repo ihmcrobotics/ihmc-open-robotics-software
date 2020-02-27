@@ -13,7 +13,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
@@ -60,7 +60,7 @@ public class AStarPlanarRegionsPlannerTest
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
       FootstepNode goalNode = new FootstepNode(4.0, 0.0);
-      FootstepGraph graph = new FootstepGraph();
+      DirectedGraph graph = new DirectedGraph();
       graph.initialize(startNode);
       double transitionCost = 1.0;
 

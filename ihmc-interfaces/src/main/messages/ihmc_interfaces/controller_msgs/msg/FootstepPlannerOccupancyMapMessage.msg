@@ -5,4 +5,4 @@
 uint32 sequence_id
 
 # List of cells that the planner has explored
-FootstepPlannerCellMessage[] occupied_cells
+FootstepPlannerCellMessage[<=10000] occupied_cells

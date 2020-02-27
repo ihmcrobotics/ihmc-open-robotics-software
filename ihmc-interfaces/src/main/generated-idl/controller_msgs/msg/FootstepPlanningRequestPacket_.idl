@@ -16,23 +16,17 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL =
-      0;
-
       const octet FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP =
-      1;
+      0;
 
       /**
        * The recommended planner type
        */
       const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
-      2;
-
-      const octet FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH =
-      3;
+      1;
 
       const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR =
-      4;
+      2;
 
       const long NO_PLAN_ID =
       -1;
@@ -88,6 +82,10 @@ module controller_msgs
          * Timeout in seconds
          */
         double timeout;
+        /**
+         * Best effort timeout in seconds
+         */
+        double best_effort_timeout;
         /**
          * Max body path length if using body path
          */

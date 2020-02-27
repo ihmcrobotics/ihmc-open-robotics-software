@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class QuadrupedContinuousPlanningController extends QuadrupedToolboxController
 {
    private static final boolean debug = false;
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
    private static final RobotQuadrant defaultInitialQuadrant = RobotQuadrant.FRONT_LEFT;
 

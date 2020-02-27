@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -38,12 +39,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -59,7 +63,13 @@ public class LinearMomentumRateControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final Vector3DReadOnly linearMomentumRateWeight;
+   private final Vector3DReadOnly recoveryLinearMomentumRateWeight;
    private final Vector3DReadOnly angularMomentumRateWeight;
+
+   private final BooleanProvider allowMomentumRecoveryWeight;
+   private final YoBoolean useRecoveryMomentumWeight;
+   private final DoubleParameter maxMomentumRateWeightChangeRate;
+   private final RateLimitedYoFrameVector desiredLinearMomentumRateWeight;
 
    private final YoBoolean minimizingAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
 
@@ -153,7 +163,14 @@ public class LinearMomentumRateControlModule
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
+      recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight", momentumOptimizationSettings.getRecoveryLinearMomentumWeight(), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
+
+      allowMomentumRecoveryWeight = new BooleanParameter("allowMomentumRecoveryWeight", registry, false);
+      maxMomentumRateWeightChangeRate = new DoubleParameter("maxMomentumRateWeightChangeRate", registry, 10.0);
+      useRecoveryMomentumWeight = new YoBoolean("useRecoveryMomentumWeight", registry);
+      useRecoveryMomentumWeight.set(false);
+      desiredLinearMomentumRateWeight = new RateLimitedYoFrameVector("desiredLinearMomentumRateWeight", "", registry, maxMomentumRateWeightChangeRate, controlDT, worldFrame);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -195,6 +212,8 @@ public class LinearMomentumRateControlModule
 
    public void reset()
    {
+      desiredLinearMomentumRateWeight.set(linearMomentumRateWeight);
+
       capturePointVelocity.reset();
       icpOptimizationController.clearPlan();
       yoDesiredCMP.setToNaN();
@@ -218,6 +237,7 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
+      this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
@@ -319,6 +339,11 @@ public class LinearMomentumRateControlModule
 
       checkAndPackOutputs();
 
+      if (allowMomentumRecoveryWeight.getValue() && useRecoveryMomentumWeight.getBooleanValue())
+         desiredLinearMomentumRateWeight.update(recoveryLinearMomentumRateWeight);
+      else
+         desiredLinearMomentumRateWeight.update(linearMomentumRateWeight);
+
       yoDesiredCMP.set(desiredCMP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
       yoCapturePoint.set(capturePoint);
@@ -330,7 +355,7 @@ public class LinearMomentumRateControlModule
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
-      momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
+      momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
       desiredCoPInMidFeet.setMatchingFrame(desiredCoP);
       centerOfPressureCommand.setDesiredCoP(desiredCoP);

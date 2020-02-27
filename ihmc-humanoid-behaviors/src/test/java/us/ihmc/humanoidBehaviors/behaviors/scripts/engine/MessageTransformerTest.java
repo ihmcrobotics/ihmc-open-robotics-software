@@ -43,12 +43,6 @@ public class MessageTransformerTest
          trajectoryPoint.getLinearVelocity().applyTransform(transform);
          trajectoryPoint.getAngularVelocity().applyTransform(transform);
       }
-      for (int i = 0; i < expected.getWrenchTrajectory().getWrenchTrajectoryPoints().size(); i++)
-      {
-         WrenchTrajectoryPointMessage trajectoryPoint = expected.getWrenchTrajectory().getWrenchTrajectoryPoints().get(i);
-         trajectoryPoint.getWrench().getForce().applyTransform(transform);
-         trajectoryPoint.getWrench().getTorque().applyTransform(transform);
-      }
 
       HandTrajectoryMessage actual = new HandTrajectoryMessage(original);
 

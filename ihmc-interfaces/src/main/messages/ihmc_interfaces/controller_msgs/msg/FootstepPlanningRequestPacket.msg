@@ -6,12 +6,10 @@ uint32 sequence_id
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = 0
-byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 1
+byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 0
 # The recommended planner type
-byte FOOTSTEP_PLANNER_TYPE_A_STAR = 2
-byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = 3
-byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 4
+byte FOOTSTEP_PLANNER_TYPE_A_STAR = 1
+byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 2
 
 int32 NO_PLAN_ID = -1
 
@@ -33,6 +31,8 @@ float64 goal_distance_proximity -1.0
 float64 goal_yaw_proximity -1.0
 # Timeout in seconds
 float64 timeout
+# Best effort timeout in seconds
+float64 best_effort_timeout
 # Max body path length if using body path
 float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
