@@ -43,7 +43,7 @@ public class StereoVisionPointCloudPublisher
 
    private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
-   private static final int MAX_NUMBER_OF_POINTS = 2500;
+   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 2500;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -64,6 +64,7 @@ public class StereoVisionPointCloudPublisher
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
 
+   private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
    private CollidingScanPointFilter collisionFilter;
    private final ScanPointFilterList activeFilters = new ScanPointFilterList();
@@ -118,6 +119,11 @@ public class StereoVisionPointCloudPublisher
          pointcloudPublisher = null;
          pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
       }
+   }
+
+   public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
+   {
+      this.maximumNumberOfPoints = maximumNumberOfPoints;
    }
 
    public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
@@ -185,7 +191,7 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, MAX_NUMBER_OF_POINTS, true));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, maximumNumberOfPoints, true));
 
             if (Debug)
                System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
