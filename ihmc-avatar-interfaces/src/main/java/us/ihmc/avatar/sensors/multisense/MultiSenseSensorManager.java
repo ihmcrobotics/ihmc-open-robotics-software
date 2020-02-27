@@ -11,7 +11,6 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager
@@ -95,11 +94,6 @@ public class MultiSenseSensorManager
       cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 
       cameraReceiver.start();
-   }
-
-   public void registerCameraListener(DRCStereoListener drcStereoListener)
-   {
-      cameraReceiver.registerCameraListener(drcStereoListener);
    }
 
    public void closeAndDispose()
