@@ -18,17 +18,21 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 class ValkyrieTorqueSpeedTestConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP;
+		STAIRS, STEP, SQUARE_UP_STEP, SLOPE;
 	}
 
-	public double stepStartingDistance;
-	public double stepHeight;
-	public int numberOfSteps;
-	public HashMap<String, Double> torqueLimits;
-	public boolean showGui;
-	public TestType testType;
-	public String footstepsFile;
-	public boolean disableAnkleLimits;
+	public double stepStartingDistance; // for step/stair scenarios, distance to the first step (inches)
+	public double stepHeight;           // for step/stairs scenarios, height of each step (inches)
+	public int numberOfSteps;           // for step/stair scenarios, number of steps in the staircase
+	public HashMap<String, Double> torqueLimits; // Map of joint name to overridden torque limit. Only overridden
+	                                             // joint need to be specified.
+	public boolean showGui;             // whether to pop up a GUI (required if a video is wanted)
+	public TestType testType;           // type of test to run (see TestType enum)
+	public String footstepsFile;        // path to a file of footstep messages
+	public boolean disableAnkleLimits;  // ignore ankle limits -- falls are sometimes due to hitting ankle limits rather than insufficient torque 
+	public double slopeDegrees;         // for slope scenarios, the pitch of the slope (degrees). Positive values
+	                                    // indicate an upward slope.
+	public double stepLengthInches;     // for slope scenarios, the length of step to take in inches
 	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
@@ -43,6 +47,8 @@ class ValkyrieTorqueSpeedTestConfig {
 		testType = TestType.STAIRS;
 		footstepsFile = null;
 		disableAnkleLimits = false;
+		slopeDegrees = 5.0;
+		stepLengthInches = 0.5 * 100.0 / 2.54; // 0.5 meters in inches
 	}
 
 	public String toString() {

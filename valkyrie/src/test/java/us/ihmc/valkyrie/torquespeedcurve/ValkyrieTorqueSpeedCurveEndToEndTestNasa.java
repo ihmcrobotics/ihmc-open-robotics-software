@@ -264,7 +264,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		}
 	}
 
-	private void testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, WalkingControllerParameters walkingControllerParameters,
+	public File testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, 
+			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps, 
 			File dataOutputFolder)
 					throws SimulationExceededMaximumTimeException
 	{
@@ -318,7 +319,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 				info += "_FAILED";
 			}
 			
-			exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
 		}
 		finally
 		{

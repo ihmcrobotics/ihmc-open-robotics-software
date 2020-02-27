@@ -53,6 +53,9 @@ import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class TorqueSpeedTestRunner {
+	private double inchesToMeters(double inches) {
+		return inches * 2.54 / 100.0;
+	}
 
 	// Given a folder name, construct a top-level output directory
 	private File getOutputDirectory(String folderName) {
@@ -207,7 +210,15 @@ public class TorqueSpeedTestRunner {
 			case STEP:
 				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance, 
 						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
-				break;				
+				break;			
+			case SLOPE:
+				outputResultsDirectory = tester.testWalkSlope(robot, 
+						                                      Math.toRadians(-config.slopeDegrees), 
+						                                      runner.inchesToMeters(config.stepLengthInches),
+						                                      walkingParameters, 
+						                                      recordedFootsteps, 
+						                                      outputPrefixDirectory);
+				break;
 			}
 
 		} catch (SimulationExceededMaximumTimeException e) {
