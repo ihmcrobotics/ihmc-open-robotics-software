@@ -197,7 +197,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
       publisher.setROSClockCalculator(rosClockCalculator);
-      publisher.setCollisionBoxProvider(collisionBoxProvider);
+      publisher.addShadowFilter();
+      publisher.addSelfCollisionFilter(collisionBoxProvider);
       return publisher;
    }
 

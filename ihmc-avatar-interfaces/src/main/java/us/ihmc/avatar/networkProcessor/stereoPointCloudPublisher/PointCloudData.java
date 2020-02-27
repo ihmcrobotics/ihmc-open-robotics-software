@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,22 +22,32 @@ public class PointCloudData
    public PointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
    {
       this.timestamp = timestamp;
+      pointCloud = scanPoints;
+      numberOfPoints = scanPoints.length;
 
-      if (scanPoints.length != scanColors.length)
-         throw new IllegalArgumentException("wrong size!");
-
-      this.pointCloud = scanPoints;
-      this.colors = scanColors;
-      this.numberOfPoints = scanPoints.length;
+      if (scanColors != null)
+      {
+         if (scanPoints.length != scanColors.length)
+            throw new IllegalArgumentException("wrong size!");
+         colors = scanColors;
+      }
+      else
+      {
+         colors = null;
+      }
    }
 
-   public PointCloudData(PointCloud2 rosPointCloud2, int maxSize)
+   public PointCloudData(PointCloud2 rosPointCloud2, int maxSize, boolean hasColors)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
 
       UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(rosPointCloud2);
       pointCloud = unpackPointsAndIntensities.getPoints();
-      colors = unpackPointsAndIntensities.getPointColorsRGB();
+
+      if (hasColors)
+         colors = unpackPointsAndIntensities.getPointColorsRGB();
+      else
+         colors = null;
 
       if (unpackPointsAndIntensities.getPoints().length <= maxSize)
       {
@@ -47,16 +58,33 @@ public class PointCloudData
          Random random = new Random();
          int currentSize = pointCloud.length;
 
-         while (currentSize > maxSize)
+         if (hasColors)
          {
-            int nextToRemove = random.nextInt(currentSize);
-            pointCloud[nextToRemove] = pointCloud[currentSize - 1];
-            colors[nextToRemove] = colors[currentSize - 1];
-            pointCloud[currentSize - 1] = null;
-            colors[currentSize - 1] = -1;
+            while (currentSize > maxSize)
+            {
+               int nextToRemove = random.nextInt(currentSize);
+               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
+               colors[nextToRemove] = colors[currentSize - 1];
+               pointCloud[currentSize - 1] = null;
+               colors[currentSize - 1] = -1;
 
-            currentSize--;
+               currentSize--;
+            }
          }
+         else
+         {
+            while (currentSize > maxSize)
+            {
+               int nextToRemove = random.nextInt(currentSize);
+               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
+               colors[nextToRemove] = colors[currentSize - 1];
+               pointCloud[currentSize - 1] = null;
+               colors[currentSize - 1] = -1;
+
+               currentSize--;
+            }
+         }
+
          numberOfPoints = maxSize;
       }
    }
@@ -88,6 +116,9 @@ public class PointCloudData
 
    public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(ScanPointFilter filter)
    {
+      if (colors == null)
+         throw new IllegalStateException("This pointcloud has no colors.");
+
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
       message.setTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
@@ -105,6 +136,33 @@ public class PointCloudData
             pointCloudBuffer.add(scanPoint.getY32());
             pointCloudBuffer.add(scanPoint.getZ32());
             colorBuffer.add(color);
+         }
+      }
+
+      return message;
+   }
+
+   public LidarScanMessage toLidarScanMessage()
+   {
+      return toLidarScanMessage((index, point) -> true);
+   }
+
+   public LidarScanMessage toLidarScanMessage(ScanPointFilter filter)
+   {
+      LidarScanMessage message = new LidarScanMessage();
+      message.setRobotTimestamp(timestamp);
+      message.setSensorPoseConfidence(1.0);
+      Float pointCloudBuffer = message.getScan();
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Point3D scanPoint = pointCloud[i];
+
+         if (filter.test(i, scanPoint))
+         {
+            pointCloudBuffer.add(scanPoint.getX32());
+            pointCloudBuffer.add(scanPoint.getY32());
+            pointCloudBuffer.add(scanPoint.getZ32());
          }
       }
 
