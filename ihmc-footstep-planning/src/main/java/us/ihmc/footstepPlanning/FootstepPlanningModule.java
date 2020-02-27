@@ -38,6 +38,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -444,24 +445,66 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private boolean checkIfGoalIsReached(SideDependentList<FootstepNode> goalNodes, AStarIterationData<FootstepNode> iterationData)
    {
+      double distanceProximity = request.getGoalDistanceProximity();
+      double yawProximity = request.getGoalYawProximity();
+
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
          FootstepNode childNode = iterationData.getValidChildNodes().get(i);
-         if (childNode.equals(goalNodes.get(childNode.getRobotSide())))
+         FootstepNode goalNode = goalNodes.get(childNode.getRobotSide());
+         boolean validProximityToGoal = isValidProximityToGoal(distanceProximity, yawProximity, childNode, goalNode);
+
+         if (validProximityToGoal)
          {
-            endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
-            footstepPlanner.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
-            return true;
+            boolean proximityMode = distanceProximity > 0.0 || yawProximity > 0.0;
+            if (proximityMode && isValidProximityToGoal(distanceProximity, yawProximity, footstepPlanner.getGraph().getParentNode(childNode), goalNode))
+            {
+               endNode = childNode;
+               return true;
+            }
+            else if (!proximityMode)
+            {
+               endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
+               footstepPlanner.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
+               return true;
+            }
          }
 
          double cost = footstepPlanner.getGraph().getCostFromStart(childNode) + distanceAndYawHeuristics.compute(childNode);
-         if(cost < endNodeCost)
+         if (cost < endNodeCost)
          {
             endNode = childNode;
             endNodeCost = cost;
          }
       }
+
       return false;
+   }
+
+   private boolean isValidProximityToGoal(double distanceProximity, double yawProximity, FootstepNode childNode, FootstepNode goalNode)
+   {
+      boolean validXYDistanceToGoal, validYawDistanceToGoal;
+
+      // check distance
+      if(distanceProximity > 0.0)
+      {
+         validXYDistanceToGoal = goalNode.euclideanDistanceSquared(childNode) < MathTools.square(distanceProximity);
+      }
+      else
+      {
+         validXYDistanceToGoal = childNode.equalPosition(goalNode);
+      }
+      // check yaw
+      if(yawProximity > 0.0)
+      {
+         validYawDistanceToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), childNode.getYaw())) < yawProximity;
+      }
+      else
+      {
+         validYawDistanceToGoal = childNode.getYawIndex() == goalNode.getYawIndex();
+      }
+
+      return validXYDistanceToGoal && validYawDistanceToGoal;
    }
 
    private void addStartPoseToSnapper(FootstepPlannerRequest request, FootstepNode startNode)

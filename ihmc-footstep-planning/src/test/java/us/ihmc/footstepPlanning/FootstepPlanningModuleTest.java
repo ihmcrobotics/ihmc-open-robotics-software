@@ -11,6 +11,8 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
@@ -68,5 +70,28 @@ public class FootstepPlanningModuleTest
       Assertions.assertTrue(numberOfStatusesReceived.intValue() == expectedStatuses,
                             "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
                             + ", # of statuses=" + numberOfStatusesReceived.getValue());
+   }
+
+   @Test
+   public void testGoalProximity()
+   {
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(6.0, 6.0);
+
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      request.setGoalPose(new Pose3D(3.5, 0.0, 0.0, 0.0, 0.0, 0.0));
+      request.setInitialStancePose(new Pose3D());
+      request.setInitialStanceSide(RobotSide.LEFT);
+      request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
+      request.setPlanBodyPath(false);
+      request.setGoalDistanceProximity(0.65);
+      request.setGoalYawProximity(0.4);
+      request.setTimeout(2.0);
+
+      FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
+      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
    }
 }
