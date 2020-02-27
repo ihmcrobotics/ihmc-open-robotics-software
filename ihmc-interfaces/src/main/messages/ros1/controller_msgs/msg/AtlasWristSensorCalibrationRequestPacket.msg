@@ -1,3 +1,5 @@
+# Atlas specific message: request taring of the wrist force/torque sensors.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

@@ -18,6 +18,18 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
    public long robot_timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D lidar_position_;
    public us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public double sensor_pose_confidence_ = 1.0;
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public double point_cloud_confidence_ = 1.0;
    public us.ihmc.idl.IDLSequence.Float  scan_;
 
    public LidarScanMessage()
@@ -42,6 +54,10 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.lidar_position_, lidar_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.lidar_orientation_, lidar_orientation_);
+      sensor_pose_confidence_ = other.sensor_pose_confidence_;
+
+      point_cloud_confidence_ = other.point_cloud_confidence_;
+
       scan_.set(other.scan_);
    }
 
@@ -81,6 +97,44 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       return lidar_orientation_;
    }
 
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public void setSensorPoseConfidence(double sensor_pose_confidence)
+   {
+      sensor_pose_confidence_ = sensor_pose_confidence;
+   }
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the sensor pose represents the quality of the pose estimation.
+            */
+   public double getSensorPoseConfidence()
+   {
+      return sensor_pose_confidence_;
+   }
+
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public void setPointCloudConfidence(double point_cloud_confidence)
+   {
+      point_cloud_confidence_ = point_cloud_confidence;
+   }
+   /**
+            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+            * The confidence of the point cloud represents the quality of the collected point cloud data.
+            */
+   public double getPointCloudConfidence()
+   {
+      return point_cloud_confidence_;
+   }
+
 
    public us.ihmc.idl.IDLSequence.Float  getScan()
    {
@@ -111,6 +165,10 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       if (!this.lidar_position_.epsilonEquals(other.lidar_position_, epsilon)) return false;
       if (!this.lidar_orientation_.epsilonEquals(other.lidar_orientation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_pose_confidence_, other.sensor_pose_confidence_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.point_cloud_confidence_, other.point_cloud_confidence_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.scan_, other.scan_, epsilon)) return false;
 
 
@@ -132,6 +190,10 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       if (!this.lidar_position_.equals(otherMyClass.lidar_position_)) return false;
       if (!this.lidar_orientation_.equals(otherMyClass.lidar_orientation_)) return false;
+      if(this.sensor_pose_confidence_ != otherMyClass.sensor_pose_confidence_) return false;
+
+      if(this.point_cloud_confidence_ != otherMyClass.point_cloud_confidence_) return false;
+
       if (!this.scan_.equals(otherMyClass.scan_)) return false;
 
       return true;
@@ -151,6 +213,10 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       builder.append(this.lidar_position_);      builder.append(", ");
       builder.append("lidar_orientation=");
       builder.append(this.lidar_orientation_);      builder.append(", ");
+      builder.append("sensor_pose_confidence=");
+      builder.append(this.sensor_pose_confidence_);      builder.append(", ");
+      builder.append("point_cloud_confidence=");
+      builder.append(this.point_cloud_confidence_);      builder.append(", ");
       builder.append("scan=");
       builder.append(this.scan_);
       builder.append("}");

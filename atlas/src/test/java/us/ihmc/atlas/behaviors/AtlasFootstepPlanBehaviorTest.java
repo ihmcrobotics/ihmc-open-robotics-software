@@ -7,7 +7,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -66,7 +66,7 @@ public class AtlasFootstepPlanBehaviorTest
    @Test
    public void testWalkNegativePiToPi() throws IOException
    {
-      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
@@ -113,8 +113,7 @@ public class AtlasFootstepPlanBehaviorTest
       LogTools.info("Planning from {}, {}, yaw: {}", lastX, lastY, lastYaw);
       LogTools.info("to {}, {}, yaw: {}", x, y, yaw);
 
-      TypedNotification<RemoteFootstepPlannerResult> resultNotification = remoteFootstepPlannerInterface
-            .requestPlan(startPose, goalPose, null);
+      TypedNotification<RemoteFootstepPlannerResult> resultNotification = remoteFootstepPlannerInterface.requestPlan(startPose, goalPose);
 
       RemoteFootstepPlannerResult result = resultNotification.blockingPoll();
 
@@ -154,7 +153,7 @@ public class AtlasFootstepPlanBehaviorTest
 
    private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
    {
-      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      new FootstepPlanningModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
@@ -176,9 +175,7 @@ public class AtlasFootstepPlanBehaviorTest
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
       currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
-      RemoteFootstepPlannerResult output = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
-                                                                                      currentGoalWaypoint,
-                                                                                      null).blockingPoll();
+      RemoteFootstepPlannerResult output = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint).blockingPoll();
 
       LogTools.info("Received footstep planning status: {}", output);
 

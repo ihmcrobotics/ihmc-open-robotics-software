@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -34,15 +33,11 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
    private final RobotTarget target;
-
-   private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    private final ValkyrieJointMap jointMap;
 
@@ -55,40 +50,40 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final ValkyrieSteppingParameters steppingParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
+   private final ValkyriePhysicalProperties physicalProperties;
+
+   // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
+   private final double minimumHeightAboveGround;
+   private final double nominalHeightAboveGround;
+   private final double maximumHeightAboveGround;
+
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
    {
-      this(jointMap, RobotTarget.SCS);
+      this(jointMap, physicalProperties, RobotTarget.SCS);
    }
 
-   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, RobotTarget target)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
       this.jointMap = jointMap;
+      this.physicalProperties = physicalProperties;
       this.target = target;
 
       legConfigurationParameters = new ValkyrieLegConfigurationParameters(target);
-      toeOffParameters = new ValkyrieToeOffParameters(target);
-      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(target);
-      steppingParameters = new ValkyrieSteppingParameters(target);
+      toeOffParameters = new ValkyrieToeOffParameters(physicalProperties, target);
+      swingTrajectoryParameters = new ValkyrieSwingTrajectoryParameters(physicalProperties, target);
+      steppingParameters = new ValkyrieSteppingParameters(physicalProperties, target);
       icpOptimizationParameters = new ValkyrieICPOptimizationParameters(target);
 
-      // Generated using ValkyrieFullRobotModelVisualizer
-      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
-            0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112,
-            0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
-
-      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[] { 0.8772107606751612, -0.47056267784177724, -0.09524729695945025,
-            0.11738015535642271, -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021, -0.3166524835989298, -0.48010546476828164,
-            -0.8597107556492186, -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0 });
-
-      handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
-      handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
    }
 
    @Override
    public double getOmega0()
    {
       // TODO probably need to be tuned.
-      return target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3; // 3.3 seems more appropriate.
+      return (target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3) / Math.sqrt(jointMap.getModelScale()); // 3.3 seems more appropriate.
    }
 
    @Override
@@ -106,7 +101,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05;
+      return 0.05 * jointMap.getModelScale();
    }
 
    @Override
@@ -114,11 +109,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return target != RobotTarget.SCS ? 0.70 : 0.30;
    }
-
-   // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.23 + 0.08;
-   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01 + 0.08;
-   private final double maximumHeightAboveGround = 0.735 + 0.23 + 0.08;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -147,7 +137,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
-      return ValkyriePhysicalProperties.thighLength + ValkyriePhysicalProperties.shinLength;
+      return physicalProperties.getThighLength() + physicalProperties.getShinLength();
    }
 
    @Override
@@ -472,9 +462,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      double kpX = runningOnRealRobot? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
-      double kpY = runningOnRealRobot? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
-      double kpZ = runningOnRealRobot ? 250.0 : 200.0;  // Was 200.0 before tuneup of sep 2018
+      double kpX = runningOnRealRobot ? 100.0 : 150.0; // Was 150.0 before tuneup of sep 2018
+      double kpY = runningOnRealRobot ? 100.0 : 150.0; // Was 100.0 before tuneup of sep 2018
+      double kpZ = runningOnRealRobot ? 250.0 : 200.0; // Was 200.0 before tuneup of sep 2018
       // zeta was [0.8, 0.5, 0.8] before tuneup of sep 2018
       double zetaXY = runningOnRealRobot ? 0.7 : 0.7;
       double zetaZ = runningOnRealRobot ? 0.8 : 0.7;
@@ -602,16 +592,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch1]);
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch2]);
          jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftThumbPitch3]);
-
-         if (target == RobotTarget.REAL_ROBOT)
-         {
-            if (!ValkyrieRosControlController.HAS_FOREARMS_ON)
-            {
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw]);
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll]);
-               jointToIgnoreList.add(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch]);
-            }
-         }
       }
 
       return jointToIgnoreList.toArray(new String[0]);
@@ -636,13 +616,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportX()
+   public double getMaxICPErrorBeforeSingleSupportForwardX()
    {
       return 0.02;
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupportY()
+   public double getMaxICPErrorBeforeSingleSupportInnerY()
    {
       return 0.02;
    }
@@ -707,7 +687,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
-      return 0.18;
+      return 0.18 * jointMap.getModelScale();
    }
 
    /** {@inheritDoc} */

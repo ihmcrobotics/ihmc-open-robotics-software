@@ -6,8 +6,8 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
 {

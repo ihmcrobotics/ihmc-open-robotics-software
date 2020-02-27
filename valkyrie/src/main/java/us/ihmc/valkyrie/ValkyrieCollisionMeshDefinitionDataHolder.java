@@ -11,26 +11,26 @@ import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 
 public class ValkyrieCollisionMeshDefinitionDataHolder extends CollisionMeshDefinitionDataHolder
 {
-   public ValkyrieCollisionMeshDefinitionDataHolder(ValkyrieJointMap jointMap)
+   public ValkyrieCollisionMeshDefinitionDataHolder(ValkyrieJointMap jointMap, ValkyriePhysicalProperties physicalProperties)
    {
       RigidBodyTransform ankleOffset = new RigidBodyTransform();
-      ankleOffset.appendTranslation((ValkyriePhysicalProperties.footForward - ValkyriePhysicalProperties.footLength * 0.5), 0.0,
-                                    -ValkyriePhysicalProperties.ankleHeight * 0.5);
+      ankleOffset.appendTranslation((physicalProperties.getFootForward() - physicalProperties.getFootLength() * 0.5), 0.0,
+                                    -physicalProperties.getAnkleHeight() * 0.5);
 
       CollisionMeshDefinitionData rightFootCollisionMeshData = new BoxCollisionMeshDefinitionData(jointMap.getLegJointName(RobotSide.RIGHT,
                                                                                                                            LegJointName.ANKLE_ROLL),
-                                                                                                  ValkyriePhysicalProperties.footLength,
-                                                                                                  ValkyriePhysicalProperties.footWidth,
-                                                                                                  ValkyriePhysicalProperties.ankleHeight);
+                                                                                                  physicalProperties.getFootLength(),
+                                                                                                  physicalProperties.getFootWidth(),
+                                                                                                  physicalProperties.getAnkleHeight());
 
       rightFootCollisionMeshData.setTransformToParentJoint(ankleOffset);
       addCollisionMeshDefinitionData(rightFootCollisionMeshData);
 
       CollisionMeshDefinitionData leftFootCollisionMeshData = new BoxCollisionMeshDefinitionData(jointMap.getLegJointName(RobotSide.LEFT,
                                                                                                                           LegJointName.ANKLE_ROLL),
-                                                                                                 ValkyriePhysicalProperties.footLength,
-                                                                                                 ValkyriePhysicalProperties.footWidth,
-                                                                                                 ValkyriePhysicalProperties.ankleHeight);
+                                                                                                 physicalProperties.getFootLength(),
+                                                                                                 physicalProperties.getFootWidth(),
+                                                                                                 physicalProperties.getAnkleHeight());
 
       leftFootCollisionMeshData.setTransformToParentJoint(ankleOffset);
       addCollisionMeshDefinitionData(leftFootCollisionMeshData);

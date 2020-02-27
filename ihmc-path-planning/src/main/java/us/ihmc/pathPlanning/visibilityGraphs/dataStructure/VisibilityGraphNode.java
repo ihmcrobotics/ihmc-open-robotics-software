@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -8,8 +9,14 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
+/**
+ * Visibility graph node data structure associated with a navigable region,
+ * holding cost information, and connected graph edges
+ */
 public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNode>
 {
+   private static final double hashGridSize = 1e-3;
+
    private final VisibilityGraphNavigableRegion visibilityGraphNavigableRegion;
    private final ConnectionPoint3D pointInWorld;
    private final Point2D point2DInLocal;
@@ -17,28 +24,35 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    private boolean edgesHaveBeenDetermined = false;
 
    private double costFromStart = Double.NaN;
-   private double estimatedCostToGoal = Double.NaN;
 
    private boolean hasBeenExpanded = false;
    private VisibilityGraphNode bestParentNode = null;
 
-   private final ArrayList<VisibilityGraphEdge> edges = new ArrayList<>();
+   private final boolean isPreferredNode;
+   private final int hashCode;
 
-   public int getRegionId()
+   private final HashSet<VisibilityGraphEdge> edges = new HashSet<>();
+
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
+                              boolean isPreferredNode)
    {
-      return pointInWorld.getRegionId();
+      this(pointInWorld, pointInLocal, visibilityGraphNavigableRegion, visibilityGraphNavigableRegion.getMapId(), isPreferredNode);
    }
 
-   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion)
-   {
-      this(pointInWorld, pointInLocal, visibilityGraphNavigableRegion, visibilityGraphNavigableRegion.getMapId());
-   }
-
-   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion, int mapId)
+   public VisibilityGraphNode(Point3DReadOnly pointInWorld, Point2DReadOnly pointInLocal, VisibilityGraphNavigableRegion visibilityGraphNavigableRegion,
+                              int mapId, boolean isPreferredNode)
    {
       this.visibilityGraphNavigableRegion = visibilityGraphNavigableRegion;
       this.pointInWorld = new ConnectionPoint3D(pointInWorld, mapId);
       this.point2DInLocal = new Point2D(pointInLocal);
+      this.isPreferredNode = isPreferredNode;
+
+      hashCode = computeHashCode(this);
+   }
+
+   public int getRegionId()
+   {
+      return pointInWorld.getRegionId();
    }
 
    public VisibilityGraphNavigableRegion getVisibilityGraphNavigableRegion()
@@ -56,24 +70,22 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return point2DInLocal;
    }
 
-   public void addEdge(VisibilityGraphEdge edge)
+   public synchronized void addEdge(VisibilityGraphEdge edge)
    {
-      edges.add(edge);
+      if (edge != null)
+      {
+         edges.add(edge);
+      }
    }
 
-   public List<VisibilityGraphEdge> getEdges()
+   public HashSet<VisibilityGraphEdge> getEdges()
    {
       return edges;
    }
 
-   public double distance(VisibilityGraphNode target)
+   public double distanceXYSquared(VisibilityGraphNode target)
    {
-      return pointInWorld.distance(target.pointInWorld);
-   }
-
-   public double distanceXY(VisibilityGraphNode target)
-   {
-      return pointInWorld.distanceXY(target.pointInWorld);
+      return pointInWorld.distanceXYSquared(target.pointInWorld);
    }
 
    public double getCostFromStart()
@@ -92,14 +104,9 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return bestParentNode;
    }
 
-   public double getEstimatedCostToGoal()
+   public boolean isPreferredNode()
    {
-      return estimatedCostToGoal;
-   }
-
-   public void setEstimatedCostToGoal(double estimatedCostToGoal)
-   {
-      this.estimatedCostToGoal = estimatedCostToGoal;
+      return isPreferredNode;
    }
 
    public boolean getHasBeenExpanded()
@@ -123,6 +130,25 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
    }
 
    @Override
+   public int hashCode()
+   {
+      return hashCode;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      VisibilityGraphNode other = (VisibilityGraphNode) obj;
+      return epsilonEquals(other, 1e-8);
+   }
+
+   @Override
    public boolean epsilonEquals(VisibilityGraphNode other, double epsilon)
    {
       return pointInWorld.epsilonEquals(other.pointInWorld, epsilon);
@@ -134,4 +160,12 @@ public class VisibilityGraphNode implements EpsilonComparable<VisibilityGraphNod
       return pointInWorld.toString();
    }
 
+   private static int computeHashCode(VisibilityGraphNode node)
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + (int) Math.round(node.getPointInWorld().getX() / hashGridSize);
+      result = prime * result + (int) Math.round(node.getPointInWorld().getY() / hashGridSize);
+      return result;
+   }
 }

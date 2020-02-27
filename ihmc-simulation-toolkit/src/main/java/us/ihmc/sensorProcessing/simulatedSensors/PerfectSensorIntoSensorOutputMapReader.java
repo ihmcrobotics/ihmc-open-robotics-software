@@ -67,14 +67,14 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
-      this.forceSensorDataHolderToUpdate = sensorOutputMap.getForceSensorProcessedOutputs();
+      this.forceSensorDataHolderToUpdate = sensorOutputMap.getForceSensorOutputs();
       this.sensorOutputMap = sensorOutputMap;
 
       createJointRelations(robot, rootJoint);
 
 
       HashMap<String, IMUSensor> imuSensors = new HashMap<>();
-      for (IMUSensor sensor : sensorOutputMap.getIMUProcessedOutputs())
+      for (IMUSensor sensor : sensorOutputMap.getIMUOutputs())
       {
          imuSensors.put(sensor.getSensorName(), sensor);
       }

@@ -6,9 +6,11 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
 {
    private final RobotTarget target;
+   private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieSwingTrajectoryParameters(RobotTarget target)
+   public ValkyrieSwingTrajectoryParameters(ValkyriePhysicalProperties physicalProperties, RobotTarget target)
    {
+      this.physicalProperties = physicalProperties;
       this.target = target;
    }
 
@@ -39,7 +41,7 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
    @Override
    public double getMinMechanicalLegLength()
    {
-      return 0.1;
+      return 0.1 * physicalProperties.getModelSizeScale();
    }
 
    /** {@inheritDoc} */
@@ -56,11 +58,11 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
       switch (target)
       {
       case SCS:
-         return -0.3;
+         return -0.3 * physicalProperties.getModelSizeScale();
       case GAZEBO:
       case REAL_ROBOT:
       default:
-         return -0.1;
+         return -0.1 * physicalProperties.getModelSizeScale();
       }
    }
 
@@ -72,9 +74,9 @@ public class ValkyrieSwingTrajectoryParameters extends SwingTrajectoryParameters
       {
       case REAL_ROBOT:
       case GAZEBO:
-         return -1.0;
+         return -1.0 * physicalProperties.getModelSizeScale();
       default:
-         return -2.0;
+         return -2.0 * physicalProperties.getModelSizeScale();
       }
    }
 

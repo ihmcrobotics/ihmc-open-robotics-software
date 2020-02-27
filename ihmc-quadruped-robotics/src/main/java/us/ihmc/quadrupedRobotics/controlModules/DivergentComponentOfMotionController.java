@@ -11,16 +11,12 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.javadecklink.Capture;
-import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -119,7 +115,7 @@ public class DivergentComponentOfMotionController
       this.dcmPositionEstimate.changeFrame(comZUpFrame);
 
       double omega = lipModel.getNaturalFrequency();
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(this.dcmPositionSetpoint, this.dcmVelocitySetpoint, lipModel.getNaturalFrequency(), perfectVRP);
+      CapturePointTools.computeCentroidalMomentumPivot(this.dcmPositionSetpoint, this.dcmVelocitySetpoint, lipModel.getNaturalFrequency(), perfectVRP);
       dcmError.sub(this.dcmPositionSetpoint, this.dcmPositionEstimate);
 
       vrpProportionalAction.set(computeProportionalAction());

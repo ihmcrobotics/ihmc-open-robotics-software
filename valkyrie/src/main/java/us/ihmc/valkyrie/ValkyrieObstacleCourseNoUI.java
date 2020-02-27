@@ -12,7 +12,7 @@ public class ValkyrieObstacleCourseNoUI
 {
    public static void main(final String[] args) throws JSAPException
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DefaultCommonAvatarEnvironment());
       simulationStarter.setRunMultiThreaded(true);
 

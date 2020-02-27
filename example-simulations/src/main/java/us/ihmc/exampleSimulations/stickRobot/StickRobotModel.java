@@ -4,10 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -26,15 +22,14 @@ import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -58,7 +53,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final StickRobotJointMap jointMap;
    private final StickRobotContactPointParameters contactPointParameters;
    private final String robotName = "STICK_BOT";
-   private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
 
    private final RobotTarget target;
 
@@ -257,30 +251,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public Transform getJmeTransformWristToHand(RobotSide side)
-   {
-      createTransforms();
-      return offsetHandFromWrist.get(side);
-   }
-
-   private void createTransforms()
-   {
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         Vector3f centerOfHandToWristTranslation = new Vector3f();
-         float[] angles = new float[3];
-
-         centerOfHandToWristTranslation = new Vector3f(0f, robotSide.negateIfLeftSide(0.015f), -0.06f);
-         angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-         angles[1] = 0.0f;
-         angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-         //
-         Quaternion centerOfHandToWristRotation = new Quaternion(angles);
-         offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
-      }
-   }
-
-   @Override
    public double getSimulateDT()
    {
       return 0.0001; //0.00003875;
@@ -301,19 +271,13 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public LogModelProvider getLogModelProvider()
    {
-      return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
+      return new DefaultLogModelProvider<>(SDFModelLoader.class, jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
    }
 
    @Override
    public String getSimpleRobotName()
    {
       return "StickRobot";
-   }
-
-   @Override
-   public double getStandPrepAngle(String jointName)
-   {
-      return 0;
    }
 
    @Override

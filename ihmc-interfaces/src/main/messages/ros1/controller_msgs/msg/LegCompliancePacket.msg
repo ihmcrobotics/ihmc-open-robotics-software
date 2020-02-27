@@ -1,3 +1,11 @@
+# Atlas specific message.
+# This packet controls the stiffness of LegJoints. i.e., the maximum force a joint puts out when it
+# is (pushed) away from a desired position. This is useful to prevent robot from falling when leg
+# hit things unexpectedly. However, low stiffness (high compliance) can lead to poor joint tracking
+# in the presence of natural joint stiction. Finding a good balance is application specific. In our
+# hybrid velocity+force controller, most force comes from velocity control, therefore, only
+# parameter related to velocity control is exposed.
+
 int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1

@@ -1,3 +1,5 @@
+# This message is part of the IHMC humanoid behavior module.
+
 int8 STOP=0
 
 int8 PAUSE=1

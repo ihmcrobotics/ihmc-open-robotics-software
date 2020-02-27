@@ -1,5 +1,6 @@
 package us.ihmc.atlas.jfxvisualizer;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -7,13 +8,16 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
@@ -30,7 +34,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
    private FootstepPlannerUI ui;
 
-   private MultiStageFootstepPlanningModule planningModule;
+   private FootstepPlanningModule planningModule;
+   private FootstepPlanPostProcessingToolboxModule postProcessingModule;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -41,19 +46,24 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
       AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
+      IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher
+            = ROS2Tools.createPublisher(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
       messageConverter = new RemoteUIMessageConverter(ros2Node, messager, drcRobotModel.getSimpleRobotName());
 
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewModel,
-                                              drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel.getFootstepPostProcessingParameters(), drcRobotModel,
+                                              previewModel, drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
+      ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();
 
       if (launchPlannerToolbox)
       {
-         planningModule = new MultiStageFootstepPlanningModule(drcRobotModel, null, false);
+         planningModule = new FootstepPlanningModule(drcRobotModel);
+         planningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
+         postProcessingModule = new FootstepPlanPostProcessingToolboxModule(drcRobotModel, null, false);
       }
    }
 
@@ -68,7 +78,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (planningModule != null)
       {
-         planningModule.destroy();
+         planningModule.closeAndDispose();
+         postProcessingModule.destroy();
       }
 
       Platform.exit();

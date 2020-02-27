@@ -8,10 +8,15 @@ import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClusterTest
 {
@@ -27,10 +32,12 @@ public class ClusterTest
 
       Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.1, -0.1));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, -0.1));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, 1.1));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.1, 1.1));
+      ExtrusionHull clusterPoints = new ExtrusionHull();
+      clusterPoints.addPoint(new Point2D(0.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, 1.1));
+      clusterPoints.addPoint(new Point2D(0.1, 1.1));
+      obstacleCluster.addNonNavigableExtrusionsInLocal(clusterPoints);
 
       assertFalse(obstacleCluster.isInsideNonNavigableZone(pointA));
       assertTrue(obstacleCluster.isInsideNonNavigableZone(pointB));
@@ -43,12 +50,14 @@ public class ClusterTest
    {
       Cluster obstacleCluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
 
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.1, -0.1));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, -0.1));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(1.1, 1.6));
-      obstacleCluster.addNonNavigableExtrusionInLocal(new Point2D(0.3, 1.1));
+      ExtrusionHull clusterPoints = new ExtrusionHull();
+      clusterPoints.addPoint(new Point2D(0.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, -0.1));
+      clusterPoints.addPoint(new Point2D(1.1, 1.6));
+      clusterPoints.addPoint(new Point2D(0.3, 1.1));
+      obstacleCluster.addNonNavigableExtrusionsInLocal(clusterPoints);
 
-      BoundingBox2D boundingBox = obstacleCluster.getNonNavigableExtrusionsBoundingBox();
+      BoundingBox2DReadOnly boundingBox = obstacleCluster.getNonNavigableExtrusionsBoundingBox();
       assertEquals(0.1, boundingBox.getMinX(), EPSILON);
       assertEquals(-0.1, boundingBox.getMinY(), EPSILON);
       assertEquals(1.1, boundingBox.getMaxX(), EPSILON);

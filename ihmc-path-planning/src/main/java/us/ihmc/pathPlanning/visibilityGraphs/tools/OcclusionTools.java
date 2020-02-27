@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
@@ -15,7 +16,7 @@ public class OcclusionTools
    {
       for (Cluster cluster : region.getObstacleClusters())
       {
-         ArrayList<Point2D> list2D = new ArrayList<>();
+         ArrayList<Point2DReadOnly> list2D = new ArrayList<>();
 
          for (Point3DReadOnly point3d : cluster.getNonNavigableExtrusionsInWorld())
          {
@@ -39,7 +40,7 @@ public class OcclusionTools
       List<Cluster> clustersTemp = new ArrayList<Cluster>();
       for (Cluster cluster : obstacleClusters)
       {
-         ArrayList<Point2D> list2D = new ArrayList<>();
+         ArrayList<Point2DReadOnly> list2D = new ArrayList<>();
 
          for (Point3DReadOnly point3d : cluster.getNonNavigableExtrusionsInWorld())
          {

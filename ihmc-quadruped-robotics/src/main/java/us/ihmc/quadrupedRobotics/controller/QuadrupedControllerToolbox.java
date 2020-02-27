@@ -62,6 +62,7 @@ public class QuadrupedControllerToolbox
 
    private final QuadrantDependentList<YoEnum<ContactState>> contactStates = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
+   private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final List<ContactablePlaneBody> contactablePlaneBodies;
 
    private final QuadrupedSupportPolygons supportPolygon;
@@ -126,7 +127,7 @@ public class QuadrupedControllerToolbox
          String name = contactableFoot.getSoleFrame().getName();
          YoPlaneContactState planeContactState = new YoPlaneContactState(name, rigidBody, contactableFoot.getSoleFrame(),
                                                                          contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
-         YoEnum<ContactState> contactState = new YoEnum<>(name, registry, ContactState.class);
+         YoEnum<ContactState> contactState = new YoEnum<>(name + "ContactState", registry, ContactState.class);
 
 
          footContactStates.put(robotQuadrant, planeContactState);
@@ -137,6 +138,8 @@ public class QuadrupedControllerToolbox
                                                              contactState.set(ContactState.IN_CONTACT);
                                                           else
                                                              contactState.set(ContactState.NO_CONTACT);
+
+                                                          updateFeetInContact();
                                                        });
 
       }
@@ -154,6 +157,7 @@ public class QuadrupedControllerToolbox
 
       update();
       updateSupportPolygon();
+      updateFeetInContact();
    }
 
    public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
@@ -181,6 +185,16 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
+   }
+
+   private void updateFeetInContact()
+   {
+      feetInContact.clear();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footContactStates.get(robotQuadrant).inContact())
+            feetInContact.add(robotQuadrant);
+      }
    }
 
    public void updateSupportPolygon()
@@ -276,6 +290,11 @@ public class QuadrupedControllerToolbox
    public QuadrantDependentList<YoEnum<ContactState>> getContactStates()
    {
       return contactStates;
+   }
+
+   public List<RobotQuadrant> getFeetInContact()
+   {
+      return feetInContact;
    }
 
    public List<ContactablePlaneBody> getContactablePlaneBodies()

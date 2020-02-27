@@ -1,12 +1,5 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
-import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -26,13 +19,16 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.simulationconstructionset.KinematicPoint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+
+import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector;
 
 public class FixedBaseRobotArm extends Robot
 {
@@ -261,7 +257,7 @@ public class FixedBaseRobotArm extends Robot
       return momentOfInertia;
    }
 
-   public void updateSCSRobotJointTaus(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   public void updateJointTaus(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       for (Entry<OneDoFJointBasics, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
@@ -270,6 +266,7 @@ public class FixedBaseRobotArm extends Robot
          if (data.hasDesiredTorque())
          {
             double tau = data.getDesiredTorque();
+            pair.getKey().setTau(tau);
             pair.getValue().setTau(tau);
          }
       }
@@ -378,5 +375,10 @@ public class FixedBaseRobotArm extends Robot
    public RevoluteJoint getWristYaw()
    {
       return wristYaw;
+   }
+
+   public OneDegreeOfFreedomJoint getSCSJointFromIDJoint(OneDoFJointBasics oneDoFJoint)
+   {
+      return idToSCSJointMap.get(oneDoFJoint);
    }
 }

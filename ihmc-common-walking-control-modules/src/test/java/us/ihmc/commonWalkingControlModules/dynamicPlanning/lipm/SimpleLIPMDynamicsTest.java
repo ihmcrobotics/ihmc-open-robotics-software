@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.testing.JUnitTools;
-import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 
 public class SimpleLIPMDynamicsTest
 {
@@ -65,7 +64,7 @@ public class SimpleLIPMDynamicsTest
       expectedNextState.set(2, nextXDot);
       expectedNextState.set(3, nextYDot);
 
-      JUnitTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -116,7 +115,7 @@ public class SimpleLIPMDynamicsTest
          expectedNextState.set(2, nextXDot);
          expectedNextState.set(3, nextYDot);
 
-         JUnitTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedNextState, nextState, 1e-10);
       }
    }
 
@@ -179,7 +178,7 @@ public class SimpleLIPMDynamicsTest
       expectedDynamicsStateGradient.set(3, 1, f31);
       expectedDynamicsStateGradient.set(3, 3, f33);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsStateGradient, dynamicsStateGradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsStateGradient, dynamicsStateGradient, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -292,7 +291,7 @@ public class SimpleLIPMDynamicsTest
       expectedDynamicsControlGradient.set(2, 0, f20);
       expectedDynamicsControlGradient.set(3, 1, f31);
 
-      JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
+      MatrixTestTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
 
       assertEquals(x, currentState.get(0), 1e-10);
       assertEquals(y, currentState.get(1), 1e-10);
@@ -343,7 +342,7 @@ public class SimpleLIPMDynamicsTest
          expectedDynamicsControlGradient.set(2, 0, f20);
          expectedDynamicsControlGradient.set(3, 1, f31);
 
-         JUnitTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
+         MatrixTestTools.assertMatrixEquals(expectedDynamicsControlGradient, dynamicsControlGradient, 1e-10);
       }
    }
 

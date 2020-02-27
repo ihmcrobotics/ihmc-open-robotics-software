@@ -192,7 +192,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       robotMass = TotalMassCalculator.computeSubTreeMass(desiredFullRobotModel.getElevator());
 
       footWeight.set(200.0);
-      momentumWeight.set(1.0e-6);
+      momentumWeight.set(0.001);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.
 
       for (RobotSide robotSide : RobotSide.values)
@@ -441,7 +441,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
          feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
-         feedbackControlCommand.setGains(getDefaultGains());
+         feedbackControlCommand.resetControlFrame();
+         feedbackControlCommand.resetControlBaseFrame();
+         feedbackControlCommand.setGains(getDefaultSpatialGains());
+         feedbackControlCommand.setSelectionMatrixToIdentity();
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.setInverseKinematics(footPoseToHold, KinematicsToolboxHelper.zeroVector6D);
       }
@@ -474,7 +477,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       centerOfMassPositionToHold.setIncludingFrame(initialCenterOfMassPosition);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = bufferToPack.addCenterOfMassFeedbackControlCommand();
-      feedbackControlCommand.setGains(getDefaultGains().getPositionGains());
+      feedbackControlCommand.setGains(getDefaultSpatialGains().getPositionGains());
       feedbackControlCommand.setWeightForSolver(momentumWeight.getDoubleValue());
       feedbackControlCommand.setSelectionMatrixForLinearXYControl();
       feedbackControlCommand.setInverseKinematics(centerOfMassPositionToHold, KinematicsToolboxHelper.zeroVector3D);

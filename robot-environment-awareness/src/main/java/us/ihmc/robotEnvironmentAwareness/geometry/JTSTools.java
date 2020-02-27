@@ -160,7 +160,8 @@ public class JTSTools
 
    public static Triangle3D quadEdgeTriangleToTriangle(QuadEdgeTriangle quadEdgeTriangle)
    {
-      return new Triangle3D(vertexToPoint3D(quadEdgeTriangle.getVertex(0)), vertexToPoint3D(quadEdgeTriangle.getVertex(1)),
+      return new Triangle3D(vertexToPoint3D(quadEdgeTriangle.getVertex(0)),
+                            vertexToPoint3D(quadEdgeTriangle.getVertex(1)),
                             vertexToPoint3D(quadEdgeTriangle.getVertex(2)));
    }
 
@@ -201,31 +202,40 @@ public class JTSTools
 
    public static List<Point3D> extractBorderVerticesInWorld(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getIntermediateVariables().stream().flatMap(vars -> vars.getBorderVertices().stream()).map(JTSTools::vertexToPoint3D)
                                      .peek(transformToWorld::transform).collect(Collectors.toList());
    }
 
    public static List<LineSegment3D> extractBorderEdgesInWorld(ConcaveHullVariables concaveHullVariables, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullVariables == null)
+         return Collections.emptyList();
       return concaveHullVariables.getBorderEdges().stream().map(JTSTools::quadEdgeToLineSegment3D).peek(segment -> segment.applyTransform(transformToWorld))
                                  .collect(Collectors.toList());
    }
 
    public static List<LineSegment3D> extractBorderEdgesInWorld(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
-
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getIntermediateVariables().stream().flatMap(vars -> vars.getBorderEdges().stream()).map(JTSTools::quadEdgeToLineSegment3D)
                                      .peek(segment -> segment.applyTransform(transformToWorld)).collect(Collectors.toList());
    }
 
    public static List<LineSegment3D> extractOrderedBorderEdgesInWorld(ConcaveHullVariables concaveHullVariables, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullVariables == null)
+         return Collections.emptyList();
       return concaveHullVariables.getOrderedBorderEdges().stream().map(JTSTools::quadEdgeToLineSegment3D)
                                  .peek(segment -> segment.applyTransform(transformToWorld)).collect(Collectors.toList());
    }
 
    public static List<LineSegment3D> extractOrderedBorderEdgesInWorld(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getIntermediateVariables().stream().flatMap(vars -> vars.getOrderedBorderEdges().stream())
                                      .map(JTSTools::quadEdgeToLineSegment3D).peek(segment -> segment.applyTransform(transformToWorld))
                                      .collect(Collectors.toList());
@@ -233,6 +243,8 @@ public class JTSTools
 
    public static List<Triangle3D> extractBorderTrianglesInWorld(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getIntermediateVariables().stream().flatMap(vars -> vars.getBorderTriangles().stream())
                                      .map(JTSTools::quadEdgeTriangleToTriangle).peek(triangle -> triangle.applyTransform(transformToWorld))
                                      .collect(Collectors.toList());
@@ -240,12 +252,16 @@ public class JTSTools
 
    public static List<Triangle3D> extractAllTrianglesInWorld(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getAllTriangles().stream().map(JTSTools::quadEdgeTriangleToTriangle)
                                      .peek(triangle -> triangle.applyTransform(transformToWorld)).collect(Collectors.toList());
    }
 
    public static List<LineSegment3D> extractConstraintEdges(ConcaveHullFactoryResult concaveHullFactoryResult, RigidBodyTransform transformToWorld)
    {
+      if (concaveHullFactoryResult == null)
+         return Collections.emptyList();
       return concaveHullFactoryResult.getIntermediateVariables().stream().flatMap(vars -> vars.getConstraintEdges().stream())
                                      .map(JTSTools::quadEdgeToLineSegment3D).peek(segment -> segment.applyTransform(transformToWorld))
                                      .collect(Collectors.toList());

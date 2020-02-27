@@ -5,13 +5,7 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -33,16 +27,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -59,25 +47,24 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -121,7 +108,9 @@ public class KinematicsToolboxController extends ToolboxController
    protected final ReferenceFrame centerOfMassFrame;
 
    /** The same set of gains is used for controlling any part of the desired robot body. */
-   private final YoPIDSE3Gains gains = new DefaultYoPIDSE3Gains("GenericGains", GainCoupling.XYZ, false, registry);
+   private final YoPIDSE3Gains spatialGains = new DefaultYoPIDSE3Gains("GenericSpatialGains", GainCoupling.XYZ, false, registry);
+   /** The same set of gains is used for controlling any joint of the desired robot body. */
+   private final YoPIDGains jointGains = new YoPIDGains("GenericJointGains", registry);
    /**
     * Default settings for the solver. The joint velocity/acceleration weights can be modified at
     * runtime using {@link KinematicsToolboxConfigurationMessage}.
@@ -228,6 +217,7 @@ public class KinematicsToolboxController extends ToolboxController
    private boolean isUserControllingCenterOfMass = false;
    private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
    private final RecyclingArrayList<SpatialFeedbackControlCommand> userRigidBodyFeedbackControlCommands = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
+   private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> userJointFeedbackControlCommands = new RecyclingArrayList<>(OneDoFJointFeedbackControlCommand::new);
 
    /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
@@ -264,6 +254,7 @@ public class KinematicsToolboxController extends ToolboxController
     * burden.
     */
    private final YoDouble collisionActivationDistanceThreshold = new YoDouble("collisionActivationDistanceThreshold", registry);
+   private final YoDouble maxCollisionResolutionVelocity = new YoDouble("maxCollisionResolutionVelocity", registry);
    /** Sets the maximum number of collisions to create YoVariables for. */
    private final int numberOfCollisionsToVisualize = 20;
    /** Debug variable. */
@@ -276,6 +267,19 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoFramePose3D[] yoCollisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
    /** Timer to debug computational load. */
    private final ThreadTimer threadTimer;
+
+   /**
+    * When {@code true}, the solver will add an objective to minimize the overall angular momentum
+    * generated. This is not recommended when using this toolbox as an IK solver as it'll increase the
+    * number of iterations before converging.
+    */
+   private final YoBoolean minimizeAngularMomentum = new YoBoolean("minimizeAngularMomentum", registry);
+   /**
+    * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that
+    * is about 130kg.
+    */
+   private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
+   private final MomentumCommand angularMomentumCommand = new MomentumCommand();
 
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
@@ -319,10 +323,13 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-      gains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
-      gains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-      gains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
+      spatialGains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
+      spatialGains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
+
+      jointGains.setKp(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
       privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
@@ -333,8 +340,13 @@ public class KinematicsToolboxController extends ToolboxController
 
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
+      minimizeAngularMomentum.set(false);
+      angularMomentumWeight.set(0.125);
+      angularMomentumCommand.setSelectionMatrixForAngularControl();
+
       enableCollisionAvoidance.set(true);
       collisionActivationDistanceThreshold.set(0.10);
+      maxCollisionResolutionVelocity.set(0.10);
       setupCollisionVisualization();
    }
 
@@ -352,11 +364,14 @@ public class KinematicsToolboxController extends ToolboxController
          YoFramePoint3D collisionPointB = new YoFramePoint3D("collision_" + i + "_pointB" + i, worldFrame, registry);
          YoFramePose3D collisionFramePose = new YoFramePose3D("collision_" + i + "_frame", worldFrame, registry);
 
-         AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
-         yoGraphicsListRegistry.registerYoGraphic("Collisions",
-                                                  new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         if (yoGraphicsListRegistry != null)
+         {
+            AppearanceDefinition appearance = new YoAppearanceRGBColor(new Color(random.nextInt()), 0.7);
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointA", collisionPointA, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions", new YoGraphicPosition("collision_" + i + "_pointB", collisionPointB, 0.01, appearance));
+            yoGraphicsListRegistry.registerYoGraphic("Collisions",
+                                                     new YoGraphicCoordinateSystem("collision_" + i + "_frame", collisionFramePose, 0.1, appearance));
+         }
 
          yoCollisionDistances[i] = collisionDistance;
          yoCollisionPointAs[i] = collisionPointA;
@@ -535,7 +550,9 @@ public class KinematicsToolboxController extends ToolboxController
       else
          rigidBodies = rootBody.subtreeList();
 
-      rigidBodies.stream().map(this::createFeedbackControlCommand).forEach(template::addCommand);
+      rigidBodies.stream().map(this::createRigidBodyFeedbackControlCommand).forEach(template::addCommand);
+
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).map(this::createJointFeedbackControlCommand).forEach(template::addCommand);
       return template;
    }
 
@@ -543,10 +560,21 @@ public class KinematicsToolboxController extends ToolboxController
     * Convenience method for pure laziness. Should only be used for
     * {@link #createControllerCoreTemplate()}.
     */
-   private SpatialFeedbackControlCommand createFeedbackControlCommand(RigidBodyBasics endEffector)
+   private SpatialFeedbackControlCommand createRigidBodyFeedbackControlCommand(RigidBodyBasics endEffector)
    {
       SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
       command.set(rootBody, endEffector);
+      return command;
+   }
+
+   /**
+    * Convenience method for pure laziness. Should only be used for
+    * {@link #createControllerCoreTemplate()}.
+    */
+   private OneDoFJointFeedbackControlCommand createJointFeedbackControlCommand(OneDoFJointBasics joint)
+   {
+      OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
+      command.setJoint(joint);
       return command;
    }
 
@@ -618,6 +646,7 @@ public class KinematicsToolboxController extends ToolboxController
    {
       isUserControllingCenterOfMass = false;
       userRigidBodyFeedbackControlCommands.clear();
+      userJointFeedbackControlCommands.clear();
    }
 
    /**
@@ -642,7 +671,8 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandBuffer feedbackControlCommandBuffer = controllerCoreCommand.getFeedbackControlCommandList();
       InverseKinematicsCommandBuffer inverseKinematicsCommandBuffer = controllerCoreCommand.getInverseKinematicsCommandList();
       consumeUserCommands(feedbackControlCommandBuffer);
-      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + (isUserControllingCenterOfMass ? 1 : 0));
+      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + userJointFeedbackControlCommands.size()
+            + (isUserControllingCenterOfMass ? 1 : 0));
       getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
       inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
@@ -655,6 +685,12 @@ public class KinematicsToolboxController extends ToolboxController
       // Save all commands used for this control tick for computing the solution quality.
       allFeedbackControlCommands.clear();
       allFeedbackControlCommands.addCommandList(feedbackControlCommandBuffer);
+
+      if (minimizeAngularMomentum.getValue())
+      {
+         angularMomentumCommand.setWeight(angularMomentumWeight.getValue());
+         inverseKinematicsCommandBuffer.addMomentumCommand().set(angularMomentumCommand);
+      }
 
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
@@ -756,7 +792,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains.getPositionGains(), userCoMFeedbackControlCommand);
+         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userCoMFeedbackControlCommand);
          isUserControllingCenterOfMass = true;
       }
 
@@ -773,14 +809,45 @@ public class KinematicsToolboxController extends ToolboxController
             {
                SpatialFeedbackControlCommand candidate = userRigidBodyFeedbackControlCommands.get(bufferIndex);
                if (candidate.getEndEffector() == endEffector)
+               {
                   rigidBodyCommand = candidate;
+                  break;
+               }
             }
 
             if (rigidBodyCommand == null)
                rigidBodyCommand = userRigidBodyFeedbackControlCommands.add();
 
-            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, gains, rigidBodyCommand);
+            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, spatialGains, rigidBodyCommand);
             rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
+         }
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxOneDoFJointCommand.class))
+      {
+         List<KinematicsToolboxOneDoFJointCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxOneDoFJointCommand.class);
+
+         for (int i = 0; i < commands.size(); i++)
+         {
+            KinematicsToolboxOneDoFJointCommand command = commands.get(i);
+            int jointHashCode = command.getJointHashCode();
+            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCode);
+            OneDoFJointFeedbackControlCommand jointCommand = null;
+
+            for (int bufferIndex = 0; bufferIndex < userJointFeedbackControlCommands.size(); bufferIndex++)
+            {
+               OneDoFJointFeedbackControlCommand candidate = userJointFeedbackControlCommands.get(bufferIndex);
+               if (candidate.getJoint() == joint)
+               {
+                  jointCommand = candidate;
+                  break;
+               }
+            }
+
+            if (jointCommand == null)
+               jointCommand = userJointFeedbackControlCommands.add();
+
+            KinematicsToolboxHelper.consumeJointCommand(command, joint, jointGains, jointCommand);
          }
       }
 
@@ -796,6 +863,11 @@ public class KinematicsToolboxController extends ToolboxController
       for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
       {
          commandBufferToPack.addSpatialFeedbackControlCommand().set(userRigidBodyFeedbackControlCommands.get(i));
+      }
+
+      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      {
+         commandBufferToPack.addOneDoFJointFeedbackControlCommand().set(userJointFeedbackControlCommands.get(i));
       }
    }
 
@@ -861,10 +933,14 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsCollidable collidableA = collision.getCollidableA();
          KinematicsCollidable collidableB = collision.getCollidableB();
 
+         if (collision.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+            continue;
+
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
          double sigma = -collision.getSignedDistance();
          double sigmaDot = sigma / updateDT;
+         sigmaDot = Math.min(sigmaDot, maxCollisionResolutionVelocity.getValue());
 
          KinematicsCollisionFrame collisionFrame = collisionFrames.add();
          collisionFrame.update(collision, true);
@@ -975,14 +1051,29 @@ public class KinematicsToolboxController extends ToolboxController
       return false;
    }
 
+   public boolean isUserControllingJoint(OneDoFJointBasics joint)
+   {
+      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      {
+         if (userJointFeedbackControlCommands.get(i).getJoint() == joint)
+            return true;
+      }
+      return false;
+   }
+
    public boolean isUserControllingCenterOfMass()
    {
       return isUserControllingCenterOfMass;
    }
 
-   public YoPIDSE3Gains getDefaultGains()
+   public YoPIDSE3Gains getDefaultSpatialGains()
    {
-      return gains;
+      return spatialGains;
+   }
+
+   public YoPIDGains getDefaultJointGains()
+   {
+      return jointGains;
    }
 
    protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
@@ -1035,8 +1126,18 @@ public class KinematicsToolboxController extends ToolboxController
       preserveUserCommandHistory.set(value);
    }
 
+   public void minimizeAngularMomentum(boolean enable)
+   {
+      minimizeAngularMomentum.set(enable);
+   }
+
    public double getUpdateDT()
    {
       return updateDT;
+   }
+
+   public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
+   {
+      return initialRobotConfigurationMap;
    }
 }

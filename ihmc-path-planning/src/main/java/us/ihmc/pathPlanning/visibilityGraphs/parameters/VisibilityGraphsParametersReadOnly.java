@@ -1,5 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.parameters;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -7,9 +8,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import java.util.List;
@@ -40,6 +42,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
       return get(obstacleExtrusionDistance);
    }
 
+   default double getPreferredNavigableExtrusionDistance()
+   {
+      return get(preferredNavigableExtrusionDistance);
+   }
+
    default double getPreferredObstacleExtrusionDistance()
    {
       return get(preferredObstacleExtrusionDistance);
@@ -53,6 +60,11 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    default double getTooHighToStepDistance()
    {
       return get(tooHighToStepDistance);
+   }
+
+   default double getHeightForMaxAvoidance()
+   {
+      return get(heightForMaxAvoidance);
    }
 
    default double getClusterResolution()
@@ -175,12 +187,25 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    }
 
    /**
+    * This is the additional weight applied to any edge that ends on a non-preferred node.
+    * */
+   default double getWeightForNonPreferredEdge()
+   {
+      return get(weightForNonPreferredEdge);
+   }
+
+   /**
     * This flag says whether or not to return a solution even when the goal is not reached.
     * The solution that is returned is the lowest cost path, including estimated cost to goal.
     */
    default boolean returnBestEffortSolution()
    {
       return get(returnBestEffortSolution);
+   }
+
+   default boolean includePreferredExtrusions()
+   {
+      return get(includePreferredExtrusions);
    }
 
    /**
@@ -190,14 +215,12 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
     */
    default NavigableExtrusionDistanceCalculator getNavigableExtrusionDistanceCalculator()
    {
-      return new NavigableExtrusionDistanceCalculator()
-      {
-         @Override
-         public double computeNavigableExtrusionDistance(PlanarRegion navigableRegionToBeExtruded)
-         {
-            return getNavigableExtrusionDistance();
-         }
-      };
+      return region -> getNavigableExtrusionDistance();
+   }
+
+   default NavigableExtrusionDistanceCalculator getPreferredNavigableExtrusionDistanceCalculator()
+   {
+      return region -> getPreferredNavigableExtrusionDistance();
    }
 
    /**
@@ -218,7 +241,32 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          }
          else
          {
-            return getObstacleExtrusionDistance();
+            double alpha = MathTools.clamp((obstacleHeight - getTooHighToStepDistance()) / (getHeightForMaxAvoidance() - getTooHighToStepDistance()), 0.0, 1.0);
+            return InterpolationTools.linearInterpolate(getObstacleExtrusionDistanceIfNotTooHighToStep(), getObstacleExtrusionDistance(), alpha);
+         }
+      };
+   }
+
+   /**
+    * This calculator is used when extruding the projection of an obstacle onto a navigable region.
+    *
+    * @return the calculator use for obstacle extrusion.
+    */
+   default ObstacleExtrusionDistanceCalculator getPreferredObstacleExtrusionDistanceCalculator()
+   {
+      return (pointToExtrude, obstacleHeight) -> {
+         if (obstacleHeight < 0.0)
+         {
+            return 0.0;
+         }
+         else if (obstacleHeight < getTooHighToStepDistance())
+         {
+            return getObstacleExtrusionDistanceIfNotTooHighToStep();
+         }
+         else
+         {
+            double alpha = MathTools.clamp((obstacleHeight - getTooHighToStepDistance()) / (getHeightForMaxAvoidance() - getTooHighToStepDistance()), 0.0, 1.0);
+            return InterpolationTools.linearInterpolate(getObstacleExtrusionDistance(), getPreferredObstacleExtrusionDistance(), alpha);
          }
       };
    }
@@ -239,7 +287,7 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    {
       return new InterRegionConnectionFilter()
       {
-         private final double maxLength = getMaxInterRegionConnectionLength();
+         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * getNavigableExtrusionDistance();
          private final double maxLengthSquared = MathTools.square(maxLength);
          private final double maxDeltaHeight = getTooHighToStepDistance();
 
@@ -248,14 +296,68 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
          {
             if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
                return false;
-            if (source.distanceSquared(target) > maxLengthSquared)
+            if (source.distanceXYSquared(target) > maxLengthSquared)
                return false;
 
             return true;
          }
 
          @Override
-         public double getMaximumInterRegionConnetionDistance()
+         public double getMaximumInterRegionConnectionDistance()
+         {
+            return maxLength;
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getPreferredToPreferredInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         private final double maxLength = getMaxInterRegionConnectionLength() + 2.0 * getPreferredNavigableExtrusionDistance();
+         private final double maxLengthSquared = MathTools.square(maxLength);
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceXYSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnectionDistance()
+         {
+            return maxLength;
+         }
+      };
+   }
+
+   default InterRegionConnectionFilter getPreferredToNonPreferredInterRegionConnectionFilter()
+   {
+      return new InterRegionConnectionFilter()
+      {
+         private final double maxLength = getMaxInterRegionConnectionLength() + getPreferredNavigableExtrusionDistance() + getNavigableExtrusionDistance();
+         private final double maxLengthSquared = MathTools.square(maxLength);
+         private final double maxDeltaHeight = getTooHighToStepDistance();
+
+         @Override
+         public boolean isConnectionValid(ConnectionPoint3D source, ConnectionPoint3D target)
+         {
+            if (Math.abs(source.getZ() - target.getZ()) > maxDeltaHeight)
+               return false;
+            if (source.distanceXYSquared(target) > maxLengthSquared)
+               return false;
+
+            return true;
+         }
+
+         @Override
+         public double getMaximumInterRegionConnectionDistance()
          {
             return maxLength;
          }
@@ -308,14 +410,12 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
 
             //TOOD: ++++++JerryPratt: Lots of bugs here. Need to clean up ConvexPolygon stuff to find distances and if overlapping more nicely...
             //TODO: Get rid of these magic numbers and make them parameters somewhere. Make sure the overlapping region check is larger than getMaxInterRegionConnectionLength()
-            //TODO: BodyPathPlannerEnvironment crash when the number is set to 1.0. But should work fine all the same...
             //TOOD: This check should just be an approximation and should be ok for false positives. In fact, just returning true should be ok. Check that.
             //TODO: But somehow that's not right, since if we change 0.25 to 1.0 below, we get a Runtime Exception: Tried to create a line from two coincidal points!?
-            if (!PlanarRegionTools.isRegionAOverlapingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0)) //0.25)) //1.0))
+            if (!PlanarRegionTools.isRegionAOverlappingWithRegionB(potentialObstacleRegion, navigableRegion, 0.25)) //1.0))
                return false;
 
-            double minimumHeight = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(potentialObstacleRegion, navigableRegion);
-            if (minimumHeight > getCanDuckUnderHeight())
+            if (potentialObstacleRegion.getBoundingBox3dInWorld().getMinZ() > navigableRegion.getBoundingBox3dInWorld().getMaxZ() + getCanDuckUnderHeight())
                return false;
 
             if (!PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(potentialObstacleRegion, navigableRegion, getCanEasilyStepOverHeight()))
@@ -363,5 +463,16 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
             return true;
          }
       };
+   }
+
+   default String getAsString()
+   {
+      String message = "";
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         message += "\n" + key.getTitleCasedName() + " = " + get(key);
+      }
+
+      return message;
    }
 }

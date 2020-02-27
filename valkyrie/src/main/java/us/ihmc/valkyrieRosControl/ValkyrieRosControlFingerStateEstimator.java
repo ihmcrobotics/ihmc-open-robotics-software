@@ -266,8 +266,6 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
          scales.get(IndexFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
          scales.get(MiddleFingerPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
          scales.get(PinkyPitch3).set(robotSide.negateIfLeftSide(defaultScaleFingerPitch3));
-
-         biases.get(ThumbRoll).set(1.57); // TODO at the same I added these, the thumb roll did not work.
       }
    }
 

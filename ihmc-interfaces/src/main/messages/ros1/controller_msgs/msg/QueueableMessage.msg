@@ -1,3 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# General message carrying the information needed to safely queue messages.
+
 int8 EXECUTION_MODE_OVERRIDE=0
 
 int8 EXECUTION_MODE_QUEUE=1

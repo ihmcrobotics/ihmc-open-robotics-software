@@ -1,3 +1,7 @@
+# This message is part of the IHMC quadruped controller API.
+# This message notifies the user of a change in the stepping controller state.
+# This message's primary use is to signal a requested state change is completed.
+
 int8 STAND=0
 
 int8 STEP=1

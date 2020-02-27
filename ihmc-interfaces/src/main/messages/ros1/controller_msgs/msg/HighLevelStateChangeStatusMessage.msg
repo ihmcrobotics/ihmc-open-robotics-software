@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body controller API.
+# This message notifies the user of a change in the high level state.
+# This message's primary use is to signal a requested state change is completed.
+
 int8 DO_NOTHING_BEHAVIOR=0
 
 int8 STAND_PREP_STATE=1

@@ -22,6 +22,13 @@
                         <registry name="leftFootTaskspaceControlModule">
                            <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
+                        <registry name="FootLeapOfFaithModule">
+                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
+                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
+                        </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                         <parameter name="leftFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="leftFootTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
@@ -62,6 +69,13 @@
                         </registry>
                         <registry name="rightFootTaskspaceControlModule">
                            <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
+                        </registry>
+                        <registry name="FootLeapOfFaithModule">
+                           <parameter name="leapOfFaithScaleFootWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithFractionOfSwingToScaleFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="0.92" />
+                           <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                           <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
+                           <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
                         </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                         <parameter name="rightFootTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
@@ -112,6 +126,8 @@
                         <parameter name="useToeLineContactInTransfer" type="BooleanParameter" value="false" />
                         <parameter name="updateLineContactDuringToeOff" type="BooleanParameter" value="false" />
                         <parameter name="updatePointContactDuringToeOff" type="BooleanParameter" value="false" />
+                        <parameter name="icpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        <parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="false" />
                      </registry>
                      <registry name="FootRotationDetectorParameters">
                         <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
@@ -123,6 +139,9 @@
                         <parameter name="avoidFootRotations" type="BooleanParameter" value="false" />
                         <parameter name="dampFootRotations" type="BooleanParameter" value="false" />
                         <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                     </registry>
+                     <registry name="FootControlModuleParameters">
+                        <parameter name="CoefficientOfFriction" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                      </registry>
                      <parameter name="blindFootstepsHeightOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
                   </registry>
@@ -145,6 +164,17 @@
                   </registry>
                   <registry name="PelvisOrientationManager">
                      <registry name="ControllerPelvisOrientationManager">
+                        <registry name="PelvisLeapOfFaithModule">
+                           <parameter name="leapOfFaithUsePelvisRotationForReaching" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithRelaxPelvisWeight" type="BooleanParameter" value="false" />
+                           <parameter name="leapOfFaithPelvisReachingYawGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                           <parameter name="leapOfFaithPelvisReachingRollGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                           <parameter name="leapOfFaithPelvisReachingMaxYaw" type="DoubleParameter" min="0.0" max="1.0" value="0.2" />
+                           <parameter name="leapOfFaithPelvisReachingMaxRoll" type="DoubleParameter" min="0.0" max="1.0" value="0.3" />
+                           <parameter name="leapOfFaithPelvisReachingFractionOfSwing" type="DoubleParameter" min="0.0" max="1.0" value="0.9" />
+                           <parameter name="leapOfFaithPelvisWeightRelaxationRate" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
+                           <parameter name="leapOfFaithPelvisMinimumWeight" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                        </registry>
                         <parameter name="UseManualPelvisRotation" type="BooleanParameter" value="false" />
                         <parameter name="UserDesiredYawOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="UserDesiredPitchOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
@@ -198,8 +228,10 @@
                         <parameter name="userDesiredICPOffsetY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                         <parameter name="manualModeICPOffset" type="BooleanParameter" value="false" />
                      </registry>
-                     <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
-                     <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
+                     <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.02" />
                   </registry>
                </registry>
                <registry name="RigidBodyGains">
@@ -412,6 +444,18 @@
                   <registry name="ControllerCoreOptimizationSettings">
                      <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   </registry>
+                  <registry name="ToWalkingLeftSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
+                  </registry>
+                  <registry name="ToWalkingRightSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />
+                  </registry>
+                  <registry name="WalkingLeftSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
+                  </registry>
+                  <registry name="WalkingRightSupport">
+                     <parameter name="minimizeAngularMomentumRateZDuringSwing" type="BooleanParameter" value="true" />
+                  </registry>
                   <parameter name="MinimumTransferTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
                </registry>
                <registry name="WalkingJointSettings">
@@ -427,62 +471,32 @@
                   <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="4.0" />
                   <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5" />
                   <parameter name="NoLoadhipYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.08" />
-                  <parameter name="NoLoadhipYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadhipPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
-                  <parameter name="NoLoadhipPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadhipRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.03184372610882351" />
                   <parameter name="NoLoadhipRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0" />
-                  <parameter name="NoLoadhipRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadhipRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadkneePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadkneePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadkneePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadanklePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
                   <parameter name="NoLoadanklePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadanklePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadanklePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadankleRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
                   <parameter name="NoLoadankleRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="NaN" />
-                  <parameter name="NoLoadankleRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadankleRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspineYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspineYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspineYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspinePitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspinePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspinePitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspinePitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadspineRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadspineRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.452227422644407" />
-                  <parameter name="NoLoadspineRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
-                  <parameter name="NoLoadspineRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
                   <parameter name="NoLoadelbowRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.00795854300889478" />
                   <parameter name="NoLoadelbowRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="6.919780134430234" />
-                  <parameter name="NoLoadelbowRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadelbowRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadfirstWristPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
                   <parameter name="NoLoadfirstWristPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadfirstWristPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadfirstWristPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadwristRollPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.019899342722165266" />
                   <parameter name="NoLoadwristRollVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="7.392442711918637" />
-                  <parameter name="NoLoadwristRollMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadwristRollMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadproximalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoadproximalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoadproximalNeckPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoadproximalNeckPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoaddistalNeckYawPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoaddistalNeckYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckYawMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckYawMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoaddistalNeckPitchPositionBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="0.015918678044796738" />
                   <parameter name="NoLoaddistalNeckPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0404479883576343" />
-                  <parameter name="NoLoaddistalNeckPitchMaxPositionError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
-                  <parameter name="NoLoaddistalNeckPitchMaxVelocity" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
                   <parameter name="NoLoadHipYawControlMode" type="EnumParameter" value="EFFORT" />
                   <parameter name="NoLoadHipYawStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0" />
                   <parameter name="NoLoadHipYawMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
@@ -600,6 +614,86 @@
                   <parameter name="LoadedAnkleRollDamping" type="DoubleParameter" min="0.0" max="10.0" value="3.0" />
                   <parameter name="LoadedAnkleRollMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="LoadedAnkleRollVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadhipYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadhipPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadhipRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadhipRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadkneePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadkneePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadanklePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadanklePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadankleRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadankleRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspineYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspineYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspinePitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspinePitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadspineRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="NaN" />
+                  <parameter name="NoLoadspineRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="NaN" />
+                  <parameter name="NoLoadelbowRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadelbowRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadfirstWristPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadfirstWristPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadwristRollPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadwristRollVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadproximalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoadproximalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoaddistalNeckYawPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoaddistalNeckYawVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoaddistalNeckPitchPositionIntegrationMaxError" type="DoubleParameter" min="0.0" max="6.283185307179586" value="0.2" />
+                  <parameter name="NoLoaddistalNeckPitchVelocityIntegrationMaxMagnitude" type="DoubleParameter" min="0.0" max="62.83185307179586" value="2.0" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="LoadedAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
                <registry name="WholeBodyControllerCore">
                   <registry name="WholeBodyFeedbackController">
@@ -776,6 +870,44 @@
                   <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
                <parameter name="lefthipyawStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                <parameter name="righthipyawStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
@@ -907,6 +1039,44 @@
                   <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
             </registry>
             <registry name="toWalkingSmoothTransitionControllerState">
@@ -1006,6 +1176,44 @@
                   <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
                <parameter name="toWalkingTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
             </registry>
@@ -1106,6 +1314,44 @@
                   <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
                <parameter name="exitWalkingTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />
             </registry>
@@ -1206,8 +1452,47 @@
                   <parameter name="NoLoadDistalNeckPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="0.0" />
                   <parameter name="NoLoadDistalNeckPitchMasterGain" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
                   <parameter name="NoLoadDistalNeckPitchVelocityScaling" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                  <parameter name="NoLoadShoulderPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadShoulderYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadHipPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadKneePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnklePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadAnkleRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpinePitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadSpineRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadElbowRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadWristRollVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadFirstWristPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadProximalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckYawVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchPositionFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
+                  <parameter name="NoLoadDistalNeckPitchVelocityFeedbackMaxError" type="DoubleParameter" min="0.0" max="Infinity" value="Infinity" />
                </registry>
             </registry>
+            <parameter name="jointDesiredOutputBroadcastFrequency" type="IntegerParameter" min="-10" max="10" value="10" />
          </registry>
       </registry>
       <registry name="DRCOutputProcessorWithStateChangeSmoother">
@@ -1344,6 +1629,129 @@
             <parameter name="armJointVelocityBacklashSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
             <parameter name="armJointPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
             <parameter name="fingerPositionBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
+         </registry>
+         <registry name="leftHipYaw">
+            <parameter name="leftHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="rightHipYaw">
+            <parameter name="rightHipYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="torsoYaw">
+            <parameter name="torsoYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="leftHipRoll">
+            <parameter name="leftHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipRoll">
+            <parameter name="rightHipRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftHipPitch">
+            <parameter name="leftHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightHipPitch">
+            <parameter name="rightHipPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftKneePitch">
+            <parameter name="leftKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightKneePitch">
+            <parameter name="rightKneePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftShoulderPitch">
+            <parameter name="leftShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="rightShoulderPitch">
+            <parameter name="rightShoulderPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="180.0" />
+         </registry>
+         <registry name="leftAnklePitch">
+            <parameter name="leftAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftShoulderRoll">
+            <parameter name="leftShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="rightShoulderRoll">
+            <parameter name="rightShoulderRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="330.0" />
+         </registry>
+         <registry name="leftShoulderYaw">
+            <parameter name="leftShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightShoulderYaw">
+            <parameter name="rightShoulderYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="leftElbowPitch">
+            <parameter name="leftElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="rightElbowPitch">
+            <parameter name="rightElbowPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="60.0" />
+         </registry>
+         <registry name="torsoPitch">
+            <parameter name="torsoPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="torsoRoll">
+            <parameter name="torsoRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightAnklePitch">
+            <parameter name="rightAnklePitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftAnkleRoll">
+            <parameter name="leftAnkleRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightAnkleRoll">
+            <parameter name="rightAnkleRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftForearmYaw">
+            <parameter name="leftForearmYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightForearmYaw">
+            <parameter name="rightForearmYawTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftWristRoll">
+            <parameter name="leftWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightWristRoll">
+            <parameter name="rightWristRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftWristPitch">
+            <parameter name="leftWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightWristPitch">
+            <parameter name="rightWristPitchTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftThumbMotorRoll">
+            <parameter name="leftThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftThumbMotorPitch1">
+            <parameter name="leftThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftThumbMotorPitch2">
+            <parameter name="leftThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftIndexFingerMotorPitch1">
+            <parameter name="leftIndexFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftMiddleFingerMotorPitch1">
+            <parameter name="leftMiddleFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="leftPinkyMotorPitch1">
+            <parameter name="leftPinkyMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightThumbMotorRoll">
+            <parameter name="rightThumbMotorRollTauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightThumbMotorPitch1">
+            <parameter name="rightThumbMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightThumbMotorPitch2">
+            <parameter name="rightThumbMotorPitch2TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightIndexFingerMotorPitch1">
+            <parameter name="rightIndexFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightMiddleFingerMotorPitch1">
+            <parameter name="rightMiddleFingerMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
+         </registry>
+         <registry name="rightPinkyMotorPitch1">
+            <parameter name="rightPinkyMotorPitch1TauMax" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
          </registry>
       </registry>
       <parameter name="ContactThresholdForce" type="DoubleParameter" min="0.0" max="1.0" value="120.0" />

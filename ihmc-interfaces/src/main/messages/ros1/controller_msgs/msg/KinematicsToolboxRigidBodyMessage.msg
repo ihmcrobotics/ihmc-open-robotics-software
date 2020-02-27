@@ -1,3 +1,7 @@
+# This message is part of the IHMC whole-body inverse kinematics module.
+# This message contains all the information needed to configure the objectives/constraints to apply on
+# a given end-effector in the solver.
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 

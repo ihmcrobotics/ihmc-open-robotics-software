@@ -73,6 +73,7 @@ public class LidarScanPublisher
    private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanRealtimePublisher;
 
    private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
+   private long publisherPeriodInMillisecond = 1L;
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -120,9 +121,20 @@ public class LidarScanPublisher
       }
    }
 
+   public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
+   {
+      this.publisherPeriodInMillisecond = publisherPeriodInMillisecond;
+
+      if (publisherTask != null)
+      {
+         publisherTask.cancel(false);
+         start();
+      }
+   }
+
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()

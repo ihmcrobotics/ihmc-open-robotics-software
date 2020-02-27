@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -62,6 +63,9 @@ public class KinematicsSolutionQualityCalculator
                break;
             case TASKSPACE:
                error += calculateCommandQuality((SpatialFeedbackControlCommand) command, feedbackControllerDataHolder);
+               break;
+            case JOINTSPACE:
+               error += calculateCommandQuality((OneDoFJointFeedbackControlCommand) command, feedbackControllerDataHolder);
                break;
             default:
                throw new RuntimeException("The following command is not handled: " + command.getClass());
@@ -154,5 +158,10 @@ public class KinematicsSolutionQualityCalculator
 
       // Returning the Euclidean norm of the error computed as the command quality
       return NormOps.normP2(errorSubspace);
+   }
+
+   private double calculateCommandQuality(OneDoFJointFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   {
+      return Math.abs(command.getJoint().getQ() - command.getReferencePosition()) * command.getWeightForSolver();
    }
 }

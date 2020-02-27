@@ -564,7 +564,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInWorld2DInside(Point3DReadOnly point3dInWorld)
    {
-      return isPointInWorld2DInside(point3dInWorld, 0.0);
+      return isPointInWorld2DInside(point3dInWorld, 1e-7);
    }
 
    /**
@@ -597,7 +597,7 @@ public class PlanarRegion implements SupportingVertexHolder
 
       boolean onOrAbove = localPoint.getZ() >= 0.0;
       boolean withinDistance = localPoint.getZ() < distanceFromPlane;
-      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
+      boolean isInsideXY = isPointInsideExclusive(localPoint.getX(), localPoint.getY());
 
       return onOrAbove && withinDistance && isInsideXY;
    }
@@ -617,7 +617,7 @@ public class PlanarRegion implements SupportingVertexHolder
 
       boolean onOrBelow = localPoint.getZ() <= 0.0;
       boolean withinDistance = localPoint.getZ() > (distanceFromPlane * -1.0);
-      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
+      boolean isInsideXY = isPointInsideExclusive(localPoint.getX(), localPoint.getY());
 
       return onOrBelow && withinDistance && isInsideXY;
    }
@@ -636,7 +636,8 @@ public class PlanarRegion implements SupportingVertexHolder
 
    /**
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this
-    * region.
+    * region. Note that a point on the edge using this method counts as inside. If you would
+    * like this to return false, use {@link #isPointInside(Point3DReadOnly, double)}
     *
     * @param point2dInLocal query expressed in local coordinates.
     * @param epsilon the tolerance to use during the test.
@@ -649,6 +650,20 @@ public class PlanarRegion implements SupportingVertexHolder
 
    /**
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this
+    * region. Note that a point on the edge using this method does not count as inside. If you would
+    * like this to return true, use {@link #isPointInside(Point3DReadOnly, double)}
+    *
+    * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
+    * @param yCoordinateInLocal y Coordinate of the 2D point in planar region local frame
+    * @return true if the point is inside this region, false otherwise.
+    */
+   public boolean isPointInsideExclusive(double xCoordinateInLocal, double yCoordinateInLocal)
+   {
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, 0.0);
+   }
+
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this
     * region.
     *
     * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
@@ -657,12 +672,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal)
    {
-      for (int i = 0; i < convexPolygons.size(); i++)
-      {
-         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal))
-            return true;
-      }
-      return false;
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, 1e-7);
    }
 
    /**
@@ -676,12 +686,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal, double epsilon)
    {
-      for (int i = 0; i < convexPolygons.size(); i++)
-      {
-         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal, epsilon))
-            return true;
-      }
-      return false;
+      return PlanarRegionTools.isPointInLocalInsidePlanarRegion(this, xCoordinateInLocal, yCoordinateInLocal, epsilon);
    }
 
    /**

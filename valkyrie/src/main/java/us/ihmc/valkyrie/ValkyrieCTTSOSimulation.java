@@ -3,7 +3,7 @@ package us.ihmc.valkyrie;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -19,39 +19,25 @@ public class ValkyrieCTTSOSimulation
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(DATA_SET_TO_USE);
 
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.02, true);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw()));
+      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(),
+                                                                                    dataSet.getPlannerInput().getStartYaw()));
 
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
-      networkProcessorParameters.enableControllerCommunicator(true);
-      networkProcessorParameters.enableFootstepPlanningToolbox(true);
-      networkProcessorParameters.enableWalkingPreviewToolbox(true);
-      networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
-
-      networkProcessorParameters.enablePerceptionModule(true);
+      networkProcessorParameters.setUseFootstepPlanningToolboxModule(true);
+      networkProcessorParameters.setUseWalkingPreviewModule(true);
+      networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(true);
 
       // disable everything else
-      networkProcessorParameters.enableUiModule(false);
-      networkProcessorParameters.enableBehaviorModule(false);
-      networkProcessorParameters.enableBehaviorVisualizer(false);
-      networkProcessorParameters.enableSensorModule(true);
-      networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(false);
-      networkProcessorParameters.setEnableJoystickBasedStepping(false);
-      networkProcessorParameters.enableRosModule(false);
-      networkProcessorParameters.enableLocalControllerCommunicator(false);
-      networkProcessorParameters.enableKinematicsToolbox(false);
-      networkProcessorParameters.enableWholeBodyTrajectoryToolbox(false);
-      networkProcessorParameters.enableKinematicsPlanningToolbox(false);
-      networkProcessorParameters.enableRobotEnvironmentAwerenessModule(false);
-      networkProcessorParameters.enableMocapModule(false);
-      networkProcessorParameters.enableAutoREAStateUpdater(true);
+      networkProcessorParameters.setUseSensorModule(true);
+      networkProcessorParameters.setUseHumanoidAvatarREAStateUpdater(true);
 
       // start sim
       simulationStarter.startSimulation(networkProcessorParameters, false);
