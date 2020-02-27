@@ -18,7 +18,7 @@ public class CollidingScanPointFilter implements ScanPointFilter
       this.collisionBoxNode = collisionBoxNode;
    }
 
-   public void updateFilter(ColorPointCloudData colorPointCloudData)
+   public void updateFilter(PointCloudData colorPointCloudData)
    {
       collidingPointIndices.reset();
       collidingPointBufferIndex = 0;
