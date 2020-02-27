@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
@@ -74,7 +73,7 @@ public class AtlasPointCloudSensorManager
    
    public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
    {
-      realsenseDepthPointCloudPublisher.setCollisionBoxProvider(collisionBoxProvider);
+      realsenseDepthPointCloudPublisher.addSelfCollisionFilter(collisionBoxProvider);
    }
 
    private StereoVisionWorldTransformCalculator createDepthPointCloudWorldTransformCalculator()

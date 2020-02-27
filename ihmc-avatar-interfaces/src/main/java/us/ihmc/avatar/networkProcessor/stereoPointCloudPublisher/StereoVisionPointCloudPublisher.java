@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -63,8 +64,8 @@ public class StereoVisionPointCloudPublisher
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
 
    private RangeScanPointFilter rangeFilter = null;
-   private CollidingScanPointFilter collisionFilter = null;
-   private ScanPointFilter activeFilters = (index, point) -> true;
+   private CollidingScanPointFilter collisionFilter;
+   private final ScanPointFilterList activeFilters = new ScanPointFilterList();
 
    /**
     * units of velocities are meter/sec and rad/sec.
@@ -127,26 +128,18 @@ public class StereoVisionPointCloudPublisher
       executorService.shutdownNow();
    }
 
-   public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
+   public void addSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
    {
       collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
-
-      if (rangeFilter == null)
-         activeFilters = collisionFilter;
-      else
-         activeFilters = ScanPointFilter.combine(collisionFilter, rangeFilter);
+      activeFilters.addFilter(collisionFilter);
    }
 
-   public void setRangeLimits(double minRange, double maxRange)
+   public void addRangeFilter(double minRange, double maxRange)
    {
       rangeFilter = new RangeScanPointFilter();
       rangeFilter.setMinRange(minRange);
       rangeFilter.setMaxRange(minRange);
-
-      if (collisionFilter == null)
-         activeFilters = rangeFilter;
-      else
-         activeFilters = ScanPointFilter.combine(collisionFilter, rangeFilter);
+      activeFilters.addFilter(rangeFilter);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
@@ -178,7 +171,7 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, MAX_NUMBER_OF_POINTS));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, MAX_NUMBER_OF_POINTS, true));
 
             if (Debug)
                System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
@@ -275,18 +268,11 @@ public class StereoVisionPointCloudPublisher
       }
 
       if (collisionFilter != null)
-         collisionFilter.updateFilter(pointCloudData);
-
+         collisionFilter.update();
       if (rangeFilter != null)
-         rangeFilter.updateSensorPosition(sensorPose.getPosition());
+         rangeFilter.setSensorPosition(sensorPose.getPosition());
 
-      StereoVisionPointCloudMessage message;
-
-      if (activeFilters != null)
-         message = pointCloudData.toStereoVisionPointCloudMessage(activeFilters);
-      else
-         message = pointCloudData.toStereoVisionPointCloudMessage();
-
+      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(activeFilters);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
 

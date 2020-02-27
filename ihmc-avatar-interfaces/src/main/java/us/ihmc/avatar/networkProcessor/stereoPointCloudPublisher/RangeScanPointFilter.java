@@ -28,7 +28,7 @@ public class RangeScanPointFilter implements ScanPointFilter
          maxRangeSquared = maxRange * maxRange;
    }
 
-   public void updateSensorPosition(Point3DReadOnly sensorPosition)
+   public void setSensorPosition(Point3DReadOnly sensorPosition)
    {
       this.sensorPosition = sensorPosition;
    }

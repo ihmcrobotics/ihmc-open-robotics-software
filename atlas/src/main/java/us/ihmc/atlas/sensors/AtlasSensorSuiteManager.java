@@ -70,7 +70,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
       lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
-      lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
+      lidarScanPublisher.addShadowFilter();
+      lidarScanPublisher.addSelfCollisionFilter(collisionBoxProvider);
 
       multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
       multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
