@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -73,9 +74,11 @@ public class StereoVisionPointCloudPublisher
    private long previousTimeStamp = 0;
    private final Point3D previousSensorPosition = new Point3D();
    private final Quaternion previousSensorOrientation = new Quaternion();
-   private final AtomicReference<Boolean> enableFilter = new AtomicReference<Boolean>(false);
+   private final AtomicBoolean enableFilter = new AtomicBoolean(false);
    private final AtomicDouble linearVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
+
+   private long publisherPeriodInMillisecond = 1L;
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -117,9 +120,20 @@ public class StereoVisionPointCloudPublisher
       }
    }
 
+   public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
+   {
+      this.publisherPeriodInMillisecond = publisherPeriodInMillisecond;
+
+      if (publisherTask != null)
+      {
+         publisherTask.cancel(false);
+         start();
+      }
+   }
+
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
