@@ -13,7 +13,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLength;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParameters;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerStatus;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeTaken;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeout;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
@@ -183,13 +182,9 @@ public class FootstepPathCalculatorModule
                                                 });
          planningModule.addStatusCallback(status -> messager.submitMessage(PlanningResult, status.getResult()));
 
-         Stopwatch stopwatch = new Stopwatch();
-         stopwatch.start();
          FootstepPlannerOutput output = planningModule.handleRequest(request);
-         double time = stopwatch.totalElapsed();
 
          messager.submitMessage(PlanningResult, output.getResult());
-         messager.submitMessage(PlannerTimeTaken, time);
          messager.submitMessage(PlannerStatus, FootstepPlannerStatus.IDLE);
 
          if (output.getResult().validForExecution())
