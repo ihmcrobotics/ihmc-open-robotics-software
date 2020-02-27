@@ -374,7 +374,7 @@ public class AvatarEstimatorThreadFactory
     */
    public void addSecondaryStateEstimator(String reinitializeVariableName, StateEstimatorController secondaryStateEstimator)
    {
-      YoBoolean reinitialize = new YoBoolean(reinitializeVariableName, estimatorRegistry);
+      YoBoolean reinitialize = new YoBoolean(reinitializeVariableName, getEstimatorRegistry());
       BooleanSupplier reinitilizeSupplier = () ->
       {
          boolean ret = reinitialize.getValue();
@@ -404,7 +404,7 @@ public class AvatarEstimatorThreadFactory
       if (jointDesiredOutputWriterField.hasValue())
       {
          jointDesiredOutputWriterField.get().setJointDesiredOutputList(getDesiredJointDataHolder());
-         estimatorRegistry.addChild(jointDesiredOutputWriterField.get().getYoVariableRegistry());
+         getEstimatorRegistry().addChild(jointDesiredOutputWriterField.get().getYoVariableRegistry());
       }
 
       AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
@@ -414,10 +414,10 @@ public class AvatarEstimatorThreadFactory
                                                                               getSecondaryStateEstimators(),
                                                                               getForceSensorStateUpdater(),
                                                                               createControllerCrashPublisher(),
-                                                                              estimatorRegistry,
-                                                                              yoGraphicsListRegistry);
+                                                                              getEstimatorRegistry(),
+                                                                              getYoGraphicsListRegistry());
       avatarEstimatorThread.setRawOutputWriter(getRobotConfigurationDataPublisher());
-      ParameterLoaderHelper.loadParameters(this, getControllerParameters(), estimatorRegistry);
+      ParameterLoaderHelper.loadParameters(this, getControllerParameters(), getEstimatorRegistry());
 
       FactoryTools.disposeFactory(this);
       return avatarEstimatorThread;
@@ -440,7 +440,7 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
-      return estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
+      return estimatorFactory.createStateEstimator(getEstimatorRegistry(), getYoGraphicsListRegistry());
    }
 
    public StateEstimatorController createEKFStateEstimator()
@@ -461,7 +461,7 @@ public class AvatarEstimatorThreadFactory
                                                                                                 estimatorDT,
                                                                                                 getGravity(),
                                                                                                 getProcessedSensorOutputMap(),
-                                                                                                yoGraphicsListRegistry,
+                                                                                                getYoGraphicsListRegistry(),
                                                                                                 getEstimatorFullRobotModel());
 
       InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
@@ -510,8 +510,8 @@ public class AvatarEstimatorThreadFactory
                                                                       stateEstimatorParametersField.get(),
                                                                       getGravity(),
                                                                       getRobotMotionStatusFromController(),
-                                                                      yoGraphicsListRegistry,
-                                                                      estimatorRegistry));
+                                                                      getYoGraphicsListRegistry(),
+                                                                      getEstimatorRegistry()));
 
          if (realtimeRos2NodeField.hasValue())
          {
@@ -632,7 +632,7 @@ public class AvatarEstimatorThreadFactory
       {
          // This is only used by the perfect sensor reader if we are not using the estimator. It will update the data structure.
          getSensorReaderFactory().setForceSensorDataHolder(getForceSensorDataHolder());
-         getSensorReaderFactory().build(getRootJoint(), getIMUDefinitions(), getForceSensorDefinitions(), getDesiredJointDataHolder(), estimatorRegistry);
+         getSensorReaderFactory().build(getRootJoint(), getIMUDefinitions(), getForceSensorDefinitions(), getDesiredJointDataHolder(), getEstimatorRegistry());
          sensorReaderField.set(getSensorReaderFactory().getSensorReader());
       }
       return sensorReaderField.get();
@@ -767,5 +767,15 @@ public class AvatarEstimatorThreadFactory
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }
       return robotConfigurationDataPublisherField.get();
+   }
+
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   {
+      return yoGraphicsListRegistry;
+   }
+
+   public YoVariableRegistry getEstimatorRegistry()
+   {
+      return estimatorRegistry;
    }
 }
