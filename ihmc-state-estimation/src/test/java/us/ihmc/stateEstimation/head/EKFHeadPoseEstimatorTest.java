@@ -154,8 +154,8 @@ public class EKFHeadPoseEstimatorTest
             RigidBodyTransform expected = new RigidBodyTransform();
             poseEstimator.getHeadTransform(actual);
             headPose.get(expected);
-            EuclidCoreTestTools.assertTuple3DEquals(expected.getTranslationVector(), actual.getTranslationVector(), translationEpsilon);
-            EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(expected.getRotationMatrix(), actual.getRotationMatrix(), rotationEpsilon);
+            EuclidCoreTestTools.assertTuple3DEquals(expected.getTranslation(), actual.getTranslation(), translationEpsilon);
+            EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(expected.getRotation(), actual.getRotation(), rotationEpsilon);
          }
 
          t += dt;
