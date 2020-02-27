@@ -155,28 +155,38 @@ public class LidarScanPublisher
       scanPointsFrame = lidarSensorFrame;
    }
 
-   public void addRangeFilter(double minRange, double maxRange)
+   public void setRangeFilter(double minRange, double maxRange)
    {
-      rangeFilter = new RangeScanPointFilter();
+      if (rangeFilter == null)
+      {
+         rangeFilter = new RangeScanPointFilter();
+         activeFilters.addFilter(rangeFilter);
+      }
+
       rangeFilter.setMinRange(minRange);
       rangeFilter.setMaxRange(minRange);
-      activeFilters.addFilter(rangeFilter);
    }
 
-   public void addShadowFilter()
+   public void setShadowFilter()
    {
-      addShadowFilter(ShadowScanPointFilter.DEFAULT_SHADOW_ANGLE_THRESHOLD);
+      setShadowFilter(ShadowScanPointFilter.DEFAULT_SHADOW_ANGLE_THRESHOLD);
    }
 
-   public void addShadowFilter(double angleThreshold)
+   public void setShadowFilter(double angleThreshold)
    {
-      shadowFilter = new ShadowScanPointFilter();
+      if (shadowFilter == null)
+      {
+         shadowFilter = new ShadowScanPointFilter();
+         activeFilters.addFilter(shadowFilter);
+      }
+
       shadowFilter.setShadowAngleThreshold(angleThreshold);
-      activeFilters.addFilter(shadowFilter);
    }
 
-   public void addSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
+   public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
    {
+      if (collisionFilter != null)
+         return;
       collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
       activeFilters.addFilter(collisionFilter);
    }
