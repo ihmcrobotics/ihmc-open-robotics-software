@@ -15,7 +15,9 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -264,6 +266,98 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		}
 	}
 
+	public File testStepDown(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches, 
+			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps, File dataOutputFolder)
+					throws SimulationExceededMaximumTimeException
+	{
+		showMemoryUsageBeforeTest();
+		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+		try
+		{
+			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+			double stepLength = steppingParameters.getDefaultStepLength();
+			double stepWidth = steppingParameters.getInPlaceWidth();
+			double footLength = steppingParameters.getFootLength();
+			// Sole foot frame to front of foot =~ 0.12; sole foot frame to back of foot =~ 0.13
+			//double footFrameToFrontOfFoot = 0.12;
+			double fudgeFactor = -0.01; // Fudge factor to make sim robot look like real robot
+			double footFrameToFrontOfFoot = steppingParameters.getFootForwardOffset() + fudgeFactor; 
+
+			final double INCHESTOMETERS = 2.54 / 100.0;
+			double stepEnd = INCHESTOMETERS * stepStartInches + footFrameToFrontOfFoot;
+			double stepHeight = INCHESTOMETERS * stepHeightInches;
+			
+			DRCStartingLocation startingLocation = new DRCStartingLocation()
+			{
+				@Override
+				public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+				{
+					// TODO: Why is stepHeight wrong here? Visually, stepHeight/2 is correct.
+					return new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, stepHeight/2), 0.0);
+				}
+			};
+
+			StepDownEnvironment stepDown = new StepDownEnvironment(stepEnd, stepHeight);
+
+			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepDown);
+			drcSimulationTestHelper.setStartingLocation(startingLocation);
+			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
+			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+			scs.setCameraFix(stepEnd, 0.0, 1.0);
+			scs.setCameraPosition(stepEnd, -6.0, 1.0);
+
+			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+			
+			if (success) {
+				scs.setInPoint();
+
+				FootstepDataListMessage footsteps = null;
+
+				if (recordedFootsteps == null) {
+
+					double xGoal = stepEnd + 0.5; // 0.5m on to the step
+					footsteps = new FootstepDataListMessage();
+
+
+					HeightMapWithNormals heightMap = stepDown.getTerrainObject3D().getHeightMapIfAvailable();
+
+					RobotSide firstSide = RobotSide.LEFT;
+					if (stepEnd > stepLength) { // If more than a footstep away
+						stepTo(0.0, stepEnd - 0.5 * footLength - 0.15, stepLength, stepWidth, firstSide, heightMap, footsteps, false, false);
+						firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide()).getOppositeSide();
+						stepTo(stepEnd + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+					}
+					stepTo(stepEnd + 0.5 * footLength + 0.05, xGoal, stepLength, stepWidth, firstSide, heightMap, footsteps, false, true);
+					setTimings(footsteps, walkingControllerParameters);
+				} else {
+					footsteps = recordedFootsteps;
+				}
+
+				drcSimulationTestHelper.publishToController(footsteps);
+
+				double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+			}
+
+			String dataNameSuffix = "StepUpWithoutSquareUp";
+			String info = "Step up a " + stepHeightInches + " inches high step while walking";
+
+			if (!success) {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
+			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+		}
+		finally
+		{
+			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+			destroySimulationAndRecycleMemory();
+		}
+	}	
+	
 	public File testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, 
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps, 
 			File dataOutputFolder)

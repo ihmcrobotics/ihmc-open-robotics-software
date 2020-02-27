@@ -211,6 +211,10 @@ public class TorqueSpeedTestRunner {
 				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance, 
 						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
 				break;			
+			case STEP_DOWN:
+				outputResultsDirectory = tester.testStepDown(robot, config.stepStartingDistance, 
+						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
+				break;					
 			case SLOPE:
 				outputResultsDirectory = tester.testWalkSlope(robot, 
 						                                      Math.toRadians(-config.slopeDegrees), 

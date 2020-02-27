@@ -18,7 +18,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 class ValkyrieTorqueSpeedTestConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, SLOPE;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE;
 	}
 
 	public double stepStartingDistance; // for step/stair scenarios, distance to the first step (inches)
