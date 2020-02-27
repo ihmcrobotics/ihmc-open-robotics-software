@@ -2,15 +2,12 @@ package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.util.Random;
 
-import javax.vecmath.MismatchedSizeException;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TIntArrayList;
 import sensor_msgs.PointCloud2;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -20,7 +17,6 @@ public class ColorPointCloudData
    private final int numberOfPoints;
    private final Point3D[] pointCloud;
    private final int[] colors;
-   private final TIntArrayList collidingPointIndices = new TIntArrayList();
 
    public ColorPointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
    {
@@ -70,6 +66,16 @@ public class ColorPointCloudData
       return timestamp;
    }
 
+   public int getNumberOfPoints()
+   {
+      return numberOfPoints;
+   }
+
+   public Point3D[] getPointCloud()
+   {
+      return pointCloud;
+   }
+
    public int[] getColors()
    {
       return colors;
@@ -77,55 +83,32 @@ public class ColorPointCloudData
 
    public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
    {
-      long timestamp = this.timestamp;
-      int numberOfPointsToAdd = numberOfPoints - collidingPointIndices.size();
-      float[] pointCloudBuffer = new float[3 * numberOfPointsToAdd];
-      int[] colorsInteger;
+      return toStereoVisionPointCloudMessage((index, point) -> true);
+   }
 
-      if (colors.length == numberOfPointsToAdd)
+   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(ScanPointFilter filter)
+   {
+      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
+      message.setTimestamp(timestamp);
+      message.setSensorPoseConfidence(1.0);
+      Float pointCloudBuffer = message.getPointCloud();
+      Integer colorBuffer = message.getColors();
+
+      for (int i = 0; i < numberOfPoints; i++)
       {
-         colorsInteger = colors;
-         for (int i = 0; i < numberOfPoints; i++)
+         Point3D scanPoint = pointCloud[i];
+         int color = colors[i];
+
+         if (filter.test(i, scanPoint))
          {
-            Point3D scanPoint = pointCloud[i];
-
-            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
-            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
-            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
-         }
-      }
-      else
-      {
-         int bufferIndex = 0;
-         colorsInteger = new int[numberOfPointsToAdd];
-         int collisionNumber = 0;
-         int collisionIndex = collidingPointIndices.get(collisionNumber);
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            if (i == collisionIndex)
-            {
-               collisionNumber++;
-               if (collisionNumber < collidingPointIndices.size())
-                  collisionIndex = collidingPointIndices.get(collisionNumber);
-               continue;
-            }
-
-            colorsInteger[bufferIndex] = colors[i];
-            Point3D scanPoint = pointCloud[i];
-
-            pointCloudBuffer[3 * bufferIndex + 0] = (float) scanPoint.getX();
-            pointCloudBuffer[3 * bufferIndex + 1] = (float) scanPoint.getY();
-            pointCloudBuffer[3 * bufferIndex + 2] = (float) scanPoint.getZ();
-            bufferIndex++;
-         }
-
-         if (bufferIndex != numberOfPointsToAdd)
-         {
-            throw new MismatchedSizeException("bufferIndex is different with numberOfPointsToAdd. " + bufferIndex + " " + numberOfPointsToAdd);
+            pointCloudBuffer.add(scanPoint.getX32());
+            pointCloudBuffer.add(scanPoint.getY32());
+            pointCloudBuffer.add(scanPoint.getZ32());
+            colorBuffer.add(color);
          }
       }
 
-      return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
+      return message;
    }
 
    public void applyTransform(RigidBodyTransform transform)
@@ -133,19 +116,6 @@ public class ColorPointCloudData
       for (int i = 0; i < numberOfPoints; i++)
       {
          pointCloud[i].applyTransform(transform);
-      }
-   }
-
-   public void updateCollisionBox(CollisionShapeTester collisionBoxNode)
-   {
-      if (collisionBoxNode != null)
-      {
-         collidingPointIndices.clear();
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            if (collisionBoxNode.contains(pointCloud[i]))
-               collidingPointIndices.add(i);
-         }
       }
    }
 }
