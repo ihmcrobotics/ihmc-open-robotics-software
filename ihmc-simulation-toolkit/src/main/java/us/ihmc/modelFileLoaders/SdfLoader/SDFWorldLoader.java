@@ -31,7 +31,7 @@ public class SDFWorldLoader
 
    public SDFWorldLoader(InputStream inputStream, List<String> resourceDirectories) throws FileNotFoundException, JAXBException
    {
-      jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories, null);
+      jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories);
       for (GeneralizedSDFRobotModel generalizedSDFRobotModel : jaxbSDFLoader.getGeneralizedSDFRobotModels())
       {
          String name = generalizedSDFRobotModel.getName();
