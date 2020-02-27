@@ -11,14 +11,14 @@ import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
-public class ColorPointCloudData
+public class PointCloudData
 {
    private final long timestamp;
    private final int numberOfPoints;
    private final Point3D[] pointCloud;
    private final int[] colors;
 
-   public ColorPointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
+   public PointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
    {
       this.timestamp = timestamp;
 
@@ -30,7 +30,7 @@ public class ColorPointCloudData
       this.numberOfPoints = scanPoints.length;
    }
 
-   public ColorPointCloudData(PointCloud2 rosPointCloud2, int maxSize)
+   public PointCloudData(PointCloud2 rosPointCloud2, int maxSize)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
 

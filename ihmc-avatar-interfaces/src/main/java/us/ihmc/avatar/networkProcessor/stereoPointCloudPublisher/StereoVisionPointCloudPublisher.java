@@ -48,7 +48,7 @@ public class StereoVisionPointCloudPublisher
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
    private ScheduledFuture<?> publisherTask;
 
-   private final AtomicReference<ColorPointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
+   private final AtomicReference<PointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
@@ -178,7 +178,7 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            rosPointCloud2ToPublish.set(new ColorPointCloudData(pointCloud, MAX_NUMBER_OF_POINTS));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, MAX_NUMBER_OF_POINTS));
 
             if (Debug)
                System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
@@ -186,7 +186,7 @@ public class StereoVisionPointCloudPublisher
       };
    }
 
-   public void updateScanData(ColorPointCloudData scanDataToPublish)
+   public void updateScanData(PointCloudData scanDataToPublish)
    {
       this.rosPointCloud2ToPublish.set(scanDataToPublish);
    }
@@ -217,7 +217,7 @@ public class StereoVisionPointCloudPublisher
 
    private void transformDataAndPublish()
    {
-      ColorPointCloudData pointCloudData = rosPointCloud2ToPublish.getAndSet(null);
+      PointCloudData pointCloudData = rosPointCloud2ToPublish.getAndSet(null);
 
       if (pointCloudData == null)
          return;
