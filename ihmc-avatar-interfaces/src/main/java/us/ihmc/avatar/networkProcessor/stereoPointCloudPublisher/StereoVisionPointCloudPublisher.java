@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.net.URI;
-import java.util.List;
-import java.util.PriorityQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -64,7 +62,10 @@ public class StereoVisionPointCloudPublisher
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
 
-   private CollisionShapeTester collisionBoxNode = null;
+   private RangeScanPointFilter rangeFilter = null;
+   private CollidingScanPointFilter collisionFilter = null;
+   private ScanPointFilter activeFilters = (index, point) -> true;
+
    /**
     * units of velocities are meter/sec and rad/sec.
     */
@@ -97,14 +98,18 @@ public class StereoVisionPointCloudPublisher
       String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageType);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
          pointcloudRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = null;
          pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
@@ -124,7 +129,24 @@ public class StereoVisionPointCloudPublisher
 
    public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
    {
-      collisionBoxNode = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
+      collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
+
+      if (rangeFilter == null)
+         activeFilters = collisionFilter;
+      else
+         activeFilters = ScanPointFilter.combine(collisionFilter, rangeFilter);
+   }
+
+   public void setRangeLimits(double minRange, double maxRange)
+   {
+      rangeFilter = new RangeScanPointFilter();
+      rangeFilter.setMinRange(minRange);
+      rangeFilter.setMaxRange(minRange);
+
+      if (collisionFilter == null)
+         activeFilters = rangeFilter;
+      else
+         activeFilters = ScanPointFilter.combine(collisionFilter, rangeFilter);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
@@ -252,13 +274,19 @@ public class StereoVisionPointCloudPublisher
             return;
       }
 
-      if (collisionBoxNode != null)
-      {
-         collisionBoxNode.update();
-         pointCloudData.updateCollisionBox(collisionBoxNode);
-      }
+      if (collisionFilter != null)
+         collisionFilter.updateFilter(pointCloudData);
 
-      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
+      if (rangeFilter != null)
+         rangeFilter.updateSensorPosition(sensorPose.getPosition());
+
+      StereoVisionPointCloudMessage message;
+
+      if (activeFilters != null)
+         message = pointCloudData.toStereoVisionPointCloudMessage(activeFilters);
+      else
+         message = pointCloudData.toStereoVisionPointCloudMessage();
+
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
 
