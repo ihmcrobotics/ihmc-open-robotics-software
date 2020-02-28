@@ -1630,6 +1630,7 @@ public class CrossRobotCommandRandomTools
       next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
                                                                                   nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
       next.setControlHeightWithMomentum(random.nextBoolean());
+      next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
       next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());

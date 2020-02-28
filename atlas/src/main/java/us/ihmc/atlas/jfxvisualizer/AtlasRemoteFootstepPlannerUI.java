@@ -9,7 +9,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -35,7 +35,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
    private FootstepPlannerUI ui;
 
-   private FootstepPlanningToolboxModule planningModule;
+   private FootstepPlanningModule planningModule;
    private FootstepPlanPostProcessingToolboxModule postProcessingModule;
 
    @Override
@@ -63,7 +63,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningModule = new FootstepPlanningToolboxModule(drcRobotModel, null, false);
+         planningModule = new FootstepPlanningModule(drcRobotModel);
+         planningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
          postProcessingModule = new FootstepPlanPostProcessingToolboxModule(drcRobotModel, null, false);
       }
    }
@@ -79,7 +80,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (planningModule != null)
       {
-         planningModule.destroy();
+         planningModule.closeAndDispose();
          postProcessingModule.destroy();
       }
 
