@@ -3,15 +3,19 @@ package us.ihmc.ihmcPerception.camera;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.LongUnaryOperator;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
+import us.ihmc.communication.producers.CompressedVideoDataServer;
 import us.ihmc.communication.producers.CompressedVideoHandler;
-import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,7 +29,7 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 public class CameraDataReceiver implements CloseableAndDisposable
 {
    private static final boolean DEBUG = false;
-   private final VideoDataServer compressedVideoDataServer;
+   private final CompressedVideoDataServer compressedVideoDataServer;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
 
    private final FullRobotModel fullRobotModel;
@@ -42,6 +46,8 @@ public class CameraDataReceiver implements CloseableAndDisposable
    private boolean useTimestamps = true;
    private long initialDelayMilliseconds = 1000L;
    private long publishingPeriodMilliseconds = 200L;
+
+   private final AtomicReference<VideoControlSettings> newVideoSettings = new AtomicReference<>(null);
 
    private final ScheduledExecutorService executorService = ThreadTools.newSingleDaemonThreadScheduledExecutor(getClass().getName());
 
@@ -71,19 +77,16 @@ public class CameraDataReceiver implements CloseableAndDisposable
       this.initialDelayMilliseconds = initialDelayMilliseconds;
    }
 
-   public void setPublishingPeriodMilliseconds(long publishingPeriodMilliseconds)
-   {
-      this.publishingPeriodMilliseconds = publishingPeriodMilliseconds;
-   }
-
    public void setUseTimestamps(boolean useTimestamps)
    {
       this.useTimestamps = useTimestamps;
    }
 
+   private ScheduledFuture<?> activeTask;
+
    public void start()
    {
-      executorService.scheduleAtFixedRate(this::run, initialDelayMilliseconds, publishingPeriodMilliseconds, TimeUnit.MILLISECONDS);
+      activeTask = executorService.scheduleAtFixedRate(this::run, initialDelayMilliseconds, publishingPeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
 
    private void run()
@@ -128,6 +131,11 @@ public class CameraDataReceiver implements CloseableAndDisposable
                System.out.println(cameraOrientation);
             }
 
+            VideoControlSettings settings = newVideoSettings.getAndSet(null);
+
+            if (newVideoSettings.get() != null)
+               compressedVideoDataServer.setVideoControlSettings(settings);
+
             compressedVideoDataServer.onFrame(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
             readWriteLock.writeLock().unlock();
          }
@@ -140,6 +148,31 @@ public class CameraDataReceiver implements CloseableAndDisposable
    public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       dataQueue.offer(new CameraData(videoSource, bufferedImage, timeStamp, intrinsicParameters));
+   }
+
+   public void setVideoSettings(VideoControlSettings settings)
+   {
+      this.newVideoSettings.set(settings);
+
+      if (!settings.isSendVideo() && activeTask != null)
+      {
+         activeTask.cancel(false);
+         return;
+      }
+
+      int fps = settings.getFPS();
+      long periodInMilliseconds = (long) Conversions.secondsToMilliseconds(1.0 / (double) fps);
+
+      if (periodInMilliseconds != publishingPeriodMilliseconds)
+      {
+         publishingPeriodMilliseconds = periodInMilliseconds;
+
+         if (activeTask != null)
+         {
+            activeTask.cancel(false);
+         }
+         start();
+      }
    }
 
    @Override

@@ -1,6 +1,10 @@
 package us.ihmc.avatar.sensors.multisense;
 
+import java.util.concurrent.Executor;
+
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
@@ -17,56 +21,48 @@ public class MultiSenseSensorManager
 {
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
 
-   private CameraDataReceiver cameraReceiver;
-
-   private final FullRobotModelFactory fullRobotModelFactory;
-   private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final RobotROSClockCalculator rosClockCalculator;
-
+   private final Ros2Node ros2Node;
    private final AvatarRobotCameraParameters cameraParameters;
+   private final AvatarRobotLidarParameters lidarParameters;
+   private boolean setROSParameters;
 
+   private CameraDataReceiver cameraReceiver;
    private MultiSenseParamaterSetter multiSenseParameterSetter;
-
    private RosCameraCompressedImageReceiver cameraImageReceiver;
-
    private VideoPacketHandler compressedVideoHandler;
 
-   public MultiSenseSensorManager(FullRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+   public MultiSenseSensorManager(FullRobotModelFactory fullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode, Ros2Node ros2Node, RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
                                   AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
-      this.fullRobotModelFactory = sdfFullRobotModelFactory;
-      this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
+      this.ros2Node = ros2Node;
       this.cameraParameters = cameraParameters;
       this.rosMainNode = rosMainNode;
-      this.rosClockCalculator = rosClockCalculator;
+      this.lidarParameters = lidarParameters;
+      this.setROSParameters = setROSParameters;
 
-      boolean rosOnline = false;
-
-      while (!rosOnline)
-      {
-         registerCameraReceivers(ros2Node);
-
-         if (setROSParameters)
-         {
-            multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);
-            rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
-         }
-         else
-         {
-            multiSenseParameterSetter = null;
-            rosOnline = true;
-         }
-      }
+      compressedVideoHandler = new VideoPacketHandler(ros2Node);
+      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory,
+                                              cameraParameters.getPoseFrameForSdf(),
+                                              robotConfigurationDataBuffer,
+                                              compressedVideoHandler,
+                                              rosClockCalculator::computeRobotMonotonicTime);
    }
+
+   private boolean initializeParameterListenersRequested = false;
 
    public void initializeParameterListeners()
    {
       if (multiSenseParameterSetter != null)
       {
          multiSenseParameterSetter.initializeParameterListeners();
+         initializeParameterListenersRequested = false;
+      }
+      else
+      {
+         initializeParameterListenersRequested = true;
       }
    }
 
@@ -81,19 +77,51 @@ public class MultiSenseSensorManager
       return true;
    }
 
-   private void registerCameraReceivers(Ros2Node ros2Node)
+   public void start()
    {
-      CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      compressedVideoHandler = new VideoPacketHandler(ros2Node);
-      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory,
-                                              cameraParameters.getPoseFrameForSdf(),
-                                              robotConfigurationDataBuffer,
-                                              compressedVideoHandler,
-                                              rosClockCalculator::computeRobotMonotonicTime);
+      Executor starter = ThreadTools.newSingleDaemonThreadExecutor(getClass().getSimpleName() + "- starter");
 
-      cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
+      starter.execute(() ->
+      {
+         boolean rosOnline = false;
 
-      cameraReceiver.start();
+         while (!rosOnline)
+         {
+            CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
+            cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
+
+            if (setROSParameters)
+            {
+               multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);
+               rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
+            }
+            else
+            {
+               multiSenseParameterSetter = null;
+               rosOnline = true;
+            }
+
+            if (rosOnline && initializeParameterListenersRequested)
+               initializeParameterListeners();
+
+            try
+            {
+               Thread.sleep(2000);
+            }
+            catch (InterruptedException e)
+            {
+               closeAndDispose();
+               return;
+            }
+         }
+
+         cameraReceiver.start();
+      });
+   }
+
+   public void setVideoSettings(VideoControlSettings settings)
+   {
+      cameraReceiver.setVideoSettings(settings);
    }
 
    public void closeAndDispose()
