@@ -13,7 +13,7 @@ int32 joint_hash_code
 # The is the desired joint position.
 float64 desired_position
 
-# Weight used to define the priority for reacing the desired position.
+# Weight used to define the priority for reaching the desired position.
 float64 weight
 
 
