@@ -1,3 +1,11 @@
+import org.apache.commons.lang3.SystemUtils
+
+buildscript {
+   dependencies {
+      classpath("org.apache.commons:commons-lang3:3.9")
+   }
+}
+
 plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
@@ -8,7 +16,7 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   description "Robot Environment Awareness is a library meant to provide interpretation to point cloud data such as identifying planar regions that can be used to planify footsteps for a bipedal robot."
+   description = "Robot Environment Awareness is a library meant to provide interpretation to point cloud data such as identifying planar regions that can be used to planify footsteps for a bipedal robot."
    openSource = true
    
    configureDependencyResolution()
@@ -26,11 +34,25 @@ mainDependencies {
    api("us.ihmc:ihmc-javafx-toolkit:0.14.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("org.bytedeco:javacv-platform:1.5")
+   api("org.bytedeco:javacv-platform:1.5") {
+      exclude(group = "org.bytedeco", module = "opencv")
+   }
+   if (SystemUtils.IS_OS_UNIX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
+   }
+   else if (SystemUtils.IS_OS_WINDOWS)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
+   }
+   else if (SystemUtils.IS_OS_MAC_OSX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
+   }
 }
 
 applicationDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
@@ -39,10 +61,10 @@ applicationDependencies {
 }
 
 testDependencies {
-   compile ihmc.sourceSetProject("visualizers")
+   api(ihmc.sourceSetProject("visualizers"))
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
 
 visualizersDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 }

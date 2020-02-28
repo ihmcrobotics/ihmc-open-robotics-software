@@ -1,3 +1,11 @@
+import org.apache.commons.lang3.SystemUtils
+
+buildscript {
+   dependencies {
+      classpath("org.apache.commons:commons-lang3:3.9")
+   }
+}
+
 plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
@@ -13,7 +21,21 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5")
+   api("org.bytedeco:javacv-platform:1.5") {
+      exclude(group = "org.bytedeco", module = "opencv")
+   }
+   if (SystemUtils.IS_OS_UNIX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
+   }
+   else if (SystemUtils.IS_OS_WINDOWS)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
+   }
+   else if (SystemUtils.IS_OS_MAC_OSX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
+   }
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("org.georegression:georegression:0.11")
