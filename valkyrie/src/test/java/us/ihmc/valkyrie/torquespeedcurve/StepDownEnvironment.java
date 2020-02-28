@@ -14,10 +14,10 @@ public class StepDownEnvironment implements CommonAvatarEnvironmentInterface
    private final CombinedTerrainObject3D stepGround;
    private final ArrayList<Robot> environmentRobots = new ArrayList<>();
 
-   public StepDownEnvironment(double stepEnd, double stepHeight)
+   public StepDownEnvironment(double platformEnd, double stepHeight)
    {
       stepGround = DefaultCommonAvatarEnvironment.setUpGround("Ground");
-      stepGround.addBox(-0.5, -1.0, stepEnd, 1.0, stepHeight);
+      stepGround.addBox(-0.5, -1.0, platformEnd, 1.0, stepHeight);
    }
 
    public void addEnvironmentRobot(Robot robot)
