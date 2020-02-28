@@ -1,18 +1,30 @@
 package us.ihmc.footstepPlanning.scoring;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.BipedalStepAdjustmentCostCalculator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -23,6 +35,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotControllerAdapter;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -35,10 +49,11 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.UnaryOperator;
 
 import static us.ihmc.robotics.Assert.*;
 
-public class BipedalStepAdjustmentCostCalculatorTest
+public class FootstepCostCalculatorTest
 {
    private Color[] costColorGradient;
    private ConvexPolygon2D defaultFootPolygon;
@@ -56,72 +71,77 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private int numInX = (int) ((xMax - xMin) / incrementX);
    private int numInY = (int) ((xMax - yMin) / incrementY);
 
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
-
    @Test
    public void testIdealFootstepAlwaysBetterThanOthers()
    {
       Random random = new Random(1776L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      BipedalStepAdjustmentCostCalculator stepAdjustmentCostCalculator = new BipedalStepAdjustmentCostCalculator(registry, yoGraphicsListRegistry);
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(defaultFootPolygons);
+      UnaryOperator<FootstepNode> idealStepCalculator = node ->
+      {
+         Point2D midFootPoint = node.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth());
+         Pose2D midFootPose = new Pose2D(midFootPoint, node.getYaw());
+         midFootPose.appendTranslation(footstepPlannerParameters.getIdealFootstepLength(), 0.5 * node.getRobotSide().negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         return new FootstepNode(midFootPose.getX(), midFootPose.getY(), midFootPose.getYaw(), node.getRobotSide().getOppositeSide());
+      };
 
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      int numberOfIdealStepsToTest = 1000;
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons);
+      int numberOfIdealStepsToTest = 10;
 
       for (int i = 0; i < numberOfIdealStepsToTest; i++)
       {
-         FramePose3D stanceFoot = new FramePose3D(worldFrame);
+         FramePose3D stanceFoot = new FramePose3D();
          stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
+         double yaw = random.nextInt(1000) / ((double) LatticeNode.yawDivisions);
+         double pitch = 0.0; // EuclidCoreRandomTools.nextDouble(random, -0.25 * Math.PI, 0.25 * Math.PI);
+         double roll = 0.0; // EuclidCoreRandomTools.nextDouble(random, -0.25 * Math.PI, 0.25 * Math.PI);
+         stanceFoot.setOrientation(new Quaternion(yaw, pitch, roll));
 
-         FramePose3D swingStartFoot = new FramePose3D(worldFrame);
-         swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
+         FootstepNode stanceNode = new FootstepNode(stanceFoot.getX(), stanceFoot.getY(), stanceFoot.getYaw(), RobotSide.generateRandomRobotSide(random));
+         FootstepNode idealStepNode = idealStepCalculator.apply(stanceNode);
 
-         FramePose3D idealFootstep = new FramePose3D(worldFrame);
-         idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
+         FramePose3D idealStep = new FramePose3D();
+         idealStep.setPosition(idealStepNode.getX(), idealStepNode.getY(), stanceFoot.getZ());
+         idealStep.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
 
-         FramePose3D candidateFootstep = new FramePose3D(worldFrame);
-         candidateFootstep.set(idealFootstep);
+         snapper.addSnapData(stanceNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceNode, stanceFoot), new ConvexPolygon2D()));
+         snapper.addSnapData(idealStepNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(idealStepNode, idealStep), new ConvexPolygon2D()));
 
-         double idealFootstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
-         assertEquals(stepAdjustmentCostCalculator.getStepBaseCost(), idealFootstepCost, 1e-7);
+         System.out.println(i);
+         double stepCost = stepCostCalculator.computeCost(stanceNode, idealStepNode);
+         Assertions.assertTrue(MathTools.epsilonEquals(stepCost, footstepPlannerParameters.getCostPerStep(), 1e-7), "Ideal step cost does not equal per step cost.");
+
+         snapper.reset();
       }
 
-      int numberOfRandomXYTranslations = 1000;
-
-      for (int i = 0; i<numberOfRandomXYTranslations; i++)
-      {
-         FramePose3D stanceFoot = new FramePose3D(worldFrame);
-         stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
-
-         FramePose3D swingStartFoot = new FramePose3D(worldFrame);
-         swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
-
-         FramePose3D idealFootstep = new FramePose3D(worldFrame);
-         idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
-         idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
-
-         FramePose3D candidateFootstep = new FramePose3D(worldFrame);
-         candidateFootstep.set(idealFootstep);
-
-         RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(RandomNumbers.nextDouble(random, 0.1), RandomNumbers.nextDouble(random, 0.1), 0.0);
-         candidateFootstep.applyTransform(transform);
-         double footstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
-
-         assertTrue(footstepCost >= 0.0);
-      }
+//      int numberOfRandomXYTranslations = 1000;
+//
+//      for (int i = 0; i<numberOfRandomXYTranslations; i++)
+//      {
+//         FramePose3D stanceFoot = new FramePose3D(worldFrame);
+//         stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+//         stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
+//
+//         FramePose3D swingStartFoot = new FramePose3D(worldFrame);
+//         swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+//         swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
+//
+//         FramePose3D idealFootstep = new FramePose3D(worldFrame);
+//         idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+//         idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
+//
+//         FramePose3D candidateFootstep = new FramePose3D(worldFrame);
+//         candidateFootstep.set(idealFootstep);
+//
+//         RigidBodyTransform transform = new RigidBodyTransform();
+//         transform.setTranslation(RandomNumbers.nextDouble(random, 0.1), RandomNumbers.nextDouble(random, 0.1), 0.0);
+//         candidateFootstep.applyTransform(transform);
+//         double footstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
+//
+//         assertTrue(footstepCost >= 0.0);
+//      }
 
    }
 
