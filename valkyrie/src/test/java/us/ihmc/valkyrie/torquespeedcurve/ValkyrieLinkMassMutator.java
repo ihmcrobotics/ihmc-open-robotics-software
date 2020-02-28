@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.torquespeedcurve;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFContactSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
@@ -14,36 +15,37 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 
-public class ValkyrieJointTorqueLimitMutator implements SDFDescriptionMutator
+public class ValkyrieLinkMassMutator implements SDFDescriptionMutator
 {
-   private final Map<String, Double> customJointTorqueLimitMap = new HashMap<>();
+   private final Map<String, Double> customLinkMassMap = new HashMap<>();
 
-   public ValkyrieJointTorqueLimitMutator(ValkyrieJointMap jointMap, String jointName, double torqueLimit)
+   public ValkyrieLinkMassMutator(ValkyrieJointMap jointMap, String linkName, double mass)
    {
-	   System.out.printf("Adding mutator torque limit of %s to %f\n", jointName, torqueLimit);
-	   customJointTorqueLimitMap.put(jointName, torqueLimit);
-   }
-
-   public ValkyrieJointTorqueLimitMutator(ValkyrieJointMap jointMap) {
-	   // Example how to setup custom joint torque limit:
-	   for (RobotSide robotSide : RobotSide.values)
-	   {
-		   customJointTorqueLimitMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 350.0);
-	   }
+	   System.out.printf("Changing mass of %s link to %f\n", linkName, mass);
+	   customLinkMassMap.put(linkName, mass);
    }
 
    @Override
    public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      if (customJointTorqueLimitMap.containsKey(jointHolder.getName()))
-      {
-         jointHolder.setEffortLimit(customJointTorqueLimitMap.get(jointHolder.getName()));
-      }
+
    }
 
    @Override
    public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
    {
+	   if (customLinkMassMap.containsKey(linkHolder.getName())) {
+		   double oldMass = linkHolder.getMass();
+		   double newMass = customLinkMassMap.get(linkHolder.getName());
+		   
+		   // Update link mass
+		   linkHolder.setMass(newMass);
+		   
+		   // Scale inertia tensor
+		   Matrix3D inertia = linkHolder.getInertia();
+		   inertia.scale(newMass/oldMass);
+		   linkHolder.setInertia(inertia);
+	   }
    }
 
    @Override

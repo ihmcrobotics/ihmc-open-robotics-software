@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,9 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
@@ -151,29 +154,11 @@ public class TorqueSpeedTestRunner {
 		// Set walking parameters
 		WalkingControllerParameters walkingParameters = robot.getWalkingControllerParameters();
 
-		// Create a list of mutators based on the torque limits defined in the params
-		// file
-		SDFDescriptionMutatorList mutator = new SDFDescriptionMutatorList(
-				new ValkyrieSDFDescriptionMutator(robot.getJointMap(), false));
-
-		// Create a list of joint names with the format we need
-		HashSet<String> validJointNames = new HashSet<String>();
-		for (LegJointName joint : LegJointName.values()) {
-			if (!joint.equals("Unknown Position")) {
-				validJointNames.add(joint.getPascalCaseName());
-			}
-		}
+		// Apply torque limit overrides
+		SDFDescriptionMutatorList mutator = getSdfMutators(config, robot);
 		
-		// Add a mutator for each joint torque limit specified in the parameter file
-		for (String joint : config.torqueLimits.keySet()) {
-			if (!validJointNames.contains(joint)) {
-				System.err.println("Invalid joint specified in config file: " + joint);
-				System.err.println("Ensure case and spelling are correct (e.g. KneePitch)");
-				System.exit(1);
-			}
-			mutator.addMutator(
-					new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), joint, config.torqueLimits.get(joint)));
-		}
+		// Apply mass link overrides
+		
 
 		// Create test runner and test case class
 		TorqueSpeedTestRunner runner = new TorqueSpeedTestRunner();
@@ -243,6 +228,109 @@ public class TorqueSpeedTestRunner {
 		// Without calling System.exit(0), the sim has non-terminating threads. Specifically, the simulation
 		// thread and the intraprocess thread (associated with ROS2 publishing) do not exit.
 		System.exit(0);
+	}
+	
+	private static String capitalize(String s)
+	{
+		if (s == null || s.length() == 0) {
+			return s;
+		}
+		return s.substring(0,1).toUpperCase() + s.substring(1);
+	}
+	
+	private static String uncapitalize(String s)
+	{
+		if (s == null || s.length() == 0) {
+			return s;
+		}
+		return s.substring(0,1).toLowerCase() + s.substring(1);
+	}
+	
+	
+	private static SDFDescriptionMutatorList getSdfMutators(ValkyrieTorqueSpeedTestConfig config,
+			                                                ValkyrieRobotModel robot) {
+		// Create a list of mutators based on the torque limits defined in the params file
+		SDFDescriptionMutatorList mutator = new SDFDescriptionMutatorList(
+				new ValkyrieSDFDescriptionMutator(robot.getJointMap(), false));
+
+		// Create a list of joint names with the format we need
+		HashSet<String> validJointNames = new HashSet<>(Arrays.asList(robot.getJointMap().getOrderedJointNames()));
+		HashSet<String> validLinkNames = getLinkNames(validJointNames);
+		
+		// Add a mutator for each joint torque limit specified in the parameter file
+		for (String joint : config.torqueLimits.keySet()) {
+
+			if (!validJointNames.contains(uncapitalize(joint))) {
+				// Leg and arm joints should be parallel on each side, so we allow user to specify, for example, "HipPitch"
+				// and we translate that into a pair of SDF mutations for leftHipPitch and rightHipPitch
+				for (RobotSide robotSide : RobotSide.values) {
+					String fullJointName = robotSide.getCamelCaseNameForStartOfExpression() + capitalize(joint);
+					if (!validJointNames.contains(fullJointName)) {
+						System.err.println("Invalid torque limit joint specified in config file: " + joint);
+						System.err.println("Ensure case and spelling are correct (e.g. KneePitch)");
+						System.exit(1);						
+					} else {
+						mutator.addMutator(
+								new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), fullJointName, config.torqueLimits.get(joint)));
+					}
+				}
+			} else {
+				mutator.addMutator(
+						new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), uncapitalize(joint), config.torqueLimits.get(joint)));
+			}
+		}
+		
+		// Add a mutator for each joint mass modifier specified in the parameter file
+		for (String link : config.linkMassKg.keySet()) {
+			// Try link literally. In this form, it should have a leading lower-case letter
+			if (!validLinkNames.contains(uncapitalize(link))) {
+				// Try link with side prepended. In this case, link should have a leading upper-case letter
+				for (RobotSide robotSide : RobotSide.values) {
+					String fullLinkName = robotSide.getCamelCaseNameForStartOfExpression() + capitalize(link);
+					if (!validLinkNames.contains(fullLinkName)) {
+						System.err.println("Invalid mass link specified in config file: " + link);
+						System.err.println("Ensure case and spelling are correct (e.g. KneePitchLink)");
+						System.exit(1);						
+					} else {
+						mutator.addMutator(
+								new ValkyrieLinkMassMutator(robot.getJointMap(), fullLinkName, config.linkMassKg.get(link)));
+					}
+				}
+			} else {
+				mutator.addMutator(
+						new ValkyrieLinkMassMutator(robot.getJointMap(), uncapitalize(link), config.linkMassKg.get(link)));
+			}
+		}
+		
+		return mutator;
+	}
+
+	private static HashSet<String> getLinkNames(HashSet<String> validJointNames) {
+		// There seems to be no simple way to get a list of links. After the SDF model is read, we could get the link
+		// names as the children of the SDFJointHolders in the Generalized SDF model. But getting the SDF model
+		// to access the joint holders makes us unable to apply the mutators we're defining.
+		// For now, this is a hack.
+		HashSet<String> validLinkNames = new HashSet<>();
+		for (String jointName: validJointNames) {
+    		validLinkNames.add(jointName + "Link");
+		}
+		
+		// Add exceptions to the rule
+		validLinkNames.remove("pelvisLink");    // The pelvis link is called "pelvis"
+		validLinkNames.remove("torsoRollLink"); // The torsoRoll link is called "torso"
+		validLinkNames.remove("leftAnkleRollLink"); // The leftAnkleRoll link is called "leftFoot"
+		validLinkNames.remove("leftWristPitchLink"); // The leftWristPitch link is called "leftPalm"		
+		validLinkNames.remove("rightAnkleRollLink"); // The rightAnkleRoll link is called "rightFoot"
+		validLinkNames.remove("hokuyo_joint"); // The hokuyo_joint link is called "hokuyo_link"
+		validLinkNames.remove("rightWristPitchLink"); // The rightWristPitch link is called "rightPalm"
+		validLinkNames.add("pelvis");
+		validLinkNames.add("torso");
+		validLinkNames.add("leftFoot");
+		validLinkNames.add("leftPalm");
+		validLinkNames.add("rightFoot");
+		validLinkNames.add("rightPalm");
+		validLinkNames.add("hokuyo_link");
+		return validLinkNames;
 	}
 
 }

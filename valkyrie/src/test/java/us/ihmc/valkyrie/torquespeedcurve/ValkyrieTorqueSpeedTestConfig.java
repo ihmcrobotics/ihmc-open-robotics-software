@@ -25,7 +25,9 @@ class ValkyrieTorqueSpeedTestConfig {
 	public double stepHeight;           // for step/stairs scenarios, height of each step (inches)
 	public int numberOfSteps;           // for step/stair scenarios, number of steps in the staircase
 	public HashMap<String, Double> torqueLimits; // Map of joint name to overridden torque limit. Only overridden
-	                                             // joint need to be specified.
+	                                             // joints need to be specified.
+	public HashMap<String, Double> linkMassKg;  // Map of link name to overridden link mass in kg. Only overridden
+                                                // joints need to be specified.	
 	public boolean showGui;             // whether to pop up a GUI (required if a video is wanted)
 	public TestType testType;           // type of test to run (see TestType enum)
 	public String footstepsFile;        // path to a file of footstep messages
@@ -43,6 +45,7 @@ class ValkyrieTorqueSpeedTestConfig {
 		stepHeight = 6.0;
 		numberOfSteps = 3;
 		torqueLimits = new HashMap<String, Double>();
+		linkMassKg = new HashMap<String, Double>();
 		showGui = true;
 		testType = TestType.STAIRS;
 		footstepsFile = null;
@@ -59,6 +62,9 @@ class ValkyrieTorqueSpeedTestConfig {
 		}
 		for (String joint : torqueLimits.keySet()) {
 			value += String.format("%s joint torque limit: %f\n", joint, torqueLimits.get(joint).doubleValue());
+		}
+		for (String joint : linkMassKg.keySet()) {
+			value += String.format("%s link mass: %f\n", joint, linkMassKg.get(joint).doubleValue());
 		}
 		return value;
 	}
