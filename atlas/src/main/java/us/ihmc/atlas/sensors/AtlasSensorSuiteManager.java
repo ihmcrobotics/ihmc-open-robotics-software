@@ -259,4 +259,19 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       lidarScanPublisher.setSelfCollisionFilter(collisionBoxProvider);
       return lidarScanPublisher;
    }
+
+   public LidarScanPublisher getLidarScanPublisher()
+   {
+      return lidarScanPublisher;
+   }
+
+   public StereoVisionPointCloudPublisher getMultisenseStereoVisionPointCloudPublisher()
+   {
+      return multisenseStereoVisionPointCloudPublisher;
+   }
+
+   public MultiSenseSensorManager getMultiSenseSensorManager()
+   {
+      return multiSenseSensorManager;
+   }
 }
