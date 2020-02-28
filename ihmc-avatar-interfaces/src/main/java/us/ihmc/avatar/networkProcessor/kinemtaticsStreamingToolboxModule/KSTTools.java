@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -28,6 +29,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -65,6 +67,8 @@ public class KSTTools
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
    private long currentMessageId = 1L;
+
+   private final KinematicsStreamingToolboxOutputConfigurationCommand outputConfiguration = new KinematicsStreamingToolboxOutputConfigurationCommand();
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod,
@@ -181,11 +185,26 @@ public class KSTTools
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      outputConverter.computeHandTrajectoryMessages();
-      outputConverter.computeArmTrajectoryMessages();
-      outputConverter.computeNeckTrajectoryMessage();
-      outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
-      outputConverter.computePelvisTrajectoryMessage();
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxOutputConfigurationCommand.class))
+      {
+         outputConfiguration.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxOutputConfigurationCommand.class));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (outputConfiguration.isHandTaskspaceEnabled(robotSide))
+            outputConverter.computeHandTrajectoryMessage(robotSide);
+
+         if (outputConfiguration.isArmJointspaceEnabled(robotSide))
+            outputConverter.computeArmTrajectoryMessages();
+      }
+
+      if (outputConfiguration.isNeckJointspaceEnabled())
+         outputConverter.computeNeckTrajectoryMessage();
+      if (outputConfiguration.isChestTaskspaceEnabled())
+         outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+      if (outputConfiguration.isPelvisTaskspaceEnabled())
+         outputConverter.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
@@ -199,11 +218,21 @@ public class KSTTools
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.5);
 
-      outputConverter.computeHandTrajectoryMessages();
-      outputConverter.computeArmTrajectoryMessages();
-      outputConverter.computeNeckTrajectoryMessage();
-      outputConverter.computeChestTrajectoryMessage();
-      outputConverter.computePelvisTrajectoryMessage();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (outputConfiguration.isHandTaskspaceEnabled(robotSide))
+            outputConverter.computeHandTrajectoryMessage(robotSide);
+
+         if (outputConfiguration.isArmJointspaceEnabled(robotSide))
+            outputConverter.computeArmTrajectoryMessages();
+      }
+
+      if (outputConfiguration.isNeckJointspaceEnabled())
+         outputConverter.computeNeckTrajectoryMessage();
+      if (outputConfiguration.isChestTaskspaceEnabled())
+         outputConverter.computeChestTrajectoryMessage();
+      if (outputConfiguration.isPelvisTaskspaceEnabled())
+         outputConverter.computePelvisTrajectoryMessage();
 
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);

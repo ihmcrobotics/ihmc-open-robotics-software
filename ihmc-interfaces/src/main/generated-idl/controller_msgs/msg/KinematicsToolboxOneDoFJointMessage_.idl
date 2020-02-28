@@ -31,7 +31,7 @@ module controller_msgs
          */
         double desired_position;
         /**
-         * Weight used to define the priority for reacing the desired position.
+         * Weight used to define the priority for reaching the desired position.
          */
         double weight;
       };
