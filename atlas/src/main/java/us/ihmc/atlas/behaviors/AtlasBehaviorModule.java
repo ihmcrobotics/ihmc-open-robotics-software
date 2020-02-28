@@ -3,7 +3,7 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
@@ -15,7 +15,7 @@ public class AtlasBehaviorModule
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean START_FOOTSTEP_PLANNING_TOOLBOX = false;
 
-   private FootstepPlanningToolboxModule footstepPlanningModule;
+   private FootstepPlanningModule footstepPlanningModule;
 
    public AtlasBehaviorModule()
    {
@@ -24,10 +24,8 @@ public class AtlasBehaviorModule
          ThreadTools.startAsDaemon(() ->
          {
             LogTools.info("Creating footstep toolbox");
-            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(),
-                                                                       null,
-                                                                       false,
-                                                                       DomainFactory.PubSubImplementation.FAST_RTPS);
+            footstepPlanningModule = new FootstepPlanningModule(createRobotModel());
+            footstepPlanningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
          }, "MultiStageFootstepPlanningModule");
       }
 
@@ -38,7 +36,7 @@ public class AtlasBehaviorModule
       { // add cleanup actions here
          if (START_FOOTSTEP_PLANNING_TOOLBOX)
          {
-            footstepPlanningModule.destroy();
+            footstepPlanningModule.closeAndDispose();
          }
       }, "Cleanup"));
    }

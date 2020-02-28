@@ -1241,6 +1241,7 @@ public class HumanoidMessageTools
       message.setDefaultSwingDuration(defaultSwingDuration);
       message.setDefaultTransferDuration(defaultTransferDuration);
       message.setFinalTransferDuration(finalTransferDuration);
+      message.getQueueingProperties().setExecutionMode(executionMode.toByte());
       return message;
    }
 
