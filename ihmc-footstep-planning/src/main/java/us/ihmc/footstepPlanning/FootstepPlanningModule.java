@@ -214,7 +214,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         double pathLength = bodyPathPlanHolder.computePathLength(1.0);
+         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
