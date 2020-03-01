@@ -37,6 +37,7 @@ mainDependencies {
    api("org.bytedeco:javacv-platform:1.5") {
       exclude(group = "org.bytedeco", module = "opencv")
    }
+   api("org.bytedeco:opencv:4.1.2-1.5.2:")
    if (SystemUtils.IS_OS_UNIX)
    {
       api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
