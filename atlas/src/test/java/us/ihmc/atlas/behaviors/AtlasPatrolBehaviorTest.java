@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -41,7 +41,7 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testPatrolBehavior() throws IOException
    {
-      new FootstepPlanningModule(robotModel).setupWithRos(PubSubImplementation.INTRAPROCESS);
+      FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);

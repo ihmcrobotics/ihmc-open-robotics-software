@@ -1,18 +1,27 @@
 package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
@@ -23,20 +32,30 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoi
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
-public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPlanner
+public class VisibilityGraphPathPlanner
 {
+   private static final boolean debug = false;
+   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
+
    private final NavigableRegionsManager navigableRegionsManager;
    private final PathOrientationCalculator pathOrientationCalculator;
+   private final YoEnum<FootstepPlanningResult> yoResult;
+
+   private final FootstepPlannerParametersReadOnly parameters;
+   private final FramePose3D bodyStartPose = new FramePose3D();
+   private final FramePose3D bodyGoalPose = new FramePose3D();
+
+   private final List<Pose3DReadOnly> waypoints = new ArrayList<>();
+
+   private PlanarRegionsList planarRegionsList;
 
    private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
-
-   public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                     YoVariableRegistry parentRegistry)
-   {
-      this("", footstepPlannerParameters, visibilityGraphsParameters, parentRegistry);
-   }
 
    public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                      VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
@@ -47,17 +66,11 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
 
    public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                      VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                     YoVariableRegistry parentRegistry)
-   {
-      this(prefix, footstepPlannerParameters, visibilityGraphsParameters, null, parentRegistry);
-   }
-
-   public VisibilityGraphPathPlanner(String prefix, FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                     VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      BodyPathPostProcessor postProcessor, YoVariableRegistry parentRegistry)
    {
-      super(prefix, footstepPlannerParameters, parentRegistry);
+      this.parameters = footstepPlannerParameters;
 
+      yoResult = new YoEnum<>(prefix + "PathPlanningResult", parentRegistry, FootstepPlanningResult.class);
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);
       this.pathOrientationCalculator = new PathOrientationCalculator(visibilityGraphsParameters);
    }
@@ -116,26 +129,51 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       return visibilityGraphStatistics;
    }
 
-   public void cancelPlanning()
+   public void setInitialStanceFoot(Pose3DReadOnly stanceFootPose, RobotSide side)
    {
+      if (side == null)
+      {
+         if (debug)
+            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
+
+         side = defaultStartNodeSide;
+      }
+
+      double defaultStepWidth = parameters.getIdealFootstepWidth();
+      ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", new FramePose3D(stanceFootPose));
+      FramePoint2D bodyStartPoint = new FramePoint2D(stanceFrame);
+      bodyStartPoint.setY(side.negateIfLeftSide(defaultStepWidth / 2.0));
+      bodyStartPoint.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+      bodyStartPose.setToZero(ReferenceFrame.getWorldFrame());
+      bodyStartPose.setPosition(bodyStartPoint.getX(), bodyStartPoint.getY(), 0.0);
+      bodyStartPose.setOrientationYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
    }
 
-   public void setTimeout(double timeout)
+   public void setGoal(Pose3DReadOnly goalPose)
    {
+      bodyGoalPose.set(goalPose);
    }
 
-   // TODO hack to add start and goal planar regions
-   private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(0.3, 0.3);
-      polygon.addVertex(-0.3, 0.3);
-      polygon.addVertex(0.3, -0.3);
-      polygon.addVertex(-0.3, -0.25);
-      polygon.update();
+      this.planarRegionsList = planarRegionsList;
+   }
 
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
-      planarRegionsList.addPlanarRegion(planarRegion);
+   public void computeBestEffortPlan(double horizonLength)
+   {
+      Vector2D goalDirection = new Vector2D(bodyGoalPose.getPosition());
+      goalDirection.sub(bodyStartPose.getX(), bodyStartPose.getY());
+      goalDirection.scale(horizonLength / goalDirection.length());
+      Point3D waypointPosition = new Point3D(bodyStartPose.getPosition());
+      waypointPosition.add(goalDirection.getX(), goalDirection.getY(), 0.0);
+      Quaternion waypointOrientation = new Quaternion(BodyPathPlannerTools.calculateHeading(goalDirection), 0.0, 0.0);
+      waypoints.add(new Pose3D(waypointPosition, waypointOrientation));
+   }
+
+   public List<Pose3DReadOnly> getWaypoints()
+   {
+      return waypoints;
    }
 
    private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)

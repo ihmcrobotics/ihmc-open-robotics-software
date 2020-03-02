@@ -1,14 +1,11 @@
 package us.ihmc.atlas.behaviors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
-
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
@@ -37,16 +34,9 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
@@ -71,10 +61,15 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
 @Tag("humanoid-behaviors")
 public class AtlasCorridorNavigationTest
@@ -331,52 +326,32 @@ public class AtlasCorridorNavigationTest
          {
             snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
          }
-         FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-         BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
-         PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-         FootstepNodeChecker nodeChecker;
-         if (useFastFlatInvalidFootsteps)
-         {
-            nodeChecker = new AlwaysValidNodeChecker();
-         }
-         else
-         {
-            // nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-            nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
-         }
-         FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
-         FootstepCost stepCostCalculator = new EuclideanDistanceAndYawBasedCost(footstepPlannerParameters);
-         CostToGoHeuristics heuristics = new BodyPathHeuristics(() -> 10.0, footstepPlannerParameters, snapper, bodyPath);
 
-         LogTools.info("Creating A* planner");
-         YoVariableRegistry registry = new YoVariableRegistry("registry");
-         AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,
-                                                                 nodeChecker,
-                                                                 heuristics,
-                                                                 nodeExpansion,
-                                                                 stepCostCalculator,
-                                                                 snapper,
-                                                                 registry);
+         LogTools.info("Creating planner");
          LogTools.info("Running footstep planner");
-         planner.setPlanningHorizonLength(100.0);
-         FootstepPlannerGoal footstepPlannerGoal = new FootstepPlannerGoal();
-         footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-         footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
-         planner.setPlanarRegions(latestMap);
-         planner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
-         planner.setGoal(footstepPlannerGoal);
-         planner.setBestEffortTimeout(2.0);
+
+         FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
+
+         FootstepPlannerRequest request = new FootstepPlannerRequest();
+         request.setHorizonLength(100.0);
+         request.setGoalPose(goalPose);
+         request.setPlanarRegionsList(latestMap);
+         request.setInitialStancePose(initialStanceFootPose);
+         request.setInitialStanceSide(initialStanceFootSide);
+         request.setTimeout(2.0);
 
          Stopwatch footstepPlannerStopwatch = new Stopwatch().start();
-         FootstepPlanningResult result = planner.plan();
+         FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
          LogTools.info("Planning took " + footstepPlannerStopwatch.lapElapsed() + "s");
 
-         if (!result.validForExecution())
+         if (!plannerOutput.getResult().validForExecution())
          {
-            LogTools.error("Footstep plan not valid for execution! {}", result);
+            LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getResult());
 
+            GraphSearchStatistics graphSearchStatistics = new GraphSearchStatistics();
+            graphSearchStatistics.set(planner);
             HashMap<BipedalFootstepPlannerNodeRejectionReason, Integer> reasons = new HashMap<>();
-            for (PlannerNodeData nodeDatum : planner.getPlannerStatistics().getFullGraph().getNodeData())
+            for (PlannerNodeData nodeDatum : graphSearchStatistics.getFullGraph().getNodeData())
             {
                BipedalFootstepPlannerNodeRejectionReason rejectionReason = nodeDatum.getRejectionReason();
                if (!reasons.containsKey(rejectionReason))
@@ -397,7 +372,7 @@ public class AtlasCorridorNavigationTest
             continue;
          }
 
-         FootstepPlan footstepPlan = planner.getPlan();
+         FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();
          LogTools.info("Got {} footsteps", footstepPlan.getNumberOfSteps());
 
          // make robot walk a little of the path
