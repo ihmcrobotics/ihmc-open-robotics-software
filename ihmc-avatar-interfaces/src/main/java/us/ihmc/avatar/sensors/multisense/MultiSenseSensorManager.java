@@ -1,14 +1,12 @@
 package us.ihmc.avatar.sensors.multisense;
 
-import java.util.concurrent.Executor;
-
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -79,44 +77,43 @@ public class MultiSenseSensorManager
 
    public void start()
    {
-      Executor starter = ThreadTools.newSingleDaemonThreadExecutor(getClass().getSimpleName() + "- starter");
+      boolean rosOnline = false;
 
-      starter.execute(() ->
+      while (!rosOnline)
       {
-         boolean rosOnline = false;
+         CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
+         cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 
-         while (!rosOnline)
+         if (setROSParameters)
          {
-            CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-            cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
-
-            if (setROSParameters)
-            {
-               multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);
-               rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
-            }
-            else
-            {
-               multiSenseParameterSetter = null;
-               rosOnline = true;
-            }
-
-            if (rosOnline && initializeParameterListenersRequested)
-               initializeParameterListeners();
-
-            try
-            {
-               Thread.sleep(2000);
-            }
-            catch (InterruptedException e)
-            {
-               closeAndDispose();
-               return;
-            }
+            multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, ros2Node);
+            rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
+         }
+         else
+         {
+            multiSenseParameterSetter = null;
+            rosOnline = true;
          }
 
-         cameraReceiver.start();
-      });
+         if (rosOnline && initializeParameterListenersRequested)
+            initializeParameterListeners();
+
+         try
+         {
+            if (!rosOnline)
+            {
+               LogTools.info("Wainting for ROS to come online.");
+               Thread.sleep(500);
+            }
+         }
+         catch (InterruptedException e)
+         {
+            closeAndDispose();
+            return;
+         }
+      }
+
+      cameraReceiver.start();
    }
 
    public void setVideoSettings(VideoControlSettings settings)
