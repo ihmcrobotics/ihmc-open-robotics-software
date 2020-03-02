@@ -64,7 +64,7 @@ public class ShadowScanPointFilter implements ScanPointFilter
    @Override
    public boolean test(int index, Point3DReadOnly currentScanPoint)
    {
-      if (shadowAngleThreshold <= 0.0)
+      if (shadowAngleThreshold <= 0.0 || index == 0 || index == pointCloudData.getNumberOfPoints() - 1)
          return true;
 
       Point3D[] pointCloud = pointCloudData.getPointCloud();
