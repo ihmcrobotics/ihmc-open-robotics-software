@@ -13,6 +13,8 @@ import us.ihmc.sensorProcessing.parameters.*;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
+   public static final long HEAD_MICROSTRAIN_SERIAL_NUMBER = 625476543L;
+
    private static final String multisense_namespace = "/multisense";
    private static final String realsense_namespace = "/realsense";
    private static final String depth_camera_namespace = "/depthcam";

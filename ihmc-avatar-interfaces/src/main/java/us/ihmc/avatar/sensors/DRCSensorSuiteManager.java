@@ -1,6 +1,5 @@
 package us.ihmc.avatar.sensors;
 
-import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -12,5 +11,5 @@ public interface DRCSensorSuiteManager extends CloseableAndDisposable
 
    public void initializePhysicalSensors(URI sensorURI);
    
-   public void connect() throws IOException;
+   public void connect();
 }

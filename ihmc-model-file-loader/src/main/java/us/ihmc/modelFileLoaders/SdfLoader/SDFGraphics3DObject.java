@@ -30,7 +30,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.T
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 
-
 public class SDFGraphics3DObject extends LinkGraphicsDescription
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
@@ -42,10 +41,21 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
 
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories)
    {
-      this(sdfVisuals, resourceDirectories, new RigidBodyTransform());
+      this(sdfVisuals, resourceDirectories, (ClassLoader) null);
+   }
+
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, ClassLoader resourceClassLoader)
+   {
+      this(sdfVisuals, resourceDirectories, resourceClassLoader, new RigidBodyTransform());
    }
 
    public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, RigidBodyTransform graphicsTransform)
+   {
+      this(sdfVisuals, resourceDirectories, null, graphicsTransform);
+   }
+
+   public SDFGraphics3DObject(List<? extends AbstractSDFMesh> sdfVisuals, List<String> resourceDirectories, ClassLoader resourceClassLoader,
+                              RigidBodyTransform graphicsTransform)
    {
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
@@ -87,7 +97,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                         }
                         else
                         {
-                           String id = convertToResourceIdentifier(resourceDirectories, uri);
+                           String id = convertToResourceIdentifier(resourceDirectories, resourceClassLoader, uri);
                            resourceUrls.add(id);
                         }
                      }
@@ -123,7 +133,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
             Mesh mesh = geometry.getMesh();
             if(mesh != null)
             {
-               String resourceUrl = convertToResourceIdentifier(resourceDirectories, mesh.getUri());
+               String resourceUrl = convertToResourceIdentifier(resourceDirectories, resourceClassLoader, mesh.getUri());
                if(mesh.getScale() != null)
                {
                   Vector3D scale = ModelFileLoaderConversionsHelper.stringToVector3d(mesh.getScale());
@@ -136,7 +146,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                   submesh = mesh.getSubmesh().getName().trim();
                   centerSubmesh = mesh.getSubmesh().getCenter().trim().equals("1") || mesh.getSubmesh().getCenter().trim().equals("true");
                }
-               addMesh(resourceUrl, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
+               addMesh(resourceUrl, submesh, centerSubmesh, visualPose, appearance, resourceDirectories, resourceClassLoader);
             }
             else if(geometry.getCylinder() != null)
             {
@@ -170,7 +180,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
             }
             else if(geometry.getHeightMap() != null)
             {
-               String id = convertToResourceIdentifier(resourceDirectories, geometry.getHeightMap().getUri());
+               String id = convertToResourceIdentifier(resourceDirectories, resourceClassLoader, geometry.getHeightMap().getUri());
                SDFHeightMap heightMap = new SDFHeightMap(id, geometry.getHeightMap());
 
 
@@ -183,8 +193,8 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                   {
                      double size = Double.parseDouble(text.getSize());
                      double scale = width/size;
-                     sdfTerrainBlend.addTexture(scale, convertToResourceIdentifier(resourceDirectories, text.getDiffuse()),
-                           convertToResourceIdentifier(resourceDirectories, text.getNormal()));
+                     sdfTerrainBlend.addTexture(scale, convertToResourceIdentifier(resourceDirectories, resourceClassLoader, text.getDiffuse()),
+                           convertToResourceIdentifier(resourceDirectories, resourceClassLoader, text.getNormal()));
                   }
 
                   for(Blend blend : geometry.getHeightMap().getBlends())
@@ -221,7 +231,8 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
       }
    }
 
-   private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance, List<String> resourceDirectories)
+   private void addMesh(String mesh, String submesh, boolean centerSubmesh, RigidBodyTransform visualPose, AppearanceDefinition appearance,
+                        List<String> resourceDirectories, ClassLoader resourceClassLoader)
    {
 
       // STL files do not have appearances
@@ -229,10 +240,10 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
       {
          appearance = getDefaultAppearanceIfNull(appearance);
       }
-      addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, appearance);
+      addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, resourceClassLoader, appearance);
    }
 
-   private String convertToResourceIdentifier(List<String> resourceDirectories, String meshPath)
+   private String convertToResourceIdentifier(List<String> resourceDirectories, ClassLoader resourceClassLoader, String meshPath)
    {
       if(meshPath.equals("__default__"))
       {
@@ -244,13 +255,13 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
 
       if (resourceDirectories.size() == 0)
       {
-         String id = tryConversion(meshPath, "");
+         String id = tryConversion(meshPath, "", resourceClassLoader);
          if (id != null) return id;
       }
 
       for (String resourceDirectory : resourceDirectories)
       {
-         String id = tryConversion(meshPath, resourceDirectory);
+         String id = tryConversion(meshPath, resourceDirectory, resourceClassLoader);
          if (id != null) return id;
       }
 
@@ -258,7 +269,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
       throw new RuntimeException("Resource not found: " + meshPath);
    }
 
-   private String tryConversion(String meshPath, String resourceDirectory)
+   private String tryConversion(String meshPath, String resourceDirectory, ClassLoader resourceClassLoader)
    {
       try
       {
@@ -269,7 +280,9 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
 //            System.out.println("PATH: " + meshURI.getPath());
 //            System.out.println("AUTH: " + meshURI.getAuthority());
 //            System.out.println("ID: " + id);
-         URL resource = getClass().getClassLoader().getResource(id);
+         if (resourceClassLoader == null)
+            resourceClassLoader = getClass().getClassLoader();
+         URL resource = resourceClassLoader.getResource(id);
          // Path relative to class root
          if (resource != null)
          {

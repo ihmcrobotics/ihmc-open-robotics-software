@@ -9,31 +9,33 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
- * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 
+ * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which
+ * typically make up the main diagonal of a matrix.
  * <p>
- * Given the set of weights about particular axis of interest and a reference frame to which these axes refer to, the
- * {@code WeightMatrix3D} is then able compute the corresponding 3-by-3 weight matrix.
+ * Given the set of weights about particular axis of interest and a reference frame to which these
+ * axes refer to, the {@code WeightMatrix3D} is then able compute the corresponding 3-by-3 weight
+ * matrix.
  * </p>
  * <p>
- * The principal use-case of this class is to help users define the QP weights of each axis for a given end-effector and what frame they should be 
- * expressed in. 
+ * The principal use-case of this class is to help users define the QP weights of each axis for a
+ * given end-effector and what frame they should be expressed in.
  * </p>
  * <p>
- * Note that the {@link #weightFrame} is optional. It is preferable to provide it when possible,
- * but when it is absent, i.e. equal to {@code null}, the weight matrix will then be generated
- * assuming the destination frame is the same as the weight frame.
+ * Note that the {@link #weightFrame} is optional. It is preferable to provide it when possible, but
+ * when it is absent, i.e. equal to {@code null}, the weight matrix will then be generated assuming
+ * the destination frame is the same as the weight frame.
  * </p>
  */
 public class WeightMatrix3D implements Tuple3DReadOnly
 {
    private static final double EPSILON = 1.0e-7;
    /**
-    * This frame is optional. It is preferable to provide it when possible, but when it is absent, i.e. equal
-    * to {@code null}, the weight matrix will then be generated assuming the destination frame is
+    * This frame is optional. It is preferable to provide it when possible, but when it is absent, i.e.
+    * equal to {@code null}, the weight matrix will then be generated assuming the destination frame is
     * the same as the weight frame.
     * <p>
-    * Note that if all of the weights are NaN or all the weights are the same, (they are all NaN by default) the weight matrix becomes
-    * independent from its weight frame.
+    * Note that if all of the weights are NaN or all the weights are the same, (they are all NaN by
+    * default) the weight matrix becomes independent from its weight frame.
     * </p>
     */
    private ReferenceFrame weightFrame = null;
@@ -51,9 +53,8 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    private final transient FrameMatrix3D frameMatrix = new FrameMatrix3D();
 
    /**
-    * Creates a new weight matrix. This weight matrix is initialized with all the weights
-    * set to Double.NAN. Until the weight is changed, this weight matrix is independent from its
-    * weight frame.
+    * Creates a new weight matrix. This weight matrix is initialized with all the weights set to
+    * Double.NAN. Until the weight is changed, this weight matrix is independent from its weight frame.
     */
    public WeightMatrix3D()
    {
@@ -72,8 +73,8 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * Sets the weight frame to {@code null}.
     * <p>
-    * When the weight frame is {@code null}, the conversion into a 3-by-3 weight matrix will
-    * be done regardless of the destination frame.
+    * When the weight frame is {@code null}, the conversion into a 3-by-3 weight matrix will be done
+    * regardless of the destination frame.
     * </p>
     */
    public void clearWeightFrame()
@@ -121,8 +122,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * Sets the weights.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param xWeight the weight of the x Axis.
@@ -139,8 +139,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * sets the weight of the x-axis, does not change the y and z components.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param weight the weight of the x Axis.
@@ -153,8 +152,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * sets the weight of the y-axis, does not change the x and z components.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param weight the weight of the y Axis.
@@ -167,8 +165,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * sets the weight of the z-axis, does not change the x and y components.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param weight the weight of the z Axis.
@@ -179,16 +176,28 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
-    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Scales the individual of this weight matrix to the given {@code scalar}.
+    * 
+    * @param scalar the scale factor to apply to each weight.
+    */
+   public void scale(double scalar)
+   {
+      xWeight *= scalar;
+      yWeight *= scalar;
+      zWeight *= scalar;
+   }
+
+   /**
+    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
     * <p>
-    * Only the block (row=0, column=0) to (row=2, column=2) of {@code weightMatrixToPack} is
-    * edited to insert the weight matrix. The given dense-matrix is not reshaped.
+    * Only the block (row=0, column=0) to (row=2, column=2) of {@code weightMatrixToPack} is edited to
+    * insert the weight matrix. The given dense-matrix is not reshaped.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be
-    *           inserted. Modified.
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
+    *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
@@ -197,19 +206,19 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
-    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
     * <p>
-    * Only the block (row=startRow, column=startColumn) to (row=startRow + 2, column=startColumn+2)
-    * of {@code weightMatrixToPack} is edited to insert the weight matrix. The given
-    * dense-matrix is not reshaped.
+    * Only the block (row=startRow, column=startColumn) to (row=startRow + 2, column=startColumn+2) of
+    * {@code weightMatrixToPack} is edited to insert the weight matrix. The given dense-matrix is not
+    * reshaped.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param startColumn the first column index to start writing in the dense-matrix.
-    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be
-    *           inserted. Modified.
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param startRow           the first row index to start writing in the dense-matrix.
+    * @param startColumn        the first column index to start writing in the dense-matrix.
+    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
+    *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F weightMatrixToPack)
@@ -246,20 +255,19 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
-    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)}
-    * does, this method also removes the zero-rows of the given weight matrix.
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)} does,
+    * this method also removes the zero-rows of the given weight matrix.
     * </p>
     * <p>
-    * Only the block (row=0, column=0) to (row=2, column=2) of {@code weightMatrixToPack} is
-    * edited to insert the weight matrix. The given dense-matrix is not reshaped.
+    * Only the block (row=0, column=0) to (row=2, column=2) of {@code weightMatrixToPack} is edited to
+    * insert the weight matrix. The given dense-matrix is not reshaped.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be
-    *           inserted.
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getEfficientWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
@@ -268,24 +276,22 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
-    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in
-    * the {@code destinationFrame}.
+    * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
+    * {@code destinationFrame}.
     * <p>
-    * In addition to what
-    * {@link #getFullWeightMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)} does, this
-    * method also removes the zero-rows of the given weight matrix.
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)}
+    * does, this method also removes the zero-rows of the given weight matrix.
     * </p>
     * <p>
-    * Only the block (row=startRow, column=startColumn) to (row=startRow + 2, column=startColumn+2)
-    * of {@code weightMatrixToPack} is edited to insert the weight matrix. The given
-    * dense-matrix is not reshaped.
+    * Only the block (row=startRow, column=startColumn) to (row=startRow + 2, column=startColumn+2) of
+    * {@code weightMatrixToPack} is edited to insert the weight matrix. The given dense-matrix is not
+    * reshaped.
     * </p>
     * 
-    * @param destinationFrame the reference frame in which the weight matrix is to be used.
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param startColumn the first column index to start writing in the dense-matrix.
-    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be
-    *           inserted.
+    * @param destinationFrame   the reference frame in which the weight matrix is to be used.
+    * @param startRow           the first row index to start writing in the dense-matrix.
+    * @param startColumn        the first column index to start writing in the dense-matrix.
+    * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
    public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F weightMatrixToPack)
@@ -326,11 +332,10 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    /**
     * Internal method to determine if this weight frame is frame independent or not.
     * 
-    * @param destinationFrame the frame into which the 3-by-3 weight matrix is about to be
-    *           converted.
-    * @return {@code true} if this is frame independent and thus there is no need to consider
-    *         changing the frame to {@code destinationFrame}, {@code false} if the change of frame
-    *         has to be performed.
+    * @param destinationFrame the frame into which the 3-by-3 weight matrix is about to be converted.
+    * @return {@code true} if this is frame independent and thus there is no need to consider changing
+    *         the frame to {@code destinationFrame}, {@code false} if the change of frame has to be
+    *         performed.
     */
    private boolean canIgnoreWeightFrame(ReferenceFrame destinationFrame)
    {
@@ -401,7 +406,8 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     */
    public boolean containsHardConstraint()
    {
-      if(getXAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT || getYAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT || getZAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT)
+      if (getXAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT || getYAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT
+            || getZAxisWeight() == SolverWeightLevels.HARD_CONSTRAINT)
       {
          return true;
       }
