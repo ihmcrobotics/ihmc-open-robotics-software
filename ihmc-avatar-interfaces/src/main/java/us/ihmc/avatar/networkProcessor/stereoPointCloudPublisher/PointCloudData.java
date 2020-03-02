@@ -77,9 +77,7 @@ public class PointCloudData
             {
                int nextToRemove = random.nextInt(currentSize);
                pointCloud[nextToRemove] = pointCloud[currentSize - 1];
-               colors[nextToRemove] = colors[currentSize - 1];
                pointCloud[currentSize - 1] = null;
-               colors[currentSize - 1] = -1;
 
                currentSize--;
             }
@@ -175,5 +173,11 @@ public class PointCloudData
       {
          pointCloud[i].applyTransform(transform);
       }
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Pointcloud data, number of points: " + numberOfPoints;
    }
 }
