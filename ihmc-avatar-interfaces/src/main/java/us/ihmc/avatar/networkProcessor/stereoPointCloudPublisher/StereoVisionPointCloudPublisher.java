@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.net.URI;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -25,6 +27,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -60,6 +64,7 @@ public class StereoVisionPointCloudPublisher
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
 
+   private CollisionShapeTester collisionBoxNode = null;
    /**
     * units of velocities are meter/sec and rad/sec.
     */
@@ -115,6 +120,11 @@ public class StereoVisionPointCloudPublisher
    {
       publisherTask.cancel(false);
       executorService.shutdownNow();
+   }
+
+   public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
+   {
+      collisionBoxNode = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
@@ -240,6 +250,12 @@ public class StereoVisionPointCloudPublisher
 
          if (linearVelocity > linearVelocityThreshold.get() || angularVelocity > angularVelocityThreshold.get())
             return;
+      }
+
+      if (collisionBoxNode != null)
+      {
+         collisionBoxNode.update();
+         pointCloudData.updateCollisionBox(collisionBoxNode);
       }
 
       StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();

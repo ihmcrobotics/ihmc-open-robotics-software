@@ -4,10 +4,19 @@
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
                 <registry name="WalkingControllerState">
+                    <registry name="WalkingHighLevelHumanoidController">
+                        <registry name="TouchdownErrorCompensator">
+                            <parameter name="spatialVelocityThresholdForSupportConfidence" type="DoubleParameter" min="0.0" max="1.0" value="0.4" />
+                            <parameter name="touchdownErrorCorrectionScale" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
+                        </registry>
+                    </registry>
                     <registry name="LinearMomentumRateControlModule">
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                         <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                        <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                        <parameter name="RecoveryLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
@@ -213,6 +222,17 @@
                     </registry>
                 </registry>
             </registry>
+        </registry>
+    </registry>
+    <registry name="DRCEstimatorThread">
+        <registry name="AtlasHeadPoseEstimator">
+            <parameter name="AngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
+            <parameter name="LinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="3.0E-4"/>
+            <parameter name="MagneticFieldVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="PositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="HeadAngularAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="HeadLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+            <parameter name="LinearAccelerationBiasVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
         </registry>
     </registry>
 </parameters>

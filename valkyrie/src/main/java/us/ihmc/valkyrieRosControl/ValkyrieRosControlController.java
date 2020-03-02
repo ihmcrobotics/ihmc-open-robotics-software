@@ -1,16 +1,8 @@
 package us.ihmc.valkyrieRosControl;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.EXIT_WALKING;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.affinity.Affinity;
@@ -41,11 +33,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.rosControl.wholeRobot.JointStateHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -70,7 +58,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
    // Note: keep committed as DEFAULT, only change locally if needed
-   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.DEFAULT;
+   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.fromEnvironment();
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
    public static final boolean HAS_LIGHTER_BACKPACK = true;
@@ -244,6 +232,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    @Override
    protected void init()
    {
+      LogTools.info("Valkyrie robot version: " + VERSION);
       /*
        * Create joints
        */

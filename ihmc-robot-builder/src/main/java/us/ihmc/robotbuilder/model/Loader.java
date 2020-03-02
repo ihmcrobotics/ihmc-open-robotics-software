@@ -1,7 +1,6 @@
 package us.ihmc.robotbuilder.model;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.Collections;
 import java.util.function.Function;
 
@@ -21,7 +20,7 @@ public class Loader {
         JaxbSDFLoader[] rawLoader = new JaxbSDFLoader[1];
         RobotDescriptionFromSDFLoader sdfLoader = new RobotDescriptionFromSDFLoader();
         return Future.of(() -> {
-                    JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader(new FileInputStream(file), Collections.emptyList(), null);
+                    JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader(file, Collections.emptyList());
                     rawLoader[0] = jaxbSDFLoader;
                     return List.ofAll(jaxbSDFLoader.getGeneralizedSDFRobotModels())
                             .map(GeneralizedSDFRobotModel::getName);

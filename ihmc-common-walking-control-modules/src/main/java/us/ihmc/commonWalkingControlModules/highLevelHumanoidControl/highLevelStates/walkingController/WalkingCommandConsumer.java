@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.List;
 
+import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -16,41 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -306,6 +273,7 @@ public class WalkingCommandConsumer
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
          commandConsumerWithDelayBuffers.clearCommands(HandTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(HandWrenchTrajectoryCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(ArmTrajectoryCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(ArmDesiredAccelerationsCommand.class);
          commandConsumerWithDelayBuffers.clearCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
@@ -313,6 +281,7 @@ public class WalkingCommandConsumer
       }
 
       List<HandTrajectoryCommand> handTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandTrajectoryCommand.class);
+      List<HandWrenchTrajectoryCommand> handWrenchTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandWrenchTrajectoryCommand.class);
       List<ArmTrajectoryCommand> armTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmTrajectoryCommand.class);
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
@@ -326,14 +295,21 @@ public class WalkingCommandConsumer
             if (handManagers.get(robotSide) != null)
             {
                SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
-               WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
                se3Trajectory.setSequenceId(command.getSequenceId());
-               wrenchTrajectory.setSequenceId(command.getSequenceId());
                handManagers.get(robotSide).handleTaskspaceTrajectoryCommand(se3Trajectory);
+            }
+         }
+         for (int i = 0; i < handWrenchTrajectoryCommands.size(); i++)
+         {
+            HandWrenchTrajectoryCommand command = handWrenchTrajectoryCommands.get(i);
+            RobotSide robotSide = command.getRobotSide();
+            if (handManagers.get(robotSide) != null)
+            {
+               WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
+               wrenchTrajectory.setSequenceId(command.getSequenceId());
                handManagers.get(robotSide).handleWrenchTrajectoryCommand(wrenchTrajectory);
             }
          }
-
          for (int i = 0; i < armTrajectoryCommands.size(); i++)
          {
             ArmTrajectoryCommand command = armTrajectoryCommands.get(i);

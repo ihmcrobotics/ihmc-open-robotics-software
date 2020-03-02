@@ -6,8 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
@@ -63,11 +62,9 @@ public class KinematicToolboxDiagnosticEnvironment
          }
       }, 1, TimeUnit.MILLISECONDS);
 
-      DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
-      parameters.enableNetworkProcessor(true);
-      parameters.enableKinematicsToolbox(true);
-      parameters.enableKinematicsToolboxVisualizer(true);
-      new DRCNetworkProcessor(drcRobotModel, parameters, PubSubImplementation.INTRAPROCESS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(drcRobotModel, PubSubImplementation.INTRAPROCESS);
+      networkProcessor.setupKinematicsToolboxModule(true);
+      networkProcessor.start();
    }
 
    private long timestamp = 0L;
