@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
@@ -18,7 +17,6 @@ public class SLAMBasics implements SLAMInterface
 {
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
    protected final NormalOcTree octree;
-   //private final List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
    private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
 
    protected PlanarRegionsList planarRegionsMap;
@@ -30,7 +28,7 @@ public class SLAMBasics implements SLAMInterface
    public SLAMBasics(double octreeResolution)
    {
       octree = new NormalOcTree(octreeResolution);
-      
+
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
       planarRegionSegmentationParameters.setMinRegionSize(150);
    }
@@ -41,7 +39,6 @@ public class SLAMBasics implements SLAMInterface
       SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       latestSlamFrame.set(frame);
 
-      //pointCloudMap.add(frame.getPointCloud());
       sensorPoses.add(frame.getSensorPose());
    }
 
@@ -62,7 +59,6 @@ public class SLAMBasics implements SLAMInterface
 
          latestSlamFrame.set(frame);
 
-         //pointCloudMap.add(frame.getPointCloud());
          sensorPoses.add(frame.getSensorPose());
 
          return true;
@@ -73,7 +69,6 @@ public class SLAMBasics implements SLAMInterface
    public void clear()
    {
       latestSlamFrame.set(null);
-     // pointCloudMap.clear();
       sensorPoses.clear();
    }
 
@@ -84,11 +79,6 @@ public class SLAMBasics implements SLAMInterface
       else
          return false;
    }
-
-//   public List<Point3DReadOnly[]> getPointCloudMap()
-//   {
-//      return pointCloudMap;
-//   }
 
    public List<RigidBodyTransformReadOnly> getSensorPoses()
    {
