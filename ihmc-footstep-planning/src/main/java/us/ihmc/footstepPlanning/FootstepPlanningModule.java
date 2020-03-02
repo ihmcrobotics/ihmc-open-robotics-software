@@ -25,12 +25,15 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -45,6 +48,7 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
@@ -88,6 +92,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
    private Consumer<BodyPathPlanMessage> bodyPathResultCallback = bodyPathPlanMessage -> {};
    private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
+
+   private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+   private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
 
    public FootstepPlanningModule(String name)
    {
@@ -386,6 +394,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return request;
    }
 
+   public FootstepPlannerOutput getOutput()
+   {
+      return output;
+   }
+
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
@@ -414,6 +427,21 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public VisibilityGraphPathPlanner getBodyPathPlanner()
    {
       return bodyPathPlanner;
+   }
+
+   public FootstepNode getEndNode()
+   {
+      return endNode;
+   }
+
+   public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
+   {
+      return edgeDataMap;
+   }
+
+   public List<FootstepPlannerIterationData> getIterationData()
+   {
+      return iterationData;
    }
 
    public void setStatusPublishPeriod(double statusPublishPeriod)
