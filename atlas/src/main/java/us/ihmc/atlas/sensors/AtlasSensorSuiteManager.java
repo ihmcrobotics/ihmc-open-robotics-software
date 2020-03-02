@@ -47,6 +47,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private LidarScanPublisher lidarScanPublisher;
    private StereoVisionPointCloudPublisher multisenseStereoVisionPointCloudPublisher;
    private AtlasPointCloudSensorManager pointCloudSensorManager;
+   private FisheyeCameraReceiver leftFishEyeCameraReceiver;
+   private FisheyeCameraReceiver rightFishEyeCameraReceiver;
 
    private RosMainNode rosMainNode;
 
@@ -55,10 +57,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private boolean enableStereoVisionPointCloudPublisher = false;
    private boolean enableDepthPointCloudPublisher = true;
    private boolean enableFisheyeCameraPublishers = false;
-
-   private FisheyeCameraReceiver leftFishEyeCameraReceiver;
-
-   private FisheyeCameraReceiver rightFishEyeCameraReceiver;
 
    public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
                                   RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
