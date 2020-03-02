@@ -20,9 +20,4 @@ public class AlwaysSucessfulAction implements BehaviorTreeAction
       action.run();
       return SUCCESS;
    }
-
-   @Override
-   public void reset()
-   {
-   }
 }
