@@ -33,8 +33,6 @@ import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpda
 
 public class SLAMTools
 {
-   private static OcTreeHitLocationExtractor ocTreeHitLocationExtractor = new OcTreeHitLocationExtractor();
-
    public static Point3D[] extractPointsFromMessage(StereoVisionPointCloudMessage message)
    {
       int numberOfPoints = message.getColors().size();
@@ -318,38 +316,6 @@ public class SLAMTools
       return candidates;
    }
 
-   static class OcTreeHitLocationExtractor
-   {
-      private int index = 0;
-
-      OcTreeHitLocationExtractor()
-      {
-
-      }
-
-      Point3DReadOnly[] extractHitLocationsToWorld(NormalOcTree octree)
-      {
-         int numberOfNodes = octree.getNumberOfLeafNodes();
-         Point3D[] hitLocations = new Point3D[numberOfNodes];
-
-         index = 0;
-         octree.forEach(child -> packHitLocation(child, hitLocations));
-
-         return hitLocations;
-      }
-
-      void clear()
-      {
-         index = 0;
-      }
-
-      void packHitLocation(NormalOcTreeNode child, Point3D[] hitLocations)
-      {
-         hitLocations[index] = new Point3D(child.getHitLocationCopy());
-         index++;
-      }
-   }
-
    /**
     * Computes the convex hull of all the {@code mapOctree} nodes in the sensor frame (z-axis is
     * depth).
@@ -439,7 +405,7 @@ public class SLAMTools
       int indexOfSourcePoint = 0;
       Point3D[] sourcePoints = new Point3D[desiredNumberOfSourcePoints];
       Random randomSelector = new Random(0612L);
-      
+
       while (indexOfSourcePoints.size() != desiredNumberOfSourcePoints)
       {
          int selectedIndex = randomSelector.nextInt(pointsInPreviousWindow.length);
