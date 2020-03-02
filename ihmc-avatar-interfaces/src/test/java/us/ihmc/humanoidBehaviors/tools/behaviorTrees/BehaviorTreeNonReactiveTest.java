@@ -2,11 +2,9 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.TimedExpirationCondition;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
@@ -42,32 +40,14 @@ public class BehaviorTreeNonReactiveTest
    }
 
    @Test
-   public void testExpirationCondition()
-   {
-      TimedExpirationCondition timedExpirationCondition = new TimedExpirationCondition(1.0);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
-      timedExpirationCondition.renew();
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
-      ThreadTools.sleep(500);
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
-      ThreadTools.sleep(520);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
-      timedExpirationCondition.renew();
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
-      ThreadTools.sleep(500);
-      assertEquals(SUCCESS, timedExpirationCondition.tick());
-      ThreadTools.sleep(520);
-      assertEquals(FAILURE, timedExpirationCondition.tick());
-   }
-   @Test
    public void testFallbackNode()
    {
       MutableObject<String> output = new MutableObject<>();
       output.setValue("0");
 
-      BehaviorTreeTestAction testAction1 = new BehaviorTreeTestAction(() -> output.setValue(output.getValue() + "1"));
-      BehaviorTreeTestAction testAction2 = new BehaviorTreeTestAction(() -> output.setValue(output.getValue() + "2"));
-      BehaviorTreeTestAction testAction3 = new BehaviorTreeTestAction(() -> output.setValue(output.getValue() + "3"));
+      BehaviorTreeConstantInstantTestAction testAction1 = new BehaviorTreeConstantInstantTestAction(() -> output.setValue(output.getValue() + "1"));
+      BehaviorTreeConstantInstantTestAction testAction2 = new BehaviorTreeConstantInstantTestAction(() -> output.setValue(output.getValue() + "2"));
+      BehaviorTreeConstantInstantTestAction testAction3 = new BehaviorTreeConstantInstantTestAction(() -> output.setValue(output.getValue() + "3"));
 
       FallbackNode fallbackNode = new FallbackNode();
       fallbackNode.addChild(testAction1);
