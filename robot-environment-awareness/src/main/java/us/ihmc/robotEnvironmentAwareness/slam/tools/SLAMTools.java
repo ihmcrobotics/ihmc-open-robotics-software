@@ -8,12 +8,14 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.jOctoMap.iterators.OcTreeIterable;
+import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
@@ -25,8 +27,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 
 public class SLAMTools
@@ -88,16 +90,19 @@ public class SLAMTools
    public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
    {
       Point3D[] convertedPoints = new Point3D[pointCloud.length];
-      RigidBodyTransform inverseTransformer = new RigidBodyTransform(sensorPose);
-      inverseTransformer.invert();
-      Point3D convertedPoint = new Point3D();
       for (int i = 0; i < pointCloud.length; i++)
       {
-         inverseTransformer.transform(pointCloud[i], convertedPoint);
-         convertedPoints[i] = new Point3D(convertedPoint);
+         convertedPoints[i] = createConvertedPointToSensorPose(sensorPose, pointCloud[i]);
       }
 
       return convertedPoints;
+   }
+
+   public static Point3D createConvertedPointToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly point)
+   {
+      Point3D convertedPoint = new Point3D();
+      sensorPose.inverseTransform(point, convertedPoint);
+      return convertedPoint;
    }
 
    public static Point3D[] createConvertedPointsToWorld(RigidBodyTransformReadOnly otherSensorPose, Point3DReadOnly[] pointCloudToSensorPose)
@@ -346,25 +351,54 @@ public class SLAMTools
    }
 
    /**
-    * if there is not enough source points, think this frame is key frame.
-    * return null.
+    * Computes the convex hull of all the {@code mapOctree} nodes in the sensor frame (z-axis is
+    * depth).
     */
-   public static Point3D[] createSourcePointsToSensorPose(SLAMFrame frame, NormalOcTree octree, int numberOfSourcePoints, double minimumOverlappedRatio,
+   public static ConvexPolygon2D computeMapConvexHullInSensorFrame(NormalOcTree mapOctree, RigidBodyTransformReadOnly sensorPose)
+   {
+      List<Point3D> vertex = new ArrayList<>();
+
+      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(mapOctree.getRoot());
+      // TODO Consider using a bounding box as follows:
+      //      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createLeafBoundingBoxIteratable(octree.getRoot(), boundingBox);
+
+      for (NormalOcTreeNode node : iterable)
+      {
+         Point3D hitLocation = node.getHitLocationCopy();
+         sensorPose.inverseTransform(hitLocation);
+         vertex.add(hitLocation);
+      }
+      Vertex3DSupplier supplier = Vertex3DSupplier.asVertex3DSupplier(vertex);
+      ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
+
+      return windowForMap;
+   }
+
+   /**
+    * Collects the points in the {@code frame} that overlap with the {@code mapOctree} from the sensor
+    * perspective.
+    * <p>
+    * The points from the new frame that overlap with the map are called <i>source points</i>.
+    * </p>
+    * 
+    * @param frame                       single frame previously measured.
+    * @param mapOctree                   the octree used to record frames over-time and serving as a
+    *                                    map.
+    * @param desiredNumberOfSourcePoints the number of source points required. If the actual number of
+    *                                    source points found is less than
+    *                                    {@code desiredNumberOfSourcePoints}, then this method returns
+    *                                    {@code null}.
+    * @param minimumOverlapRatio         minimum ratio of the actual number of source points over the
+    *                                    frame size. If the actual ratio is under, then this method
+    *                                    returns {@code null}.
+    * @param windowMargin                tolerance used to shrink the map when testing if a point is
+    *                                    overlapping.
+    * @return the source points or {@code null} if {@code frame} should be thrown away.
+    */
+   public static Point3D[] createSourcePointsToSensorPose(SLAMFrame frame, NormalOcTree mapOctree, int desiredNumberOfSourcePoints, double minimumOverlapRatio,
                                                           double windowMargin)
    {
-      ocTreeHitLocationExtractor.clear();
-      Point3DReadOnly[] octreePointMapToWorld = ocTreeHitLocationExtractor.extractHitLocationsToWorld(octree);
-
-      Point3D[] octreePointMapToSensorPose = createConvertedPointsToSensorPose(frame.getInitialSensorPoseToWorld(), octreePointMapToWorld);
-      double[][] vertex = new double[octreePointMapToSensorPose.length][2];
-
-      for (int i = 0; i < octreePointMapToSensorPose.length; i++)
-      {
-         vertex[i][0] = octreePointMapToSensorPose[i].getX();
-         vertex[i][1] = octreePointMapToSensorPose[i].getY();
-      }
-      Vertex2DSupplier supplier = Vertex2DSupplier.asVertex2DSupplier(vertex);
-      ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
+      ConvexPolygon2D windowForMap = computeMapConvexHullInSensorFrame(mapOctree, frame.getInitialSensorPoseToWorld());
 
       Point3DReadOnly[] newPointCloudToSensorPose = frame.getOriginalPointCloudToSensorPose();
       boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
@@ -392,20 +426,21 @@ public class SLAMTools
       }
 
       double overlappedRatio = (double) numberOfPointsInWindow / newPointCloudToSensorPose.length;
-      if (overlappedRatio < minimumOverlappedRatio)
+      if (overlappedRatio < minimumOverlapRatio)
       {
          return null;
       }
-      if (numberOfPointsInWindow < numberOfSourcePoints)
+      if (numberOfPointsInWindow < desiredNumberOfSourcePoints)
       {
          return null;
       }
 
       TIntArrayList indexOfSourcePoints = new TIntArrayList();
       int indexOfSourcePoint = 0;
-      Point3D[] sourcePoints = new Point3D[numberOfSourcePoints];
+      Point3D[] sourcePoints = new Point3D[desiredNumberOfSourcePoints];
       Random randomSelector = new Random(0612L);
-      while (indexOfSourcePoints.size() != numberOfSourcePoints)
+      
+      while (indexOfSourcePoints.size() != desiredNumberOfSourcePoints)
       {
          int selectedIndex = randomSelector.nextInt(pointsInPreviousWindow.length);
          if (!indexOfSourcePoints.contains(selectedIndex))
