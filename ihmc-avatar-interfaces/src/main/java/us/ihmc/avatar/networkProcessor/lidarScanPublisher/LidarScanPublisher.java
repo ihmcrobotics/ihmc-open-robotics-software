@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,7 +15,7 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPo
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -38,6 +36,7 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -49,7 +48,7 @@ public class LidarScanPublisher
    private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 5000;
 
    private final String name = getClass().getSimpleName();
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+   private final ExceptionHandlingThreadScheduler executorService = new ExceptionHandlingThreadScheduler(name, DefaultExceptionHandler.PRINT_STACKTRACE);
    private ScheduledFuture<?> publisherTask;
 
    private final AtomicReference<PointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
@@ -141,13 +140,13 @@ public class LidarScanPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.schedule(this::readAndPublishInternal, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
    {
       publisherTask.cancel(false);
-      executorService.shutdownNow();
+      executorService.shutdown();
    }
 
    public void setScanFrameToLidarSensorFrame()
