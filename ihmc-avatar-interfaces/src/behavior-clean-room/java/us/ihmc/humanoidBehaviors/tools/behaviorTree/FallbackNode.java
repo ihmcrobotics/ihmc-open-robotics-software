@@ -11,6 +11,8 @@ public class FallbackNode extends BehaviorTreeControlFlowNodeBasics
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
+         BehaviorTreeNode.checkStatusInNotNull(childStatus);
+
          if (childStatus == RUNNING)
          {
             return RUNNING;

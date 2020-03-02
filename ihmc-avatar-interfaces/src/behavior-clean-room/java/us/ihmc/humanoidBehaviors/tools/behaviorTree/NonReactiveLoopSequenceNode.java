@@ -14,7 +14,7 @@ public class NonReactiveLoopSequenceNode extends SequenceNode
          currentChild = 0; // this loops back to first child
       }
 
-      getChildren().get(currentChild++).tick();
+      BehaviorTreeNode.checkStatusInNotNull(getChildren().get(currentChild++).tick());
 
       return RUNNING;
    }
