@@ -77,7 +77,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepPlannerOutput output = new FootstepPlannerOutput();
    private final Stopwatch stopwatch = new Stopwatch();
-   private final double statusPublishPeriod;
+   private double statusPublishPeriod = defaultStatusPublishPeriod;
 
    private FootstepPlanningResult result = null;
    private FootstepNode endNode = null;
@@ -95,17 +95,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name)
    {
-      this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons(), defaultStatusPublishPeriod);
+      this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons());
    }
 
    public FootstepPlanningModule(String name,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
-                                 SideDependentList<ConvexPolygon2D> footPolygons,
-                                 double statusPublishPeriod)
+                                 SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.name = name;
-      this.statusPublishPeriod = statusPublishPeriod;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.visibilityGraphParameters = visibilityGraphParameters;
 
@@ -146,6 +144,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return null;
       }
 
+      // Start timer
+      stopwatch.start();
+
       this.request.set(request);
       isPlanning.set(true);
       haltRequested.set(false);
@@ -165,9 +166,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-
-      // Start timer
-      stopwatch.start();
 
       // Plan body path if requested
       if (bodyPathPlanRequested.getAsBoolean())
@@ -289,7 +287,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
 
-         FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(path.get(i));
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
          footstep.getSoleFramePose().set(footstepPose);
@@ -419,6 +417,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public VisibilityGraphPathPlanner getBodyPathPlanner()
    {
       return bodyPathPlanner;
+   }
+
+   public void setStatusPublishPeriod(double statusPublishPeriod)
+   {
+      this.statusPublishPeriod = statusPublishPeriod;
    }
 
    @Override
