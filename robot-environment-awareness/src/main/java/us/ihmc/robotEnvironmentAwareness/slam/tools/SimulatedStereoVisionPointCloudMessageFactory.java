@@ -3,8 +3,6 @@ package us.ihmc.robotEnvironmentAwareness.slam.tools;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.MismatchedSizeException;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,11 +13,12 @@ public class SimulatedStereoVisionPointCloudMessageFactory
    private static final Random random = new Random(0612L);
    private static final double DEFAULT_WINDOW_SIZE = 10.0;
 
-   public static StereoVisionPointCloudMessage generateStereoVisionPointCloudMessage(RigidBodyTransform sensorPose, int numberOfPoints, List<ConvexPolygon2D> convexPolygons,
+   public static StereoVisionPointCloudMessage generateStereoVisionPointCloudMessage(RigidBodyTransform sensorPose, int numberOfPoints,
+                                                                                     List<ConvexPolygon2D> convexPolygons,
                                                                                      List<RigidBodyTransform> centroidPoses)
    {
       if (convexPolygons.size() != centroidPoses.size())
-         throw new MismatchedSizeException("convexPolygons and centerPoses are mismatched." + convexPolygons.size() + " " + centroidPoses.size());
+         throw new RuntimeException("convexPolygons and centerPoses are mismatched." + convexPolygons.size() + " " + centroidPoses.size());
 
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
       message.setTimestamp(0);
