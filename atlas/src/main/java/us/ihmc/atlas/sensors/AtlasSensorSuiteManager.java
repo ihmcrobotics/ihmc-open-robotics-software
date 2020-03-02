@@ -157,6 +157,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (enableLidarScanPublisher)
       {
          AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
+         lidarScanPublisher = createLidarScanPublisher();
          lidarScanPublisher.receiveLidarFromROSAsPointCloud2WithSource(multisenseLidarParameters.getRosTopic(), rosMainNode);
          lidarScanPublisher.setScanFrameToWorldFrame();
       }
@@ -210,7 +211,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (cameraDataReceiver != null)
          cameraDataReceiver.start();
       if (multiSenseSensorManager != null)
+      {
          multiSenseSensorManager.initializeParameterListeners();
+         multiSenseSensorManager.start();
+      }
       if (lidarScanPublisher != null)
          lidarScanPublisher.start();
       if (multisenseStereoVisionPointCloudPublisher != null)
