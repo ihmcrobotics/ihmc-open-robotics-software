@@ -35,9 +35,8 @@ public class FootstepPlanningModuleLauncher
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
-      double statusPublishPeriod = 1.0;
 
-      return new FootstepPlanningModule(moduleName, footstepPlannerParameters, visibilityGraphsParameters, footPolygons, statusPublishPeriod);
+      return new FootstepPlanningModule(moduleName, footstepPlannerParameters, visibilityGraphsParameters, footPolygons);
    }
 
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
