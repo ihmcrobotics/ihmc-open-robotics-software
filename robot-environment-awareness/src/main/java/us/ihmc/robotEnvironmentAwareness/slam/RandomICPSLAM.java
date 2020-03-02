@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
-import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
@@ -30,7 +29,7 @@ public class RandomICPSLAM extends SLAMBasics
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
-   
+
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
 
    private final GradientDescentModule optimizer;
@@ -91,17 +90,6 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setReducingStepSizeRatio(2);
    }
 
-   public NormalOcTree getOctree()
-   {
-      return octree;
-   }
-
-   public void clear()
-   {
-      super.clear();
-      octree.clear();
-   }
-
    private void insertNewPointCloud(SLAMFrame frame)
    {
       Point3DReadOnly[] pointCloud = frame.getPointCloud();
@@ -144,9 +132,6 @@ public class RandomICPSLAM extends SLAMBasics
       {
          SLAMFrame newFrame = getLatestFrame();
          insertNewPointCloud(newFrame);
-
-         octree.updateNormals();
-         segmentationCalculator.compute(octree.getRoot());
       }
 
       return success;

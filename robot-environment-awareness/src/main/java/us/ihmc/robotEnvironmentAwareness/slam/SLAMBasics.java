@@ -70,6 +70,7 @@ public class SLAMBasics implements SLAMInterface
    {
       latestSlamFrame.set(null);
       sensorPoses.clear();
+      octree.clear();
    }
 
    public boolean isEmpty()
@@ -98,5 +99,10 @@ public class SLAMBasics implements SLAMInterface
    public double getOctreeResolution()
    {
       return octree.getResolution();
+   }
+
+   public NormalOcTree getOctree()
+   {
+      return octree;
    }
 }
