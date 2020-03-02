@@ -163,7 +163,7 @@ public class LidarScanPublisher
       }
 
       rangeFilter.setMinRange(minRange);
-      rangeFilter.setMaxRange(minRange);
+      rangeFilter.setMaxRange(maxRange);
    }
 
    public void setShadowFilter()

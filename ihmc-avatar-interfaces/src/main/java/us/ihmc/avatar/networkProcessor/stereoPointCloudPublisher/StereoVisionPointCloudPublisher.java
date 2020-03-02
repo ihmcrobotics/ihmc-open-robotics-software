@@ -164,7 +164,7 @@ public class StereoVisionPointCloudPublisher
          activeFilters.addFilter(rangeFilter);
       }
       rangeFilter.setMinRange(minRange);
-      rangeFilter.setMaxRange(minRange);
+      rangeFilter.setMaxRange(maxRange);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
