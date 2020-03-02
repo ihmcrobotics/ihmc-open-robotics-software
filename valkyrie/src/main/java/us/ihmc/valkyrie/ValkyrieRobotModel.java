@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -74,7 +73,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
 
-   private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
@@ -536,17 +534,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (calibrationParameters == null)
          calibrationParameters = new ValkyrieCalibrationParameters(getJointMap());
       return calibrationParameters;
-   }
-
-   /**
-    * Adds robot specific footstep parameters
-    */
-   @Override
-   public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
-   {
-      if (planarRegionFootstepPlannerParameters == null)
-         planarRegionFootstepPlannerParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      return planarRegionFootstepPlannerParameters;
    }
 
    @Override
