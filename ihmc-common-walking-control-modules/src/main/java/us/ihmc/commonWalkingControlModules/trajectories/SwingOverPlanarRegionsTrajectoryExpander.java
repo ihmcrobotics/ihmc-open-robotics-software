@@ -38,10 +38,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double[] swingWaypointProportions;
 
-   private static final double lessClearanceForEstimation = 0.05;
-   private static final double maximumIncrementalAdjustmentDistance = 0.15;
-   private static final double backPropogationGain = 0.95;
-
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
    private final ConvexPolygon2D footPolygonShape;
    private final FrameConvexPolygon2D swingStartPolygon = new FrameConvexPolygon2D();
@@ -51,7 +47,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final YoInteger numberOfCheckpoints;
    private final YoCounter numberOfTriesCounter;
    private final YoDouble minimumClearance;
-   private final YoDouble incrementalAdjustmentDistance;
+   private final YoDouble fastApproximationLessClearance;
+   private final YoDouble minimumAdjustmentIncrementDistance;
+   private final YoDouble maximumAdjustmentIncrementDistance;
+   private final YoDouble adjustmentIncrementDistanceGain;
    private final YoDouble maximumAdjustmentDistance;
    private final YoDouble minimumHeightAboveFloorForCollision;
    private final YoEnum<SwingOverPlanarRegionsCollisionType> mostSevereCollisionType;
@@ -68,6 +67,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final double minimumSwingHeight;
    private final double maximumSwingHeight;
    private final double collisionSphereRadius;
+   private final double toeLength;
+   private final double heelLength;
 
    private final Map<SwingOverPlanarRegionsCollisionType, FramePoint3D> closestPolygonPointMap;
    private final FramePoint3D midGroundPoint;
@@ -111,6 +112,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
+      toeLength = steppingParameters.getFootForwardOffset();
+      heelLength = steppingParameters.getFootBackwardOffset();
       collisionSphereRadius = steppingParameters.getActualFootLength() / 2.0;
 
       swingWaypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
@@ -126,8 +129,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
       minimumClearance = new YoDouble(namePrefix + "MinimumClearance", parentRegistry);
+      fastApproximationLessClearance = new YoDouble(namePrefix + "FastApproximationLessClearance", parentRegistry);
       minimumHeightAboveFloorForCollision = new YoDouble(namePrefix + "MinimumHeightAboveFloorForCollision", parentRegistry);
-      incrementalAdjustmentDistance = new YoDouble(namePrefix + "IncrementalAdjustmentDistance", parentRegistry);
+      minimumAdjustmentIncrementDistance = new YoDouble(namePrefix + "MinimumAdjustmentIncrementDistance", parentRegistry);
+      maximumAdjustmentIncrementDistance = new YoDouble(namePrefix + "MaximumAdjustmentIncrementDistance", parentRegistry);
+      adjustmentIncrementDistanceGain = new YoDouble(namePrefix + "AdjustmentIncrementDistanceGain", parentRegistry);
       maximumAdjustmentDistance = new YoDouble(namePrefix + "MaximumAdjustmentDistance", parentRegistry);
       wereWaypointsAdjusted = new YoBoolean(namePrefix + "WereWaypointsAdjusted", parentRegistry);
       status = new YoEnum<>(namePrefix + "Status", parentRegistry, SwingOverPlanarRegionsStatus.class);
@@ -166,17 +172,25 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       // Set default values
       doInitialFastApproximation.set(true);
+      fastApproximationLessClearance.set(0.05);
       minimumHeightAboveFloorForCollision.set(0.02);
       numberOfCheckpoints.set(100);
       numberOfTriesCounter.setMaxCount(50);
       minimumClearance.set(0.04);
-      incrementalAdjustmentDistance.set(0.03);
+      minimumAdjustmentIncrementDistance.set(0.03);
+      maximumAdjustmentIncrementDistance.set(0.15);
+      adjustmentIncrementDistanceGain.set(0.95);
       maximumAdjustmentDistance.set(maximumSwingHeight - minimumSwingHeight);
    }
 
    public void setDoInitialFastApproximation(boolean doInitialFastApproximation)
    {
       this.doInitialFastApproximation.set(doInitialFastApproximation);
+   }
+
+   public void setFastApproximationLessClearance(double fastApproximationLessClearance)
+   {
+      this.fastApproximationLessClearance.set(fastApproximationLessClearance);
    }
 
    public void setNumberOfCheckpoints(int numberOfCheckpoints)
@@ -194,9 +208,19 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumClearance.set(minimumSwingFootClearance);
    }
 
-   public void setIncrementalAdjustmentDistance(double incrementalAdjustmentDistance)
+   public void setMinimumAdjustmentIncrementDistance(double minimumAdjustmentIncrementDistance)
    {
-      this.incrementalAdjustmentDistance.set(incrementalAdjustmentDistance);
+      this.minimumAdjustmentIncrementDistance.set(minimumAdjustmentIncrementDistance);
+   }
+
+   public void setMaximumAdjustmentIncrementDistance(double maximumAdjustmentIncrementDistance)
+   {
+      this.maximumAdjustmentIncrementDistance.set(maximumAdjustmentIncrementDistance);
+   }
+
+   public void setAdjustmentIncrementDistanceGain(double adjustmentIncrementDistanceGain)
+   {
+      this.adjustmentIncrementDistanceGain.set(adjustmentIncrementDistanceGain);
    }
 
    public void setMaximumAdjustmentDistance(double maximumAdjustmentDistance)
@@ -354,11 +378,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          if (MathTools.epsilonEquals(distanceToCollision, 0.0, 1e-3))
          {
             computeWaypointAdjustmentDirection(fractionForCollision);
-            waypointAdjustment.scale(incrementalAdjustmentDistance.getDoubleValue());
+            waypointAdjustment.scale(minimumAdjustmentIncrementDistance.getDoubleValue());
          }
          else
          {
-            double adjustmentDistance = MathTools.clamp(backPropogationGain * distanceToCollision, incrementalAdjustmentDistance.getDoubleValue(), maximumIncrementalAdjustmentDistance);
+            double adjustmentDistance = MathTools
+                  .clamp(adjustmentIncrementDistanceGain.getDoubleValue() * distanceToCollision, minimumAdjustmentIncrementDistance.getDoubleValue(),
+                         maximumAdjustmentIncrementDistance.getDoubleValue());
             waypointAdjustment.scale(adjustmentDistance / distanceToCollision);
          }
 
@@ -416,7 +442,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private double checkLineSegmentForCollision(Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint, List<PlanarRegion> planarRegions,
                                                Point3DBasics collisionOnSegmentToPack, Point3DBasics collisionOnRegionToPack, boolean collisionIsOnRising)
    {
-      double avoidanceDistance = collisionSphereRadius + minimumClearance.getDoubleValue() - lessClearanceForEstimation;
+      double avoidanceDistance = collisionSphereRadius + minimumClearance.getDoubleValue() - fastApproximationLessClearance.getDoubleValue();
       double avoidanceDistanceSquared = MathTools.square(avoidanceDistance);
       for (PlanarRegion planarRegion : planarRegions)
       {
@@ -457,8 +483,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       boolean collisionIsOnRising = true;
 
-      for (double fraction = 0.0;
-           fraction <= 1.0; fraction += stepAmount)
+      for (double fraction = 0.0; fraction <= 1.0; fraction += stepAmount)
       {
          twoWaypointSwingGenerator.compute(fraction);
          FramePoint3D frameTupleUnsafe = new FramePoint3D(trajectoryPosition);
@@ -525,8 +550,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                collisionRelativeToStart.setIncludingFrame(worldFrame, closestPointOnRegion);
                collisionRelativeToStart.changeFrame(startOfSwingReferenceFrame);
 
-               double toePoint = collisionSphereRadius;
-               double heelPoint = stepRelativeToStart.getX() - collisionSphereRadius;
+               double toePoint = toeLength;
+               double heelPoint = stepRelativeToStart.getX() - heelLength;
                boolean collisionIsBetweenToeAndHeel = MathTools
                      .intervalContains(collisionRelativeToStart.getX(), Math.min(toePoint, heelPoint), Math.max(toePoint, heelPoint));
 
