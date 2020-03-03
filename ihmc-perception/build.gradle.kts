@@ -1,3 +1,11 @@
+import org.apache.commons.lang3.SystemUtils
+
+buildscript {
+   dependencies {
+      classpath("org.apache.commons:commons-lang3:3.9")
+   }
+}
+
 plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
@@ -13,7 +21,22 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5")
+   api("org.bytedeco:javacv-platform:1.5") {
+      exclude(group = "org.bytedeco", module = "opencv")
+   }
+   api("org.bytedeco:opencv:4.1.2-1.5.2:")
+   if (SystemUtils.IS_OS_UNIX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
+   }
+   else if (SystemUtils.IS_OS_WINDOWS)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
+   }
+   else if (SystemUtils.IS_OS_MAC_OSX)
+   {
+      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
+   }
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("org.georegression:georegression:0.11")
@@ -33,9 +56,9 @@ mainDependencies {
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-yovariables:0.4.0")
    api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.13.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.13.0")
-   api("us.ihmc:ihmc-graphics-description:0.13.0")
+   api("us.ihmc:simulation-construction-set:0.14.0")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
+   api("us.ihmc:ihmc-graphics-description:0.14.1")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -49,8 +72,8 @@ mainDependencies {
 testDependencies {
 
    api("us.ihmc:ihmc-commons-testing:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.13.0")
-   api("us.ihmc:simulation-construction-set-test:0.13.0")
+   api("us.ihmc:simulation-construction-set:0.14.0")
+   api("us.ihmc:simulation-construction-set-test:0.14.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

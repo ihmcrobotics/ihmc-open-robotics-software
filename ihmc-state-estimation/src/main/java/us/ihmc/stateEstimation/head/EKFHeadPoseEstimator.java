@@ -1,9 +1,6 @@
 package us.ihmc.stateEstimation.head;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.ekf.filter.sensor.Sensor;
@@ -13,17 +10,27 @@ import us.ihmc.ekf.filter.sensor.implementations.MagneticFieldSensor;
 import us.ihmc.ekf.filter.state.implementations.PoseState;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An estimator for the head pose based on the EKF package. The inputs to the estimation algorithm are:
@@ -42,9 +49,12 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
  * @author Georg Wiedebach
  *
  */
-public class HeadPoseEstimator
+public class EKFHeadPoseEstimator implements StateEstimatorController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final YoDouble confirmedDt = new YoDouble("confirmedDt", registry);
+   private final YoLong previousCallNanos = new YoLong("previousCallNanos", registry);
 
    private final PoseState poseState;
    private final LinearAccelerationSensor linearAccelerationSensor;
@@ -60,17 +70,22 @@ public class HeadPoseEstimator
 
    private final YoFramePoseUsingYawPitchRoll headPose;
 
+   private FullRobotModel fullRobotModel;
+   private RigidBodyTransform rootJointTransform = null;
+   private TObjectDoubleMap<String> jointPositions;
+
    /**
     * Creates a new pose estimator.
     *
     * @param dt the time interval at which compute is called and the measurements are sampled.
     * @param imuToHead the transform that describes the location of the IMU on the head.
     * @param estimateAngularVelocityBias whether a bias should be estimated for the angular velocity measurements.
-    * @param parentRegistry the {@link YoVariableRegistry} that all variables created by this class should be attached
-    * to (can be {@code null}).
     */
-   public HeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias, YoVariableRegistry parentRegistry)
+   public EKFHeadPoseEstimator(double dt, RigidBodyTransform imuToHead, boolean estimateAngularVelocityBias)
    {
+      LogTools.info("EKFHeadPoseEstimator dt = " + dt);
+      previousCallNanos.set(System.nanoTime());
+
       // Creates a simple joint structure representing the head attached to world with a floating joint:
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       headJoint = new SixDoFJoint("head_joint", elevator);
@@ -83,22 +98,65 @@ public class HeadPoseEstimator
       linearAccelerationSensor = new LinearAccelerationSensor("LinearAcceleration", dt, headBody, imuFrame, false, registry);
       magneticFieldSensor = new MagneticFieldSensor("MagneticField", dt, headBody, imuFrame, registry);
       positionSensor = new PositionSensor("Position", dt, registry);
-      List<Sensor> sensors = Arrays.asList(new Sensor[] {angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor});
+      List<Sensor> sensors = Arrays.asList(angularVelocitySensor, positionSensor, linearAccelerationSensor, magneticFieldSensor);
 
       // Create the state and the estimator:
       poseState = new PoseState("Head", dt, headFrame, registry);
       RobotState robotState = new RobotState(poseState, Collections.emptyList());
       stateEstimator = new StateEstimator(sensors, robotState, registry);
 
-      if (parentRegistry != null)
+      headPose = new YoFramePoseUsingYawPitchRoll("EstimatedHeadPose", ReferenceFrame.getWorldFrame(), registry);
+   }
+
+   /**
+    * Initializes the root joint pose and joint positions in the estimator.
+    *  @param rootJointTransform the transform of the floating root joint that is estimated.
+    * @param jointPositions a map from joint names to initial joint positions.
+    */
+   @Override
+   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   {
+      this.rootJointTransform = rootJointTransform;
+      this.jointPositions = jointPositions;
+   }
+
+   @Override
+   public void doControl()
+   {
+      compute();
+   }
+
+   @Override
+   public void initialize()
+   {
+      if(rootJointTransform != null)
       {
-         headPose = new YoFramePoseUsingYawPitchRoll("EstimatedHeadPose", ReferenceFrame.getWorldFrame(), registry);
-         parentRegistry.addChild(registry);
+         initialize(rootJointTransform, null);
       }
-      else
-      {
-         headPose = null;
-      }
+   }
+
+   /**
+    * Sets the operating mode of the state estimator. This will tell the estimator whether the robot
+    * should be fixed in world or if the position of the robot should be estimated. If the robot is
+    * hanging in the air and drifting away in normal operating mode this method can be used to fix
+    * the robot and avoid the drift.
+    * <p>
+    * The implementation of this method is estimator specific. However, this method needs to be
+    * thread-safe as this might be called from other threads then the one that is running the estimator.
+    * </p>
+    *
+    * @param operatingMode to be set for the estimator.
+    */
+   @Override
+   public void requestStateEstimatorMode(StateEstimatorMode operatingMode)
+   {
+
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    /**
@@ -165,7 +223,7 @@ public class HeadPoseEstimator
     *
     * @param headPosition estimate in world frame.
     */
-   public void setEstimatedHeadPosition(FramePoint3DReadOnly headPosition)
+   public void setEstimatedHeadPosition(Point3DReadOnly headPosition)
    {
       positionSensor.setMeasurement(headPosition);
    }
@@ -175,13 +233,18 @@ public class HeadPoseEstimator
     * <li>{@link #setImuAngularVelocity(Vector3DReadOnly)}</li>
     * <li>{@link #setImuLinearAcceleration(Vector3DReadOnly)}</li>
     * <li>{@link #setImuMagneticFieldVector(Vector3DReadOnly)}</li>
-    * <li>{@link #setEstimatedHeadPosition(Vector3DReadOnly)}</li>
+    * <li>{@link #setEstimatedHeadPosition(Point3DReadOnly)}</li>
     * <p>
     * each tick with the newest measurements before calling this method. After the call to this method the newest head
     * pose estimate can be obtained via {@link #getHeadTransform(RigidBodyTransform)}.
     */
    public void compute()
    {
+      long nanoTime = System.nanoTime();
+
+      confirmedDt.set((nanoTime - previousCallNanos.getLongValue()) * 1.0e-9);
+      previousCallNanos.set(nanoTime);
+
       stateEstimator.predict();
       updateRobot();
       stateEstimator.correct();
@@ -193,6 +256,16 @@ public class HeadPoseEstimator
          poseState.getTransform(headTransform);
          headPose.set(headTransform);
       }
+   }
+
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      this.fullRobotModel = fullRobotModel;
+   }
+
+   protected FullRobotModel getFullRobotModel()
+   {
+      return this.fullRobotModel;
    }
 
    private void updateRobot()

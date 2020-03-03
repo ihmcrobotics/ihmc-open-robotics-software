@@ -359,7 +359,6 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTaken, packet.getFootstepPlanningStatistics().getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
       if (lowLevelGoal != null)
       {

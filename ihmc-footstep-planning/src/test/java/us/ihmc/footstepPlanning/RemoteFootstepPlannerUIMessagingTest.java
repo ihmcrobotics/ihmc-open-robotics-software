@@ -430,7 +430,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
-      AtomicReference<Double> timeTakenReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeTaken);
       AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathData);
       AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPosition);
       AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientation);
@@ -465,7 +464,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setPlanId(planId);
          outputPacket.setSequenceId(sequenceId);
          outputPacket.setFootstepPlanningResult(result.toByte());
-         outputPacket.getFootstepPlanningStatistics().setTimeTaken(timeTaken);
          for (int i = 0; i < bodyPath.size(); i++)
             outputPacket.getBodyPath().add().set(bodyPath.get(i));
          outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);
@@ -484,7 +482,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
          assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
-         assertEquals("Time taken results aren't equal.", timeTaken, timeTakenReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
          List<? extends Pose3DReadOnly> bodyPathResult = bodyPathReference.getAndSet(null);
