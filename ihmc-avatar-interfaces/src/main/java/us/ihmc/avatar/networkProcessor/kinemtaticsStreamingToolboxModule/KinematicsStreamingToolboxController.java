@@ -3,10 +3,13 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
+import java.util.Map;
+
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
@@ -81,6 +84,16 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       isDone.set(false);
    }
 
+   public void setInitialRobotConfiguration(DRCRobotModel robotModel)
+   {
+      tools.getIKController().setInitialRobotConfiguration(robotModel);
+   }
+
+   public void setInitialRobotConfigurationNamedMap(Map<String, Double> initialConfiguration)
+   {
+      tools.getIKController().setInitialRobotConfigurationNamedMap(initialConfiguration);
+   }
+
    public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
    {
       tools.getIKController().setCollisionModel(collisionModel);
@@ -131,6 +144,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       }
       catch (Throwable e)
       {
+         e.printStackTrace();
+
          try
          {
             reportMessage(toCrashNotification(0, StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()) + " " + e.getMessage()));
@@ -147,7 +162,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
             e1.printStackTrace();
          }
 
-         e.printStackTrace();
          isDone.set(true);
       }
    }

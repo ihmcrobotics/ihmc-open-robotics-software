@@ -41,8 +41,6 @@ public class SphereRobotModel implements FullRobotModel
 
    private final ReferenceFrame centerOfMassFrame;
 
-   private final CenterOfMassJacobian centerOfMassJacobian;
-
    private final double totalMass;
 
    public SphereRobotModel()
@@ -55,8 +53,6 @@ public class SphereRobotModel implements FullRobotModel
       body = new RigidBody("body", floatingJoint, inertia, mass, new Vector3D());
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
-
-      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
       oneDoFJoints = MultiBodySystemTools.createOneDoFJointPath(elevator, body);
       totalMass = TotalMassCalculator.computeSubTreeMass(body);

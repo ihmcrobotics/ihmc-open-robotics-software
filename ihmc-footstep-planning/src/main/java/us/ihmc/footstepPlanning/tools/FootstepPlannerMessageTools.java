@@ -19,7 +19,7 @@ public class FootstepPlannerMessageTools
    public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide,
                                                                                    FramePose3D goalPose)
    {
-      return createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+      return createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.A_STAR);
    }
 
    public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide,
@@ -161,7 +161,6 @@ public class FootstepPlannerMessageTools
       packet.setOccludedGoalEdgeWeight(parameters.getOccludedGoalEdgeWeight());
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
-      packet.setCostForNonPreferredNode(parameters.getCostForNonPreferredNode());
       packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
    }
 }

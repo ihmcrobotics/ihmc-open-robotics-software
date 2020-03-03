@@ -7,9 +7,8 @@ import com.esotericsoftware.minlog.Log;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.valkyrie.imu.MicroStrainData;
-import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
-import us.ihmc.valkyrie.imu.MicrostrainUDPPacketListener;
+import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
+import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 
 public class MicroStrainIMUHandle implements IMUHandle
@@ -17,7 +16,7 @@ public class MicroStrainIMUHandle implements IMUHandle
 
    private final String name;
 
-   private final MicrostrainUDPPacketListener imuListener;
+   private final MicroStrainUDPPacketListener imuListener;
    private MicroStrainData microStrainData;
 
    private final Vector3D linearAcceleration = new Vector3D();
@@ -31,7 +30,7 @@ public class MicroStrainIMUHandle implements IMUHandle
 //   private RotationMatrix quaternionConversionMatrix = new RotationMatrix();
 //   private final RotationMatrix orientationMatrix = new RotationMatrix();
    
-   private MicrostrainFilterType filterTypeToReturn = MicrostrainFilterType.COMPLIMENTARY_FILTER;
+   private MicroStrainData.MicrostrainFilterType filterTypeToReturn = MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER;
 
    /* package-private */ MicroStrainIMUHandle(String name, Integer id)
    {
@@ -41,7 +40,7 @@ public class MicroStrainIMUHandle implements IMUHandle
       Log.info("Starting listener for IMU " + name);
       try
       {
-         imuListener = MicrostrainUDPPacketListener.createRealtimeListener(ValkyriePriorityParameters.IMU_PRIORITY, id);
+         imuListener = MicroStrainUDPPacketListener.createRealtimeListener(ValkyriePriorityParameters.IMU_PRIORITY, id);
       }
       catch (IOException e)
       {
@@ -49,12 +48,12 @@ public class MicroStrainIMUHandle implements IMUHandle
       }
    }
    
-   public MicrostrainFilterType getFilterTypeToReturn()
+   public MicroStrainData.MicrostrainFilterType getFilterTypeToReturn()
    {
       return filterTypeToReturn;
    }
 
-   public void setFilterTypeToReturn(MicrostrainFilterType filterTypeToReturn)
+   public void setFilterTypeToReturn(MicroStrainData.MicrostrainFilterType filterTypeToReturn)
    {
       this.filterTypeToReturn = filterTypeToReturn;
    }
@@ -67,7 +66,7 @@ public class MicroStrainIMUHandle implements IMUHandle
       {
 	      linearAcceleration.set(microStrainData.getLinearAcceleration());
 	      isLinearAccelerationValid = microStrainData.isLinearAccelerationValid();
-	      if (filterTypeToReturn == MicrostrainFilterType.COMPLIMENTARY_FILTER)
+	      if (filterTypeToReturn == MicroStrainData.MicrostrainFilterType.COMPLIMENTARY_FILTER)
 	         linearAcceleration.scale(MicroStrainData.MICROSTRAIN_GRAVITY);
 	
 	      angularRate.set(microStrainData.getAngularRate());

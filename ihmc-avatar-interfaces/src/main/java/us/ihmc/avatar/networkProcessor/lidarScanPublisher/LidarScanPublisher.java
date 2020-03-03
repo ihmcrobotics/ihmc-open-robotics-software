@@ -1,11 +1,6 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,25 +11,24 @@ import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
-import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
@@ -42,23 +36,22 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class LidarScanPublisher
 {
-   private static final double DEFAULT_SHADOW_ANGLE_THRESHOLD = Math.toRadians(12.0);
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 5000;
 
    private final String name = getClass().getSimpleName();
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+   private final ExceptionHandlingThreadScheduler executorService = new ExceptionHandlingThreadScheduler(name, DefaultExceptionHandler.PRINT_STACKTRACE);
    private ScheduledFuture<?> publisherTask;
 
-   private final AtomicReference<ScanData> scanDataToPublish = new AtomicReference<>(null);
+   private final AtomicReference<PointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
@@ -66,13 +59,18 @@ public class LidarScanPublisher
    private ReferenceFrame scanPointsFrame = worldFrame;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
-   private CollisionShapeTester collisionBoxNode = null;
    private RobotROSClockCalculator rosClockCalculator = null;
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanRealtimePublisher;
 
-   private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
+   private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
+   private RangeScanPointFilter rangeFilter = null;
+   private ShadowScanPointFilter shadowFilter = null;
+   private CollidingScanPointFilter collisionFilter = null;
+   private final ScanPointFilterList activeFilters = new ScanPointFilterList();
+
+   private long publisherPeriodInMillisecond = 1L;
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -106,29 +104,90 @@ public class LidarScanPublisher
 
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
          lidarScanRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          lidarScanPublisher = null;
          lidarScanRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, LidarScanMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
       }
    }
 
+   public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
+   {
+      this.maximumNumberOfPoints = maximumNumberOfPoints;
+   }
+
+   public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
+   {
+      this.publisherPeriodInMillisecond = publisherPeriodInMillisecond;
+
+      if (publisherTask != null)
+      {
+         publisherTask.cancel(false);
+         start();
+      }
+   }
+
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.schedule(this::readAndPublishInternal, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
    {
       publisherTask.cancel(false);
-      executorService.shutdownNow();
+      executorService.shutdown();
+   }
+
+   public void setScanFrameToLidarSensorFrame()
+   {
+      scanPointsFrame = lidarSensorFrame;
+   }
+
+   public void setRangeFilter(double minRange, double maxRange)
+   {
+      if (rangeFilter == null)
+      {
+         rangeFilter = new RangeScanPointFilter();
+         activeFilters.addFilter(rangeFilter);
+      }
+
+      rangeFilter.setMinRange(minRange);
+      rangeFilter.setMaxRange(maxRange);
+   }
+
+   public void setShadowFilter()
+   {
+      setShadowFilter(ShadowScanPointFilter.DEFAULT_SHADOW_ANGLE_THRESHOLD);
+   }
+
+   public void setShadowFilter(double angleThreshold)
+   {
+      if (shadowFilter == null)
+      {
+         shadowFilter = new ShadowScanPointFilter();
+         activeFilters.addFilter(shadowFilter);
+      }
+
+      shadowFilter.setShadowAngleThreshold(angleThreshold);
+   }
+
+   public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
+   {
+      if (collisionFilter != null)
+         return;
+      collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
+      activeFilters.addFilter(collisionFilter);
    }
 
    public void receiveLidarFromROS(String lidarScanROSTopic, URI rosCoreURI)
@@ -156,39 +215,9 @@ public class LidarScanPublisher
       scsSensorsCommunicator.attachListener(SimulatedLidarScanPacket.class, createSimulatedLidarScanPacketConsumer());
    }
 
-   public void updateScanData(ScanData scanDataToPublish)
-   {
-      this.scanDataToPublish.set(scanDataToPublish);
-   }
-
    public void setScanFrameToWorldFrame()
    {
       scanPointsFrame = worldFrame;
-   }
-
-   public void setScanFrameToLidarSensorFrame()
-   {
-      scanPointsFrame = lidarSensorFrame;
-   }
-
-   public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
-   {
-      collisionBoxNode = new CollisionShapeTester(fullRobotModel, collisionBoxProvider);
-   }
-
-   /**
-    * <p>
-    * For more details, see
-    * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
-    * master thesis, section 2.2.1, page 25.</a>
-    * </p>
-    * 
-    * @param angleThreshold the angle threshold in radians used by the removal algorithm. Expecting a
-    *           positive value close to zero, the default value is 0.21 radian (= 12 degrees).
-    */
-   public void setShadowThreshold(double angleThreshold)
-   {
-      shadowAngleThreshold = angleThreshold;
    }
 
    public void setROSClockCalculator(RobotROSClockCalculator rosClockCalculator)
@@ -203,11 +232,7 @@ public class LidarScanPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-            Point3D[] scanPoints = pointCloudData.getPoints();
-            long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
-
-            scanDataToPublish.set(new ScanData(timestamp, scanPoints));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, maximumNumberOfPoints, false));
          }
       };
    }
@@ -219,12 +244,7 @@ public class LidarScanPublisher
          @Override
          public void onNewMessage(PointCloud2WithSource pointCloud)
          {
-            PointCloud2 cloud = pointCloud.getCloud();
-            UnpackedPointCloud pointCloudData = RosPointCloudReceiver.unpackPointsAndIntensities(cloud);
-            Point3D[] scanPoints = pointCloudData.getPoints();
-            long timestamp = cloud.getHeader().getStamp().totalNsecs();
-
-            scanDataToPublish.set(new ScanData(timestamp, scanPoints));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud.getCloud(), maximumNumberOfPoints, false));
          }
       };
    }
@@ -244,16 +264,21 @@ public class LidarScanPublisher
             LidarScan scan = new LidarScan(lidarScanParameters, ranges.toArray(), sensorId);
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
-            List<Point3D> scanPoints = scan.getAllPoints();
+            Point3D[] scanPoints = scan.toPointArray();
             long timestamp = packet.getLidarScanParameters().getTimestamp();
 
-            scanDataToPublish.set(new ScanData(timestamp, scanPoints));
+            rosPointCloud2ToPublish.set(new PointCloudData(timestamp, scanPoints, null));
          }
       };
    }
 
+   public void updateScanData(PointCloudData scanDataToPublish)
+   {
+      this.rosPointCloud2ToPublish.set(scanDataToPublish);
+   }
+
    // Temporary variables used to find shadows
-   private final Point3D lidarPosition = new Point3D();
+   private final Pose3D sensorPose = new Pose3D();
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public LidarScanMessage readAndPublish()
@@ -261,30 +286,35 @@ public class LidarScanPublisher
       if (publisherTask != null)
          throw new RuntimeException("The publisher is running using its own thread, cannot manually update it.");
 
-      return readAndPublishInternal();      
+      return readAndPublishInternal();
    }
 
    private LidarScanMessage readAndPublishInternal()
    {
-      ScanData scanData = scanDataToPublish.getAndSet(null);
-      if (scanData == null)
+      PointCloudData pointCloudData = rosPointCloud2ToPublish.getAndSet(null);
+
+      if (pointCloudData == null)
          return null;
 
       long robotTimestamp;
 
       if (rosClockCalculator == null)
       {
-         robotTimestamp = scanData.getTimestamp();
+         robotTimestamp = pointCloudData.getTimestamp();
          robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
       }
       else
       {
-         long rosTimestamp = scanData.getTimestamp();
+         long rosTimestamp = pointCloudData.getTimestamp();
          robotTimestamp = rosClockCalculator.computeRobotMonotonicTime(rosTimestamp);
          if (robotTimestamp == -1L)
             return null;
          boolean waitForTimestamp = true;
+         if (robotConfigurationDataBuffer.getNewestTimestamp() == -1)
+            return null;
+
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
+
          if (!success)
             return null;
       }
@@ -292,184 +322,28 @@ public class LidarScanPublisher
       if (!scanPointsFrame.isWorldFrame())
       {
          scanPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
-         scanData.transform(transformToWorld);
+         pointCloudData.applyTransform(transformToWorld);
       }
 
-      if (collisionBoxNode != null)
-         collisionBoxNode.update();
+      sensorPose.set(lidarSensorFrame.getTransformToRoot());
 
-      lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
+      if (shadowFilter != null)
+         shadowFilter.set(sensorPose.getPosition(), pointCloudData);
+      if (collisionFilter != null)
+         collisionFilter.update();
+      if (rangeFilter != null)
+         rangeFilter.setSensorPosition(sensorPose.getPosition());
 
-      List<Integer> shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
-
-      List<Integer> selfCollisionRemovalIndices;
-      if (collisionBoxNode != null)
-         selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
-      else
-         selfCollisionRemovalIndices = null;
-
-      Point3D32 lidarPosition;
-      Quaternion32 lidarOrientation;
-
-      if (lidarSensorFrame != null)
-      {
-         lidarPosition = new Point3D32();
-         lidarOrientation = new Quaternion32();
-         lidarSensorFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
-         transformToWorld.get(lidarOrientation, lidarPosition);
-      }
-      else
-      {
-         lidarPosition = null;
-         lidarOrientation = null;
-      }
-
-      lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
-      lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
-
-      PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
-
-      //            if (requestLidarScanMessage.getRemoveSelfCollisions())
-      {
-         if (selfCollisionRemovalIndices != null)
-            indicesToRemove.addAll(selfCollisionRemovalIndices);
-      }
-
-      //            if (requestLidarScanMessage.getRemoveShadows())
-      {
-         indicesToRemove.addAll(shadowRemovalIndices);
-      }
-
-      float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
-
-      LidarScanMessage message = MessageTools.createLidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+      LidarScanMessage message = pointCloudData.toLidarScanMessage(activeFilters);
+      message.getLidarPosition().set(sensorPose.getPosition());
+      message.getLidarOrientation().set(sensorPose.getOrientation());
 
       if (lidarScanPublisher != null)
          lidarScanPublisher.publish(message);
       else
          lidarScanRealtimePublisher.publish(message);
-      
+
       return message;
-   }
-
-   public static class ScanData
-   {
-      private final long timestamp;
-      private final Point3D[] scanPoints;
-      private final int numberOfScanPoints;
-
-      public ScanData(long timestamp, Point3D[] scanPoints)
-      {
-         this.timestamp = timestamp;
-         this.scanPoints = scanPoints;
-         numberOfScanPoints = scanPoints.length;
-      }
-
-      public ScanData(long timestamp, List<Point3D> scanPoints)
-      {
-         this.timestamp = timestamp;
-         this.scanPoints = scanPoints.toArray(new Point3D[0]);
-         numberOfScanPoints = scanPoints.size();
-      }
-
-      public long getTimestamp()
-      {
-         return timestamp;
-      }
-
-      public void transform(RigidBodyTransform transform)
-      {
-         for (int i = 0; i < numberOfScanPoints; i++)
-            transform.transform(scanPoints[i]);
-      }
-
-      public List<Integer> computeCollidingPointIndices(CollisionShapeTester collisionShapeTester)
-      {
-         List<Integer> collidingPointIndices = new ArrayList<>();
-
-         if (collisionShapeTester != null)
-         {
-            for (int i = 0; i < numberOfScanPoints; i++)
-            {
-               if (collisionShapeTester.contains(scanPoints[i]))
-                  collidingPointIndices.add(i);
-            }
-         }
-         return collidingPointIndices;
-      }
-
-      /**
-       * Attempt to remove flying LIDAR points, which, when present, result as objects having shadows.
-       * <p>
-       * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
-       * </p>
-       * <p>
-       * The rejection method is based on the observation that flying points always fall in line with view
-       * direction of the laser ray. It compares the angle between the angle between the scanner view
-       * direction and the line segment connecting outlier points with their scan line neighbors.
-       * </p>
-       * <p>
-       * For more details, see
-       * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
-       * master thesis, section 2.2.1, page 25.</a>
-       * </p>
-       */
-      public List<Integer> computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
-      {
-         List<Integer> shadowPointIndices = new ArrayList<>();
-         Vector3D fromLidarToScanPoint = new Vector3D();
-         Vector3D currentToNextScanPoint = new Vector3D();
-         Vector3D previousToCurrentScanPoint = new Vector3D();
-
-         for (int i = 1; i < numberOfScanPoints - 1; i++)
-         {
-            Point3D currentScanPoint = scanPoints[i];
-            Point3D previousScanPoint = scanPoints[i - 1];
-            fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
-            previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
-
-            if (fromLidarToScanPoint.dot(previousToCurrentScanPoint) < 0.0)
-               previousToCurrentScanPoint.negate();
-            if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
-            {
-               shadowPointIndices.add(i);
-               continue;
-            }
-
-            Point3D nextScanPoint = scanPoints[i + 1];
-            currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
-
-            if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
-               currentToNextScanPoint.negate();
-            if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
-               shadowPointIndices.add(i);
-         }
-
-         return shadowPointIndices;
-      }
-
-      public float[] getScanBuffer(PriorityQueue<Integer> indicesToRemove)
-      {
-         TFloatArrayList scanPointBuffer = new TFloatArrayList();
-         Integer nextIndexToIgnore = indicesToRemove.poll();
-
-         for (int i = 0; i < numberOfScanPoints; i++)
-         {
-            if (nextIndexToIgnore == null || i < nextIndexToIgnore)
-            {
-               Point3D scanPoint = scanPoints[i];
-               scanPointBuffer.add((float) scanPoint.getX());
-               scanPointBuffer.add((float) scanPoint.getY());
-               scanPointBuffer.add((float) scanPoint.getZ());
-            }
-            else
-            {
-               nextIndexToIgnore = indicesToRemove.poll();
-            }
-         }
-
-         return scanPointBuffer.toArray();
-      }
    }
 
    public static interface SensorFrameFactory

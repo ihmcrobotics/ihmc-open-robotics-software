@@ -78,7 +78,7 @@ import java.util.function.Consumer;
 
    private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
    {
-      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, toolbox.getWrenchMatrixCalculator());
+      DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
       this.dynamicMatrixSetter = (m, c) ->
       {
          dynamicsMatrixCalculator.compute();

@@ -22,6 +22,9 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
+
+import java.util.function.Consumer;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -33,43 +36,46 @@ public class ValkyrieAStarFootstepPlannerTest
    @Test
    public void testEODCinders()
    {
-      testDataSet(DataSetName._20190220_172417_EOD_Cinders, 4.0);
+      testDataSet(DataSetName._20190220_172417_EOD_Cinders, 4.0, null);
    }
 
    @Test
    public void testSteppingStones()
    {
-      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0);
+      testDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0, 4.0, p -> {p.setMinimumFootholdPercent(0.8); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
    public void testStepAfterPitchDown()
    {
-      testDataSet(DataSetName._20190219_182005_StepAfterPitchDown, 4.0);
+      testDataSet(DataSetName._20190219_182005_StepAfterPitchDown, 4.0, null);
    }
 
    @Test
    public void testRandomField()
    {
-      testDataSet(DataSetName._20190219_182005_Random, 6.0);
+      testDataSet(DataSetName._20190219_182005_Random, 12.0, p -> {p.setIdealFootstepLength(0.45); p.setAstarHeuristicsWeight(5.0);});
    }
 
    @Test
    public void testLargeCinderBlockField()
    {
-      testDataSet(DataSetName._20171215_214730_CinderBlockField, 6.0);
+      testDataSet(DataSetName._20171215_214730_CinderBlockField, 12.0, p -> {p.setFlatGroundLowerThreshold(-0.2); p.setMaximumStepZ(0.2);});
    }
 
    @Test
    public void testSimpleGaps()
    {
-      testDataSet(DataSetName._20190219_182005_SimpleGaps, 6.0);
+      testDataSet(DataSetName._20190219_182005_SimpleGaps, 6.0, null);
    }
 
-   private void testDataSet(DataSetName dataSetName, double timeout)
+   private void testDataSet(DataSetName dataSetName, double timeout, Consumer<ValkyrieAStarFootstepPlannerParameters> parameterMutator)
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       ValkyrieAStarFootstepPlanner planner = new ValkyrieAStarFootstepPlanner(robotModel);
+
+      if(parameterMutator != null)
+         parameterMutator.accept(planner.getParameters());
 
       if (visualize)
       {
@@ -87,8 +93,12 @@ public class ValkyrieAStarFootstepPlannerTest
 
       planner.handleRequestPacket(requestPacket);
 
+      // Check that planner reports solution was found
+      ValkyrieAStarFootstepPlanner.Status status = ValkyrieAStarFootstepPlanner.Status.fromByte(planningResult.getPlannerStatus());
+      assertTrue("Planner did not find solution, status: " + status, status == ValkyrieAStarFootstepPlanner.Status.FOUND_SOLUTION);
+
       // Check that plan returned isn't empty
-      assertTrue(!planningResult.getFootstepDataList().getFootstepDataList().isEmpty());
+      assertTrue("Plan returned is empty", !planningResult.getFootstepDataList().getFootstepDataList().isEmpty());
 
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(ValkyrieAStarFootstepPlanner.createFootPolygons(robotModel));
 
@@ -101,7 +111,7 @@ public class ValkyrieAStarFootstepPlannerTest
                                               footstepDataMessage.getOrientation().getYaw(),
                                               RobotSide.fromByte(footstepDataMessage.getRobotSide()));
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
-         assertTrue(!snapData.getSnapTransform().containsNaN());
+         assertTrue("Solution step " + i + " can't be snapped", !snapData.getSnapTransform().containsNaN());
       }
 
       // Check that final steps are squared up at the goal
@@ -124,8 +134,8 @@ public class ValkyrieAStarFootstepPlannerTest
    {
       Pose3D footPose = new Pose3D(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Pose3D desiredPose = RobotSide.LEFT.toByte() == footstepDataMessage.getRobotSide() ? requestPacket.getGoalLeftFootPose() : requestPacket.getGoalRightFootPose();
-      assertTrue(footPose.getPosition().epsilonEquals(desiredPose.getPosition(), goalPositionEpsilon));
-      assertTrue(MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon));
+      assertTrue("Final step position is not at goal", footPose.getPosition().epsilonEquals(desiredPose.getPosition(), goalPositionEpsilon));
+      assertTrue("Final step orientation doesn't match goal", MathTools.epsilonEquals(footPose.getYaw(), desiredPose.getYaw(), goalYawEpsilon));
    }
 
    public static ValkyrieFootstepPlanningRequestPacket createPlanningRequest(DataSet dataSet, double timeout, ValkyrieAStarFootstepPlannerParameters parameters)

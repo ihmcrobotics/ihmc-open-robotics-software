@@ -52,7 +52,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class AvatarControllerThread
+public class AvatarControllerThread implements AvatarControllerThreadInterface
 {
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;

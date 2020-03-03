@@ -17,12 +17,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class ValkyrieFootstepValidityChecker
 {
+   private final ValkyriePlannerEdgeData edgeData;
    private final FootstepNodeSnapper snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ValkyrieAStarFootstepPlannerParameters parameters;
@@ -40,10 +42,20 @@ public class ValkyrieFootstepValidityChecker
    private UnaryOperator<FootstepNode> parentNodeSupplier = null;
    private PlanarRegionsList planarRegionsList = null;
 
+   // Variables to log
+   private double stepWidth;
+   private double stepLength;
+   private double stepHeight;
+   private double stepReach;
+   private double footAreaPercentage;
+   private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
+
    public ValkyrieFootstepValidityChecker(ValkyrieAStarFootstepPlannerParameters parameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons,
-                                          FootstepNodeSnapper snapper)
+                                          FootstepNodeSnapper snapper,
+                                          ValkyriePlannerEdgeData edgeData)
    {
+      this.edgeData = edgeData;
       this.parameters = parameters;
       this.footPolygons = footPolygons;
       this.snapper = snapper;
@@ -67,17 +79,28 @@ public class ValkyrieFootstepValidityChecker
 
    public boolean checkFootstep(FootstepNode candidateNode, FootstepNode stanceNode)
    {
+      clearLoggedVariables();
+      StepRejectionReason rejectionReason = checkFootstepInternal(candidateNode, stanceNode);
+
+      if(edgeData.getStanceNode() == null)
+         logVariables(candidateNode, stanceNode, rejectionReason);
+
+      return rejectionReason == null;
+   }
+
+   private StepRejectionReason checkFootstepInternal(FootstepNode candidateNode, FootstepNode stanceNode)
+   {
       if(planarRegionsList == null)
       {
-         return true;
+         return null;
       }
 
-      FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
+      candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())
       {
-         return false;
+         return StepRejectionReason.COULD_NOT_SNAP;
       }
 
       // Check incline
@@ -85,23 +108,24 @@ public class ValkyrieFootstepValidityChecker
       double minimumSurfaceNormalZ = Math.cos(parameters.getMaximumSurfanceInclineRadians());
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
-         return false;
+         return StepRejectionReason.INCLINE_TOO_STEEP;
       }
 
       // Check snap area
       ConvexPolygon2D footholdAfterSnap = candidateNodeSnapData.getCroppedFoothold();
-      double area = footholdAfterSnap.getArea();
-      double footArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
+      double croppedFootArea = footholdAfterSnap.getArea();
+      double fullFootArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
+      footAreaPercentage = croppedFootArea / fullFootArea;
 
       double epsilonAreaPercentage = 1e-4;
-      if (!footholdAfterSnap.isEmpty() && area < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage) * footArea)
+      if (!footholdAfterSnap.isEmpty() && footAreaPercentage < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
       {
-         return false;
+         return StepRejectionReason.AREA_TOO_SMALL;
       }
 
       if(stanceNode == null)
       {
-         return true;
+         return null;
       }
 
       FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
@@ -112,42 +136,43 @@ public class ValkyrieFootstepValidityChecker
       candidateFootPosition.setToZero(candidateFootFrame);
       candidateFootPosition.changeFrame(stanceFootZUpFrame);
 
+      stepLength = candidateFootPosition.getX();
+      stepWidth = candidateNode.getRobotSide().negateIfRightSide(candidateFootPosition.getY());
+      stepReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()),
+                                                                     Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
+      stepHeight = candidateFootPosition.getZ();
+
       // Check step height
-      if (Math.abs(candidateFootPosition.getZ()) > parameters.getMaximumStepZ())
+      if (Math.abs(stepHeight) > parameters.getMaximumStepZ())
       {
-         return false;
+         return StepRejectionReason.HEIGHT_TOO_LOW_OR_HIGH;
       }
 
       // Check step width and reach
-      double stepWidth = candidateNode.getRobotSide().negateIfRightSide(candidateFootPosition.getY());
-      double stepReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()),
-                                                                     Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
-
-      // Flat ground
-      boolean flatGround = MathTools.intervalContains(candidateFootPosition.getZ(),
+      boolean flatGround = MathTools.intervalContains(stepHeight,
                                                       parameters.getFlatGroundLowerThreshold(),
                                                       parameters.getFlatGroundUpperThreshold());
       if (flatGround)
       {
          if (stepReach > parameters.getMaximumStepReach())
          {
-            return false;
+            return StepRejectionReason.REACH_EXCEEDED;
          }
          else if (!MathTools.intervalContains(stepWidth, parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth()))
          {
-            return false;
+            return StepRejectionReason.WIDTH_TOO_SMALL_OR_LARGE;
          }
       }
       // Stepping up
-      else if (candidateFootPosition.getZ() >= parameters.getFlatGroundUpperThreshold())
+      else if (stepHeight >= parameters.getFlatGroundUpperThreshold())
       {
          if (stepReach > parameters.getMaximumStepReachWhenSteppingUp())
          {
-            return false;
+            return StepRejectionReason.REACH_EXCEEDED;
          }
          else if (!MathTools.intervalContains(stepWidth, parameters.getMinimumStepWidth(), parameters.getMaximumStepWidthWhenSteppingUp()))
          {
-            return false;
+            return StepRejectionReason.WIDTH_TOO_SMALL_OR_LARGE;
          }
       }
       // Stepping down
@@ -155,11 +180,11 @@ public class ValkyrieFootstepValidityChecker
       {
          if (stepReach > parameters.getMaximumStepReachWhenSteppingDown())
          {
-            return false;
+            return StepRejectionReason.REACH_EXCEEDED;
          }
          else if (!MathTools.intervalContains(stepWidth, parameters.getMinimumStepWidth(), parameters.getMaximumStepWidthWhenSteppingDown()))
          {
-            return false;
+            return StepRejectionReason.WIDTH_TOO_SMALL_OR_LARGE;
          }
       }
 
@@ -176,18 +201,18 @@ public class ValkyrieFootstepValidityChecker
 
          double swingReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPosition.getX()), Math.abs(candidateFootPosition.getY()));
 
-         if (candidateFootPosition.getZ() > parameters.getFlatGroundUpperThreshold())
+         if (stepHeight > parameters.getFlatGroundUpperThreshold())
          {
             if (swingReach > alpha * parameters.getMaximumStepReachWhenSteppingUp())
             {
-               return false;
+               return StepRejectionReason.SWING_REACH_EXCEEDED;
             }
          }
-         else if (candidateFootPosition.getZ() < parameters.getFlatGroundLowerThreshold())
+         else if (stepHeight < parameters.getFlatGroundLowerThreshold())
          {
             if (swingReach > alpha * parameters.getMaximumStepReachWhenSteppingDown())
             {
-               return false;
+               return StepRejectionReason.SWING_REACH_EXCEEDED;
             }
          }
       }
@@ -196,16 +221,23 @@ public class ValkyrieFootstepValidityChecker
       cliffAvoider.setPlanarRegions(planarRegionsList);
       if(!cliffAvoider.isNodeValidInternal(candidateNode, stanceNode))
       {
-         return false;
+         return StepRejectionReason.TOO_CLOSE_TO_LEDGE;
       }
 
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.getCheckForPathCollisions())
       {
          obstacleBetweenNodesChecker.setPlanarRegions(planarRegionsList);
-         if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+         try
          {
-            return false;
+            if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+            {
+               return StepRejectionReason.OBSTACLE_BETWEEN_STEPS;
+            }
+         }
+         catch(Exception e)
+         {
+            return StepRejectionReason.OBSTACLE_BETWEEN_STEPS;
          }
       }
 
@@ -222,12 +254,41 @@ public class ValkyrieFootstepValidityChecker
          {
             if (bodyCollisionData.get(i).isCollisionDetected())
             {
-               return false;
+               return StepRejectionReason.BOUNDING_BOX_COLLISION;
             }
          }
       }
 
-      return true;
+      return null;
+   }
+
+   private void logVariables(FootstepNode candidateNode, FootstepNode stanceNode, StepRejectionReason rejectionReason)
+   {
+      edgeData.setStanceNode(stanceNode);
+      edgeData.setCandidateNode(candidateNode);
+      edgeData.setCandidateNodeSnapData(candidateNodeSnapData);
+
+      edgeData.setStepWidth(stepWidth);
+      edgeData.setStepLength(stepLength);
+      edgeData.setStepHeight(stepHeight);
+      edgeData.setStepReach(stepReach);
+      edgeData.setFootAreaPercentage(footAreaPercentage);
+      edgeData.setRejectionReason(rejectionReason);
+   }
+
+   private void clearLoggedVariables()
+   {
+      stepWidth = Double.NaN;
+      stepLength = Double.NaN;
+      stepHeight = Double.NaN;
+      stepReach = Double.NaN;
+      footAreaPercentage = Double.NaN;
+      candidateNodeSnapData.clear();
+   }
+
+   public enum StepRejectionReason
+   {
+      COULD_NOT_SNAP, INCLINE_TOO_STEEP, AREA_TOO_SMALL, HEIGHT_TOO_LOW_OR_HIGH, REACH_EXCEEDED, WIDTH_TOO_SMALL_OR_LARGE, SWING_REACH_EXCEEDED, TOO_CLOSE_TO_LEDGE, OBSTACLE_BETWEEN_STEPS, BOUNDING_BOX_COLLISION
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)

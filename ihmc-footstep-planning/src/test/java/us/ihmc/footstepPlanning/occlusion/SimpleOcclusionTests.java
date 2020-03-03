@@ -1,16 +1,9 @@
 package us.ihmc.footstepPlanning.occlusion;
 
-import java.awt.Color;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis;
@@ -22,14 +15,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -52,16 +40,18 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleOcclusionTests
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
+   private static final boolean visualize =true; //  simulationTestingParameters.getKeepSCSUp();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int maxSteps = 100;
@@ -134,8 +124,9 @@ public class SimpleOcclusionTests
       YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FootstepPlanner planner = getPlanner(parameters, visibilityGraphsParameters, graphicsListRegistry, registry);
-      FootstepPlannerGoal goal = createPlannerGoal(goalPose);
+      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      request.setGoalPose(goalPose);
 
       FramePose3D stancePose = new FramePose3D();
       RobotSide stanceSide = computeStanceFootPose(startPose, parameters, stancePose);
@@ -265,16 +256,19 @@ public class SimpleOcclusionTests
             }
          }
 
-         planner.setPlanarRegions(visiblePlanarRegions);
-         planner.setInitialStanceFoot(stancePose, stanceSide);
-         planner.setGoal(goal);
-         planner.setTimeout(maxAllowedSolveTime + 5.0);
+         request.setGoalPose(goalPose);
+         request.setPlanarRegionsList(visiblePlanarRegions);
+         request.setInitialStanceSide(stanceSide);
+         request.setInitialStancePose(stancePose);
+         request.setTimeout(maxAllowedSolveTime + 5.0);
+         request.setPlanBodyPath(true);
+         request.setHorizonLength(1.0);
 
          boolean haveNewPlan = false;
          try
          {
             long startTime = System.currentTimeMillis();
-            FootstepPlanningResult result = planner.plan();
+            FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             solveTime.set(seconds);
 
@@ -283,14 +277,14 @@ public class SimpleOcclusionTests
                maxSolveTime = seconds;
             }
 
-            if (result.validForExecution())
+            if (plannerOutput.getResult().validForExecution())
             {
                haveNewPlan = true;
-               plan = planner.getPlan();
+               plan = plannerOutput.getFootstepPlan();
             }
             else
             {
-               PrintTools.info("Planner failed: " + result);
+               PrintTools.info("Planner failed: " + plannerOutput.getResult());
             }
          }
          catch (Exception e)
@@ -583,13 +577,6 @@ public class SimpleOcclusionTests
       }
 
       return ret;
-   }
-
-   private FootstepPlanner getPlanner(FootstepPlannerParametersReadOnly parameters, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                      YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
-   {
-      SideDependentList<ConvexPolygon2D> footPloygons = PlannerTools.createDefaultFootPolygons();
-      return new VisibilityGraphWithAStarPlanner(parameters, visibilityGraphsParameters, footPloygons, graphicsListRegistry, registry);
    }
 
    private FootstepPlannerParametersReadOnly getParameters()

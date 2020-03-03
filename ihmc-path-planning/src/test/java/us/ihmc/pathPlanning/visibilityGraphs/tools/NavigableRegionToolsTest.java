@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class NavigableRegionToolsTest
@@ -57,7 +58,7 @@ public class NavigableRegionToolsTest
          pointToCheck.interpolate(scaledRegion.getVertex(startIndex), scaledRegion.getNextVertex(startIndex), alpha);
 
          NavigableRegion containingRegion = NavigableRegionTools.getNavigableRegionContainingThisPoint(new Point3D(pointToCheck), navigableRegions, parameters.getCanDuckUnderHeight());
-         assertTrue("Should be no region, since we're outside the navigable region", containingRegion == null);
+         assertEquals("Should be no region, since we're outside the navigable region", null, containingRegion);
       }
    }
 }

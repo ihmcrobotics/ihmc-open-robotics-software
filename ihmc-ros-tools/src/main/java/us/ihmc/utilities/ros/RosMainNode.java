@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
@@ -23,6 +24,7 @@ import org.ros.node.topic.Subscriber;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
@@ -138,7 +140,7 @@ public class RosMainNode implements NodeMain
          final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
          if (entry.getKey() == null)
          {
-            PrintTools.error(this, "RosTopic was null! Message type: " + rosTopicSubscriber.getMessageType());
+            LogTools.error("RosTopic was null! Message type: " + rosTopicSubscriber.getMessageType());
             continue;
          }
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
@@ -178,7 +180,7 @@ public class RosMainNode implements NodeMain
             }
             catch (ServiceNotFoundException e)
             {
-               PrintTools.error(this, "Waiting for service " + entry.getKey() + " (check spelling/service provider)...");
+               LogTools.error("Waiting for service " + entry.getKey() + " (check spelling/service provider)...");
                ThreadTools.sleep(2000);
             }
          }

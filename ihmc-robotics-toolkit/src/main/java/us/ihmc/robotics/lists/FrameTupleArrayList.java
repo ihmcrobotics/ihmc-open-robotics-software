@@ -35,7 +35,7 @@ public class FrameTupleArrayList<T extends FrameTuple3DBasics> extends Recycling
       unsafeGet(i).setIncludingFrame(frameTuple);
    }
 
-   public void copyFromListAndTrimSize(FrameTupleArrayList<?> otherList)
+   public void set(FrameTupleArrayList<?> otherList)
    {
       for (int i = 0; i < otherList.size(); i++)
       {
