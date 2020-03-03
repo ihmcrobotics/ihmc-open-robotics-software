@@ -63,4 +63,7 @@ bool assume_flat_ground
 # Field default value -1
 int32 planner_request_id
 
+# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+geometry_msgs/Pose[] body_path_waypoints
+
 

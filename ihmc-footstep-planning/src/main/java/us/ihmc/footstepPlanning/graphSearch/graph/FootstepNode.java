@@ -99,6 +99,11 @@ public class FootstepNode
       return dx * dx + dy * dy;
    }
 
+   public boolean equalPosition(FootstepNode other)
+   {
+      return getXIndex() == other.getXIndex() && getYIndex() == other.getYIndex();
+   }
+
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
    {
       return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),

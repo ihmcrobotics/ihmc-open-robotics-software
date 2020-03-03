@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
@@ -31,8 +32,8 @@ public class AtlasBehaviorModule
    private void footstepPlanningToolbox()
    {
       LogTools.info("Creating footstep toolbox");
-      footstepPlanningModule = new FootstepPlanningModule(createRobotModel());
-      footstepPlanningModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(createRobotModel(),
+                                                                           DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    private void shutdown() // add cleanup actions here
