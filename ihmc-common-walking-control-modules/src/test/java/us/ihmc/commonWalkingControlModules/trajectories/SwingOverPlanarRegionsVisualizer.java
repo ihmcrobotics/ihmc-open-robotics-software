@@ -56,6 +56,7 @@ public class SwingOverPlanarRegionsVisualizer
       AppearanceDefinition bubble = YoAppearance.LightBlue();
       bubble.setTransparency(0.5);
       collisionSphere = new YoGraphicEllipsoid("CollisionSphere", solePose.getPosition(), solePose.getYawPitchRoll(), bubble, new Vector3D());
+      YoGraphicPosition trajectoryPosition = new YoGraphicPosition("TrajectoryPosition", solePose.getPosition(), 0.03, YoAppearance.Red());
       stanceFootGraphic = new YoGraphicPolygon("StanceFootGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Blue());
       swingStartGraphic = new YoGraphicPolygon("SwingStartGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Green());
       swingEndGraphic = new YoGraphicPolygon("SwingEndGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Yellow());
@@ -98,6 +99,7 @@ public class SwingOverPlanarRegionsVisualizer
          yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", intersectionMap.get(swingOverPlanarRegionsTrajectoryCollisionType));
       }
 
+      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", trajectoryPosition);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", collisionSphere);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", stanceFootGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingStartGraphic);
@@ -115,7 +117,7 @@ public class SwingOverPlanarRegionsVisualizer
          intersectionMap.get(collisionType).setPosition(trajectoryExpander.getClosestPolygonPoint(collisionType));
       }
 
-      double sphereRadius = trajectoryExpander.getSphereRadius();
+      double sphereRadius = trajectoryExpander.getCollisionSphereRadius() + trajectoryExpander.getMinimumClearance();
       collisionSphere.setRadii(new Vector3D(sphereRadius, sphereRadius, sphereRadius));
       collisionSphere.update();
 
