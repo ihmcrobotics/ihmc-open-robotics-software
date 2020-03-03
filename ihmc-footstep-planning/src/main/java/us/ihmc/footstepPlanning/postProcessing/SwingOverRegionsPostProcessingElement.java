@@ -31,7 +31,7 @@ import java.util.List;
 public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
-   private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+   final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    public SwingOverRegionsPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, WalkingControllerParameters walkingControllerParameters,
                                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)

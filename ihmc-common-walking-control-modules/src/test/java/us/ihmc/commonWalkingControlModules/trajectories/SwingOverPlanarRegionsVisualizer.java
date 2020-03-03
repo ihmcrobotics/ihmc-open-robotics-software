@@ -1,16 +1,11 @@
-package us.ihmc.avatar.roughTerrainWalking;
+package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -22,56 +17,61 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
-public class AvatarSwingOverPlanarRegionsVisualizer
+import java.util.HashMap;
+import java.util.Map;
+
+public class SwingOverPlanarRegionsVisualizer
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
-   private static final AppearanceDefinition[] appearances = {YoAppearance.Gray(), YoAppearance.Gray()};
 
    private final SimulationConstructionSet scs;
-   private final YoVariableRegistry registry;
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final YoFramePoseUsingYawPitchRoll solePose;
+   private final YoFramePoint3D firstWaypoint;
+   private final YoFramePoint3D secondWaypoint;
    private final YoGraphicEllipsoid collisionSphere;
    private final YoGraphicPolygon stanceFootGraphic;
    private final YoGraphicPolygon swingStartGraphic;
    private final YoGraphicPolygon swingEndGraphic;
+   private final YoGraphicPosition firstWaypointGraphic;
+   private final YoGraphicPosition secondWaypointGraphic;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap;
 
-   private final ConvexPolygon2D footPolygon;
-   private final FramePose3D stanceFootPose;
-   private final FramePose3D swingStartPose;
-   private final FramePose3D swingEndPose;
+   private final ConvexPolygon2DReadOnly footPolygon;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
-   public AvatarSwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                 WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters<RobotSide> contactPointParameters)
+
+   public SwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           ConvexPolygon2DReadOnly footPolygon, SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander)
    {
       this.scs = scs;
-      this.registry = registry;
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      this.swingOverPlanarRegionsTrajectoryExpander = swingOverPlanarRegionsTrajectoryExpander;
 
-      footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPointParameters.getFootContactPoints().get(RobotSide.LEFT)));
+      this.footPolygon = footPolygon;
 
-      swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters, registry, yoGraphicsListRegistry);
       swingOverPlanarRegionsTrajectoryExpander.attachVisualizer(this::update);
 
       solePose = new YoFramePoseUsingYawPitchRoll("SolePose", WORLD, registry);
+      firstWaypoint = new YoFramePoint3D("FirstWaypointViz", WORLD, registry);
+      secondWaypoint = new YoFramePoint3D("SecondWaypointViz", WORLD, registry);
       AppearanceDefinition bubble = YoAppearance.LightBlue();
       bubble.setTransparency(0.5);
       collisionSphere = new YoGraphicEllipsoid("CollisionSphere", solePose.getPosition(), solePose.getYawPitchRoll(), bubble, new Vector3D());
       stanceFootGraphic = new YoGraphicPolygon("StanceFootGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Blue());
       swingStartGraphic = new YoGraphicPolygon("SwingStartGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Green());
       swingEndGraphic = new YoGraphicPolygon("SwingEndGraphic", footPolygon.getNumberOfVertices(), registry, true, 1.0, YoAppearance.Yellow());
-      intersectionMap = new HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition>();
+      firstWaypointGraphic = new YoGraphicPosition("FirstWaypointGraphic", firstWaypoint, 0.02, YoAppearance.White());
+      secondWaypointGraphic = new YoGraphicPosition("SecondWaypointGraphic", secondWaypoint, 0.02, YoAppearance.White());
+      intersectionMap = new HashMap<>();
+
+
+
       for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
       {
          AppearanceDefinition appearance;
@@ -102,8 +102,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
          intersectionMap.put(swingOverPlanarRegionsTrajectoryCollisionType,
                              new YoGraphicPosition("IntersectionGraphic" + swingOverPlanarRegionsTrajectoryCollisionType.name(),
                                                    new YoFramePoint3D("IntersectionPoint" + swingOverPlanarRegionsTrajectoryCollisionType.name(), WORLD,
-                                                                    registry),
-                                                   size, appearance));
+                                                                      registry), size, appearance));
 
          yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", intersectionMap.get(swingOverPlanarRegionsTrajectoryCollisionType));
       }
@@ -112,65 +111,12 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", stanceFootGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingStartGraphic);
       yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", swingEndGraphic);
-
-      stanceFootPose = new FramePose3D(WORLD);
-      swingStartPose = new FramePose3D(WORLD);
-      swingEndPose = new FramePose3D(WORLD);
+//      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", firstWaypointGraphic);
+//      yoGraphicsListRegistry.registerYoGraphic("SwingOverPlanarRegions", secondWaypointGraphic);
    }
 
-   public AvatarSwingOverPlanarRegionsVisualizer(WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
-   {
-      this(new SimulationConstructionSet(new Robot("Robot")), new YoVariableRegistry(AvatarSwingOverPlanarRegionsVisualizer.class.getSimpleName()),
-           new YoGraphicsListRegistry(), walkingControllerParameters, contactPointParameters);
 
-      scs.addYoVariableRegistry(registry);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setDT(1.0, 1);
-      scs.setCameraFix(0.4, 0.0, 0.0);
-
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.4, 0.0, 0.0001);
-      generator.addCubeReferencedAtBottomMiddle(1.0, 1.0, 0.001);
-      generator.translate(-0.15, 0.0, 0.0001);
-      generator.translate(0.0, 0.0, 0.25);
-      generator.addRectangle(0.1, 0.1);
-//      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-      generator.translate(0.52, -0.12, 0.1);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-
-      PlanarRegionsList terrain = generator.getPlanarRegionsList();
-      Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addCoordinateSystem(0.3);
-      Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, terrain, appearances);
-      scs.addStaticLinkGraphics(graphics3DObject);
-
-      stanceFootPose.setPosition(0.4, 0.3, 0.0);
-      swingStartPose.setPosition(0.0, 0.0, 0.0);
-      swingEndPose.setPosition(0.8, 0.0, 0.0);
-      updateFootGraphics();
-      swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, terrain);
-
-      scs.startOnAThread();
-      scs.cropBuffer();
-      ThreadTools.sleepForever();
-   }
-
-   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose, FramePose3D swingEndPose,
-                                                 PlanarRegionsList planarRegionsList)
-   {
-      this.stanceFootPose.set(stanceFootPose);
-      this.swingStartPose.set(swingStartPose);
-      this.swingEndPose.set(swingEndPose);
-      updateFootGraphics();
-      return swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-   }
-
-   public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
-   {
-      return swingOverPlanarRegionsTrajectoryExpander;
-   }
-
-   private void update()
+   public void update()
    {
       solePose.setFromReferenceFrame(swingOverPlanarRegionsTrajectoryExpander.getSolePoseReferenceFrame());
 
@@ -184,10 +130,13 @@ public class AvatarSwingOverPlanarRegionsVisualizer
       collisionSphere.setRadii(new Vector3D(sphereRadius, sphereRadius, sphereRadius));
       collisionSphere.update();
 
+      firstWaypoint.set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+      secondWaypoint.set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
+
       scs.tickAndUpdate(scs.getTime() + 0.1);
    }
 
-   private void updateFootGraphics()
+   public void updateFoot(FramePose3D stanceFootPose, FramePose3D swingStartPose, FramePose3D swingEndPose)
    {
       stanceFootGraphic.setPose(stanceFootPose);
       stanceFootGraphic.updateConvexPolygon2d(footPolygon);
