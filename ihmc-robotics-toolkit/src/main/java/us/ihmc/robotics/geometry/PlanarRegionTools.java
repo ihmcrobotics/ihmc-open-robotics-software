@@ -419,7 +419,7 @@ public class PlanarRegionTools
             {
                minDistanceToEdge = distanceToFirstEnd;
                if (closestPointOnSegmentToPack != null)
-               closestPointOnSegmentToPack.set(firstEndPointInLocal);
+                  closestPointOnSegmentToPack.set(firstEndPointInLocal);
                if (closestPointOnRegionToPack != null)
                   closestPointOnRegionToPack.set(firstEndPointInLocal.getX(), firstEndPointInLocal.getY(), 0.0);
             }
