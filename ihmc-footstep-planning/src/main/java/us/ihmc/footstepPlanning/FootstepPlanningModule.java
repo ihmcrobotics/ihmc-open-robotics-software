@@ -16,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
@@ -26,8 +25,6 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -54,7 +51,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class FootstepPlanningModule implements CloseableAndDisposable
 {

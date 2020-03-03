@@ -12,7 +12,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -90,8 +89,8 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
-      planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
+//      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
+      planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, null, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(1000);
    }
