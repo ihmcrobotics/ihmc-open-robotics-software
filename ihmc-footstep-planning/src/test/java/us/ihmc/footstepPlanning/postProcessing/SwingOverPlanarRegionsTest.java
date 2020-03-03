@@ -163,13 +163,11 @@ public class SwingOverPlanarRegionsTest
       endFoot.setPosition(1.0, 0.0, 0.0);
 
       runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      Assert.fail();
    }
 
    private void runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
    {
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       ConvexPolygon2D foot = getFootPolygon();
 
       Graphics3DObject startGraphics = new Graphics3DObject();
@@ -257,7 +255,6 @@ public class SwingOverPlanarRegionsTest
 
       scs.startOnAThread();
       scs.cropBuffer();
-      ThreadTools.sleepForever();
    }
 
    private ConvexPolygon2D getFootPolygon()
