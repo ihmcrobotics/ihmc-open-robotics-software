@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -41,6 +45,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private static final double[] swingWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
+   private final ConvexPolygon2D footPlanePolygon;
 
    private final YoBoolean doInitialFastApproximation;
    private final YoInteger numberOfCheckpoints;
@@ -102,14 +107,22 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
-                                                                walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
-                                                                walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(),
-                                                                walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getMinSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getMaxSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 parentRegistry, graphicsListRegistry);
-      minimumSwingHeight = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
-      maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
-      collisionSphereRadius = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
+      minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
+      maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
+      collisionSphereRadius = steppingParameters.getActualFootLength() / 2.0;
+
+      footPlanePolygon = new ConvexPolygon2D();
+      footPlanePolygon.addVertex(steppingParameters.getFootForwardOffset(), 0.5 * steppingParameters.getToeWidth());
+      footPlanePolygon.addVertex(steppingParameters.getFootForwardOffset(), -0.5 * steppingParameters.getToeWidth());
+      footPlanePolygon.addVertex(-steppingParameters.getFootBackwardOffset(), 0.5 * steppingParameters.getFootWidth());
+      footPlanePolygon.addVertex(-steppingParameters.getFootBackwardOffset(), -0.5 * steppingParameters.getFootWidth());
+      footPlanePolygon.update();
 
       doInitialFastApproximation = new YoBoolean(namePrefix + "DoInitialFastApproximation", parentRegistry);
       numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
@@ -212,7 +225,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       this.minimumHeightAboveFloorForCollision.set(heightAboveFloorForCollision);
    }
 
-   public double expandTrajectoryOverPlanarRegions(FramePose3D stanceFootPose, FramePose3D swingStartPose, FramePose3D swingEndPose,
+
+   private final RigidBodyTransform transformToStart = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromStart = new RigidBodyTransform();
+   private final RigidBodyTransform transformToEnd = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromEnd = new RigidBodyTransform();
+
+   public double expandTrajectoryOverPlanarRegions(FramePose3DReadOnly stanceFootPose, FramePose3DReadOnly swingStartPose, FramePose3DReadOnly swingEndPose,
                                                    PlanarRegionsList planarRegionsList)
    {
       stanceFootPosition.setIncludingFrame(stanceFootPose.getPosition());
@@ -227,6 +246,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       swingEndPosition.changeFrame(worldFrame);
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
+
+      swingStartPose.get(transformToStart);
+      swingEndPose.get(transformToEnd);
+      transformToStart.inverseTransform(transformFromStart);
+      transformToEnd.inverseTransform(transformFromEnd);
 
       originalWaypoints.get(0).interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[0]);
       originalWaypoints.get(0).add(0.0, 0.0, minimumSwingHeight);
@@ -509,8 +533,24 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       if (!swingFloorPlane.isOnOrAbove(collisionPoint))
          return true;
 
-      // see if the collision is within some distance of the floor
-      return swingFloorPlane.distance(collisionPoint) < minimumHeightAboveFloorForCollision.getDoubleValue() + minimumClearance.getDoubleValue();
+      Point3D collisionInStart = new Point3D(trajectoryPosition);
+      Point3D collisionInEnd = new Point3D(trajectoryPosition);
+      transformFromStart.transform(collisionInStart);
+      transformFromEnd.transform(collisionInEnd);
+
+      // FIXME check the order of the transforms
+      double distanceToStart = PlanarRegionTools.closestPointOnPlane(collisionPoint, footPlanePolygon, transformToStart, transformFromStart).distance(collisionPoint);
+      double distanceToEnd = PlanarRegionTools.closestPointOnPlane(collisionPoint, footPlanePolygon, transformToEnd, transformFromEnd).distance(collisionPoint);
+      double distanceToFloor = swingFloorPlane.distance(collisionPoint);
+
+      double minimalDistance = minimumHeightAboveFloorForCollision.getDoubleValue() + minimumClearance.getDoubleValue();
+
+      if (collisionInStart.getZ() < minimalDistance && collisionInStart.getZ() > 0.0)
+         return true;
+//      if (distanceToEnd < minimalDistance)
+//         return true;
+
+      return distanceToFloor < minimalDistance;
    }
 
    private void computeWaypointAdjustmentDirection(double time)

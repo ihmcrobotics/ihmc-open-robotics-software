@@ -1062,14 +1062,17 @@ public class PlanarRegionTools
     */
    public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
-      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
+      return closestPointOnPlane(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), region.getTransformToLocal());
+   }
 
+   public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, ConvexPolygon2DReadOnly regionConvexHull, RigidBodyTransformReadOnly regionToWorld,
+                                             RigidBodyTransformReadOnly regionToLocal)
+   {
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
 
       Point3D pointOnPlane = new Point3D();
-      pointOnPlane.set(region.getConvexPolygon(0).getVertex(0));
+      pointOnPlane.set(regionConvexHull.getVertex(0));
       pointOnPlane.applyTransform(regionToWorld);
 
       Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointInWorld, planeNormal);
@@ -1083,10 +1086,9 @@ public class PlanarRegionTools
       Point2D intersectionInPlaneFrame2D = new Point2D(intersectionInPlaneFrame);
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
-      ConvexPolygon2D convexHull = region.getConvexHull();
-      if (!convexHull.isPointInside(intersectionInPlaneFrame2D))
+      if (!regionConvexHull.isPointInside(intersectionInPlaneFrame2D))
       {
-         convexHull.orthogonalProjection(intersectionInPlaneFrame2D);
+         regionConvexHull.orthogonalProjection(intersectionInPlaneFrame2D);
          intersectionWithPlane.setToZero();
          intersectionWithPlane.set(intersectionInPlaneFrame2D);
          intersectionWithPlane.applyTransform(regionToWorld);

@@ -49,33 +49,10 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SwingOverPlanarRegionsTest
 {
-   @Test
-   public void testBigStepDown()
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      generator.translate(0.0, 0.0, 0.5);
-      generator.addRectangle(0.4, 0.4);
-
-      generator.translate(0.5, 0.0, -0.15);
-      generator.rotateEuler(new Vector3D(0.0, Math.toRadians(20), 0.0));
-      generator.addRectangle(0.4, 0.4);
-
-
-
-      double width = 0.25;
-      FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, -width / 2.0, 0.5);
-
-      FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(0.6, -width / 2.0, 0.36);
-      endFoot.setOrientationYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
-
-      runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-   }
 
    @Test
-   public void testBigStepDown2()
+   public void testAngleStepDown()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -95,6 +72,56 @@ public class SwingOverPlanarRegionsTest
       FramePose3D endFoot = new FramePose3D();
       endFoot.setPosition(0.6, -width / 2.0, 0.31);
       endFoot.setOrientationYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
+
+      runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+   }
+
+   @Test
+   public void testAngleStepSlightPitch()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      generator.translate(0.0, 0.0, 0.5);
+      generator.rotateEuler(new Vector3D(0.0, -Math.toRadians(5), 0.0));
+      generator.addRectangle(0.4, 0.4);
+
+      generator.identity();
+      generator.translate(0.0, 0.0, 0.5);
+      generator.translate(0.5, 0.0, -0.15);
+      generator.rotateEuler(new Vector3D(0.0, Math.toRadians(20), 0.0));
+      generator.addRectangle(0.4, 0.4);
+
+
+      double width = 0.25;
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.setPosition(0.0, -width / 2.0, 0.5);
+      startFoot.setOrientationYawPitchRoll(0.0, -Math.toRadians(5), 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.setPosition(0.6, -width / 2.0, 0.31);
+      endFoot.setOrientationYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
+
+      runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+   }
+
+   @Test
+   public void testBigStepDown()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      generator.translate(0.0, 0.0, 0.5);
+      generator.addRectangle(0.2, 0.4);
+
+      generator.translate(0.2, 0.0, -0.4);
+      generator.addRectangle(0.2, 0.4);
+
+
+      double width = 0.25;
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.setPosition(0.0, -width / 2.0, 0.5);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.setPosition(0.2, -width / 2.0, 0.1);
 
       runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
@@ -128,6 +155,7 @@ public class SwingOverPlanarRegionsTest
 
       DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
       parameters.setMaximumWaypointAdjustmentDistance(1.0);
+      parameters.setDoInitialFastApproximation(false);
       SwingOverRegionsPostProcessingElement swingOverElement = new SwingOverRegionsPostProcessingElement(parameters, getWalkingControllerParameters(), registry,
                                                                                                          yoGraphicsListRegistry);
 
@@ -190,23 +218,6 @@ public class SwingOverPlanarRegionsTest
       ThreadTools.sleepForever();
    }
 
-   private void update(SwingOverPlanarRegionsTrajectoryExpander expander, SimulationConstructionSet scs, YoFramePoseUsingYawPitchRoll solePose,
-                       HashMap<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap, YoGraphicEllipsoid collisionSphere)
-   {
-      solePose.setFromReferenceFrame(expander.getSolePoseReferenceFrame());
-
-      for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
-      {
-         intersectionMap.get(swingOverPlanarRegionsTrajectoryCollisionType)
-                        .setPosition(expander.getClosestPolygonPoint(swingOverPlanarRegionsTrajectoryCollisionType));
-      }
-
-      double sphereRadius = expander.getSphereRadius();
-      collisionSphere.setRadii(new Vector3D(sphereRadius, sphereRadius, sphereRadius));
-      collisionSphere.update();
-
-      scs.tickAndUpdate(scs.getTime() + 0.1);
-   }
 
    private WalkingControllerParameters getWalkingControllerParameters()
    {
