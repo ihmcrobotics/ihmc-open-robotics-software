@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsVi
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -146,7 +147,7 @@ public class SwingOverPlanarRegionsTest
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      ConvexPolygon2D foot = PlannerTools.createDefaultFootPolygon();
+      ConvexPolygon2D foot = getFootPolygon();
 
       generator.translate(0.6, 0.0, 0.0);
       generator.addRectangle(1.75, 0.4);
@@ -154,7 +155,7 @@ public class SwingOverPlanarRegionsTest
       double cubeDepth = 0.02;
       double cubeHeight = 0.05;
       generator.identity();
-      generator.translate(foot.getMaxX() + cubeDepth / 2.0, 0.0, cubeHeight / 2.0);
+      generator.translate(foot.getMaxX() + cubeDepth / 2.0 + 1e-3, 0.0, cubeHeight / 2.0);
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
@@ -169,12 +170,14 @@ public class SwingOverPlanarRegionsTest
 
    private void runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
    {
-      ConvexPolygon2D feet = PlannerTools.createDefaultFootPolygon();
+      WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      ConvexPolygon2D foot = getFootPolygon();
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
-      startGraphics.addExtrudedPolygon(feet, 0.02, YoAppearance.Color(Color.blue));
-      endGraphics.addExtrudedPolygon(feet, 0.02, YoAppearance.Color(Color.RED));
+      startGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.blue));
+      endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -195,7 +198,9 @@ public class SwingOverPlanarRegionsTest
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("secondWaypoint", secondWaypoint, 0.02, YoAppearance.White()));
 
       DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
-      SwingOverRegionsPostProcessingElement swingOverElement = new SwingOverRegionsPostProcessingElement(parameters, getWalkingControllerParameters(), registry,
+      parameters.setDoInitialFastApproximation(true);
+
+      SwingOverRegionsPostProcessingElement swingOverElement = new SwingOverRegionsPostProcessingElement(parameters, walkingControllerParameters, registry,
                                                                                                          yoGraphicsListRegistry);
 
       FootstepPostProcessingPacket postProcessingPacket = new FootstepPostProcessingPacket();
@@ -216,7 +221,7 @@ public class SwingOverPlanarRegionsTest
 
 
       SwingOverPlanarRegionsTrajectoryExpander expander = swingOverElement.swingOverPlanarRegionsTrajectoryExpander;
-      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, feet, expander);
+      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
       expander.attachVisualizer(visualizer::update);
 
       scs.setDT(1.0, 1);
@@ -257,6 +262,19 @@ public class SwingOverPlanarRegionsTest
       ThreadTools.sleepForever();
    }
 
+   private ConvexPolygon2D getFootPolygon()
+   {
+      SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
+
+      ConvexPolygon2D foot = new ConvexPolygon2D();
+      foot.addVertex(steppingParameters.getFootForwardOffset(), -0.5 * steppingParameters.getToeWidth());
+      foot.addVertex(steppingParameters.getFootForwardOffset(), 0.5 * steppingParameters.getToeWidth());
+      foot.addVertex(-steppingParameters.getFootBackwardOffset(), -0.5 * steppingParameters.getFootWidth());
+      foot.addVertex(-steppingParameters.getFootBackwardOffset(), 0.5 * steppingParameters.getFootWidth());
+      foot.update();
+
+      return foot;
+   }
 
    private WalkingControllerParameters getWalkingControllerParameters()
    {
