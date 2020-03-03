@@ -7,6 +7,7 @@ import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
@@ -37,6 +38,7 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
+      new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
          networkProcessor.setupFootstepPlanningToolboxModule(false);
@@ -64,6 +66,7 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
+      new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
          networkProcessor.setupFootstepPlanningToolboxModule(false);
