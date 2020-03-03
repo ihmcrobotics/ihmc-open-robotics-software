@@ -1,22 +1,16 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
-import us.ihmc.commons.Conversions;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -56,10 +50,13 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputPlan)
    {
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(parameters.getDoInitialFastApproximation());
+      swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(parameters.getFastApproximationLessClearance());
       swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(parameters.getMinimumSwingFootClearance());
-      swingOverPlanarRegionsTrajectoryExpander.setIncrementalAdjustmentDistance(parameters.getIncrementalWaypointAdjustmentDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(parameters.getMinimumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(parameters.getMaximumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(parameters.getAdjustmentIncrementDistanceGain());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(parameters.getMaximumWaypointAdjustmentDistance());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(parameters.getMinimumHeightAboveFloorForCollision());
 
