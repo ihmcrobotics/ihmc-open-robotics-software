@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.*;
 public class SwingOverPlanarRegionsTrajectoryExpander
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double[] swingWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
+   private final double[] swingWaypointProportions;
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
    private final ConvexPolygon2D footPlanePolygon;
@@ -107,6 +107,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
       collisionSphereRadius = steppingParameters.getActualFootLength() / 2.0;
+
+      swingWaypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
 
       footPlanePolygon = new ConvexPolygon2D();
       footPlanePolygon.addVertex(steppingParameters.getFootForwardOffset(), 0.5 * steppingParameters.getToeWidth());
