@@ -13,8 +13,7 @@ import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
@@ -65,14 +64,12 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
       this.robotModel = robotModel;
       URI rosUri = NetworkParameters.getROSURI();
 
-      DRCNetworkModuleParameters params = new DRCNetworkModuleParameters();
-
-      params.setRosUri(rosUri);
-      params.enableRosModule(true);
-      params.enableSensorModule(true);
-      params.enableZeroPoseRobotConfigurationPublisherModule(true);
-
-      DRCNetworkProcessor drcNetworkProcessor = new DRCNetworkProcessor(robotModel, params, PubSubImplementation.FAST_RTPS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
+      networkProcessor.setupZeroPoseRobotConfigurationPublisherModule();
+      networkProcessor.setupShutdownHook();
+      networkProcessor.start();
 
       if (rosNamespace == null || rosNamespace.isEmpty())
       {

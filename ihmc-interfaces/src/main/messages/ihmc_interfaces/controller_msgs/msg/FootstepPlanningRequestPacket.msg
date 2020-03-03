@@ -6,12 +6,10 @@ uint32 sequence_id
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = 0
-byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 1
+byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 0
 # The recommended planner type
-byte FOOTSTEP_PLANNER_TYPE_A_STAR = 2
-byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = 3
-byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 4
+byte FOOTSTEP_PLANNER_TYPE_A_STAR = 1
+byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 2
 
 int32 NO_PLAN_ID = -1
 
@@ -43,3 +41,5 @@ PlanarRegionsListMessage planar_regions_list_message
 bool assume_flat_ground
 # Set this id to keep track of your request
 int32 planner_request_id -1
+# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+geometry_msgs/Pose[<=50] body_path_waypoints

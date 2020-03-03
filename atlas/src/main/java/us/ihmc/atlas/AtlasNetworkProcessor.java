@@ -1,18 +1,27 @@
 package us.ihmc.atlas;
 
-import java.net.URI;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
-import com.martiansoftware.jsap.*;
-
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
+import us.ihmc.communication.producers.VideoControlSettings;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasNetworkProcessor
 {
+   private enum Application
+   {
+      DEFAULT, VR
+   };
+
+   private static final Application APPLICATION = Application.DEFAULT;
+
    public static void main(String[] args) throws JSAPException
    {
       JSAP jsap = new JSAP();
@@ -37,85 +46,91 @@ public class AtlasNetworkProcessor
 
       JSAPResult config = jsap.parse(args);
 
-      if (config.success())
-      {
-         DRCRobotModel model;
-
-         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
-         networkModuleParams.enableBehaviorModule(true);
-         networkModuleParams.enableBehaviorVisualizer(true);
-         networkModuleParams.enableSensorModule(true);
-         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
-         networkModuleParams.enableHeightQuadTreeToolbox(true);
-         networkModuleParams.enableMocapModule(false);
-         networkModuleParams.enableFootstepPlanningToolbox(false);
-         networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-         networkModuleParams.enableKinematicsToolbox(true);
-         networkModuleParams.enableKinematicsToolboxVisualizer(false);
-         networkModuleParams.enableKinematicsStreamingToolbox(true, AtlasKinematicsStreamingToolboxModule.class);
-         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
-         networkModuleParams.enableAutoREAStateUpdater(true);
-         networkModuleParams.enableWalkingPreviewToolbox(true);
-         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
-
-         URI rosuri = NetworkParameters.getROSURI();
-         if (rosuri != null)
-         {
-            networkModuleParams.enableRosModule(true);
-            networkModuleParams.setRosUri(rosuri);
-            System.out.println("ROS_MASTER_URI=" + rosuri);
-
-            createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
-         }
-         try
-         {
-            RobotTarget target;
-            if (config.getBoolean(runningOnRealRobot.getID()))
-            {
-               target = RobotTarget.REAL_ROBOT;
-            }
-            else if (config.getBoolean(runningOnGazebo.getID()))
-            {
-               target = RobotTarget.GAZEBO;
-            }
-            else
-            {
-               target = RobotTarget.SCS;
-            }
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
-         }
-         catch (IllegalArgumentException e)
-         {
-            System.err.println("Incorrect robot model " + config.getString("robotModel"));
-            System.out.println(jsap.getHelp());
-
-            return;
-         }
-
-         System.out.println("Using the " + model + " model");
-
-         URI rosMasterURI = NetworkParameters.getROSURI();
-         networkModuleParams.setRosUri(rosMasterURI);
-
-         new DRCNetworkProcessor(args, model, networkModuleParams, PubSubImplementation.FAST_RTPS);
-      }
-      else
+      if (!config.success())
       {
          System.err.println("Invalid parameters");
          System.out.println(jsap.getHelp());
          return;
       }
+
+      RobotTarget target;
+      AtlasRobotModel model;
+
+      try
+      {
+         if (config.getBoolean(runningOnRealRobot.getID()))
+         {
+            target = RobotTarget.REAL_ROBOT;
+         }
+         else if (config.getBoolean(runningOnGazebo.getID()))
+         {
+            target = RobotTarget.GAZEBO;
+         }
+         else
+         {
+            target = RobotTarget.SCS;
+         }
+         model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
+      }
+      catch (IllegalArgumentException e)
+      {
+         System.err.println("Incorrect robot model " + config.getString("robotModel"));
+         System.out.println(jsap.getHelp());
+         return;
+      }
+
+      LogTools.info("Selected model: {}", model);
+
+      switch (APPLICATION)
+      {
+         case VR:
+            vrNetworkProcessor(args, model);
+            break;
+         case DEFAULT:
+         default:
+            defaultNetworkProcessor(args, model);
+            break;
+      }
    }
 
-   private static void createAuxiliaryRobotDataRosPublisher(DRCNetworkModuleParameters networkModuleParams, URI rosuri)
+   private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel)
    {
-      // FIXME Do we still need that?
-      //      RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosuri, defaultRosNameSpace);
-      //      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER,
-      //            new IHMCCommunicationKryoNetClassList());
-      //
-      //      packetCommunicator.attachListener(AtlasAuxiliaryRobotData.class, auxiliaryRobotDataPublisher::receivedPacket);
-      //
-      //      networkModuleParams.addRobotSpecificModuleCommunicatorPort(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER, PacketDestination.AUXILIARY_ROBOT_DATA_PUBLISHER);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
+      networkProcessor.setupBehaviorModule(false, false, 0);
+      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupShutdownHook();
+      networkProcessor.start();
+   }
+
+   private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel)
+   {
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
+      networkProcessor.setupRosModule();
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      sensorModule.setEnableDepthPointCloudPublisher(false);
+      sensorModule.setEnableFisheyeCameraPublishers(false);
+      sensorModule.setEnableLidarScanPublisher(true);
+      sensorModule.setEnableStereoVisionPointCloudPublisher(true);
+      sensorModule.setEnableVideoPublisher(true);
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setRangeFilter(0.2, 2.5);
+      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setPublisherPeriodInMillisecond(1500L);
+      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
+
+      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupShutdownHook();
+      networkProcessor.start();
    }
 }

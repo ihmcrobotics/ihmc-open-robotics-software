@@ -31,7 +31,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -52,7 +51,15 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyInverseDynamicsSolver
 {
+   /**
+    * Switch to using the {@link DynamicsMatrixCalculator} instead of the
+    * {@link InverseDynamicsCalculator} for computing the joint efforts.
+    */
    private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = false;
+   /**
+    * Whether to assemble the objective for minimizing the joint torques. May be computationally
+    * intensive, needs benchmark.
+    */
    private static final boolean MINIMIZE_JOINT_TORQUES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -96,8 +103,7 @@ public class WholeBodyInverseDynamicsSolver
       controlDT = toolbox.getControlDT();
       rootJoint = toolbox.getRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
-      WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
-      dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
+      dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -134,9 +140,15 @@ public class WholeBodyInverseDynamicsSolver
       optimizationControlModule.initialize();
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
+      {
          dynamicsMatrixCalculator.reset();
+      }
       else
+      {
          inverseDynamicsCalculator.setExternalWrenchesToZero();
+         if (MINIMIZE_JOINT_TORQUES)
+            dynamicsMatrixCalculator.reset();
+      }
    }
 
    public void initialize()
@@ -147,9 +159,15 @@ public class WholeBodyInverseDynamicsSolver
       planeContactWrenchProcessor.initialize();
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
+      {
          dynamicsMatrixCalculator.reset();
+      }
       else
+      {
          inverseDynamicsCalculator.compute();
+         if (MINIMIZE_JOINT_TORQUES)
+            dynamicsMatrixCalculator.reset();
+      }
 
       optimizationControlModule.resetRateRegularization();
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
@@ -163,6 +181,11 @@ public class WholeBodyInverseDynamicsSolver
          dynamicsMatrixCalculator.compute();
          if (MINIMIZE_JOINT_TORQUES)
             optimizationControlModule.setupTorqueMinimizationCommand();
+      }
+      else if (MINIMIZE_JOINT_TORQUES)
+      {
+         dynamicsMatrixCalculator.compute();
+         optimizationControlModule.setupTorqueMinimizationCommand();
       }
 
       if (!optimizationControlModule.compute())
@@ -267,54 +290,54 @@ public class WholeBodyInverseDynamicsSolver
          InverseDynamicsCommand<?> command = inverseDynamicsCommandList.pollCommand();
          switch (command.getCommandType())
          {
-         case TASKSPACE:
-            optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
-            break;
-         case JOINTSPACE:
-            optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
-            break;
-         case MOMENTUM:
-            optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
-            recordMomentumRate((MomentumRateCommand) command);
-            break;
-         case PRIVILEGED_CONFIGURATION:
-            optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
-            break;
-         case PRIVILEGED_JOINTSPACE_COMMAND:
-            optimizationControlModule.submitPrivilegedAccelerationCommand((PrivilegedJointSpaceCommand) command);
-            break;
-         case LIMIT_REDUCTION:
-            optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            optimizationControlModule.submitJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) command);
-            break;
-         case EXTERNAL_WRENCH:
-            optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
-            if (USE_DYNAMIC_MATRIX_CALCULATOR)
-               dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(),
-                                                          ((ExternalWrenchCommand) command).getExternalWrench());
-            break;
-         case CONTACT_WRENCH:
-            optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
-            break;
-         case PLANE_CONTACT_STATE:
-            optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
-            break;
-         case CENTER_OF_PRESSURE:
-            optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
-            break;
-         case JOINT_ACCELERATION_INTEGRATION:
-            jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
-            break;
-         case COMMAND_LIST:
-            submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
-            break;
-         case OPTIMIZATION_SETTINGS:
-            optimizationControlModule.submitOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) command);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
+            case TASKSPACE:
+               optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
+               break;
+            case JOINTSPACE:
+               optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
+               break;
+            case MOMENTUM:
+               optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
+               recordMomentumRate((MomentumRateCommand) command);
+               break;
+            case PRIVILEGED_CONFIGURATION:
+               optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+               break;
+            case PRIVILEGED_JOINTSPACE_COMMAND:
+               optimizationControlModule.submitPrivilegedAccelerationCommand((PrivilegedJointSpaceCommand) command);
+               break;
+            case LIMIT_REDUCTION:
+               optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               optimizationControlModule.submitJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) command);
+               break;
+            case EXTERNAL_WRENCH:
+               optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
+               if (USE_DYNAMIC_MATRIX_CALCULATOR)
+                  dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(),
+                                                             ((ExternalWrenchCommand) command).getExternalWrench());
+               break;
+            case CONTACT_WRENCH:
+               optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
+               break;
+            case PLANE_CONTACT_STATE:
+               optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
+               break;
+            case CENTER_OF_PRESSURE:
+               optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
+               break;
+            case JOINT_ACCELERATION_INTEGRATION:
+               jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
+               break;
+            case COMMAND_LIST:
+               submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
+               break;
+            case OPTIMIZATION_SETTINGS:
+               optimizationControlModule.submitOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) command);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
    }

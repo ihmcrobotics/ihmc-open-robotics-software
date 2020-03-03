@@ -1,6 +1,7 @@
 package us.ihmc.pathPlanning.graph.structure;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Class that maintains a directed graph.
@@ -18,6 +19,9 @@ public class DirectedGraph<N>
 
    private final HashMap<N, HashSet<GraphEdge<N>>> outgoingEdges = new HashMap<>();
    private final HashMap<N, GraphEdge<N>> incomingBestEdge = new HashMap<>();
+
+   /** Callback triggered when {@link #checkAndSetEdge(Object, Object, double)} is called */
+   private Consumer<GraphEdge<N>> graphExpansionCallback = null;
 
    /**
     * Removes all nodes and edges stored in the graph and
@@ -68,18 +72,21 @@ public class DirectedGraph<N>
       if (nodeCostMap.containsKey(endNode))
       {
          double oldNodeCost = nodeCostMap.get(endNode).getNodeCost();
-         if (newNodeCost >= oldNodeCost)
-            return;
-
-         nodeCostMap.put(endNode, new NodeCost(newNodeCost));
-         incomingBestEdge.put(endNode, edge);
-         updateChildCostsRecursively(endNode);
+         if (newNodeCost < oldNodeCost)
+         {
+            nodeCostMap.put(endNode, new NodeCost(newNodeCost));
+            incomingBestEdge.put(endNode, edge);
+            updateChildCostsRecursively(endNode);
+         }
       }
       else
       {
          nodeCostMap.put(endNode, new NodeCost(newNodeCost));
          incomingBestEdge.put(endNode, edge);
       }
+
+      if(graphExpansionCallback != null)
+         graphExpansionCallback.accept(edge);
    }
 
    /**
@@ -154,5 +161,10 @@ public class DirectedGraph<N>
    public N getParentNode(N node)
    {
       return incomingBestEdge.get(node).getStartNode();
+   }
+
+   public void setGraphExpansionCallback(Consumer<GraphEdge<N>> graphExpansionCallback)
+   {
+      this.graphExpansionCallback = graphExpansionCallback;
    }
 }

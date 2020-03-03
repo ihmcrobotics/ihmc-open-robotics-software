@@ -16,8 +16,7 @@ public class CompressedVideoDataFactory
       switch (algorithm)
       {
       case H264:
-         H264CompressedVideoDataServer h264Server = new H264CompressedVideoDataServer(handler);
-         return h264Server;
+            return new H264CompressedVideoDataServer(handler);
       case JPEG:
          return new JPEGCompressedVideoDataServer(handler);
       default:

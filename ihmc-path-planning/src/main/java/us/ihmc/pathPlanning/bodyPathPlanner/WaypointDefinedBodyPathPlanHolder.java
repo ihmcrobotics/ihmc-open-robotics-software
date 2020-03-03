@@ -72,7 +72,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
    @Override
    public void getPointAlongPath(double alpha, Pose3DBasics poseToPack)
    {
-      int segmentIndex = getRegionIndexFromAlpha(alpha);
+      int segmentIndex = getSegmentIndexFromAlpha(alpha);
       Pose3DReadOnly firstPoint = bodyPathPlan.getWaypoint(segmentIndex);
       Pose3DReadOnly secondPoint = bodyPathPlan.getWaypoint(segmentIndex + 1);
 
@@ -116,7 +116,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
    @Override
    public double computePathLength(double alpha)
    {
-      int segmentIndex = getRegionIndexFromAlpha(alpha);
+      int segmentIndex = getSegmentIndexFromAlpha(alpha);
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
       double segmentLength = (1.0 - alphaInSegment) * segmentLengths[segmentIndex];
@@ -136,7 +136,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       return (alpha - alphaSegmentStart) / (alphaSegmentEnd - alphaSegmentStart);
    }
 
-   private int getRegionIndexFromAlpha(double alpha)
+   public int getSegmentIndexFromAlpha(double alpha)
    {
       if (alpha > maxAlphas[maxAlphas.length - 1])
       {
@@ -152,5 +152,10 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       }
 
       throw new RuntimeException("Alpha = " + alpha + "\nalpha must be between [0,1] and maxAlphas highest value must be 1.0.");
+   }
+
+   public double getMaxAlphaFromSegmentIndex(int index)
+   {
+      return maxAlphas[index];
    }
 }

@@ -57,4 +57,9 @@ public abstract class FootstepNodeChecker
    abstract boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode);
 
    public abstract void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform);
+
+   public ArrayList<BipedalFootstepPlannerListener> getListeners()
+   {
+      return listeners;
+   }
 }

@@ -19,12 +19,12 @@ public class TransferToFlamingoStanceState extends TransferState
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private final FootstepShiftFractions footstepShiftFractions = new FootstepShiftFractions();
 
-   public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingControllerParameters walkingControllerParameters,
-                                        WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                        HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+   public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
+                                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                        WalkingFailureDetectionControlModule failureDetectionControlModule,
                                         DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
             rhoMin, parentRegistry);
    }
 

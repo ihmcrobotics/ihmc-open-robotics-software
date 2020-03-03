@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -62,7 +63,8 @@ public class ConcaveHullFactoryGraphicsTools
 
       double lineSat, lineHue;
 
-      List<ConcaveHullVariables> intermediateVariablesList = concaveHullFactoryResult.getIntermediateVariables();
+      List<ConcaveHullVariables> intermediateVariablesList = concaveHullFactoryResult != null ? concaveHullFactoryResult.getIntermediateVariables()
+            : Collections.emptyList();
 
       for (int variablesIndex = 0; variablesIndex < intermediateVariablesList.size(); variablesIndex++)
       {
@@ -103,7 +105,8 @@ public class ConcaveHullFactoryGraphicsTools
       return meshView;
    }
 
-   public static MeshView constraintEdgesToMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult, Color color, double lineWidth)
+   public static MeshView constraintEdgesToMultiLine(RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult, Color color,
+                                                     double lineWidth)
    {
       List<LineSegment3D> constraintEdges = JTSTools.extractConstraintEdges(concaveHullFactoryResult, transformToWorld);
       return REAGraphics3DTools.multiLine(constraintEdges, color, lineWidth);

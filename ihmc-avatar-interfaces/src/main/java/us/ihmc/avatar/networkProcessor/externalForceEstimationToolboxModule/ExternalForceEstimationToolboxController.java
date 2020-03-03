@@ -108,7 +108,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       }
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
-      this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox, controlCoreToolbox.getWrenchMatrixCalculator());
+      this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox);
       int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       this.controllerDesiredQdd = new DenseMatrix64F(degreesOfFreedom, 1);

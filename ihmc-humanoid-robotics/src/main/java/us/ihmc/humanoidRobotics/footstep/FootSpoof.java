@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.ArrayList;
 import java.util.List;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -187,6 +186,6 @@ public class FootSpoof implements ContactablePlaneBody
    @Override
    public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
    {
-      throw new NotImplementedException();
+      throw new RuntimeException("Not implemented");
    }
 }

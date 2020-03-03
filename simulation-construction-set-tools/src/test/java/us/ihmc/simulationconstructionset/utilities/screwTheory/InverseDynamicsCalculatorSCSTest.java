@@ -125,8 +125,7 @@ public class InverseDynamicsCalculatorSCSTest
       inverseDynamicsCalculator.compute();
       inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(elevator).collect(Collectors.toList()));
 
-      Wrench outputWrench = new Wrench(null, null);
-      outputWrench.setIncludingFrame(rootInverseDynamicsJoint.getJointWrench());
+      Wrench outputWrench = new Wrench(rootInverseDynamicsJoint.getJointWrench());
       
       outputWrench.setBodyFrame(forceApplicationFrame);
       outputWrench.changeFrame(forceApplicationFrame);

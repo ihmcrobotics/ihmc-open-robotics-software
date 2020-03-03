@@ -193,14 +193,18 @@ public class VisibilityGraphMessagesConverter
 
    public static VisibilityMapWithNavigableRegion convertToVisibilityMapWithNavigableRegion(VisibilityMapWithNavigableRegionMessage message)
    {
-      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()));
-
-      visibilityMapWithNavigableRegion.setHomeRegionCluster(convertToCluster(message.getHomeRegionCluster()));
-      visibilityMapWithNavigableRegion.setVisibilityMapInWorld(convertToVisibilityMap(message.getVisibilityMapInWorld()));
+      Cluster homeRegionCluster = convertToCluster(message.getHomeRegionCluster());
 
       List<VisibilityClusterMessage> obstacleClusterMessages = message.getObstacleClusters();
+      List<Cluster> obstacleClusters = new ArrayList<>();
       for (int i = 0; i < obstacleClusterMessages.size(); i++)
-         visibilityMapWithNavigableRegion.addObstacleCluster(convertToCluster(obstacleClusterMessages.get(i)));
+         obstacleClusters.add(convertToCluster(obstacleClusterMessages.get(i)));
+
+      NavigableRegion navigableRegion = new NavigableRegion(PlanarRegionMessageConverter.convertToPlanarRegion(message.getHomeRegion()),
+                                                            homeRegionCluster, obstacleClusters);
+
+      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
+      visibilityMapWithNavigableRegion.setVisibilityMapInWorld(convertToVisibilityMap(message.getVisibilityMapInWorld()));
 
       return visibilityMapWithNavigableRegion;
    }

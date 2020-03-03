@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -254,8 +254,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       simulationStarter.setRunMultiThreaded(false);
 
       boolean automaticallyStartSimulation = true;
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
+      simulationStarter.startSimulation(null, automaticallyStartSimulation);
       simulationStarter.setPubSubImplementation(PubSubImplementation.INTRAPROCESS);
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();

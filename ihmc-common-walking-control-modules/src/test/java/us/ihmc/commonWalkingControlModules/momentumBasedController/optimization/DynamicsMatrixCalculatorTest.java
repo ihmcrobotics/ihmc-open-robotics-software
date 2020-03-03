@@ -354,12 +354,12 @@ public class DynamicsMatrixCalculatorTest
                                                 yoGraphicsListRegistry, registry);
       toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
-      wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+      wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       jointIndexHandler = toolbox.getJointIndexHandler();
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody());
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
-      dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
+      dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
 
       centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
 
