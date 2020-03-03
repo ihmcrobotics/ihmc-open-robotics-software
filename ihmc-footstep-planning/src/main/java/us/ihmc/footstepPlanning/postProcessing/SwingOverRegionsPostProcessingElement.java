@@ -87,16 +87,29 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
          FramePose3D nextFootPose = new FramePose3D();
+         RobotSide side = RobotSide.fromByte(footstepDataMessageList.get(stepNumber).getRobotSide());
 
          if (stepNumber > 0)
          {
             stanceFootPose.setPosition(footstepDataMessageList.get(stepNumber - 1).getLocation());
             stanceFootPose.setOrientation(footstepDataMessageList.get(stepNumber - 1).getOrientation());
          }
+         else
+         {
+            if (side == RobotSide.LEFT)
+            {
+               stanceFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
+               stanceFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+            }
+            else
+            {
+               stanceFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
+               stanceFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+            }
+         }
 
          nextFootPose.setPosition(footstepDataMessageList.get(stepNumber).getLocation());
          nextFootPose.setOrientation(footstepDataMessageList.get(stepNumber).getOrientation());
-         RobotSide side = RobotSide.fromByte(footstepDataMessageList.get(stepNumber).getRobotSide());
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, footPoses.get(side),
                                                                                                                    nextFootPose, planarRegionsList);
