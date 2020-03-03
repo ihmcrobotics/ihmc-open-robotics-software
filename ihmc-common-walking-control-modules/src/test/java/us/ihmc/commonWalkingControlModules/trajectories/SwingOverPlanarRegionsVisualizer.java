@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsCollisionType;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,7 +34,7 @@ public class SwingOverPlanarRegionsVisualizer
    private final YoGraphicPolygon swingEndGraphic;
    private final YoGraphicPosition firstWaypointGraphic;
    private final YoGraphicPosition secondWaypointGraphic;
-   private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, YoGraphicPosition> intersectionMap;
+   private final Map<SwingOverPlanarRegionsCollisionType, YoGraphicPosition> intersectionMap;
 
    private final ConvexPolygon2DReadOnly footPolygon;
    private final SwingOverPlanarRegionsTrajectoryExpander trajectoryExpander;
@@ -63,7 +63,7 @@ public class SwingOverPlanarRegionsVisualizer
       secondWaypointGraphic = new YoGraphicPosition("SecondWaypointGraphic", secondWaypoint, 0.02, YoAppearance.White());
       intersectionMap = new HashMap<>();
 
-      for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
+      for (SwingOverPlanarRegionsCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsCollisionType.values())
       {
          AppearanceDefinition appearance;
          double size;
@@ -110,7 +110,7 @@ public class SwingOverPlanarRegionsVisualizer
    {
       solePose.setFromReferenceFrame(trajectoryExpander.getSolePoseReferenceFrame());
 
-      for (SwingOverPlanarRegionsTrajectoryCollisionType collisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
+      for (SwingOverPlanarRegionsCollisionType collisionType : SwingOverPlanarRegionsCollisionType.values())
       {
          intersectionMap.get(collisionType).setPosition(trajectoryExpander.getClosestPolygonPoint(collisionType));
       }
