@@ -8,8 +8,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryCollisionType;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsStandaloneVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -24,10 +22,10 @@ import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostPro
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,7 +40,6 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -126,6 +123,50 @@ public class SwingOverPlanarRegionsTest
       runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
 
+   @Test
+   public void testFlatClearance()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+
+      generator.translate(0.4, 0.0, 0.0);
+      generator.addRectangle(1.5, 0.4);
+
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.setPosition(0.0, 0.0, 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.setPosition(0.6, 0.0, 0.0);
+
+      runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+   }
+
+   @Test
+   public void testFlatClearanceOfCurb()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      ConvexPolygon2D foot = PlannerTools.createDefaultFootPolygon();
+
+      generator.translate(0.6, 0.0, 0.0);
+      generator.addRectangle(1.75, 0.4);
+
+      double cubeDepth = 0.02;
+      double cubeHeight = 0.05;
+      generator.identity();
+      generator.translate(foot.getMaxX() + cubeDepth / 2.0, 0.0, cubeHeight / 2.0);
+      generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
+
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.setPosition(0.0, 0.0, 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.setPosition(1.0, 0.0, 0.0);
+
+      runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      Assert.fail();
+   }
+
    private void runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
    {
       ConvexPolygon2D feet = PlannerTools.createDefaultFootPolygon();
@@ -154,8 +195,6 @@ public class SwingOverPlanarRegionsTest
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("secondWaypoint", secondWaypoint, 0.02, YoAppearance.White()));
 
       DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
-      parameters.setMaximumWaypointAdjustmentDistance(1.0);
-      parameters.setDoInitialFastApproximation(false);
       SwingOverRegionsPostProcessingElement swingOverElement = new SwingOverRegionsPostProcessingElement(parameters, getWalkingControllerParameters(), registry,
                                                                                                          yoGraphicsListRegistry);
 
