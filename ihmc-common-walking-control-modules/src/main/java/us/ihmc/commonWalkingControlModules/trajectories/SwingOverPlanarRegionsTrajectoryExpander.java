@@ -66,14 +66,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final Vector3D waypointAdjustmentDirection;
    private final Plane3D swingTrajectoryPlane;
    private final Plane3D swingFloorPlane;
-   private final Plane3D swingStartToeFacingSwingEndPlane;
-   private final Plane3D swingEndHeelFacingSwingStartPlane;
+   private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final AxisAngle axisAngle;
    private final RigidBodyTransform rigidBodyTransform;
 
    private final Vector3D tempPlaneNormal = new Vector3D();
-   private final Point3D toeAtStartOfStep = new Point3D();
-   private final Point3D heelAtEndOfStep = new Point3D();
    private final Vector3D stepDirectionVector = new Vector3D();
 
    // Boilerplate variables
@@ -82,13 +79,15 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final FramePoint3D swingStartPosition;
    private final FramePoint3D swingEndPosition;
    private final FramePoint3D stanceFootPosition;
+   private final FramePoint3D collisionRelativeToStart;
+   private final FramePoint3D stepRelativeToStart;
 
    // Visualization
    private Optional<Runnable> visualizer;
 
    public enum SwingOverPlanarRegionsCollisionType
    {
-      NO_INTERSECTION, TOO_CLOSE_TO_IGNORE_PLANE, OUTSIDE_TRAJECTORY, CRITICAL_INTERSECTION,
+      NO_INTERSECTION, TOO_CLOSE_TO_IGNORE_PLANE, OUTSIDE_TRAJECTORY, COLLISION_INSIDE_TRAJECTORY, COLLISION_BETWEEN_FEET
    }
 
    public enum SwingOverPlanarRegionsStatus
@@ -148,8 +147,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       waypointAdjustmentDirection = new Vector3D();
       swingTrajectoryPlane = new Plane3D();
       swingFloorPlane = new Plane3D();
-      swingStartToeFacingSwingEndPlane = new Plane3D();
-      swingEndHeelFacingSwingStartPlane = new Plane3D();
       axisAngle = new AxisAngle();
       rigidBodyTransform = new RigidBodyTransform();
 
@@ -159,6 +156,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       swingStartPosition = new FramePoint3D();
       swingEndPosition = new FramePoint3D();
       stanceFootPosition = new FramePoint3D();
+      collisionRelativeToStart = new FramePoint3D();
+      stepRelativeToStart = new FramePoint3D();
 
       visualizer = Optional.empty();
 
@@ -246,6 +245,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       adjustSwingEndIfCoincidentWithSwingStart();
 
+      startOfSwingReferenceFrame.setPoseAndUpdate(swingStartPose);
+      stepRelativeToStart.setIncludingFrame(swingEndPosition);
+      stepRelativeToStart.changeFrame(startOfSwingReferenceFrame);
+
       midGroundPoint.interpolate(swingStartPosition, swingEndPosition, 0.5);
       swingTrajectoryPlane.set(swingStartPosition, adjustedWaypoints.get(0), swingEndPosition);
 
@@ -256,17 +259,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       tempPlaneNormal.normalize();
       swingFloorPlane.set(swingStartPosition, tempPlaneNormal);
 
-      stepDirectionVector.sub(swingEndPosition, swingStartPosition);
-      stepDirectionVector.normalize();
-      toeAtStartOfStep.scaleAdd(collisionSphereRadius, stepDirectionVector, swingStartPosition);
-      swingStartToeFacingSwingEndPlane.set(toeAtStartOfStep, stepDirectionVector);
-
-      stepDirectionVector.negate();
-      heelAtEndOfStep.scaleAdd(collisionSphereRadius, stepDirectionVector, swingEndPosition);
-      swingEndHeelFacingSwingStartPlane.set(heelAtEndOfStep, stepDirectionVector);
-
       wereWaypointsAdjusted.set(false);
-
 
       double filterDistance = maximumSwingHeight + collisionSphereRadius + 2.0 * minimumClearance.getDoubleValue();
       List<PlanarRegion> filteredRegions = PlanarRegionTools
@@ -429,7 +422,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
             if (!checkIfCollidingWithFloorPlane(closestPointOnRegionInWorld))
             {
-               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.OUTSIDE_TRAJECTORY, closestPointInRegion);
+               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_INSIDE_TRAJECTORY, closestPointInRegion);
 
                return closestPointOnSegment.distance(startInLocal) / endInLocal.distance(startInLocal);
             }
@@ -490,17 +483,21 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
                   if (isCollisionInsideTheTrajectory)
                   {
-                     updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.CRITICAL_INTERSECTION, closestPointOnRegion);
+                     updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_INSIDE_TRAJECTORY, closestPointOnRegion);
                      return fraction;
                   }
 
-                  // TODO check this math. there's probably a better way using reference frames than this
-                  boolean collisionIsBetweenToeAndHeel = swingStartToeFacingSwingEndPlane.isOnOrAbove(closestPointOnRegion) && swingEndHeelFacingSwingStartPlane
-                        .isOnOrAbove(closestPointOnRegion);
+                  collisionRelativeToStart.setIncludingFrame(worldFrame, closestPointOnRegion);
+                  collisionRelativeToStart.changeFrame(startOfSwingReferenceFrame);
+
+                  double toePoint = collisionSphereRadius;
+                  double heelPoint = stepRelativeToStart.getX() - collisionSphereRadius;
+                  boolean collisionIsBetweenToeAndHeel = MathTools.intervalContains(collisionRelativeToStart.getX(), Math.min(toePoint, heelPoint),
+                                                                                    Math.max(toePoint, heelPoint));
 
                   if (collisionIsBetweenToeAndHeel)
                   {
-                     updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.CRITICAL_INTERSECTION, closestPointOnRegion);
+                     updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_BETWEEN_FEET, closestPointOnRegion);
                      return fraction;
                   }
                }

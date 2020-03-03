@@ -70,7 +70,8 @@ public class SwingOverPlanarRegionsVisualizer
          double size;
          switch (swingOverPlanarRegionsTrajectoryCollisionType)
          {
-         case CRITICAL_INTERSECTION:
+         case COLLISION_BETWEEN_FEET:
+         case COLLISION_INSIDE_TRAJECTORY:
             appearance = YoAppearance.Red();
             size = 0.014;
             break;
