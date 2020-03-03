@@ -63,9 +63,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final double maximumSwingHeight;
    private final double collisionSphereRadius;
 
-   private final SphereWithConvexPolygonIntersector sphereWithConvexPolygonIntersector;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D> closestPolygonPointMap;
-   private final FrameSphere3d footCollisionSphere;
    private final FramePoint3D midGroundPoint;
    private final Vector3D waypointAdjustmentDirection;
    private final Plane3D waypointAdjustmentPlane;
@@ -135,13 +133,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints.add();
       adjustedWaypoints.add();
 
-      sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
       closestPolygonPointMap = new HashMap<>();
       for (SwingOverPlanarRegionsTrajectoryCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsTrajectoryCollisionType.values())
       {
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
       }
-      footCollisionSphere = new FrameSphere3d();
       midGroundPoint = new FramePoint3D();
       waypointAdjustmentDirection = new Vector3D();
       waypointAdjustmentPlane = new Plane3D();
@@ -387,18 +383,19 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          double distance = PlanarRegionTools.getDistanceFromLineSegment3DToPlanarRegion(startInLocal, endInLocal, planarRegion, closestPointOnSegment, closestPointInRegion);
 
-         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.NO_INTERSECTION);
+         // FIXME double check the frame of the collision point
+         updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.NO_INTERSECTION, closestPointInRegion);
 
          if (distance < avoidanceDistance)
          {
             Point3D closestPointOnRegionInWorld = new Point3D(closestPointInRegion);
             planarRegion.transformFromLocalToWorld(closestPointOnRegionInWorld);
 
-            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE);
+            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE, closestPointInRegion);
 
             if (!checkIfCollidingWithFloorPlane(closestPointOnRegionInWorld))
             {
-               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY);
+               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY, closestPointInRegion);
 
                return closestPointOnSegment.distance(startInLocal) / endInLocal.distance(startInLocal);
             }
@@ -462,15 +459,15 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
             double distanceToClosestPoint = closestPointOnRegion.distanceSquared(trajectoryPosition);
 
-            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.NO_INTERSECTION);
+            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.NO_INTERSECTION, closestPointOnRegion);
 
             if (distanceToClosestPoint < avoidanceDistanceSquared)
             {
-               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE);
+               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_BELOW_IGNORE_PLANE, closestPointOnRegion);
 
                if (!checkIfCollidingWithFloorPlane(closestPointOnRegion))
                {
-                  updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY);
+                  updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType.INTERSECTION_BUT_OUTSIDE_TRAJECTORY, closestPointOnRegion);
 
                   boolean isCollisionCloserToMidpointThanSwing =
                         midGroundPoint.distanceSquared(closestPointOnRegion) < midGroundPoint.distanceSquared(trajectoryPosition);
@@ -493,16 +490,16 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return -1.0;
    }
 
-   private void updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType collisionType)
+   private void updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType collisionType, Point3DReadOnly collision)
    {
       if (collisionType.ordinal() > this.mostSevereCollisionType.getEnumValue().ordinal())
       {
          this.mostSevereCollisionType.set(collisionType);
       }
-      if (footCollisionSphere.distance(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon()) < footCollisionSphere
-            .distance(closestPolygonPointMap.get(collisionType)))
+      if (trajectoryPosition.distanceSquared(collision) < trajectoryPosition
+            .distanceSquared(closestPolygonPointMap.get(collisionType)))
       {
-         closestPolygonPointMap.get(collisionType).set(sphereWithConvexPolygonIntersector.getClosestPointOnPolygon());
+         closestPolygonPointMap.get(collisionType).set(collision);
       }
    }
 
