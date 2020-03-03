@@ -13,4 +13,4 @@ REA/Module/PlanarRegions/Intersection/Parameters=maxDistanceToRegion\: 0.07, min
 REA/Module/PlanarRegions/Polygonizer/Enable=true
 REA/Module/PlanarRegions/Polygonizer/Parameters=concaveHullThreshold\: 0.15, minNumberOfNodes\: 0, shallowAngleThreshold\: 0.017453292519943295, peakAngleThreshold\: 2.96705972839036, lengthThreshold\: 0.05, depthThreshold\: 0.1
 REA/Module/PlanarRegions/Segmentation/Enable=true
-REA/Module/PlanarRegions/Segmentation/Parameters=search radius\: 0.05, max distance from plane\: 0.05, maxAngleFromPlane\: 0.17453292519943295, minNormalQuality\: 0.005, min region size\: 50
+REA/Module/PlanarRegions/Segmentation/Parameters=search radius\: 0.05, max distance from plane\: 0.07, maxAngleFromPlane\: 0.314159, minNormalQuality\: 0.005, min region size\: 50, max standard deviation\: 0.017, min volumic density\: 100000.0
