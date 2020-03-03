@@ -74,11 +74,11 @@ public class SwingOverPlanarRegionsVisualizer
             appearance = YoAppearance.Red();
             size = 0.014;
             break;
-         case INTERSECTION_BUT_OUTSIDE_TRAJECTORY:
+         case OUTSIDE_TRAJECTORY:
             appearance = YoAppearance.Orange();
             size = 0.013;
             break;
-         case INTERSECTION_BUT_BELOW_IGNORE_PLANE:
+         case TOO_CLOSE_TO_IGNORE_PLANE:
             appearance = YoAppearance.Yellow();
             size = 0.012;
             break;
