@@ -21,12 +21,14 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
@@ -68,11 +70,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
    private final FootstepNodeChecker checker;
    private final CostToGoHeuristics distanceAndYawHeuristics;
-   private final FootstepCost stepCost;
+   private final IdealStepCalculator idealStepCalculator;
+   private final FootstepCostCalculator stepCostCalculator;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
-   private final BodyPathHeuristics bodyPathHeuristics;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -87,7 +89,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FramePose3D goalPose = new FramePose3D();
 
    private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
-   private final Supplier<CostToGoHeuristics> heuristicsSupplier;
 
    private Consumer<FootstepPlannerRequest> requestCallback = request -> {};
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
@@ -112,7 +113,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.snapAndWiggler  = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.bodyPathHeuristics = new BodyPathHeuristics(footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, snapper, bodyPathPlanHolder);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
@@ -121,19 +121,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
       PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
       this.checker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder);
 
-      FootstepCostBuilder costBuilder = new FootstepCostBuilder();
-      costBuilder.setFootstepPlannerParameters(footstepPlannerParameters);
-      costBuilder.setSnapper(snapper);
-      costBuilder.setFootPolygons(footPolygons);
-      costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludePitchAndRollCost(true);
-      costBuilder.setIncludeAreaCost(true);
-      this.stepCost = costBuilder.buildCost();
-      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters);
+      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder);
+      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons);
 
-      this.heuristicsSupplier = () -> bodyPathPlanRequested.getAsBoolean() ? bodyPathHeuristics : distanceAndYawHeuristics;
-      this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCost::compute, node -> heuristicsSupplier.get().compute(node));
+      this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
       checker.addFootstepGraph(footstepPlanner.getGraph());
    }
 
@@ -168,22 +161,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
-      if (!request.getBodyPathWaypoints().isEmpty())
+      if (bodyPathPlanRequested.getAsBoolean())
       {
-         Pose3D startPose = new Pose3D(request.getStanceFootPose());
-         double stanceOffset = request.getInitialStanceSide().negateIfLeftSide(0.5 * getFootstepPlannerParameters().getIdealFootstepWidth());
-         startPose.appendTranslation(0.0, stanceOffset, 0.0);
-
-         List<Pose3DReadOnly> waypoints = new ArrayList<>();
-         waypoints.add(startPose);
-         waypoints.addAll(request.getBodyPathWaypoints());
-         waypoints.add(new Pose3D(request.getGoalPose()));
-
-         bodyPathPlanHolder.setPoseWaypoints(waypoints);
-      }
-      else if (bodyPathPlanRequested.getAsBoolean())
-      {
-         bodyPathHeuristics.setGoalAlpha(1.0);
          bodyPathPlanner.setInitialStanceFoot(request.getStanceFootPose(), request.getInitialStanceSide());
          bodyPathPlanner.setGoal(goalPose);
 
@@ -222,6 +201,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
          reportBodyPathPlan();
       }
+      else
+      {
+         Pose3D startPose = new Pose3D(request.getStanceFootPose());
+         double stanceOffset = request.getInitialStanceSide().negateIfLeftSide(0.5 * getFootstepPlannerParameters().getIdealFootstepWidth());
+         startPose.appendTranslation(0.0, stanceOffset, 0.0);
+
+         List<Pose3DReadOnly> waypoints = new ArrayList<>();
+         waypoints.add(startPose);
+         waypoints.addAll(request.getBodyPathWaypoints());
+         waypoints.add(new Pose3D(request.getGoalPose()));
+
+         bodyPathPlanHolder.setPoseWaypoints(waypoints);
+      }
 
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
@@ -229,10 +221,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       addStartPoseToSnapper(request, startNode);
       footstepPlanner.initialize(startNode);
       SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
-      heuristicsSupplier.get().setGoalPose(goalPose);
+      distanceAndYawHeuristics.setGoalPose(goalPose);
+      idealStepCalculator.initialize(goalNodes);
 
       // Calculate end node cost
-      endNodeCost = heuristicsSupplier.get().compute(endNode);
+      endNodeCost = distanceAndYawHeuristics.compute(endNode);
 
       // Check valid goal
       if (!bodyPathPlanRequested.getAsBoolean() && !footstepPlannerParameters.getReturnBestEffortPlan() && !validGoal(goalNodes))
@@ -391,6 +384,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public String getName()
    {
       return name;
+   }
+
+   public boolean isPlanning()
+   {
+      return isPlanning.get();
    }
 
    public FootstepPlannerRequest getRequest()
