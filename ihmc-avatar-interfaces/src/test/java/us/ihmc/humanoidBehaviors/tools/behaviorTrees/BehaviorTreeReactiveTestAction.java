@@ -62,8 +62,10 @@ public class BehaviorTreeReactiveTestAction implements BehaviorTreeAction
       }
    }
 
-   public synchronized void reset()
+   public synchronized void reset(BehaviorTreeNodeStatus resultStatus)
    {
+      this.resultStatus = resultStatus;
+
       if (currentStatus.get() != RUNNING) // TODO: make sure this is thread safe
       {
          currentStatus.set(null);
