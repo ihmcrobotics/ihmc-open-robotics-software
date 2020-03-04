@@ -1,105 +1,57 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
-import java.util.function.DoubleSupplier;
-
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-   private final DoubleSupplier stepUpWeight;
-   private final DoubleSupplier stepDownWeight;
-   private final DoubleSupplier maximumStepReach;
-   private final DoubleSupplier maximumStepYaw;
-   private final DoubleSupplier yawWeight;
-   private final DoubleSupplier costPerStep;
-   private final DoubleSupplier finalTurnProximity;
-   private final DoubleSupplier finalTurnProximityBlendFactor;
+   private final FootstepPlannerParametersReadOnly parameters;
+   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
-   public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
-   {
-      this(parameters::getStepUpWeight,
-           parameters::getStepDownWeight,
-           parameters::getMaximumStepReach,
-           parameters::getMaximumStepYaw,
-           parameters::getYawWeight,
-           parameters::getCostPerStep,
-           parameters::getFinalTurnProximity,
-           parameters::getFinalTurnProximityBlendFactor,
-           parameters::getIdealFootstepWidth,
-           weight::getValue,
-           snapper);
-   }
+   private final Point2D midFootPoint = new Point2D();
+   private final Pose3D projectionPose = new Pose3D();
 
-   public DistanceAndYawBasedHeuristics(DoubleSupplier stepUpWeight,
-                                        DoubleSupplier stepDownWeight,
-                                        DoubleSupplier maximumStepReach,
-                                        DoubleSupplier maximumStepYaw,
-                                        DoubleSupplier yawWeight,
-                                        DoubleSupplier costPerStep,
-                                        DoubleSupplier finalTurnProximity,
-                                        DoubleSupplier finalTurnProximityBlendFactor,
-                                        DoubleSupplier idealFootstepWidth,
-                                        DoubleSupplier weight,
-                                        FootstepNodeSnapperReadOnly snapper)
+   public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
    {
-      super(weight, idealFootstepWidth, snapper);
-      this.stepUpWeight = stepUpWeight;
-      this.stepDownWeight = stepDownWeight;
-      this.maximumStepReach = maximumStepReach;
-      this.maximumStepYaw = maximumStepYaw;
-      this.yawWeight = yawWeight;
-      this.costPerStep = costPerStep;
-      this.finalTurnProximity = finalTurnProximity;
-      this.finalTurnProximityBlendFactor = finalTurnProximityBlendFactor;
+      super(weight::getValue, parameters::getIdealFootstepWidth, snapper);
+      this.parameters = parameters;
+      this.bodyPathPlanHolder = bodyPathPlanHolder;
    }
 
    @Override
-   protected double computeHeuristics(FramePose3DReadOnly pose)
+   protected double computeHeuristics(FramePose3DReadOnly midFootPose3D)
    {
-      double euclideanDistance = pose.getPosition().distanceXY(goalPose.getPosition());
+      double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose3D.getX() - goalPose.getX(), midFootPose3D.getY() - goalPose.getY());
 
-      double referenceYaw = computeReferenceYaw(pose, goalPose);
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(pose.getYaw(), referenceYaw);
+      double initialTurnDistance = 0.0;
+      double walkDistance = 0.0;
+      double finalTurnDistance;
 
-      double heightCost;
-
-      // add a two times multiplier because both feet have to move
-      double heightChange = goalPose.getZ() - pose.getZ();
-      if (heightChange > 0)
-         heightCost = stepUpWeight.getAsDouble() * 2.0 * heightChange;
+      if(xyDistanceToGoal < parameters.getFinalTurnProximity())
+      {
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose3D.getYaw(), goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+      }
       else
-         heightCost = -stepDownWeight.getAsDouble() * 2.0 * heightChange;
+      {
+         midFootPoint.set(midFootPose3D.getPosition());
+         double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
+         int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
+         double pathHeading = bodyPathPlanHolder.getSegmentYaw(segmentIndex);
 
-      double minSteps = euclideanDistance / maximumStepReach.getAsDouble() + Math.abs(yaw) / (0.5 * maximumStepYaw.getAsDouble());
-      return euclideanDistance + yawWeight.getAsDouble() * Math.abs(yaw) + heightCost + costPerStep.getAsDouble() * minSteps;
-   }
+         initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose3D.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         walkDistance = xyDistanceToGoal;
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+     }
 
-   private double computeReferenceYaw(FramePose3DReadOnly pose, FramePose3D goalPose)
-   {
-      double distanceToGoal = pose.getPosition().distanceXY(goalPose.getPosition());
-      double finalTurnProximity = this.finalTurnProximity.getAsDouble();
-
-      double minimumBlendDistance = (1.0 - finalTurnProximityBlendFactor.getAsDouble()) * finalTurnProximity;
-      double maximumBlendDistance = (1.0 + finalTurnProximityBlendFactor.getAsDouble()) * finalTurnProximity;
-
-      double pathHeading = BodyPathPlannerTools.calculateHeading(goalPose.getX() - pose.getX(), goalPose.getY() - pose.getY());
-
-      double yawMultiplier;
-      if (distanceToGoal < minimumBlendDistance)
-         yawMultiplier = 0.0;
-      else if (distanceToGoal > maximumBlendDistance)
-         yawMultiplier = 1.0;
-      else
-         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
-
-      return AngleTools.interpolateAngle(goalPose.getYaw(), pathHeading, yawMultiplier);
+      return initialTurnDistance + walkDistance + finalTurnDistance;
    }
 }
