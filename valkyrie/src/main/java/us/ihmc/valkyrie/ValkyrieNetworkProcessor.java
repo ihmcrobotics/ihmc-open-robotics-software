@@ -4,6 +4,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
+import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -52,7 +53,10 @@ public class ValkyrieNetworkProcessor
       sensorSuiteManager.setEnableLidarScanPublisher(true);
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(true);
+
       networkProcessor.setupSensorModule();
+
+      sensorSuiteManager.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 20));
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
