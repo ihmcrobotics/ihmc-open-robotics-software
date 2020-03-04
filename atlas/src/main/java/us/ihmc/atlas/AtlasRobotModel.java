@@ -34,7 +34,6 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -118,6 +117,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
    private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
+   private AtlasSensorSuiteManager sensorSuiteManager;
+
    private boolean useShapeCollision = false;
 
    private final RobotDescription robotDescription;
@@ -175,7 +176,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties);
 
       boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(jointMap, atlasVersion, createFootContactPoints, simulationContactPoints,
+      contactPointParameters = new AtlasContactPointParameters(jointMap,
+                                                               atlasVersion,
+                                                               createFootContactPoints,
+                                                               simulationContactPoints,
                                                                createAdditionalContactPoints);
 
       this.target = target;
@@ -320,7 +324,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public FullHumanoidRobotModel createFullRobotModel()
    {
       RobotDescription robotDescription = loader.createRobotDescription(getJointMap(), getContactPointParameters());
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription, getJointMap(),
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription,
+                                                                                        getJointMap(),
                                                                                         sensorInformation.getSensorFramesToTrack());
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -360,7 +365,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping,
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription,
+                                                                                                         jointMap,
+                                                                                                         enableJointDamping,
                                                                                                          enableTorqueVelocityLimits);
       return humanoidFloatingRootJointRobot;
    }
@@ -413,10 +420,20 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public AtlasSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getROSClockCalculator(), sensorInformation,
-                                         getJointMap(), getPhysicalProperties(), target);
+      if (sensorSuiteManager == null)
+      {
+         sensorSuiteManager = new AtlasSensorSuiteManager(getSimpleRobotName(),
+                                                          this,
+                                                          getCollisionBoxProvider(),
+                                                          getROSClockCalculator(),
+                                                          sensorInformation,
+                                                          getJointMap(),
+                                                          getPhysicalProperties(),
+                                                          target);
+      }
+      return sensorSuiteManager;
    }
 
    @Override
@@ -436,13 +453,15 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       switch (selectedVersion.getHandModel())
       {
-      case ROBOTIQ:
-         return new SimulatedRobotiqHandsController(simulatedRobot, this, realtimeRos2Node,
-                                                    ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+         case ROBOTIQ:
+            return new SimulatedRobotiqHandsController(simulatedRobot,
+                                                       this,
+                                                       realtimeRos2Node,
+                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
+                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
 
-      default:
-         return null;
+         default:
+            return null;
       }
    }
 
@@ -455,7 +474,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public LogModelProvider getLogModelProvider()
    {
-      return new DefaultLogModelProvider<>(SDFModelLoader.class, jointMap.getModelName(), selectedVersion.getSdfFileAsStream(), selectedVersion.getResourceDirectories());
+      return new DefaultLogModelProvider<>(SDFModelLoader.class,
+                                           jointMap.getModelName(),
+                                           selectedVersion.getSdfFileAsStream(),
+                                           selectedVersion.getResourceDirectories());
    }
 
    @Override
@@ -464,12 +486,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       switch (target)
       {
-      case REAL_ROBOT:
-         return new DataServerSettings(true, "AtlasGUI");
-      case GAZEBO:
-      case SCS:
-      default:
-         return new DataServerSettings(false, "SimulationGUI");
+         case REAL_ROBOT:
+            return new DataServerSettings(true, "AtlasGUI");
+         case GAZEBO:
+         case SCS:
+         default:
+            return new DataServerSettings(false, "SimulationGUI");
       }
    }
 
@@ -524,118 +546,118 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          switch (linkHolder.getName())
          {
-         case "pelvis":
-            addAdditionalPelvisImuInImuFrame(linkHolder);
-            break;
-         case "utorso":
-            addCustomCrashProtectionVisual(linkHolder);
+            case "pelvis":
+               addAdditionalPelvisImuInImuFrame(linkHolder);
+               break;
+            case "utorso":
+               addCustomCrashProtectionVisual(linkHolder);
 
-            if (BATTERY_MASS_SIMULATOR_IN_ROBOT)
-            {
-               modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
-               modifyLinkMass(linkHolder, 84.609);
-            }
-            else
-            {
-               modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
-               modifyLinkMass(linkHolder, 60.009);
-               double ixx = 1.5;
-               double ixy = 0.0;
-               double ixz = 0.1;
-               double iyy = 1.5;
-               double iyz = 0.0;
-               double izz = 0.5;
-               modifyLinkInertia(linkHolder, new Matrix3D(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
-            }
+               if (BATTERY_MASS_SIMULATOR_IN_ROBOT)
+               {
+                  modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
+                  modifyLinkMass(linkHolder, 84.609);
+               }
+               else
+               {
+                  modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
+                  modifyLinkMass(linkHolder, 60.009);
+                  double ixx = 1.5;
+                  double ixy = 0.0;
+                  double ixz = 0.1;
+                  double iyy = 1.5;
+                  double iyz = 0.0;
+                  double izz = 0.5;
+                  modifyLinkInertia(linkHolder, new Matrix3D(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
+               }
 
-            addChestIMU(linkHolder);
-            break;
-         case "l_lfarm":
-         case "r_lfarm":
-            modifyLinkMass(linkHolder, 1.6);
-            break;
-         case "l_hand":
-            modifyLeftHand(linkHolder);
-            break;
-         case "r_hand":
-            modifyRightHand(linkHolder);
-            break;
-         case "l_finger_1_link_0":
-            modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_1_link_1":
-            modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_1_link_2":
-            modifyLinkPose(linkHolder, "0.0903092 1.20153 0.35505 1.5708 0.520796 1.57081");
-            break;
-         case "l_finger_1_link_3":
-            modifyLinkPose(linkHolder, "0.0903088 1.23536 0.335645 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_2_link_0":
-            modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_2_link_1":
-            modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_2_link_2":
-            modifyLinkPose(linkHolder, "0.162309 1.20153 0.35505 1.5708 0.520796 1.57081");
-            break;
-         case "l_finger_2_link_3":
-            modifyLinkPose(linkHolder, "0.162309 1.23536 0.335645 1.5708 0.000796327 1.5708");
-            break;
-         case "l_finger_middle_link_0":
-            modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
-            break;
-         case "l_finger_middle_link_1":
-            modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
-            break;
-         case "l_finger_middle_link_2":
-            modifyLinkPose(linkHolder, "0.12631 1.20153 0.50213 -1.57079 -0.520796 1.57079");
-            break;
-         case "l_finger_middle_link_3":
-            modifyLinkPose(linkHolder, "0.126311 1.23536 0.521535 -1.57079 -0.000796327 1.5708");
-            break;
-         case "r_finger_1_link_0":
-            modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_1_link_1":
-            modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_1_link_2":
-            modifyLinkPose(linkHolder, "0.16231 -1.20153 0.35505 1.57079 0.520796 -1.57079");
-            break;
-         case "r_finger_1_link_3":
-            modifyLinkPose(linkHolder, "0.16231 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_2_link_0":
-            modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_2_link_1":
-            modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_2_link_2":
-            modifyLinkPose(linkHolder, "0.0903099 -1.20153 0.35505 1.57079 0.520796 -1.57079");
-            break;
-         case "r_finger_2_link_3":
-            modifyLinkPose(linkHolder, "0.09031 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
-            break;
-         case "r_finger_middle_link_0":
-            modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
-            break;
-         case "r_finger_middle_link_1":
-            modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
-            break;
-         case "r_finger_middle_link_2":
-            modifyLinkPose(linkHolder, "0.12631 -1.20153 0.50213 -1.5708 -0.520796 -1.57079");
-            break;
-         case "r_finger_middle_link_3":
-            modifyLinkPose(linkHolder, "0.126311 -1.23536 0.521535 -1.5708 -0.000796327 -1.5708");
-            break;
-         case "hokuyo_link":
-            modifyHokuyoInertia(linkHolder);
-         default:
-            break;
+               addChestIMU(linkHolder);
+               break;
+            case "l_lfarm":
+            case "r_lfarm":
+               modifyLinkMass(linkHolder, 1.6);
+               break;
+            case "l_hand":
+               modifyLeftHand(linkHolder);
+               break;
+            case "r_hand":
+               modifyRightHand(linkHolder);
+               break;
+            case "l_finger_1_link_0":
+               modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_1_link_1":
+               modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_1_link_2":
+               modifyLinkPose(linkHolder, "0.0903092 1.20153 0.35505 1.5708 0.520796 1.57081");
+               break;
+            case "l_finger_1_link_3":
+               modifyLinkPose(linkHolder, "0.0903088 1.23536 0.335645 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_2_link_0":
+               modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_2_link_1":
+               modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_2_link_2":
+               modifyLinkPose(linkHolder, "0.162309 1.20153 0.35505 1.5708 0.520796 1.57081");
+               break;
+            case "l_finger_2_link_3":
+               modifyLinkPose(linkHolder, "0.162309 1.23536 0.335645 1.5708 0.000796327 1.5708");
+               break;
+            case "l_finger_middle_link_0":
+               modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
+               break;
+            case "l_finger_middle_link_1":
+               modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
+               break;
+            case "l_finger_middle_link_2":
+               modifyLinkPose(linkHolder, "0.12631 1.20153 0.50213 -1.57079 -0.520796 1.57079");
+               break;
+            case "l_finger_middle_link_3":
+               modifyLinkPose(linkHolder, "0.126311 1.23536 0.521535 -1.57079 -0.000796327 1.5708");
+               break;
+            case "r_finger_1_link_0":
+               modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_1_link_1":
+               modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_1_link_2":
+               modifyLinkPose(linkHolder, "0.16231 -1.20153 0.35505 1.57079 0.520796 -1.57079");
+               break;
+            case "r_finger_1_link_3":
+               modifyLinkPose(linkHolder, "0.16231 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_2_link_0":
+               modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_2_link_1":
+               modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_2_link_2":
+               modifyLinkPose(linkHolder, "0.0903099 -1.20153 0.35505 1.57079 0.520796 -1.57079");
+               break;
+            case "r_finger_2_link_3":
+               modifyLinkPose(linkHolder, "0.09031 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
+               break;
+            case "r_finger_middle_link_0":
+               modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
+               break;
+            case "r_finger_middle_link_1":
+               modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
+               break;
+            case "r_finger_middle_link_2":
+               modifyLinkPose(linkHolder, "0.12631 -1.20153 0.50213 -1.5708 -0.520796 -1.57079");
+               break;
+            case "r_finger_middle_link_3":
+               modifyLinkPose(linkHolder, "0.126311 -1.23536 0.521535 -1.5708 -0.000796327 -1.5708");
+               break;
+            case "hokuyo_link":
+               modifyHokuyoInertia(linkHolder);
+            default:
+               break;
          }
       }
    }
