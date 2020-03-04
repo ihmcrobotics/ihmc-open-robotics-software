@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -34,13 +35,13 @@ public class SLAMFrame
    {
       previousFrame = null;
 
-      originalSensorPoseToWorld = SLAMTools.extractSensorPoseFromMessage(message);
+      originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
       transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
       optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
-      originalPointCloudToWorld = SLAMTools.extractPointsFromMessage(message);
+      originalPointCloudToWorld = MessageTools.unpackScanPoint3ds(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
@@ -53,7 +54,7 @@ public class SLAMFrame
    {
       previousFrame = frame;
 
-      originalSensorPoseToWorld = SLAMTools.extractSensorPoseFromMessage(message);
+      originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
       RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
       transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
@@ -63,7 +64,7 @@ public class SLAMFrame
       transformToWorld.multiply(transformFromPreviousFrame);
       sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
 
-      originalPointCloudToWorld = SLAMTools.extractPointsFromMessage(message);
+      originalPointCloudToWorld = MessageTools.unpackScanPoint3ds(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
@@ -71,7 +72,7 @@ public class SLAMFrame
 
       updateOptimizedPointCloudAndSensorPose();
    }
-   
+
    public void updateOptimizedCorrection(RigidBodyTransformReadOnly driftCorrectionTransform)
    {
       slamTransformer.set(driftCorrectionTransform);
@@ -128,7 +129,7 @@ public class SLAMFrame
       else
          return false;
    }
-   
+
    public SLAMFrame getPreviousFrame()
    {
       return previousFrame;
