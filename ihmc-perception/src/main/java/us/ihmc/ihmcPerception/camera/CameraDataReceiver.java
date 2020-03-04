@@ -51,6 +51,9 @@ public class CameraDataReceiver implements CloseableAndDisposable
 
    private final ScheduledExecutorService executorService = ThreadTools.newSingleDaemonThreadScheduledExecutor(getClass().getName());
 
+   private boolean hasStarted = false;
+   private boolean isPaused = false;
+
    public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                              CompressedVideoHandler compressedVideoHandler, LongUnaryOperator robotMonotonicTimeCalculator)
    {
@@ -85,6 +88,53 @@ public class CameraDataReceiver implements CloseableAndDisposable
    private ScheduledFuture<?> activeTask;
 
    public void start()
+   {
+      hasStarted = true;
+      if (!isPaused)
+         startThread();
+   }
+
+   public void pause()
+   {
+      if (isPaused)
+         return;
+
+      if (!hasStarted)
+      {
+         isPaused = true;
+         return;
+      }
+
+      activeTask.cancel(false);
+      activeTask = null;
+      isPaused = true;
+   }
+
+   public void resume()
+   {
+      if (!isPaused)
+         return;
+
+      if (!hasStarted)
+      {
+         isPaused = false;
+         return;
+      }
+
+      startThread();
+      isPaused = false;
+   }
+
+   private void restart()
+   {
+      if (!hasStarted || isPaused)
+         return;
+
+      activeTask.cancel(false);
+      startThread();
+   }
+
+   private void startThread()
    {
       activeTask = executorService.scheduleAtFixedRate(this::run, initialDelayMilliseconds, publishingPeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
@@ -133,15 +183,16 @@ public class CameraDataReceiver implements CloseableAndDisposable
 
             VideoControlSettings settings = newVideoSettings.getAndSet(null);
 
-            if (newVideoSettings.get() != null)
+            if (settings != null)
                compressedVideoDataServer.setVideoControlSettings(settings);
 
             compressedVideoDataServer.onFrame(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
             readWriteLock.writeLock().unlock();
          }
       }
-      catch (InterruptedException e)
+      catch (Exception e)
       {
+         e.printStackTrace();
       }
    }
 
@@ -154,9 +205,9 @@ public class CameraDataReceiver implements CloseableAndDisposable
    {
       this.newVideoSettings.set(settings);
 
-      if (!settings.isSendVideo() && activeTask != null)
+      if (!settings.isSendVideo())
       {
-         activeTask.cancel(false);
+         pause();
          return;
       }
 
@@ -167,11 +218,11 @@ public class CameraDataReceiver implements CloseableAndDisposable
       {
          publishingPeriodMilliseconds = periodInMilliseconds;
 
-         if (activeTask != null)
-         {
-            activeTask.cancel(false);
-         }
-         start();
+         restart();
+      }
+      else
+      {
+         resume();
       }
    }
 
