@@ -186,7 +186,8 @@ public class FootstepPlannerRequest
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
-      setHorizonLength(requestPacket.getHorizonLength());
+      if(requestPacket.getHorizonLength() > 0.0)
+         setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
 
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
