@@ -16,6 +16,8 @@ mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
    api("org.ejml:dense64:0.30")
    api("org.ejml:core:0.30")
+   api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
+   api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-yovariables:0.4.0")

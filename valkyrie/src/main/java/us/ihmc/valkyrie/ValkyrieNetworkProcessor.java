@@ -45,10 +45,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
       networkProcessor.setupRosModule();
-      ValkyrieSensorSuiteManager sensorSuiteManager = (ValkyrieSensorSuiteManager) networkProcessor.setupSensorModule();
+
+      ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
       sensorSuiteManager.setEnableLidarScanPublisher(true);
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(true);
+      networkProcessor.setupSensorModule();
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
@@ -71,10 +73,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
       networkProcessor.setupRosModule();
-      ValkyrieSensorSuiteManager sensorSuiteManager = (ValkyrieSensorSuiteManager) networkProcessor.setupSensorModule();
+
+      ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
       sensorSuiteManager.setEnableLidarScanPublisher(true);
       sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
       sensorSuiteManager.setEnableVideoPublisher(false);
+      networkProcessor.setupSensorModule();
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
