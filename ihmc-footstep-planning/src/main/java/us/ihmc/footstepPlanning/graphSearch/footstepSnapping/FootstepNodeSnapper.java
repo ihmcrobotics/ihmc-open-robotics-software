@@ -27,7 +27,7 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       {
          return snapDataHolder.get(footstepNode);
       }
-      else if (planarRegionsList == null || planarRegionsList.isEmpty())
+      else if (!hasPlanarRegions())
       {
          return FootstepNodeSnapData.identityData();
       }
@@ -48,10 +48,29 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
    }
 
    @Override
-   public FootstepNodeSnapData getSnapData(FootstepNode node)
+   public FootstepNodeSnapData getSnapData(FootstepNode footstepNode)
    {
-      return snapDataHolder.get(node);
+      if(snapDataHolder.containsKey(footstepNode))
+      {
+         return snapDataHolder.get(footstepNode);
+      }
+      else if(!hasPlanarRegions())
+      {
+         return FootstepNodeSnapData.identityData();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);
+
+   /**
+    * Clears snapper history
+    */
+   public void reset()
+   {
+      snapDataHolder.clear();
+   }
 }
