@@ -104,15 +104,23 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    {
       double groundClearance = heightOffset.getAsDouble();
       double regionHeight = heightExtrusion.getAsDouble();
-      PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, regionHeight);
 
-      for (PlanarRegion region : planarRegions)
+      try
       {
-         List<LineSegment3D> intersections = region.intersect(bodyPath);
-         if (!intersections.isEmpty())
+         PlanarRegion bodyPath = createBodyRegionFromNodes(nodePosition, previousNodePosition, groundClearance, regionHeight);
+
+         for (PlanarRegion region : planarRegions)
          {
-            return true;
+            List<LineSegment3D> intersections = region.intersect(bodyPath);
+            if (!intersections.isEmpty())
+            {
+               return true;
+            }
          }
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
       }
 
       return false;

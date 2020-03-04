@@ -1,33 +1,32 @@
-package us.ihmc.valkyrie;
+package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotEnvironmentAwareness.tools.ConstantPlanarRegionsPublisher;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 
-public class ValkyrieCTTSOSimulation
+public class AvatarPlanarRegionsSimulation
 {
-   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190220_172417_EOD_Cinders;
-
-   public static void main(String[] args)
+   public AvatarPlanarRegionsSimulation(DRCRobotModel robotModel, DataSetName dataSetName)
    {
-      DataSet dataSet = DataSetIOTools.loadDataSet(DATA_SET_TO_USE);
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
+      startSimulation(robotModel, dataSet.getPlanarRegionsList(), dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw());
+   }
 
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
-      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.02, true);
-
+   public static void startSimulation(DRCRobotModel robotModel, PlanarRegionsList planarRegionsList, Tuple3DReadOnly startPosition, double startOrientation)
+   {
+      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.02, true);
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(),
-                                                                                    dataSet.getPlannerInput().getStartYaw()));
-
+      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(startPosition, startOrientation));
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
@@ -43,7 +42,7 @@ public class ValkyrieCTTSOSimulation
       simulationStarter.startSimulation(networkProcessorParameters, false);
 
       // spoof and publish planar regions
-      ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(dataSet.getPlanarRegionsList());
+      ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(planarRegionsList);
       constantPlanarRegionsPublisher.start(2000);
    }
 }
