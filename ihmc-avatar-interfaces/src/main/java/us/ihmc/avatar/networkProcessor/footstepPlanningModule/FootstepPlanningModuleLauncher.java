@@ -49,7 +49,17 @@ public class FootstepPlanningModuleLauncher
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation, AdaptiveSwingParameters swingParameters)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
+      return setupForRos(footstepPlanningModule, pubSubImplementation);
+   }
+
+   public static FootstepPlanningModule setupForRos(FootstepPlanningModule footstepPlanningModule, DomainFactory.PubSubImplementation pubSubImplementation)
+   {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
+      return setupForRos(footstepPlanningModule, ros2Node);
+   }
+
+   public static FootstepPlanningModule setupForRos(FootstepPlanningModule footstepPlanningModule, Ros2Node ros2Node)
+   {
       footstepPlanningModule.registerRosNode(ros2Node);
 
       String name = footstepPlanningModule.getName();
