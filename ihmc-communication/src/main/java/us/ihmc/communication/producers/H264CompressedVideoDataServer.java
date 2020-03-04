@@ -40,9 +40,8 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
 
    private final CompressedVideoHandler handler;
 
-   private long initialTimestamp;
-   private long prevTimeStamp;
-   
+   private long previousTimestamp = -1;
+
    private final YUVPictureConverter converter = new YUVPictureConverter();
 
    public int getFps()
@@ -64,8 +63,8 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
    }
 
    @Override
-   public synchronized void onFrame(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition, final QuaternionReadOnly cameraOrientation,
-         IntrinsicParameters intrinsicParameters)
+   public synchronized void onFrame(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition,
+                                    final QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
       {
@@ -77,11 +76,7 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
          fps = desiredFPS;
       }
 
-      if (initialTimestamp == -1)
-      {
-         initialTimestamp = timeStamp;
-      }
-      else if ((timeStamp - prevTimeStamp) < Conversions.secondsToNanoseconds(1.0 / ((double) fps)))
+      if (previousTimestamp > -1 && (timeStamp - previousTimestamp) < Conversions.secondsToNanoseconds(1.0 / ((double) fps)))
       {
          return;
       }
@@ -127,7 +122,7 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
       {
          encoder.encodeFrame(frame);
          frame.delete();
-         while(encoder.nextNAL())
+         while (encoder.nextNAL())
          {
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
@@ -139,8 +134,8 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
       {
          e.printStackTrace();
       }
-      
-      prevTimeStamp = timeStamp;
+
+      previousTimestamp = timeStamp;
    }
 
    @Override
@@ -175,12 +170,12 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
          desiredHorizontalResolution = object.getHorizontalResolution();
          desiredBandwidth = object.getBandwidthInKbit();
 
-         desiredFPS = object.getFps();
-         cropVideo = object.crop();
+         desiredFPS = object.getFPS();
+         cropVideo = object.isCropped();
          videoEnabled = true;
 
-         cropX = MathTools.clamp(object.cropX(), 0, 100);
-         cropY = MathTools.clamp(object.cropY(), 0, 100);
+         cropX = MathTools.clamp(object.getCropX(), 0, 100);
+         cropY = MathTools.clamp(object.getCropY(), 0, 100);
 
       }
       else

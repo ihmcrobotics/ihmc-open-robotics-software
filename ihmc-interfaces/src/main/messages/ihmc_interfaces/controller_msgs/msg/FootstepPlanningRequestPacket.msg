@@ -41,3 +41,5 @@ PlanarRegionsListMessage planar_regions_list_message
 bool assume_flat_ground
 # Set this id to keep track of your request
 int32 planner_request_id -1
+# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+geometry_msgs/Pose[<=50] body_path_waypoints

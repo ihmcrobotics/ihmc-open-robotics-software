@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.depthData.collisionShapes;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class CollisionSphere extends CollisionShape
 {
@@ -22,7 +22,7 @@ public class CollisionSphere extends CollisionShape
    }
 
    @Override
-   public boolean contains(Point3D point)
+   public boolean contains(Point3DReadOnly point)
    {
       return (point.getX() * point.getX() + point.getY() * point.getY() + point.getZ() * point.getZ()) <= radiusSquared;
    }

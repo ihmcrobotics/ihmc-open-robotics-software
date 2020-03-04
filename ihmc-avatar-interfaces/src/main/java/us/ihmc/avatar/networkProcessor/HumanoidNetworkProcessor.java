@@ -8,7 +8,8 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -286,8 +287,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         FootstepPlanningModule module = new FootstepPlanningModule(robotModel);
-         module.setupWithRos(PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
          modulesToClose.add(module);
          return module;
       }

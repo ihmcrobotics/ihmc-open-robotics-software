@@ -99,7 +99,6 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                                                         scsSensorsCommunicator,
                                                         ros2Node,
                                                         rosClockCalculator::computeRobotMonotonicTime);
-         cameraDataReceiver.start();
       }
 
       if (enableLidarScanPublisher)
@@ -107,7 +106,6 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          lidarScanPublisher = createLidarScanPublisher();
          lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
          lidarScanPublisher.setScanFrameToLidarSensorFrame();
-         lidarScanPublisher.start();
       }
    }
 
@@ -169,14 +167,16 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void connect()
    {
-      if (enableVideoPublisher)
+      if (cameraDataReceiver != null)
+         cameraDataReceiver.start();
+      if (multiSenseSensorManager != null)
          multiSenseSensorManager.initializeParameterListeners();
-      if (enableLidarScanPublisher)
+      if (lidarScanPublisher != null)
          lidarScanPublisher.start();
-      if (enableStereoVisionPointCloudPublisher)
+      if (stereoVisionPointCloudPublisher != null)
          stereoVisionPointCloudPublisher.start();
-
-      rosMainNode.execute();
+      if (rosMainNode != null)
+         rosMainNode.execute();
    }
 
    private StereoVisionPointCloudPublisher createStereoPointCloudPublisher()
@@ -197,7 +197,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
       publisher.setROSClockCalculator(rosClockCalculator);
-      publisher.setCollisionBoxProvider(collisionBoxProvider);
+      publisher.setShadowFilter();
+      publisher.setSelfCollisionFilter(collisionBoxProvider);
       return publisher;
    }
 
