@@ -438,12 +438,34 @@ public class MessageTools
       return message;
    }
 
-   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, String stackTrace)
+   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(Throwable exception)
+   {
+      return createControllerCrashNotificationPacket(null, exception);
+   }
+
+   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, Throwable exception)
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
-      message.setControllerCrashLocation(location.toByte());
-      message.setStacktrace(stackTrace);
+      message.setControllerCrashLocation(location != null ? location.toByte() : -1);
+      message.setExceptionType(exception.getClass().getSimpleName());
+      message.setErrorMessage(exception.getMessage());
+
+      StackTraceElement[] stackTrace = exception.getStackTrace();
+
+      message.getStacktrace().clear();
+
+      if (stackTrace != null)
+      {
+         int length = Math.min(50, stackTrace.length);
+
+         for (int i = 0; i < length; i++)
+         {
+            message.getStacktrace().add(stackTrace[i].toString());
+         }
+      }
+
       return message;
+
    }
 
    public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
@@ -475,9 +497,17 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
-                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
-                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(),
+                                     message.getScanHeight(),
+                                     message.getSweepYawMin(),
+                                     message.getSweepYawMax(),
+                                     message.getHeightPitchMin(),
+                                     message.getHeightPitchMax(),
+                                     message.getTimeIncrement(),
+                                     message.getMinRange(),
+                                     message.getMaxRange(),
+                                     message.getScanTime(),
+                                     message.getTimestamp());
    }
 
    /**

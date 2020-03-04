@@ -287,7 +287,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
       catch (Exception e)
       {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e.getMessage()));
+         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
 
          throw new RuntimeException(e);
       }
