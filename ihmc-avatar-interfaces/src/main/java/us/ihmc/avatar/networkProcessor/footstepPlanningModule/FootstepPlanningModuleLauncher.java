@@ -50,14 +50,16 @@ public class FootstepPlanningModuleLauncher
       ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           FootstepPlannerParametersPacket.class,
-                                           subscriberTopicNameGenerator,
-                                           s -> footstepPlanningModule.getFootstepPlannerParameters().set(s.readNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           VisibilityGraphsParametersPacket.class,
-                                           subscriberTopicNameGenerator,
-                                           s -> footstepPlanningModule.getVisibilityGraphParameters().set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerParametersPacket.class, subscriberTopicNameGenerator, s ->
+      {
+         if (!footstepPlanningModule.isPlanning())
+            footstepPlanningModule.getFootstepPlannerParameters().set(s.readNextData());
+      });
+      ROS2Tools.createCallbackSubscription(ros2Node, VisibilityGraphsParametersPacket.class, subscriberTopicNameGenerator, s ->
+      {
+         if (!footstepPlanningModule.isPlanning())
+            footstepPlanningModule.getVisibilityGraphParameters().set(s.takeNextData());
+      });
 
       // Planner request callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, subscriberTopicNameGenerator, s ->

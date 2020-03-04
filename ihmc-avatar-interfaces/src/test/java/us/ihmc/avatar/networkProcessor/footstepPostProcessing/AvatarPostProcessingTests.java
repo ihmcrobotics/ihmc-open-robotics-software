@@ -171,6 +171,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
       footstepPlannerParameters.setMaximumStepZ(height + 0.05);
+      footstepPlanningModule.getVisibilityGraphParameters().setTooHighToStepDistance(height + 0.05);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -444,7 +445,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.getGoalOrientationInWorld().set(goalPose.getOrientation());
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      request.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+      request.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
 
       double timeout = 12.0;
       request.setTimeout(timeout);
