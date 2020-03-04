@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -93,7 +93,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
 
    private FootstepPlanningModule footstepPlanningModule;
-   private FootstepPlanPostProcessingToolboxModule postProcessingToolboxModule;
+   private FootstepPlanPostProcessingModule postProcessingToolboxModule;
 
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -111,14 +111,18 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
-      postProcessingToolboxModule = new FootstepPlanPostProcessingToolboxModule(getRobotModel(), null, false, DomainFactory.PubSubImplementation.INTRAPROCESS);
+      postProcessingToolboxModule = new FootstepPlanPostProcessingModule(getRobotModel());
+      postProcessingToolboxModule.setupWithRos(DomainFactory.PubSubImplementation.INTRAPROCESS);
 
       postProcessingOutputStatus = new AtomicReference<>();
       Ros2Node ros2Node = drcSimulationTestHelper.getRos2Node();
 
       String robotName = robotModel.getSimpleRobotName();
-      MessageTopicNameGenerator postProcessingPubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingToolboxModule.moduleName, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-      MessageTopicNameGenerator postProcessingSubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingToolboxModule.moduleName, ROS2Tools.ROS2TopicQualifier.INPUT);
+
+      MessageTopicNameGenerator footstepPlannerSubGenerator = FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
+      MessageTopicNameGenerator postProcessingPubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingModule.MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      MessageTopicNameGenerator postProcessingSubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingModule.MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
 
       postProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class, postProcessingSubGenerator);
       postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingParametersPacket.class, postProcessingSubGenerator);
@@ -149,7 +153,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       postProcessingOutputStatus = null;
 
       footstepPlanningModule.closeAndDispose();
-      postProcessingToolboxModule.destroy();
+      postProcessingToolboxModule.closeAndDispose();
       footstepPlanningModule = null;
       postProcessingToolboxModule = null;
 
