@@ -29,7 +29,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
-import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 
 public class SLAMTools
 {
@@ -123,20 +122,18 @@ public class SLAMTools
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(toScan(pointCloud, sensorPosition));
 
-      NormalOcTree referenceOctree = new NormalOcTree(octreeResolution);
+      NormalOcTree octree = new NormalOcTree(octreeResolution);
 
-      referenceOctree.insertScanCollection(scanCollection, false);
+      octree.insertScanCollection(scanCollection, false);
 
-      referenceOctree.enableParallelComputationForNormals(true);
-      referenceOctree.enableParallelInsertionOfMisses(true);
-      referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+      octree.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
-      referenceOctree.setNormalEstimationParameters(normalEstimationParameters);
+      octree.setNormalEstimationParameters(normalEstimationParameters);
 
-      referenceOctree.updateNormals();
-      return referenceOctree;
+      octree.updateNormals();
+      return octree;
    }
 
    public static NormalOcTree computeOctreeData(List<Point3DReadOnly[]> pointCloudMap, List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution)
@@ -150,20 +147,18 @@ public class SLAMTools
          scanCollection.addScan(toScan(pointCloudMap.get(i), sensorPoses.get(i).getTranslation()));
       }
 
-      NormalOcTree referenceOctree = new NormalOcTree(octreeResolution);
+      NormalOcTree octree = new NormalOcTree(octreeResolution);
 
-      referenceOctree.insertScanCollection(scanCollection, false);
+      octree.insertScanCollection(scanCollection, false);
 
-      referenceOctree.enableParallelComputationForNormals(true);
-      referenceOctree.enableParallelInsertionOfMisses(true);
-      referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+      octree.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
-      referenceOctree.setNormalEstimationParameters(normalEstimationParameters);
+      octree.setNormalEstimationParameters(normalEstimationParameters);
 
-      referenceOctree.updateNormals();
-      return referenceOctree;
+      octree.updateNormals();
+      return octree;
    }
 
    public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(List<Point3DReadOnly[]> pointCloudMap,
