@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -103,19 +105,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return 0.05 * jointMap.getModelScale();
    }
-   
+
    @Override
    public boolean allowUpperBodyMotionDuringLocomotion()
    {
       return true;
    }
-   
+
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
       return false;
    }
-   
+
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
@@ -707,5 +709,34 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public ICPOptimizationParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public String[] getJointsWithRestrictiveLimits()
+   {
+      List<String> joints = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      { // This is reduce frequency of joint faulting. These are the main joints that can easily fault.
+         joints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+         joints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+         joints.add(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH));
+         joints.add(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW));
+      }
+
+      return joints.toArray(new String[joints.size()]);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   {
+      JointLimitParameters parameters = new JointLimitParameters();
+      parameters.setMaxAbsJointVelocity(1.5);
+      parameters.setJointLimitDistanceForMaxVelocity(0.3);
+      parameters.setJointLimitFilterBreakFrequency(15.0);
+      parameters.setVelocityControlGain(20.0);
+      return parameters;
    }
 }
