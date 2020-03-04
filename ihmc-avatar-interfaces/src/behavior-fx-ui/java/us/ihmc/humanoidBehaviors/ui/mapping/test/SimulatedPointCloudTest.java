@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -67,7 +68,9 @@ public class SimulatedPointCloudTest
       double stairWidth = 0.5;
       double stairLength = 0.25;
 
-      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength,
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight,
+                                                                                                                          stairWidth,
+                                                                                                                          stairLength,
                                                                                                                           stairLength);
 
       double translationX = movingForward / 2;
@@ -77,10 +80,12 @@ public class SimulatedPointCloudTest
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
       preMultiplier.setTranslation(translationX, translationY, translationZ);
       preMultiplier.appendPitchRotation(rotateY);
-      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, stairHeight,
+      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier,
+                                                                                                                          stairHeight,
                                                                                                                           stairWidth,
                                                                                                                           stairLength - movingForward,
-                                                                                                                          stairLength + movingForward, true);
+                                                                                                                          stairLength + movingForward,
+                                                                                                                          true);
       SLAMViewer viewer = new SLAMViewer();
       viewer.addStereoMessage(messageOne, Color.BLUE);
       viewer.addStereoMessage(messageTwo, Color.GREEN);
@@ -105,8 +110,10 @@ public class SimulatedPointCloudTest
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
       preMultiplier.setTranslation(translationX, translationY, translationZ);
       preMultiplier.appendPitchRotation(rotateY);
-      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, stairHeight,
-                                                                                                                          stairWidth, stairLength);
+      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier,
+                                                                                                                          stairHeight,
+                                                                                                                          stairWidth,
+                                                                                                                          stairLength);
 
       SLAMViewer viewer = new SLAMViewer();
       viewer.addStereoMessage(messageOne, Color.BLUE);
@@ -132,11 +139,13 @@ public class SimulatedPointCloudTest
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.02);
 
       StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(stairHeight, stairWidth, stairLength);
-      Point3DReadOnly[] pointCloud = SLAMTools.extractPointsFromMessage(message);
-      RigidBodyTransformReadOnly sensorPose = SLAMTools.extractSensorPoseFromMessage(message);
+      Point3DReadOnly[] pointCloud = MessageTools.unpackScanPoint3ds(message);
+      RigidBodyTransformReadOnly sensorPose = MessageTools.unpackSensorPose(message);
 
-      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
-                                                                                               planarRegionSegmentationParameters);
+      List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud,
+                                                                                           sensorPose.getTranslation(),
+                                                                                           octreeResolution,
+                                                                                           planarRegionSegmentationParameters);
       PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
 
       SLAMViewer viewer = new SLAMViewer();
@@ -164,29 +173,40 @@ public class SimulatedPointCloudTest
 
       List<Point3DReadOnly[]> pointCloudMap = new ArrayList<>();
 
-      StereoVisionPointCloudMessage firstMessage = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(0.0, groundWidth, stairLength,
-                                                                                                                            stairLength, false);
-      Point3DReadOnly[] firstPointCloud = SLAMTools.extractPointsFromMessage(firstMessage);
-      RigidBodyTransformReadOnly firstSensorPose = SLAMTools.extractSensorPoseFromMessage(firstMessage);
+      StereoVisionPointCloudMessage firstMessage = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(0.0,
+                                                                                                                            groundWidth,
+                                                                                                                            stairLength,
+                                                                                                                            stairLength,
+                                                                                                                            false);
+      Point3DReadOnly[] firstPointCloud = MessageTools.unpackScanPoint3ds(firstMessage);
+      RigidBodyTransformReadOnly firstSensorPose = MessageTools.unpackSensorPose(firstMessage);
       pointCloudMap.add(firstPointCloud);
 
-      List<PlanarRegionSegmentationRawData> firstRawData = SLAMTools.computePlanarRegionRawData(firstPointCloud, firstSensorPose.getTranslation(),
-                                                                                                    octreeResolution, planarRegionSegmentationParameters);
+      List<PlanarRegionSegmentationRawData> firstRawData = SLAMTools.computePlanarRegionRawData(firstPointCloud,
+                                                                                                firstSensorPose.getTranslation(),
+                                                                                                octreeResolution,
+                                                                                                planarRegionSegmentationParameters);
       PlanarRegionsList planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(firstRawData, concaveHullFactoryParameters, polygonizerParameters);
 
       for (int i = 1; i < numberOfMessages; i++)
       {
          RigidBodyTransform preMultiplier = new RigidBodyTransform();
          preMultiplier.setTranslation(i * stairLength, 0.0, 0.0);
-         StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier, 0.0, groundWidth,
-                                                                                                                          stairLength, stairLength, false);
+         StereoVisionPointCloudMessage message = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(preMultiplier,
+                                                                                                                          0.0,
+                                                                                                                          groundWidth,
+                                                                                                                          stairLength,
+                                                                                                                          stairLength,
+                                                                                                                          false);
 
-         Point3DReadOnly[] pointCloud = SLAMTools.extractPointsFromMessage(message);
-         RigidBodyTransformReadOnly sensorPose = SLAMTools.extractSensorPoseFromMessage(message);
+         Point3DReadOnly[] pointCloud = MessageTools.unpackScanPoint3ds(message);
+         RigidBodyTransformReadOnly sensorPose = MessageTools.unpackSensorPose(message);
          pointCloudMap.add(pointCloud);
 
-         List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud, sensorPose.getTranslation(), octreeResolution,
-                                                                                                  planarRegionSegmentationParameters);
+         List<PlanarRegionSegmentationRawData> rawData = SLAMTools.computePlanarRegionRawData(pointCloud,
+                                                                                              sensorPose.getTranslation(),
+                                                                                              octreeResolution,
+                                                                                              planarRegionSegmentationParameters);
 
          planarRegionsMap = buildNewMap(rawData, planarRegionsMap, customRegionMergeParameters, concaveHullFactoryParameters, polygonizerParameters);
       }
@@ -211,7 +231,8 @@ public class SimulatedPointCloudTest
                                          PolygonizerParameters polygonizerParameters)
    {
       List<PlanarRegion> oldMapCopy = new ArrayList<>(oldMap.getPlanarRegionsAsList());
-      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(oldMapCopy, newRawData,
+      List<PlanarRegion> unmergedCustomPlanarRegions = CustomPlanarRegionHandler.mergeCustomRegionsToEstimatedRegions(oldMapCopy,
+                                                                                                                      newRawData,
                                                                                                                       customRegionMergeParameters);
 
       PlanarRegionsList newMap = PlanarRegionPolygonizer.createPlanarRegionsList(newRawData, concaveHullFactoryParameters, polygonizerParameters);

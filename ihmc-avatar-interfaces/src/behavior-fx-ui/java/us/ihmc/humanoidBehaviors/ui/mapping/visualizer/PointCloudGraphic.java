@@ -8,6 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class PointCloudGraphic extends Group
 {
@@ -65,7 +65,8 @@ public class PointCloudGraphic extends Group
          Point3D[] sensorPoseTrajectoryPoints = new Point3D[numberOfPoints];
          for (int i = 0; i < numberOfPoints; i++)
             sensorPoseTrajectoryPoints[i] = new Point3D(sensorPoseTrajectory.get(i));
-         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfPoints, TRAJECTORY_RADIAL_RESOLUTION,
+         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfPoints,
+                                                                                                              TRAJECTORY_RADIAL_RESOLUTION,
                                                                                                               TRAJECTORY_MESH_RADIUS);
          segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
          for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
@@ -95,9 +96,9 @@ public class PointCloudGraphic extends Group
       int redScaler = (int) (0xFF * (1 - (stereoVisionPointCloudMessage.getSensorPoseConfidence())));
       int greenScaler = (int) (0xFF * (stereoVisionPointCloudMessage.getSensorPoseConfidence()));
       Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
-      addSensorPoseMesh(SLAMTools.extractSensorPoseFromMessage(stereoVisionPointCloudMessage), confidenceColor);
+      addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), confidenceColor);
 
-      addPointsMeshes(SLAMTools.extractPointsFromMessage(stereoVisionPointCloudMessage), pointCloudColor);
+      addPointsMeshes(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage), pointCloudColor);
    }
 
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)

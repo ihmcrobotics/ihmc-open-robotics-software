@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -32,23 +29,6 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 
 public class SLAMTools
 {
-   public static Point3D[] extractPointsFromMessage(StereoVisionPointCloudMessage message)
-   {
-      int numberOfPoints = message.getColors().size();
-      Point3D[] pointCloud = new Point3D[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         pointCloud[i] = new Point3D();
-         MessageTools.unpackScanPoint(message, i, pointCloud[i]);
-      }
-      return pointCloud;
-   }
-
-   public static RigidBodyTransform extractSensorPoseFromMessage(StereoVisionPointCloudMessage message)
-   {
-      return new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
-   }
-
    public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
