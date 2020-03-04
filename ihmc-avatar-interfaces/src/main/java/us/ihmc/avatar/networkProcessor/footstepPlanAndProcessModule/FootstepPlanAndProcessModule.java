@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanAndProcessModule;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -21,7 +22,7 @@ public class FootstepPlanAndProcessModule implements CloseableAndDisposable
    public FootstepPlanAndProcessModule(DRCRobotModel robotModel)
    {
       this.planningModule = FootstepPlanningModuleLauncher.createModule(robotModel);
-      this.postProcessingModule = new FootstepPlanPostProcessingModule(robotModel);
+      this.postProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel);
    }
 
    @Override
@@ -37,7 +38,7 @@ public class FootstepPlanAndProcessModule implements CloseableAndDisposable
          return;
 
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
-      planningModule.setupWithRos(ros2Node);
-      postProcessingModule.setupWithRos(ros2Node);
+      FootstepPlanningModuleLauncher.setupForRos(planningModule, ros2Node);
+      FootstepPlanPostProcessingModuleLauncher.setupForRos(postProcessingModule, ros2Node);
    }
 }

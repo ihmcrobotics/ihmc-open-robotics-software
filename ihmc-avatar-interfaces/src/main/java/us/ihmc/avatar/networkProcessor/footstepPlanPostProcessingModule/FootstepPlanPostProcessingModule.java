@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.AreaSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.PositionSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.SwingOverRegionsPostProcessingElement;
@@ -32,20 +33,9 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
    private final FootstepPostProcessingParametersBasics parameters;
    private final CompositeFootstepPlanPostProcessing postProcessing = new CompositeFootstepPlanPostProcessing();
 
-   public static final String MODULE_NAME = "footstep_post_processor";
-
    private Consumer<FootstepPostProcessingPacket> statusCallback = result -> {};
 
    private Ros2Node ros2Node;
-
-   public FootstepPlanPostProcessingModule(DRCRobotModel robotModel)
-   {
-      this(robotModel.getSimpleRobotName(),
-           robotModel.getFootstepPostProcessingParameters(),
-           robotModel.getWalkingControllerParameters(),
-           robotModel.getContactPointParameters(),
-           robotModel.getCapturePointPlannerParameters());
-   }
 
    public FootstepPlanPostProcessingModule(String name,
                                            FootstepPostProcessingParametersBasics parameters,
@@ -76,6 +66,11 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
       isDone.set(true);
    }
 
+   public String getName()
+   {
+      return name;
+   }
+
    public void handleRequestPacket(FootstepPostProcessingPacket latestOutput)
    {
       FootstepPostProcessingPacket processedOutputStatus = postProcessing.postProcessFootstepPlan(latestOutput);
@@ -90,6 +85,11 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
       statusCallback = statusCallback.andThen(callback);
    }
 
+   public FootstepPostProcessingParametersBasics getParameters()
+   {
+      return parameters;
+   }
+
    @Override
    public void closeAndDispose()
    {
@@ -100,35 +100,11 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
       }
    }
 
-   public void setupWithRos(DomainFactory.PubSubImplementation pubSubImplementation)
+   public boolean registerRosNode(Ros2Node ros2Node)
    {
-      if (ros2Node != null)
-         return;
-
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
-      setupWithRos(ros2Node);
-   }
-
-   public void setupWithRos(Ros2Node ros2Node)
-   {
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-
-      // Parameters callback
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,
-                                           s -> parameters.set(s.readNextData()));
-
-      // Planner request callback
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class, subscriberTopicNameGenerator, s -> {
-         FootstepPostProcessingPacket requestPacket = s.takeNextData();
-         new Thread(() -> handleRequestPacket(requestPacket)).start();
-      });
-
-      // Result publisher
-      IHMCROS2Publisher<FootstepPostProcessingPacket> resultPublisher = ROS2Tools
-            .createPublisher(ros2Node, FootstepPostProcessingPacket.class, publisherTopicNameGenerator);
-      addStatusCallback(resultPublisher::publish);
+      if (this.ros2Node != null)
+         return false;
+      this.ros2Node = ros2Node;
+      return true;
    }
 }

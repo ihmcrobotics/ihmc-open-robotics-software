@@ -7,6 +7,7 @@ import java.util.List;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
@@ -305,8 +306,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         FootstepPlanPostProcessingModule module = new FootstepPlanPostProcessingModule(robotModel);
-         module.setupWithRos(pubSubImplementation);
+         FootstepPlanPostProcessingModule module = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
          modulesToClose.add(module);
          return module;
       }
