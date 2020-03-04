@@ -1,27 +1,18 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepPostProcessingPacket;
+import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.postProcessing.AreaSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.PositionSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.SwingOverRegionsPostProcessingElement;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.YoVariablesForFootstepPostProcessingParameters;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -29,12 +20,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-
-import static us.ihmc.footstepPlanning.FootstepPlannerStatus.*;
-import static us.ihmc.footstepPlanning.FootstepPlannerStatus.IDLE;
 
 public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
 {
@@ -48,8 +34,7 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
 
    public static final String MODULE_NAME = "footstep_post_processor";
 
-   private Consumer<FootstepPostProcessingPacket> statusCallback = result -> {
-   };
+   private Consumer<FootstepPostProcessingPacket> statusCallback = result -> {};
 
    private Ros2Node ros2Node;
 
