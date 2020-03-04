@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,42 +29,63 @@ public class StereoVisionPointCloudDataExporter
    public static final String STEREO_DATA_SPLITER = "_";
    public static final String STEREO_DATA_EXTENSION = ".txt";
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(),
+                                                                                                                  ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> activeRecordingTask = null;
 
    private final AtomicReference<StereoVisionPointCloudMessage> stereovisionPointCloudMessage;
    private final AtomicReference<String> dataDirectoryPath;
-
-   private final AtomicReference<Boolean> enableRecording;
 
    public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager)
    {
       stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.DepthPointCloudState);
       dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIStereoDataExporterDirectory, new File("Data/").getAbsolutePath());
 
-      enableRecording = uiMessager.createInput(REAModuleAPI.UIStereoDataExportRequest, false);
-
-      executorService.scheduleAtFixedRate(this::recording, 0, recodingFrequency, TimeUnit.MILLISECONDS);
+      uiMessager.registerTopicListener(REAModuleAPI.UIStereoDataExportRequest, this::toggleRecording);
    }
 
-   private void recording()
+   private void toggleRecording(boolean enable)
    {
-      if (enableRecording.get())
+      if (enable)
       {
-         StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
+         if (activeRecordingTask != null)
+            return;
 
-         int numberOfPoints = message.getColors().size();
-         Point3D[] pointCloud = new Point3D[numberOfPoints];
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            pointCloud[i] = new Point3D();
-            MessageTools.unpackScanPoint(message, i, pointCloud[i]);
-         }
-
-         Path path = Paths.get(dataDirectoryPath.get());
-
-         saveSensorPose(path, message.timestamp_, message.getSensorPosition(), message.getSensorOrientation());
-         savePointCloud(path, message.timestamp_, pointCloud, message.getColors());
+         activeRecordingTask = executorService.scheduleAtFixedRate(this::record, 0, recodingFrequency, TimeUnit.MILLISECONDS);
       }
+      else
+      {
+         if (activeRecordingTask == null)
+            return;
+
+         activeRecordingTask.cancel(false);
+         activeRecordingTask = null;
+      }
+   }
+
+   private void record()
+   {
+      StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
+
+      int numberOfPoints = message.getColors().size();
+      Point3D[] pointCloud = new Point3D[numberOfPoints];
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         pointCloud[i] = new Point3D();
+         MessageTools.unpackScanPoint(message, i, pointCloud[i]);
+      }
+
+      Path path = Paths.get(dataDirectoryPath.get());
+
+      saveSensorPose(path, message.timestamp_, message.getSensorPosition(), message.getSensorOrientation());
+      savePointCloud(path, message.timestamp_, pointCloud, message.getColors());
+   }
+
+   public void shutdown()
+   {
+      if (activeRecordingTask != null)
+         activeRecordingTask.cancel(false);
+      executorService.shutdown();
    }
 
    private static void saveSensorPose(Path path, long timestamp, Point3D sensorPosition, Quaternion sensorOrientation)
