@@ -28,7 +28,6 @@ mainDependencies {
    api("org.boofcv:calibration:0.24.1")
    api("org.boofcv:visualize:0.24.1")
    api("com.github.wendykierp:JTransforms:3.1")
-   api("org.bytedeco:javacv-platform:1.5")
    api("org.boofcv:recognition:0.24.1")
 
    api("us.ihmc:euclid:0.12.2")

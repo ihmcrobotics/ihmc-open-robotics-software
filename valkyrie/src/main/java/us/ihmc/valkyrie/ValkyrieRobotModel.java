@@ -13,23 +13,16 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.*;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -80,12 +73,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
 
-   private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
+
+   private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
    public ValkyrieRobotModel(RobotTarget target)
    {
@@ -230,9 +224,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (generalizedRobotModel == null)
       {
-         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(),
-                                                               getSDFModelInputStream(),
-                                                               getSDFDescriptionMutator());
+         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), getSDFDescriptionMutator());
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
@@ -405,15 +397,19 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public ValkyrieSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(getSimpleRobotName(),
-                                            this,
-                                            getCollisionBoxProvider(),
-                                            getROSClockCalculator(),
-                                            getSensorInformation(),
-                                            getJointMap(),
-                                            target);
+      if (sensorSuiteManager == null)
+      {
+         sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
+                                                             this,
+                                                             getCollisionBoxProvider(),
+                                                             getROSClockCalculator(),
+                                                             getSensorInformation(),
+                                                             getJointMap(),
+                                                             target);
+      }
+      return sensorSuiteManager;
    }
 
    @Override
@@ -538,17 +534,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (calibrationParameters == null)
          calibrationParameters = new ValkyrieCalibrationParameters(getJointMap());
       return calibrationParameters;
-   }
-
-   /**
-    * Adds robot specific footstep parameters
-    */
-   @Override
-   public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
-   {
-      if (planarRegionFootstepPlannerParameters == null)
-         planarRegionFootstepPlannerParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      return planarRegionFootstepPlannerParameters;
    }
 
    @Override

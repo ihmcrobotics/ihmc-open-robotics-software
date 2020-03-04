@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -45,7 +45,7 @@ public class CollisionShapeTester
       }
    }
    
-   public boolean contains(Point3D point)
+   public boolean contains(Point3DReadOnly point)
    {
       for (int i = 0; i < trackingCollisionShapes.size(); i++)
       {
