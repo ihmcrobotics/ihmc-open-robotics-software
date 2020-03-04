@@ -56,6 +56,7 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupSensorModule();
 
+      sensorSuiteManager.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
       sensorSuiteManager.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 20));
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
