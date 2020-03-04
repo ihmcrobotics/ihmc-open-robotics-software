@@ -20,6 +20,7 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -200,9 +201,6 @@ public class SLAMTools
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
 
-      Point3D closestPoint = new Point3D();
-      double minDistance = -1.0;
-
       NormalOcTreeNode firstNode = octree.search(occupiedKey);
       if (firstNode != null)
       {
@@ -212,83 +210,20 @@ public class SLAMTools
          return firstPoint.distance(point);
       }
 
-      for (int searchingSize = 1; searchingSize < maximumSearchingSize + 1; searchingSize++)
+      OcTreeKey nearestKey = new OcTreeKey();
+      double distance = OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), point, nearestKey);
+
+      if (Double.isNaN(distance))
       {
-         OcTreeKey[] candidateKeys = createCandidateOctreeKey(occupiedKey, searchingSize);
-         for (int i = 0; i < candidateKeys.length; i++)
-         {
-            OcTreeKey candidateKey = candidateKeys[i];
-
-            NormalOcTreeNode searchNode = octree.search(candidateKey);
-            if (searchNode != null)
-            {
-               if (minDistance < 0.0)
-                  minDistance = Double.MAX_VALUE;
-
-               Point3D candidatePoint = new Point3D(searchNode.getHitLocationCopy());
-               double distance = candidatePoint.distance(point);
-               if (distance < minDistance)
-               {
-                  minDistance = distance;
-                  closestPoint.set(candidatePoint);
-               }
-            }
-            else
-            {
-               continue;
-            }
-         }
-         if (minDistance > 0)
-         {
-            break;
-         }
+         return 1.0;
       }
-      if (RandomICPSLAM.DEBUG)
-         closestOctreePoints.add(closestPoint);
-
-      return minDistance;
-   }
-
-   private static OcTreeKey[] createCandidateOctreeKey(OcTreeKey key, int searchingSize)
-   {
-      int outerSize = 2 * searchingSize + 1;
-      int innerSize = 2 * searchingSize - 1;
-      int numberOfCandidates = outerSize * outerSize * outerSize - innerSize * innerSize * innerSize;
-      OcTreeKey[] candidates = new OcTreeKey[numberOfCandidates];
-
-      int index = 0;
-      for (int i = 0; i < outerSize; i++)
+      else
       {
-         for (int j = 0; j < outerSize; j++)
-         {
-            for (int k = 0; k < outerSize; k++)
-            {
-               if (i == 0 || i == outerSize - 1)
-               {
-                  OcTreeKey candidate = new OcTreeKey();
-                  candidate.setKey(0, key.getKey(0) - searchingSize + i);
-                  candidate.setKey(1, key.getKey(1) - searchingSize + j);
-                  candidate.setKey(2, key.getKey(2) - searchingSize + k);
-                  candidates[index] = candidate;
-                  index++;
-               }
-               else
-               {
-                  if (j == 0 || j == outerSize - 1 || k == 0 || k == outerSize - 1)
-                  {
-                     OcTreeKey candidate = new OcTreeKey();
-                     candidate.setKey(0, key.getKey(0) - searchingSize + i);
-                     candidate.setKey(1, key.getKey(1) - searchingSize + j);
-                     candidate.setKey(2, key.getKey(2) - searchingSize + k);
-                     candidates[index] = candidate;
-                     index++;
-                  }
-               }
-            }
-         }
+         octree.keyToCoordinate(nearestKey);
+         if (RandomICPSLAM.DEBUG)
+            closestOctreePoints.add(octree.keyToCoordinate(nearestKey));
+         return distance;
       }
-
-      return candidates;
    }
 
    /**
