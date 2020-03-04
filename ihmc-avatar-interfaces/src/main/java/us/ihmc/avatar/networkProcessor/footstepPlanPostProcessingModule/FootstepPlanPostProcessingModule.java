@@ -71,13 +71,15 @@ public class FootstepPlanPostProcessingModule implements CloseableAndDisposable
       return name;
    }
 
-   public void handleRequestPacket(FootstepPostProcessingPacket latestOutput)
+   public FootstepPostProcessingPacket handleRequestPacket(FootstepPostProcessingPacket latestOutput)
    {
       FootstepPostProcessingPacket processedOutputStatus = postProcessing.postProcessFootstepPlan(latestOutput);
 
       statusCallback.accept(processedOutputStatus);
 
       isDone.set(true);
+
+      return processedOutputStatus;
    }
 
    public void addStatusCallback(Consumer<FootstepPostProcessingPacket> callback)
