@@ -39,7 +39,6 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
-      new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
          networkProcessor.setupFootstepPlanningToolboxModule(false);
