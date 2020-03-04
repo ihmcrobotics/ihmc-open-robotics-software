@@ -19,8 +19,6 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -39,10 +37,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -55,7 +52,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -72,14 +68,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
@@ -90,12 +83,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    protected SimulationTestingParameters simulationTestingParameters;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private IHMCROS2Publisher<FootstepPostProcessingPacket> postProcessingRequestPublisher;
-   private IHMCROS2Publisher<FootstepPostProcessingParametersPacket> postProcessingParametersPublisher;
-   private AtomicReference<FootstepPostProcessingPacket> postProcessingOutputStatus;
-
    private FootstepPlanningModule footstepPlanningModule;
-   private FootstepPlanPostProcessingModule postProcessingToolboxModule;
+   private FootstepPlanPostProcessingModule postProcessingModule;
 
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -113,22 +102,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
-      postProcessingToolboxModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
-
-      postProcessingOutputStatus = new AtomicReference<>();
-      Ros2Node ros2Node = drcSimulationTestHelper.getRos2Node();
-
-      String robotName = robotModel.getSimpleRobotName();
-
-      MessageTopicNameGenerator footstepPlannerSubGenerator = FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
-      MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
-      MessageTopicNameGenerator postProcessingPubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingModule.MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT);
-      MessageTopicNameGenerator postProcessingSubGenerator = getTopicNameGenerator(robotName, FootstepPlanPostProcessingModule.MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
-
-      postProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class, postProcessingSubGenerator);
-      postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingParametersPacket.class, postProcessingSubGenerator);
-
-      drcSimulationTestHelper.createSubscriber(FootstepPostProcessingPacket.class, postProcessingPubGenerator, postProcessingOutputStatus::set);
+      postProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -150,13 +124,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          drcSimulationTestHelper = null;
       }
 
-      postProcessingRequestPublisher = null;
-      postProcessingOutputStatus = null;
-
       footstepPlanningModule.closeAndDispose();
-      postProcessingToolboxModule.closeAndDispose();
+      postProcessingModule.closeAndDispose();
       footstepPlanningModule = null;
-      postProcessingToolboxModule = null;
+      postProcessingModule = null;
 
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -215,10 +186,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
 
-      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
-      parameters.setSwingOverRegionsProcessingEnabled(true);
-
-      postProcessingParametersPublisher.publish(parameters.getAsPacket());
+      postProcessingModule.getParameters().setSwingOverRegionsProcessingEnabled(true);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -239,13 +207,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
-      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
+      FootstepPostProcessingParametersBasics parameters = postProcessingModule.getParameters();
       parameters.setFractionLoadIfFootHasFullSupport(0.6);
       parameters.setFractionTimeOnFootIfFootHasFullSupport(0.6);
       parameters.setFractionLoadIfOtherFootHasNoWidth(0.7);
       parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(0.7);
-
-      postProcessingParametersPublisher.publish(parameters.getAsPacket());
 
       // increase ankle damping to match the real robot better
       YoDouble damping_l_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
@@ -358,21 +324,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          postProcessingRequest.getRightFootContactPoints2d().add().set(vertex);
       }
 
-      postProcessingRequestPublisher.publish(postProcessingRequest);
+      FootstepPostProcessingPacket postProcessingOutput = postProcessingModule.handleRequestPacket(postProcessingRequest);
 
-      double maxTimeToWait = 20.0;
-      long startTime = System.nanoTime();
-      while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
-      {
-         ThreadTools.sleep(100);
-      }
-
-      if (postProcessingOutputStatus.get() == null)
-      {
-         fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
-      }
-
-      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
+      FootstepDataListMessage footstepDataListMessage = postProcessingOutput.getFootstepDataList();
 
       List<FootstepDataMessage> footsteps = new ArrayList<>(footstepDataListMessage.getFootstepDataList());
 
@@ -505,21 +459,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       System.out.println("sending post processing request");
 
-      postProcessingRequestPublisher.publish(postProcessingRequest);
+      FootstepPostProcessingPacket postProcessingOutputStatus = postProcessingModule.handleRequestPacket(postProcessingRequest);
 
-      long startTime = System.nanoTime();
-      double maxTimeToWait = 20.0;
-      while (postProcessingOutputStatus.get() == null && Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) < maxTimeToWait)
-      {
-         ThreadTools.sleep(100);
-      }
-
-      if (postProcessingOutputStatus.get() == null)
-      {
-         fail("Never received an output from the post processor, even after " + maxTimeToWait + " seconds.");
-      }
-
-      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.get().getFootstepDataList();
+      FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.getFootstepDataList();
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
