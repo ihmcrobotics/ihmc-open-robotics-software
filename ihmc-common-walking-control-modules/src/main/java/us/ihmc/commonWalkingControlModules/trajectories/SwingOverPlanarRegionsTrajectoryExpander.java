@@ -114,7 +114,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
       toeLength = steppingParameters.getFootForwardOffset();
       heelLength = steppingParameters.getFootBackwardOffset();
-      collisionSphereRadius = steppingParameters.getActualFootLength() / 2.0;
+      collisionSphereRadius = Math.max(toeLength, heelLength);
 
       swingWaypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();
 
@@ -372,6 +372,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       if (fractionForCollision >= 0.0)
       {
+         wereWaypointsAdjusted.set(true);
          waypointAdjustment.sub(pointOnTrajectory, nearestCollision);
          double distanceToCollision = waypointAdjustment.length();
 
