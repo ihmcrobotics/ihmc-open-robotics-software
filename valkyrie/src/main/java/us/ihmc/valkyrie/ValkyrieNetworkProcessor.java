@@ -37,6 +37,7 @@ public class ValkyrieNetworkProcessor
    {
       HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
 
+      networkProcessor.setupKinematicsToolboxModule(false);
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
