@@ -170,7 +170,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       if (cameraDataReceiver != null)
          cameraDataReceiver.start();
       if (multiSenseSensorManager != null)
+      {
          multiSenseSensorManager.initializeParameterListeners();
+         multiSenseSensorManager.start();
+      }
       if (lidarScanPublisher != null)
          lidarScanPublisher.start();
       if (stereoVisionPointCloudPublisher != null)
@@ -217,6 +220,21 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
             sensorPoseToPack.set(transformToWorldToPack);
          }
       };
+   }
+
+   public MultiSenseSensorManager getMultiSenseSensorManager()
+   {
+      return multiSenseSensorManager;
+   }
+
+   public LidarScanPublisher getLidarScanPublisher()
+   {
+      return lidarScanPublisher;
+   }
+
+   public StereoVisionPointCloudPublisher getStereoVisionPointCloudPublisher()
+   {
+      return stereoVisionPointCloudPublisher;
    }
 
    @Override
