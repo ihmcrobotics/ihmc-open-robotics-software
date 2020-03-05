@@ -54,7 +54,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    {
       rigidBody = other.rigidBody;
       coefficientOfFriction = other.coefficientOfFriction;
-      contactPoints.copyFromListAndTrimSize(other.contactPoints);
+      contactPoints.set(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
       useHighCoPDamping = other.useHighCoPDamping;
       hasContactStateChanged = other.hasContactStateChanged;

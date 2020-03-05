@@ -65,7 +65,7 @@
                         <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         <Label text="Best Effort Timeout" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                         <Label text="Horizon Length" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-                        <Spinner fx:id="timeout" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Spinner fx:id="timeout" GridPane.columnIndex="1" GridPane.rowIndex="2" editable="true"/>
                         <Spinner fx:id="bestEffortTimeout" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Spinner fx:id="horizonLength" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />

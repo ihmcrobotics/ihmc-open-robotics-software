@@ -28,7 +28,7 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
             */
    public double desired_position_;
    /**
-            * Weight used to define the priority for reacing the desired position.
+            * Weight used to define the priority for reaching the desired position.
             */
    public double weight_;
 
@@ -104,14 +104,14 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
    }
 
    /**
-            * Weight used to define the priority for reacing the desired position.
+            * Weight used to define the priority for reaching the desired position.
             */
    public void setWeight(double weight)
    {
       weight_ = weight;
    }
    /**
-            * Weight used to define the priority for reacing the desired position.
+            * Weight used to define the priority for reaching the desired position.
             */
    public double getWeight()
    {
