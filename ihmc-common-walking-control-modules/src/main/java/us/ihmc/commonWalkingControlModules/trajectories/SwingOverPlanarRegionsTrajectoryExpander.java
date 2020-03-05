@@ -297,6 +297,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       status.set(SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION);
       numberOfTriesCounter.resetCount();
 
+      // do an initial fast approximation. This approximation just looks to see what the closest point to the line segments that make up the basic trajectory
+      // are, and modifies based on that.
       while (doInitialFastApproximation.getBooleanValue() && status.getEnumValue().equals(SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION)
              && !numberOfTriesCounter.maxCountReached())
       {
@@ -307,7 +309,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          }
          mostSevereCollisionType.set(SwingOverPlanarRegionsCollisionType.NO_INTERSECTION);
 
-         status.set(checkAndAdjustForCollisions(filteredRegions, this::getFastFractionThroughTrajectoryForCollision));
+         status.set(checkAndAdjustForCollisions(filteredRegions, this::getFractionAlongLineForCollision));
          updateVisualizer();
          numberOfTriesCounter.countOne();
       }
@@ -316,6 +318,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.initialize();
 
       status.set(SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION);
+      // walk along the trajectory and look for collisions, and adjust your waypoints if there is one.
       while (status.getEnumValue().equals(SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION) && !numberOfTriesCounter.maxCountReached())
       {
          for (SwingOverPlanarRegionsCollisionType swingOverPlanarRegionsTrajectoryCollisionType : SwingOverPlanarRegionsCollisionType.values())
@@ -363,6 +366,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       adjustedWaypoints.get(1).set(secondBaseWaypoint);
    }
 
+   /**
+    * Checks for collisions using the {@param collisionChecker}, and then modifies the waypoints if one is detected
+    */
    private SwingOverPlanarRegionsStatus checkAndAdjustForCollisions(List<PlanarRegion> planarRegionsList,
                                                                     FractionThroughTrajectoryForCollision collisionChecker)
    {
@@ -379,18 +385,20 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       double fractionForCollision = collisionChecker.getFractionThroughTrajectoryForCollision(planarRegionsList, pointOnTrajectory, nearestCollision);
 
       if (fractionForCollision >= 0.0)
-      {
+      { // we've detected a collision. We need to adjust to avoid the collision
          wereWaypointsAdjusted.set(true);
          waypointAdjustment.sub(pointOnTrajectory, nearestCollision);
          double distanceToCollision = waypointAdjustment.length();
 
          if (MathTools.epsilonEquals(distanceToCollision, 0.0, 1e-3))
-         {
+         {  // we are directly going through an object here. That means we don't have a 'vector' to the collision, so instead we can push away from the
+            // ground midpoint of the trajectory
             computeWaypointAdjustmentDirection(fractionForCollision);
             waypointAdjustment.scale(minimumAdjustmentIncrementDistance.getDoubleValue());
          }
          else
-         {
+         {  // we've detected a collision. Let's push the waypoints away from it. We don't necessarily want to completely move that far (see gradient descent
+            // theory), so let's scale the adjustment a little bit, and also clamp it to be between two predictable values.
             double adjustmentDistance = MathTools.clamp(adjustmentIncrementDistanceGain.getDoubleValue() * distanceToCollision,
                                                         minimumAdjustmentIncrementDistance.getDoubleValue(),
                                                         maximumAdjustmentIncrementDistance.getDoubleValue());
@@ -398,24 +406,30 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          }
 
          // TODO clamp the adjustment so that the waypoints remain above the foot
+         // apply the total waypoint adjustment scaled by how far through the swing we are.
          adjustedFirstWaypoint.scaleAdd(1.0 - fractionForCollision, waypointAdjustment, adjustedFirstWaypoint);
          adjustedSecondWaypoint.scaleAdd(fractionForCollision, waypointAdjustment, adjustedSecondWaypoint);
 
          if (adjustedFirstWaypoint.distanceSquared(originalFirstWaypoint) > maxAdjustmentDistanceSquared
              || adjustedSecondWaypoint.distanceSquared(originalSecondWaypoint) > maxAdjustmentDistanceSquared)
-         {
+         {  // If we've adjusted either waypoint too much, terminate the adjustment.
             return SwingOverPlanarRegionsStatus.FAILURE_HIT_MAX_ADJUSTMENT_DISTANCE;
          }
 
+         // Keep searching, because we had a collision.
          return SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION;
       }
 
+      // We didn't have a collision, so return that we have a valid trajectory.
       return SwingOverPlanarRegionsStatus.SOLUTION_FOUND;
    }
 
-   private double getFastFractionThroughTrajectoryForCollision(List<PlanarRegion> planarRegions,
-                                                               Point3DBasics collisionOnSegmentToPack,
-                                                               Point3DBasics collisionOnRegionToPack)
+   /**
+    * This approach draws a straight line between each waypoint (start, middle one, middle two, end), and checks each one for a collision.
+     */
+   private double getFractionAlongLineForCollision(List<PlanarRegion> planarRegions,
+                                                   Point3DBasics collisionOnSegmentToPack,
+                                                   Point3DBasics collisionOnRegionToPack)
    {
       double firstSegmentLength = swingStartPosition.distance(adjustedWaypoints.get(0));
       double secondSegmentLength = adjustedWaypoints.get(0).distance(adjustedWaypoints.get(1));
@@ -459,7 +473,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    }
 
    /**
-    * Returns the fraction through the segment that the collision occurs at.
+    * Returns the fraction through the the linesegment between two waypoints and also packs the point on the segment and the collision point in world.
     */
    private double checkLineSegmentForCollision(Point3DReadOnly firstEndpoint,
                                                Point3DReadOnly secondEndpoint,
@@ -481,7 +495,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          PlanarRegionTools.getDistanceFromLineSegment3DToPlanarRegion(startInLocal, endInLocal, planarRegion, closestPointOnSegment, collisionOnRegionToPack);
 
-         // FIXME double check the frame of the collision point
          planarRegion.transformFromLocalToWorld(collisionOnRegionToPack);
          planarRegion.getTransformToWorld().transform(closestPointOnSegment, collisionOnSegmentToPack);
          trajectoryPosition.set(collisionOnSegmentToPack);
@@ -497,6 +510,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return -1.0;
    }
 
+   /**
+    * This approach walks through the swing trajectory, and checks to make sure that the trajectory point at each point along the trajectory is a certain
+    * distance from the environment.
+    */
    private double getFractionThroughTrajectoryForCollision(List<PlanarRegion> planarRegions,
                                                            Point3DBasics pointOnTrajectoryToPack,
                                                            Point3DBasics closestPointOnRegionToPack)
@@ -547,6 +564,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return -1.0;
    }
 
+   /**
+    * This method checks to make sure that the collision point is a valid collision.
+    */
    private boolean checkValidityOfCollisionPoint(Point3DReadOnly pointOnTrajectory,
                                                  Point3DReadOnly closestPointOnRegion,
                                                  double avoidanceDistanceSquared,
@@ -555,46 +575,54 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       double distanceToClosestPoint = closestPointOnRegion.distanceSquared(pointOnTrajectory);
 
-      if (distanceToClosestPoint < avoidanceDistanceSquared)
+      // if it's too far away, it's not a valid collision
+      if (distanceToClosestPoint > avoidanceDistanceSquared)
+         return false;
+
+      updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.TOO_CLOSE_TO_IGNORE_PLANE, closestPointOnRegion);
+
+      // checks we're not colliding with the floor
+      if (!checkIfCollidingWithFloorPlane(closestPointOnRegion))
       {
-         if (!checkIfCollidingWithFloorPlane(closestPointOnRegion))
+         // we check to make sure that the collision is in a decent spot. As in, reject it if we're above the foot
+         boolean isCollisionAboveFootholds =
+               isCollisionAboveStartFoot(closestPointOnRegion, collisionIsOnRising) || isCollisionAboveEndFoot(closestPointOnRegion);
+         if (isCollisionAboveFootholds)
+         {  // move on, we're above the foot
+            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_ABOVE_FOOT, closestPointOnRegion);
+         }
+         else
          {
-            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.TOO_CLOSE_TO_IGNORE_PLANE, closestPointOnRegion);
+            // Check to see if the collision is closer to the point between the feet than the trajectory is to the mid point. This is effectively drawing
+            // an ellipse around the mid ground point, with the curvature defined by the trajectory. Then it checks to make sure the collision is inside that
+            // ellipse. If it's not, it's probably not a valid collision.
+            // TODO: This may be wrong. Think about trying to move the foot between an opening that isn't wide enough, like a canyon
+            boolean isCollisionInsideTheTrajectory = midGroundPoint.distanceSquared(closestPointOnRegion) < midGroundPoint.distanceSquared(trajectoryPosition);
 
-            boolean isCollisionAboveFootholds =
-                  isCollisionAboveStartFoot(closestPointOnRegion, collisionIsOnRising) || isCollisionAboveEndFoot(closestPointOnRegion);
-            if (isCollisionAboveFootholds)
-            {
-               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_ABOVE_FOOT, closestPointOnRegion);
+            if (isCollisionInsideTheTrajectory)
+            {  // If that condition is valid, we know we have a bad collision and we need to adjust.
+               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_INSIDE_TRAJECTORY, closestPointOnRegion);
+               return true;
             }
-            else
+
+            collisionRelativeToStart.setIncludingFrame(worldFrame, closestPointOnRegion);
+            collisionRelativeToStart.changeFrame(startOfSwingReferenceFrame);
+
+            // Check to see if the collision is in front of the toe at lift off and behind the heel at touchdown. If it is, we know it's a bad collision.
+            // TODO: think about this one some more. Do we want to actually be between the heel at lift off and the toe at touchdown? Probably.
+            double toePoint = toeLength;
+            double heelPoint = stepRelativeToStart.getX() - heelLength;
+            boolean collisionIsBetweenToeAndHeel = MathTools.intervalContains(collisionRelativeToStart.getX(),
+                                                                              Math.min(toePoint, heelPoint),
+                                                                              Math.max(toePoint, heelPoint));
+
+            if (collisionIsBetweenToeAndHeel)
             {
-               boolean isCollisionInsideTheTrajectory =
-                     midGroundPoint.distanceSquared(closestPointOnRegion) < midGroundPoint.distanceSquared(trajectoryPosition);
-
-               if (isCollisionInsideTheTrajectory)
-               {
-                  updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_INSIDE_TRAJECTORY, closestPointOnRegion);
-                  return true;
-               }
-
-               collisionRelativeToStart.setIncludingFrame(worldFrame, closestPointOnRegion);
-               collisionRelativeToStart.changeFrame(startOfSwingReferenceFrame);
-
-               double toePoint = toeLength;
-               double heelPoint = stepRelativeToStart.getX() - heelLength;
-               boolean collisionIsBetweenToeAndHeel = MathTools.intervalContains(collisionRelativeToStart.getX(),
-                                                                                 Math.min(toePoint, heelPoint),
-                                                                                 Math.max(toePoint, heelPoint));
-
-               if (collisionIsBetweenToeAndHeel)
-               {
-                  updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_BETWEEN_FEET, closestPointOnRegion);
-                  return true;
-               }
-
-               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.OUTSIDE_TRAJECTORY, closestPointOnRegion);
+               updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.COLLISION_BETWEEN_FEET, closestPointOnRegion);
+               return true;
             }
+
+            updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.OUTSIDE_TRAJECTORY, closestPointOnRegion);
          }
       }
 
@@ -615,11 +643,19 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       }
    }
 
+   /**
+    * This checks to make sure that the collision point is above the virtual floor plane by a certain distance. This virtual floor plane is drawn between
+    * the start foot and the end foot.
+    */
    private boolean checkIfCollidingWithFloorPlane(Point3DReadOnly collisionPoint)
    {
       return swingFloorPlane.distance(collisionPoint) < minimumHeightAboveFloorForCollision.getDoubleValue() + minimumClearance.getDoubleValue();
    }
 
+   /**
+    * Checks to see if the collision point is above or below the end foot. If is is, and it's within a proximity of the height above that foot, we return false,
+    * because that's probably the floor.
+    */
    private boolean isCollisionAboveEndFoot(Point3DReadOnly collisionPoint)
    {
       if (!swingEndPolygon.isPointInside(collisionPoint.getX(), collisionPoint.getY()))
@@ -631,14 +667,20 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return Math.abs(endOfSwingReferenceFrame.getZ()) < minimumHeightAboveFloorForCollision.getDoubleValue();
    }
 
+   /**
+    * Checks to see if the collision point is above or below the start foot. Then, if we're currently picking the foot off the ground, it returns false. We know
+    * we put the foot down there, so that point shouldn't actually collide.
+    */
    private boolean isCollisionAboveStartFoot(Point3DReadOnly collisionPoint, boolean collisionIsOnRising)
    {
       return collisionIsOnRising && swingStartPolygon.isPointInside(collisionPoint.getX(), collisionPoint.getY());
    }
 
+   /**
+    * This computes a waypoint adjustment direction that is radial w.r.t. how far through swing the collision occured at.
+    */
    private void computeWaypointAdjustmentDirection(double fraction)
    {
-      // so this does radially about the midpoint w.r.t. how far through swing we are.
       axisAngle.set(swingTrajectoryPlane.getNormal(), Math.PI * fraction);
       rigidBodyTransform.setRotation(axisAngle);
 
@@ -647,11 +689,17 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       rigidBodyTransform.transform(waypointAdjustment);
    }
 
-   public RecyclingArrayList<FramePoint3D> getExpandedWaypoints()
+   /**
+    * Returns the modified waypoints that should avoid collisions in the world.
+    */
+   public List<FramePoint3D> getExpandedWaypoints()
    {
       return adjustedWaypoints;
    }
 
+   /**
+    * Returns whether or not the waypoints were modified.
+    */
    public boolean wereWaypointsAdjusted()
    {
       return wereWaypointsAdjusted.getBooleanValue();
