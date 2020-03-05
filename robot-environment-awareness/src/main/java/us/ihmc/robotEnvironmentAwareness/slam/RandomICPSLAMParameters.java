@@ -16,7 +16,7 @@ public class RandomICPSLAMParameters
 
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
-   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 300;
+   private static final int DEFAULT_NUMBER_OF_SOURCE_POINTS = 500;
    private static final double DEFAULT_MINIMUM_DEPTH = 0.5;
    private static final double DEFAULT_MAXIMUM_DEPTH = 1.5;
    private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
