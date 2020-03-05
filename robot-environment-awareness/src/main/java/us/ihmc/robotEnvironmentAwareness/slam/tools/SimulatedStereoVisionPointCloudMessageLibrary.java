@@ -36,7 +36,12 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLengthLower,
                                                                           double stairLengthUpper, boolean generateVertical)
    {
-      return generateMessageSimpleStair(fixedSensorPose, new RigidBodyTransform(), stairHeight, stairWidth, stairLengthLower, stairLengthUpper,
+      return generateMessageSimpleStair(fixedSensorPose,
+                                        new RigidBodyTransform(),
+                                        stairHeight,
+                                        stairWidth,
+                                        stairLengthLower,
+                                        stairLengthUpper,
                                         generateVertical);
    }
 
@@ -116,6 +121,42 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
 
       for (RigidBodyTransform centroid : centroidPoses)
          centroid.preMultiply(preMultiplier);
+      return SimulatedStereoVisionPointCloudMessageFactory.generateStereoVisionPointCloudMessage(sensorPose, NUMBER_OF_POINTS, convexPolygons, centroidPoses);
+   }
+
+   public static StereoVisionPointCloudMessage generateMessageCinderBlocks(RigidBodyTransform sensorPose, RigidBodyTransform preMultiplier, double length,
+                                                                           double width)
+   {
+      List<RigidBodyTransform> centroidPoses = new ArrayList<>();
+      List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
+
+      RigidBodyTransform centerOne = new RigidBodyTransform();
+      centerOne.appendTranslation(1.0, 0.0, 0.0);
+      centerOne.appendRollRotation(Math.toRadians(15.0));
+      centroidPoses.add(centerOne);
+
+      RigidBodyTransform centerTwo = new RigidBodyTransform();
+      centerTwo.appendTranslation(1.0, width, 0.3);
+      centroidPoses.add(centerTwo);
+
+      RigidBodyTransform centerThree = new RigidBodyTransform();
+      centerThree.appendTranslation(1.0, -width, 0.15);
+      centroidPoses.add(centerThree);
+
+      for (RigidBodyTransform centroid : centroidPoses)
+         centroid.preMultiply(preMultiplier);
+
+      for (int i = 0; i < 3; i++)
+      {
+         ConvexPolygon2D polygon = new ConvexPolygon2D();
+         polygon.addVertex(length / 2, width / 2);
+         polygon.addVertex(length / 2, -width / 2);
+         polygon.addVertex(-length / 2, -width / 2);
+         polygon.addVertex(-length / 2, width / 2);
+         polygon.update();
+         convexPolygons.add(polygon);
+      }
+
       return SimulatedStereoVisionPointCloudMessageFactory.generateStereoVisionPointCloudMessage(sensorPose, NUMBER_OF_POINTS, convexPolygons, centroidPoses);
    }
 }

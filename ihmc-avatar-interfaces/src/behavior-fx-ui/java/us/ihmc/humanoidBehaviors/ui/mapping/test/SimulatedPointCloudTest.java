@@ -156,6 +156,38 @@ public class SimulatedPointCloudTest
    }
 
    @Test
+   public void testSimpleCinderBlockField()
+   {
+      double sizeOfCinderBlocks = 0.5;
+      RigidBodyTransform sensorPose = new RigidBodyTransform();
+      sensorPose.setTranslation(0.8, 0.0, 1.0);
+      sensorPose.appendPitchRotation(Math.toRadians(90.0 + 70.0));
+      sensorPose.appendYawRotation(Math.toRadians(-90.0));
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPose,
+                                                                                                                           new RigidBodyTransform(),
+                                                                                                                           sizeOfCinderBlocks,
+                                                                                                                           sizeOfCinderBlocks);
+
+      double forwardTranslation = 0.05;
+      RigidBodyTransform sensorPoseTwo = new RigidBodyTransform(sensorPose);
+      sensorPoseTwo.prependTranslation(forwardTranslation, 0.0, 0.0);
+      RigidBodyTransform preMultiplier = new RigidBodyTransform();
+      preMultiplier.appendTranslation(0.05, 0.04, -0.03);
+      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPoseTwo,
+                                                                                                                           preMultiplier,
+                                                                                                                           sizeOfCinderBlocks
+                                                                                                                                 - forwardTranslation,
+                                                                                                                           sizeOfCinderBlocks);
+
+      SLAMViewer viewer = new SLAMViewer();
+      viewer.addStereoMessage(messageOne, Color.BLUE);
+      viewer.addStereoMessage(messageTwo, Color.GREEN);
+      viewer.start("testSimpleCinderBlockField");
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
    public void testPlanarRegionsForFlatGround()
    {
       double groundWidth = 1.5;
