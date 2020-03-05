@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,6 +27,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.Ros2Node;
 
 public class SLAMModule
 {
@@ -43,14 +47,17 @@ public class SLAMModule
 
    private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
    private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
 
-   public SLAMModule(Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
+   private static final String PLANAR_REGIONS_LIST_TOPIC_SURFIX = "_slam";
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+
+   public SLAMModule(Ros2Node ros2Node, Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
    {
       this.reaMessager = reaMessager;
       enable = reaMessager.createInput(slamEnableTopic, true);
@@ -59,6 +66,10 @@ public class SLAMModule
       ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
 
       reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
+
+      MessageTopicNameGenerator publisherTopicNameGenerator;
+      publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
+      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
    }
 
    public void start() throws IOException
@@ -145,7 +156,9 @@ public class SLAMModule
 
          slam.updatePlanarRegionsMap();
          PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-         reaMessager.submitMessage(planarRegionsStateTopicToSubmit, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap));
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap);
+         reaMessager.submitMessage(planarRegionsStateTopicToSubmit, planarRegionsListMessage);
+         planarRegionPublisher.publish(planarRegionsListMessage);
 
          SLAMFrame latestFrame = slam.getLatestFrame();
          Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
@@ -153,7 +166,8 @@ public class SLAMModule
          Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
          if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
             return;
-         StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud, sourcePointsToWorld,
+         StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
+                                                                                                            sourcePointsToWorld,
                                                                                                             correctedPointCloud);
          latestStereoMessage.getSensorPosition().set(latestFrame.getSensorPose().getTranslation());
          latestStereoMessage.getSensorOrientation().set(latestFrame.getSensorPose().getRotation());
