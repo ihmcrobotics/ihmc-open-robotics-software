@@ -15,14 +15,14 @@ public class FootstepPlanAndProcessModule implements CloseableAndDisposable
    private final FootstepPlanningModule planningModule;
    private final FootstepPlanPostProcessingModule postProcessingModule;
 
-   private Ros2Node ros2Node;
+   public static final String MODULE_NAME = "footstep_plan_and_process_module";
 
-   public static final String MODULE_NAME = "footstep_plan_and_process";
-
-   public FootstepPlanAndProcessModule(DRCRobotModel robotModel)
+   public FootstepPlanAndProcessModule(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
-      this.planningModule = FootstepPlanningModuleLauncher.createModule(robotModel);
-      this.postProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel);
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
+
+      this.planningModule = FootstepPlanningModuleLauncher.createModule(ros2Node, robotModel);
+      this.postProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(ros2Node, robotModel);
    }
 
    @Override
@@ -30,15 +30,5 @@ public class FootstepPlanAndProcessModule implements CloseableAndDisposable
    {
       planningModule.closeAndDispose();
       postProcessingModule.closeAndDispose();
-   }
-
-   public void setupWithRos(PubSubImplementation pubSubImplementation)
-   {
-      if (ros2Node != null)
-         return;
-
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, MODULE_NAME);
-      FootstepPlanningModuleLauncher.setupForRos(planningModule, ros2Node);
-      FootstepPlanPostProcessingModuleLauncher.setupForRos(postProcessingModule, ros2Node);
    }
 }

@@ -28,18 +28,15 @@ public class FootstepPlanPostProcessingModuleLauncher
 
    public static FootstepPlanPostProcessingModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      FootstepPlanPostProcessingModule postProcessingModule = createModule(robotModel);
-      return setupForRos(postProcessingModule, pubSubImplementation);
-   }
-
-   public static FootstepPlanPostProcessingModule setupForRos(FootstepPlanPostProcessingModule postProcessingModule, DomainFactory.PubSubImplementation pubSubImplementation)
-   {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_post_processor");
-      return setupForRos(postProcessingModule, ros2Node);
+
+      return createModule(ros2Node, robotModel);
    }
 
-   public static FootstepPlanPostProcessingModule setupForRos(FootstepPlanPostProcessingModule postProcessingModule, Ros2Node ros2Node)
+   public static FootstepPlanPostProcessingModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
+      FootstepPlanPostProcessingModule postProcessingModule = createModule(robotModel);
+
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
