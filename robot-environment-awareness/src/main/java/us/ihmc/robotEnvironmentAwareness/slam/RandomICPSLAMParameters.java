@@ -22,7 +22,7 @@ public class RandomICPSLAMParameters
    private static final double DEFAULT_MINIMUM_OVERLAPPED_RATIO = 0.4;
    private static final double DEFAULT_MAXIMUM_INITIAL_DISTANCE_RATIO = 2.0;
    private static final int DEFAULT_MAXIMUM_ICP_SEARCHING_SIZE = 5;
-   private static final double DEFAULT_WINDOW_MARGIN = 0.1;
+   private static final double DEFAULT_WINDOW_MARGIN = 0.025;
    private static final double DEFAULT_MINIMUM_INLIERS_RATIO_OF_KEY_FRAME = 0.95;
 
    public RandomICPSLAMParameters()
