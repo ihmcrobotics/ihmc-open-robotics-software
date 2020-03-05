@@ -25,7 +25,7 @@ import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 public class RandomICPSLAM extends SLAMBasics
 {
    // debugging variables.
-   public static final boolean DEBUG = true;
+   public static final boolean DEBUG = false;
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
