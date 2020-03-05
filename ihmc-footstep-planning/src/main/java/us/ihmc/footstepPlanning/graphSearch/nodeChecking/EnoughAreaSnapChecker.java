@@ -11,6 +11,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.function.UnaryOperator;
+
 public class EnoughAreaSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
@@ -29,7 +31,7 @@ public class EnoughAreaSnapChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(DirectedGraph<FootstepNode> graph)
+   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
    {
 
    }

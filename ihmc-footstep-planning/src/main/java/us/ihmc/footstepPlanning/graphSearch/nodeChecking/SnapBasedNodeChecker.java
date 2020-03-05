@@ -47,12 +47,12 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    }
 
    @Override
-   public void addFootstepGraph(DirectedGraph graph)
+   public void addFootstepGraph(DirectedGraph<FootstepNode> graph)
    {
       this.graph = graph;
       for (int i = 0; i < checkerComponents.size(); i++)
       {
-         checkerComponents.get(i).setFootstepGraph(graph);
+         checkerComponents.get(i).setParentNodeSupplier(graph::getParentNode);
       }
    }
 

@@ -5,9 +5,11 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.function.UnaryOperator;
+
 public interface SnapBasedCheckerComponent
 {
-   void setFootstepGraph(DirectedGraph<FootstepNode> graph);
+   void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier);
 
    void setPlanarRegions(PlanarRegionsList planarRegions);
 

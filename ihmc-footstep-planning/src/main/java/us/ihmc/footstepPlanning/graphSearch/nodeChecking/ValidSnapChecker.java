@@ -8,6 +8,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.function.UnaryOperator;
+
 public class ValidSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
@@ -22,7 +24,7 @@ public class ValidSnapChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(DirectedGraph graph)
+   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
    {
 
    }
