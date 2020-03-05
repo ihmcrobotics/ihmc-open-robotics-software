@@ -132,7 +132,7 @@ public class LIDARBasedREAModule
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
 
-      slamModule = new SLAMModule(reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
+      slamModule = new SLAMModule(ros2Node, reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
       slamModule.start();
    }
 
@@ -314,6 +314,7 @@ public class LIDARBasedREAModule
       try
       {
          reaMessager.closeMessager();
+         slamModule.stop();
       }
       catch (Exception e)
       {
