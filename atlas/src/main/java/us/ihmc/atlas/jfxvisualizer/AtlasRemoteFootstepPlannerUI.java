@@ -63,8 +63,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel);
-         planningAndProcessingModule.setupWithRos(DomainFactory.PubSubImplementation.FAST_RTPS);
+         planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
       }
    }
 
