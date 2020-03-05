@@ -17,6 +17,12 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
@@ -390,5 +396,70 @@ public class KSTTools
                                            Collections.singletonList(destination.getRootJoint()),
                                            stateSelection);
       MultiBodySystemTools.copyJointsState(Arrays.asList(source.getOneDoFJoints()), Arrays.asList(destination.getOneDoFJoints()), stateSelection);
+   }
+
+   public static void computeLinearVelocity(double dt, FramePoint3DReadOnly previousPosition, FramePoint3DReadOnly currentPosition,
+                                            FixedFrameVector3DBasics linearVelocityToPack)
+   {
+      linearVelocityToPack.sub(currentPosition, previousPosition);
+      linearVelocityToPack.scale(1.0 / dt);
+   }
+
+   /**
+    * Computes the angular velocity from finite difference. The result is the angular velocity
+    * expressed in the local frame described by {@code currentOrientation}.
+    */
+   public static void computeAngularVelocity(double dt, FrameQuaternionReadOnly previousOrientation, FrameQuaternionReadOnly currentOrientation,
+                                             FixedFrameVector3DBasics angularVelocityToPack)
+   {
+      previousOrientation.checkReferenceFrameMatch(currentOrientation);
+      previousOrientation.checkReferenceFrameMatch(angularVelocityToPack);
+
+      double qDot_x = currentOrientation.getX() - previousOrientation.getX();
+      double qDot_y = currentOrientation.getY() - previousOrientation.getY();
+      double qDot_z = currentOrientation.getZ() - previousOrientation.getZ();
+      double qDot_s = currentOrientation.getS() - previousOrientation.getS();
+
+      double qx = -currentOrientation.getX();
+      double qy = -currentOrientation.getY();
+      double qz = -currentOrientation.getZ();
+      double qs = currentOrientation.getS();
+
+      double wx = qs * qDot_x + qx * qDot_s + qy * qDot_z - qz * qDot_y;
+      double wy = qs * qDot_y - qx * qDot_z + qy * qDot_s + qz * qDot_x;
+      double wz = qs * qDot_z + qx * qDot_y - qy * qDot_x + qz * qDot_s;
+      angularVelocityToPack.set(wx, wy, wz);
+      angularVelocityToPack.scale(2.0 / dt);
+   }
+
+   public static void integrateLinearVelocity(double dt, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly linearVelocity,
+                                              FixedFramePoint3DBasics finalPosition)
+   {
+      finalPosition.scaleAdd(dt, linearVelocity, initialPosition);
+   }
+
+   public static void integrateAngularVelocity(double dt, FrameQuaternionReadOnly initialOrientation, FrameVector3DReadOnly angularVelocity,
+                                               FixedFrameQuaternionBasics finalOrientation)
+   {
+      double qInit_x = initialOrientation.getX();
+      double qInit_y = initialOrientation.getY();
+      double qInit_z = initialOrientation.getZ();
+      double qInit_s = initialOrientation.getS();
+
+      double x = angularVelocity.getX() * dt;
+      double y = angularVelocity.getY() * dt;
+      double z = angularVelocity.getZ() * dt;
+      finalOrientation.setRotationVector(x, y, z);
+
+      double qInt_x = finalOrientation.getX();
+      double qInt_y = finalOrientation.getY();
+      double qInt_z = finalOrientation.getZ();
+      double qInt_s = finalOrientation.getS();
+
+      double qFinal_x = qInit_s * qInt_x + qInit_x * qInt_s + qInit_y * qInt_z - qInit_z * qInt_y;
+      double qFinal_y = qInit_s * qInt_y - qInit_x * qInt_z + qInit_y * qInt_s + qInit_z * qInt_x;
+      double qFinal_z = qInit_s * qInt_z + qInit_x * qInt_y - qInit_y * qInt_x + qInit_z * qInt_s;
+      double qFinal_s = qInit_s * qInt_s - qInit_x * qInt_x - qInit_y * qInt_y - qInit_z * qInt_z;
+      finalOrientation.set(qFinal_x, qFinal_y, qFinal_z, qFinal_s);
    }
 }
