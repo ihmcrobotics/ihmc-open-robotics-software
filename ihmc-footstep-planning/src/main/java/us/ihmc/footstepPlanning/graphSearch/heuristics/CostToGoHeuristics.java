@@ -46,7 +46,7 @@ public abstract class CostToGoHeuristics
       Point3DBasics midfootPoint = new Point3D(node.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
 
       FootstepNodeSnapData snapData = snapper.getSnapData(node);
-      if (snapData != null)
+      if (snapData != null && !snapData.getSnapTransform().containsNaN())
          snapData.getSnapTransform().transform(midfootPoint);
 
       pose.setPosition(midfootPoint);

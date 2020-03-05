@@ -79,6 +79,16 @@ public class LidarScan
       return points;
    }
 
+   public Point3D[] toPointArray()
+   {
+      Point3D[] points = new Point3D[ranges.length];
+      for (int i = 0; i < ranges.length; i++)
+      {
+         points[i] = getPoint(i);
+      }
+      return points;
+   }
+
    public int size()
    {
       return ranges.length;
@@ -100,7 +110,6 @@ public class LidarScan
    }
 
    /**
-    *
     * @param index of the point with respect to {@link #getPoint(int)}
     * @return
     */
@@ -175,7 +184,6 @@ public class LidarScan
       return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirection(true));
    }
 
-
    /* PRIVATE/PROTECTED FUNCTIONS */
    protected Point3D getPoint(int index, float range)
    {
@@ -218,7 +226,8 @@ public class LidarScan
    {
       if (i >= params.pointsPerSweep * params.scanHeight)
       {
-         throw new IndexOutOfBoundsException("Index " + i + " greater than or equal to pointsPerSweep " + params.pointsPerSweep + " * scanHeight " + params.scanHeight);
+         throw new IndexOutOfBoundsException("Index " + i + " greater than or equal to pointsPerSweep " + params.pointsPerSweep + " * scanHeight "
+               + params.scanHeight);
       }
 
       double yawPerIndex = (params.sweepYawMax - params.sweepYawMin) / (params.pointsPerSweep - 1);
