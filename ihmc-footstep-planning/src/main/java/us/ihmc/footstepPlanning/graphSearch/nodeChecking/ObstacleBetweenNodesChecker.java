@@ -19,9 +19,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.function.UnaryOperator;
 
-public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
+public class ObstacleBetweenNodesChecker
 {
    private static final boolean DEBUG = false;
 
@@ -50,13 +49,6 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       this.heightExtrusion = heightExtrusion;
    }
 
-   @Override
-   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
-   {
-
-   }
-
-   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
@@ -67,10 +59,9 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
 
-   @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || !checkForPathCollisions.getAsBoolean())
+      if (previousNode == null || !checkForPathCollisions.getAsBoolean() || !hasPlanarRegions())
          return true;
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
@@ -85,7 +76,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       snapTransform.transform(nodePosition);
       previousSnapTransform.transform(previousNodePosition);
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
+      if (isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
       {
          if (DEBUG)
          {
@@ -168,11 +159,5 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       polygon.update();
 
       return new PlanarRegion(transform, polygon);
-   }
-
-   @Override
-   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
-   {
-      return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY;
    }
 }

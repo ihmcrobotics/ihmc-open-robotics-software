@@ -10,7 +10,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
@@ -46,7 +45,6 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
@@ -64,7 +62,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
-   private final FootstepNodeValidityChecker checker;
+   private final FootstepNodeChecker checker;
    private final CostToGoHeuristics distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
    private final FootstepCostCalculator stepCostCalculator;
@@ -112,7 +110,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
-      this.checker = new FootstepNodeValidityChecker(footstepPlannerParameters, footPolygons, snapper);
+      this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
       this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder);
@@ -403,7 +401,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return snapper;
    }
 
-   public FootstepNodeValidityChecker getChecker()
+   public FootstepNodeChecker getChecker()
    {
       return checker;
    }
