@@ -245,11 +245,6 @@ public class RandomICPSLAMTest
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
-      Point3D[] ruler = new Point3D[50];
-      for (int i = 0; i < 50; i++)
-         ruler[i] = new Point3D(0.15, 0.0, (double) i * octreeResolution);
-      slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
-
       slamViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, slam.getOctreeResolution(), true);
 
       slamViewer.start("testOptimizationForSimulatedPointCloud");
@@ -307,8 +302,7 @@ public class RandomICPSLAMTest
       RigidBodyTransform sensorPoseTwo = new RigidBodyTransform(sensorPose);
       sensorPoseTwo.prependTranslation(forwardTranslation, 0.0, 0.0);
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
-      //preMultiplier.appendTranslation(0.05, 0.04, -0.03);
-      preMultiplier.appendTranslation(0.0, 0.08, 0.0);
+      preMultiplier.appendTranslation(0.05, 0.04, -0.03);
       StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPoseTwo,
                                                                                                                            preMultiplier,
                                                                                                                            sizeOfCinderBlocks
@@ -331,17 +325,11 @@ public class RandomICPSLAMTest
       slamViewer.addStereoMessage(messageTwo, Color.BLACK);
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
-      //slamViewer.addOctree(slam.getOctree(), Color.BLUEVIOLET, octreeResolution, true);
 
       if (RandomICPSLAM.DEBUG)
          slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
-
-      Point3D[] ruler = new Point3D[50];
-      for (int i = 0; i < 50; i++)
-         ruler[i] = new Point3D(1.0, 0.0, (double) i * octreeResolution);
-      slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
 
       slamViewer.start("testSimpleCinderBlockField");
 
@@ -365,8 +353,6 @@ public class RandomICPSLAMTest
       for (int i = 0; i < 17; i++)
       {
          slam.addKeyFrame(messages.get(i));
-         //         slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
-         //         slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
       }
       slamViewer.addOctree(slam.getOctree(), Color.BLUE, octreeResolution, true);
       parameters.setWindowMargin(0.02);
@@ -433,45 +419,6 @@ public class RandomICPSLAMTest
          octreeViewer.addStereoMessage(messages.get(i), Color.GREEN);
       }
       octreeViewer.start("octreeViewer");
-
-      ThreadTools.sleepForever();
-   }
-
-   @Test
-   public void testRandomICPSLAMRoundTripEndToEnd()
-   {
-      String stereoPath = "E:\\Data\\20200213_Round_2\\PointCloud\\";
-      File pointCloudFile = new File(stereoPath);
-
-      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.02;
-      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      SLAMViewer slamViewer = new SLAMViewer();
-
-      slam.addKeyFrame(messages.get(0));
-      for (int i = 1; i < messages.size(); i++)
-      {
-         System.out.println();
-         System.out.println(" ## add frame " + i);
-         slam.addFrame(messages.get(i));
-         slam.updatePlanarRegionsMap();
-
-         slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
-         slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
-      }
-
-      slam.updatePlanarRegionsMap();
-
-      String path1 = "E:\\Data\\20200213_Round_2\\20200213_153657_PlanarRegion\\";
-      String path2 = "E:\\Data\\20200213_Round_2\\20200213_154007_PlanarRegion\\";
-      String path3 = "E:\\Data\\20200213_Round_2\\20200213_154146_PlanarRegion\\";
-
-      //slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
-      slamViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
-      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path1)));
-      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path2)));
-      slamViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(new File(path3)));
-      slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
 
       ThreadTools.sleepForever();
    }
