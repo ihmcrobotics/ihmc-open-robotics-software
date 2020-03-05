@@ -1,3 +1,4 @@
+
 package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -282,7 +283,7 @@ public class SwingOverPlanarRegionsTest
 
       scs.startOnAThread();
       scs.cropBuffer();
-            ThreadTools.sleepForever();
+//            ThreadTools.sleepForever();
 
       scs.closeAndDispose();
       return processedPacket;
