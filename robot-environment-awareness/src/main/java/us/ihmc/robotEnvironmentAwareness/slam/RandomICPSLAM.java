@@ -142,6 +142,7 @@ public class RandomICPSLAM extends SLAMBasics
    public void updatePlanarRegionsMap()
    {
       octree.updateNormals();
+      segmentationCalculator.setSensorPosition(getLatestFrame().getSensorPose().getTranslation());
       segmentationCalculator.compute(octree.getRoot());
 
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
