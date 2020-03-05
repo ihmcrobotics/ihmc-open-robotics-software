@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -29,7 +28,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
@@ -46,7 +44,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
-   private final FootstepNodeValidityChecker nodeChecker;
+   private final FootstepNodeChecker nodeChecker;
 
    private final MeshView meshView = new MeshView();
    private final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -85,7 +83,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       }
 
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-      nodeChecker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      nodeChecker = new FootstepNodeChecker(parameters, footPolygons, snapper);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters::set);
    }

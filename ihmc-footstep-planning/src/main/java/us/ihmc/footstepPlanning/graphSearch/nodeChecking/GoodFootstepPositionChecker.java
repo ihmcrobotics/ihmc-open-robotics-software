@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -12,16 +11,14 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.UnaryOperator;
 
-public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
+public class GoodFootstepPositionChecker
 {
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
@@ -43,17 +40,11 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
       this.snapper = snapper;
    }
 
-   @Override
    public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
    {
       this.parentNodeSupplier = parentNodeSupplier;
    }
 
-   @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegions)
-   {
-
-   }
    public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
    {
       RobotSide stepSide = candidateNode.getRobotSide();

@@ -41,7 +41,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-public class FootstepNodeValidityCheckerTest
+public class FootstepNodeCheckerTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
@@ -60,7 +60,7 @@ public class FootstepNodeValidityCheckerTest
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
       FootstepNodeSnapper snapper = new TestSnapper();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
       checker.setPlanarRegions(planarRegions);
 
       FootstepNode node0 = new FootstepNode(-0.65, -0.1, 0.0, RobotSide.LEFT);
@@ -139,7 +139,7 @@ public class FootstepNodeValidityCheckerTest
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
       FootstepNodeSnapper snapper = new TestSnapper();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
       checker.setPlanarRegions(planarRegions);
 
       FootstepNode node0 = new FootstepNode(-0.1, 0.25, 0.0, RobotSide.LEFT);
@@ -205,7 +205,7 @@ public class FootstepNodeValidityCheckerTest
    {
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
 
       // the checker should check for limits in z-height, pitch, and roll.
       // the valid ranges for x, y, and yaw should be considered in the node expansion.
@@ -223,7 +223,7 @@ public class FootstepNodeValidityCheckerTest
    {
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
 
       FootstepNode node = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
       snapper.addSnapData(node, FootstepNodeSnapData.identityData());
@@ -234,7 +234,7 @@ public class FootstepNodeValidityCheckerTest
    public void testNodesOnSameSides()
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, new TestSnapper());
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, new TestSnapper());
       FootstepNode leftNode0 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
       FootstepNode leftNode1 = new FootstepNode(5.0, 0.0, 2.0, RobotSide.LEFT);
       FootstepNode rightNode0 = new FootstepNode(-1.0, 0.0, -2.5, RobotSide.RIGHT);
@@ -259,7 +259,7 @@ public class FootstepNodeValidityCheckerTest
       };
 
       FootstepNodeSnapper snapper = new TestSnapper();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
 
       FootstepNode node0 = new FootstepNode(0.2, 0.2, 0.0, RobotSide.LEFT);
       RigidBodyTransform snapTransform0 = new RigidBodyTransform();
@@ -292,7 +292,7 @@ public class FootstepNodeValidityCheckerTest
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeSnapper snapper = new TestSnapper();
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
 
       double minFoothold = parameters.getMinimumFootholdPercent();
 
@@ -360,7 +360,7 @@ public class FootstepNodeValidityCheckerTest
       snapper.addSnapData(node2, new FootstepNodeSnapData(t2, footPolygons.get(RobotSide.RIGHT)));
       snapper.addSnapData(node3, new FootstepNodeSnapData(t3, footPolygons.get(RobotSide.LEFT)));
 
-      FootstepNodeValidityChecker checker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper);
       checker.setParentNodeSupplier(graph::getParentNode);
       Assert.assertFalse(checker.isNodeValid(node3, node2));
    }
@@ -425,7 +425,7 @@ public class FootstepNodeValidityCheckerTest
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
-      FootstepNodeValidityChecker nodeChecker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
+      FootstepNodeChecker nodeChecker = new FootstepNodeChecker(parameters, footPolygons, snapper);
       nodeChecker.setListener(rejectionListener);
 
       nodeChecker.setPlanarRegions(planarRegionsList);
