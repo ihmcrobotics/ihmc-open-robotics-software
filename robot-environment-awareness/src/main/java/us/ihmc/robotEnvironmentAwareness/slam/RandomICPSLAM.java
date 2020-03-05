@@ -76,6 +76,8 @@ public class RandomICPSLAM extends SLAMBasics
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
       segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
 
+      polygonizerParameters.setConcaveHullThreshold(0.15);
+
       optimizer = new GradientDescentModule(null, INITIAL_INPUT);
       int maxIterations = 300;
       double convergenceThreshold = 1 * 10E-5;
@@ -150,8 +152,11 @@ public class RandomICPSLAM extends SLAMBasics
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       RandomICPSLAMParameters parameters = this.parameters.get();
-      Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame, octree, parameters.getNumberOfSourcePoints(),
-                                                                                parameters.getMinimumOverlappedRatio(), parameters.getWindowMargin());
+      Point3D[] sourcePointsToSensor = SLAMTools.createSourcePointsToSensorPose(frame,
+                                                                                octree,
+                                                                                parameters.getNumberOfSourcePoints(),
+                                                                                parameters.getMinimumOverlappedRatio(),
+                                                                                parameters.getWindowMargin());
 
       if (sourcePointsToSensor == null)
       {
@@ -178,7 +183,9 @@ public class RandomICPSLAM extends SLAMBasics
          }
          else
          {
-            int numberOfInliers = SLAMTools.countNumberOfInliers(octree, transformWorldToSensorPose, sourcePointsToSensor,
+            int numberOfInliers = SLAMTools.countNumberOfInliers(octree,
+                                                                 transformWorldToSensorPose,
+                                                                 sourcePointsToSensor,
                                                                  parameters.getMaximumICPSearchingSize());
             if (numberOfInliers > parameters.getMinimumInliersRatioOfKeyFrame() * sourcePointsToSensor.length)
             {
@@ -202,6 +209,8 @@ public class RandomICPSLAM extends SLAMBasics
                RigidBodyTransform optimizedSensorPose = new RigidBodyTransform(transformWorldToSensorPose);
                optimizedSensorPose.multiply(transformer);
                correctedSourcePointsToWorld = SLAMTools.createConvertedPointsToWorld(optimizedSensorPose, sourcePointsToSensor);
+               double finalQuery = costFunction.getQuery(optimalInput);
+               System.out.println("finalQuery " + finalQuery);
             }
 
             return transformer;

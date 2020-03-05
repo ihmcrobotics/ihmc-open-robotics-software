@@ -43,7 +43,7 @@ public class RandomICPSLAMTest
       slam.addKeyFrame(messages.get(50));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
-      
+
       slam.addFrame(messages.get(51));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
@@ -103,11 +103,6 @@ public class RandomICPSLAMTest
       System.out.println("frameDistance " + frameDistance + " " + numberOfInliers);
       System.out.println("frameDistance " + totalOutliersDistance / numberOfOutliers + " " + numberOfOutliers);
 
-      Point3D[] closestPoints = new Point3D[SLAMTools.closestOctreePoints.size()];
-      System.out.println("closestPoints " + closestPoints.length);
-      for (int i = 0; i < closestPoints.length; i++)
-         closestPoints[i] = new Point3D(SLAMTools.closestOctreePoints.get(i));
-
       List<Point3D> allPoints = new ArrayList<>();
       NormalOcTreeMessage normalOctreeMessage = OcTreeMessageConverter.convertToMessage(octree);
       UIOcTree octreeForViz = new UIOcTree(normalOctreeMessage);
@@ -136,7 +131,6 @@ public class RandomICPSLAMTest
       slamViewer.addPointCloud(frame.getOriginalPointCloud(), Color.BLUE);
       slamViewer.addPointCloud(sourcePointsToWorld, Color.BLACK);
       slamViewer.addPointCloud(allPointss, Color.YELLOW);
-      slamViewer.addPointCloud(closestPoints, Color.RED);
 
       slamViewer.start("testComputeDistance");
       ThreadTools.sleepForever();
@@ -156,23 +150,23 @@ public class RandomICPSLAMTest
       originalViewer.addStereoMessage(messages.get(48), Color.GREEN);
       originalViewer.addStereoMessage(messages.get(49), Color.BLUE); // Fix this frame.
       originalViewer.start("testSourcePointsInKinematicOverlappedArea originalViewer");
-      
+
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       SLAMViewer slamViewer = new SLAMViewer();
-      
+
       slam.addKeyFrame(messages.get(46));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.RED);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.RED);
-      
+
       slam.addFrame(messages.get(47));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.YELLOW);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.YELLOW);
-      
+
       slam.addFrame(messages.get(48));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
-      
+
       slam.addFrame(messages.get(49));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
@@ -198,8 +192,11 @@ public class RandomICPSLAMTest
       sensorPoseOne.appendPitchRotation(sensorPitchAngle);
       sensorPoseOne.appendYawRotation(Math.toRadians(-90.0));
       StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne,
-                                                                                                                          new RigidBodyTransform(), stairHeight,
-                                                                                                                          stairWidth, stairLength, stairLength,
+                                                                                                                          new RigidBodyTransform(),
+                                                                                                                          stairHeight,
+                                                                                                                          stairWidth,
+                                                                                                                          stairLength,
+                                                                                                                          stairLength,
                                                                                                                           true);
 
       double translationX = movingForward / 2;
@@ -222,8 +219,10 @@ public class RandomICPSLAMTest
       preMultiplier.multiply(driftingTransformer);
       sensorPoseTwo.multiply(driftingTransformer);
 
-      StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo, preMultiplier,
-                                                                                                                                 stairHeight, stairWidth,
+      StereoVisionPointCloudMessage driftedMessageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseTwo,
+                                                                                                                                 preMultiplier,
+                                                                                                                                 stairHeight,
+                                                                                                                                 stairWidth,
                                                                                                                                  stairLength - movingForward,
                                                                                                                                  stairLength + movingForward,
                                                                                                                                  true);
@@ -235,7 +234,7 @@ public class RandomICPSLAMTest
       slam.addKeyFrame(messageOne);
       slamViewer.addStereoMessage(messageOne, Color.BLUE);
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
-      
+
       slam.addFrame(driftedMessageTwo);
       slamViewer.addStereoMessage(driftedMessageTwo, Color.BLACK);
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
@@ -245,12 +244,6 @@ public class RandomICPSLAMTest
          slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
-
-      Point3D[] closestPoints = new Point3D[SLAMTools.closestOctreePoints.size()];
-      System.out.println("closestPoints " + closestPoints.length);
-      for (int i = 0; i < closestPoints.length; i++)
-         closestPoints[i] = new Point3D(SLAMTools.closestOctreePoints.get(i));
-      slamViewer.addPointCloud(closestPoints, Color.PINK);
 
       Point3D[] ruler = new Point3D[50];
       for (int i = 0; i < 50; i++)
@@ -277,17 +270,113 @@ public class RandomICPSLAMTest
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       SLAMViewer slamViewer = new SLAMViewer();
-      
+
       slam.updateParameters(parameters);
       slam.addKeyFrame(messages.get(47));
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
-      
+
       slam.addFrame(messages.get(48));
       slamViewer.addStereoMessage(messages.get(48), Color.BLACK);
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
-      
+
+      if (RandomICPSLAM.DEBUG)
+         slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
+      if (slam.correctedSourcePointsToWorld != null)
+         slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
+
+      slamViewer.start("testOptimizationForRealData");
+      ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testSimpleCinderBlockField()
+   {
+      double sizeOfCinderBlocks = 0.5;
+      RigidBodyTransform sensorPose = new RigidBodyTransform();
+      sensorPose.setTranslation(0.8, 0.0, 1.0);
+      sensorPose.appendPitchRotation(Math.toRadians(90.0 + 70.0));
+      sensorPose.appendYawRotation(Math.toRadians(-90.0));
+      StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPose,
+                                                                                                                           new RigidBodyTransform(),
+                                                                                                                           sizeOfCinderBlocks,
+                                                                                                                           sizeOfCinderBlocks);
+
+      double forwardTranslation = 0.05;
+      RigidBodyTransform sensorPoseTwo = new RigidBodyTransform(sensorPose);
+      sensorPoseTwo.prependTranslation(forwardTranslation, 0.0, 0.0);
+      RigidBodyTransform preMultiplier = new RigidBodyTransform();
+      //preMultiplier.appendTranslation(0.05, 0.04, -0.03);
+      preMultiplier.appendTranslation(0.0, 0.08, 0.0);
+      StereoVisionPointCloudMessage messageTwo = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPoseTwo,
+                                                                                                                           preMultiplier,
+                                                                                                                           sizeOfCinderBlocks
+                                                                                                                                 - forwardTranslation,
+                                                                                                                           sizeOfCinderBlocks);
+      RandomICPSLAMParameters parameters = new RandomICPSLAMParameters();
+      parameters.setNumberOfSourcePoints(500);
+
+      double octreeResolution = 0.02;
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      SLAMViewer slamViewer = new SLAMViewer();
+
+      slam.updateParameters(parameters);
+      slam.addKeyFrame(messageOne);
+      slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
+      slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
+      slamViewer.addOctree(slam.getOctree(), Color.ALICEBLUE, octreeResolution, true);
+
+      slam.addFrame(messageTwo);
+      slamViewer.addStereoMessage(messageTwo, Color.BLACK);
+      slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
+      slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
+      //slamViewer.addOctree(slam.getOctree(), Color.BLUEVIOLET, octreeResolution, true);
+
+      if (RandomICPSLAM.DEBUG)
+         slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
+      if (slam.correctedSourcePointsToWorld != null)
+         slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
+
+      Point3D[] ruler = new Point3D[50];
+      for (int i = 0; i < 50; i++)
+         ruler[i] = new Point3D(1.0, 0.0, (double) i * octreeResolution);
+      slamViewer.addPointCloud(ruler, Color.ALICEBLUE);
+
+      slamViewer.start("testSimpleCinderBlockField");
+
+      ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testOptimizationForRealData2()
+   {
+      String stereoPath = "E:\\Data\\20200213_Round_1\\PointCloud\\";
+      File pointCloudFile = new File(stereoPath);
+
+      RandomICPSLAMParameters parameters = new RandomICPSLAMParameters();
+      parameters.setNumberOfSourcePoints(500);
+
+      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
+      double octreeResolution = 0.02;
+      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
+      SLAMViewer slamViewer = new SLAMViewer();
+
+      for (int i = 0; i < 17; i++)
+      {
+         slam.addKeyFrame(messages.get(i));
+         //         slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
+         //         slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
+      }
+      slamViewer.addOctree(slam.getOctree(), Color.BLUE, octreeResolution, true);
+      parameters.setWindowMargin(0.02);
+      slam.updateParameters(parameters);
+
+      slam.addFrame(messages.get(17));
+      slamViewer.addStereoMessage(messages.get(17), Color.BLACK);
+      slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
+      slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
+
       if (RandomICPSLAM.DEBUG)
          slamViewer.addPointCloud(slam.getSourcePointsToWorldLatestFrame(), Color.RED);
       if (slam.correctedSourcePointsToWorld != null)
@@ -314,7 +403,7 @@ public class RandomICPSLAMTest
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       SLAMViewer originalViewer = new SLAMViewer();
       SLAMViewer slamViewer = new SLAMViewer();
-      
+
       slam.addKeyFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {
@@ -322,14 +411,14 @@ public class RandomICPSLAMTest
          System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
          slam.updatePlanarRegionsMap();
-         
+
          originalViewer.addStereoMessage(messages.get(i), Color.GREEN);
-         
+
          slamViewer.addStereoMessage(messages.get(i), Color.GREEN);
          slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
          slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
       }
-      
+
       slamViewer.start("testRandomICPSLAMEndToEnd slamViewer");
       originalViewer.start("testRandomICPSLAMEndToEnd originalViewer");
 
@@ -358,7 +447,7 @@ public class RandomICPSLAMTest
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       SLAMViewer slamViewer = new SLAMViewer();
-      
+
       slam.addKeyFrame(messages.get(0));
       for (int i = 1; i < messages.size(); i++)
       {
@@ -366,7 +455,7 @@ public class RandomICPSLAMTest
          System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
          slam.updatePlanarRegionsMap();
-         
+
          slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.BLUE);
          slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.BLUE);
       }
