@@ -156,7 +156,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    @FXML
    public void openSLAM() throws IOException
    {
-      uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, true);
       if (stage != null)
       {
          ihmcSLAMViewer.start();

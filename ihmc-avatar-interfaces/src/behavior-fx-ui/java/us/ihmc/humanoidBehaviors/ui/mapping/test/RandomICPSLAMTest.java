@@ -337,7 +337,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
-   public void testOptimizationForRealData2()
+   public void testOptimizationForRealDataUnsolved()
    {
       String stereoPath = "E:\\Data\\20200213_Round_1\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
@@ -349,8 +349,9 @@ public class RandomICPSLAMTest
       double octreeResolution = 0.02;
       RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
       SLAMViewer slamViewer = new SLAMViewer();
+      int frameIndexToLookAt = 17;
 
-      for (int i = 0; i < 17; i++)
+      for (int i = 0; i < frameIndexToLookAt; i++)
       {
          slam.addKeyFrame(messages.get(i));
       }
@@ -358,8 +359,8 @@ public class RandomICPSLAMTest
       parameters.setWindowMargin(0.02);
       slam.updateParameters(parameters);
 
-      slam.addFrame(messages.get(17));
-      slamViewer.addStereoMessage(messages.get(17), Color.BLACK);
+      slam.addFrame(messages.get(frameIndexToLookAt));
+      slamViewer.addStereoMessage(messages.get(frameIndexToLookAt), Color.BLACK);
       slamViewer.addSensorPose(slam.getLatestFrame().getSensorPose(), Color.GREEN);
       slamViewer.addPointCloud(slam.getLatestFrame().getPointCloud(), Color.GREEN);
 
@@ -368,7 +369,7 @@ public class RandomICPSLAMTest
       if (slam.correctedSourcePointsToWorld != null)
          slamViewer.addPointCloud(slam.correctedSourcePointsToWorld, Color.YELLOW);
 
-      slamViewer.start("testOptimizationForRealData");
+      slamViewer.start("testOptimizationForRealDataUnsolved");
       ThreadTools.sleepForever();
    }
 
@@ -380,8 +381,9 @@ public class RandomICPSLAMTest
       //String stereoPath = "E:\\Data\\SimpleArea3\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200115_Simple Area\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200205_Complex\\PointCloud\\";
-      String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";
+      //String stereoPath = "E:\\Data\\20200205_Tour2\\PointCloud\\";
       //String stereoPath = "E:\\Data\\20200205_Tour4\\PointCloud\\";
+      String stereoPath = "E:\\Data\\20200305_Simple\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -410,7 +412,8 @@ public class RandomICPSLAMTest
 
       SLAMViewer octreeViewer = new SLAMViewer();
 
-      String path = "E:\\Data\\20200205_Tour2\\20200205_174253_PlanarRegion\\";
+      //String path = "E:\\Data\\20200205_Tour2\\20200205_174253_PlanarRegion\\";
+      String path = "E:\\Data\\20200305_Simple\\20200305_104707_PlanarRegion\\";
       File file = new File(path);
       octreeViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(file));
       octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
