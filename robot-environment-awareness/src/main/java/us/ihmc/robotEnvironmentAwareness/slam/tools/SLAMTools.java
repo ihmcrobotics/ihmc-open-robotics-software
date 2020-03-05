@@ -25,7 +25,6 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCa
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 
 public class SLAMTools
@@ -195,8 +194,6 @@ public class SLAMTools
       return rawData;
    }
 
-   public static List<Point3D> closestOctreePoints = new ArrayList<>();
-
    public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
@@ -205,8 +202,6 @@ public class SLAMTools
       if (firstNode != null)
       {
          Point3D firstPoint = new Point3D(firstNode.getHitLocationCopy());
-         if (RandomICPSLAM.DEBUG)
-            closestOctreePoints.add(firstPoint);
          return firstPoint.distance(point);
       }
 
@@ -219,10 +214,8 @@ public class SLAMTools
       }
       else
       {
-         octree.keyToCoordinate(nearestKey);
-         if (RandomICPSLAM.DEBUG)
-            closestOctreePoints.add(octree.keyToCoordinate(nearestKey));
-         return distance;
+         NormalOcTreeNode nearestNode = octree.search(nearestKey);
+         return nearestNode.getHitLocationCopy().distance(point);
       }
    }
 
