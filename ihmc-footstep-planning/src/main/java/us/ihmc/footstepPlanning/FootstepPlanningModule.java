@@ -64,7 +64,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
-   private final FootstepNodeChecker checker;
+   private final FootstepNodeValidityChecker checker;
    private final CostToGoHeuristics distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
    private final FootstepCostCalculator stepCostCalculator;
@@ -112,18 +112,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
-      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-      this.checker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder);
+      this.checker = new FootstepNodeValidityChecker(footstepPlannerParameters, footPolygons, snapper);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
       this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder);
       this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons);
 
       this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
-      checker.addFootstepGraph(footstepPlanner.getGraph());
+      checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -407,7 +403,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return snapper;
    }
 
-   public FootstepNodeChecker getChecker()
+   public FootstepNodeValidityChecker getChecker()
    {
       return checker;
    }

@@ -46,7 +46,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
-   private final FootstepNodeChecker nodeChecker;
+   private final FootstepNodeValidityChecker nodeChecker;
 
    private final MeshView meshView = new MeshView();
    private final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -85,12 +85,7 @@ public class NodeCheckerRenderer extends AnimationTimer
       }
 
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-
-      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
-      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, parameters, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
-      nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
+      nodeChecker = new FootstepNodeValidityChecker(parameters, footPolygons, snapper);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters::set);
    }
