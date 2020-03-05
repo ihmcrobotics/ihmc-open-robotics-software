@@ -234,6 +234,11 @@ public class SwingOverPlanarRegionsTest
       firstStep.getOrientation().set(endFoot.getOrientation());
       firstStep.setRobotSide(swingSide.toByte());
 
+      FramePose3D stanceFoot = new FramePose3D(startFoot);
+      stanceFoot.getPosition().addY(0.3);
+
+      postProcessingPacket.getLeftFootPositionInWorld().set(stanceFoot.getPosition());
+      postProcessingPacket.getLeftFootOrientationInWorld().set(stanceFoot.getOrientation());
       postProcessingPacket.getRightFootPositionInWorld().set(startFoot.getPosition());
       postProcessingPacket.getRightFootOrientationInWorld().set(startFoot.getOrientation());
 
@@ -277,7 +282,7 @@ public class SwingOverPlanarRegionsTest
 
       scs.startOnAThread();
       scs.cropBuffer();
-      //      ThreadTools.sleepForever();
+            ThreadTools.sleepForever();
 
       scs.closeAndDispose();
       return processedPacket;

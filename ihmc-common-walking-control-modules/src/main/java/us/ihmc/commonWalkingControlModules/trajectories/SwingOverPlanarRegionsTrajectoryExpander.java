@@ -477,6 +477,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    {
       twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, adjustedWaypoints);
       twoWaypointSwingGenerator.initialize();
+      adjustedWaypoints.get(0).set(twoWaypointSwingGenerator.getWaypoint(0));
+      adjustedWaypoints.get(1).set(twoWaypointSwingGenerator.getWaypoint(1));
 
       double avoidanceDistance = collisionSphereRadius + minimumClearance.getDoubleValue();
       double avoidanceDistanceSquared = MathTools.square(avoidanceDistance);
