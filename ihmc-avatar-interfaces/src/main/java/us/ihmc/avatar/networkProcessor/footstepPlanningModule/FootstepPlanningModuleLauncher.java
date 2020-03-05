@@ -127,11 +127,12 @@ public class FootstepPlanningModuleLauncher
       IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                               FootstepPlannerOccupancyMapMessage.class,
                                                                                                               publisherTopicNameGenerator);
+
       RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(plannerNodeDataPublisher,
                                                                             occupancyMapPublisher,
                                                                             footstepPlanningModule.getSnapper(),
                                                                             updateFrequency);
-      footstepPlanningModule.getChecker().addPlannerListener(plannerListener);
+      footstepPlanningModule.getChecker().setListener(plannerListener);
 
       footstepPlanningModule.addRequestCallback(request -> plannerListener.reset());
       footstepPlanningModule.addIterationCallback(iterationData ->
