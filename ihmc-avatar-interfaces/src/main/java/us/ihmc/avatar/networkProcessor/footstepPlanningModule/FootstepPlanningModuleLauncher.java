@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -13,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -40,6 +42,11 @@ public class FootstepPlanningModuleLauncher
    }
 
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      return createModule(robotModel, pubSubImplementation, null);
+   }
+
+   public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation, AdaptiveSwingParameters swingParameters)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
@@ -77,10 +84,19 @@ public class FootstepPlanningModuleLauncher
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                          FootstepPlanningToolboxOutputStatus.class,
                                                                                                          publisherTopicNameGenerator);
+
+      AdaptiveSwingTrajectoryCalculator swingParameterCalculator =
+            swingParameters == null ? null : new AdaptiveSwingTrajectoryCalculator(swingParameters, robotModel.getWalkingControllerParameters());
       footstepPlanningModule.addStatusCallback(output ->
                                                {
                                                   FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
                                                   output.setPacket(outputStatus);
+                                                  if (swingParameterCalculator != null)
+                                                  {
+                                                     swingParameterCalculator.setPlanarRegionsList(footstepPlanningModule.getRequest().getPlanarRegionsList());
+                                                     swingParameterCalculator.setSwingParameters(footstepPlanningModule.getRequest().getStanceFootPose(),
+                                                                                                 outputStatus.getFootstepDataList());
+                                                  }
                                                   resultPublisher.publish(outputStatus);
                                                });
 
