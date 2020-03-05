@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
@@ -197,26 +199,17 @@ public class SLAMTools
    public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
-
-      NormalOcTreeNode firstNode = octree.search(occupiedKey);
-      if (firstNode != null)
-      {
-         Point3D firstPoint = new Point3D(firstNode.getHitLocationCopy());
-         return firstPoint.distance(point);
-      }
-
       OcTreeKey nearestKey = new OcTreeKey();
-      double distance = OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), point, nearestKey);
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
 
-      if (Double.isNaN(distance))
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
       {
-         return 1.0;
-      }
-      else
-      {
-         NormalOcTreeNode nearestNode = octree.search(nearestKey);
-         return nearestNode.getHitLocationCopy().distance(point);
-      }
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), node.getHitLocationCopy().distanceSquared(point)));
+      });
+
+      return Math.sqrt(nearestHitDistanceSquared.getValue());
    }
 
    /**
