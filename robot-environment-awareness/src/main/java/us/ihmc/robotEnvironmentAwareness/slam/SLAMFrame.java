@@ -12,19 +12,29 @@ public class SLAMFrame
 {
    protected final SLAMFrame previousFrame;
 
-   // from message.
+   /**
+    * original sensor pose from message.
+    */
    private final RigidBodyTransformReadOnly originalSensorPoseToWorld;
 
-   // fixedDiff(parent.originalSensorPoseToWorld vs this.originalSensorPoseToWorld).
+   /**
+    * fixedDiff(parent.originalSensorPoseToWorld vs this.originalSensorPoseToWorld).
+    */
    private final RigidBodyTransformReadOnly transformFromPreviousFrame;
 
-   // parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
+   /**
+    * parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
+    */
    protected final RigidBodyTransformReadOnly sensorPoseToWorld;
 
-   // SLAM result.
+   /**
+    * SLAM result.
+    */
    private final RigidBodyTransform slamTransformer = new RigidBodyTransform();
 
-   // this.sensorPoseToWorld * this.slamTransformer.
+   /**
+    * this.sensorPoseToWorld * this.slamTransformer.
+    */
    protected final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
    protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
