@@ -10,6 +10,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.function.UnaryOperator;
+
 public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
 {
    private static final boolean DEBUG = false;
@@ -26,7 +28,7 @@ public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(DirectedGraph graph)
+   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
    {
 
    }

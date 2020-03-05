@@ -19,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.UnaryOperator;
 
 public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
 {
@@ -50,7 +51,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
    }
 
    @Override
-   public void setFootstepGraph(DirectedGraph graph)
+   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
    {
 
    }

@@ -49,7 +49,7 @@ public abstract class FootstepNodeChecker
       }
    }
 
-   public void addFootstepGraph(DirectedGraph graph)
+   public void addFootstepGraph(DirectedGraph<FootstepNode> graph)
    {
       this.graph = graph;
    }
