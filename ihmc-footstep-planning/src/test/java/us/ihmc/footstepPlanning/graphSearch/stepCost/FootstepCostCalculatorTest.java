@@ -43,7 +43,7 @@ public class FootstepCostCalculatorTest
       HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
       UnaryOperator<FootstepNode> idealStepCalculator = node -> idealStepMap.computeIfAbsent(node, n -> FootstepNode.generateRandomFootstepNode(random, 2.0));
 
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons);
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons, null);
       int numberOfTests = 1000;
 
       for (int i = 0; i < numberOfTests; i++)

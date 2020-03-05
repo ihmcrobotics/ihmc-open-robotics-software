@@ -118,14 +118,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
-      this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper);
+      this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
-      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder);
-      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons);
+      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder, edgeData);
+      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, edgeData);
 
       this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
       checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
+      footstepPlanner.getGraph().setGraphExpansionCallback(edge ->
+                                                           {
+                                                              edgeData.setCostFromStart(footstepPlanner.getGraph().getCostFromStart(edge.getEndNode()));
+                                                              edgeDataMap.put(edge, edgeData.getCopyAndClear());
+                                                           });
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -146,6 +151,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanHolder.getPlan().clear();
       goalPose.set(request.getGoalPose());
       requestCallback.accept(request);
+
+      // Reset logged variables
+      edgeData.clear();
+      edgeDataMap.clear();
+      iterationData.clear();
 
       // Update planar regions
       PlanarRegionsList planarRegionsList = null;
@@ -244,6 +254,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
+         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
          if (iterationData.getParentNode() == null)
@@ -264,6 +275,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       reportStatus();
+      markSolutionEdges();
       isPlanning.set(false);
       return output;
    }
@@ -333,6 +345,26 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanMessage.setFootstepPlanningResult(result.toByte());
       bodyPathPlanMessage.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(request.getPlanarRegionsList()));
       bodyPathResultCallback.accept(bodyPathPlanMessage);
+   }
+
+   private void markSolutionEdges()
+   {
+      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
+   }
+
+   private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
+   {
+      FootstepPlannerIterationData loggedData = new FootstepPlannerIterationData();
+      loggedData.setStanceNode(iterationData.getParentNode());
+      iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
+      iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
+      loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
+      loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
+      this.iterationData.add(loggedData);
    }
 
    private boolean validGoal(SideDependentList<FootstepNode> goalNodes)
