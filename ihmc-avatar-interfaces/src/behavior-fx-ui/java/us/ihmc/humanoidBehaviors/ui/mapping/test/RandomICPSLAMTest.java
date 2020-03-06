@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 public class RandomICPSLAMTest
 {
    @Test
+   @Disabled
    public void testSmallOverlappedFrameDetection()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
@@ -54,6 +56,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testComputeDistance()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
@@ -137,6 +140,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testSourcePoints()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
@@ -177,6 +181,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testOptimizationForSimulatedPointCloud()
    {
       double movingForward = 0.1;
@@ -253,6 +258,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testOptimizationForRealData()
    {
       String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
@@ -286,6 +292,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testSimpleCinderBlockField()
    {
       double sizeOfCinderBlocks = 0.5;
@@ -337,6 +344,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testOptimizationForRealDataUnsolved()
    {
       String stereoPath = "E:\\Data\\20200213_Round_1\\PointCloud\\";
@@ -374,6 +382,7 @@ public class RandomICPSLAMTest
    }
 
    @Test
+   @Disabled
    public void testRandomICPSLAMEndToEnd()
    {
       //String stereoPath = "E:\\Data\\20200108_Normal Walk\\PointCloud\\";
