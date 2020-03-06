@@ -73,7 +73,6 @@ public class REAModuleAPI
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
    private static final TypedTopicTheme<Integer> Capacity = apiFactory.createTypedTopicTheme("Capacity");
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
-   private static final TypedTopicTheme<Double> Ratio = apiFactory.createTypedTopicTheme("Ratio");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Min = apiFactory.createTopicTheme("Min");
@@ -136,6 +135,7 @@ public class REAModuleAPI
    public static final Topic<Boolean> UIOcTreeBoundingBoxShow = Root.child(UI).child(OcTree).child(BoundingBox).topic(Show);
    public static final Topic<Boolean> UIOcTreeShowLidarBuffer = Root.child(UI).child(OcTree).child(Lidar).child(Buffer).topic(Show);
    public static final Topic<Boolean> UIOcTreeShowStereoVisionBuffer = Root.child(UI).child(OcTree).child(StereoVision).child(Buffer).topic(Show);
+   public static final Topic<Double> UIOcTreeHitLocationSize = Root.child(UI).child(OcTree).topic(Display);
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);

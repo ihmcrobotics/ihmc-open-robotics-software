@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -61,7 +63,7 @@ public class OcTreeMeshBuilder implements Runnable
       HIDE, CELL, PLANE, HIT_LOCATION
    }
    
-   private static final double DEFAULT_HIT_LOCATION_SIZE = 0.02;
+   private static final double DEFAULT_HIT_LOCATION_SIZE = 0.0075;
 
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> clear;
@@ -91,6 +93,7 @@ public class OcTreeMeshBuilder implements Runnable
 
    private final REAUIMessager uiMessager;
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
+   private final AtomicDouble octreeHitLocationVizSize = new AtomicDouble(DEFAULT_HIT_LOCATION_SIZE);
 
    public OcTreeMeshBuilder(REAUIMessager uiMessager)
    {
@@ -250,7 +253,7 @@ public class OcTreeMeshBuilder implements Runnable
          {
             Point3D hitLocation = new Point3D();
             node.getHitLocation(hitLocation);
-            meshBuilder.addTetrahedron(DEFAULT_HIT_LOCATION_SIZE, hitLocation, color);
+            meshBuilder.addTetrahedron(octreeHitLocationVizSize.get(), hitLocation, color);
          }
          break;
       default:
@@ -290,6 +293,11 @@ public class OcTreeMeshBuilder implements Runnable
       default:
          return DEFAULT_COLOR;
       }
+   }
+   
+   public void setOctreeHitLocationVizSize(double size)
+   {
+      octreeHitLocationVizSize.set(size);
    }
 
    public static Color getRegionColor(int regionId)
