@@ -1,8 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -28,6 +31,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FootstepPlanGraphic footstepPlanGraphic;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
 
+   @FXML private CheckBox enablePlanningCheckBox;
+   @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
 
@@ -50,6 +55,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
+
+      behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
    }
 
    @Override
@@ -85,5 +92,10 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void saveFootstepPlanningParameters()
    {
       footstepPlannerParameters.save();
+   }
+
+   @FXML public void enablePlanningCheckBox()
+   {
+      behaviorMessager.submitMessage(EnablePlanning, enablePlanningCheckBox.isSelected());
    }
 }

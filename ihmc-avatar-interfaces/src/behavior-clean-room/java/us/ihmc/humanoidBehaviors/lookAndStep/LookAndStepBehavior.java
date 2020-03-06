@@ -29,22 +29,34 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorState.*;
 
 public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
+   public enum LookAndStepBehaviorState
+   {
+      PERCEPT,
+      PLAN,
+      USER,
+      STEP
+   }
+
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final AtomicReference<Boolean> planningEnabled;
    private final Notification takeStep;
    private final PausablePeriodicThread mainThread;
    private final RemoteREAInterface rea;
@@ -53,17 +65,30 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final WalkingControllerParameters walkingControllerParameters;
    private final RemoteHumanoidRobotInterface robot;
 
+   private final Notification planningFinishedNotification = new Notification();
+   private final Notification planarRegionsExpiredNotification = new Notification();
+   private final Notification takeStepNotification = new Notification();
+
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
       footPolygons = helper.createFootPolygons();
       rea = helper.getOrCreateREAInterface();
       robot = helper.getOrCreateRobotInterface();
+      planningEnabled = helper.createUIInput(EnablePlanning, true);
       takeStep = helper.createUINotification(TakeStep);
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       walkingControllerParameters = helper.getRobotModel().getWalkingControllerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
+
+      EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
+      stateMachineFactory.setDoAction(PERCEPT, this::doPerceptStateAction);
+      stateMachineFactory.setDoAction(PLAN, this::doPlanStateAction);
+      stateMachineFactory.setDoAction(USER, this::doUserStateAction);
+      stateMachineFactory.setDoAction(STEP, this::doStepStateAction);
+
+      stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
 
       // regions out of date?
 
@@ -83,6 +108,52 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       mainThread.setRunning(enabled);
       helper.setCommunicationCallbacksEnabled(enabled);
+   }
+
+   private void stateChanged(LookAndStepBehaviorState from, LookAndStepBehaviorState to)
+   {
+      helper.publishToUI(CurrentState, to.name());
+      LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+   }
+
+   private void doPerceptStateAction(double timeInState)
+   {
+      pollInterrupts();
+   }
+
+   private void doPlanStateAction(double timeInState)
+   {
+      pollInterrupts();
+
+   }
+
+   private void onPlanStateExit()
+   {
+      // check if regions expired, wait regions
+      // else wait on user
+   }
+
+   private void doUserStateAction(double timeInState)
+   {
+      pollInterrupts();
+
+   }
+
+   private void onTransitionUserState()
+   {
+      // if user clicked button
+   }
+
+   private void doStepStateAction(double timeInState)
+   {
+      pollInterrupts();
+
+   }
+
+   private void pollInterrupts()
+   {
+      planningFinishedNotification.poll();
+      planarRegionsExpiredNotification.poll();
    }
 
    private void lookAndStep()
@@ -252,7 +323,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       private static final Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
       private static final CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
+      public static final Topic<String> CurrentState = topic("CurrentState");
       public static final Topic<Object> TakeStep = topic("TakeStep");
+      public static final Topic<Boolean> EnablePlanning = topic("EnablePlanning");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
