@@ -14,5 +14,6 @@ public class SLAMOcTreeMeshBuilder extends OcTreeMeshBuilder
       displayType.setValue(DisplayType.HIT_LOCATION);
       treeDepthForDisplay.setValue(15);
       hidePlanarRegionNodes.setValue(false);
+      setOctreeHitLocationVizSize(0.02);
    }
 }
