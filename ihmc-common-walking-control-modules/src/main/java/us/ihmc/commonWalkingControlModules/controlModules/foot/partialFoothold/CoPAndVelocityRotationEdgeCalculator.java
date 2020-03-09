@@ -27,16 +27,16 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
 
-   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+   public CoPAndVelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
                                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(side, soleFrame, new CoPHistoryRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null),
-           new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, parentRegistry, null), explorationParameters, dt, parentRegistry,
+      this(side, soleFrame, new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, parentRegistry, null),
+           new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, parentRegistry, null), rotationParameters, dt, parentRegistry,
            graphicsListRegistry);
    }
 
    public CoPAndVelocityRotationEdgeCalculator(RobotSide side, ReferenceFrame soleFrame, RotationEdgeCalculator copHistoryEdgeCalculator,
-                                               RotationEdgeCalculator velocityEdgeCalculator, ExplorationParameters explorationParameters, double dt,
+                                               RotationEdgeCalculator velocityEdgeCalculator, FootholdRotationParameters rotationParameters, double dt,
                                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.copHistoryEdgeCalculator = copHistoryEdgeCalculator;
@@ -50,8 +50,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 
       lineOfRotationInSole = new YoFrameLine2D(pointOfRotation, axisOfRotation);
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
 
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);

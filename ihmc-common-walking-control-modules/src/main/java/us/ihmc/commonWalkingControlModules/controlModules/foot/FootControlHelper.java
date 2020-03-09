@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootRotationCalculationModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -38,14 +39,20 @@ public class FootControlHelper
    private final ToeSlippingDetector toeSlippingDetector;
 
    private final ExplorationParameters explorationParameters;
+   private final FootholdRotationParameters footholdRotationParameters;
 
-   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, YoVariableRegistry registry)
+   public FootControlHelper(RobotSide robotSide,
+                            WalkingControllerParameters walkingControllerParameters,
+                            HighLevelHumanoidControllerToolbox controllerToolbox,
+                            ExplorationParameters explorationParameters,
+                            FootholdRotationParameters footholdRotationParameters,
+                            YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
       this.controllerToolbox = controllerToolbox;
       this.walkingControllerParameters = walkingControllerParameters;
       this.explorationParameters = explorationParameters;
+      this.footholdRotationParameters = footholdRotationParameters;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -175,5 +182,10 @@ public class FootControlHelper
    public ExplorationParameters getExplorationParameters()
    {
       return explorationParameters;
+   }
+
+   public FootholdRotationParameters getFootholdRotationParameters()
+   {
+      return footholdRotationParameters;
    }
 }

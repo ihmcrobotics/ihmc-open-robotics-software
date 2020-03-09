@@ -36,7 +36,7 @@ public class FootRotationCalculationModule
 
    private final YoBoolean isRotating;
 
-   public FootRotationCalculationModule(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+   public FootRotationCalculationModule(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
@@ -44,23 +44,23 @@ public class FootRotationCalculationModule
 
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
-      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
                                                                                          graphicsRegistry);
-      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
                                                                                              graphicsRegistry);
-      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, explorationParameters, dt, registry,
+      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
                                                                                            graphicsRegistry);
       RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, copHistoryEdgeCalculator,
-                                                                                                     velocityEdgeCalculator, explorationParameters, dt,
+                                                                                                     velocityEdgeCalculator, rotationParameters, dt,
                                                                                                      registry, graphicsRegistry);
       edgeCalculators.put(EdgeCalculatorType.VELOCITY, velocityEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.COP_HISTORY, copHistoryEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.GEOMETRIC, geometricEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.VELOCITY_AND_COP, copAndVelocityEdgeCalculator);
 
-      FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(side, soleFrame, explorationParameters, registry);
+      FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(side, soleFrame, rotationParameters, registry);
       FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, dt, registry);
-      FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, explorationParameters, dt, registry);
+      FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       rotationDetectors.put(RotationDetectorType.GEOMETRIC, geometricRotationDetector);
       rotationDetectors.put(RotationDetectorType.KINEMATIC, kinematicRotationDetector);
       rotationDetectors.put(RotationDetectorType.VELOCITY, velocityRotationDetector);

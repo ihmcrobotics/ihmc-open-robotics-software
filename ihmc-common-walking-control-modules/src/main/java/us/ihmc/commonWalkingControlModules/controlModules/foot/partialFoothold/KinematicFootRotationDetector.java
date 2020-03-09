@@ -48,7 +48,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
 
    private final MovingReferenceFrame soleFrame;
 
-   public KinematicFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double controllerDt,
+   public KinematicFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double controllerDt,
                                         YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
@@ -57,16 +57,16 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      angularVelocityFilterBreakFrequency = explorationParameters.getAngularVelocityFilterBreakFrequency();
+      angularVelocityFilterBreakFrequency = rotationParameters.getAngularVelocityFilterBreakFrequency();
       footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "", registry, () -> AlphaFilteredYoVariable
             .computeAlphaGivenBreakFrequencyProperly(angularVelocityFilterBreakFrequency.getDoubleValue(), controllerDt), soleFrame);
 
       angularVelocityMagnitude = new YoDouble(namePrefix + "AngularVelocityMagnitude", registry);
-      angularVelocityMagnitudeThreshold = explorationParameters.getAngularVelocityAroundLoRThreshold();
+      angularVelocityMagnitudeThreshold = rotationParameters.getAngularVelocityAroundLoRThreshold();
       isAngularVelocityPastThreshold = new YoBoolean(namePrefix + "IsAngularVelocityPastThreshold", registry);
 
       footDropOrLift = new YoDouble(namePrefix + "FootDropOrLift", registry);
-      footDropThreshold = explorationParameters.getFootDropThreshold();
+      footDropThreshold = rotationParameters.getFootDropThreshold();
       isFootDropPastThreshold = new YoBoolean(namePrefix + "IsFootDropPastThreshold", registry);
 
       isFootRotating = new YoBoolean(namePrefix + "IsRotating", registry);

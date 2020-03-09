@@ -42,7 +42,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
 
-   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
@@ -71,8 +71,8 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       else
          edgeVisualizer = null;
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
 
       reset();
    }
