@@ -162,6 +162,11 @@ public class KSTTools
       }
    }
 
+   public double getTime()
+   {
+      return time.getValue();
+   }
+
    public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
    {
       MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
@@ -187,6 +192,10 @@ public class KSTTools
             hasPreviousInput.set(true);
          }
          latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
+
+         if (latestInput.getTimestamp() <= 0)
+            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+
          latestInputReceivedTime.set(time.getValue());
       }
    }

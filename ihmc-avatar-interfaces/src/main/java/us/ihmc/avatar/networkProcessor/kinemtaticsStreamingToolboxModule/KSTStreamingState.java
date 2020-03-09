@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -564,7 +565,10 @@ public class KSTStreamingState implements State
          }
          else
          {
-            double timeInterval = tools.getLatestInputReceivedTime() - tools.getPreviousInputReceivedTime();
+            double latestInputReceivedTime = Conversions.nanosecondsToSeconds(latestInput.getTimestamp());
+            double previousInputReceivedTime = Conversions.nanosecondsToSeconds(previousInput.getTimestamp());
+
+            double timeInterval = latestInputReceivedTime - previousInputReceivedTime;
 
             for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
             {
