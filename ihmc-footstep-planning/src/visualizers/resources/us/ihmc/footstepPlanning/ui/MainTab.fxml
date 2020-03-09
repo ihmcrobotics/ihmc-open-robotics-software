@@ -59,7 +59,7 @@
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
                         <CheckBox fx:id="ignorePartialFootholds" text="Ignore partial footholds" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="autoPostProcess" text="Auto post process" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="autoPostProcess" text="Auto post process" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="2" />
                         <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
                         <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                         <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
@@ -166,7 +166,6 @@
 
                         <Label text="Result" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="0"/>
                         <Label text="Time Taken" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1"/>
-                        <Label text="Rejection %" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="2"/>
 
                         <TextField fx:id="sentRequestId" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
                         <TextField fx:id="receivedRequestId" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
