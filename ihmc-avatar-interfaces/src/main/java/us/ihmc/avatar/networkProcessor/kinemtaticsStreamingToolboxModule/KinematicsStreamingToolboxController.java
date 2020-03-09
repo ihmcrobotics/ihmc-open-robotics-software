@@ -72,6 +72,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            fullRobotModelFactory,
                            walkingControllerPeriod,
                            toolboxControllerPeriod,
+                           time,
                            yoGraphicsListRegistry,
                            registry);
 
