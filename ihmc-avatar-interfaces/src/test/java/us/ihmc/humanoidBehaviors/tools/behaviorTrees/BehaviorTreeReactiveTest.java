@@ -20,13 +20,13 @@ public class BehaviorTreeReactiveTest
    {
       TimedExpirationCondition timedExpirationCondition = new TimedExpirationCondition(1.0);
       assertEquals(FAILURE, timedExpirationCondition.tick());
-      timedExpirationCondition.renew();
+      timedExpirationCondition.update();
       assertEquals(SUCCESS, timedExpirationCondition.tick());
       ThreadTools.sleep(500);
       assertEquals(SUCCESS, timedExpirationCondition.tick());
       ThreadTools.sleep(520);
       assertEquals(FAILURE, timedExpirationCondition.tick());
-      timedExpirationCondition.renew();
+      timedExpirationCondition.update();
       assertEquals(SUCCESS, timedExpirationCondition.tick());
       ThreadTools.sleep(500);
       assertEquals(SUCCESS, timedExpirationCondition.tick());

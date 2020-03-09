@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
+/**
+ * Behavior tree sequence control flow node that loops around from rightmost to leftmost child.
+ */
 public class NonReactiveLoopSequenceNode extends SequenceNode
 {
    private int currentChild = 0;
