@@ -10,6 +10,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -137,6 +138,12 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<RejectionReasonToVisualize> RejectionReasonToShow = topic("RejectionReasonToShow");
    public static final Topic<Boolean> ShowRejectedNodes = topic("ShowRejectedNodes");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
+
+   public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
+   public static final Topic<Boolean> RequestLoadLog = topic("RequestLoadLog");
+   public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
+   public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
+   public static final Topic<FootstepPlannerLog> LoadedLog = topic("LoadedLog");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
