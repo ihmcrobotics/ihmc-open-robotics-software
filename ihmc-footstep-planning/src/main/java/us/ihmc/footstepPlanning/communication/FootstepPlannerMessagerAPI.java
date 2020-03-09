@@ -68,6 +68,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
    public static final Topic<Integer> PlannerRequestId = topic("PlannerRequestId");
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
+   public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
    public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");

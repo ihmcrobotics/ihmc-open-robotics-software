@@ -141,6 +141,25 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return null;
       }
 
+      try
+      {
+         return handleRequestInternal(request);
+      }
+      catch (Exception exception)
+      {
+         exception.printStackTrace();
+
+         output.clear();
+         output.setPlanId(request.getRequestId());
+         output.setResult(FootstepPlanningResult.EXCEPTION);
+         output.setException(exception);
+         statusCallback.accept(output);
+         return output;
+      }
+   }
+
+   private FootstepPlannerOutput handleRequestInternal(FootstepPlannerRequest request)
+   {
       // Start timer
       stopwatch.start();
 
@@ -256,7 +275,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
-
+         
          if (iterationData.getParentNode() == null)
          {
             result = FootstepPlanningResult.NO_PATH_EXISTS;
@@ -358,6 +377,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
    {
+      if (iterationData.getParentNode() == null)
+      {
+         return;
+      }
+
       FootstepPlannerIterationData loggedData = new FootstepPlannerIterationData();
       loggedData.setStanceNode(iterationData.getParentNode());
       iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
