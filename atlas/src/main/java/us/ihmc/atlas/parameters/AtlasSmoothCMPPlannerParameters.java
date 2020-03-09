@@ -149,4 +149,10 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return true;
    }
+
+   @Override
+   public double getExitCoPForwardSafetyMarginOnToes()
+   {
+      return modelScale * 1.2e-2;
+   }
 }
