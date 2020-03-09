@@ -25,11 +25,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.checkForPathCollisions, checkForPathCollisions);
    }
 
-   default void setPerformHeuristicSearchPolicies(boolean performHeuristicSearchPolicies)
-   {
-      set(FootstepPlannerParameterKeys.performHeuristicSearchPolicies, performHeuristicSearchPolicies);
-   }
-
    default void setMinimumDistanceFromCliffBottoms(double distance)
    {
       set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
@@ -352,7 +347,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
       setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
-      setPerformHeuristicSearchPolicies(parametersPacket.getPerformHeuristicSearchPolicies());
       if (parametersPacket.getIdealFootstepWidth() != noValue)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != noValue)
