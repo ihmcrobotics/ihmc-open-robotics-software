@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -20,6 +23,12 @@ public class FootholdRotationParameters
    private static final double defaultFootDropThreshold = -0.04;
    private static final double defaultAngularVelocityFilterBreakFrequency = 16.0;
 
+   private final DoubleProvider omegaThresholdForEstimation;
+   private final DoubleProvider decayBreakFrequency;
+   private final DoubleProvider rotationThreshold;
+   private final DoubleProvider filterBreakFrequency;
+
+
    public FootholdRotationParameters(YoVariableRegistry registry)
    {
       String namePrefix = "ExplorationGeometric_";
@@ -37,6 +46,12 @@ public class FootholdRotationParameters
       footDropThreshold.set(defaultFootDropThreshold);
       angularVelocityFilterBreakFrequency = new YoDouble(namePrefix + "AngularVelocityFilterBreakFrequency", registry);
       angularVelocityFilterBreakFrequency.set(defaultAngularVelocityFilterBreakFrequency);
+
+      omegaThresholdForEstimation = new DoubleParameter("omegaThresholdForEstimation", registry, 2.0);
+      decayBreakFrequency = new DoubleParameter("decayBreakFrequency", registry, 1.0);
+      rotationThreshold = new DoubleParameter("rotationThreshold", registry, 0.05);
+      filterBreakFrequency = new DoubleParameter("filterBreakFrequency", registry, 1.0);
+
    }
 
    public YoDouble getGeometricDetectionAngleThreshold()
@@ -67,5 +82,25 @@ public class FootholdRotationParameters
    public YoDouble getStableCoRLinearVelocityThreshold()
    {
       return stableCoRLinearVelocityThreshold;
+   }
+
+   public DoubleProvider getOmegaThresholdForEstimation()
+   {
+      return omegaThresholdForEstimation;
+   }
+
+   public DoubleProvider getDecayBreakFrequency()
+   {
+      return decayBreakFrequency;
+   }
+
+   public DoubleProvider getRotationThreshold()
+   {
+      return rotationThreshold;
+   }
+
+   public DoubleProvider getFilterBreakFrequency()
+   {
+      return filterBreakFrequency;
    }
 }

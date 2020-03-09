@@ -28,22 +28,23 @@ public class VelocityFootRotationDetector implements FootRotationDetector
    private final DoubleProvider decayBreakFrequency;
    private final DoubleProvider rotationThreshold;
 
-   public VelocityFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry)
+   public VelocityFootRotationDetector(RobotSide side,
+                                       MovingReferenceFrame soleFrame,
+                                       FootholdRotationParameters parameters,
+                                       double dt,
+                                       YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;
 
       String namePrefix = side.getLowerCaseName() + "Velocity";
 
-
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
-      String feetManagerName = FeetManager.class.getSimpleName();
-      String paramRegistryName = getClass().getSimpleName() + "Parameters";
-      omegaThresholdForEstimation = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "omegaThresholdForEstimation", registry, 3.0);
-      decayBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "decayBreakFrequency", registry, 1.0);
-      rotationThreshold = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "rotationThreshold", registry, 0.2);
+      omegaThresholdForEstimation = parameters.getOmegaThresholdForEstimation();
+      decayBreakFrequency = parameters.getDecayBreakFrequency();
+      rotationThreshold = parameters.getRotationThreshold();
 
       integratedRotationAngle = new YoDouble(namePrefix + "IntegratedRotationAngle", registry);
       absoluteFootOmega = new YoDouble(namePrefix + "AbsoluteFootOmega", registry);

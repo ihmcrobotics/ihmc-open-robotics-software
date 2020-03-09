@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -34,16 +31,18 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final FixedFrameLine2DBasics lineOfRotationInSole;
 
-   private final DoubleProvider filterBreakFrequency;
-
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
    private final EdgeVisualizer edgeVisualizer;
 
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
 
-   public VelocityRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
-                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public VelocityRotationEdgeCalculator(RobotSide side,
+                                         MovingReferenceFrame soleFrame,
+                                         FootholdRotationParameters rotationParameters,
+                                         double dt,
+                                         YoVariableRegistry parentRegistry,
+                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
@@ -54,10 +53,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
       parentRegistry.addChild(registry);
 
-      String feetManagerName = FeetManager.class.getSimpleName();
-      String paramRegistryName = KinematicFootRotationDetector.class.getSimpleName() + "Parameters";
-      filterBreakFrequency = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "filterBreakFrequency", registry, 1.0);
-
+      DoubleProvider filterBreakFrequency = rotationParameters.getFilterBreakFrequency();
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(namePrefix + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);
@@ -71,8 +67,12 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       else
          edgeVisualizer = null;
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
+                                                              lineOfRotationInSole,
+                                                              rotationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              rotationParameters.getStableCoRLinearVelocityThreshold(),
+                                                              dt,
+                                                              registry);
 
       reset();
    }
