@@ -101,6 +101,8 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
    @FXML
+   private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
+   @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
    private MainTabController mainTabController;
@@ -161,6 +163,7 @@ public class FootstepPlannerUI
       footstepPostProcessingParametersUIController.attachMessager(messager);
       bodyCollisionCheckingUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
+      footstepPlannerLogVisualizerController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
@@ -174,6 +177,7 @@ public class FootstepPlannerUI
       footstepPostProcessingParametersUIController.bindControls();
       bodyCollisionCheckingUIController.bindControls();
       footstepPlannerCostsUIController.bindControls();
+      footstepPlannerLogVisualizerController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
@@ -347,6 +351,7 @@ public class FootstepPlannerUI
    public void show()
    {
       primaryStage.show();
+      footstepPlannerLogVisualizerController.setup();
    }
 
    public void stop()

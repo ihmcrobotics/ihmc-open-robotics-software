@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
+package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,8 +9,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -18,16 +16,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
+   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
+
    private FootstepPlannerLog log = null;
+   private final ObjectMapper objectMapper = new ObjectMapper();
 
    public boolean load()
    {
@@ -48,16 +46,29 @@ public class FootstepPlannerLogLoader
          // load request packet
          File requestFile = new File(selectedFile, FootstepPlannerLogger.requestPacketFileName);
          InputStream requestPacketInputStream = new FileInputStream(requestFile);
-         ObjectMapper objectMapper = new ObjectMapper();
          JsonNode jsonNode = objectMapper.readTree(requestPacketInputStream);
-         log.requestPacket.set(requestPacketSerializer.deserialize(jsonNode.toString()));
+         log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
+
+         // load footstep parameters packet
+         File footstepParametersFile = new File(selectedFile, FootstepPlannerLogger.footstepParametersFileName);
+         InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
+         jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
+         log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
+         footstepParametersPacketInputStream.close();
+
+         // load footstep parameters packet
+         File bodyPathParametersFile = new File(selectedFile, FootstepPlannerLogger.bodyPathParametersFileName);
+         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+         bodyPathParametersPacketInputStream.close();
 
          // load status packet
          File statusFile = new File(selectedFile, FootstepPlannerLogger.statusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
-         log.statusPacket.set(statusPacketSerializer.deserialize(jsonNode.toString()));
+         log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
          // load data file
@@ -75,7 +86,7 @@ public class FootstepPlannerLogLoader
             int edges = getIntCSV(dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-            log.iterationData.add(iterationData);
+            log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
             {
@@ -83,6 +94,7 @@ public class FootstepPlannerLogLoader
                dataFileReader.readLine();
 
                FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+               edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
@@ -100,7 +112,7 @@ public class FootstepPlannerLogLoader
                edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
                iterationData.getChildNodes().add(edgeData.getCandidateNode());
 
-               log.edgeDataMap.put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
+               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
 
@@ -111,44 +123,6 @@ public class FootstepPlannerLogLoader
          LogTools.error("Exception while loading log");
          e.printStackTrace();
          return false;
-      }
-   }
-
-   public class FootstepPlannerLog
-   {
-      private final String logName;
-      private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-      private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
-      private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
-      private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
-
-      public FootstepPlannerLog(String logName)
-      {
-         this.logName = logName;
-      }
-
-      public String getLogName()
-      {
-         return logName;
-      }
-      public FootstepPlanningRequestPacket getRequestPacket()
-      {
-         return requestPacket;
-      }
-
-      public FootstepPlanningToolboxOutputStatus getStatusPacket()
-      {
-         return statusPacket;
-      }
-
-      public Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
-      {
-         return edgeDataMap;
-      }
-
-      public List<FootstepPlannerIterationData> getIterationData()
-      {
-         return iterationData;
       }
    }
 
