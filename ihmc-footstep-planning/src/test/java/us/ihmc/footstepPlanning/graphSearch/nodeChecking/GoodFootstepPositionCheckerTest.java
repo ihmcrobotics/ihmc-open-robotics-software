@@ -59,7 +59,6 @@ public class GoodFootstepPositionCheckerTest
       PlanarRegionsList flatGround = planarRegionGenerator.getPlanarRegionsList();
 
       snapper.setPlanarRegions(flatGround);
-      checker.setPlanarRegions(flatGround);
 
       FootstepNode stanceNode = new FootstepNode(0.0, 0.15, 0.0, RobotSide.LEFT);
       FootstepNode childNode = new FootstepNode(0.3, -0.15, 0.0, RobotSide.RIGHT);
@@ -70,7 +69,6 @@ public class GoodFootstepPositionCheckerTest
       assertEquals(null, rejectionReason);
 
       snapper.setPlanarRegions(angledGround);
-      checker.setPlanarRegions(angledGround);
 
       isValid = checker.isNodeValid(childNode, stanceNode);
       assertFalse(isValid);
@@ -275,7 +273,6 @@ public class GoodFootstepPositionCheckerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
 
       snapper.setPlanarRegions(planarRegionsList);
-      nodeChecker.setPlanarRegions(planarRegionsList);
 
       assertFalse(nodeChecker.isNodeValid(childNodeAtMaxYaw, parentNode));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.getRejectionReason());
