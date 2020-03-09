@@ -14,7 +14,9 @@ import javafx.scene.layout.Pane;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -36,6 +38,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -56,7 +59,7 @@ public class FootstepPlannerLogVisualizerController
 
    private List<FootstepPlannerIterationData> iterationDataList;
    private Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap;
-   private FootstepNodeSnapper snapper;
+   private FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(PlannerTools.createDefaultFootPolygons());
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
 
@@ -84,10 +87,6 @@ public class FootstepPlannerLogVisualizerController
 
    public void setup()
    {
-      // TODO refactor so that foot polygons are logged
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-
       parentColumnHolder = new TableColumnHolder(debugParentStepTable, true);
       childColumnHolder = new TableColumnHolder(debugChildStepTable, false);
 
@@ -134,6 +133,17 @@ public class FootstepPlannerLogVisualizerController
                                          });
 
       debugParentStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
+   }
+
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
+                                                                                {
+                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints()
+                                                                                                                                         .get(side);
+                                                                                   return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+                                                                                });
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
    }
 
    public void loadLog()
@@ -256,7 +266,6 @@ public class FootstepPlannerLogVisualizerController
       childColumnHolder.totalCostColumn.setSortType(TableColumn.SortType.ASCENDING);
       debugChildStepTable.sort();
 
-      // TODO setup visualizer
       messager.submitMessage(FootstepPlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
       messager.submitMessage(FootstepPlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
 

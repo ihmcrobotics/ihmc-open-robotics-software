@@ -209,7 +209,7 @@ public class FootstepPlannerUI
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
       this.fullGraphRenderer = new FullGraphRenderer(messager);
-      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(messager);
+      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(contactPointParameters, messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -266,6 +266,7 @@ public class FootstepPlannerUI
          startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
          expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
          fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
+         footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
       }
 
       planarRegionViewer.start();
