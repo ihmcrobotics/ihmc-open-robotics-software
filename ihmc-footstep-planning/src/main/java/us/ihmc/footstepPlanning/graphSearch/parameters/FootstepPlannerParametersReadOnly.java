@@ -29,14 +29,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Sets whether or not to perform the defined heuristic search policies.
-    */
-   default boolean performHeuristicSearchPolicies()
-   {
-      return get(performHeuristicSearchPolicies);
-   }
-
-   /**
     * Returns the ideal step width for walking on flat ground.
     */
    default double getIdealFootstepWidth()
