@@ -35,7 +35,7 @@ import java.awt.*;
  *
  * @author Georg Wiedebach
  */
-public class KinematicFootRotationDetector
+public class FootRotationDetector
 {
    private final YoVariableRegistry registry;
 
@@ -60,8 +60,8 @@ public class KinematicFootRotationDetector
 
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
-   public KinematicFootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
-                                        YoGraphicsListRegistry graphicsRegistry)
+   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry graphicsRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;

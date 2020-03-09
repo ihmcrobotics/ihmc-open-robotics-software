@@ -59,7 +59,7 @@ public class FootRotationCalculationModule
       edgeCalculators.put(EdgeCalculatorType.VELOCITY_AND_COP, copAndVelocityEdgeCalculator);
 
       FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(side, soleFrame, rotationParameters, registry);
-      FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, dt, registry);
+      FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       rotationDetectors.put(RotationDetectorType.GEOMETRIC, geometricRotationDetector);
       rotationDetectors.put(RotationDetectorType.KINEMATIC, kinematicRotationDetector);
