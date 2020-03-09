@@ -4,12 +4,10 @@ import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +25,6 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
@@ -44,6 +41,7 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndS
 public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
+   private TypedNotification<WalkingStatusMessage> walkingStatusNotification;
 
    public enum LookAndStepBehaviorState
    {
@@ -53,14 +51,12 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final StateMachine<LookAndStepBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
    private final RemoteREAInterface rea;
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final WalkingControllerParameters walkingControllerParameters;
    private final RemoteHumanoidRobotInterface robot;
    private final FootstepPlanningModule footstepPlanningModule;
 
@@ -72,7 +68,6 @@ public class LookAndStepBehavior implements BehaviorInterface
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      footPolygons = helper.createFootPolygons();
       rea = helper.getOrCreateREAInterface();
       robot = helper.getOrCreateRobotInterface();
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
@@ -80,7 +75,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       takeStepNotification = helper.createUINotification(TakeStep);
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
-      walkingControllerParameters = helper.getRobotModel().getWalkingControllerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
       helper.createUICallback(TakeStep, clicked -> takeStepNotification.set());
 
@@ -181,7 +175,12 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
-      footstepPlannerOutputNotification.add(footstepPlanningModule.handleRequest(footstepPlannerRequest));
+      FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
+      footstepPlannerOutputNotification.add(footstepPlannerOutput);
+
+      latestFootstepPlannerOutput.set(footstepPlannerOutput);
+
+      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
    }
 
    private void doPlanStateAction(double timeInState)
@@ -220,8 +219,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private LookAndStepBehaviorState transitionFromUser(double timeInState)
    {
-      // expired and planning enabled? percept
-      // user clicked, valid?
       if (arePlanarRegionsExpired() && operatorReviewEnabledInput.get())
       {
          return PERCEPT;
@@ -236,28 +233,25 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void onStepStateEntry()
    {
-            FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-            if (footstepPlan.getNumberOfSteps() > 0)
-            {
-               shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(0));
-            }
+      FootstepPlan footstepPlan = latestFootstepPlannerOutput.get().getFootstepPlan();
 
-      // send footstep plan to UI
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlan));
-
-      if (takeStep.poll())
+      FootstepPlan shortenedFootstepPlan = new FootstepPlan();
+      if (footstepPlan.getNumberOfSteps() > 0)
       {
-         // take step
-
-         LogTools.info("Requesting walk");
-         TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
-               shortenedFootstepPlan,
-               1.0,
-               0.5,
-               ExecutionMode.OVERRIDE), robot.pollHumanoidRobotState(), true, latestPlanarRegionList);
-
-         walkingStatusNotification.blockingPoll();
+         shortenedFootstepPlan.addFootstep(footstepPlan.getFootstep(0));
       }
+
+      LogTools.info("Requesting walk");
+      boolean swingOverPlanarRegions = true;
+      double swingTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.swingTime);
+      double transferTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.transferTime);
+      walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
+                                                                                                                swingTime,
+                                                                                                                transferTime,
+                                                                                                                ExecutionMode.OVERRIDE),
+                                                    robot.pollHumanoidRobotState(),
+                                                    swingOverPlanarRegions,
+                                                    rea.getLatestPlanarRegionsList());
    }
 
    private void doStepStateAction(double timeInState)
@@ -267,13 +261,19 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean transitionFromStep(double timeInState)
    {
-      return !robot.isRobotWalking();
+      return walkingStatusNotification.hasNext(); // use rea.isRobotWalking?
    }
 
    private void pollInterrupts()
    {
+      if (walkingStatusNotification != null)
+      {
+         walkingStatusNotification.poll();
+      }
+
       footstepPlannerOutputNotification.poll();
       takeStepNotification.poll();
+      rePlanNotification.poll();
    }
 
    private boolean arePlanarRegionsExpired()

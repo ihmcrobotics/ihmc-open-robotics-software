@@ -11,6 +11,8 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey stepLength = keys.addDoubleKey("Step length");
    public static final DoubleStoredPropertyKey stepWidth = keys.addDoubleKey("Step width");
    public static final DoubleStoredPropertyKey planarRegionsExpiration = keys.addDoubleKey("Planar regions expiration");
+   public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
+   public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
 
    public LookAndStepBehaviorParameters()
    {

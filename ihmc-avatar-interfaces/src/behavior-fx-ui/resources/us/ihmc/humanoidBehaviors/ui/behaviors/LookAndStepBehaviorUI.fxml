@@ -15,7 +15,7 @@
          <children>
             <VBox alignment="CENTER">
                <children>
-                  <CheckBox fx:id="operatorReviewCheckBox" mnemonicParsing="false" onAction="#operatorReviewCheckBox" text="Operator review">
+                  <CheckBox fx:id="operatorReviewCheckBox" mnemonicParsing="false" onAction="#operatorReviewCheckBox" selected="true" text="Operator review">
                      <padding>
                         <Insets bottom="5.0" />
                      </padding>
