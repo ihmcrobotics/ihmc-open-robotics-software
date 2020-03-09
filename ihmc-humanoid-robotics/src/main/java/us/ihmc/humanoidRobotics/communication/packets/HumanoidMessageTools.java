@@ -2429,4 +2429,14 @@ public class HumanoidMessageTools
       }
       return trajectoryTime;
    }
+
+   /**
+    * Empty message used to reset any {@link WholeBodyTrajectoryMessage}. Do NOT modify.
+    */
+   private static final WholeBodyTrajectoryMessage EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE = new WholeBodyTrajectoryMessage();
+
+   public static void resetWholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryMessage message)
+   {
+      message.set(EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE);
+   }
 }
