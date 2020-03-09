@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -42,9 +40,9 @@ public class VelocityFootRotationDetector implements FootRotationDetector
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
-      omegaThresholdForEstimation = parameters.getOmegaThresholdForEstimation();
-      decayBreakFrequency = parameters.getDecayBreakFrequency();
-      rotationThreshold = parameters.getRotationThreshold();
+      omegaThresholdForEstimation = parameters.getOmegaMagnitudeThresholdForEstimation();
+      decayBreakFrequency = parameters.getVelocityRotationAngleDecayBreakFrequency();
+      rotationThreshold = parameters.getVelocityRotationAngleThreshold();
 
       integratedRotationAngle = new YoDouble(namePrefix + "IntegratedRotationAngle", registry);
       absoluteFootOmega = new YoDouble(namePrefix + "AbsoluteFootOmega", registry);

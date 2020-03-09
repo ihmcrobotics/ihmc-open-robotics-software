@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParame
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,7 +23,7 @@ public class GeometricRotationDetector implements FootRotationDetector
    private final FrameVector3D footNormal = new FrameVector3D();
 
    private final YoDouble angleFootGround;
-   private final YoDouble angleThreshold;
+   private final DoubleProvider angleThreshold;
    private final YoBoolean isRotating;
 
    private final ReferenceFrame soleFrame;
@@ -59,7 +60,7 @@ public class GeometricRotationDetector implements FootRotationDetector
       double alpha = Math.acos(cosAlpha);
       angleFootGround.set(alpha);
       if (!isRotating.getBooleanValue())
-         isRotating.set(alpha > angleThreshold.getDoubleValue());
+         isRotating.set(alpha > angleThreshold.getValue());
 
       return isRotating.getBooleanValue();
    }
