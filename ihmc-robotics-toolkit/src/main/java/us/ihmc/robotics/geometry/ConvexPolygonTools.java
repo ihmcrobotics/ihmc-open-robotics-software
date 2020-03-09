@@ -982,32 +982,23 @@ public class ConvexPolygonTools
       while (vertices > desiredVertices)
       {
          int removeVertex = -1;
-         double shortestEdgeLength = Double.POSITIVE_INFINITY;
+         double leastAreaLost = Double.POSITIVE_INFINITY;
          for (int i = 0; i < vertices; i++)
          {
+            Point2DReadOnly previousVertex = polygon.getPreviousVertex(i);
             Point2DReadOnly vertex = polygon.getVertex(i);
             Point2DReadOnly nextVertex = polygon.getNextVertex(i);
-            double edgeLength = vertex.distance(nextVertex);
-            if (edgeLength < shortestEdgeLength)
+            double areaLostWithoutVertex = EuclidGeometryTools.triangleArea(previousVertex, vertex, nextVertex);
+
+            if (areaLostWithoutVertex < leastAreaLost)
             {
-               shortestEdgeLength = edgeLength;
+               leastAreaLost = areaLostWithoutVertex;
                removeVertex = i;
             }
          }
 
-         int idx1 = removeVertex;
-         int idx2 = polygon.getNextVertexIndex(removeVertex);
-
-         Point2DReadOnly vertexA = polygon.getVertex(idx1);
-         Point2DReadOnly vertexB = polygon.getVertex(idx2);
-         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
-         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
-
-         polygon.removeVertex(Math.max(idx1, idx2));
-         polygon.removeVertex(Math.min(idx1, idx2));
-         polygon.addVertex(xNew, yNew);
+         polygon.removeVertex(removeVertex);
          polygon.update();
-
          vertices = polygon.getNumberOfVertices();
       }
 
