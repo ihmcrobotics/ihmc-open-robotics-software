@@ -76,7 +76,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
-      helper.createUICallback(TakeStep, clicked -> takeStepNotification.set());
 
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
@@ -133,11 +132,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
-      FramePose3D goalPoseBetweenFeet = new FramePose3D();
-      goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
-      double midFeetZ = goalPoseBetweenFeet.getZ();
+      FramePose3D initialPoseBetweenFeet = new FramePose3D();
+      initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+      initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+      double midFeetZ = initialPoseBetweenFeet.getZ();
 
+      FramePose3D goalPoseBetweenFeet = new FramePose3D(initialPoseBetweenFeet);
       goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
       goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
       goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
@@ -162,13 +162,15 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
+      footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setInitialStanceSide(initialStanceFootSide);
-      footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
+      footstepPlannerRequest.setInitialStancePose(initialPoseBetweenFeet);
       footstepPlannerRequest.setGoalPose(goalPoseBetweenFeet);
+      footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
 
-      footstepPlanningModule.addStatusCallback(status -> LogTools.info("Planning steps: {}", status.getFootstepPlan().getNumberOfSteps()));
+      footstepPlanningModule.addStatusCallback(status -> LogTools.trace("Planning steps: {}", status.getFootstepPlan().getNumberOfSteps()));
 
       ThreadTools.startAsDaemon(() -> footstepPlanningThread(footstepPlannerRequest), "FootstepPlanner");
    }
@@ -219,13 +221,13 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private LookAndStepBehaviorState transitionFromUser(double timeInState)
    {
-      if (arePlanarRegionsExpired() && operatorReviewEnabledInput.get())
+      if (rePlanNotification.read())
       {
          return PERCEPT;
       }
       else if (takeStepNotification.read())
       {
-         return USER;
+         return STEP;
       }
 
       return null;
