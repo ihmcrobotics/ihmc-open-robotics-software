@@ -53,7 +53,7 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
             parametersBasics.setNumberOfChecksPerSwing(100);
             parametersBasics.setMaximumNumberOfAdjustmentAttempts(50);
             parametersBasics.setMaximumWaypointAdjustmentDistance(0.2);
-            parametersBasics.setIncrementalWaypointAdjustmentDistance(0.03);
+            parametersBasics.setMinimumAdjustmentIncrementDistance(0.03);
             parametersBasics.setMinimumHeightAboveFloorForCollision(0.03);
 
             return parametersBasics;
