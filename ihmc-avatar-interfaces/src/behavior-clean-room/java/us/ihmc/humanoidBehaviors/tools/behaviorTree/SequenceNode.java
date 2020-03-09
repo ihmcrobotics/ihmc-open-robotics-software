@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
+/**
+ * A sequence node proceeds through children left to right while they are SUCCESSful.
+ */
 public class SequenceNode extends BehaviorTreeControlFlowNodeBasics
 {
    @Override

@@ -2,7 +2,10 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import java.util.function.BooleanSupplier;
 
-public class BehaviorTreeCondition implements BehaviorTreeNode
+/**
+ * A behavior tree action that draws from a boolean supplier.
+ */
+public class BehaviorTreeCondition implements BehaviorTreeAction
 {
    private final BooleanSupplier conditionSupplier;
 

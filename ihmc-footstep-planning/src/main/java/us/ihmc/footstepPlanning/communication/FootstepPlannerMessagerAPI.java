@@ -54,6 +54,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
+   public static final Topic<Boolean> AutoPostProcess = topic("AutoPostProcess");
 
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
    public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");

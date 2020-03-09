@@ -7,6 +7,7 @@ import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
@@ -39,7 +40,7 @@ public class ValkyrieNetworkProcessor
 
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(false);
+         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
@@ -66,7 +67,7 @@ public class ValkyrieNetworkProcessor
 
       new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(false);
+         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
