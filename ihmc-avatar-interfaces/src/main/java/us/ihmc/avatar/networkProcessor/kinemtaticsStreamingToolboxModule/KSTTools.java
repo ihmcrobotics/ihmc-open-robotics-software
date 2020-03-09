@@ -36,6 +36,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -83,6 +84,11 @@ public class KSTTools
    private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
 
    private final KinematicsStreamingToolboxOutputConfigurationCommand outputConfiguration = new KinematicsStreamingToolboxOutputConfigurationCommand();
+   private final YoBoolean isNeckJointspaceOutputEnabled;
+   private final YoBoolean isChestTaskspaceOutputEnabled;
+   private final YoBoolean isPelvisTaskspaceOutputEnabled;
+   private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
@@ -128,10 +134,37 @@ public class KSTTools
       latestInputReceivedTime = new YoDouble("latestInputReceivedTime", registry);
       previousInputReceivedTime = new YoDouble("previousInputReceivedTime", registry);
       flushInputCommands();
+
+      isNeckJointspaceOutputEnabled = new YoBoolean("isNeckJointspaceOutputEnabled", registry);
+      isChestTaskspaceOutputEnabled = new YoBoolean("isChestTaskspaceOutputEnabled", registry);
+      isPelvisTaskspaceOutputEnabled = new YoBoolean("isPelvisTaskspaceOutputEnabled", registry);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoBoolean isHandTaskspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "HandTaskspaceOutputEnabled", registry);
+         areHandTaskspaceOutputsEnabled.put(robotSide, isHandTaskspaceOutputEnabled);
+         YoBoolean isArmJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "ArmJointspaceOutputEnabled", registry);
+         areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
+      }
    }
 
    public void update()
    {
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxOutputConfigurationCommand.class))
+      {
+         outputConfiguration.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxOutputConfigurationCommand.class));
+      }
+
+      isNeckJointspaceOutputEnabled.set(outputConfiguration.isNeckJointspaceEnabled());
+      isChestTaskspaceOutputEnabled.set(outputConfiguration.isChestTaskspaceEnabled());
+      isPelvisTaskspaceOutputEnabled.set(outputConfiguration.isPelvisTaskspaceEnabled());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         areHandTaskspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isHandTaskspaceEnabled(robotSide));
+         areArmJointspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isArmJointspaceEnabled(robotSide));
+      }
+
       RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
       if (newRobotConfigurationData != null)
       {
@@ -242,30 +275,26 @@ public class KSTTools
 
    public WholeBodyTrajectoryMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
       outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxOutputConfigurationCommand.class))
-      {
-         outputConfiguration.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxOutputConfigurationCommand.class));
-      }
-
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (outputConfiguration.isHandTaskspaceEnabled(robotSide))
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
             outputConverter.computeHandTrajectoryMessage(robotSide);
 
-         if (outputConfiguration.isArmJointspaceEnabled(robotSide))
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             outputConverter.computeArmTrajectoryMessages();
       }
 
-      if (outputConfiguration.isNeckJointspaceEnabled())
+      if (isNeckJointspaceOutputEnabled.getValue())
          outputConverter.computeNeckTrajectoryMessage();
-      if (outputConfiguration.isChestTaskspaceEnabled())
+      if (isChestTaskspaceOutputEnabled.getValue())
          outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
-      if (outputConfiguration.isPelvisTaskspaceEnabled())
+      if (isPelvisTaskspaceOutputEnabled.getValue())
          outputConverter.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
@@ -276,24 +305,25 @@ public class KSTTools
 
    public WholeBodyTrajectoryMessage setupFinalizeStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
       outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.5);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (outputConfiguration.isHandTaskspaceEnabled(robotSide))
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
             outputConverter.computeHandTrajectoryMessage(robotSide);
 
-         if (outputConfiguration.isArmJointspaceEnabled(robotSide))
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             outputConverter.computeArmTrajectoryMessages();
       }
 
-      if (outputConfiguration.isNeckJointspaceEnabled())
+      if (isNeckJointspaceOutputEnabled.getValue())
          outputConverter.computeNeckTrajectoryMessage();
-      if (outputConfiguration.isChestTaskspaceEnabled())
+      if (isChestTaskspaceOutputEnabled.getValue())
          outputConverter.computeChestTrajectoryMessage();
-      if (outputConfiguration.isPelvisTaskspaceEnabled())
+      if (isPelvisTaskspaceOutputEnabled.getValue())
          outputConverter.computePelvisTrajectoryMessage();
 
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
