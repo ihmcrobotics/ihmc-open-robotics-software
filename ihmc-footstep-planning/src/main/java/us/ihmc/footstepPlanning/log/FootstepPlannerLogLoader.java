@@ -192,9 +192,4 @@ public class FootstepPlannerLogLoader
       polygon.update();
       return polygon;
    }
-
-   public static void main(String[] args)
-   {
-      new FootstepPlannerLogLoader().load();
-   }
 }

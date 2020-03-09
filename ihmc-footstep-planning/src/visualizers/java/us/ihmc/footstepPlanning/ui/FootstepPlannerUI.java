@@ -1,16 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegion;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 import java.util.ArrayList;
 
@@ -245,6 +235,7 @@ public class FootstepPlannerUI
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
+         messager.registerTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
       }
 
       if(previewModelFactory == null)

@@ -34,6 +34,7 @@ public class FootstepPlannerMessagerAPI
    private static final Category Root = apiFactory.createRootCategory("FootstepPlannerRoot");
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
+   public static final Topic<Boolean> ShowRobot = topic("ShowRobot");
    public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
@@ -145,7 +146,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
-   public static final Topic<FootstepPlannerLog> LoadedLog = topic("LoadedLog");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
@@ -158,7 +158,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
-   private static final <T> Topic<T> topic(String name)
+   private static <T> Topic<T> topic(String name)
    {
       return Root.child(FootstepPlanner).topic(apiFactory.createTypedTopicTheme(name));
    }
