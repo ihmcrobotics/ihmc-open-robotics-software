@@ -39,7 +39,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -425,7 +424,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       }
    }
 
-   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   public void attachControllerAPI(StatusMessageOutputManager statusOutputManager)
    {
       statusOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, new StatusMessageListener<HighLevelStateChangeStatusMessage>()
       {
