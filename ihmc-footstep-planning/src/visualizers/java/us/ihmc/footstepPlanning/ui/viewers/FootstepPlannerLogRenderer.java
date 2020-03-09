@@ -18,15 +18,18 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class FootstepPlannerLogRenderer extends AnimationTimer
 {
-   private final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
-   private final List<Point2D> defaultFootPoints;
+   private final List<Point2D> defaultFootPoints = new ArrayList<>();
+   private final ConvexPolygon2D defaultFootPolygon = new ConvexPolygon2D();
 
    private final Group root = new Group();
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette());
@@ -38,12 +41,20 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugChildStep;
    private final AtomicReference<RigidBodyTransform> debugIdealStep;
 
-   public FootstepPlannerLogRenderer(Messager messager)
+   public FootstepPlannerLogRenderer(RobotContactPointParameters<RobotSide> contactPointParameters, Messager messager)
    {
+      List<Point2D> contactPoints = contactPointParameters.getFootContactPoints().get(RobotSide.LEFT);
+      contactPoints.forEach(defaultFootPolygon::addVertex);
+      defaultFootPolygon.update();
+
+      for (int i = 0; i < defaultFootPolygon.getNumberOfVertices(); i++)
+      {
+         defaultFootPoints.add(new Point2D(defaultFootPolygon.getVertex(i)));
+      }
+
       debugParentStep = messager.createInput(FootstepPlannerMessagerAPI.parentDebugStep);
       debugChildStep = messager.createInput(FootstepPlannerMessagerAPI.childDebugStep);
       debugIdealStep = messager.createInput(FootstepPlannerMessagerAPI.idealDebugStep);
-      defaultFootPoints = defaultFootPolygon.getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList());
    }
 
    @Override

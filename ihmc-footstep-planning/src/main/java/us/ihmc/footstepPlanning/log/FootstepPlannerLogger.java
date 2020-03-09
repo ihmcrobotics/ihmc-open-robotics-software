@@ -16,6 +16,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -224,18 +225,24 @@ public class FootstepPlannerLogger
                                                                         snapTransform.getTranslation().getZ()) + "\n");
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
-      fileWriter.write(prefix + "croppedFoothold:");
       if (croppedFoothold.isEmpty() || croppedFoothold.containsNaN())
       {
-         fileWriter.write("null");
+         fileWriter.write(prefix + "croppedFoothold: null \n");
       }
       else
       {
-         for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
-         {
-            Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
-            fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ","));
-         }
+         writeFootPolygon(prefix + "croppedFoothold:", croppedFoothold);
+      }
+   }
+
+   private void writeFootPolygon(String prefix, ConvexPolygon2D croppedFoothold) throws IOException
+   {
+      fileWriter.write(prefix);
+
+      for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
+      {
+         Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
+         fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ","));
       }
 
       fileWriter.write("\n");
