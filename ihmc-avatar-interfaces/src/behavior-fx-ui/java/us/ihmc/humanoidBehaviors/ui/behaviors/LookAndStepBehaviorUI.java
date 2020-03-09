@@ -31,7 +31,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FootstepPlanGraphic footstepPlanGraphic;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
 
-   @FXML private CheckBox enablePlanningCheckBox;
+   @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
@@ -84,6 +84,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.submitMessage(TakeStep, new Object());
    }
 
+   @FXML public void rePlan()
+   {
+      behaviorMessager.submitMessage(RePlan, new Object());
+   }
+
    @FXML public void saveLookAndStepParameters()
    {
       lookAndStepParameters.save();
@@ -94,8 +99,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerParameters.save();
    }
 
-   @FXML public void enablePlanningCheckBox()
+   @FXML public void operatorReviewCheckBox()
    {
-      behaviorMessager.submitMessage(EnablePlanning, enablePlanningCheckBox.isSelected());
+      behaviorMessager.submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
    }
 }

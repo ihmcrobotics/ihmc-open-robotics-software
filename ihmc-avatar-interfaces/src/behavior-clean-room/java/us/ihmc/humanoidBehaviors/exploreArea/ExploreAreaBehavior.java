@@ -384,7 +384,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doSlam(boolean doSlam)
    {
-      PlanarRegionsList latestPlanarRegionsList = rea.getLatestPlanarRegionList();
+      PlanarRegionsList latestPlanarRegionsList = rea.getLatestPlanarRegionsList();
 
       this.latestPlanarRegionsList = latestPlanarRegionsList;
       if (concatenatedMap == null)
