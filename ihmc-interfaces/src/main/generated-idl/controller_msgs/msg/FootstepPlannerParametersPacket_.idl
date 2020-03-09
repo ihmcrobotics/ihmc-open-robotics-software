@@ -56,10 +56,6 @@ module controller_msgs
          */
         boolean check_for_path_collisions;
         /**
-         * Sets whether or not to perform the defined heuristic search policies.
-         */
-        boolean perform_heuristic_search_policies;
-        /**
          * Returns the ideal step width for walking on flat ground.
          */
         @defaultValue(value=-11.1)

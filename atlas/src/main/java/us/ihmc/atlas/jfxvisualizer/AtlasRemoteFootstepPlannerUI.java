@@ -31,6 +31,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 public class AtlasRemoteFootstepPlannerUI extends Application
 {
    private static final boolean launchPlannerToolbox = true;
+   private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
@@ -53,6 +54,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messageConverter = new RemoteUIMessageConverter(ros2Node, messager, drcRobotModel.getSimpleRobotName());
 
       messager.startMessager();
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, GOAL_DISTANCE_PROXIMITY);
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel.getFootstepPostProcessingParameters(), drcRobotModel,
