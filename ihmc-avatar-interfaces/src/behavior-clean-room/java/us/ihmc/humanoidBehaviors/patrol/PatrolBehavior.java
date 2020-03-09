@@ -3,11 +3,7 @@ package us.ihmc.humanoidBehaviors.patrol;
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
@@ -16,11 +12,9 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
@@ -35,7 +29,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
@@ -253,7 +246,7 @@ public class PatrolBehavior implements BehaviorInterface
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
-      PlanarRegionsListMessage latestPlanarRegionList = rea.getLatestPlanarRegionListMessage();
+      PlanarRegionsListMessage latestPlanarRegionList = rea.getLatestPlanarRegionsListMessage();
 
       footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose,
                                                                           new FramePose3D(waypointManager.peekNextPose()),

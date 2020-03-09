@@ -15,13 +15,24 @@
          <children>
             <VBox alignment="CENTER">
                <children>
-                  <CheckBox fx:id="enablePlanningCheckBox" mnemonicParsing="false" onAction="#enablePlanningCheckBox" text="Enable planning">
+                  <CheckBox fx:id="operatorReviewCheckBox" mnemonicParsing="false" onAction="#operatorReviewCheckBox" text="Operator review">
                      <padding>
                         <Insets bottom="5.0" />
                      </padding>
                   </CheckBox>
-                      <Button fx:id="takeStep" mnemonicParsing="false" onAction="#takeStep" text="Take Step" />
-                  <TextField fx:id="behaviorState" />
+                  <Button mnemonicParsing="false" text="Re-plan">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                  </Button>
+                      <Button fx:id="rePlan" mnemonicParsing="false" onAction="#rePlan" text="Take Step">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin></Button>
+                  <TextField fx:id="behaviorState">
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin></TextField>
                </children>
                <FlowPane.margin>
                   <Insets />

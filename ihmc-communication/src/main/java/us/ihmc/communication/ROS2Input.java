@@ -1,6 +1,9 @@
 package us.ihmc.communication;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2NodeInterface;
@@ -18,6 +21,7 @@ public class ROS2Input<T>
    private boolean hasReceivedFirstMessage = false;
    private ROS2Callback<T> ros2Callback;
    private TypedNotification<T> messageNotification = new TypedNotification<>();
+   private List<Consumer<T>> userCallbacks = new ArrayList<>();
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
@@ -74,6 +78,10 @@ public class ROS2Input<T>
       {
          atomicReference.set(incomingData);
          messageNotification.add(incomingData);
+         for (Consumer<T> userCallback : userCallbacks)
+         {
+            userCallback.accept(incomingData);
+         }
          hasReceivedFirstMessage = true;
       }
    }
@@ -96,6 +104,11 @@ public class ROS2Input<T>
    public void setEnabled(boolean enabled)
    {
       ros2Callback.setEnabled(enabled);
+   }
+
+   public void addCallback(Consumer<T> messageReceivedCallback)
+   {
+      userCallbacks.add(messageReceivedCallback);
    }
 
    public void destroy()
