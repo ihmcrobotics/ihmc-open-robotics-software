@@ -9,6 +9,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -78,6 +80,8 @@ public class MainTabController
    private TextField sentRequestId;
    @FXML
    private TextField receivedRequestId;
+   @FXML
+   private Button viewExceptionButton;
 
    @FXML
    private TextField timeTaken;
@@ -238,7 +242,6 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-   private AnimationTimer robotPoseHandler;
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepDataListMessage> footstepPlanReference;
@@ -318,6 +321,21 @@ public class MainTabController
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
 
+      AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
+      viewExceptionButton.setOnAction(e ->
+                                      {
+                                         TextArea textArea = new TextArea(stackTrace.toString());
+                                         textArea.setEditable(false);
+
+                                         Alert alert = new Alert(Alert.AlertType.NONE);
+                                         alert.getButtonTypes().add(ButtonType.CLOSE);
+                                         alert.setHeaderText("Planner Stack Trace");
+                                         alert.setResizable(true);
+                                         alert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                                         alert.getDialogPane().setContent(textArea);
+                                         alert.show();
+                                      });
+
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
@@ -369,7 +387,6 @@ public class MainTabController
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
-      dataSetSelector.getItems().setAll(DataSetName.values());
       messager.registerTopicListener(GenerateLogStatus, logGenerationStatus::setText);
       messager.registerTopicListener(LoadLogStatus, logLoadStatus::setText);
    }

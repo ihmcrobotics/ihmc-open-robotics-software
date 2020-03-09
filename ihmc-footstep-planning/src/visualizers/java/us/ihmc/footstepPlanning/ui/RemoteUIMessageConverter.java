@@ -369,6 +369,21 @@ public class RemoteUIMessageConverter
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, lowLevelGoal.getOrientation());
       }
+      if (result == FootstepPlanningResult.EXCEPTION)
+      {
+         StringBuilder stackTrace = new StringBuilder();
+         stackTrace.append(packet.getExceptionMessage()).append("\n");
+         for (int i = 0; i < packet.getStacktrace().size(); i++)
+         {
+            stackTrace.append(packet.getStacktrace().get(i)).append("\n");
+         }
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace, stackTrace.toString());
+      }
+      else
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace,
+                                "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + result);
+      }
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatistics, packet.getFootstepPlanningStatistics());
 
