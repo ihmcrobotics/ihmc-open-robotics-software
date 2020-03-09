@@ -39,7 +39,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTTools
@@ -49,6 +51,7 @@ public class KSTTools
    private final StatusMessageOutputManager statusOutputManager;
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final DoubleProvider time;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
 
@@ -74,10 +77,15 @@ public class KSTTools
 
    private long currentMessageId = 1L;
 
+   private final YoBoolean hasNewInputCommand, hasPreviousInput;
+   private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
+   private KinematicsStreamingToolboxInputCommand latestInput = null;
+   private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
+
    private final KinematicsStreamingToolboxOutputConfigurationCommand outputConfiguration = new KinematicsStreamingToolboxOutputConfigurationCommand();
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
-                   FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod,
+                   FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.commandInputManager = commandInputManager;
@@ -86,6 +94,7 @@ public class KSTTools
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.walkingControllerPeriod = walkingControllerPeriod;
       this.toolboxControllerPeriod = toolboxControllerPeriod;
+      this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
 
@@ -113,6 +122,12 @@ public class KSTTools
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
       streamIntegrationDuration.set(0.2);
+
+      hasNewInputCommand = new YoBoolean("hasNewInputCommand", registry);
+      hasPreviousInput = new YoBoolean("hasPreviousInput", registry);
+      latestInputReceivedTime = new YoDouble("latestInputReceivedTime", registry);
+      previousInputReceivedTime = new YoDouble("previousInputReceivedTime", registry);
+      flushInputCommands();
    }
 
    public void update()
@@ -159,29 +174,61 @@ public class KSTTools
       currentStateToPack.set(status);
    }
 
-   private KinematicsStreamingToolboxInputCommand latestInput = null;
-   private boolean hasNewInputCommand = false;
-
-   public KinematicsStreamingToolboxInputCommand pollInputCommand()
+   public void pollInputCommand()
    {
-      hasNewInputCommand = commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class);
+      hasNewInputCommand.set(commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class));
 
-      if (hasNewInputCommand)
+      if (hasNewInputCommand.getValue())
+      {
+         if (latestInput != null)
+         {
+            previousInput.set(latestInput);
+            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
+            hasPreviousInput.set(true);
+         }
          latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
+         latestInputReceivedTime.set(time.getValue());
+      }
+   }
+   
+   public boolean hasNewInputCommand()
+   {
+      return hasNewInputCommand.getValue();
+   }
 
+   public KinematicsStreamingToolboxInputCommand getLatestInput()
+   {
       return latestInput;
+   }
+
+   public double getLatestInputReceivedTime()
+   {
+      return latestInputReceivedTime.getValue();
+   }
+
+   public boolean hasPreviousInput()
+   {
+      return hasPreviousInput.getValue();
+   }
+
+   public KinematicsStreamingToolboxInputCommand getPreviousInput()
+   {
+      return hasPreviousInput.getValue() ? previousInput : null;
+   }
+
+   public double getPreviousInputReceivedTime()
+   {
+      return previousInputReceivedTime.getValue();
    }
 
    public void flushInputCommands()
    {
       latestInput = null;
       commandInputManager.clearAllCommands();
-      hasNewInputCommand = false;
-   }
-
-   public boolean hasNewInputCommand()
-   {
-      return hasNewInputCommand;
+      hasNewInputCommand.set(false);
+      hasPreviousInput.set(false);
+      latestInputReceivedTime.set(-1.0);
+      previousInputReceivedTime.set(-1.0);
    }
 
    public WholeBodyTrajectoryMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
