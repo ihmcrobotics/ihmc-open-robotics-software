@@ -150,7 +150,11 @@ public class TorqueSpeedTestRunner {
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
 		
 		ValkyrieRobotModel robot = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
-
+		
+		// Scale robot mass and size
+		robot.setModelMassScale(config.globalMassScale);
+		robot.setModelSizeScale(config.globalSizeScale);
+		
 		// Set walking parameters
 		WalkingControllerParameters walkingParameters = robot.getWalkingControllerParameters();
 

@@ -35,6 +35,8 @@ class ValkyrieTorqueSpeedTestConfig {
 	public double slopeDegrees;         // for slope scenarios, the pitch of the slope (degrees). Positive values
 	                                    // indicate an upward slope.
 	public double stepLengthInches;     // for slope scenarios, the length of step to take in inches
+	public double globalMassScale;      // Amount to scale mass across the robot
+	public double globalSizeScale;      // Amount to scale size across the robot
 	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
@@ -52,11 +54,16 @@ class ValkyrieTorqueSpeedTestConfig {
 		disableAnkleLimits = false;
 		slopeDegrees = 5.0;
 		stepLengthInches = 0.5 * 100.0 / 2.54; // 0.5 meters in inches
+		globalMassScale = 1.0;
+		globalSizeScale = 1.0;
 	}
 
 	public String toString() {
 		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\nDisable Ankle Limits: %b\n",
 				testType, stepStartingDistance, stepHeight, numberOfSteps, showGui, disableAnkleLimits);
+		value += String.format("Slope Degrees: %f\nStep Length (Inches): %f\nMass scale: %f\nSize scale: %f\n",
+				slopeDegrees, stepLengthInches, globalMassScale, globalSizeScale);
+
 		if (footstepsFile != null) {
 			value += String.format("Footsteps Filename: %s\n", footstepsFile);
 		}

@@ -140,6 +140,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 			scs.setCameraFix(1.0, 0.0, 0.8);
 			scs.setCameraPosition(1.0, -8.0, 1.0);
+			setCustomSteppingParams(scs);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
@@ -215,6 +216,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			scs.setCameraFix(stepStart, 0.0, 1.0);
 			//scs.setCameraPosition(1.0, -8.0, 1.0);
 			scs.setCameraPosition(stepStart, -6.0, 1.0);
+			setCustomSteppingParams(scs);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 			
@@ -265,6 +267,17 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			destroySimulationAndRecycleMemory();
 		}
 	}
+	
+	/**
+	 * Set up custom modifications to stepping parameters
+	 * @param scs
+	 */
+	public void setCustomSteppingParams(SimulationConstructionSet scs) {
+		
+		// Increase max step height change to allow Val to attempt bigger steps.
+		YoVariable<?> maxStepHeightChange = scs.getVariable("MaxStepHeightChange");
+		maxStepHeightChange.setValueFromDouble(0.5);
+	}
 
 	public File testStepDown(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches, 
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps, File dataOutputFolder)
@@ -302,11 +315,12 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepDown);
 			drcSimulationTestHelper.setStartingLocation(startingLocation);
-			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+			drcSimulationTestHelper.createSimulation("StepDown");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 			scs.setCameraFix(stepEnd, 0.0, 1.0);
 			scs.setCameraPosition(stepEnd, -6.0, 1.0);
+			setCustomSteppingParams(scs);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 			
@@ -379,6 +393,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			double cameraZ = 0.8 + slope.getTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 0.0);
 			scs.setCameraFix(cameraX, 0.0, cameraZ);
 			scs.setCameraPosition(cameraX, -8.0, cameraZ);
+			setCustomSteppingParams(scs);
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
@@ -438,10 +453,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-			// Increase max step height change to allow Val to attempt bigger steps.
-			YoVariable<?> maxStepHeightChange = scs.getVariable("MaxStepHeightChange");
-			maxStepHeightChange.setValueFromDouble(0.5);
+			setCustomSteppingParams(scs);
 
 			double xGoal = 0.6 + numberOfStairSteps * stairStepLength + 1.0e-3;
 			double cameraX = xGoal / 2.0;
