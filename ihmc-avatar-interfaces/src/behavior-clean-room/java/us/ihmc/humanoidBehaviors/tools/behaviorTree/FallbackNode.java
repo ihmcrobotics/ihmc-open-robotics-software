@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
+/**
+ * A fallback node proceeds through children left to right until they return SUCCESS.
+ */
 public class FallbackNode extends BehaviorTreeControlFlowNodeBasics
 {
    @Override

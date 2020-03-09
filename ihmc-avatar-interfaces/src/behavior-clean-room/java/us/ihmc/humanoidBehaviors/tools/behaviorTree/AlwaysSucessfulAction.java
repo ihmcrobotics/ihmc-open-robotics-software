@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
 /**
- * non-reactive
+ * Experimental action. Not sure about this one.
  */
 public class AlwaysSucessfulAction implements BehaviorTreeAction
 {
