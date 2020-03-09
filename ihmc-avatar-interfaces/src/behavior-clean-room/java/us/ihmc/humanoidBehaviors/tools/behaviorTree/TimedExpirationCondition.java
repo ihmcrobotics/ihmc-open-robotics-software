@@ -4,6 +4,9 @@ import us.ihmc.commons.time.Stopwatch;
 
 import java.util.function.DoubleSupplier;
 
+/**
+ * A timed expiration behavrior tree condition action that is updatable but expires with wall time.
+ */
 public class TimedExpirationCondition extends BehaviorTreeCondition
 {
    private final Stopwatch stopwatch = new Stopwatch();
@@ -26,7 +29,7 @@ public class TimedExpirationCondition extends BehaviorTreeCondition
       this.expirationTimeSupplier = null;
    }
 
-   public void renew()
+   public void update()
    {
       hasBeenRenewed = true;
       stopwatch.reset();
