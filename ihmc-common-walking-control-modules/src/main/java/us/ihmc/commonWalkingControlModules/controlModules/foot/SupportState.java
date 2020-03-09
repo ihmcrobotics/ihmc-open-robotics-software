@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootRotationCalculationModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -214,10 +215,12 @@ public class SupportState extends AbstractFootControlState
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
       footRotationDetector = new KinematicFootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
-      if (explorationParameters != null)
-         footRotationCalculationModule = new FootRotationCalculationModule(robotSide, soleFrame, explorationParameters, dt, registry, graphicsListRegistry);
-      else
-         footRotationCalculationModule = null;
+      footRotationCalculationModule = new FootRotationCalculationModule(robotSide,
+                                                                        soleFrame,
+                                                                        footControlHelper.getFootholdRotationParameters(),
+                                                                        dt,
+                                                                        registry,
+                                                                        graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
@@ -258,8 +261,7 @@ public class SupportState extends AbstractFootControlState
          frameViz.hide();
       explorationHelper.stopExploring();
       footRotationDetector.reset();
-      if (footRotationCalculationModule != null)
-         footRotationCalculationModule.reset();
+      footRotationCalculationModule.reset();
 
       liftOff.set(false);
       touchDown.set(false);
@@ -347,8 +349,7 @@ public class SupportState extends AbstractFootControlState
       boolean dampingRotations = false;
 
       footSwitch.computeAndPackCoP(cop);
-      if (footRotationCalculationModule != null)
-         footRotationCalculationModule.compute(cop);
+      footRotationCalculationModule.compute(cop);
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {

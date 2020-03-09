@@ -34,7 +34,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final FramePoint2D tempPoint = new FramePoint2D();
 
-   public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, ExplorationParameters explorationParameters, double dt,
+   public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
@@ -43,8 +43,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, explorationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              explorationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
+                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
 
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);

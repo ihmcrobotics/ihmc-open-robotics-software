@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -99,10 +100,17 @@ public class FootControlModule
    private final ContactWrenchCommand minWrenchCommand;
    private final int numberOfBasisVectors;
 
-   public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
-                            PIDSE3GainsReadOnly swingFootControlGains, PIDSE3GainsReadOnly holdPositionFootControlGains,
-                            PIDSE3GainsReadOnly toeOffFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, DoubleProvider minWeightFractionPerFoot, DoubleProvider maxWeightFractionPerFoot,
+   public FootControlModule(RobotSide robotSide,
+                            ToeOffCalculator toeOffCalculator,
+                            WalkingControllerParameters walkingControllerParameters,
+                            PIDSE3GainsReadOnly swingFootControlGains,
+                            PIDSE3GainsReadOnly holdPositionFootControlGains,
+                            PIDSE3GainsReadOnly toeOffFootControlGains,
+                            HighLevelHumanoidControllerToolbox controllerToolbox,
+                            ExplorationParameters explorationParameters,
+                            FootholdRotationParameters footholdRotationParameters,
+                            DoubleProvider minWeightFractionPerFoot,
+                            DoubleProvider maxWeightFractionPerFoot,
                             YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
@@ -113,14 +121,19 @@ public class FootControlModule
       String namePrefix = sidePrefix + "Foot";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, explorationParameters, registry);
+      footControlHelper = new FootControlHelper(robotSide,
+                                                walkingControllerParameters,
+                                                controllerToolbox,
+                                                explorationParameters,
+                                                footholdRotationParameters,
+                                                registry);
 
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
 
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
-      
+
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
@@ -217,13 +230,13 @@ public class FootControlModule
       factory.addState(ConstraintType.FULL, supportState);
       factory.addState(ConstraintType.SWING, swingState);
       factory.addState(ConstraintType.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
-      
+
       for (ConstraintType from : ConstraintType.values())
       {
          factory.addRequestedTransition(from, requestedState);
          factory.addRequestedTransition(from, from, requestedState);
       }
-      
+
       return factory.build(ConstraintType.FULL);
    }
 
@@ -304,12 +317,12 @@ public class FootControlModule
       {
          requestExploration();
       }
-      
+
       stateMachine.doTransitions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
-      
+
 
       stateMachine.doAction();
 
@@ -324,7 +337,7 @@ public class FootControlModule
    {
       stateMachine.resetCurrentState();
    }
-   
+
    public boolean isInFlatSupportState()
    {
       ConstraintType currentConstraintType = getCurrentConstraintType();
