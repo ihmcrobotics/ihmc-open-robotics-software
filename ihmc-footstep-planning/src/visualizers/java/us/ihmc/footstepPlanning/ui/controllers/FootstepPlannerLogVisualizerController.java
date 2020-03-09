@@ -11,6 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -157,7 +158,7 @@ public class FootstepPlannerLogVisualizerController
       loadingLog.set(false);
    }
 
-   public void loadLog(FootstepPlannerLog footstepPlannerLog)
+   private void loadLog(FootstepPlannerLog footstepPlannerLog)
    {
       // publish log name
       messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, footstepPlannerLog.getLogName());
@@ -256,20 +257,20 @@ public class FootstepPlannerLogVisualizerController
       debugChildStepTable.sort();
 
       // TODO setup visualizer
-//      messager.submitMessage(ValkyriePlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
-//      messager.submitMessage(ValkyriePlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
-//
-//      debugChildStepTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
-//                                                                                 {
-//                                                                                    if (newValue != null)
-//                                                                                    {
-//                                                                                       ChildStepProperty property = (ChildStepProperty) newValue;
-//                                                                                       messager.submitMessage(ValkyriePlannerMessagerAPI.childDebugStep,
-//                                                                                                              Pair.of(property.transform,
-//                                                                                                                      property.edgeData.getCandidateNodeSnapData().getCroppedFoothold()));
-//                                                                                       selectedRow.set(property);
-//                                                                                    }
-//                                                                                 });
+      messager.submitMessage(FootstepPlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
+
+      debugChildStepTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
+                                                                                 {
+                                                                                    if (newValue != null)
+                                                                                    {
+                                                                                       ChildStepProperty property = (ChildStepProperty) newValue;
+                                                                                       messager.submitMessage(FootstepPlannerMessagerAPI.childDebugStep,
+                                                                                                              Pair.of(property.transform,
+                                                                                                                      property.edgeData.getCandidateNodeSnapData().getCroppedFoothold()));
+                                                                                       selectedRow.set(property);
+                                                                                    }
+                                                                                 });
 
       debugChildStepTable.getSelectionModel().select(0);
       debugChildStepTable.getFocusModel().focus(0);
@@ -319,25 +320,25 @@ public class FootstepPlannerLogVisualizerController
       private final TableColumn<ChildStepProperty, String> expandedColumn = new TableColumn<>("Expanded");
       private final TableColumn<ChildStepProperty, String> solutionStep = new TableColumn<>("Solution");
 
-      public TableColumnHolder(TableView table, boolean parentTable)
+      public TableColumnHolder(TableView<ChildStepProperty> table, boolean parentTable)
       {
-         xColumn.setCellValueFactory(new PropertyValueFactory("x"));
-         yColumn.setCellValueFactory(new PropertyValueFactory("y"));
-         zColumn.setCellValueFactory(new PropertyValueFactory("z"));
-         yawColumn.setCellValueFactory(new PropertyValueFactory("yaw"));
-         pitchColumn.setCellValueFactory(new PropertyValueFactory("pitch"));
-         rollColumn.setCellValueFactory(new PropertyValueFactory("roll"));
+         xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
+         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
+         zColumn.setCellValueFactory(new PropertyValueFactory<>("z"));
+         yawColumn.setCellValueFactory(new PropertyValueFactory<>("yaw"));
+         pitchColumn.setCellValueFactory(new PropertyValueFactory<>("pitch"));
+         rollColumn.setCellValueFactory(new PropertyValueFactory<>("roll"));
          widthColumn.setCellValueFactory(new PropertyValueFactory<>("width"));
          lengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
          heightColumn.setCellValueFactory(new PropertyValueFactory<>("height"));
          reachColumn.setCellValueFactory(new PropertyValueFactory<>("reach"));
          stepYawColumn.setCellValueFactory(new PropertyValueFactory<>("stepYaw"));
          areaPercentageColumn.setCellValueFactory(new PropertyValueFactory<>("areaPercentage"));
-         edgeCostColumn.setCellValueFactory(new PropertyValueFactory("edgeCost"));
-         heuristicCostColumn.setCellValueFactory(new PropertyValueFactory("heuristicCost"));
-         totalCostColumn.setCellValueFactory(new PropertyValueFactory("totalCost"));
-         rejectionReasonColumn.setCellValueFactory(new PropertyValueFactory("rejectionReason"));
-         expandedColumn.setCellValueFactory(new PropertyValueFactory("expanded"));
+         edgeCostColumn.setCellValueFactory(new PropertyValueFactory<>("edgeCost"));
+         heuristicCostColumn.setCellValueFactory(new PropertyValueFactory<>("heuristicCost"));
+         totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+         rejectionReasonColumn.setCellValueFactory(new PropertyValueFactory<>("rejectionReason"));
+         expandedColumn.setCellValueFactory(new PropertyValueFactory<>("expanded"));
          solutionStep.setCellValueFactory(new PropertyValueFactory<>("solution"));
 
          table.getColumns().add(xColumn);
@@ -455,7 +456,7 @@ public class FootstepPlannerLogVisualizerController
          this.expanded = expanded;
 
          FootstepNode candidateNode = edgeData.getCandidateNode();
-         FootstepNode stanceNode = edgeData.getCandidateNode();
+         FootstepNode stanceNode = edgeData.getStanceNode();
 
          if (edgeData.getCandidateNodeSnapData().getSnapTransform().containsNaN())
          {

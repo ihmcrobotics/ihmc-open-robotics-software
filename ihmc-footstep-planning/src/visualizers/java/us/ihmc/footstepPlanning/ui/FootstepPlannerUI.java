@@ -85,6 +85,7 @@ public class FootstepPlannerUI
    private final FullGraphRenderer fullGraphRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
+   private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -218,6 +219,7 @@ public class FootstepPlannerUI
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
       this.fullGraphRenderer = new FullGraphRenderer(messager);
+      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -230,6 +232,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
       view3dFactory.addNodeToView(expandedNodesRenderer.getRoot());
       view3dFactory.addNodeToView(fullGraphRenderer.getRoot());
+      view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -288,6 +291,7 @@ public class FootstepPlannerUI
       occupancyMapRenderer.start();
       expandedNodesRenderer.start();
       fullGraphRenderer.start();
+      footstepPlannerLogRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
