@@ -364,8 +364,8 @@ public class KSTStreamingState implements State
 
          if (tools.hasNewInputCommand())
             rawInputs.set(latestInput);
-
-         extrapolateInputPositions(rawInputs);
+         else
+            extrapolateInputPositions(rawInputs);
 
          filteredInputs.set(rawInputs);
 
