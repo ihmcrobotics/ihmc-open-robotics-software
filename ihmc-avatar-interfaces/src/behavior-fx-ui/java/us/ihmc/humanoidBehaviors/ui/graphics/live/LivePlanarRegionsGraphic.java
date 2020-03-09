@@ -9,8 +9,8 @@ import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -41,13 +41,34 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       animationTimer.start();
    }
 
-   private synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
+   public LivePlanarRegionsGraphic(boolean initializeToFlatGround)
+   {
+      super(initializeToFlatGround);
+      animationTimer.start();
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
    {
       if (acceptNewRegions)
       {
          synchronized (this) // just here for clear method
          {
             executorService.submit(() -> convertAndGenerateMesh(incomingData));
+         }
+      }
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsList incomingData)
+   {
+      if (acceptNewRegions)
+      {
+         synchronized (this) // just here for clear method
+         {
+            executorService.submit(() ->
+            {
+               this.latestPlanarRegionsList = incomingData;
+               generateMeshes(incomingData);
+            });
          }
       }
    }
@@ -62,6 +83,11 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private void handle(long now)
    {
       super.update();
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      acceptNewRegions = enabled;
    }
 
    public synchronized void clear()

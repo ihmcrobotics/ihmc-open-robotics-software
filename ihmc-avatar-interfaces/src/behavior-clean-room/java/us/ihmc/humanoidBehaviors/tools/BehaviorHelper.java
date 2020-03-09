@@ -1,17 +1,28 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.StepThroughAlgorithm;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -107,6 +118,20 @@ public class BehaviorHelper
       return managedMessager.createInput(topic, initialValue);
    }
 
+   public Notification createUINotification(Topic<Object> topic)
+   {
+      Notification notification = new Notification();
+      createUICallback(topic, object -> notification.set());
+      return notification;
+   }
+
+   public <T> TypedNotification<T> createUITypedNotification(Topic<T> topic)
+   {
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      createUICallback(topic, message -> typedNotification.add(message));
+      return typedNotification;
+   }
+
    // Thread and Schedule Methods:
    // TODO: Track and auto start/stop threads?
 
@@ -138,5 +163,29 @@ public class BehaviorHelper
    public Messager getManagedMessager()
    {
       return managedMessager;
+   }
+
+   public ManagedROS2Node getManagedROS2Node()
+   {
+      return managedROS2Node;
+   }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
+
+   public SideDependentList<ConvexPolygon2D> createFootPolygons()
+   {
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+         footPolygons.set(side, scaledFoot);
+      }
+
+      return footPolygons;
    }
 }
