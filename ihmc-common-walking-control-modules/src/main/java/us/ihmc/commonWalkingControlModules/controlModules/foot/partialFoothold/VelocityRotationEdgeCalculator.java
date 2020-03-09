@@ -53,7 +53,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
       parentRegistry.addChild(registry);
 
-      DoubleProvider filterBreakFrequency = rotationParameters.getFilterBreakFrequency();
+      DoubleProvider filterBreakFrequency = rotationParameters.getVelocityEdgeFilterBreakFrequency();
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(namePrefix + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);

@@ -9,6 +9,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -25,20 +26,20 @@ public class KinematicFootRotationDetector implements FootRotationDetector
    private final FrameVector2D angularVelocity = new FrameVector2D();
 
    /** Alpha filter to filter the foot angular velocity. */
-   private final YoDouble angularVelocityFilterBreakFrequency;
+   private final DoubleProvider angularVelocityFilterBreakFrequency;
    /** Foot filtered angular velocity in the sole frame. The yaw rate is intentionally ignored. */
    private final AlphaFilteredYoFrameVector2d footAngularVelocityFiltered;
 
    /** Foot angular velocity around the estimated line of rotation. */
    private final YoDouble angularVelocityMagnitude;
    /** Threshold on the foot angular velocity. */
-   private final YoDouble angularVelocityMagnitudeThreshold;
+   private final DoubleProvider angularVelocityMagnitudeThreshold;
    private final YoBoolean isAngularVelocityPastThreshold;
 
    /** Amount that the foot drops or lifts around the axis of rotation */
    private final YoDouble footDropOrLift;
    /** Threshold on the foot drop around the line of rotation. */
-   private final YoDouble footDropThreshold;
+   private final DoubleProvider footDropThreshold;
    private final YoBoolean isFootDropPastThreshold;
 
    private final YoBoolean isFootRotating;
@@ -59,7 +60,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
 
       angularVelocityFilterBreakFrequency = rotationParameters.getAngularVelocityFilterBreakFrequency();
       footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered", "", registry, () -> AlphaFilteredYoVariable
-            .computeAlphaGivenBreakFrequencyProperly(angularVelocityFilterBreakFrequency.getDoubleValue(), controllerDt), soleFrame);
+            .computeAlphaGivenBreakFrequencyProperly(angularVelocityFilterBreakFrequency.getValue(), controllerDt), soleFrame);
 
       angularVelocityMagnitude = new YoDouble(namePrefix + "AngularVelocityMagnitude", registry);
       angularVelocityMagnitudeThreshold = rotationParameters.getAngularVelocityAroundLoRThreshold();
@@ -102,9 +103,9 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       footDropOrLift.set(pointingBackwardVector.getZ());
       angularVelocityMagnitude.set(footAngularVelocityFiltered.length());
 
-      isFootDropPastThreshold.set(Math.abs(footDropOrLift.getDoubleValue()) > Math.abs(footDropThreshold.getDoubleValue()));
+      isFootDropPastThreshold.set(Math.abs(footDropOrLift.getDoubleValue()) > Math.abs(footDropThreshold.getValue()));
 
-      isAngularVelocityPastThreshold.set(angularVelocityMagnitude.getDoubleValue() > angularVelocityMagnitudeThreshold.getDoubleValue());
+      isAngularVelocityPastThreshold.set(angularVelocityMagnitude.getDoubleValue() > angularVelocityMagnitudeThreshold.getValue());
 
       if (!isFootRotating.getValue())
       {
