@@ -206,6 +206,17 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
 
+      // set graphics
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowExpandedNodes, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowRejectedNodes, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
+
       this.iterationDataList = footstepPlannerLog.getIterationData();
       this.edgeDataMap = footstepPlannerLog.getEdgeDataMap();
       this.snapper.setPlanarRegions(planarRegionsList);
