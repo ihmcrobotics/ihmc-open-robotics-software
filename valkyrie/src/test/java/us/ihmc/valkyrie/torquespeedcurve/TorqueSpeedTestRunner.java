@@ -47,9 +47,11 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 
@@ -88,26 +90,21 @@ public class TorqueSpeedTestRunner {
 
 		return argumentParser;
 	}
-	
-	public void disableAnkleLimits(ValkyrieRobotModel robotModel)
-	{
-		robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true)
-		{
+
+	public void disableAnkleLimits(ValkyrieRobotModel robotModel) {
+		robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true) {
 			@Override
-			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-			{
+			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder) {
 				if (jointHolder.getName().contains("AnklePitch"))
 					jointHolder.setLimits(-Math.PI, Math.PI);
 			}
 		});
-	}	
-	
-	private ValkyrieSDFDescriptionMutator getAnkleLimitMutator(ValkyrieRobotModel robot)
-	{ 
+	}
+
+	private ValkyrieSDFDescriptionMutator getAnkleLimitMutator(ValkyrieRobotModel robot) {
 		return new ValkyrieSDFDescriptionMutator(robot.getJointMap(), true) {
 			@Override
-			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-			{
+			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder) {
 				if (jointHolder.getName().contains("AnklePitch"))
 					jointHolder.setLimits(-Math.PI, Math.PI);
 			}
@@ -148,21 +145,20 @@ public class TorqueSpeedTestRunner {
 		// If the config file specifies footsteps, read them in here. Otherwise
 		// recordedFootsteps will be null.
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
-		
+
 		ValkyrieRobotModel robot = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
-		
+
 		// Scale robot mass and size
 		robot.setModelMassScale(config.globalMassScale);
 		robot.setModelSizeScale(config.globalSizeScale);
-		
+
 		// Set walking parameters
 		WalkingControllerParameters walkingParameters = robot.getWalkingControllerParameters();
 
 		// Apply torque limit overrides
 		SDFDescriptionMutatorList mutator = getSdfMutators(config, robot);
-		
+
 		// Apply mass link overrides
-		
 
 		// Create test runner and test case class
 		TorqueSpeedTestRunner runner = new TorqueSpeedTestRunner();
@@ -171,15 +167,12 @@ public class TorqueSpeedTestRunner {
 		// Disable ankle limits on the robot
 		if (config.disableAnkleLimits) {
 			mutator.addMutator(runner.getAnkleLimitMutator(robot));
-		}		
+		}
 
 		robot.setSDFDescriptionMutator(mutator);
-		
+
 		// Set whether tester should show a GUI
 		tester.setGuiEnabled(config.showGui);
-		
-
-
 
 		// Set up output directories for test results
 		File outputPrefixDirectory = runner.getOutputDirectory("capped_torque");
@@ -193,24 +186,21 @@ public class TorqueSpeedTestRunner {
 						walkingParameters, outputPrefixDirectory);
 				break;
 			case SQUARE_UP_STEP:
-				outputResultsDirectory = tester.testStepUpWithSquareUp(robot, config.stepStartingDistance, 
+				outputResultsDirectory = tester.testStepUpWithSquareUp(robot, config.stepStartingDistance,
 						config.stepHeight, walkingParameters, outputPrefixDirectory);
 				break;
 			case STEP:
-				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance, 
+				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance,
 						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
-				break;			
+				break;
 			case STEP_DOWN:
-				outputResultsDirectory = tester.testStepDown(robot, config.stepStartingDistance, 
-						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
-				break;					
+				outputResultsDirectory = tester.testStepDown(robot, config.stepStartingDistance, config.stepHeight,
+						walkingParameters, recordedFootsteps, outputPrefixDirectory);
+				break;
 			case SLOPE:
-				outputResultsDirectory = tester.testWalkSlope(robot, 
-						                                      Math.toRadians(-config.slopeDegrees), 
-						                                      runner.inchesToMeters(config.stepLengthInches),
-						                                      walkingParameters, 
-						                                      recordedFootsteps, 
-						                                      outputPrefixDirectory);
+				outputResultsDirectory = tester.testWalkSlope(robot, Math.toRadians(-config.slopeDegrees),
+						runner.inchesToMeters(config.stepLengthInches), walkingParameters, recordedFootsteps,
+						outputPrefixDirectory);
 				break;
 			}
 
@@ -228,105 +218,119 @@ public class TorqueSpeedTestRunner {
 		} catch (IOException e) {
 			System.err.println("Unable to copy param file to destination: " + e.getMessage());
 		}
-		
-		// Without calling System.exit(0), the sim has non-terminating threads. Specifically, the simulation
-		// thread and the intraprocess thread (associated with ROS2 publishing) do not exit.
+
+		// Without calling System.exit(0), the sim has non-terminating threads.
+		// Specifically, the simulation
+		// thread and the intraprocess thread (associated with ROS2 publishing) do not
+		// exit.
 		System.exit(0);
 	}
-	
-	private static String capitalize(String s)
-	{
+
+	private static String capitalize(String s) {
 		if (s == null || s.length() == 0) {
 			return s;
 		}
-		return s.substring(0,1).toUpperCase() + s.substring(1);
+		return s.substring(0, 1).toUpperCase() + s.substring(1);
 	}
-	
-	private static String uncapitalize(String s)
-	{
+
+	private static String uncapitalize(String s) {
 		if (s == null || s.length() == 0) {
 			return s;
 		}
-		return s.substring(0,1).toLowerCase() + s.substring(1);
+		return s.substring(0, 1).toLowerCase() + s.substring(1);
 	}
-	
-	
+
 	private static SDFDescriptionMutatorList getSdfMutators(ValkyrieTorqueSpeedTestConfig config,
-			                                                ValkyrieRobotModel robot) {
-		// Create a list of mutators based on the torque limits defined in the params file
-		SDFDescriptionMutatorList mutator = new SDFDescriptionMutatorList(
-				new ValkyrieSDFDescriptionMutator(robot.getJointMap(), false));
+			ValkyrieRobotModel robot) {
+		// Create a list of mutators based on the torque limits defined in the params
+		// file
+		SDFDescriptionMutatorList mutator = new SDFDescriptionMutatorList();
 
 		// Create a list of joint names with the format we need
-		HashSet<String> validJointNames = new HashSet<>(Arrays.asList(robot.getJointMap().getOrderedJointNames()));
+		ValkyrieJointMap jointMap = robot.getJointMap();
+		HashSet<String> validJointNames = new HashSet<>(Arrays.asList(jointMap.getOrderedJointNames()));
 		HashSet<String> validLinkNames = getLinkNames(validJointNames);
-		
+
 		// Add a mutator for each joint torque limit specified in the parameter file
 		for (String joint : config.torqueLimits.keySet()) {
 
 			if (!validJointNames.contains(uncapitalize(joint))) {
-				// Leg and arm joints should be parallel on each side, so we allow user to specify, for example, "HipPitch"
-				// and we translate that into a pair of SDF mutations for leftHipPitch and rightHipPitch
+				// Leg and arm joints should be parallel on each side, so we allow user to
+				// specify, for example, "HipPitch"
+				// and we translate that into a pair of SDF mutations for leftHipPitch and
+				// rightHipPitch
 				for (RobotSide robotSide : RobotSide.values) {
 					String fullJointName = robotSide.getCamelCaseNameForStartOfExpression() + capitalize(joint);
 					if (!validJointNames.contains(fullJointName)) {
 						System.err.println("Invalid torque limit joint specified in config file: " + joint);
 						System.err.println("Ensure case and spelling are correct (e.g. KneePitch)");
-						System.exit(1);						
+						System.exit(1);
 					} else {
-						mutator.addMutator(
-								new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), fullJointName, config.torqueLimits.get(joint)));
+						mutator.addMutator(new ValkyrieJointTorqueLimitMutator(jointMap, fullJointName,
+								config.torqueLimits.get(joint)));
 					}
 				}
 			} else {
-				mutator.addMutator(
-						new ValkyrieJointTorqueLimitMutator(robot.getJointMap(), uncapitalize(joint), config.torqueLimits.get(joint)));
+				mutator.addMutator(new ValkyrieJointTorqueLimitMutator(jointMap, uncapitalize(joint),
+						config.torqueLimits.get(joint)));
 			}
 		}
-		
+
 		// Add a mutator for each joint mass modifier specified in the parameter file
 		for (String link : config.linkMassKg.keySet()) {
 			// Try link literally. In this form, it should have a leading lower-case letter
 			if (!validLinkNames.contains(uncapitalize(link))) {
-				// Try link with side prepended. In this case, link should have a leading upper-case letter
+				// Try link with side prepended. In this case, link should have a leading
+				// upper-case letter
 				for (RobotSide robotSide : RobotSide.values) {
 					String fullLinkName = robotSide.getCamelCaseNameForStartOfExpression() + capitalize(link);
 					if (!validLinkNames.contains(fullLinkName)) {
 						System.err.println("Invalid mass link specified in config file: " + link);
 						System.err.println("Ensure case and spelling are correct (e.g. KneePitchLink)");
-						System.exit(1);						
+						System.exit(1);
 					} else {
-						mutator.addMutator(
-								new ValkyrieLinkMassMutator(robot.getJointMap(), fullLinkName, config.linkMassKg.get(link)));
+						double desiredMass = config.linkMassKg.get(link);
+						mutator.addMutator(new ValkyrieLinkMassMutator(jointMap, fullLinkName, desiredMass));
 					}
 				}
 			} else {
-				mutator.addMutator(
-						new ValkyrieLinkMassMutator(robot.getJointMap(), uncapitalize(link), config.linkMassKg.get(link)));
+				// By default, the Valkyrie model will remove 8.6 kg from the robot to account
+				// for an absent battery. If we're overriding the torso weight, we don't want this
+				// compensation, so pre-emptively add 8.6 to desired mass.
+				double desiredMass = config.linkMassKg.get(link);
+				if (link.equals("torso") && ValkyrieRosControlController.HAS_LIGHTER_BACKPACK) {
+					desiredMass += 8.6;
+				}
+				mutator.addMutator(new ValkyrieLinkMassMutator(jointMap, uncapitalize(link), desiredMass));
 			}
 		}
-		
+
 		return mutator;
 	}
 
 	private static HashSet<String> getLinkNames(HashSet<String> validJointNames) {
-		// There seems to be no simple way to get a list of links. After the SDF model is read, we could get the link
-		// names as the children of the SDFJointHolders in the Generalized SDF model. But getting the SDF model
-		// to access the joint holders makes us unable to apply the mutators we're defining.
+		// There seems to be no simple way to get a list of links. After the SDF model
+		// is read, we could get the link
+		// names as the children of the SDFJointHolders in the Generalized SDF model.
+		// But getting the SDF model
+		// to access the joint holders makes us unable to apply the mutators we're
+		// defining.
 		// For now, this is a hack.
 		HashSet<String> validLinkNames = new HashSet<>();
-		for (String jointName: validJointNames) {
-    		validLinkNames.add(jointName + "Link");
+		for (String jointName : validJointNames) {
+			validLinkNames.add(jointName + "Link");
 		}
-		
+
 		// Add exceptions to the rule
-		validLinkNames.remove("pelvisLink");    // The pelvis link is called "pelvis"
+		validLinkNames.remove("pelvisLink"); // The pelvis link is called "pelvis"
 		validLinkNames.remove("torsoRollLink"); // The torsoRoll link is called "torso"
 		validLinkNames.remove("leftAnkleRollLink"); // The leftAnkleRoll link is called "leftFoot"
-		validLinkNames.remove("leftWristPitchLink"); // The leftWristPitch link is called "leftPalm"		
+		validLinkNames.remove("leftWristPitchLink"); // The leftWristPitch link is called "leftPalm"
 		validLinkNames.remove("rightAnkleRollLink"); // The rightAnkleRoll link is called "rightFoot"
 		validLinkNames.remove("hokuyo_joint"); // The hokuyo_joint link is called "hokuyo_link"
 		validLinkNames.remove("rightWristPitchLink"); // The rightWristPitch link is called "rightPalm"
+		validLinkNames.remove("leftForearmYawLink"); // The leftForearmYaw link is called leftForearmLink
+		validLinkNames.remove("rightForearmYawLink"); // The rightForearmYaw link is called rightForearmLink		
 		validLinkNames.add("pelvis");
 		validLinkNames.add("torso");
 		validLinkNames.add("leftFoot");
@@ -334,6 +338,8 @@ public class TorqueSpeedTestRunner {
 		validLinkNames.add("rightFoot");
 		validLinkNames.add("rightPalm");
 		validLinkNames.add("hokuyo_link");
+		validLinkNames.add("leftForearmLink");
+		validLinkNames.add("rightForearmLink");		
 		return validLinkNames;
 	}
 

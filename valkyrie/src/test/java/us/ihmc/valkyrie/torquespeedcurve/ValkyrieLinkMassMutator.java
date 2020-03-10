@@ -15,56 +15,48 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 
-public class ValkyrieLinkMassMutator implements SDFDescriptionMutator
-{
-   private final Map<String, Double> customLinkMassMap = new HashMap<>();
+public class ValkyrieLinkMassMutator implements SDFDescriptionMutator {
+	private final Map<String, Double> customLinkMassMap = new HashMap<>();
 
-   public ValkyrieLinkMassMutator(ValkyrieJointMap jointMap, String linkName, double mass)
-   {
-	   System.out.printf("Changing mass of %s link to %f\n", linkName, mass);
-	   customLinkMassMap.put(linkName, mass);
-   }
+	public ValkyrieLinkMassMutator(ValkyrieJointMap jointMap, String linkName, double mass) {
+		System.out.printf("Changing mass of %s link to %f (note: torso may be further adjusted)\n", linkName, mass);
+		customLinkMassMap.put(linkName, mass);
+	}
 
-   @Override
-   public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-   {
+	@Override
+	public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder) {
 
-   }
+	}
 
-   @Override
-   public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
-   {
-	   if (customLinkMassMap.containsKey(linkHolder.getName())) {
-		   double oldMass = linkHolder.getMass();
-		   double newMass = customLinkMassMap.get(linkHolder.getName());
-		   
-		   // Update link mass
-		   linkHolder.setMass(newMass);
-		   
-		   // Scale inertia tensor
-		   Matrix3D inertia = linkHolder.getInertia();
-		   inertia.scale(newMass/oldMass);
-		   linkHolder.setInertia(inertia);
-	   }
-   }
+	@Override
+	public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder) {
+		if (customLinkMassMap.containsKey(linkHolder.getName())) {
+			double oldMass = linkHolder.getMass();
+			double newMass = customLinkMassMap.get(linkHolder.getName());
 
-   @Override
-   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
-   {
-   }
+			// Update link mass
+			linkHolder.setMass(newMass);
 
-   @Override
-   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
-   {
-   }
+			// Scale inertia tensor
+			Matrix3D inertia = linkHolder.getInertia();
+			inertia.scale(newMass / oldMass);
+			linkHolder.setInertia(inertia);
+		}
+	}
 
-   @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-   }
+	@Override
+	public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor) {
+	}
 
-   @Override
-   public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
-   {
-   }
+	@Override
+	public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor) {
+	}
+
+	@Override
+	public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor) {
+	}
+
+	@Override
+	public void mutateModelWithAdditions(GeneralizedSDFRobotModel model) {
+	}
 }
