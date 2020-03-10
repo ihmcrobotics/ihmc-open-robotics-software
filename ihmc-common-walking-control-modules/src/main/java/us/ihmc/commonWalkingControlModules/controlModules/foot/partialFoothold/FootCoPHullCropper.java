@@ -27,13 +27,7 @@ public class FootCoPHullCropper
    private static final double defaultDecayRate = 1.0;
    private static final double defaultAreaRatioThreshold = 0.6;
 
-   private final YoInteger nLengthSubdivisions;
-   private final YoInteger nWidthSubdivisions;
-
    private final ReferenceFrame soleFrame;
-
-   private final double footLength;
-   private final double footWidth;
 
    private final YoDouble areaOnRightSideOfLine;
    private final YoDouble areaOnLeftSideOfLine;
@@ -49,15 +43,11 @@ public class FootCoPHullCropper
 
    public FootCoPHullCropper(String namePrefix,
                              ReferenceFrame soleFrame,
-                             int nLengthSubdivisions,
-                             int nWidthSubdivisions,
-                             WalkingControllerParameters walkingControllerParameters,
-                             ExplorationParameters explorationParameters,
+                             double lengthResolution,
+                             double widthResolution,
                              YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoVariableRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
       this.soleFrame = soleFrame;
 
       String name = getClass().getSimpleName();
@@ -66,11 +56,8 @@ public class FootCoPHullCropper
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
       this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
 
-      this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
-      this.nLengthSubdivisions.set(nLengthSubdivisions);
-      this.nWidthSubdivisions = new YoInteger(namePrefix + "NWidthSubdivisions", registry);
-      this.nWidthSubdivisions.set(nWidthSubdivisions);
-
+      occupancyGrid.setCellXSize(lengthResolution);
+      occupancyGrid.setCellYSize(widthResolution);
       occupancyGrid.setThresholdForCellOccupancy(defaultThresholdForCellActivation);
       occupancyGrid.setOccupancyDecayRate(defaultDecayRate);
 
@@ -80,26 +67,12 @@ public class FootCoPHullCropper
       areaOnRightSideOfLine = new YoDouble(namePrefix + "AreaOnRightSideOfLine", registry);
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
 
-      setupChangedGridParameterListeners();
-
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 100, 100, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
       else
          visualizer = null;
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupChangedGridParameterListeners()
-   {
-      VariableChangedListener changedGridSizeListener = (v) ->
-      {
-         occupancyGrid.setCellXSize(footLength / nLengthSubdivisions.getIntegerValue());
-         occupancyGrid.setCellYSize(footWidth / nWidthSubdivisions.getIntegerValue());
-      };
-      nLengthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      nWidthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      changedGridSizeListener.notifyOfVariableChange(null);
    }
 
    public void registerCenterOfPressureLocation(FramePoint2DReadOnly copToRegister)
