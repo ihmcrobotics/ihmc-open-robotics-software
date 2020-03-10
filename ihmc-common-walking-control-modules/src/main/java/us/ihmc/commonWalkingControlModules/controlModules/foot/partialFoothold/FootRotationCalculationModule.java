@@ -75,14 +75,17 @@ public class FootRotationCalculationModule
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
       isRotating.set(computeIsRotating());
-      if (isRotating.getBooleanValue())
-      {
-         edgeCalculators.get(edgeCalculatorType.getEnumValue()).compute(measuredCoP);
-      }
-      else
+      if (!isRotating.getBooleanValue())
       {
          resetEdgeCalculators();
       }
+
+      RotationEdgeCalculator edgeCalculator = edgeCalculators.get(edgeCalculatorType.getEnumValue());
+      edgeCalculator.compute(measuredCoP);
+      if (!edgeCalculator.isRotationEdgeTrusted())
+         return;
+
+
    }
 
    private boolean computeIsRotating()
