@@ -44,6 +44,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -462,6 +463,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       FootstepPostProcessingPacket postProcessingOutputStatus = postProcessingModule.handleRequestPacket(postProcessingRequest);
 
       FootstepDataListMessage footstepDataListMessage = postProcessingOutputStatus.getFootstepDataList();
+      for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
+      {
+         FootstepDataMessage message = footstepDataListMessage.getFootstepDataList().get(i);
+         String outputMessage = "Step " + i + " Side = " + RobotSide.fromByte(message.getRobotSide());
+         outputMessage += "\nPoint: " + message.getLocation() + ", Orientation: " + message.getOrientation();
+         LogTools.info(outputMessage);
+      }
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
