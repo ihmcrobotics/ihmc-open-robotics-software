@@ -85,7 +85,6 @@ public class SupportState extends AbstractFootControlState
    private final FramePose3D bodyFixedControlledPose = new FramePose3D();
    private final FramePoint3D desiredCopPosition = new FramePoint3D();
 
-   private final FramePoint2D cop = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
    private final FramePoint3D footPosition = new FramePoint3D();
@@ -273,13 +272,16 @@ public class SupportState extends AbstractFootControlState
       computeFootPolygon();
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
+      footSwitch.computeAndPackCoP(cop2d);
+      if (cop2d.containsNaN())
+         cop2d.setToZero(contactableFoot.getSoleFrame());
+
       // handle partial foothold detection
       boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
       boolean contactStateHasChanged = false;
       if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
-         footSwitch.computeAndPackCoP(cop);
-         partialFootholdControlModule.compute(desiredCoP, cop);
+         partialFootholdControlModule.compute(desiredCoP, cop2d);
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
@@ -300,7 +302,6 @@ public class SupportState extends AbstractFootControlState
       // toe contact point loading //// TODO: 6/5/17
       if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
       {
-
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
 
@@ -346,8 +347,7 @@ public class SupportState extends AbstractFootControlState
       localGains.set(gains);
       boolean dampingRotations = false;
 
-      footSwitch.computeAndPackCoP(cop);
-      footRotationCalculationModule.compute(cop);
+      footRotationCalculationModule.compute(cop2d);
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {
@@ -362,9 +362,6 @@ public class SupportState extends AbstractFootControlState
       }
 
       // update the control frame
-      footSwitch.computeAndPackCoP(cop2d);
-      if (cop2d.containsNaN())
-         cop2d.setToZero(contactableFoot.getSoleFrame());
       framePosition.setIncludingFrame(cop2d, 0.0);
       frameOrientation.setToZero(contactableFoot.getSoleFrame());
       controlFrame.setPoseAndUpdate(framePosition, frameOrientation);

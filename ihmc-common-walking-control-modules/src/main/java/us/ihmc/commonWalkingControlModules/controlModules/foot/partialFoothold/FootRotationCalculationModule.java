@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import com.sun.prism.ReadbackGraphics;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,7 +15,7 @@ public class FootRotationCalculationModule
 {
    private enum RotationDetectorType
    {
-      GEOMETRIC, KINEMATIC, VELOCITY, ANY;
+      GEOMETRIC, KINEMATIC, VELOCITY, ANY, KINEMATIC_AND_VELOCITY;
 
       static final RotationDetectorType[] values = {GEOMETRIC, KINEMATIC, VELOCITY};
    }
@@ -68,7 +66,7 @@ public class FootRotationCalculationModule
       edgeCalculatorType = YoEnum.create(side.getCamelCaseName() + "EdgeCalculatorType", EdgeCalculatorType.class, registry);
       rotationDetectorType = YoEnum.create(side.getCamelCaseName() + "RotationDetectorType", RotationDetectorType.class, registry);
 
-      rotationDetectorType.set(RotationDetectorType.ANY);
+      rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
       edgeCalculatorType.set(EdgeCalculatorType.VELOCITY_AND_COP);
 
       reset();
@@ -91,13 +89,20 @@ public class FootRotationCalculationModule
    {
       if (rotationDetectorType.getEnumValue() == RotationDetectorType.ANY)
       {
+         boolean rotationDetected = false;
          for (RotationDetectorType type : RotationDetectorType.values)
          {
             if (rotationDetectors.get(type).compute())
-               return true;
+               rotationDetected = true;
          }
 
-         return false;
+         return rotationDetected;
+      }
+      else if (rotationDetectorType.getEnumValue() == RotationDetectorType.KINEMATIC_AND_VELOCITY)
+      {
+         boolean rotationDetected = rotationDetectors.get(RotationDetectorType.KINEMATIC).compute();
+         rotationDetected |= rotationDetectors.get(RotationDetectorType.VELOCITY).compute();
+         return rotationDetected;
       }
       else
       {

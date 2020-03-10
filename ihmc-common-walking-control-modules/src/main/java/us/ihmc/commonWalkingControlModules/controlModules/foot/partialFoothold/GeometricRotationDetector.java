@@ -32,7 +32,7 @@ public class GeometricRotationDetector implements FootRotationDetector
    {
       this.soleFrame = soleFrame;
 
-      String namePrefix = side.getLowerCaseName() + "Kinematic";
+      String namePrefix = side.getLowerCaseName() + "Geometric";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
