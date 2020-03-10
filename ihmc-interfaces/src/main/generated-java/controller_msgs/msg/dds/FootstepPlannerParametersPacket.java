@@ -51,10 +51,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public boolean check_for_path_collisions_;
    /**
-            * Sets whether or not to perform the defined heuristic search policies.
-            */
-   public boolean perform_heuristic_search_policies_;
-   /**
             * Returns the ideal step width for walking on flat ground.
             */
    public double ideal_footstep_width_ = -11.1;
@@ -481,8 +477,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       check_for_path_collisions_ = other.check_for_path_collisions_;
 
-      perform_heuristic_search_policies_ = other.perform_heuristic_search_policies_;
-
       ideal_footstep_width_ = other.ideal_footstep_width_;
 
       ideal_footstep_length_ = other.ideal_footstep_length_;
@@ -660,21 +654,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getCheckForPathCollisions()
    {
       return check_for_path_collisions_;
-   }
-
-   /**
-            * Sets whether or not to perform the defined heuristic search policies.
-            */
-   public void setPerformHeuristicSearchPolicies(boolean perform_heuristic_search_policies)
-   {
-      perform_heuristic_search_policies_ = perform_heuristic_search_policies;
-   }
-   /**
-            * Sets whether or not to perform the defined heuristic search policies.
-            */
-   public boolean getPerformHeuristicSearchPolicies()
-   {
-      return perform_heuristic_search_policies_;
    }
 
    /**
@@ -1965,8 +1944,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_path_collisions_, other.check_for_path_collisions_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_heuristic_search_policies_, other.perform_heuristic_search_policies_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_width_, other.ideal_footstep_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_length_, other.ideal_footstep_length_, epsilon)) return false;
@@ -2114,8 +2091,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.check_for_path_collisions_ != otherMyClass.check_for_path_collisions_) return false;
 
-      if(this.perform_heuristic_search_policies_ != otherMyClass.perform_heuristic_search_policies_) return false;
-
       if(this.ideal_footstep_width_ != otherMyClass.ideal_footstep_width_) return false;
 
       if(this.ideal_footstep_length_ != otherMyClass.ideal_footstep_length_) return false;
@@ -2260,8 +2235,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
       builder.append("check_for_path_collisions=");
       builder.append(this.check_for_path_collisions_);      builder.append(", ");
-      builder.append("perform_heuristic_search_policies=");
-      builder.append(this.perform_heuristic_search_policies_);      builder.append(", ");
       builder.append("ideal_footstep_width=");
       builder.append(this.ideal_footstep_width_);      builder.append(", ");
       builder.append("ideal_footstep_length=");

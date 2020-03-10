@@ -57,7 +57,6 @@ public class FootstepPlannerMessageTools
 
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
-      packet.setPerformHeuristicSearchPolicies(parameters.performHeuristicSearchPolicies());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());

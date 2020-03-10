@@ -79,4 +79,10 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       int b = value >> 0 & 0xFF;
       return Color.rgb(r, g, b);
    }
+   
+   public static int colorToInt(javafx.scene.paint.Color color)
+   {
+      int rgb = (int) (color.getRed() * 0xFF) << 16 | (int) (color.getGreen() * 0xFF) << 8 | (int) (color.getBlue() * 0xFF) << 0;
+      return rgb;
+   }
 }

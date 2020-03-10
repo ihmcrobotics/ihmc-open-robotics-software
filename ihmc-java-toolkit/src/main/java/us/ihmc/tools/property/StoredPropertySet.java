@@ -166,6 +166,18 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
       if (valueChanged)
       {
+         if (!key.getType().equals(newValue.getClass()))
+         {
+            if (key.getType().equals(Boolean.class) && newValue.getClass().equals(Integer.class))
+            {
+               newValue = (Integer) newValue != 0;
+            }
+            else
+            {
+               throw new RuntimeException("Value of type " + newValue.getClass() + " cannot be set to key type " + key.getType());
+            }
+         }
+
          values[key.getIndex()] = newValue;
 
          if (propertyChangedListeners.get(key) != null)

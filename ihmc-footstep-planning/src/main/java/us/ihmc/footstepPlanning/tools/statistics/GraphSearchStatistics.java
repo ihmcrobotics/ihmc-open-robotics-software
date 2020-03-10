@@ -96,10 +96,9 @@ public class GraphSearchStatistics implements PlannerStatistics<GraphSearchStati
          }
       }
 
-      ArrayList<BipedalFootstepPlannerListener> listeners = planningModule.getChecker().getListeners();
-      if (!listeners.isEmpty())
+      BipedalFootstepPlannerListener listener = planningModule.getChecker().getListener();
+      if (listener != null)
       {
-         BipedalFootstepPlannerListener listener = listeners.get(0);
          for (FootstepNode footstepNode : listener.getRejectedNodeData().keySet())
          {
             expandedNodeMap.addFootstepNode(footstepNode);

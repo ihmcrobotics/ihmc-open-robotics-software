@@ -8,9 +8,10 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.footstepPlanAndProcessModule.FootstepPlanAndProcessModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -18,6 +19,7 @@ import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -29,14 +31,14 @@ import us.ihmc.ros2.RealtimeRos2Node;
 public class AtlasRemoteFootstepPlannerUI extends Application
 {
    private static final boolean launchPlannerToolbox = true;
+   private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
 
-   private FootstepPlanningModule planningModule;
-   private FootstepPlanPostProcessingToolboxModule postProcessingModule;
+   private FootstepPlanAndProcessModule planningAndProcessingModule;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -52,6 +54,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messageConverter = new RemoteUIMessageConverter(ros2Node, messager, drcRobotModel.getSimpleRobotName());
 
       messager.startMessager();
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, GOAL_DISTANCE_PROXIMITY);
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel.getFootstepPostProcessingParameters(), drcRobotModel,
@@ -62,8 +65,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningModule = FootstepPlanningModuleLauncher.createModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
-         postProcessingModule = new FootstepPlanPostProcessingToolboxModule(drcRobotModel, null, false);
+         planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
       }
    }
 
@@ -76,11 +78,8 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messageConverter.destroy();
       ui.stop();
 
-      if (planningModule != null)
-      {
-         planningModule.closeAndDispose();
-         postProcessingModule.destroy();
-      }
+      if (planningAndProcessingModule != null)
+         planningAndProcessingModule.closeAndDispose();
 
       Platform.exit();
    }
