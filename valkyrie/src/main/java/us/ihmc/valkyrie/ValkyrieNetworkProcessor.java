@@ -50,15 +50,20 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
       networkProcessor.setupRosModule();
 
-      ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
-      sensorSuiteManager.setEnableLidarScanPublisher(true);
-      sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(false);
-      sensorSuiteManager.setEnableVideoPublisher(true);
+      ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      sensorModule.setEnableLidarScanPublisher(true);
+      sensorModule.setEnableStereoVisionPointCloudPublisher(true);
+      sensorModule.setEnableVideoPublisher(true);
 
       networkProcessor.setupSensorModule();
 
-      sensorSuiteManager.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
-      sensorSuiteManager.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 20));
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 20));
+      sensorModule.getStereoVisionPointCloudPublisher().setRangeFilter(0.2, 2.5);
+      sensorModule.getStereoVisionPointCloudPublisher().setSelfCollisionFilter(robotModel.getCollisionBoxProvider());
+      sensorModule.getStereoVisionPointCloudPublisher().setPublisherPeriodInMillisecond(750L);
+      sensorModule.getStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(500000);
+      sensorModule.getStereoVisionPointCloudPublisher().setMinimumResolution(0.005);
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
