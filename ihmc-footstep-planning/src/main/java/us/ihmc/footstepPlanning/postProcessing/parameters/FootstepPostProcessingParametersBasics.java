@@ -50,6 +50,11 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.doInitialFastApproximation, doApproximation);
    }
 
+   default void setFastApproximationLessClearance(double distance)
+   {
+      set(FootstepPostProcessingKeys.fastApproximationLessClearance, distance);
+   }
+
    default void setMinimumSwingFootClearance(double minimumSwingFootClearance)
    {
       set(FootstepPostProcessingKeys.minimumSwingFootClearance, minimumSwingFootClearance);
@@ -70,9 +75,19 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
       set(FootstepPostProcessingKeys.maximumWaypointAdjustmentDistance, distance);
    }
 
-   default void setIncrementalWaypointAdjustmentDistance(double distance)
+   default void setMinimumAdjustmentIncrementDistance(double distance)
    {
-      set(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance, distance);
+      set(FootstepPostProcessingKeys.minimumAdjustmentIncrementDistance, distance);
+   }
+
+   default void setMaximumAdjustmentIncrementDistance(double distance)
+   {
+      set(FootstepPostProcessingKeys.maximumAdjustmentIncrementDistance, distance);
+   }
+
+   default void setAdjustmentIncrementDistanceGain(double gain)
+   {
+      set(FootstepPostProcessingKeys.adjustmentIncrementDistanceGain, gain);
    }
 
    default void setMinimumHeightAboveFloorForCollision(double height)
@@ -116,12 +131,18 @@ public interface FootstepPostProcessingParametersBasics extends FootstepPostProc
          setTransferWeightDistributionAtFullDepth(packet.getTransferWeightDistributionAtFullDepth());
 
       setDoInitialFastApproximation(packet.getDoInitialFastApproximation());
+      if (packet.getFastApproximationLessClearance() != -1.0)
+         setFastApproximationLessClearance(packet.getFastApproximationLessClearance());
       if (packet.getMinimumSwingFootClearance() != -1.0)
          setMinimumSwingFootClearance(packet.getMinimumSwingFootClearance());
       if (packet.getMaximumWaypointAdjustmentDistance() != -1.0)
          setMaximumWaypointAdjustmentDistance(packet.getMaximumWaypointAdjustmentDistance());
-      if (packet.getIncrementalWaypointAdjustmentDistance() != -1.0)
-         setIncrementalWaypointAdjustmentDistance(packet.getIncrementalWaypointAdjustmentDistance());
+      if (packet.getMinimumAdjustmentIncrementDistance() != -1.0)
+         setMinimumAdjustmentIncrementDistance(packet.getMinimumAdjustmentIncrementDistance());
+      if (packet.getMaximumAdjustmentIncrementDistance() != -1.0)
+         setMaximumAdjustmentIncrementDistance(packet.getMaximumAdjustmentIncrementDistance());
+      if (packet.getAdjustmentIncrementDistanceGain() != -1.0)
+         setAdjustmentIncrementDistanceGain(packet.getAdjustmentIncrementDistanceGain());
       if (packet.getMinimumHeightAboveFloorForCollision() != -1.0)
          setMinimumHeightAboveFloorForCollision(packet.getMinimumHeightAboveFloorForCollision());
       setNumberOfChecksPerSwing((int) packet.getNumberOfChecksPerSwing());

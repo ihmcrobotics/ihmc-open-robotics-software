@@ -107,7 +107,7 @@ public class FootstepPostProcessingParametersUIController
       javaFXStoredPropertyMap.put(numberOfChecksPerSwing, FootstepPostProcessingKeys.numberOfChecksPerSwing);
       javaFXStoredPropertyMap.put(maximumNumberOfAdjustmentAttempts, FootstepPostProcessingKeys.maximumNumberOfAdjustmentAttempts);
       javaFXStoredPropertyMap.put(maximumAdjustmentDistance, FootstepPostProcessingKeys.maximumWaypointAdjustmentDistance);
-      javaFXStoredPropertyMap.put(incrementalAdjustmentDistance, FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+      javaFXStoredPropertyMap.put(incrementalAdjustmentDistance, FootstepPostProcessingKeys.minimumAdjustmentIncrementDistance);
       javaFXStoredPropertyMap.put(minimumHeightAboveFloorForCollision, FootstepPostProcessingKeys.minimumHeightAboveFloorForCollision);
 
       javaFXStoredPropertyMap.put(areaSplitFractionProcessingEnabled, FootstepPostProcessingKeys.areaSplitFractionProcessingEnabled);
