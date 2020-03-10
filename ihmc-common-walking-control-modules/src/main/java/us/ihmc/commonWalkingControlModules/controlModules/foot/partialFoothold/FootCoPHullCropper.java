@@ -16,6 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class FootCoPHullCropper
    private final FramePoint2D cellCenter = new FramePoint2D();
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+   private final YoEnum<RobotSide> sideOfFootToCrop;
 
    public FootCoPHullCropper(String namePrefix,
                              ReferenceFrame soleFrame,
@@ -61,6 +63,7 @@ public class FootCoPHullCropper
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
 
+      sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
       this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
 
       this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
@@ -121,11 +124,13 @@ public class FootCoPHullCropper
       areaOnRightSideOfLine.set(leftSideCut.getArea());
 
       if (areaOnLeftSideOfLine.getDoubleValue() / areaOnRightSideOfLine.getDoubleValue() > areaRatioThreshold.getDoubleValue())
-         return RobotSide.RIGHT;
+         sideOfFootToCrop.set(RobotSide.RIGHT);
       else if (areaOnRightSideOfLine.getDoubleValue() / areaOnLeftSideOfLine.getDoubleValue() > areaRatioThreshold.getDoubleValue())
-         return RobotSide.LEFT;
+         sideOfFootToCrop.set(RobotSide.LEFT);
       else
-         return null;
+         sideOfFootToCrop.set(null);
+
+      return sideOfFootToCrop.getEnumValue();
    }
 
    public void computeConvexHull(FrameConvexPolygon2D convexHullToPack)
@@ -147,6 +152,7 @@ public class FootCoPHullCropper
    public void reset()
    {
       occupancyGrid.reset();
+      sideOfFootToCrop.set(null);
       if (visualizer != null)
          visualizer.update();
    }
