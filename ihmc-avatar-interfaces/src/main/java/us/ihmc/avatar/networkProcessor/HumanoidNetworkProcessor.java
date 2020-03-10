@@ -7,9 +7,10 @@ import java.util.List;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -28,6 +29,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -77,7 +79,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(parameters.isVisualizeFootstepPlanningToolboxModule());
+         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(null);
       if (parameters.isUseFootstepPostProcessingToolboxModule())
          humanoidNetworkProcessor.setupFootstepPostProcessingToolboxModule(parameters.isVisualizeFootstepPostProcessingToolboxModule());
       if (parameters.isUseMocapModule())
@@ -279,14 +281,14 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public FootstepPlanningModule setupFootstepPlanningToolboxModule(boolean enableYoVariableServer)
+   public FootstepPlanningModule setupFootstepPlanningToolboxModule(AdaptiveSwingParameters adaptiveSwingParameters)
    {
 	   
       checkIfModuleCanBeCreated(FootstepPlanningModule.class);
 
       try
       {
-         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS, adaptiveSwingParameters);
          modulesToClose.add(module);
 
          return module;
@@ -298,16 +300,13 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public FootstepPlanPostProcessingToolboxModule setupFootstepPostProcessingToolboxModule(boolean enableYoVariableServer)
+   public FootstepPlanPostProcessingModule setupFootstepPostProcessingToolboxModule(boolean enableYoVariableServer)
    {
-      checkIfModuleCanBeCreated(FootstepPlanPostProcessingToolboxModule.class);
+      checkIfModuleCanBeCreated(FootstepPlanPostProcessingModule.class);
 
       try
       {
-         FootstepPlanPostProcessingToolboxModule module = new FootstepPlanPostProcessingToolboxModule(robotModel,
-                                                                                                      null,
-                                                                                                      enableYoVariableServer,
-                                                                                                      pubSubImplementation);
+         FootstepPlanPostProcessingModule module = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
          modulesToClose.add(module);
          return module;
       }

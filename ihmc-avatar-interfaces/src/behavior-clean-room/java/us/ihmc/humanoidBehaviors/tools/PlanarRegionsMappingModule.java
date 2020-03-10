@@ -26,6 +26,7 @@ public class PlanarRegionsMappingModule
    private Notification slamUpdated = new Notification();
 
    private long i = 0; // to slow down trying to SLAM for now
+   private long sequenceId = 0; // to detect slam updated
    private static final int SLAM_EVERY = 1;
 
    public PlanarRegionsMappingModule(DomainFactory.PubSubImplementation pubSubImplementation)
@@ -64,6 +65,11 @@ public class PlanarRegionsMappingModule
       }
 
       PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(slamMap);
+      if (slamUpdatedTemp)
+      {
+         sequenceId++;
+      }
+      message.setSequenceId(sequenceId);
       planarRegionPublisher.publish(message);
 
       if (slamUpdatedTemp)

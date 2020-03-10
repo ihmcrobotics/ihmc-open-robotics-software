@@ -182,7 +182,7 @@ public class PartialFootholdControlModule
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
       lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
-      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getSoleFrame(), explorationParameters, registry);
 
       unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);

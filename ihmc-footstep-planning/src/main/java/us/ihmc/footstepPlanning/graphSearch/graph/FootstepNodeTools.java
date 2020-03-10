@@ -97,6 +97,11 @@ public class FootstepNodeTools
       footPolygonToPack.applyTransform(nodeTransform);
    }
 
+   public static double getSnappedNodeHeight(FootstepNode footstepNode, RigidBodyTransform snapTransform)
+   {
+      return snapTransform.getRotation().getM20() * footstepNode.getX() + snapTransform.getRotation().getM21() * footstepNode.getY() + snapTransform.getTranslationZ();
+   }
+
    public static LatticeNode interpolate(LatticeNode nodeA, LatticeNode nodeB, double alpha)
    {
       double x = EuclidCoreTools.interpolate(nodeA.getX(), nodeB.getX(), alpha);

@@ -28,6 +28,8 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class StepInPlaceBehavior implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new, API.create());
+
    private final BehaviorHelper helper;
 
    private final ActivationReference<Boolean> stepping;

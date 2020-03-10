@@ -1,22 +1,16 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
-import us.ihmc.commons.Conversions;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -31,7 +25,7 @@ import java.util.List;
 public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostProcessingElement
 {
    private final FootstepPostProcessingParametersReadOnly parameters;
-   private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+   final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    public SwingOverRegionsPostProcessingElement(FootstepPostProcessingParametersReadOnly parameters, WalkingControllerParameters walkingControllerParameters,
                                                 YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -56,10 +50,13 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
    public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket outputPlan)
    {
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(parameters.getDoInitialFastApproximation());
+      swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(parameters.getFastApproximationLessClearance());
       swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(parameters.getNumberOfChecksPerSwing());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(parameters.getMaximumNumberOfAdjustmentAttempts());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(parameters.getMinimumSwingFootClearance());
-      swingOverPlanarRegionsTrajectoryExpander.setIncrementalAdjustmentDistance(parameters.getIncrementalWaypointAdjustmentDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(parameters.getMinimumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(parameters.getMaximumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(parameters.getAdjustmentIncrementDistanceGain());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(parameters.getMaximumWaypointAdjustmentDistance());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(parameters.getMinimumHeightAboveFloorForCollision());
 
@@ -87,18 +84,31 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
       for (int stepNumber = 0; stepNumber < footstepDataMessageList.size(); stepNumber++)
       {
          FramePose3D nextFootPose = new FramePose3D();
+         RobotSide swingSide = RobotSide.fromByte(footstepDataMessageList.get(stepNumber).getRobotSide());
 
          if (stepNumber > 0)
          {
             stanceFootPose.setPosition(footstepDataMessageList.get(stepNumber - 1).getLocation());
             stanceFootPose.setOrientation(footstepDataMessageList.get(stepNumber - 1).getOrientation());
          }
+         else
+         {
+            if (swingSide == RobotSide.LEFT)
+            {
+               stanceFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
+               stanceFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+            }
+            else
+            {
+               stanceFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
+               stanceFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+            }
+         }
 
          nextFootPose.setPosition(footstepDataMessageList.get(stepNumber).getLocation());
          nextFootPose.setOrientation(footstepDataMessageList.get(stepNumber).getOrientation());
-         RobotSide side = RobotSide.fromByte(footstepDataMessageList.get(stepNumber).getRobotSide());
 
-         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, footPoses.get(side),
+         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, footPoses.get(swingSide),
                                                                                                                    nextFootPose, planarRegionsList);
          if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
          {
@@ -110,7 +120,7 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
             MessageTools.copyData(new Point3D[] {waypointOne, waypointTwo}, footstepData.getCustomPositionWaypoints());
          }
 
-         footPoses.put(side, nextFootPose);
+         footPoses.put(swingSide, nextFootPose);
       }
 
       return processedPlan;

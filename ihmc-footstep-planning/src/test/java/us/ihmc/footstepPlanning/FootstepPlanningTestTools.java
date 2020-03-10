@@ -40,7 +40,6 @@ public class FootstepPlanningTestTools
    {
       assertEquals(parameters.checkForBodyBoxCollisions(), other.checkForBodyBoxCollisions());
       assertEquals(parameters.checkForPathCollisions(), other.checkForPathCollisions());
-      assertEquals(parameters.performHeuristicSearchPolicies(), other.performHeuristicSearchPolicies());
       assertEquals(parameters.getIdealFootstepWidth(), other.getIdealFootstepWidth(), epsilon);
       assertEquals(parameters.getIdealFootstepLength(), other.getIdealFootstepLength(), epsilon);
       assertEquals(parameters.getWiggleInsideDelta(), other.getWiggleInsideDelta(), epsilon);

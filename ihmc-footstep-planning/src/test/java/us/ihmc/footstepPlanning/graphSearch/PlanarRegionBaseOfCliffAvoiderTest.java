@@ -73,7 +73,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
-      avoider.setPlanarRegions(planarRegionsList);
+      avoider.setPlanarRegionsList(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
 
       SimulationConstructionSet scs = null;
@@ -98,17 +98,17 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double y = 0.0;
       FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
-      assertTrue(avoider.isNodeValid(node, null));
+      assertTrue(avoider.isNodeValid(node));
 
       x = closestNodeDistanceToCliff + LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
-      assertFalse(avoider.isNodeValid(node, null));
+      assertFalse(avoider.isNodeValid(node));
 
       x = closestNodeDistanceToCliff - LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
-      assertTrue(avoider.isNodeValid(node, null));
+      assertTrue(avoider.isNodeValid(node));
    }
 
    @Test
@@ -143,7 +143,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       generator.addRectangle(boxWidth, boxWidth);
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      cliffAvoider.setPlanarRegions(planarRegionsList);
+      cliffAvoider.setPlanarRegionsList(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
 
       Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticeNode.gridSizeXY, 0.0);
@@ -173,10 +173,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       snapper.snapFootstepNode(frontFarNode);
       snapper.snapFootstepNode(sideFarNode);
 
-      assertFalse(cliffAvoider.isNodeValid(frontNearNode, null));
-      assertFalse(cliffAvoider.isNodeValid(sideNearNode, null));
-      assertTrue(cliffAvoider.isNodeValid(frontFarNode, null));
-      assertTrue(cliffAvoider.isNodeValid(sideFarNode, null));
+      assertFalse(cliffAvoider.isNodeValid(frontNearNode));
+      assertFalse(cliffAvoider.isNodeValid(sideNearNode));
+      assertTrue(cliffAvoider.isNodeValid(frontFarNode));
+      assertTrue(cliffAvoider.isNodeValid(sideFarNode));
    }
 
    public static void main(String[] args)

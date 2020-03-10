@@ -53,8 +53,6 @@
                         <children>
                             <CheckBox fx:id="returnBestEffortPlan" mnemonicParsing="false" prefWidth="250.0" text="Return Best Effort Plan" GridPane.columnSpan="2" />
             
-                            <CheckBox fx:id="performHeuristicSearchPolicies" mnemonicParsing="false" prefWidth="250.0" text="Perform Heuristic Search Actions" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-
                             <Label text="Ideal step length" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                             <Label text="Ideal step width" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
 

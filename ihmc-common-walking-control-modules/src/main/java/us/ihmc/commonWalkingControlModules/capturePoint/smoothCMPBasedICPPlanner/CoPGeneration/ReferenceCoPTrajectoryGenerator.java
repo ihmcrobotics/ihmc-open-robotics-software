@@ -1162,7 +1162,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             copPlannerParameters = copPointParametersMap.get(exitCoPName);
 
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
-         framePointToPack.add(supportFootPolygon.getMaxX(),// - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
+         framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
                               copPlannerParameters.getCoPOffsets(supportSide).getY(), 0.0);
          constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());
          framePointToPack.changeFrame(worldFrame);
