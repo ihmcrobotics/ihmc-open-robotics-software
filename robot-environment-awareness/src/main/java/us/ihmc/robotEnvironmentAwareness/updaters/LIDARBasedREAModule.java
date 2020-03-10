@@ -32,6 +32,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -73,6 +74,8 @@ public class LIDARBasedREAModule
    private final Messager reaMessager;
 
    private final AtomicReference<Boolean> preserveOcTreeHistory;
+
+   private final SLAMModule slamModule;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile) throws IOException
    {
@@ -128,6 +131,9 @@ public class LIDARBasedREAModule
       preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
+
+      slamModule = new SLAMModule(ros2Node, reaMessager, REAModuleAPI.SLAMEnable, REAModuleAPI.SLAMPlanarRegionsState);
+      slamModule.start();
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -143,6 +149,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      slamModule.handlePointCloud(message);
    }
 
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
@@ -150,8 +157,9 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      slamModule.handlePointCloud(message);
    }
-   
+
    private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
    {
       StampedPosePacket message = subscriber.takeNextData();
@@ -306,6 +314,7 @@ public class LIDARBasedREAModule
       try
       {
          reaMessager.closeMessager();
+         slamModule.stop();
       }
       catch (Exception e)
       {
