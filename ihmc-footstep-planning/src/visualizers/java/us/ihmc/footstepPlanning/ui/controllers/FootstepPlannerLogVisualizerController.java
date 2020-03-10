@@ -4,10 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
@@ -31,6 +28,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -51,7 +49,7 @@ public class FootstepPlannerLogVisualizerController
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();
    private TableColumnHolder parentColumnHolder;
    private TableColumnHolder childColumnHolder;
-   private Messager messager;
+   private JavaFXMessager messager;
    private FootstepPlannerLog footstepPlannerLog = null;
    private List<FootstepNode> path = new ArrayList<>();
    private final Stack<FootstepNode> parentStepStack = new Stack<>();
@@ -69,13 +67,15 @@ public class FootstepPlannerLogVisualizerController
    private TableView debugChildStepTable;
 
    @FXML
+   private CheckBox showLogGraphics;
+   @FXML
    private Button reset;
    @FXML
    private Button stepInto;
    @FXML
    private Button stepBack;
 
-   public void attachMessager(Messager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
@@ -83,6 +83,7 @@ public class FootstepPlannerLogVisualizerController
    public void bindControls()
    {
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, b -> loadLog());
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLogGraphics, showLogGraphics.selectedProperty(), true);
    }
 
    public void setup()
@@ -216,6 +217,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true); // hide plan by default
 
       this.iterationDataList = footstepPlannerLog.getIterationData();
       this.edgeDataMap = footstepPlannerLog.getEdgeDataMap();

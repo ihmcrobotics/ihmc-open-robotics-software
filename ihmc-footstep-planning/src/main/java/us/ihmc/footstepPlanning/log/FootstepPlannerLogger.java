@@ -116,13 +116,6 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      HashSet<GraphEdge<FootstepNode>> solutionEdges = new HashSet<>();
-      List<FootstepNode> solutionPath = planner.getFootstepPlanner().getGraph().getPathFromStart(planner.getEndNode());
-      for (int i = 0; i < solutionPath.size() - 1; i++)
-      {
-         solutionEdges.add(new GraphEdge<>(solutionPath.get(i), solutionPath.get(i + 1)));
-      }
-
       // log planner iteration data
       String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
       try
@@ -155,7 +148,6 @@ public class FootstepPlannerLogger
                writeSnapData(edgeDataPrefix, edgeData.getCandidateNodeSnapData());
 
                // write additional data as doubles
-               boolean solutionEdge = solutionEdges.contains(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()));
                fileWriter.write(edgeDataPrefix + "edgeData:" + EuclidCoreIOTools.getStringOf(",",
                                                                                              EuclidCoreIOTools.getStringFormat(8, 8),
                                                                                              edgeData.getRejectionReason() == null ?
@@ -169,7 +161,7 @@ public class FootstepPlannerLogger
                                                                                              edgeData.getCostFromStart(),
                                                                                              edgeData.getEdgeCost(),
                                                                                              edgeData.getHeuristicCost(),
-                                                                                             solutionEdge ? 1.0 : 0.0));
+                                                                                             edgeData.getSolutionEdge() ? 1.0 : 0.0));
                fileWriter.write("\n");
             }
          }
