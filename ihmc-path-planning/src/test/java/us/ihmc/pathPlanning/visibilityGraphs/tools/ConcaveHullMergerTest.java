@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
@@ -29,6 +30,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class ConcaveHullMergerTest
 {
+   private static boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize")); // To visualize, pass -Dvisualize=true
+
    @Test
    public void testMergePlanarRegions()
    {
@@ -66,6 +69,344 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB3, concaveHull[i++], epsilon);
 
       assertEquals(3, mergedPlanarRegion.getNumberOfConvexPolygons());
+   }
+
+   @Test
+   public void testMergingLargeConcaveHullsDoesNotResultInLoopError()
+   {
+
+      ArrayList<Point2D> hullOneIn = new ArrayList<>();
+      hullOneIn.add(new Point2D(-5.749524598760511, 0.5117437910963702));
+      hullOneIn.add(new Point2D(-5.728123782790979, 0.5459983746280823));
+      hullOneIn.add(new Point2D(-5.7399913558093285, 0.6035766893026047));
+      hullOneIn.add(new Point2D(-5.744468610604233, 0.694045329220125));
+      hullOneIn.add(new Point2D(-5.737302951671169, 0.7405933317230063));
+      hullOneIn.add(new Point2D(-5.747356977774587, 0.7746161519210959));
+      hullOneIn.add(new Point2D(-5.7439567074182225, 0.8703532796275977));
+      hullOneIn.add(new Point2D(-5.692965468368499, 0.9951412173459644));
+      hullOneIn.add(new Point2D(-5.679698791941023, 0.9867877638775487));
+      hullOneIn.add(new Point2D(-5.674227159238477, 0.9998465307044619));
+      hullOneIn.add(new Point2D(-5.626988684071912, 0.9710215255132163));
+      hullOneIn.add(new Point2D(-5.5639615756464, 0.9869988408249551));
+      hullOneIn.add(new Point2D(-5.5224577232914775, 0.9806565781908224));
+      hullOneIn.add(new Point2D(-5.4952056062465635, 0.9812225755496267));
+      hullOneIn.add(new Point2D(-5.3905051238049495, 0.9754911050233318));
+      hullOneIn.add(new Point2D(-5.312287991718677, 0.9879855553770478));
+      hullOneIn.add(new Point2D(-5.266367345872897, 0.981367748236366));
+      hullOneIn.add(new Point2D(-5.2549902103305435, 0.983808971736873));
+      hullOneIn.add(new Point2D(-5.086496427682135, 0.9617731030194927));
+      hullOneIn.add(new Point2D(-4.972073598804863, 0.9578481350779146));
+      hullOneIn.add(new Point2D(-4.69002889770831, 0.9688291140682104));
+      hullOneIn.add(new Point2D(-4.620584717668329, 0.9697418185816936));
+      hullOneIn.add(new Point2D(-4.485499797873681, 0.9599631185985655));
+      hullOneIn.add(new Point2D(-4.2844259655801755, 0.9650453478557063));
+      hullOneIn.add(new Point2D(-4.127532020019224, 0.9731692870338705));
+      hullOneIn.add(new Point2D(-3.9895805758480467, 0.9858546871869462));
+      hullOneIn.add(new Point2D(-3.929530742810961, 0.975422157465795));
+      hullOneIn.add(new Point2D(-3.8290640916358214, 0.9872807646348367));
+      hullOneIn.add(new Point2D(-3.7914395205494293, 0.9734324381282777));
+      hullOneIn.add(new Point2D(-3.765046062997586, 0.9717311278445286));
+      hullOneIn.add(new Point2D(-3.7269438034502187, 0.9948942577162081));
+      hullOneIn.add(new Point2D(-3.6911846212023818, 0.994360788404708));
+      hullOneIn.add(new Point2D(-3.6845441870848648, 0.9983737685671348));
+      hullOneIn.add(new Point2D(-3.66015708468799, 0.9938979076143376));
+      hullOneIn.add(new Point2D(-3.6425031336683134, 0.9936345391449344));
+      hullOneIn.add(new Point2D(-3.574785520835281, 0.9827997022993876));
+      hullOneIn.add(new Point2D(-3.5324887644696172, 0.9669310808864168));
+      hullOneIn.add(new Point2D(-3.514396194055692, 0.967898099543165));
+      hullOneIn.add(new Point2D(-3.4687467690029115, 0.9972621090785931));
+      hullOneIn.add(new Point2D(-3.450501175786697, 0.903286376147967));
+      hullOneIn.add(new Point2D(-3.477808315783969, 0.8363517284832812));
+      hullOneIn.add(new Point2D(-3.4503855757676885, 0.7084649077177977));
+      hullOneIn.add(new Point2D(-3.4519356319813426, 0.691501742299384));
+      hullOneIn.add(new Point2D(-3.4507249984530106, 0.6864337314897999));
+      hullOneIn.add(new Point2D(-3.4590296804392295, 0.6138674498025338));
+      hullOneIn.add(new Point2D(-3.4506427098398005, 0.5320829494580994));
+      hullOneIn.add(new Point2D(-3.4730316150872316, 0.4944138087167209));
+      hullOneIn.add(new Point2D(-3.4576724687093745, 0.42703472071193));
+      hullOneIn.add(new Point2D(-3.469050710082898, 0.39614081406237));
+      hullOneIn.add(new Point2D(-3.4562360512838715, 0.33010626703733204));
+      hullOneIn.add(new Point2D(-3.4611130730394457, 0.28557700048180445));
+      hullOneIn.add(new Point2D(-3.454276599748612, 0.27438162293095636));
+      hullOneIn.add(new Point2D(-3.4529722927325954, 0.20177317049318907));
+      hullOneIn.add(new Point2D(-3.454710694046327, 0.1681001442384945));
+      hullOneIn.add(new Point2D(-3.4500964528222298, 0.15053648770308856));
+      hullOneIn.add(new Point2D(-3.4594224127989497, 0.11501377928172901));
+      hullOneIn.add(new Point2D(-3.468206134282527, 0.0675125394266569));
+      hullOneIn.add(new Point2D(-3.4572093157630874, -0.019897511502465347));
+      hullOneIn.add(new Point2D(-3.4593722948460184, -0.06901561014926934));
+      hullOneIn.add(new Point2D(-3.4519247530567103, -0.19588527227923483));
+      hullOneIn.add(new Point2D(-3.456040026979768, -0.2579599636172649));
+      hullOneIn.add(new Point2D(-3.4660311616897483, -0.3197480588391426));
+      hullOneIn.add(new Point2D(-3.4519432798993916, -0.3771245637071432));
+      hullOneIn.add(new Point2D(-3.462252695934336, -0.4330900228967462));
+      hullOneIn.add(new Point2D(-3.4620756627133464, -0.4737587483482082));
+      hullOneIn.add(new Point2D(-3.4521966159903457, -0.6148869355167963));
+      hullOneIn.add(new Point2D(-3.466862610703944, -0.6623289955436329));
+      hullOneIn.add(new Point2D(-3.463455947305653, -0.6949801612413369));
+      hullOneIn.add(new Point2D(-3.451191774163828, -0.7803182857048854));
+      hullOneIn.add(new Point2D(-3.4570435106527557, -0.8440776125672041));
+      hullOneIn.add(new Point2D(-3.450565674078502, -0.9247677747995431));
+      hullOneIn.add(new Point2D(-3.4726425250150186, -0.9559173281362914));
+      hullOneIn.add(new Point2D(-3.4767283563966522, -0.9788713115004916));
+      hullOneIn.add(new Point2D(-3.8779571284008623, -0.9793296614675466));
+      hullOneIn.add(new Point2D(-4.018882470860417, -0.9833066110279061));
+      hullOneIn.add(new Point2D(-4.326543542341959, -0.9798421111780302));
+      hullOneIn.add(new Point2D(-4.475635932786875, -0.9800124292035975));
+      hullOneIn.add(new Point2D(-4.5942518025713035, -0.9932573596399061));
+      hullOneIn.add(new Point2D(-4.633157916720989, -0.9996669399888102));
+      hullOneIn.add(new Point2D(-4.721360327366889, -0.9993110453896975));
+      hullOneIn.add(new Point2D(-4.838473471222047, -0.9833268139389376));
+      hullOneIn.add(new Point2D(-4.875813068495177, -0.9796466483791992));
+      hullOneIn.add(new Point2D(-5.147204213861442, -0.9903518848965941));
+      hullOneIn.add(new Point2D(-5.366397085760237, -0.9811112016702952));
+      hullOneIn.add(new Point2D(-5.422379243020392, -0.985286196329092));
+      hullOneIn.add(new Point2D(-5.481372733964425, -0.9835024962787696));
+      hullOneIn.add(new Point2D(-5.654399435369487, -0.9807308386124838));
+      hullOneIn.add(new Point2D(-5.741344449058611, -0.9614688883949685));
+      hullOneIn.add(new Point2D(-5.747230233914902, -0.8814042608407457));
+      hullOneIn.add(new Point2D(-5.730291364192527, -0.8011279767284065));
+      hullOneIn.add(new Point2D(-5.74536600486778, -0.7218941914337257));
+      hullOneIn.add(new Point2D(-5.742214791778014, -0.6423804557254951));
+      hullOneIn.add(new Point2D(-5.7406752787324375, -0.5625295323731163));
+      hullOneIn.add(new Point2D(-5.742404688353241, -0.42228343083503284));
+      hullOneIn.add(new Point2D(-5.745526327611753, -0.3932582187144888));
+      hullOneIn.add(new Point2D(-5.743273832029272, -0.3518004112117196));
+      hullOneIn.add(new Point2D(-5.746225689936693, -0.11242012858223811));
+      hullOneIn.add(new Point2D(-5.743362431851638, -0.021229730096219607));
+      hullOneIn.add(new Point2D(-5.736324556630382, 0.008588054155153093));
+      hullOneIn.add(new Point2D(-5.737891010536603, 0.18249418901560158));
+      hullOneIn.add(new Point2D(-5.732582936128593, 0.21849493309682944));
+      hullOneIn.add(new Point2D(-5.738658739852778, 0.27759855166664577));
+      hullOneIn.add(new Point2D(-5.726504258756771, 0.3459350450978585));
+      hullOneIn.add(new Point2D(-5.723695893328202, 0.4597672373799782));
+
+      ArrayList<Point2D> hullTwoIn = new ArrayList<>();
+      hullTwoIn.add(new Point2D(-5.743924018230668, 0.8702030554602013));
+      hullTwoIn.add(new Point2D(-5.692933720181574, 0.9949886903216416));
+      hullTwoIn.add(new Point2D(-5.644927015011673, 0.9647609403647504));
+      hullTwoIn.add(new Point2D(-5.581748167516879, 0.9792723252542896));
+      hullTwoIn.add(new Point2D(-5.495177507552343, 0.9810703053821865));
+      hullTwoIn.add(new Point2D(-5.390478957270484, 0.9753389406253825));
+      hullTwoIn.add(new Point2D(-5.312263268615906, 0.9878331604044763));
+      hullTwoIn.add(new Point2D(-5.1440940871853265, 0.9635976299754941));
+      hullTwoIn.add(new Point2D(-4.972055154073909, 0.9576962962662058));
+      hullTwoIn.add(new Point2D(-4.690015657876206, 0.9686770726117266));
+      hullTwoIn.add(new Point2D(-4.620572759370433, 0.9695897602820124));
+      hullTwoIn.add(new Point2D(-4.38418104453348, 0.9524775344214074));
+      hullTwoIn.add(new Point2D(-4.20615998127517, 0.9580119983734515));
+      hullTwoIn.add(new Point2D(-4.047455873075396, 0.9756457599384123));
+      hullTwoIn.add(new Point2D(-3.949136805659209, 0.9729558814204238));
+      hullTwoIn.add(new Point2D(-3.82906674018847, 0.9871283826685883));
+      hullTwoIn.add(new Point2D(-3.7732601293816668, 0.966587864986605));
+      hullTwoIn.add(new Point2D(-3.7269483365472973, 0.9947417352493186));
+      hullTwoIn.add(new Point2D(-3.642509225047265, 0.9934820399250965));
+      hullTwoIn.add(new Point2D(-3.5747928618860887, 0.9826474030273937));
+      hullTwoIn.add(new Point2D(-3.5220190904126243, 0.9628480833630877));
+      hullTwoIn.add(new Point2D(-3.4687560669101156, 0.9971095429149891));
+      hullTwoIn.add(new Point2D(-3.45051081040105, 0.9031355442278435));
+      hullTwoIn.add(new Point2D(-3.4778174464679132, 0.8362021317860475));
+      hullTwoIn.add(new Point2D(-3.4503952125153425, 0.7083176710647827));
+      hullTwoIn.add(new Point2D(-3.459039157667169, 0.613721958866414));
+      hullTwoIn.add(new Point2D(-3.4506523418422606, 0.531938967786469));
+      hullTwoIn.add(new Point2D(-3.4846281802127166, 0.47477491160601465));
+      hullTwoIn.add(new Point2D(-3.4680874882763164, 0.4022124976394681));
+      hullTwoIn.add(new Point2D(-3.456245580065898, 0.329966012676294));
+      hullTwoIn.add(new Point2D(-3.464752464866794, 0.2522945648458048));
+      hullTwoIn.add(new Point2D(-3.4671474930498016, 0.21526595732756543));
+      hullTwoIn.add(new Point2D(-3.450106094905406, 0.15039954715200463));
+      hullTwoIn.add(new Point2D(-3.466951588798911, 0.07641664255073098));
+      hullTwoIn.add(new Point2D(-3.4572188265843327, -0.020031306836770145));
+      hullTwoIn.add(new Point2D(-3.4614797941891817, -0.1167916633272208));
+      hullTwoIn.add(new Point2D(-3.462442757435875, -0.209546313695431));
+      hullTwoIn.add(new Point2D(-3.466484295854634, -0.27050878048765137));
+      hullTwoIn.add(new Point2D(-3.4762964142050423, -0.33118978625546514));
+      hullTwoIn.add(new Point2D(-3.4624609523234753, -0.3875382464293819));
+      hullTwoIn.add(new Point2D(-3.4620850837302326, -0.4738841680533295));
+      hullTwoIn.add(new Point2D(-3.4583885456097496, -0.5305190277462231));
+      hullTwoIn.add(new Point2D(-3.4522062193167686, -0.6150097508193664));
+      hullTwoIn.add(new Point2D(-3.4697405029718453, -0.6717302497651625));
+      hullTwoIn.add(new Point2D(-3.4538990259305136, -0.7555870299496712));
+      hullTwoIn.add(new Point2D(-3.4549311145950012, -0.8398459640177292));
+      hullTwoIn.add(new Point2D(-3.450575307502593, -0.9248848715106358));
+      hullTwoIn.add(new Point2D(-3.486801941708004, -0.9785031846183563));
+      hullTwoIn.add(new Point2D(-3.7756186299451886, -0.9790577159739826));
+      hullTwoIn.add(new Point2D(-4.461522909596047, -0.9809380667609313));
+      hullTwoIn.add(new Point2D(-4.622511151841817, -0.9989262070098633));
+      hullTwoIn.add(new Point2D(-4.709133193999282, -0.9985766891594756));
+      hullTwoIn.add(new Point2D(-4.897066393393353, -0.980041491226906));
+      hullTwoIn.add(new Point2D(-4.9193193587467805, -0.9806881270602278));
+      hullTwoIn.add(new Point2D(-4.9417072315195645, -0.9814041598963572));
+      hullTwoIn.add(new Point2D(-4.964243346549871, -0.9821906204465226));
+      hullTwoIn.add(new Point2D(-4.986941375626375, -0.9830486467355584));
+      hullTwoIn.add(new Point2D(-5.0098153623161155, -0.9839794881546094));
+      hullTwoIn.add(new Point2D(-5.032879758649933, -0.9849845099594325));
+      hullTwoIn.add(new Point2D(-5.056149463877388, -0.9860651982449903));
+      hullTwoIn.add(new Point2D(-5.079639865521575, -0.987223165430846));
+      hullTwoIn.add(new Point2D(-5.1033668829857, -0.9884601562960496));
+      hullTwoIn.add(new Point2D(-5.1273470139879365, -0.9897780546069046));
+      hullTwoIn.add(new Point2D(-5.151597384123594, -0.9911788903859349));
+      hullTwoIn.add(new Point2D(-5.369865939943904, -0.9827027052348051));
+      hullTwoIn.add(new Point2D(-5.397591588959723, -0.9848031306174416));
+      hullTwoIn.add(new Point2D(-5.425816979700131, -0.9870080145718424));
+      hullTwoIn.add(new Point2D(-5.654368398886416, -0.9808469025720823));
+      hullTwoIn.add(new Point2D(-5.741311808078097, -0.9615853078177334));
+      hullTwoIn.add(new Point2D(-5.747197484317155, -0.8815221577891874));
+      hullTwoIn.add(new Point2D(-5.730258927187441, -0.8012473551084698));
+      hullTwoIn.add(new Point2D(-5.7453332896728195, -0.7220150320069674));
+      hullTwoIn.add(new Point2D(-5.742182134736054, -0.6425027636581653));
+      hullTwoIn.add(new Point2D(-5.740642650100902, -0.5626533138877312));
+      hullTwoIn.add(new Point2D(-5.746192958876964, -0.11255221648909881));
+      hullTwoIn.add(new Point2D(-5.743329753630941, -0.021363500845545464));
+      hullTwoIn.add(new Point2D(-5.7293558474652935, 0.03784057795621435));
+      hullTwoIn.add(new Point2D(-5.721428459690666, 0.10012551324005828));
+      hullTwoIn.add(new Point2D(-5.731100813546803, 0.2042550380083518));
+      hullTwoIn.add(new Point2D(-5.738626148434779, 0.27745926629153944));
+      hullTwoIn.add(new Point2D(-5.726471891639546, 0.3457944986299724));
+      hullTwoIn.add(new Point2D(-5.72366357803701, 0.45962459023427643));
+      hullTwoIn.add(new Point2D(-5.749491806822182, 0.5116001847668805));
+      hullTwoIn.add(new Point2D(-5.709512880251592, 0.5755912719137528));
+      hullTwoIn.add(new Point2D(-5.737749026703811, 0.6326257211969648));
+      hullTwoIn.add(new Point2D(-5.730819487676998, 0.7186156673552689));
+      hullTwoIn.add(new Point2D(-5.74732422583789, 0.7744676945022468));
+
+      // print smallest distance
+      double closestPoints;
+      closestPoints = Double.POSITIVE_INFINITY;
+      for (Point2D a : hullOneIn)
+      {
+         for (Point2D b : hullOneIn)
+         {
+            if (a != b)
+            {
+               double distance = a.distance(b);
+               if (distance < closestPoints)
+               {
+                  closestPoints = distance;
+               }
+            }
+         }
+      }
+      LogTools.info("Closest gap in list one: {}", closestPoints);
+
+      closestPoints = Double.POSITIVE_INFINITY;
+      for (Point2D a : hullTwoIn)
+      {
+         for (Point2D b : hullTwoIn)
+         {
+            if (a != b)
+            {
+               double distance = a.distance(b);
+               if (distance < closestPoints)
+               {
+                  closestPoints = distance;
+               }
+            }
+         }
+      }
+      LogTools.info("Closest gap in list two: {}", closestPoints);
+
+      closestPoints = Double.POSITIVE_INFINITY;
+      hullOneIn = ConcaveHullMerger.preprocessHullByRemovingPoints(hullOneIn);
+      for (Point2D a : hullOneIn)
+      {
+         for (Point2D b : hullOneIn)
+         {
+            if (a != b)
+            {
+               double distance = a.distance(b);
+               if (distance < closestPoints)
+               {
+                  closestPoints = distance;
+               }
+            }
+         }
+      }
+      LogTools.info("Closest gap in list one filtered: {}", closestPoints);
+
+      closestPoints = Double.POSITIVE_INFINITY;
+      hullTwoIn = ConcaveHullMerger.preprocessHullByRemovingPoints(hullTwoIn);
+      for (Point2D a : hullTwoIn)
+      {
+         for (Point2D b : hullTwoIn)
+         {
+            if (a != b)
+            {
+               double distance = a.distance(b);
+               if (distance < closestPoints)
+               {
+                  closestPoints = distance;
+               }
+            }
+         }
+      }
+      LogTools.info("Closest gap in list two filtered: {}", closestPoints);
+
+      closestPoints = Double.POSITIVE_INFINITY;
+      for (Point2D a : hullOneIn)
+      {
+         for (Point2D b : hullTwoIn)
+         {
+            if (a != b)
+            {
+               double distance = a.distance(b);
+               if (distance < closestPoints)
+               {
+                  closestPoints = distance;
+               }
+            }
+         }
+      }
+      LogTools.info("Closest gap between the two: {}", closestPoints);
+
+//      // wiggle away from each other
+//      for (Point2D a : hullOneIn)
+//      {
+//         for (Point2D b : hullTwoIn)
+//         {
+//            double wiggleAmount = 2e-2;
+//            if (a.distance(b) <= wiggleAmount)
+//            {
+//               b.setX(b.getX() + wiggleAmount);
+//               b.setY(b.getY() + wiggleAmount);
+//            }
+//         }
+//      }
+//
+//      closestPoints = Double.POSITIVE_INFINITY;
+//      for (Point2D a : hullOneIn)
+//      {
+//         for (Point2D b : hullTwoIn)
+//         {
+//            if (a != b)
+//            {
+//               double distance = a.distance(b);
+//               if (distance < closestPoints)
+//               {
+//                  closestPoints = distance;
+//               }
+//            }
+//         }
+//      }
+//      LogTools.info("Closest gap between the two after wiggle: {}", closestPoints);
+
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+
+//      ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(hullOneIn));
+//      ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(hullTwoIn));
+//      PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
+//      PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
+
+      ArrayList<Point2D> points = ConcaveHullMerger.mergeConcaveHulls(hullOneIn, hullTwoIn, listener);
+
+//      ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
+      if (VISUALIZE)
+         ThreadTools.sleepForever();
+//      assertTrue(mergedPlanarRegions.isEmpty());
+//
+//      mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
+//      assertTrue(mergedPlanarRegions.isEmpty());
+
    }
 
    @Test
@@ -143,8 +484,6 @@ public class ConcaveHullMergerTest
    @Test
    public void testMergeShapesNotIntersectingThoughBoundingBoxesClearlyIntersect()
    {
-      boolean visualize = false; //true;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -159,10 +498,10 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
       assertTrue(mergedPlanarRegions.isEmpty());
 
@@ -173,8 +512,6 @@ public class ConcaveHullMergerTest
    @Test
    public void testMergeShapesNotIntersectingButBoundingBoxesLookLikeFullyInside()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -189,7 +526,7 @@ public class ConcaveHullMergerTest
       PlanarRegion regionA = new PlanarRegion(new RigidBodyTransform(), polygonA);
       PlanarRegion regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
 
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0, listener);
       assertTrue(mergedPlanarRegions.isEmpty());
@@ -197,15 +534,13 @@ public class ConcaveHullMergerTest
       mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionB, regionA, 1.0);
       assertTrue(mergedPlanarRegions.isEmpty());
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergePlanarRegionsWithDifferentTranslations()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -250,7 +585,7 @@ public class ConcaveHullMergerTest
 
       assertEquals(2, mergedPlanarRegion.getNumberOfConvexPolygons());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(regionA, regionB, mergedPlanarRegion);
          ThreadTools.sleepForever();
@@ -260,8 +595,6 @@ public class ConcaveHullMergerTest
    @Test
    public void testMergePlanarRegionsWithDifferentTransforms()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(1.0, 2.0);
       Point2D pointA1 = new Point2D(1.0, 3.0);
       Point2D pointA2 = new Point2D(2.0, 3.0);
@@ -352,7 +685,7 @@ public class ConcaveHullMergerTest
 
       assertEquals(2, mergedPlanarRegion.getNumberOfConvexPolygons());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(regionA, regionB, mergedPlanarRegion);
          ThreadTools.sleepForever();
@@ -422,8 +755,6 @@ public class ConcaveHullMergerTest
    @Test
    public void testMergeConcaveHullsSmallSquareInsideLargeSquare()
    {
-      boolean visualize = false;
-
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
 
       Point2D pointA0 = new Point2D(0.0, 0.0);
@@ -448,7 +779,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
@@ -460,15 +791,13 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeConcaveHullsInteriorHole()
    {
-      boolean visualize = false;
-
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
 
       Point2D pointA0 = new Point2D(0.0, 0.0);
@@ -501,7 +830,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB6);
       hullBVertices.add(pointB7);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(8, mergedHulls.size());
@@ -517,15 +846,13 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointB0, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.1, 0.0), mergedHulls.get(i++), epsilon);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeExactSame()
    {
-      boolean visualize = false;
-
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
 
       Point2D pointA0 = new Point2D(0.0, 0.0);
@@ -550,7 +877,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
@@ -562,15 +889,13 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeRemoveColinearPoints()
    {
-      boolean visualize = false;
-
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
 
       Point2D pointA0 = new Point2D(0.0, 0.0);
@@ -603,7 +928,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
@@ -615,15 +940,13 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA2, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeRemoveSlivers()
    {
-      boolean visualize = false;
-
       ArrayList<Point2D> hullAVertices = new ArrayList<Point2D>();
 
       Point2D pointA0 = new Point2D(0.0, 0.0);
@@ -656,7 +979,7 @@ public class ConcaveHullMergerTest
       hullBVertices.add(pointB2);
       hullBVertices.add(pointB3);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(hullAVertices, hullBVertices, listener);
 
       assertEquals(4, mergedHulls.size());
@@ -668,15 +991,13 @@ public class ConcaveHullMergerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointS3, mergedHulls.get(i++), epsilon);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(pointA3, mergedHulls.get(i++), epsilon);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeConcaveHullsTroublesomeOne()
    {
-      boolean visualize = false;
-
       double[][] hullOne = new double[][] {{-0.32080844044685364, 0.9086798429489136}, {-0.28522926568984985, 0.9880890846252441},
             {-0.1836146116256714, 1.0075507164001465}, {-0.1378334015607834, 0.9325186014175415}, {-0.12150357663631439, 0.8489445447921753},
             {-0.11247798800468445, 0.7848914265632629}, {-0.10055802017450333, 0.7219595313072205}, {-0.0858231782913208, 0.6531859636306763},
@@ -712,21 +1033,19 @@ public class ConcaveHullMergerTest
             {-0.14178226448362094, -0.32370311833003684}, {-0.140508233857459, -0.2346025872800086}, {-0.17330307409554194, -0.149159839926986},
             {-0.19239786762148312, -0.09986922600319931}, {-0.19854388436229184, -8.514394122500213E-4}, {-0.22962867228965547, 0.05809039869701854}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
-      assertEquals(72, mergedHulls.size());
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
 
+      assertEquals(73, mergedHulls.size());
    }
 
    @Test
    public void testMergeConcaveHullsTroublesomeTwo()
    {
-      boolean visualize = false;
-
       double[][] hullOne = new double[][] {{-2.082104444503784, 0.05125557631254196}, {-1.9877903461456299, 0.05051760375499725},
             {-1.8934645652770996, 0.032866742461919785}, {-1.8063348531723022, 0.017969924956560135}, {-1.8078804016113281, -0.05258311331272125},
             {-1.7552627325057983, -0.1071154922246933}, {-1.7423378229141235, -0.12050453573465347}, {-1.676104187965393, -0.18628227710723877},
@@ -788,20 +1107,18 @@ public class ConcaveHullMergerTest
             {-3.8132915079838856, -0.8608667191971495}, {-3.8043304894665138, -0.8101139758334739}, {-3.7971833266524024, -0.7475298426445478},
             {-3.8155070000929037, -0.6502645615646477}, {-3.8099417680550687, -0.5730421391584346}, {-3.8250805933151035, -0.47766611704632744}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
       assertEquals(164, mergedHulls.size());
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
    }
 
    @Test
    public void testMergeConcaveHullsTroublesomeWhenNearlyIdentical()
    {
-      boolean visualize = false;
-
       double[][] hullOne = new double[][] {{-0.22528910636901855, 0.28605905175209045}, {-0.1752581000328064, 0.2756955623626709},
             {-0.10332929342985153, 0.24632740020751953}, {-0.05382351204752922, 0.28411903977394104}, {-0.010817715898156166, 0.3718038499355316},
             {8.111802744679153E-4, 0.29732465744018555}, {0.060906536877155304, 0.2479160577058792}, {0.03242022916674614, 0.17993474006652832},
@@ -825,21 +1142,19 @@ public class ConcaveHullMergerTest
             {-0.09077119450640433, -0.20683586469025897}, {-0.1425952883834524, -0.17417973247544907}, {-0.17797399591242255, 0.02429222165093927},
             {-0.19742918259614284, 0.08807388647119463}, {-0.19789920767358, 0.2125274007666813}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
-      assertEquals(27, mergedHulls.size());
-
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
+
+      assertEquals(31, mergedHulls.size());
    }
 
    // TODO: Get this test working. It crosses its own path.
    //@Test
    public void testMergeConcaveHullsTroublesomeSkinnyOne()
    {
-      boolean visualize = false;
-
       double[][] hullOne = new double[][] {{0.03324427828192711, -0.06848959624767303}, {0.034265462309122086, -0.0691266655921936},
             {0.03324427828192711, -0.06848959624767303}, {0.03423566743731499, -0.0690872073173523}, {0.03472326323390007, -0.06941226869821548},
             {0.13587459921836853, -0.13251610100269318}, {0.13272781670093536, -0.19862303137779236}, {0.19089597463607788, -0.21636398136615753},
@@ -853,10 +1168,10 @@ public class ConcaveHullMergerTest
             {0.19094724867835142, -0.21627841478840013}, {0.26554344369702665, -0.2941216202077965}, {0.27688862424314487, -0.39126790764752944},
             {0.03329963129665654, -0.06839968113853566}};
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : new EnsureNoLoopsListener());
       ArrayList<Point2D> mergedHulls = ConcaveHullMerger.mergeConcaveHulls(convertToPointArrayList(hullOne), convertToPointArrayList(hullTwo), listener);
 
-      if (visualize)
+      if (VISUALIZE)
          ThreadTools.sleepForever();
       assertEquals(48, mergedHulls.size());
 

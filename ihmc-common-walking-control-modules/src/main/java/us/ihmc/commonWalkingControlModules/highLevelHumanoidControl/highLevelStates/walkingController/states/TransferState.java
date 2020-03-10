@@ -52,8 +52,7 @@ public abstract class TransferState extends WalkingState
    private final DoubleProvider unloadFraction;
    private final DoubleProvider rhoMin;
 
-   public TransferState(WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
-                        WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public TransferState(WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
                         DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
    {
@@ -113,6 +112,9 @@ public abstract class TransferState extends WalkingState
             feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading, rhoMin.getValue());
          }
       }
+
+      if (balanceManager.getNormalizedEllipticICPError() > balanceManager.getEllipticICPErrorForMomentumRecovery())
+         balanceManager.setUseMomentumRecoveryModeForBalance(true);
    }
 
    @Override
@@ -129,12 +131,17 @@ public abstract class TransferState extends WalkingState
       {
          balanceManager.getCapturePoint(capturePoint2d);
          FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-         boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
+         FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
 
-         if (!isICPInsideSupportPolygon)
+         double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
+         boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
+
+         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+            return true;
+         else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
          else
-            return balanceManager.getNormalizedEllipticICPError() < 1.0;
+            balanceManager.setUseMomentumRecoveryModeForBalance(true);
       }
 
       return false;
@@ -228,5 +235,6 @@ public abstract class TransferState extends WalkingState
          feetManager.resetLoadConstraints(transferToSide.getOppositeSide());
       }
       feetManager.reset();
+      balanceManager.setUseMomentumRecoveryModeForBalance(false);
    }
 }

@@ -37,8 +37,30 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double point_cloud_confidence;
-        sequence<float, 600000> point_cloud;
-        sequence<long, 200000> colors;
+        /**
+         * The center location of the bounding box of all the points.
+         * The location of each point in the pointcloud is with respect to this location.
+         */
+        geometry_msgs::msg::dds::Point point_cloud_center;
+        /**
+         * The pointcloud is compressed by using an octree.
+         * This indicates the resolution used for the octree, the octree depth is 16.
+         */
+        double resolution;
+        /**
+         * The number of points in this frame.
+         */
+        long number_of_points;
+        /**
+         * The compressed pointcloud.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         */
+        sequence<octet, 2000000> point_cloud;
+        /**
+         * The compressed colors.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         */
+        sequence<octet, 700000> colors;
       };
     };
   };

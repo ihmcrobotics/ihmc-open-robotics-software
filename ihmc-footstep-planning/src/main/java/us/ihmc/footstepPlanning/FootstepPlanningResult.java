@@ -36,6 +36,11 @@ public enum FootstepPlanningResult
       }
    }
 
+   public boolean terminalResult()
+   {
+      return this != SOLUTION_DOES_NOT_REACH_GOAL;
+   }
+
    public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)
    {
       byte aResult = (byte) MathTools.clamp(resultA.toByte(), OPTIMAL_SOLUTION.toByte(), INVALID_GOAL.toByte());

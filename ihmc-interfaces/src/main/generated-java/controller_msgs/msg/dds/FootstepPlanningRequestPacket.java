@@ -13,14 +13,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = (byte) 0;
-   public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = (byte) 1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = (byte) 0;
    /**
           * The recommended planner type
           */
-   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 2;
-   public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = (byte) 3;
-   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 4;
+   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 2;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -82,6 +80,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Set this id to keep track of your request
             */
    public int planner_request_id_ = -1;
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
 
    public FootstepPlanningRequestPacket()
    {
@@ -90,6 +92,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+      body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
+
    }
 
    public FootstepPlanningRequestPacket(FootstepPlanningRequestPacket other)
@@ -125,6 +129,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       planner_request_id_ = other.planner_request_id_;
 
+      body_path_waypoints_.set(other.body_path_waypoints_);
    }
 
    /**
@@ -323,6 +328,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
 
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
+   {
+      return body_path_waypoints_;
+   }
+
+
    public static Supplier<FootstepPlanningRequestPacketPubSubType> getPubSubType()
    {
       return FootstepPlanningRequestPacketPubSubType::new;
@@ -365,6 +379,13 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
+      if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.body_path_waypoints_.size(); i++)
+         {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -403,6 +424,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
+      if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
 
       return true;
    }
@@ -442,7 +464,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("assume_flat_ground=");
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
-      builder.append(this.planner_request_id_);
+      builder.append(this.planner_request_id_);      builder.append(", ");
+      builder.append("body_path_waypoints=");
+      builder.append(this.body_path_waypoints_);
       builder.append("}");
       return builder.toString();
    }

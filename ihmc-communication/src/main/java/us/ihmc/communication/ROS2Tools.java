@@ -27,6 +27,7 @@ public class ROS2Tools
 {
    public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
    public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
+   public static final ROS2ModuleIdentifier MAPPING_MODULE = new ROS2ModuleIdentifier("mapping_module", "/map");
    public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
    public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
    public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
@@ -38,7 +39,7 @@ public class ROS2Tools
    public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
    public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
 
-   public static final String FOOTSTEP_PLANNER_TOOLBOX = FOOTSTEP_PLANNER.getModuleTopicQualifier();
+   public static final String FOOTSTEP_PLANNER_MODULE = FOOTSTEP_PLANNER.getModuleTopicQualifier();
    public static final String CONTINUOUS_PLANNING_TOOLBOX = "/toolbox/continuous_planning";
    public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX = "/toolbox/footstep_postprocessing";
    public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";

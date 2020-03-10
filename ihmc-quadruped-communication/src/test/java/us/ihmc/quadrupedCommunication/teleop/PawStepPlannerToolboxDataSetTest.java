@@ -1,15 +1,21 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -22,6 +28,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -35,13 +42,14 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerCommunicationProperties;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.DefaultPawStepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
-import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.PawStepPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -51,11 +59,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 
 public abstract class PawStepPlannerToolboxDataSetTest
 {
@@ -110,7 +113,8 @@ public abstract class PawStepPlannerToolboxDataSetTest
          xGaitSettings = getXGaitSettings();
 
       VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
-      visibilityGraphsParameters.setIncludePreferredExtrusions(true);
+      visibilityGraphsParameters.setIncludePreferredExtrusions(false);
+      visibilityGraphsParameters.setObstacleExtrusionDistance(0.6);
 //      visibilityGraphsParameters.setPerformPostProcessingNodeShifting(true);
 //      visibilityGraphsParameters.setComputeOrientationsToAvoidObstacles(true);
 
@@ -120,6 +124,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
       parameters.setYawWeight(2.0);
       parameters.setMaximumStepYawOutward(0.5);
       parameters.setMaximumStepYawInward(-0.5);
+      parameters.setReturnBestEffortPlan(false);
 
       footstepPlanningModule = new PawPlanningModule(robotName, null, visibilityGraphsParameters, parameters, xGaitSettings,
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
@@ -528,7 +533,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
 
       Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
       double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
-      if (goalPosition.distanceXY(centerPoint) > 3.0 * PawNode.gridSizeXY)
+      if (goalPosition.distanceXY(centerPoint) > 4.0 * PawNode.gridSizeXY)
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
       {

@@ -723,6 +723,19 @@ public class YoFunctionGenerator
    {
       this.alphaFilter.set(alpha);
    }
+   
+   /**
+    * Reset the smoothed variables to desired values immediately
+    */
+   public void resetSmoothing()
+   {
+      offsetFiltered.reset();
+      amplitudeFiltered.reset();
+      
+      frequencyFiltered.set(frequency.getValue());
+      phaseFiltered.set(phase.getValue());
+
+   }
 
    public static void main(String[] args)
    {

@@ -30,6 +30,11 @@ public class LinearMomentumRateControlModuleInput
    private double omega0;
 
    /**
+    * Boolean saying whether or not to use the momentum recovery mode. If this is set to yes, a higher momentum rate weight is used.
+    */
+   private boolean useMomentumRecoveryMode;
+
+   /**
     * The desired capture point that the ICP controller should track.
     */
    private final FramePoint2D desiredCapturePoint = new FramePoint2D();
@@ -176,6 +181,16 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
+   }
+
+   public void setUseMomentumRecoveryMode(boolean useMomentumRecoveryMode)
+   {
+      this.useMomentumRecoveryMode = useMomentumRecoveryMode;
+   }
+
+   public boolean getUseMomentumRecoveryMode()
+   {
+      return useMomentumRecoveryMode;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
@@ -401,6 +416,7 @@ public class LinearMomentumRateControlModuleInput
    public void set(LinearMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
+      useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
       perfectCMP.setIncludingFrame(other.perfectCMP);
@@ -448,6 +464,8 @@ public class LinearMomentumRateControlModuleInput
          if (!perfectCoP.equals(other.perfectCoP))
             return false;
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
+            return false;
+         if (useMomentumRecoveryMode ^ other.useMomentumRecoveryMode)
             return false;
          if (Double.compare(desiredCoMHeightAcceleration, other.desiredCoMHeightAcceleration) != 0)
             return false;

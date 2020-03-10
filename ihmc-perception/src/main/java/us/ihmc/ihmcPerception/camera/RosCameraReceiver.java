@@ -3,6 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import java.util.Objects;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -25,11 +26,13 @@ public abstract class RosCameraReceiver
          new Thread(cameraFrame, "IHMC-RosCameraReceiver").start();
 
       }
-      else if(cameraParameters.useStaticTransformFromHeadFrameToSensor())
+      else if (cameraParameters.useStaticTransformFromHeadFrameToSensor())
       {
          Objects.requireNonNull(cameraDataReceiver.getHeadFrame());
          staticTransform.set(cameraParameters.getStaticTransformFromHeadFrameToCameraFrame());
-         ReferenceFrame headFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("headToCamera", cameraDataReceiver.getHeadFrame(), staticTransform);
+         ReferenceFrame headFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("headToCamera",
+                                                                                                      cameraDataReceiver.getHeadFrame(),
+                                                                                                      staticTransform);
          cameraDataReceiver.setCameraFrame(headFrame);
       }
       else
@@ -54,7 +57,8 @@ public abstract class RosCameraReceiver
       createImageSubscriber(robotSide, logger, cameraDataReceiver, imageInfoSubscriber, rosMainNode, cameraParameters);
    }
 
-   protected abstract void createImageSubscriber(RobotSide robotSide, CameraLogger logger, CameraDataReceiver cameraDataReceiver, RosCameraInfoSubscriber imageInfoSubscriber,
-         RosMainNode rosMainNode, AvatarRobotCameraParameters cameraParameters);
+   protected abstract void createImageSubscriber(RobotSide robotSide, CameraLogger logger, CameraDataReceiver cameraDataReceiver,
+                                                 RosCameraInfoSubscriber imageInfoSubscriber, RosMainNode rosMainNode,
+                                                 AvatarRobotCameraParameters cameraParameters);
 
 }

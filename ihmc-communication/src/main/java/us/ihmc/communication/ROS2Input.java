@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.tools.thread.TypedNotification;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
@@ -16,6 +17,7 @@ public class ROS2Input<T>
    private final MessageFilter<T> messageFilter;
    private boolean hasReceivedFirstMessage = false;
    private ROS2Callback<T> ros2Callback;
+   private TypedNotification<T> messageNotification = new TypedNotification<>();
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
@@ -71,6 +73,7 @@ public class ROS2Input<T>
       if (messageFilter.accept(incomingData))
       {
          atomicReference.set(incomingData);
+         messageNotification.add(incomingData);
          hasReceivedFirstMessage = true;
       }
    }
@@ -78,6 +81,11 @@ public class ROS2Input<T>
    public T getLatest()
    {
       return atomicReference.get();
+   }
+
+   public TypedNotification<T> getMessageNotification()
+   {
+      return messageNotification;
    }
 
    public boolean hasReceivedFirstMessage()

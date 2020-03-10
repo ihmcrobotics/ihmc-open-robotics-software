@@ -6,19 +6,14 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
-import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
@@ -30,7 +25,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Tag("humanoid-behaviors")
 public class AtlasPatrolBehaviorTest
@@ -47,7 +41,7 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testPatrolBehavior() throws IOException
    {
-      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);

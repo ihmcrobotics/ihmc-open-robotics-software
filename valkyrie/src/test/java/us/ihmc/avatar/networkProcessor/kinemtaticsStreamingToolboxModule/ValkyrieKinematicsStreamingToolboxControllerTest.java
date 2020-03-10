@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieKinematicsStreamingToolboxControllerTest extends KinematicsStreamingToolboxControllerTest
@@ -20,5 +21,12 @@ public class ValkyrieKinematicsStreamingToolboxControllerTest extends Kinematics
    public void testHandMotionWithCollision()
    {
       super.testHandMotionWithCollision();
+   }
+
+   @Test
+   @Override
+   public void testStreamingToController() throws SimulationExceededMaximumTimeException
+   {
+      super.testStreamingToController();
    }
 }

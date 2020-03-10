@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.StaticFootstepPlanningEnvironment;
@@ -15,10 +14,8 @@ public class AtlasStaticFootstepPlanningDemo
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
 
-      DRCNetworkModuleParameters networkParameters = new DRCNetworkModuleParameters();
-      networkParameters.enableNetworkProcessor(false);
       boolean automaticallySimulate = false;
 
-      simulationStarter.startSimulation(networkParameters, automaticallySimulate);
+      simulationStarter.startSimulation(null, automaticallySimulate);
    }
 }

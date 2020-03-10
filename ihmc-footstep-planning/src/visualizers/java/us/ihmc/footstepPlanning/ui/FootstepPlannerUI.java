@@ -370,6 +370,7 @@ public class FootstepPlannerUI
          robotVisualizer.stop();
    }
 
+
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
       return new FootstepPlannerUI(primaryStage, messager);

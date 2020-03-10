@@ -7,6 +7,24 @@ public enum ValkyrieRobotVersion
    ARM_MASS_SIM,
    ARMLESS;
 
+   public static final String ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME = "IHMC_VALKYRIE_ROBOT_VERSION";
+
+   public static ValkyrieRobotVersion fromEnvironment()
+   {
+      String valueFromEnvironment = System.getenv(ROBOT_VERSION_ENVIRONMENT_VARIABLE_NAME);
+
+      if (valueFromEnvironment == null)
+         return DEFAULT;
+      else if (valueFromEnvironment.trim().toLowerCase().contains(FINGERLESS.name().toLowerCase()))
+         return FINGERLESS;
+      else if (valueFromEnvironment.trim().toLowerCase().contains(ARM_MASS_SIM.name().toLowerCase()))
+         return ARM_MASS_SIM;
+      else if (valueFromEnvironment.trim().toLowerCase().contains(ARMLESS.name().toLowerCase()))
+         return ARMLESS;
+      else
+         return DEFAULT;
+   }
+
    public String getRealRobotSdfFile()
    {
       switch(this)

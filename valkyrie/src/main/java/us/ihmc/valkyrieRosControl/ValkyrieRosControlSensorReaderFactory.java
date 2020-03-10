@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -215,9 +214,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       return true;
    }
 
-   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   public void attachControllerAPI(StatusMessageOutputManager statusOutputManager)
    {
-      sensorReader.attachControllerAPI(commandInputManager, statusOutputManager);
+      sensorReader.attachControllerAPI(statusOutputManager);
    }
 
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)

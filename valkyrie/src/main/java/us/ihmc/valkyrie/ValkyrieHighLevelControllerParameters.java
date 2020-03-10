@@ -74,7 +74,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
-      if (target == RobotTarget.REAL_ROBOT)
+      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
       {
          // Can go up to kp = 30.0, kd = 3.0
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);
@@ -102,7 +102,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalking()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
-      if (target == RobotTarget.REAL_ROBOT)
+      if (target == RobotTarget.REAL_ROBOT || target == RobotTarget.GAZEBO)
       {
          // Can go up to kp = 30.0, kd = 3.0
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.EFFORT, 15.0, 1.5);

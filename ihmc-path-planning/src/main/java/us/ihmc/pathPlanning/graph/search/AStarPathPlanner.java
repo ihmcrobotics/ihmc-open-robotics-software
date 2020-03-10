@@ -86,6 +86,7 @@ public class AStarPathPlanner<N>
          }
          else
          {
+            graph.checkAndSetEdge(nodeToExpand, neighbor, Double.POSITIVE_INFINITY);
             iterationData.getInvalidChildNodes().add(neighbor);
          }
       }

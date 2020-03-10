@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 
 public class TrackingCollisionShape
@@ -28,7 +30,7 @@ public class TrackingCollisionShape
       }
    }
 
-   public boolean contains(Point3D point)
+   public boolean contains(Point3DReadOnly point)
    {
       for (int i = 0; i < geometries.size(); i++)
       {
@@ -49,7 +51,7 @@ public class TrackingCollisionShape
 
       private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape)
       {
-         this.frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("CollissionFrame", frame, shape.getPose());
+         this.frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CollissionFrame", frame, shape.getPose());
          this.shape = shape;
       }
 
@@ -62,7 +64,7 @@ public class TrackingCollisionShape
          transform.invert();
       }
 
-      public boolean contains(Point3D point)
+      public boolean contains(Point3DReadOnly point)
       {
          transform.transform(point, testPoint);
          return shape.contains(testPoint);

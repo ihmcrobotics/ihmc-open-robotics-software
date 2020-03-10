@@ -959,21 +959,7 @@ public class VisibilityGraphsFrameworkTest
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
 
-//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
-//      DataSetName dataSetName = DataSetName._20171218_205120_BodyPathPlannerEnvironment;
-//      DataSetName dataSetName = DataSetName._20191008_153543_TrickCorridor;
-//      DataSetName dataSetName = DataSetName._20171216_111326_CrossoverPlatforms;
-//      DataSetName dataSetName = DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest;
-//      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
-//      DataSetName dataSetName = DataSetName._20171215_220523_SteppingStones;
-//      DataSetName dataSetName = DataSetName._20171218_204917_FlatGround;
-//      DataSetName dataSetName = DataSetName._20171215_201810_RampSteppingStones_Si"
-      DataSetName dataSetName = DataSetName._20171115_171243_SimplePlaneAndWall;
-//      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
-//      DataSetName dataSetName = DataSetName._20001201_205050_TwoSquaresOneObstacle;
-//      DataSetName dataSetName = DataSetName._20171215_210811_DoorwayWithCeiling;
-//      DataSetName dataSetName = DataSetName._20191007_185913_SimpleCorridor;
-//      DataSetName dataSetName = DataSetName._20191007_200400_Corridor1Wall;
+      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
 
       VISUALIZE = true;
       test.setup();

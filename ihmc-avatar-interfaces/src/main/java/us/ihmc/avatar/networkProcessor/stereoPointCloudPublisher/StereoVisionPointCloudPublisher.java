@@ -5,13 +5,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -25,6 +28,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -39,14 +44,14 @@ public class StereoVisionPointCloudPublisher
 
    private static final Class<StereoVisionPointCloudMessage> messageType = StereoVisionPointCloudMessage.class;
 
-   private static final int MAX_NUMBER_OF_POINTS = 1000;
+   private static final int DEFAULT_MAX_NUMBER_OF_POINTS = 2500;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
    private ScheduledFuture<?> publisherTask;
 
-   private final AtomicReference<ColorPointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
+   private final AtomicReference<PointCloudData> rosPointCloud2ToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullRobotModel fullRobotModel;
@@ -60,15 +65,23 @@ public class StereoVisionPointCloudPublisher
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
 
+   private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
+   private RangeScanPointFilter rangeFilter = null;
+   private CollidingScanPointFilter collisionFilter;
+   private final ScanPointFilterList activeFilters = new ScanPointFilterList();
+
    /**
     * units of velocities are meter/sec and rad/sec.
     */
    private long previousTimeStamp = 0;
    private final Point3D previousSensorPosition = new Point3D();
    private final Quaternion previousSensorOrientation = new Quaternion();
-   private final AtomicReference<Boolean> enableFilter = new AtomicReference<Boolean>(false);
+   private final AtomicBoolean enableFilter = new AtomicBoolean(false);
    private final AtomicDouble linearVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
+
+   private long publisherPeriodInMillisecond = 1L;
+   private double minimumResolution = 0.005;
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -92,29 +105,81 @@ public class StereoVisionPointCloudPublisher
       String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageType);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(ros2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
          pointcloudRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                              RobotConfigurationData.class,
+                                              robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = null;
          pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
       }
    }
 
+   public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
+   {
+      this.maximumNumberOfPoints = maximumNumberOfPoints;
+   }
+
+   public void setPublisherPeriodInMillisecond(long publisherPeriodInMillisecond)
+   {
+      this.publisherPeriodInMillisecond = publisherPeriodInMillisecond;
+
+      if (publisherTask != null)
+      {
+         publisherTask.cancel(false);
+         start();
+      }
+   }
+
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, publisherPeriodInMillisecond, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
    {
       publisherTask.cancel(false);
       executorService.shutdownNow();
+   }
+
+   /**
+    * Sets the smallest value in meter for the resolution when compressing the pointcloud data.
+    * <p>
+    * Smaller means more accurate, but also more expensive bandwidth-wise.
+    * </p>
+    * 
+    * @param minimumResolution the value in meter for the minimum resolution, default is 0.005.
+    */
+   public void setMinimumResolution(double minimumResolution)
+   {
+      this.minimumResolution = minimumResolution;
+   }
+
+   public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
+   {
+      if (collisionFilter != null)
+         return;
+      collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
+      activeFilters.addFilter(collisionFilter);
+   }
+
+   public void setRangeFilter(double minRange, double maxRange)
+   {
+      if (rangeFilter == null)
+      {
+         rangeFilter = new RangeScanPointFilter();
+         activeFilters.addFilter(rangeFilter);
+      }
+      rangeFilter.setMinRange(minRange);
+      rangeFilter.setMaxRange(maxRange);
    }
 
    public void receiveStereoPointCloudFromROS1(String stereoPointCloudROSTopic, URI rosCoreURI)
@@ -146,7 +211,7 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            rosPointCloud2ToPublish.set(new ColorPointCloudData(pointCloud, MAX_NUMBER_OF_POINTS));
+            rosPointCloud2ToPublish.set(new PointCloudData(pointCloud, maximumNumberOfPoints, true));
 
             if (Debug)
                System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
@@ -154,7 +219,7 @@ public class StereoVisionPointCloudPublisher
       };
    }
 
-   public void updateScanData(ColorPointCloudData scanDataToPublish)
+   public void updateScanData(PointCloudData scanDataToPublish)
    {
       this.rosPointCloud2ToPublish.set(scanDataToPublish);
    }
@@ -185,7 +250,7 @@ public class StereoVisionPointCloudPublisher
 
    private void transformDataAndPublish()
    {
-      ColorPointCloudData pointCloudData = rosPointCloud2ToPublish.getAndSet(null);
+      PointCloudData pointCloudData = rosPointCloud2ToPublish.getAndSet(null);
 
       if (pointCloudData == null)
          return;
@@ -242,12 +307,25 @@ public class StereoVisionPointCloudPublisher
             return;
       }
 
-      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
+      if (collisionFilter != null)
+         collisionFilter.update();
+      if (rangeFilter != null)
+         rangeFilter.setSensorPosition(sensorPose.getPosition());
+
+      long startTime = System.nanoTime();
+      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(minimumResolution, activeFilters);
+
+      if (message == null)
+         return; // TODO Sometimes the LZ4 compression fails. Need to figure it out, for now just giving up.
+
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
+      long endTime = System.nanoTime();
 
       if (Debug)
-         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
+         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3) + ", packet size in kilobytes: "
+               + (StereoVisionPointCloudMessagePubSubType.getCdrSerializedSize(message) / 1000) + ", compression time in milliseconds: "
+               + Conversions.nanosecondsToMilliseconds(endTime - startTime));
       if (pointcloudPublisher != null)
          pointcloudPublisher.publish(message);
       else
