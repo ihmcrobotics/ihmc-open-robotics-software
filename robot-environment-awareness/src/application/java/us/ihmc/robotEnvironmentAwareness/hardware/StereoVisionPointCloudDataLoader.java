@@ -61,7 +61,8 @@ public class StereoVisionPointCloudDataLoader
       }
 
       long timestamp = System.nanoTime();
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorBuffer, lineIndex, null);
+      double minimumResolution = 0.001;
+      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorBuffer, lineIndex, minimumResolution, null);
       return message;
    }
 

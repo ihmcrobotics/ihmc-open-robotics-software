@@ -120,7 +120,8 @@ public class DataImporterAnchorPaneController
          colorsInteger[i] = DEFAULT_STEREO_POINT_COLOR;
       }
 
-      StereoVisionPointCloudMessage dummyMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorsInteger, numberOfPoints, null);
+      double minimumResolution = 0.001;
+      StereoVisionPointCloudMessage dummyMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorsInteger, numberOfPoints, minimumResolution, null);
       reaMessager.submitMessageToModule(REAModuleAPI.StereoVisionPointCloudState, dummyMessage);
 
       if (messager != null)
