@@ -26,13 +26,10 @@ import java.awt.*;
 public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 {
    private final OnlineLine2DLinearRegression lineCalculator;
-   private final FrameLine2D lineOfRotationInWorld = new FrameLine2D();
    private final YoFrameLine2D lineOfRotationInSole;
 
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
-
-   private final FramePoint2D tempPoint = new FramePoint2D();
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -67,12 +64,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      tempPoint.setIncludingFrame(measuredCoP);
-      tempPoint.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-      lineCalculator.update(tempPoint);
-      lineOfRotationInWorld.setIncludingFrame(ReferenceFrame.getWorldFrame(), lineCalculator.getMeanLine());
-      lineOfRotationInWorld.changeFrameAndProjectToXYPlane(lineOfRotationInSole.getReferenceFrame());
-      lineOfRotationInSole.set(lineOfRotationInWorld);
+      lineCalculator.update(measuredCoP);
+      lineOfRotationInSole.set(lineCalculator.getMeanLine());
 
       stabilityEvaluator.update();
 
