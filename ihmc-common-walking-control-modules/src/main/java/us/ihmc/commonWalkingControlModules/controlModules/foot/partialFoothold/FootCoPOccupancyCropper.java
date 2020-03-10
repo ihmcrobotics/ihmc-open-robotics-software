@@ -16,6 +16,8 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -26,21 +28,14 @@ public class FootCoPOccupancyCropper
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 1.0;
 
-   private final YoInteger nLengthSubdivisions;
-   private final YoInteger nWidthSubdivisions;
-
    private final ReferenceFrame soleFrame;
 
-   private final double footLength;
-   private final double footWidth;
-
    private final SideDependentList<YoInteger> numberOfOccupiedCells;
-   private final YoInteger thresholdForCoPRegionOccupancy;
-   private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
+   private final IntegerProvider thresholdForCoPRegionOccupancy;
+   private final DoubleProvider distanceFromLineOfRotationToComputeCoPOccupancy;
 
    private final OccupancyGrid occupancyGrid;
    private final OccupancyGridVisualizer visualizer;
-
 
    private final FrameLine2D shiftedLine = new FrameLine2D();
    private final FrameVector2D shiftingVector = new FrameVector2D();
@@ -48,25 +43,23 @@ public class FootCoPOccupancyCropper
 
    private final YoEnum<RobotSide> sideOfFootToCrop;
 
-   public FootCoPOccupancyCropper(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
-                                  WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyCropper(String namePrefix,
+                                  ReferenceFrame soleFrame,
+                                  double lengthResolution,
+                                  double widthResoultion,
+                                  ExplorationParameters explorationParameters,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
    {
-      this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
-      this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
       this.soleFrame = soleFrame;
-
 
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
       this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
 
-      this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
-      this.nLengthSubdivisions.set(nLengthSubdivisions);
-      this.nWidthSubdivisions = new YoInteger(namePrefix + "NWidthSubdivisions", registry);
-      this.nWidthSubdivisions.set(nWidthSubdivisions);
-
+      occupancyGrid.setCellXSize(lengthResolution);
+      occupancyGrid.setCellYSize(widthResoultion);
       occupancyGrid.setThresholdForCellOccupancy(defaultThresholdForCellActivation);
       occupancyGrid.setOccupancyDecayRate(defaultDecayRate);
 
@@ -78,25 +71,12 @@ public class FootCoPOccupancyCropper
 
       numberOfOccupiedCells = new SideDependentList<>(numberOfCellsOccupiedOnLeftSideOfLine, numberOfCellsOccupiedOnRightSideOfLine);
 
-      setupChangedGridParameterListeners();
-
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 100, 100, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
       else
          visualizer = null;
 
       parentRegistry.addChild(registry);
-   }
-
-   private void setupChangedGridParameterListeners()
-   {
-      VariableChangedListener changedGridSizeListener = (v) -> {
-         occupancyGrid.setCellXSize(footLength / nLengthSubdivisions.getIntegerValue());
-         occupancyGrid.setCellYSize(footWidth / nWidthSubdivisions.getIntegerValue());
-      };
-      nLengthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      nWidthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      changedGridSizeListener.notifyOfVariableChange(null);
    }
 
    public void registerCenterOfPressureLocation(FramePoint2DReadOnly copToRegister)
@@ -110,12 +90,12 @@ public class FootCoPOccupancyCropper
       {
          numberOfOccupiedCells.get(robotSide)
                               .set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
-                                                                                                 robotSide,
-                                                                                                 distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+                                                                            robotSide,
+                                                                            distanceFromLineOfRotationToComputeCoPOccupancy.getValue()));
       }
 
-      boolean leftOccupied = numberOfOccupiedCells.get(RobotSide.LEFT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
-      boolean rightOccupied = numberOfOccupiedCells.get(RobotSide.RIGHT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      boolean leftOccupied = numberOfOccupiedCells.get(RobotSide.LEFT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue();
+      boolean rightOccupied = numberOfOccupiedCells.get(RobotSide.RIGHT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue();
 
       if (leftOccupied && rightOccupied)
          throw new RuntimeException("Error: both can't be occupied.");
