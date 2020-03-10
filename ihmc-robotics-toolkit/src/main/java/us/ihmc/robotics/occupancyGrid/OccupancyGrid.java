@@ -92,6 +92,11 @@ public class OccupancyGrid
       return cellYSize.getDoubleValue();
    }
 
+   public List<OccupancyGridCell> getAllActiveCells()
+   {
+      return allActiveCells;
+   }
+
    public ReferenceFrame getGridFrame()
    {
       return gridFrame;
