@@ -47,7 +47,7 @@ public class FootCoPOccupancyCropper
                                   ReferenceFrame soleFrame,
                                   double lengthResolution,
                                   double widthResoultion,
-                                  ExplorationParameters explorationParameters,
+                                  FootholdRotationParameters explorationParameters,
                                   YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoVariableRegistry parentRegistry)
    {

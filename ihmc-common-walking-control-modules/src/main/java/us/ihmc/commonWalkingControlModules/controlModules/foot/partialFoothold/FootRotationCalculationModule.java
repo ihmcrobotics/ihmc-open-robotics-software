@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,28 +30,41 @@ public class FootRotationCalculationModule
    private final YoEnum<RotationDetectorType> rotationDetectorType;
    private final EnumMap<EdgeCalculatorType, RotationEdgeCalculator> edgeCalculators = new EnumMap<>(EdgeCalculatorType.class);
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
+   private final CroppedFootholdCalculator croppedFootholdCalculator;
 
    private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
    private final YoBoolean isRotating;
 
-   public FootRotationCalculationModule(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
-                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
+   public FootRotationCalculationModule(RobotSide side,
+                                        MovingReferenceFrame soleFrame,
+                                        ContactableFoot contactableFoot,
+                                        FootholdRotationParameters rotationParameters,
+                                        double dt,
+                                        YoVariableRegistry parentRegistry,
+                                        YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
-      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
-                                                                                         graphicsRegistry);
-      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
+      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
+      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
+                                                                                             soleFrame,
+                                                                                             rotationParameters,
+                                                                                             dt,
+                                                                                             registry,
                                                                                              graphicsRegistry);
-      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry,
-                                                                                           graphicsRegistry);
-      RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, copHistoryEdgeCalculator,
-                                                                                                     velocityEdgeCalculator, rotationParameters, dt,
-                                                                                                     registry, graphicsRegistry);
+      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
+      RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side,
+                                                                                                     soleFrame,
+                                                                                                     copHistoryEdgeCalculator,
+                                                                                                     velocityEdgeCalculator,
+                                                                                                     rotationParameters,
+                                                                                                     dt,
+                                                                                                     registry,
+                                                                                                     graphicsRegistry);
       edgeCalculators.put(EdgeCalculatorType.VELOCITY, velocityEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.COP_HISTORY, copHistoryEdgeCalculator);
       edgeCalculators.put(EdgeCalculatorType.GEOMETRIC, geometricEdgeCalculator);
@@ -69,15 +83,24 @@ public class FootRotationCalculationModule
       rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
       edgeCalculatorType.set(EdgeCalculatorType.VELOCITY_AND_COP);
 
+      croppedFootholdCalculator = new CroppedFootholdCalculator(side.getLowerCaseName(),
+                                                                contactableFoot,
+                                                                rotationParameters,
+                                                                registry,
+                                                                graphicsRegistry);
+
       reset();
    }
 
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
       isRotating.set(computeIsRotating());
+      croppedFootholdCalculator.update(measuredCoP);
+
       if (!isRotating.getBooleanValue())
       {
          resetEdgeCalculators();
+         return;
       }
 
       RotationEdgeCalculator edgeCalculator = edgeCalculators.get(edgeCalculatorType.getEnumValue());
@@ -85,7 +108,7 @@ public class FootRotationCalculationModule
       if (!edgeCalculator.isRotationEdgeTrusted())
          return;
 
-
+      croppedFootholdCalculator.computeShrunkenFoothold(edgeCalculator.getLineOfRotation());
    }
 
    private boolean computeIsRotating()
