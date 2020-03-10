@@ -34,10 +34,6 @@ public class FootstepPlannerParametersTest
       parameters.setCheckForPathCollisions(checkForPathCollisions);
       assertEquals(checkForPathCollisions, parameters.checkForPathCollisions());
 
-      boolean performheuristicSearchPolicies = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setPerformHeuristicSearchPolicies(performheuristicSearchPolicies);
-      assertEquals(performheuristicSearchPolicies, parameters.performHeuristicSearchPolicies());
-
       double idealFootstepWidth = RandomNumbers.nextDouble(random, 10.0);
       parameters.setIdealFootstepWidth(idealFootstepWidth);
       assertEquals(idealFootstepWidth, parameters.getIdealFootstepWidth(), epsilon);
