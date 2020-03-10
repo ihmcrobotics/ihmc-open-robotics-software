@@ -663,7 +663,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		scs.cropBuffer();
 		scs.gotoInPointNow();
 
-		String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
+		String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeStringWithSeconds();
 		String tagName = timeStamp + "_" + robot.getName() + "_" + dataNameSuffix;
 
 		File dataFolder = new File(dataParentFolder, tagName);
