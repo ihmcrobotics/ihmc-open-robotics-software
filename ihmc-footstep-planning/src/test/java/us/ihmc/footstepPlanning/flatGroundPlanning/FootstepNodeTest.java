@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
@@ -69,5 +70,33 @@ public class FootstepNodeTest
 
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
+   }
+
+   @Test
+   public void testFootstepNode()
+   {
+      double gridX = LatticeNode.gridSizeXY;
+      double gridY = LatticeNode.gridSizeXY;
+      FootstepNode node;
+
+      node = new FootstepNode(gridX * 0.3, 0.0);
+      assertEquals(0.0, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+      int hash1 = node.hashCode();
+
+      node = new FootstepNode(gridX * 0.1, -gridY * 0.2);
+      assertEquals(0.0, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+      int hash2 = node.hashCode();
+
+      assertEquals(hash1, hash2);
+
+      node = new FootstepNode(gridX * 0.8, 0.0);
+      assertEquals(gridX, node.getX(), 1.0e-10);
+      assertEquals(0.0, node.getY(), 1.0e-10);
+
+      node = new FootstepNode(gridX * 3.8, -gridY * 8.1);
+      assertEquals(4.0 * gridX, node.getX(), 1.0e-10);
+      assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
    }
 }

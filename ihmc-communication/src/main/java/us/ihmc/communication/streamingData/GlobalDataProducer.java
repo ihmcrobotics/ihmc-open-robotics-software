@@ -48,9 +48,9 @@ public class GlobalDataProducer
       queueDataToSend(packet);
    }
 
-   public void notifyControllerCrash(ControllerCrashLocation location, String stackTrace)
+   public void notifyControllerCrash(ControllerCrashLocation location, Throwable exception)
    {
-      queueDataToSend(MessageTools.createControllerCrashNotificationPacket(location, stackTrace));
+      queueDataToSend(MessageTools.createControllerCrashNotificationPacket(location, exception));
    }
 
    public void stop()

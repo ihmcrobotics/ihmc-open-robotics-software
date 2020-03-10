@@ -45,6 +45,11 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -64,8 +69,15 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStacktrace().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExceptionType().length() + 1;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getErrorMessage().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getStacktrace().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStacktrace().get(i0).length() + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -76,8 +88,16 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
 
       cdr.write_type_9(data.getControllerCrashLocation());
 
-      if(data.getStacktrace().length() <= 255)
-      cdr.write_type_d(data.getStacktrace());else
+      if(data.getExceptionType().length() <= 255)
+      cdr.write_type_d(data.getExceptionType());else
+          throw new RuntimeException("exception_type field exceeds the maximum length");
+
+      if(data.getErrorMessage().length() <= 255)
+      cdr.write_type_d(data.getErrorMessage());else
+          throw new RuntimeException("error_message field exceeds the maximum length");
+
+      if(data.getStacktrace().size() <= 50)
+      cdr.write_type_e(data.getStacktrace());else
           throw new RuntimeException("stacktrace field exceeds the maximum length");
 
    }
@@ -88,7 +108,9 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
       	
       data.setControllerCrashLocation(cdr.read_type_9());
       	
-      cdr.read_type_d(data.getStacktrace());	
+      cdr.read_type_d(data.getExceptionType());	
+      cdr.read_type_d(data.getErrorMessage());	
+      cdr.read_type_e(data.getStacktrace());	
 
    }
 
@@ -97,7 +119,9 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("controller_crash_location", data.getControllerCrashLocation());
-      ser.write_type_d("stacktrace", data.getStacktrace());
+      ser.write_type_d("exception_type", data.getExceptionType());
+      ser.write_type_d("error_message", data.getErrorMessage());
+      ser.write_type_e("stacktrace", data.getStacktrace());
    }
 
    @Override
@@ -105,7 +129,9 @@ public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubs
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setControllerCrashLocation(ser.read_type_9("controller_crash_location"));
-      ser.read_type_d("stacktrace", data.getStacktrace());
+      ser.read_type_d("exception_type", data.getExceptionType());
+      ser.read_type_d("error_message", data.getErrorMessage());
+      ser.read_type_e("stacktrace", data.getStacktrace());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ControllerCrashNotificationPacket src, controller_msgs.msg.dds.ControllerCrashNotificationPacket dest)

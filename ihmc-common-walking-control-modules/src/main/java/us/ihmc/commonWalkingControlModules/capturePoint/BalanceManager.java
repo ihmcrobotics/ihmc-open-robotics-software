@@ -91,6 +91,8 @@ public class BalanceManager
 
    private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
+   private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
+
    private final YoDouble yoTime;
 
    private final ReferenceFrame centerOfMassFrame;
@@ -124,6 +126,9 @@ public class BalanceManager
    private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
    private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
    private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
+
+   private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
+   private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -252,6 +257,11 @@ public class BalanceManager
       yoPerfectCoP.setToNaN();
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setUseMomentumRecoveryModeForBalance(boolean useMomentumRecoveryModeForBalance)
+   {
+      this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
@@ -402,7 +412,7 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -420,6 +430,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
+      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
@@ -671,6 +682,16 @@ public class BalanceManager
    public double getNormalizedEllipticICPError()
    {
       return normalizedICPError.getValue();
+   }
+
+   public double getEllipticICPErrorForMomentumRecovery()
+   {
+      return ellipticICPErrorForMomentumRecovery.getValue();
+   }
+
+   public double getICPDistanceOutsideSupportForStep()
+   {
+      return icpDistanceOutsideSupportForStep.getValue();
    }
 
    public double getICPErrorMagnitude()

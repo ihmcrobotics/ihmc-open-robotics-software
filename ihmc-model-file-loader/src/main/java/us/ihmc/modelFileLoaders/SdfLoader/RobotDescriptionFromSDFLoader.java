@@ -66,6 +66,7 @@ public class RobotDescriptionFromSDFLoader
    private LinkedHashMap<String, JointDescription> jointDescriptions = new LinkedHashMap<>();
 
    private boolean useShapeCollision = false;
+   private ClassLoader resourceClassLoader;
 
    public RobotDescriptionFromSDFLoader()
    {
@@ -95,6 +96,7 @@ public class RobotDescriptionFromSDFLoader
                                                        ContactPointDefinitionHolder contactPointHolder, boolean useCollisionMeshes, double transparency)
    {
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
+      this.resourceClassLoader = generalizedSDFRobotModel.getResourceClassLoader();
 
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, transparency);
 
@@ -228,7 +230,7 @@ public class RobotDescriptionFromSDFLoader
 
          try
          {
-            linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+            linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, resourceClassLoader, rotationTransform);
          }
          catch (Throwable e)
          {

@@ -84,8 +84,6 @@ module controller_msgs
         double weight_for_inter_region_edge;
         @defaultValue(value=-11.1)
         double weight_for_non_preferred_edge;
-        @defaultValue(value=-11.1)
-        double cost_for_non_preferred_node;
         boolean return_best_effort_solution;
       };
     };

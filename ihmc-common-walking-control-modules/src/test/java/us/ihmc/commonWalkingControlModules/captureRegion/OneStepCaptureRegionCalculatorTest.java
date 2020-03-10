@@ -12,8 +12,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -341,7 +339,7 @@ public class OneStepCaptureRegionCalculatorTest
       for (FramePoint2D cop : listOfPoints)
       {
          FramePoint2D predictedICP = new FramePoint2D();
-         CapturePointTools.computeCapturePointPosition(omega0, swingTimeRemaining, icp, cop, predictedICP);
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, icp, cop, predictedICP);
          //         CaptureRegionMathTools.predictCapturePoint(icp, cop, swingTimeRemaining, omega0, predictedICP);
          predictedICPList.add(predictedICP);
       }

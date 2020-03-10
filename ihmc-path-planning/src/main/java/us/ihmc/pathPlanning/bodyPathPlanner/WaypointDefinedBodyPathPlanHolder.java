@@ -1,7 +1,9 @@
 package us.ihmc.pathPlanning.bodyPathPlanner;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -10,13 +12,16 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
 {
    private double[] maxAlphas;
    private double[] segmentLengths;
+   private double[] segmentYaws;
    private final BodyPathPlan bodyPathPlan = new BodyPathPlan();
+   private final List<Line2D> segmentLines = new ArrayList<>();
 
    @Override
    public void setWaypoints(List<? extends Point3DReadOnly> waypointPositions, List<MutableDouble> waypointHeadings)
@@ -27,6 +32,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
          throw new RuntimeException("The number of waypoint positions and waypoint headings must be equal.");
 
       bodyPathPlan.clear();
+      segmentLines.clear();
 
       for (int i = 0; i < waypointPositions.size(); i++)
       {
@@ -37,6 +43,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       }
       this.maxAlphas = new double[waypointPositions.size() - 1];
       this.segmentLengths = new double[waypointPositions.size() - 1];
+      this.segmentYaws = new double[waypointPositions.size() - 1];
 
       double totalPathLength = 0.0;
 
@@ -46,6 +53,9 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
          Point3DReadOnly segmentEnd = waypointPositions.get(i + 1);
          segmentLengths[i] = segmentEnd.distanceXY(segmentStart);
          totalPathLength = totalPathLength + segmentLengths[i];
+
+         segmentYaws[i] = Math.atan2(segmentEnd.getY() - segmentStart.getY(), segmentEnd.getX() - segmentStart.getX());
+         segmentLines.add(new Line2D(segmentStart.getX(), segmentStart.getY(), segmentEnd.getX() - segmentStart.getX(), segmentEnd.getY() - segmentStart.getY()));
       }
 
       for (int i = 0; i < segmentLengths.length; i++)
@@ -72,7 +82,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
    @Override
    public void getPointAlongPath(double alpha, Pose3DBasics poseToPack)
    {
-      int segmentIndex = getRegionIndexFromAlpha(alpha);
+      int segmentIndex = getSegmentIndexFromAlpha(alpha);
       Pose3DReadOnly firstPoint = bodyPathPlan.getWaypoint(segmentIndex);
       Pose3DReadOnly secondPoint = bodyPathPlan.getWaypoint(segmentIndex + 1);
 
@@ -116,7 +126,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
    @Override
    public double computePathLength(double alpha)
    {
-      int segmentIndex = getRegionIndexFromAlpha(alpha);
+      int segmentIndex = getSegmentIndexFromAlpha(alpha);
       double alphaInSegment = getPercentInSegment(segmentIndex, alpha);
 
       double segmentLength = (1.0 - alphaInSegment) * segmentLengths[segmentIndex];
@@ -136,7 +146,7 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       return (alpha - alphaSegmentStart) / (alphaSegmentEnd - alphaSegmentStart);
    }
 
-   private int getRegionIndexFromAlpha(double alpha)
+   public int getSegmentIndexFromAlpha(double alpha)
    {
       if (alpha > maxAlphas[maxAlphas.length - 1])
       {
@@ -152,5 +162,25 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
       }
 
       throw new RuntimeException("Alpha = " + alpha + "\nalpha must be between [0,1] and maxAlphas highest value must be 1.0.");
+   }
+
+   public double getMaxAlphaFromSegmentIndex(int index)
+   {
+      return maxAlphas[index];
+   }
+
+   public BodyPathPlan getBodyPathPlan()
+   {
+      return bodyPathPlan;
+   }
+
+   public double getSegmentYaw(int segmentIndex)
+   {
+      return segmentYaws[segmentIndex];
+   }
+
+   public Line2DReadOnly getSegmentLine(int segmentIndex)
+   {
+      return segmentLines.get(segmentIndex);
    }
 }

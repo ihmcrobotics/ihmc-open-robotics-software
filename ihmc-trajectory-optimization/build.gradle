@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.19.7"
+   id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools") version "0.3.1"
@@ -17,7 +17,7 @@ mainDependencies {
    api("org.ejml:dense64:0.30")
    api("org.ejml:core:0.30")
 
-   api("us.ihmc:euclid:0.12.1")
+   api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-commons:0.26.6")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }

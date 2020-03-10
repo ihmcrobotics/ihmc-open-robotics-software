@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -63,9 +63,9 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
    @Test
    public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableBehaviorModule(true);
-      networkModuleParameters.enableFootstepPlanningToolbox(true);
+      HumanoidNetworkProcessorParameters networkModuleParameters = new HumanoidNetworkProcessorParameters();
+      networkModuleParameters.setUseBehaviorModule(true);
+      networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
       simulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
 
       simulationTestHelper.createSimulation(getClass().getSimpleName(), !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(), true);

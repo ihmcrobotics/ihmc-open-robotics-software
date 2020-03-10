@@ -42,6 +42,8 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -69,6 +71,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -94,6 +99,8 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_11(data.getTimestamp());
+
       cdr.write_type_7(data.getStreamToController());
 
       cdr.write_type_6(data.getStreamInitialBlendDuration());
@@ -112,6 +119,8 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      data.setTimestamp(cdr.read_type_11());
+      	
       data.setStreamToController(cdr.read_type_7());
       	
       data.setStreamInitialBlendDuration(cdr.read_type_6());
@@ -128,6 +137,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    public final void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_7("stream_to_controller", data.getStreamToController());
       ser.write_type_6("stream_initial_blend_duration", data.getStreamInitialBlendDuration());
       ser.write_type_6("angular_rate_limitation", data.getAngularRateLimitation());
@@ -139,6 +149,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setTimestamp(ser.read_type_11("timestamp"));
       data.setStreamToController(ser.read_type_7("stream_to_controller"));
       data.setStreamInitialBlendDuration(ser.read_type_6("stream_initial_blend_duration"));
       data.setAngularRateLimitation(ser.read_type_6("angular_rate_limitation"));

@@ -32,9 +32,10 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -70,11 +71,11 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -126,6 +127,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+@Disabled
 public class BipedContinuousPlanningToolboxDataSetTest
 {
    private static final double defaultNominalWidth = 0.3;
@@ -159,7 +161,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
-   private MultiStageFootstepPlanningModule footstepPlanningModule = null;
+   private FootstepPlanningModule footstepPlanningModule = null;
    private VisibilityGraphsParametersBasics visibilityGraphsParameters = null;
    private FootstepPlannerParametersBasics footstepPlannerParameters = null;
    private BipedContinuousPlanningToolboxModule continuousPlanningModule = null;
@@ -228,7 +230,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          footstepPlannerParameters = getTestFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
-      footstepPlanningModule = new MultiStageFootstepPlanningModule(robotModel, null, true, pubSubImplementation);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
 
       YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
@@ -282,7 +284,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    public void tearDown() throws Exception
    {
       messager.closeMessager();
-      footstepPlanningModule.destroy();
+      footstepPlanningModule.closeAndDispose();
       continuousPlanningModule.destroy();
       if (ui != null)
          ui.stop();
@@ -336,6 +338,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       }
    }
 
+   @Disabled
    @Test
    public void testFewDataSets()
    {
@@ -352,6 +355,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
+   @Disabled
    @Test
    @Tag("avatar-interfaces-slow")
    public void testAllDataSets()

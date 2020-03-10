@@ -650,7 +650,7 @@ public class PlannerTestEnvironments
       generator.rotate(Math.toRadians(-90.0), Axis.Y);
       generator.translate(0.0, 1.5, -1.0);
 
-      // opposize end wall
+      // opposite end wall
       generator.translate(10.0, -1.5, 1.0);
       generator.rotate(Math.toRadians(-90.0), Axis.Y);
       generator.addRectangle(2.0, 6.0);
@@ -658,6 +658,208 @@ public class PlannerTestEnvironments
       generator.translate(-10.0, 0.0, -1.0);
 
       generator.translate(3.0, 1.5, 0.0);
+   }
+
+   public static PlanarRegionsList getTrickCorridorWidened()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double squareSize = 2.3;
+      double halfSquareSize = squareSize / 2.0;
+      double courseWidth = 3.0 * squareSize;
+      double halfCourseWidth = courseWidth / 2.0;
+      double courseHeight = 4.0 * squareSize;
+      double halfCourseHeight = courseHeight / 2.0;
+      double wallHeight = 2.0;
+
+      // draw from center
+      offset(generator, halfCourseHeight - (1.2 * squareSize), halfCourseWidth - (2.0 * squareSize), () ->
+      {
+         // floor
+         generator.addRectangle(courseHeight, courseWidth); // referenced from center
+
+         // left wall
+         offset(generator, -halfCourseHeight, halfCourseWidth, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(courseHeight, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+         });
+
+         // right wall
+         offset(generator, halfCourseHeight, -halfCourseWidth, () ->
+         {
+            generator.rotate(Math.toRadians(180.0), Axis.Z);
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(courseHeight, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+            generator.rotate(Math.toRadians(-180.0), Axis.Z);
+         });
+
+         // near wall
+         offset(generator, -halfCourseHeight, 0.0, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+            generator.addRectangle(wallHeight, courseWidth);
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+         });
+
+         // far wall
+         offset(generator, halfCourseHeight, 0.0, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+            generator.addRectangle(wallHeight, courseWidth);
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+         });
+
+         // inner right wall 1
+         offset(generator, 1.0 * squareSize, -(0.5* squareSize), () ->
+         {
+            generator.rotate(Math.toRadians(180.0), Axis.Z);
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(2.0 * squareSize, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+            generator.rotate(Math.toRadians(-180.0), Axis.Z);
+         });
+
+         // inner far wall 1
+         offset(generator, -0.0 * squareSize, 1.0 * squareSize, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+            generator.addRectangle(wallHeight, squareSize);
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+         });
+
+         // inner far wall 2
+         offset(generator, 1.0 * squareSize, 0.5 * squareSize, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+            generator.addRectangle(wallHeight, 2.0 * squareSize);
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+         });
+      });
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static double MAZE_CORRIDOR_SQUARE_SIZE = 2.3;
+
+   public static PlanarRegionsList getMazeCorridor()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double squareSize = MAZE_CORRIDOR_SQUARE_SIZE;
+      double halfSquareSize = squareSize / 2.0;
+      double courseWidth = 4.0 * squareSize;
+      double halfCourseWidth = courseWidth / 2.0;
+      double courseHeight = 5.0 * squareSize;
+      double halfCourseHeight = courseHeight / 2.0;
+      double wallHeight = 2.0;
+
+      // draw from center
+      offset(generator, halfCourseHeight - halfSquareSize, halfCourseWidth - halfSquareSize, () ->
+      {
+         // floor
+         generator.addRectangle(courseHeight, courseWidth); // referenced from center
+
+         // left wall
+         offset(generator, -halfCourseHeight, halfCourseWidth, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(courseHeight, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+         });
+
+         // right wall
+         offset(generator, halfCourseHeight, -halfCourseWidth, () ->
+         {
+            generator.rotate(Math.toRadians(180.0), Axis.Z);
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(courseHeight, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+            generator.rotate(Math.toRadians(-180.0), Axis.Z);
+         });
+
+         // near wall
+         offset(generator, -halfCourseHeight, 0.0, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+            generator.addRectangle(wallHeight, courseWidth);
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+         });
+
+         // far wall
+         offset(generator, halfCourseHeight, 0.0, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+            generator.addRectangle(wallHeight, courseWidth);
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+         });
+
+         // inner left wall 1
+         offset(generator, -1.5 * squareSize, 1.0 * squareSize, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(3.0 * squareSize, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+         });
+
+         // inner left wall 2
+         offset(generator, 0.5 * squareSize, 0.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(2.0 * squareSize, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+         });
+
+         // inner right wall 1
+         offset(generator, 2.5 * squareSize, -squareSize, () ->
+         {
+            generator.rotate(Math.toRadians(180.0), Axis.Z);
+            generator.rotate(Math.toRadians(90.0), Axis.X);
+            generator.addRectangleReferencedAtNegativeXYCorner(3.0 * squareSize, wallHeight);
+            generator.rotate(Math.toRadians(-90.0), Axis.X);
+            generator.rotate(Math.toRadians(-180.0), Axis.Z);
+         });
+
+         // inner near wall 1
+         offset(generator, -0.5 * squareSize, 0.0, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+            generator.addRectangle(wallHeight, 2.0 * squareSize);
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+         });
+
+         // inner near wall 2
+         offset(generator, -1.5 * squareSize, 0.5 * squareSize, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+            generator.addRectangle(wallHeight, squareSize);
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+         });
+
+         // inner near wall 3
+         offset(generator, -1.5 * squareSize, -1.5 * squareSize, wallHeight / 2.0, () ->
+         {
+            generator.rotate(Math.toRadians(90.0), Axis.Y);
+            generator.addRectangle(wallHeight, squareSize);
+            generator.rotate(Math.toRadians(-90.0), Axis.Y);
+         });
+      });
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static void offset(PlanarRegionsListGenerator generator, double x, double y, Runnable runnable)
+   {
+      offset(generator, x, y, 0.0, runnable);
+   }
+
+   private static void offset(PlanarRegionsListGenerator generator, double x, double y, double z, Runnable runnable)
+   {
+      generator.translate(x, y, z);
+      runnable.run();
+      generator.translate(-x, -y, -z);
    }
 
    public static PlanarRegionsList getSimplePlatform()

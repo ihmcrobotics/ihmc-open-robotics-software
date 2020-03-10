@@ -17,11 +17,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -39,14 +36,14 @@ public class VisibilityGraphRandomTools
 
       List<Point3D> rawPointsInLocalExpected = new ArrayList<>();
       List<Point2D> navigableExtrusionsInLocalExpected = new ArrayList<>();
-      List<Point2D> nonNavigableExtrusionsInLocalExpected = new ArrayList<>();
+      ExtrusionHull nonNavigableExtrusionsInLocalExpected = new ExtrusionHull();
 
       for (int i = 0; i < numberOfRawPoints; i++)
          rawPointsInLocalExpected.add(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
       for (int i = 0; i < numberOfNavigableExtrusions; i++)
          navigableExtrusionsInLocalExpected.add(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
       for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
-         nonNavigableExtrusionsInLocalExpected.add(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
+         nonNavigableExtrusionsInLocalExpected.addPoint(EuclidCoreRandomTools.nextPoint2D(random, 100.0));
 
       Cluster cluster = new Cluster(Cluster.ExtrusionSide.fromByte(extrusionSideByte), Cluster.ClusterType.fromByte(typeByte));
       cluster.setTransformToWorld(transformToWorld);
@@ -55,8 +52,7 @@ public class VisibilityGraphRandomTools
          cluster.addRawPointInLocal(rawPointsInLocalExpected.get(i));
       for (int i = 0; i < numberOfNavigableExtrusions; i++)
          cluster.addNavigableExtrusionInLocal(navigableExtrusionsInLocalExpected.get(i));
-      for (int i = 0; i < numberOfNonNavigableExtrusions; i++)
-         cluster.addNonNavigableExtrusionInLocal(nonNavigableExtrusionsInLocalExpected.get(i));
+      cluster.addNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInLocalExpected);
 
       return cluster;
    }
@@ -67,14 +63,15 @@ public class VisibilityGraphRandomTools
       PlanarRegion homeRegion = nextPlanarRegion(random);
       Cluster homeCluster = getRandomCluster(random);
 
-      VisibilityMapWithNavigableRegion navigableRegion = new VisibilityMapWithNavigableRegion(homeRegion);
-      navigableRegion.setHomeRegionCluster(homeCluster);
+      List<Cluster> obstacleClusters = new ArrayList<>();
       for (int i = 0; i < numberOfObstacleClusters; i++)
-         navigableRegion.addObstacleCluster(getRandomCluster(random));
+         obstacleClusters.add(getRandomCluster(random));
+      NavigableRegion navigableRegion =  new NavigableRegion(homeRegion, homeCluster, obstacleClusters);
+      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(navigableRegion);
 
-      navigableRegion.setVisibilityMapInLocal(getRandomSingleSourceVisibilityMap(random).getVisibilityMapInLocal());
+      visibilityMapWithNavigableRegion.setVisibilityMapInLocal(getRandomSingleSourceVisibilityMap(random).getVisibilityMapInLocal());
 
-      return navigableRegion;
+      return visibilityMapWithNavigableRegion;
    }
 
 

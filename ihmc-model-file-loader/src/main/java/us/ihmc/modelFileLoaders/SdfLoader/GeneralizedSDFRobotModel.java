@@ -22,21 +22,23 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
    private final String name;
    private final List<String> resourceDirectories;
+   private final ClassLoader resourceClassLoader;
    private final SDFDescriptionMutator descriptionMutator;
    private final ArrayList<SDFLinkHolder> rootLinks = new ArrayList<SDFLinkHolder>();
    private final RigidBodyTransform transformToRoot;
    private final LinkedHashMap<String, SDFJointHolder> joints = new LinkedHashMap<String, SDFJointHolder>();
    private final LinkedHashMap<String, SDFLinkHolder> links = new LinkedHashMap<String, SDFLinkHolder>();
 
-   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, ClassLoader resourceClassLoader)
    {
-      this(name, model, resourceDirectories, null);
+      this(name, model, resourceDirectories, resourceClassLoader, null);
    }
 
-   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, SDFDescriptionMutator descriptionMutator)
+   public GeneralizedSDFRobotModel(String name, SDFModel model, List<String> resourceDirectories, ClassLoader resourceClassLoader, SDFDescriptionMutator descriptionMutator)
    {
       this.name = name;
       this.resourceDirectories = resourceDirectories;
+      this.resourceClassLoader = resourceClassLoader;
       this.descriptionMutator = descriptionMutator;
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
@@ -153,6 +155,11 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    public List<String> getResourceDirectories()
    {
       return resourceDirectories;
+   }
+
+   public ClassLoader getResourceClassLoader()
+   {
+      return resourceClassLoader;
    }
 
    @Override

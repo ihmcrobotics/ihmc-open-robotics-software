@@ -122,7 +122,7 @@ public class ThePeoplesGloriousNetworkProcessor
       setupInputs(namespace, robotDataReceiver, fullRobotModel, additionalMessagePackages);
       setupOutputs(namespace, tfPrefix, additionalMessagePackages);
       setupRosLocalization();
-//      setupErrorTopics();
+      //      setupErrorTopics();
 
       if (customSubscribers != null)
       {
@@ -154,27 +154,25 @@ public class ThePeoplesGloriousNetworkProcessor
       System.out.println("IHMC ROS API node successfully started.");
    }
 
-
-
    @SuppressWarnings({"unchecked", "rawtypes"})
    private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
-//      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-//      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-//      DRCRobotJointMap jointMap = robotModel.getJointMap();
-//
-//      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
-//
-//      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
-//            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
+      //      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      //      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      //      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      //
+      //      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
+      //
+      //      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
+      //            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
       if (scsSensorCommunicationBridge != null)
       {
-//         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
+         //         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
       }
 
       Set<Class<?>> outputTypes = GenericROSTranslationTools.getCoreOutputTopics();
 
-      if(additionalPackages != null && additionalPackages.length > 0)
+      if (additionalPackages != null && additionalPackages.length > 0)
       {
          for (String additionalPackage : additionalPackages)
          {
@@ -189,19 +187,22 @@ public class ThePeoplesGloriousNetworkProcessor
          String rosMessageTypeString = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(outputType);
          Message message = messageFactory.newFromType(rosMessageTypeString);
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, controllerCommunicationBridge, outputType);
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message,
+                                                                                                                       false,
+                                                                                                                       controllerCommunicationBridge,
+                                                                                                                       outputType);
          publishers.add(publisher);
          rosMainNode.attachPublisher(namespace + rosAnnotation.topic(), publisher);
       }
 
-//      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
-//      printStreamBridge.start();
-//      System.setErr(printStreamBridge);
+      //      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
+      //      printStreamBridge.start();
+      //      System.setErr(printStreamBridge);
    }
 
    @SuppressWarnings("unused")
    private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
-         RosRobotConfigurationDataPublisher robotConfigurationPublisher)
+                                               RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
@@ -223,7 +224,7 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
 
-      if(additionalPackages != null && additionalPackages.length > 0)
+      if (additionalPackages != null && additionalPackages.length > 0)
       {
          for (String additionalPackage : additionalPackages)
          {
@@ -238,8 +239,9 @@ public class ThePeoplesGloriousNetworkProcessor
          String rosMessageTypeString = IHMCROSTranslationRuntimeTools.getROSMessageTypeStringFromIHMCMessageClass(inputType);
          Message message = messageFactory.newFromType(rosMessageTypeString);
 
-         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber
-               .createIHMCMsgToPacketSubscriber(message, controllerCommunicationBridge, PacketDestination.CONTROLLER.ordinal());
+         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message,
+                                                                                                                   controllerCommunicationBridge,
+                                                                                                                   PacketDestination.CONTROLLER.ordinal());
          subscribers.add(subscriber);
          rosMainNode.attachSubscriber(namespace + rosAnnotation.topic(), subscriber);
       }
@@ -273,7 +275,7 @@ public class ThePeoplesGloriousNetworkProcessor
          public void receivedPacket(ControllerCrashNotificationPacket packet)
          {
             System.err.println("Controller crashed at " + packet.getControllerCrashLocation());
-            System.err.println("StackTrace: " + packet.getStacktraceAsString());
+            System.err.println("Error message: " + packet.getErrorMessageAsString());
          }
       });
    }

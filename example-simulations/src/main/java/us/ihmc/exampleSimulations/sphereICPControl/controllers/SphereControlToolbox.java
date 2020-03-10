@@ -6,10 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -589,7 +586,7 @@ public class SphereControlToolbox
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
-      CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue());
+      CapturePointTools.computeCapturePointPosition(centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue(), capturePoint2d);
 
       capturePoint2d.changeFrame(icp.getReferenceFrame());
       icp.set(capturePoint2d, 0.0);
