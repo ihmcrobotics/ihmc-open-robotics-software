@@ -60,6 +60,38 @@ public class OccupancyGrid
       changedGridSizeListener.notifyOfVariableChange(null);
    }
 
+   public void setThresholdForCellOccupancy(double thresholdForCellOccupancy)
+   {
+      this.thresholdForCellActivation.set(thresholdForCellOccupancy);
+   }
+
+   public void setOccupancyDecayRate(double occupancyDecayRate)
+   {
+      this.decayRate.set(occupancyDecayRate);
+   }
+
+   public void setCellXSize(double xSize)
+   {
+      this.cellXSize.set(xSize);
+      resetOccupancyGrid.set(true);
+   }
+
+   public void setCellYSize(double ySize)
+   {
+      this.cellYSize.set(ySize);
+      resetOccupancyGrid.set(true);
+   }
+
+   public double getCellXSize()
+   {
+      return cellXSize.getDoubleValue();
+   }
+
+   public double getCellYSize()
+   {
+      return cellYSize.getDoubleValue();
+   }
+
    public void reset()
    {
       allActiveCells.clear();
@@ -80,6 +112,21 @@ public class OccupancyGrid
    {
       point.checkReferenceFrameMatch(gridFrame);
       getOrCreateOccupancyGridCell(point).registerHit();
+   }
+
+   public boolean isCellOccupied(int xIndex, int yIndex)
+   {
+      return getOrCreateOccupancyGridCell(xIndex, yIndex).getIsOccupied();
+   }
+
+   public double getXLocation(int xIndex)
+   {
+      return cellXSize.getDoubleValue() * xIndex;
+   }
+
+   public double getYLocation(int yIndex)
+   {
+      return cellYSize.getDoubleValue() * yIndex;
    }
 
    private int findXIndex(double x)
