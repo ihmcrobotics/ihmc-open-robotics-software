@@ -61,6 +61,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame = new PoseReferenceFrame("desiredPositionFrame", worldFrame);
    private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final PoseReferenceFrame endOfSwingReferenceFrame = new PoseReferenceFrame("endOfSwingFrame", worldFrame);
+   private final PoseReferenceFrame midFootReferenceFrame = new PoseReferenceFrame("midFootReferenceFrame", worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
@@ -72,7 +73,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
    private final Map<SwingOverPlanarRegionsCollisionType, FramePoint3D> closestPolygonPointMap;
    private final FramePoint3D midGroundPoint;
-   private final Vector3D waypointAdjustment;
+   private final FrameVector3D waypointAdjustment;
    private final Plane3D swingTrajectoryPlane;
    private final Plane3D swingFloorPlane;
    private final AxisAngle axisAngle;
@@ -157,7 +158,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          closestPolygonPointMap.put(swingOverPlanarRegionsTrajectoryCollisionType, new FramePoint3D());
       }
       midGroundPoint = new FramePoint3D();
-      waypointAdjustment = new Vector3D();
+      waypointAdjustment = new FrameVector3D();
       swingTrajectoryPlane = new Plane3D();
       swingFloorPlane = new Plane3D();
       axisAngle = new AxisAngle();
@@ -280,6 +281,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       swingTrajectoryPlane.set(swingStartPosition, adjustedWaypoints.get(0), swingEndPosition);
 
       axisAngle.set(swingTrajectoryPlane.getNormal(), Math.PI / 2.0);
+      midFootReferenceFrame.setPoseAndUpdate(midGroundPoint, axisAngle);
+
       rigidBodyTransform.setRotation(axisAngle);
       tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       rigidBodyTransform.transform(tempPlaneNormal);
@@ -387,23 +390,29 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       if (fractionForCollision >= 0.0)
       { // we've detected a collision. We need to adjust to avoid the collision
          wereWaypointsAdjusted.set(true);
+         waypointAdjustment.setToZero(worldFrame);
          waypointAdjustment.sub(pointOnTrajectory, nearestCollision);
          double distanceToCollision = waypointAdjustment.length();
 
-         if (MathTools.epsilonEquals(distanceToCollision, 0.0, 1e-3))
+//         if (MathTools.epsilonEquals(distanceToCollision, 0.0, 1e-3))
          {  // we are directly going through an object here. That means we don't have a 'vector' to the collision, so instead we can push away from the
             // ground midpoint of the trajectory
             computeWaypointAdjustmentDirection(fractionForCollision);
             waypointAdjustment.scale(minimumAdjustmentIncrementDistance.getDoubleValue());
          }
-         else
-         {  // we've detected a collision. Let's push the waypoints away from it. We don't necessarily want to completely move that far (see gradient descent
-            // theory), so let's scale the adjustment a little bit, and also clamp it to be between two predictable values.
-            double adjustmentDistance = MathTools.clamp(adjustmentIncrementDistanceGain.getDoubleValue() * distanceToCollision,
-                                                        minimumAdjustmentIncrementDistance.getDoubleValue(),
-                                                        maximumAdjustmentIncrementDistance.getDoubleValue());
-            waypointAdjustment.scale(adjustmentDistance / distanceToCollision);
-         }
+//         else
+//         {
+//            waypointAdjustment.changeFrame(midFootReferenceFrame);
+//            waypointAdjustment.setY(0.0);
+//            waypointAdjustment.changeFrame(worldFrame);
+//
+//             we've detected a collision. Let's push the waypoints away from it. We don't necessarily want to completely move that far (see gradient descent
+//             theory), so let's scale the adjustment a little bit, and also clamp it to be between two predictable values.
+//            double adjustmentDistance = MathTools.clamp(adjustmentIncrementDistanceGain.getDoubleValue() * distanceToCollision,
+//                                                        minimumAdjustmentIncrementDistance.getDoubleValue(),
+//                                                        maximumAdjustmentIncrementDistance.getDoubleValue());
+//            waypointAdjustment.scale(adjustmentDistance / distanceToCollision);
+//         }
 
          // TODO clamp the adjustment so that the waypoints remain above the foot
          // apply the total waypoint adjustment scaled by how far through the swing we are.
