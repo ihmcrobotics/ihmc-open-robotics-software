@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -311,12 +312,16 @@ public class StereoVisionPointCloudPublisher
       if (rangeFilter != null)
          rangeFilter.setSensorPosition(sensorPose.getPosition());
 
+      long startTime = System.nanoTime();
       StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(minimumResolution, activeFilters);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
+      long endTime = System.nanoTime();
 
       if (Debug)
-         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
+         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3) + ", packet size in kilobytes: "
+               + (StereoVisionPointCloudMessagePubSubType.getCdrSerializedSize(message) / 1000) + ", compression time in milliseconds: "
+               + Conversions.nanosecondsToMilliseconds(endTime - startTime));
       if (pointcloudPublisher != null)
          pointcloudPublisher.publish(message);
       else
