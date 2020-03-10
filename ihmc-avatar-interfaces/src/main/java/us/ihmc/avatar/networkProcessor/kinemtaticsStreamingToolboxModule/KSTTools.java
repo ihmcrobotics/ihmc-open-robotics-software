@@ -287,7 +287,7 @@ public class KSTTools
             outputConverter.computeHandTrajectoryMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeArmTrajectoryMessages();
+            outputConverter.computeArmTrajectoryMessage(robotSide);
       }
 
       if (isNeckJointspaceOutputEnabled.getValue())
@@ -316,7 +316,7 @@ public class KSTTools
             outputConverter.computeHandTrajectoryMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeArmTrajectoryMessages();
+            outputConverter.computeArmTrajectoryMessage(robotSide);
       }
 
       if (isNeckJointspaceOutputEnabled.getValue())
