@@ -7,6 +7,7 @@ import java.util.function.IntConsumer;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TByteArrayList;
+import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -141,8 +142,28 @@ public class PointCloudCompression
       ByteBuffer compressedPointCloudByteBuffer = ByteBuffer.allocate(pointCloudByteBufferSize);
       ByteBuffer compressedColorByteBuffer = ByteBuffer.allocate(colorByteBufferSize);
       LZ4CompressionImplementation compressor = compressorThreadLocal.get();
-      int compressedPointCloudSize = compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
-      int compressedColorSize = compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
+
+      int compressedPointCloudSize;
+      try
+      {
+         compressedPointCloudSize = compressor.compress(rawPointCloudByteBuffer, compressedPointCloudByteBuffer);
+      }
+      catch (LZ4Exception e)
+      {
+         // TODO See why the compression would fail and how to fix it.
+         e.printStackTrace();
+         return null;
+      }
+      int compressedColorSize;
+      try
+      {
+         compressedColorSize = compressor.compress(rawColorByteBuffer, compressedColorByteBuffer);
+      }
+      catch (LZ4Exception e)
+      {
+         e.printStackTrace();
+         return null;
+      }
 
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
       message.setTimestamp(timestamp);

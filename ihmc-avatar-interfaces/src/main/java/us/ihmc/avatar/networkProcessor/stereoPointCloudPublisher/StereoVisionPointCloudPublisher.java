@@ -314,6 +314,10 @@ public class StereoVisionPointCloudPublisher
 
       long startTime = System.nanoTime();
       StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(minimumResolution, activeFilters);
+
+      if (message == null)
+         return; // TODO Sometimes the LZ4 compression fails. Need to figure it out, for now just giving up.
+
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
       long endTime = System.nanoTime();
