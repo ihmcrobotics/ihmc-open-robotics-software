@@ -103,6 +103,8 @@ public class MainTabController
    private Button placeStart;
    @FXML
    private Button placeGoal;
+   @FXML
+   private CheckBox bindStartToRobot;
 
    @FXML
    private Button computePath;
@@ -156,7 +158,8 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked compute path...");
 
-      setStartFromRobot();
+      if (bindStartToRobot.isSelected())
+        setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, newRequestID);
       messager.submitMessage(ComputePath, true);
@@ -345,9 +348,9 @@ public class MainTabController
                                  true);
 
       messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
+      messager.registerTopicListener(AbortPlanning, b -> timeElapsedManager.stop());
       messager.registerTopicListener(PlanningResult, result ->
       {
-         System.out.println(result);
          if (result.terminalResult())
             timeElapsedManager.stop();
       });
