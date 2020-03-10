@@ -39,24 +39,23 @@ public class CroppedFootholdCalculator
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
-
-   public CroppedFootholdCalculator(String namePrefix, ReferenceFrame soleFrame, ContactableFoot contactableFoot,
-                                    WalkingControllerParameters walkingControllerParameters,
-                                    ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry,
+   public CroppedFootholdCalculator(String namePrefix,
+                                    ContactableFoot contactableFoot,
+                                    FootholdRotationParameters explorationParameters,
+                                    YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
       numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
 
+      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygon.set(defaultFootPolygon);
 
-      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
-                                                         registry);
-      footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
-                                                         registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 0.5, 0.5, explorationParameters, yoGraphicsListRegistry, registry);
+      footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, 0.5, 0.5, yoGraphicsListRegistry, registry);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
@@ -67,7 +66,6 @@ public class CroppedFootholdCalculator
       doPartialFootholdDetection.set(false);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
-
 
       if (yoGraphicsListRegistry != null)
       {

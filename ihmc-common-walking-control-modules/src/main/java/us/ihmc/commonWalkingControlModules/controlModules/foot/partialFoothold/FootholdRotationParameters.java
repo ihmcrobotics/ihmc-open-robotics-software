@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootholdRotationParameters
 {
@@ -20,6 +23,8 @@ public class FootholdRotationParameters
    private final DoubleProvider rotationAngleThreshold;
    private final DoubleProvider velocityEdgeFilterBreakFrequency;
 
+   private final IntegerProvider thresholdForCoPRegionOccupancy;
+   private final DoubleProvider distanceFromLineOfRotationToComputeCoPOccupancy;
 
    public FootholdRotationParameters(YoVariableRegistry registry)
    {
@@ -40,6 +45,10 @@ public class FootholdRotationParameters
       decayBreakFrequency = new DoubleParameter(namePrefix + "rotationAngleDecayBreakFrequency", registry, 1.0);
       rotationAngleThreshold = new DoubleParameter(namePrefix + "rotationAngleThreshold", registry, 0.05);
       velocityEdgeFilterBreakFrequency = new DoubleParameter(namePrefix + "velocityEdgeFilterBreakFrequency", registry, 1.0);
+
+      namePrefix = "Cropping_";
+      thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 2);
+      distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.02);
    }
 
    public DoubleProvider getGeometricDetectionAngleThreshold()
@@ -90,5 +99,15 @@ public class FootholdRotationParameters
    public DoubleProvider getVelocityEdgeFilterBreakFrequency()
    {
       return velocityEdgeFilterBreakFrequency;
+   }
+
+   public IntegerProvider getThresholdForCoPRegionOccupancy()
+   {
+      return thresholdForCoPRegionOccupancy;
+   }
+
+   public DoubleProvider getDistanceFromLineOfRotationToComputeCoPOccupancy()
+   {
+      return distanceFromLineOfRotationToComputeCoPOccupancy;
    }
 }

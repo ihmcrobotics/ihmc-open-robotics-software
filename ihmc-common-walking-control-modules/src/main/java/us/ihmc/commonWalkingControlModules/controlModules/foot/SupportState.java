@@ -214,6 +214,7 @@ public class SupportState extends AbstractFootControlState
       footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
       footRotationCalculationModule = new FootRotationCalculationModule(robotSide,
                                                                         soleFrame,
+                                                                        footControlHelper.getContactableFoot(),
                                                                         footControlHelper.getFootholdRotationParameters(),
                                                                         dt,
                                                                         registry,
