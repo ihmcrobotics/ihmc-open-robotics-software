@@ -26,6 +26,9 @@ public class FootholdRotationParameters
    private final IntegerProvider thresholdForCoPRegionOccupancy;
    private final DoubleProvider distanceFromLineOfRotationToComputeCoPOccupancy;
 
+   private final DoubleProvider minimumAreaForCropping;
+   private final IntegerProvider shrinkMaxLimit;
+
    public FootholdRotationParameters(YoVariableRegistry registry)
    {
       String namePrefix = "Geometric_";
@@ -49,6 +52,8 @@ public class FootholdRotationParameters
       namePrefix = "Cropping_";
       thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 2);
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.02);
+      minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
+      shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 6);
    }
 
    public DoubleProvider getGeometricDetectionAngleThreshold()
@@ -109,5 +114,15 @@ public class FootholdRotationParameters
    public DoubleProvider getDistanceFromLineOfRotationToComputeCoPOccupancy()
    {
       return distanceFromLineOfRotationToComputeCoPOccupancy;
+   }
+
+   public DoubleProvider getMinimumAreaForCropping()
+   {
+      return minimumAreaForCropping;
+   }
+
+   public IntegerProvider getShrinkMaxLimit()
+   {
+      return shrinkMaxLimit;
    }
 }

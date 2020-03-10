@@ -349,6 +349,9 @@ public class SupportState extends AbstractFootControlState
       boolean dampingRotations = false;
 
       footRotationCalculationModule.compute(cop2d);
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
+         contactState.notifyContactStateHasChanged();
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {

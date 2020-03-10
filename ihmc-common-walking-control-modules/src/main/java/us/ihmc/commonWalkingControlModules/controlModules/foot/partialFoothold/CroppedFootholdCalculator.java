@@ -12,6 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -25,7 +27,7 @@ public class CroppedFootholdCalculator
    private final FrameConvexPolygon2D controllerFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D controllerFootPolygonInWorld = new FrameConvexPolygon2D();
 
-   private final YoDouble minAreaToConsider;
+   private final DoubleProvider minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
 
    private final FootCoPOccupancyCropper footCoPOccupancyGrid;
@@ -33,15 +35,17 @@ public class CroppedFootholdCalculator
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final YoBoolean doPartialFootholdDetection;
-   private final YoInteger shrinkMaxLimit;
+   private final IntegerProvider shrinkMaxLimit;
    private final YoInteger shrinkCounter;
+
+   private final YoBoolean shouldShrinkFoothold;
 
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
    public CroppedFootholdCalculator(String namePrefix,
                                     ContactableFoot contactableFoot,
-                                    FootholdRotationParameters explorationParameters,
+                                    FootholdRotationParameters rotationParameters,
                                     YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -54,18 +58,20 @@ public class CroppedFootholdCalculator
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygon.set(defaultFootPolygon);
 
-      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 0.5, 0.5, explorationParameters, yoGraphicsListRegistry, registry);
+      shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
+
+      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 0.5, 0.5, rotationParameters, yoGraphicsListRegistry, registry);
       footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, 0.5, 0.5, yoGraphicsListRegistry, registry);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
 
-      minAreaToConsider = explorationParameters.getMinAreaToConsider();
+      minAreaToConsider = rotationParameters.getMinimumAreaForCropping();
 
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       doPartialFootholdDetection.set(false);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
-      shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
+      shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
       if (yoGraphicsListRegistry != null)
       {
@@ -94,6 +100,7 @@ public class CroppedFootholdCalculator
 
    public void update(FramePoint2DReadOnly measuredCoP)
    {
+      shouldShrinkFoothold.set(false);
       footCoPOccupancyGrid.update();
       footCoPHullCropper.update();
 
@@ -110,30 +117,37 @@ public class CroppedFootholdCalculator
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
 
       boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
-      hasEnoughAreaToCrop.set(shrunkenFootPolygon.getArea() > minAreaToConsider.getDoubleValue());
+      hasEnoughAreaToCrop.set(shrunkenFootPolygon.getArea() > minAreaToConsider.getValue());
 
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
       {
+         shouldShrinkFoothold.set(true);
          sideOfFootToCrop.set(sideOfFootToCropFromHull);
          convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
       }
       else
       {
+         shouldShrinkFoothold.set(false);
          sideOfFootToCrop.set(null);
       }
+   }
+
+   public boolean shouldShrinkFoothold()
+   {
+      return shouldShrinkFoothold.getBooleanValue();
    }
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
       // if we are not doing partial foothold detection exit
-      if (!doPartialFootholdDetection.getBooleanValue())
+      if (!doPartialFootholdDetection.getBooleanValue() || !shouldShrinkFoothold.getBooleanValue())
       {
          shrunkenFootPolygon.set(defaultFootPolygon);
          return false;
       }
 
       // if we shrunk the foothold too many times exit
-      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getValue())
       {
          return false;
       }

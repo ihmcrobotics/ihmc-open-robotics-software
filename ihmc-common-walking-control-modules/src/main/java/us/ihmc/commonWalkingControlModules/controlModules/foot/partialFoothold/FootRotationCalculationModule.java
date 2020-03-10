@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -109,6 +110,21 @@ public class FootRotationCalculationModule
          return;
 
       croppedFootholdCalculator.computeShrunkenFoothold(edgeCalculator.getLineOfRotation());
+   }
+
+   public boolean isRotating()
+   {
+      return isRotating.getBooleanValue();
+   }
+
+   public boolean shouldShrinkFoothold()
+   {
+      return croppedFootholdCalculator.shouldShrinkFoothold();
+   }
+
+   public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
+   {
+      return croppedFootholdCalculator.applyShrunkenFoothold(contactStateToModify);
    }
 
    private boolean computeIsRotating()
