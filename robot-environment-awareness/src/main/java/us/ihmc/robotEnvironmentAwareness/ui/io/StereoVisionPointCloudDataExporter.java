@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
@@ -72,7 +71,7 @@ public class StereoVisionPointCloudDataExporter
       Path path = Paths.get(dataDirectoryPath.get());
 
       saveSensorPose(path, message.timestamp_, message.getSensorPosition(), message.getSensorOrientation());
-      savePointCloud(path, message.timestamp_, pointCloud, message.getColors());
+      savePointCloud(path, message.timestamp_, pointCloud, PointCloudCompression.decompressColorsToIntArray(message));
    }
 
    public void shutdown()
@@ -101,7 +100,7 @@ public class StereoVisionPointCloudDataExporter
       }
    }
 
-   private static void savePointCloud(Path path, long timestamp, Point3D[] pointCloud, Integer colors)
+   private static void savePointCloud(Path path, long timestamp, Point3D[] pointCloud, int[] colors)
    {
       File pointCloudFile = new File(path.toFile(), POINT_CLOUD_FILE_NAME_HEADER + STEREO_DATA_SPLITER + timestamp + STEREO_DATA_EXTENSION);
       FileWriter pointCloudFileWriter;
@@ -109,10 +108,10 @@ public class StereoVisionPointCloudDataExporter
       {
          pointCloudFileWriter = new FileWriter(pointCloudFile);
          StringBuilder builder = new StringBuilder("");
-         for (int i = 0; i < colors.size(); i++)
+         for (int i = 0; i < colors.length; i++)
          {
             Point3D scanPoint = pointCloud[i];
-            int color = colors.get(i);
+            int color = colors[i];
             builder.append(i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + color + "\n");
          }
          pointCloudFileWriter.write(builder.toString());

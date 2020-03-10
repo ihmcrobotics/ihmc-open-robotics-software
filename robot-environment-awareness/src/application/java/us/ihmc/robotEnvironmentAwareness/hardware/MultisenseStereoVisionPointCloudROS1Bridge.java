@@ -125,7 +125,8 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
          colorsInteger[i] = colors[i].getRGB();
       }
 
-      StereoVisionPointCloudMessage stereoVisionMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloud, colorsInteger, numberOfPoints, null);
+      double minimumResolution = 0.001;
+      StereoVisionPointCloudMessage stereoVisionMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloud, colorsInteger, numberOfPoints, minimumResolution, null);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
 

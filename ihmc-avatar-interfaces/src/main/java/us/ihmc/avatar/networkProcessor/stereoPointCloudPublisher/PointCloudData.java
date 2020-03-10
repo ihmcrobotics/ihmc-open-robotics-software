@@ -108,17 +108,17 @@ public class PointCloudData
       return colors;
    }
 
-   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
+   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(double minimumResolution)
    {
-      return toStereoVisionPointCloudMessage((index, point) -> true);
+      return toStereoVisionPointCloudMessage(minimumResolution, (index, point) -> true);
    }
 
-   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(ScanPointFilter filter)
+   public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage(double minimumResolution, ScanPointFilter filter)
    {
       if (colors == null)
          throw new IllegalStateException("This pointcloud has no colors.");
 
-      return PointCloudCompression.compressPointCloud(timestamp, pointCloud, colors, numberOfPoints, filter);
+      return PointCloudCompression.compressPointCloud(timestamp, pointCloud, colors, numberOfPoints, minimumResolution, filter);
    }
 
    public LidarScanMessage toLidarScanMessage()

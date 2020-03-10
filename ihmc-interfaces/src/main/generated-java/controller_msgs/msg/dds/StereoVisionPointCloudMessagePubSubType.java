@@ -56,9 +56,11 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (600000 * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (700000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -95,11 +97,16 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getPointCloud().size() * 2) + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getColors().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getPointCloud().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getColors().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -119,11 +126,13 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPointCloudCenter(), cdr);
       cdr.write_type_6(data.getResolution());
 
-      if(data.getPointCloud().size() <= 600000)
+      cdr.write_type_2(data.getNumberOfPoints());
+
+      if(data.getPointCloud().size() <= 2000000)
       cdr.write_type_e(data.getPointCloud());else
           throw new RuntimeException("point_cloud field exceeds the maximum length");
 
-      if(data.getColors().size() <= 200000)
+      if(data.getColors().size() <= 700000)
       cdr.write_type_e(data.getColors());else
           throw new RuntimeException("colors field exceeds the maximum length");
 
@@ -144,6 +153,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPointCloudCenter(), cdr);	
       data.setResolution(cdr.read_type_6());
       	
+      data.setNumberOfPoints(cdr.read_type_2());
+      	
       cdr.read_type_e(data.getPointCloud());	
       cdr.read_type_e(data.getColors());	
 
@@ -163,6 +174,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("point_cloud_center", new geometry_msgs.msg.dds.PointPubSubType(), data.getPointCloudCenter());
 
       ser.write_type_6("resolution", data.getResolution());
+      ser.write_type_2("number_of_points", data.getNumberOfPoints());
       ser.write_type_e("point_cloud", data.getPointCloud());
       ser.write_type_e("colors", data.getColors());
    }
@@ -181,6 +193,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("point_cloud_center", new geometry_msgs.msg.dds.PointPubSubType(), data.getPointCloudCenter());
 
       data.setResolution(ser.read_type_6("resolution"));
+      data.setNumberOfPoints(ser.read_type_2("number_of_points"));
       ser.read_type_e("point_cloud", data.getPointCloud());
       ser.read_type_e("colors", data.getColors());
    }

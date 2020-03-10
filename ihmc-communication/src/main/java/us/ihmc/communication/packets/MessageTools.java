@@ -1,6 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +18,6 @@ import controller_msgs.msg.dds.LidarScanParametersMessage;
 import controller_msgs.msg.dds.ObjectDetectorResultPacket;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
@@ -765,18 +763,6 @@ public class MessageTools
          return NameBasedHashCodeTools.NULL_HASHCODE;
       else
          return referenceFrame.hashCode();
-   }
-
-   public static Color[] unpackPointCloudColors(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      Color[] colors = new Color[stereoVisionPointCloudMessage.getColors().size()];
-
-      for (int i = 0; i < stereoVisionPointCloudMessage.getColors().size(); i++)
-      {
-         colors[i] = new Color(stereoVisionPointCloudMessage.getColors().get(i));
-      }
-
-      return colors;
    }
 
    /**

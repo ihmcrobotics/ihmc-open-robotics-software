@@ -80,6 +80,7 @@ public class StereoVisionPointCloudPublisher
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
 
    private long publisherPeriodInMillisecond = 1L;
+   private double minimumResolution = 0.005;
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -146,6 +147,19 @@ public class StereoVisionPointCloudPublisher
    {
       publisherTask.cancel(false);
       executorService.shutdownNow();
+   }
+
+   /**
+    * Sets the smallest value in meter for the resolution when compressing the pointcloud data.
+    * <p>
+    * Smaller means more accurate, but also more expensive bandwidth-wise.
+    * </p>
+    * 
+    * @param minimumResolution the value in meter for the minimum resolution, default is 0.005.
+    */
+   public void setMinimumResolution(double minimumResolution)
+   {
+      this.minimumResolution = minimumResolution;
    }
 
    public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
@@ -297,7 +311,7 @@ public class StereoVisionPointCloudPublisher
       if (rangeFilter != null)
          rangeFilter.setSensorPosition(sensorPose.getPosition());
 
-      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(activeFilters);
+      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(minimumResolution, activeFilters);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
 

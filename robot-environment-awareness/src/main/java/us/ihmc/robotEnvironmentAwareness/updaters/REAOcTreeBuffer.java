@@ -247,11 +247,7 @@ public class REAOcTreeBuffer
    private static Scan toScan(StereoVisionPointCloudMessage stereoMessage)
    {
       PointCloud pointCloud = new PointCloud();
-      PointCloudCompression.decompressPointCloud(stereoMessage.getPointCloud(),
-                                                 stereoMessage.getPointCloudCenter(),
-                                                 stereoMessage.getResolution(),
-                                                 pointCloud::add);
-
+      PointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
       return new Scan(stereoMessage.getSensorPosition(), pointCloud);
    }
 

@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
@@ -57,7 +56,7 @@ public class LidarImageFusionDataBuffer
       StereoVisionPointCloudMessage pointCloudMessage = latestStereoVisionPointCloudMessage.get();
 
       Point3D[] pointCloudBuffer = PointCloudCompression.decompressPointCloudToArray(pointCloudMessage);
-      int[] colorBuffer = pointCloudMessage.getColors().toArray();
+      int[] colorBuffer = PointCloudCompression.decompressColorsToIntArray(pointCloudMessage);
       Random random = new Random();
       int numberOfPoints = pointCloudBuffer.length;
 
