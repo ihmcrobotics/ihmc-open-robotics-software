@@ -28,7 +28,7 @@ public class ValkyrieNetworkProcessor
       }
    };
 
-   public static final boolean launchFootstepPlannerModule = true;
+   public static final boolean launchFootstepPlannerModule = false;
    private static final String REAConfigurationFilePath = System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt";
 
    public static void startIHMCNetworkProcessor(ValkyrieRobotModel robotModel)
@@ -62,9 +62,7 @@ public class ValkyrieNetworkProcessor
       HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
 
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
-
-      if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
