@@ -468,21 +468,6 @@ public class MessageTools
 
    }
 
-   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
-   {
-      return createStereoVisionPointCloudMessage(timestamp, pointCloud, colors, 1.0);
-   }
-
-   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors, double poseConfidence)
-   {
-      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.setTimestamp(timestamp);
-      message.getPointCloud().add(pointCloud);
-      message.getColors().add(colors);
-      message.setSensorPoseConfidence(poseConfidence);
-      return message;
-   }
-
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
    {
       ToolboxStateMessage message = new ToolboxStateMessage();
@@ -780,20 +765,6 @@ public class MessageTools
          return NameBasedHashCodeTools.NULL_HASHCODE;
       else
          return referenceFrame.hashCode();
-   }
-
-   public static Point3D32[] unpackPointCloud32(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      Point3D32[] points = new Point3D32[stereoVisionPointCloudMessage.getPointCloud().size() / 3];
-      for (int index = 0; index < stereoVisionPointCloudMessage.getPointCloud().size() / 3; index++)
-      {
-         Point3D32 scanPoint = new Point3D32();
-         scanPoint.setX(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 0));
-         scanPoint.setY(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 1));
-         scanPoint.setZ(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 2));
-         points[index] = scanPoint;
-      }
-      return points;
    }
 
    public static Color[] unpackPointCloudColors(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
@@ -1131,28 +1102,6 @@ public class MessageTools
       {
          Point3D scanPoint1 = new Point3D();
          MessageTools.unpackScanPoint(lidarScanMessage, index, scanPoint1);
-         Point3D scanPoint = scanPoint1;
-         scanPoints[index] = scanPoint;
-      }
-      return scanPoints;
-   }
-
-   public static void unpackScanPoint(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, int index, Point3DBasics scanPointToPack)
-   {
-      index *= 3;
-      scanPointToPack.setX(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-      scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-      scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-   }
-
-   public static Point3D[] unpackScanPoint3ds(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      int numberOfScanPoints = stereoVisionPointCloudMessage.point_cloud_.size() / 3;
-      Point3D[] scanPoints = new Point3D[numberOfScanPoints];
-      for (int index = 0; index < numberOfScanPoints; index++)
-      {
-         Point3D scanPoint1 = new Point3D();
-         MessageTools.unpackScanPoint(stereoVisionPointCloudMessage, index, scanPoint1);
          Point3D scanPoint = scanPoint1;
          scanPoints[index] = scanPoint;
       }

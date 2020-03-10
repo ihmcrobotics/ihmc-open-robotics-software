@@ -8,7 +8,8 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Float;
-import us.ihmc.idl.IDLSequence.Integer;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -117,27 +118,7 @@ public class PointCloudData
       if (colors == null)
          throw new IllegalStateException("This pointcloud has no colors.");
 
-      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.setTimestamp(timestamp);
-      message.setSensorPoseConfidence(1.0);
-      Float pointCloudBuffer = message.getPointCloud();
-      Integer colorBuffer = message.getColors();
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D scanPoint = pointCloud[i];
-         int color = colors[i];
-
-         if (filter.test(i, scanPoint))
-         {
-            pointCloudBuffer.add(scanPoint.getX32());
-            pointCloudBuffer.add(scanPoint.getY32());
-            pointCloudBuffer.add(scanPoint.getZ32());
-            colorBuffer.add(color);
-         }
-      }
-
-      return message;
+      return PointCloudCompression.compressPointCloud(timestamp, pointCloud, colors, numberOfPoints, filter);
    }
 
    public LidarScanMessage toLidarScanMessage()
