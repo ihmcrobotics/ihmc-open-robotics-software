@@ -55,6 +55,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       debugParentStep = messager.createInput(FootstepPlannerMessagerAPI.parentDebugStep);
       debugChildStep = messager.createInput(FootstepPlannerMessagerAPI.childDebugStep);
       debugIdealStep = messager.createInput(FootstepPlannerMessagerAPI.idealDebugStep);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
    }
 
    @Override

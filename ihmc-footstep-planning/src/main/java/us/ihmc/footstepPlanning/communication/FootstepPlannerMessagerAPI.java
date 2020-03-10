@@ -147,6 +147,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
+   public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
