@@ -69,8 +69,8 @@ public class RandomICPSLAM extends SLAMBasics
 
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
       surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-10.0));
-      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(10.0));
+      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
+      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
