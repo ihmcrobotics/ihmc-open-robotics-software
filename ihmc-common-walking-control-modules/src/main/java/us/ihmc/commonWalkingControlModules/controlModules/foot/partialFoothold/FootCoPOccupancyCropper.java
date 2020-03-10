@@ -17,10 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 import java.util.List;
 
@@ -37,8 +34,6 @@ public class FootCoPOccupancyCropper
    private final double footLength;
    private final double footWidth;
 
-   private final YoInteger numberOfCellsOccupiedOnRightSideOfLine;
-   private final YoInteger numberOfCellsOccupiedOnLeftSideOfLine;
    private final SideDependentList<YoInteger> numberOfOccupiedCells;
    private final YoInteger thresholdForCoPRegionOccupancy;
    private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
@@ -51,6 +46,8 @@ public class FootCoPOccupancyCropper
    private final FrameVector2D shiftingVector = new FrameVector2D();
    private final FramePoint2D cellCenter = new FramePoint2D();
 
+   private final YoEnum<RobotSide> sideOfFootToCrop;
+
    public FootCoPOccupancyCropper(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
                                   WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
                                   YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -62,7 +59,7 @@ public class FootCoPOccupancyCropper
 
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
-
+      sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
       this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
 
       this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
@@ -76,8 +73,8 @@ public class FootCoPOccupancyCropper
       thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
       distanceFromLineOfRotationToComputeCoPOccupancy = explorationParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
 
-      numberOfCellsOccupiedOnRightSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
-      numberOfCellsOccupiedOnLeftSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);
+      YoInteger numberOfCellsOccupiedOnRightSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
+      YoInteger numberOfCellsOccupiedOnLeftSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);
 
       numberOfOccupiedCells = new SideDependentList<>(numberOfCellsOccupiedOnLeftSideOfLine, numberOfCellsOccupiedOnRightSideOfLine);
 
@@ -124,11 +121,13 @@ public class FootCoPOccupancyCropper
          throw new RuntimeException("Error: both can't be occupied.");
 
       if (leftOccupied)
-         return RobotSide.RIGHT;
+         sideOfFootToCrop.set(RobotSide.RIGHT);
       else if (rightOccupied)
-         return RobotSide.LEFT;
+         sideOfFootToCrop.set(RobotSide.LEFT);
+      else
+         sideOfFootToCrop.set(null);
 
-      return null;
+      return sideOfFootToCrop.getEnumValue();
    }
 
    private int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2DReadOnly frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
@@ -173,6 +172,7 @@ public class FootCoPOccupancyCropper
    public void reset()
    {
       occupancyGrid.reset();
+      sideOfFootToCrop.set(null);
       if (visualizer != null)
          visualizer.update();
    }
@@ -182,7 +182,5 @@ public class FootCoPOccupancyCropper
       occupancyGrid.update();
       if (visualizer != null)
          visualizer.update();
-
-
    }
 }

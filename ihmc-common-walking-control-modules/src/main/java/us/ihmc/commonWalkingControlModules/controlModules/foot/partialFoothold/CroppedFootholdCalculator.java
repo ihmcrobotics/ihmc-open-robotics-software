@@ -16,21 +16,22 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CroppedFootholdCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final FrameConvexPolygon2D shrunkenFootPolygon;
-   
+
    private final YoDouble minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
 
    private final FootCoPOccupancyCropper footCoPOccupancyGrid;
    private final FootCoPHullCropper footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
+   private final YoEnum<RobotSide> sideOfFootToCrop;
 
    public CroppedFootholdCalculator(String namePrefix, ReferenceFrame soleFrame, ContactableFoot contactableFoot,
                                     WalkingControllerParameters walkingControllerParameters,
@@ -40,10 +41,13 @@ public class CroppedFootholdCalculator
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
       shrunkenFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
 
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
       footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
                                                          registry);
       footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
                                                          registry);
+      sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
 
@@ -60,6 +64,9 @@ public class CroppedFootholdCalculator
    public void reset(FrameConvexPolygon2DReadOnly polygon)
    {
       shrunkenFootPolygon.set(polygon);
+
+      footCoPHullCropper.reset();
+      footCoPOccupancyGrid.reset();
    }
 
    public void update(FramePoint2DReadOnly measuredCoP)
@@ -84,7 +91,12 @@ public class CroppedFootholdCalculator
 
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
       {
-         convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCropFromOccupancy);
+         sideOfFootToCrop.set(sideOfFootToCropFromHull);
+         convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
+      }
+      else
+      {
+         sideOfFootToCrop.set(null);
       }
    }
 }
