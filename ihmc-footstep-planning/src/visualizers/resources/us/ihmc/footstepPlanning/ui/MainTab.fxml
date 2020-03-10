@@ -98,6 +98,7 @@
                     <children>
                         <Button fx:id="placeStart" mnemonicParsing="false" onAction="#placeStart" prefWidth="130.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
                         <Button fx:id="placeGoal" mnemonicParsing="false" onAction="#placeGoal" prefWidth="130.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="bindStartToRobot" text="Bind start to robot" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2" selected="true" GridPane.halignment="CENTER"/>
                         <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="x" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
                         <Label text="x" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
@@ -195,10 +196,10 @@
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0"/>
                     </columnConstraints>
 
-                    <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
-                    <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.halignment="CENTER" GridPane.columnSpan="1"/>
-                    <TextField fx:id="logGenerationStatus" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.columnSpan="3"/>
-                    <TextField fx:id="logLoadStatus" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.columnSpan="3"/>
+                    <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="CENTER"/>
+                    <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="CENTER"/>
+                    <TextField fx:id="logGenerationStatus" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="3"/>
+                    <TextField fx:id="logLoadStatus" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="3"/>
                 </GridPane>
             </children>
         </VBox>
