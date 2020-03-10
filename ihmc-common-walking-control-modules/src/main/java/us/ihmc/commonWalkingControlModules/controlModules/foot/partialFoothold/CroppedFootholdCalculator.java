@@ -1,28 +1,29 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
+import java.util.List;
 
 public class CroppedFootholdCalculator
 {
    private final FrameConvexPolygon2D defaultFootPolygon;
-   private final FrameConvexPolygon2D shrunkenFootPolygon;
+   private final YoFrameConvexPolygon2D shrunkenFootPolygon;
+   private final FrameConvexPolygon2D controllerFootPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D controllerFootPolygonInWorld = new FrameConvexPolygon2D();
 
    private final YoDouble minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
@@ -31,7 +32,13 @@ public class CroppedFootholdCalculator
    private final FootCoPHullCropper footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
+   private final YoBoolean doPartialFootholdDetection;
+   private final YoInteger shrinkMaxLimit;
+   private final YoInteger shrinkCounter;
+
    private final YoEnum<RobotSide> sideOfFootToCrop;
+   private final int numberOfFootCornerPoints;
+
 
    public CroppedFootholdCalculator(String namePrefix, ReferenceFrame soleFrame, ContactableFoot contactableFoot,
                                     WalkingControllerParameters walkingControllerParameters,
@@ -39,9 +46,12 @@ public class CroppedFootholdCalculator
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
-      shrunkenFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
+      numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+      shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
+      shrunkenFootPolygon.set(defaultFootPolygon);
 
       footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
                                                          registry);
@@ -52,6 +62,21 @@ public class CroppedFootholdCalculator
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
 
       minAreaToConsider = explorationParameters.getMinAreaToConsider();
+
+      doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
+      doPartialFootholdDetection.set(false);
+      shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
+      shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
+
+
+      if (yoGraphicsListRegistry != null)
+      {
+         String listName = getClass().getSimpleName();
+
+         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygon, Color.CYAN, false);
+         yoShrunkPolygon.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -98,5 +123,43 @@ public class CroppedFootholdCalculator
       {
          sideOfFootToCrop.set(null);
       }
+   }
+
+   public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
+   {
+      // if we are not doing partial foothold detection exit
+      if (!doPartialFootholdDetection.getBooleanValue())
+      {
+         shrunkenFootPolygon.set(defaultFootPolygon);
+         return false;
+      }
+
+      // if we shrunk the foothold too many times exit
+      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getIntegerValue())
+      {
+         return false;
+      }
+
+      // make sure the foot has the right number of contact points
+      controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
+      ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, numberOfFootCornerPoints);
+      controllerFootPolygonInWorld.setIncludingFrame(controllerFootPolygon);
+      controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+      List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
+      int i = 0;
+      for (; i < controllerFootPolygon.getNumberOfVertices(); i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+         contactPoint.setPosition(controllerFootPolygon.getVertex(i));
+         contactPoint.setInContact(true);
+      }
+      for (; i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).setInContact(false);
+      }
+
+      shrinkCounter.increment();
+      return true;
    }
 }
