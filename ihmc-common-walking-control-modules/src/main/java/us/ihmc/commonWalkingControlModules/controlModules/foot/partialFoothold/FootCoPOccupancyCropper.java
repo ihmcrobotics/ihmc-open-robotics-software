@@ -11,14 +11,20 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class FootCoPHistory
+import java.util.List;
+
+public class FootCoPOccupancyCropper
 {
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 1.0;
@@ -31,15 +37,23 @@ public class FootCoPHistory
    private final double footLength;
    private final double footWidth;
 
+   private final YoInteger numberOfCellsOccupiedOnRightSideOfLine;
+   private final YoInteger numberOfCellsOccupiedOnLeftSideOfLine;
+   private final SideDependentList<YoInteger> numberOfOccupiedCells;
+   private final YoInteger thresholdForCoPRegionOccupancy;
+   private final YoDouble distanceFromLineOfRotationToComputeCoPOccupancy;
+
    private final OccupancyGrid occupancyGrid;
+   private final OccupancyGridVisualizer visualizer;
+
 
    private final FrameLine2D shiftedLine = new FrameLine2D();
    private final FrameVector2D shiftingVector = new FrameVector2D();
    private final FramePoint2D cellCenter = new FramePoint2D();
 
-   public FootCoPHistory(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
-                         WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyCropper(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
+                                  WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
       this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
@@ -59,7 +73,20 @@ public class FootCoPHistory
       occupancyGrid.setThresholdForCellOccupancy(defaultThresholdForCellActivation);
       occupancyGrid.setOccupancyDecayRate(defaultDecayRate);
 
+      thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
+      distanceFromLineOfRotationToComputeCoPOccupancy = explorationParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
+
+      numberOfCellsOccupiedOnRightSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
+      numberOfCellsOccupiedOnLeftSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);
+
+      numberOfOccupiedCells = new SideDependentList<>(numberOfCellsOccupiedOnLeftSideOfLine, numberOfCellsOccupiedOnRightSideOfLine);
+
       setupChangedGridParameterListeners();
+
+      if (yoGraphicsListRegistry != null)
+         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 100, 100, registry, yoGraphicsListRegistry);
+      else
+         visualizer = null;
 
       parentRegistry.addChild(registry);
    }
@@ -80,7 +107,31 @@ public class FootCoPHistory
       occupancyGrid.registerPoint(copToRegister);
    }
 
-   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2DReadOnly frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
+   public RobotSide computeSideOfFootholdToCrop(FrameLine2DReadOnly lineOfRotation)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         numberOfOccupiedCells.get(robotSide)
+                              .set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
+                                                                                                 robotSide,
+                                                                                                 distanceFromLineOfRotationToComputeCoPOccupancy.getDoubleValue()));
+      }
+
+      boolean leftOccupied = numberOfOccupiedCells.get(RobotSide.LEFT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+      boolean rightOccupied = numberOfOccupiedCells.get(RobotSide.RIGHT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getIntegerValue();
+
+      if (leftOccupied && rightOccupied)
+         throw new RuntimeException("Error: both can't be occupied.");
+
+      if (leftOccupied)
+         return RobotSide.RIGHT;
+      else if (rightOccupied)
+         return RobotSide.LEFT;
+
+      return null;
+   }
+
+   private int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2DReadOnly frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
    {
       // First create a shifted line towards the sideToLookAt such that we don't check the cells for which the line goes through.
       frameLine.checkReferenceFrameMatch(soleFrame);
@@ -107,14 +158,13 @@ public class FootCoPHistory
       shiftedLine.getPoint().add(shiftingVector);
 
       int numberOfCellsActivatedOnSideToLookAt = 0;
-      for (int xIndex = 0; xIndex < nLengthSubdivisions.getIntegerValue(); xIndex++)
+      List<OccupancyGridCell> activeCells = occupancyGrid.getAllActiveCells();
+      for (int i = 0; i < activeCells.size(); i++)
       {
-         for (int yIndex = 0; yIndex < nWidthSubdivisions.getIntegerValue(); yIndex++)
-         {
-            cellCenter.setIncludingFrame(soleFrame, occupancyGrid.getXLocation(xIndex), occupancyGrid.getYLocation(yIndex));
-            if (shiftedLine.isPointOnSideOfLine(cellCenter, sideToLookAt == RobotSide.LEFT) && occupancyGrid.isCellOccupied(xIndex, yIndex))
-               numberOfCellsActivatedOnSideToLookAt++;
-         }
+         OccupancyGridCell cell = activeCells.get(i);
+         cellCenter.setIncludingFrame(soleFrame, occupancyGrid.getXLocation(cell.getXIndex()), occupancyGrid.getYLocation(cell.getYIndex()));
+         if (shiftedLine.isPointOnSideOfLine(cellCenter, sideToLookAt == RobotSide.LEFT) && cell.getIsOccupied())
+            numberOfCellsActivatedOnSideToLookAt++;
       }
 
       return numberOfCellsActivatedOnSideToLookAt;
@@ -123,10 +173,16 @@ public class FootCoPHistory
    public void reset()
    {
       occupancyGrid.reset();
+      if (visualizer != null)
+         visualizer.update();
    }
 
    public void update()
    {
       occupancyGrid.update();
+      if (visualizer != null)
+         visualizer.update();
+
+
    }
 }
