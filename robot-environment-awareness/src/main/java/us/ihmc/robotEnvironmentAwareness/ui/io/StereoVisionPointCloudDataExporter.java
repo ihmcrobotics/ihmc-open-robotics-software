@@ -11,12 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 
@@ -67,13 +67,7 @@ public class StereoVisionPointCloudDataExporter
    {
       StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
 
-      int numberOfPoints = message.getColors().size();
-      Point3D[] pointCloud = new Point3D[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         pointCloud[i] = new Point3D();
-         MessageTools.unpackScanPoint(message, i, pointCloud[i]);
-      }
+      Point3D[] pointCloud = PointCloudCompression.decompressPointCloudToArray(message);
 
       Path path = Paths.get(dataDirectoryPath.get());
 

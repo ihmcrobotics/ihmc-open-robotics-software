@@ -37,7 +37,9 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double point_cloud_confidence;
-        sequence<float, 600000> point_cloud;
+        geometry_msgs::msg::dds::Point point_cloud_center;
+        double resolution;
+        sequence<unsigned short, 600000> point_cloud;
         sequence<long, 200000> colors;
       };
     };

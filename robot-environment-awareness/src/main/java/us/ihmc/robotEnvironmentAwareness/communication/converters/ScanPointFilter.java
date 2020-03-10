@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
+package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 

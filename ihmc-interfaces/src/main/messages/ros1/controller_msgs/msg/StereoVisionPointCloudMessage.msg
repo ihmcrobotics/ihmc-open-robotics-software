@@ -21,7 +21,11 @@ float64 sensor_pose_confidence
 # Field default value 1.0
 float64 point_cloud_confidence
 
-float32[] point_cloud
+geometry_msgs/Point point_cloud_center
+
+float64 resolution
+
+uint16[] point_cloud
 
 int32[] colors
 

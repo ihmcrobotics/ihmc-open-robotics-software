@@ -14,8 +14,9 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression.PointCoordinateConsumer;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.Ros2Node;
 
@@ -39,22 +40,24 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 
    public void trimPointCloudInROI(StereoVisionPointCloudMessage pointCloudMessage, RegionOfInterest roi)
    {
-      Float messageData = pointCloudMessage.getPointCloud();
-      int numberOfPoints = messageData.size() / 3;
-      for (int i = 0; i < numberOfPoints; i++)
+      PointCloudCompression.decompressPointCloud(pointCloudMessage, new PointCoordinateConsumer()
       {
-         Point3D point = new Point3D(messageData.get(3 * i + 0), messageData.get(3 * i + 1), messageData.get(3 * i + 2));
-         Point2D projectedPixel = new Point2D();
-         PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, projectedPixel, intrinsicParameters);
-
-         if (MathTools.intervalContains(projectedPixel.getX(), roi.getXOffset(), roi.getXOffset() + roi.getWidth()))
+         @Override
+         public void accept(double x, double y, double z)
          {
-            if (MathTools.intervalContains(projectedPixel.getY(), roi.getYOffset(), roi.getYOffset() + roi.getHeight()))
+            Point3D point = new Point3D(x, y, z);
+            Point2D projectedPixel = new Point2D();
+            PointCloudProjectionHelper.projectMultisensePointCloudOnImage(point, projectedPixel, intrinsicParameters);
+
+            if (MathTools.intervalContains(projectedPixel.getX(), roi.getXOffset(), roi.getXOffset() + roi.getWidth()))
             {
-               pointCloudToCalculate.add(point);
+               if (MathTools.intervalContains(projectedPixel.getY(), roi.getYOffset(), roi.getYOffset() + roi.getHeight()))
+               {
+                  pointCloudToCalculate.add(point);
+               }
             }
          }
-      }
+      });
       objectROI.set(roi);
       LogTools.info("total number of points in roi " + pointCloudToCalculate.size());
    }
