@@ -64,9 +64,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
       positionHelper = new RigidBodyPositionControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                          usingWeightFromMessage, registry, graphicsListRegistry);
+                                                          usingWeightFromMessage, yoTime, registry, graphicsListRegistry);
       orienationHelper = new RigidBodyOrientationControlHelper(warningPrefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame,
-                                                                useBaseFrameForControl, usingWeightFromMessage, registry);
+                                                                useBaseFrameForControl, usingWeightFromMessage, yoTime, registry);
 
       this.jointControlHelper = jointControlHelper;
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
