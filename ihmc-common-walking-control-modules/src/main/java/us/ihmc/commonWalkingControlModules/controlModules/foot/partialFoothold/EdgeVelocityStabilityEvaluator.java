@@ -5,9 +5,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class EdgeVelocityStabilityEvaluator
 {
@@ -15,6 +17,9 @@ public class EdgeVelocityStabilityEvaluator
    private final FilteredVelocityYoFrameVector2d centerOfRotationVelocity;
    /** Linear velocity of the center of rotation that is transverse (perpendicular) to the line of rotation. */
    private final YoDouble centerOfRotationTransverseVelocity;
+
+   private final YoInteger numberOfTicksInEstimate;
+   private final IntegerProvider minimumTicksToEstimate;
 
    /** Absolute angle of the line of rotation. */
    private final YoDouble angleOfLineOfRotation;
@@ -33,23 +38,38 @@ public class EdgeVelocityStabilityEvaluator
 
    private final FrameLine2DReadOnly lineOfRotation;
 
-   public EdgeVelocityStabilityEvaluator(String namePrefix, FrameLine2DReadOnly lineOfRotation, DoubleProvider lineOfRotationStableVelocityThreshold,
-                                         DoubleProvider centerOfRotationStableVelocityThreshold, double dt, YoVariableRegistry registry)
+   public EdgeVelocityStabilityEvaluator(String namePrefix,
+                                         FrameLine2DReadOnly lineOfRotation,
+                                         DoubleProvider lineOfRotationStableVelocityThreshold,
+                                         DoubleProvider centerOfRotationStableVelocityThreshold,
+                                         IntegerProvider minimumTicksToEstimate,
+                                         double dt,
+                                         YoVariableRegistry registry)
    {
       this.lineOfRotation = lineOfRotation;
       this.lineOfRotationStableVelocityThreshold = lineOfRotationStableVelocityThreshold;
       this.centerOfRotationStableVelocityThreshold = centerOfRotationStableVelocityThreshold;
+      this.minimumTicksToEstimate = minimumTicksToEstimate;
+
+      numberOfTicksInEstimate = new YoInteger(namePrefix + "NumberOfTicksInEstimate", registry);
 
       YoDouble centerOfRotationVelocityAlphaFilter = new YoDouble(namePrefix + "CenterOfRotationVelocityAlphaFilter", registry);
-      centerOfRotationVelocity = new FilteredVelocityYoFrameVector2d(namePrefix + "CenterOfRotationVelocity", "", centerOfRotationVelocityAlphaFilter, dt,
-                                                                     registry, lineOfRotation.getPoint());
+      centerOfRotationVelocity = new FilteredVelocityYoFrameVector2d(namePrefix + "CenterOfRotationVelocity",
+                                                                     "",
+                                                                     centerOfRotationVelocityAlphaFilter,
+                                                                     dt,
+                                                                     registry,
+                                                                     lineOfRotation.getPoint());
       centerOfRotationTransverseVelocity = new YoDouble(namePrefix + "CenterOfRotationTransverseVelocity", registry);
 
       angleOfLineOfRotation = new YoDouble(namePrefix + "AngleOfLineOfRotation", registry);
       YoDouble lineOfRotationAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LineOfRotationAngularVelocityAlphaFilter", registry);
-      lineOfRotationAngularVelocity = new FilteredVelocityYoVariable(namePrefix + "LineOfRotationAngularVelocityFiltered", "",
-                                                                     lineOfRotationAngularVelocityAlphaFilter, angleOfLineOfRotation, dt, registry);
-
+      lineOfRotationAngularVelocity = new FilteredVelocityYoVariable(namePrefix + "LineOfRotationAngularVelocityFiltered",
+                                                                     "",
+                                                                     lineOfRotationAngularVelocityAlphaFilter,
+                                                                     angleOfLineOfRotation,
+                                                                     dt,
+                                                                     registry);
 
       isLineOfRotationStable = new YoBoolean(namePrefix + "IsLineOfRotationStable", registry);
       isCenterOfRotationStable = new YoBoolean(namePrefix + "IsCenterOfRotationStable", registry);
@@ -61,6 +81,7 @@ public class EdgeVelocityStabilityEvaluator
       centerOfRotationVelocity.reset();
       centerOfRotationVelocity.setToNaN();
 
+      numberOfTicksInEstimate.set(0);
       angleOfLineOfRotation.set(0.0);
       lineOfRotationAngularVelocity.set(Double.NaN);
       lineOfRotationAngularVelocity.reset();
@@ -72,6 +93,7 @@ public class EdgeVelocityStabilityEvaluator
 
    public void update()
    {
+      numberOfTicksInEstimate.increment();
       centerOfRotationVelocity.update();
 
       FrameVector2DReadOnly directionOfRotation = lineOfRotation.getDirection();
@@ -83,7 +105,10 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable.set(Math.abs(lineOfRotationAngularVelocity.getDoubleValue()) < lineOfRotationStableVelocityThreshold.getValue());
       isCenterOfRotationStable.set(Math.abs(centerOfRotationTransverseVelocity.getDoubleValue()) < centerOfRotationStableVelocityThreshold.getValue());
 
-      isEdgeVelocityStable.set(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
+      if (numberOfTicksInEstimate.getIntegerValue() > minimumTicksToEstimate.getValue())
+         isEdgeVelocityStable.set(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
+      else
+         isEdgeVelocityStable.set(false);
    }
 
    public boolean isEdgeVelocityStable()
