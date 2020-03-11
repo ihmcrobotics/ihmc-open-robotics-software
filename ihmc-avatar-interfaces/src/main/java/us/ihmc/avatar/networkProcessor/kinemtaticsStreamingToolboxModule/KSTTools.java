@@ -298,7 +298,7 @@ public class KSTTools
          outputConverter.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
-      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
+      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue(), Conversions.secondsToNanoseconds(time.getValue()));
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
       return wholeBodyTrajectoryMessage;
    }
