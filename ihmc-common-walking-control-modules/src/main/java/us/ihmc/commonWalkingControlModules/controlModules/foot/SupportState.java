@@ -348,7 +348,7 @@ public class SupportState extends AbstractFootControlState
       localGains.set(gains);
       boolean dampingRotations = false;
 
-      footRotationCalculationModule.compute(cop2d);
+      footRotationCalculationModule.compute(cop2d, desiredCoP);
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();

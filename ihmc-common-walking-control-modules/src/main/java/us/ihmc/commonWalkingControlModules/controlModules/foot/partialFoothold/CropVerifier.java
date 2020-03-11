@@ -72,7 +72,8 @@ public class CropVerifier
    public void update(FramePoint2DReadOnly desiredCoP)
    {
       occupancyGrid.update();
-      occupancyGrid.registerPoint(desiredCoP);
+      if (!desiredCoP.containsNaN())
+         occupancyGrid.registerPoint(desiredCoP);
    }
 
    public boolean verifyFootholdCrop(FramePoint2DReadOnly desiredCoP, RobotSide sideToCrop, FrameLine2DReadOnly lineOfRotation)
