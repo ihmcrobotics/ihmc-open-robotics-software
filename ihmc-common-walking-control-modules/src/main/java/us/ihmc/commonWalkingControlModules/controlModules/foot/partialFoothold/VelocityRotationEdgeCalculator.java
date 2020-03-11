@@ -69,8 +69,9 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
                                                               lineOfRotationInSole,
-                                                              rotationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              rotationParameters.getStableCoRLinearVelocityThreshold(),
+                                                              rotationParameters.getStableRotationDirectionThreshold(),
+                                                              rotationParameters.getStableRotationPositionThreshold(),
+                                                              rotationParameters.getMinimumTicksForEstimate(),
                                                               dt,
                                                               registry);
 
@@ -125,7 +126,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       if (edgeVisualizer != null)
       {
-         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
+         edgeVisualizer.visualize(true);
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
    }

@@ -1,20 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 import java.awt.*;
 
@@ -31,8 +24,12 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
 
-   public CoPHistoryRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
-                                           YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public CoPHistoryRotationEdgeCalculator(RobotSide side,
+                                           MovingReferenceFrame soleFrame,
+                                           FootholdRotationParameters rotationParameters,
+                                           double dt,
+                                           YoVariableRegistry parentRegistry,
+                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -40,8 +37,13 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
+                                                              lineOfRotationInSole,
+                                                              rotationParameters.getStableRotationDirectionThreshold(),
+                                                              rotationParameters.getStableRotationPositionThreshold(),
+                                                              rotationParameters.getMinimumTicksForEstimate(),
+                                                              dt,
+                                                              registry);
 
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);
