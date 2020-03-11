@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -24,7 +25,7 @@ import java.util.List;
 public class FootCoPHullCropper
 {
    private static final double defaultThresholdForCellActivation = 1.0;
-   private static final double defaultDecayRate = 1.0;
+   private static final double defaultDecayRate = 0.0;
    private static final double defaultAreaRatioThreshold = 0.6;
 
    private final ReferenceFrame soleFrame;
@@ -86,7 +87,8 @@ public class FootCoPHullCropper
 
    public RobotSide computeSideOfFootholdToCrop(FrameLine2DReadOnly lineOfRotation)
    {
-      computeConvexHull(convexHullOfCoPs);
+      OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, convexHullOfCoPs);
+
       leftSideCut.setIncludingFrame(convexHullOfCoPs);
       rightSideCut.setIncludingFrame(convexHullOfCoPs);
 
@@ -104,22 +106,6 @@ public class FootCoPHullCropper
          sideOfFootToCrop.set(null);
 
       return sideOfFootToCrop.getEnumValue();
-   }
-
-   public void computeConvexHull(FrameConvexPolygon2D convexHullToPack)
-   {
-      convexHullToPack.clear(soleFrame);
-
-      List<OccupancyGridCell> activeCells = occupancyGrid.getAllActiveCells();
-      for (int i = 0; i < activeCells.size(); i++)
-      {
-         OccupancyGridCell cell = activeCells.get(i);
-         cellCenter.setIncludingFrame(soleFrame, occupancyGrid.getXLocation(cell.getXIndex()), occupancyGrid.getYLocation(cell.getYIndex()));
-         if (cell.getIsOccupied())
-            convexHullToPack.addVertex(cellCenter);
-      }
-
-      convexHullToPack.update();
    }
 
    public void reset()

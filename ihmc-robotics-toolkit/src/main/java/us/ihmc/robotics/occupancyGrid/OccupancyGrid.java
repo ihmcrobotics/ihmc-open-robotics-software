@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +15,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OccupancyGrid
 {
+   static final double defaultCellSize = 0.01;
+   private static final double defaultNoDecay = 0.0;
+   private static final double defaultOneHitOccupancy = 1.0;
+
    private final YoDouble decayRate;
 
    private final YoDouble cellXSize;
    private final YoDouble cellYSize;
    private final YoDouble cellArea;
+   private final YoInteger numberOfOccupiedCells;
 
    private final YoDouble thresholdForCellActivation;
 
@@ -40,9 +46,15 @@ public class OccupancyGrid
       cellXSize = new YoDouble(namePrefix + "CellXSize", registry);
       cellYSize = new YoDouble(namePrefix + "CellYSize", registry);
       cellArea = new YoDouble(namePrefix + "CellArea", registry);
+      numberOfOccupiedCells = new YoInteger(name + "NumberOfOccupiedCells", registry);
 
       thresholdForCellActivation = new YoDouble(namePrefix + "ThresholdForCellOccupancy", registry);
       decayRate = new YoDouble(namePrefix + "CellOccupancyDecayRate", registry);
+
+      thresholdForCellActivation.set(defaultOneHitOccupancy);
+      decayRate.set(defaultNoDecay);
+      cellXSize.set(defaultCellSize);
+      cellYSize.set(defaultCellSize);
 
       setupChangedGridParameterListeners();
 
@@ -104,6 +116,7 @@ public class OccupancyGrid
 
    public void reset()
    {
+      numberOfOccupiedCells.set(0);
       allActiveCells.clear();
       for (int i = 0; i < allCellsPool.size(); i++)
          allCellsPool.get(i).reset();
@@ -114,19 +127,43 @@ public class OccupancyGrid
       if (resetOccupancyGrid.getAndSet(false))
          reset();
 
+      numberOfOccupiedCells.set(0);
       for (int i = 0; i < allCellsPool.size(); i++)
-         allCellsPool.get(i).update();
+      {
+         if (allCellsPool.get(i).update())
+            numberOfOccupiedCells.increment();
+      }
    }
 
-   public void registerPoint(FramePoint2DReadOnly point)
+   public int registerPoint(FramePoint2DReadOnly point)
    {
       point.checkReferenceFrameMatch(gridFrame);
-      getOrCreateOccupancyGridCell(point).registerHit();
+      OccupancyGridCell cell = getOrCreateOccupancyGridCell(point);
+      boolean wasOccupied = cell.getIsOccupied();
+
+      if (cell.registerHit() && !wasOccupied)
+         numberOfOccupiedCells.increment();
+
+      return numberOfOccupiedCells.getIntegerValue();
+   }
+
+   public int getNumberOfOccupiedCells()
+   {
+      return numberOfOccupiedCells.getIntegerValue();
+   }
+
+   public boolean isCellOccupied(double x, double y)
+   {
+
+      return isCellOccupied(findXIndex(x), findYIndex(y));
    }
 
    public boolean isCellOccupied(int xIndex, int yIndex)
    {
-      return getOrCreateOccupancyGridCell(xIndex, yIndex).getIsOccupied();
+      OccupancyGridCell cell = getCell(xIndex, yIndex);
+      if (cell != null)
+         return cell.getIsOccupied();
+      return false;
    }
 
    public double getXLocation(int xIndex)
@@ -141,12 +178,17 @@ public class OccupancyGrid
 
    private int findXIndex(double x)
    {
-      return (int) Math.floor(x / cellXSize.getDoubleValue());
+      return findIndex(x, cellXSize.getDoubleValue());
    }
 
    private int findYIndex(double y)
    {
-      return (int) Math.floor(y / cellYSize.getDoubleValue());
+      return findIndex(y, cellYSize.getDoubleValue());
+   }
+
+   static int findIndex(double value, double gridSize)
+   {
+      return (int) Math.floor(value / gridSize);
    }
 
    private OccupancyGridCell getOrCreateOccupancyGridCell(Point2DReadOnly pointInGrid)
@@ -157,16 +199,28 @@ public class OccupancyGrid
       return getOrCreateOccupancyGridCell(xIndex, yIndex);
    }
 
-   private OccupancyGridCell getOrCreateOccupancyGridCell(int xIndex, int yIndex)
+   private OccupancyGridCell getCell(int xIndex, int yIndex)
    {
       int hashCode = OccupancyGridCell.computeHashCode(xIndex, yIndex);
-      OccupancyGridCell cell = occupancyCellMap.get(hashCode);
+      return occupancyCellMap.get(hashCode);
+   }
+
+   private OccupancyGridCell createCell(int xIndex, int yIndex)
+   {
+      int hashCode = OccupancyGridCell.computeHashCode(xIndex, yIndex);
+      OccupancyGridCell cell = new OccupancyGridCell(xIndex, yIndex, thresholdForCellActivation, decayRate);
+      allCellsPool.add(cell);
+      occupancyCellMap.put(hashCode, cell);
+
+      return cell;
+   }
+
+   private OccupancyGridCell getOrCreateOccupancyGridCell(int xIndex, int yIndex)
+   {
+      OccupancyGridCell cell = getCell(xIndex, yIndex);
       if (cell == null)
-      {
-         cell = new OccupancyGridCell(xIndex, yIndex, thresholdForCellActivation, decayRate);
-         allCellsPool.add(cell);
-         occupancyCellMap.put(hashCode, cell);
-      }
+         cell = createCell(xIndex, yIndex);
+
       if (!allActiveCells.contains(cell))
          allActiveCells.add(cell);
 
