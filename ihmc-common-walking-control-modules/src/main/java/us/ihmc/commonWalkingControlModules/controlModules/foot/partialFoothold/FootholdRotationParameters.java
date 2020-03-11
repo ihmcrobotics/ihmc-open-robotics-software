@@ -5,18 +5,19 @@ import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootholdRotationParameters
 {
    private final DoubleProvider geometricDetectionAngleThreshold;
 
+   private final DoubleProvider copHistoryAlphaFilter;
+
    private final DoubleProvider angularVelocityAroundLoRThreshold;
    private final DoubleProvider footDropThreshold;
    private final DoubleProvider angularVelocityFilterBreakFrequency;
-   private final DoubleProvider stableLoRAngularVelocityThreshold;
-   private final DoubleProvider stableCoRLinearVelocityThreshold;
+   private final DoubleProvider stableRotationDirectionThreshold;
+   private final DoubleProvider stableRotationPositionThreshold;
+   private final IntegerProvider minimumTicksForEstimate;
 
    private final DoubleProvider omegaThresholdForEstimation;
    private final DoubleProvider decayBreakFrequency;
@@ -34,9 +35,13 @@ public class FootholdRotationParameters
       String namePrefix = "Geometric_";
       geometricDetectionAngleThreshold = new DoubleParameter(namePrefix + "AngleThreshold", registry, Math.toRadians(10.0));
 
+      namePrefix = "CoPHistory_";
+      copHistoryAlphaFilter = new DoubleParameter(namePrefix + "CoPHistoryAlphaFilter", registry, 0.0);
+
       namePrefix = "Verification_";
-      stableLoRAngularVelocityThreshold = new DoubleParameter(namePrefix + "StableLoRAngularVelocityThreshold", registry, 10.0);
-      stableCoRLinearVelocityThreshold = new DoubleParameter(namePrefix + "StableCoRLinearVelocityThreshold", registry, 0.1);
+      stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThrehsold", registry, 10.0);
+      stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.1);
+      minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 5);
 
       namePrefix = "Kinematic_";
       angularVelocityAroundLoRThreshold = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 0.5);
@@ -61,6 +66,11 @@ public class FootholdRotationParameters
       return geometricDetectionAngleThreshold;
    }
 
+   public DoubleProvider getCopHistoryAlphaFilter()
+   {
+      return copHistoryAlphaFilter;
+   }
+
    public DoubleProvider getAngularVelocityAroundLoRThreshold()
    {
       return angularVelocityAroundLoRThreshold;
@@ -76,14 +86,19 @@ public class FootholdRotationParameters
       return angularVelocityFilterBreakFrequency;
    }
 
-   public DoubleProvider getStableLoRAngularVelocityThreshold()
+   public DoubleProvider getStableRotationDirectionThreshold()
    {
-      return stableLoRAngularVelocityThreshold;
+      return stableRotationDirectionThreshold;
    }
 
-   public DoubleProvider getStableCoRLinearVelocityThreshold()
+   public DoubleProvider getStableRotationPositionThreshold()
    {
-      return stableCoRLinearVelocityThreshold;
+      return stableRotationPositionThreshold;
+   }
+
+   public IntegerProvider getMinimumTicksForEstimate()
+   {
+      return minimumTicksForEstimate;
    }
 
    public DoubleProvider getOmegaMagnitudeThresholdForEstimation()
