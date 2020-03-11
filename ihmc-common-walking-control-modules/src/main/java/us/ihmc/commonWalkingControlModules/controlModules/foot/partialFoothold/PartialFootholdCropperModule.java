@@ -94,10 +94,10 @@ public class PartialFootholdCropperModule
       reset();
    }
 
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public void compute(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
       isRotating.set(computeIsRotating());
-      croppedFootholdCalculator.update(measuredCoP);
+      croppedFootholdCalculator.update(measuredCoP, desiredCoP);
 
       if (!isRotating.getBooleanValue())
       {
@@ -112,7 +112,7 @@ public class PartialFootholdCropperModule
       if (!isEdgeStable.getBooleanValue())
          return;
 
-      croppedFootholdCalculator.computeShrunkenFoothold(edgeCalculator.getLineOfRotation());
+      croppedFootholdCalculator.computeShrunkenFoothold(edgeCalculator.getLineOfRotation(), desiredCoP);
    }
 
    public boolean isRotating()

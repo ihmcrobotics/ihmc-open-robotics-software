@@ -40,6 +40,8 @@ public class FootholdCropper
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
+   private final CropVerifier verifier;
+
    public FootholdCropper(String namePrefix,
                           ContactableFoot contactableFoot,
                           FootholdRotationParameters rotationParameters,
@@ -49,8 +51,11 @@ public class FootholdCropper
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
       numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
 
+
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+      verifier = new CropVerifier(namePrefix, contactableFoot.getSoleFrame(), 0.02, 0.02, rotationParameters, registry);
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygonInWorld = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygonInWorld", "", ReferenceFrame.getWorldFrame(), 20, registry);
@@ -99,11 +104,12 @@ public class FootholdCropper
       footCoPOccupancyGrid.reset();
    }
 
-   public void update(FramePoint2DReadOnly measuredCoP)
+   public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
       shouldShrinkFoothold.set(false);
       footCoPOccupancyGrid.update();
       footCoPHullCropper.update();
+      verifier.update(desiredCoP);
 
       if (measuredCoP.containsNaN())
          return;
@@ -112,7 +118,7 @@ public class FootholdCropper
       footCoPHullCropper.registerCenterOfPressureLocation(measuredCoP);
    }
 
-   public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation)
+   public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)
    {
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
@@ -122,9 +128,11 @@ public class FootholdCropper
 
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
       {
-         shouldShrinkFoothold.set(true);
          sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
-         convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
+         shouldShrinkFoothold.set(verifier.verifyFootholdCrop(desiredCoP, sideOfFootToCrop.getEnumValue(), lineOfRotation));
+
+         if (shouldShrinkFoothold.getBooleanValue())
+            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
       }
       else
       {
