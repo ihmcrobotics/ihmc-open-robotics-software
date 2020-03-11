@@ -205,7 +205,6 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    {
       int numberOfSteps = setUpTiltedBlockTest();
 
-      simulationTestingParameters.setKeepSCSUp(true);
       double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
