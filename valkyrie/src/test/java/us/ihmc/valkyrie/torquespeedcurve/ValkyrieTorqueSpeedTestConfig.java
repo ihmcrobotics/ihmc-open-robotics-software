@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.torquespeedcurve;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 class ValkyrieTorqueSpeedTestConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED;
 	}
 
 	public double stepStartingDistance; // for step/stair scenarios, distance to the first step (inches)
@@ -28,6 +29,8 @@ class ValkyrieTorqueSpeedTestConfig {
 	                                             // joints need to be specified.
 	public HashMap<String, Double> linkMassKg;  // Map of link name to overridden link mass in kg. Only overridden
                                                 // joints need to be specified.	
+	public HashMap<String, Double> velocityLimits; // Map of joint name to overridden velocity limit.
+	public HashMap<String, ArrayList<Double>> positionLimits; // Map of joint name to array containing lower and upper limit
 	public boolean showGui;             // whether to pop up a GUI (required if a video is wanted)
 	public TestType testType;           // type of test to run (see TestType enum)
 	public String footstepsFile;        // path to a file of footstep messages
@@ -37,17 +40,22 @@ class ValkyrieTorqueSpeedTestConfig {
 	public double stepLengthInches;     // for slope scenarios, the length of step to take in inches
 	public double globalMassScale;      // Amount to scale mass across the robot
 	public double globalSizeScale;      // Amount to scale size across the robot
+	public double torsoPitchDegrees;    // Amount to pitch the torso, in degrees (0.0 = vertical, positve = forward pitch)
+	public ValkyrieWalkingParameterValues walkingValues; // Tweaks to default walking settings
 	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
 	
 	// Default constructor
 	public ValkyrieTorqueSpeedTestConfig() {
+		
 		stepStartingDistance = 1.0 * 100.0 / 2.54; // 1m in inches
 		stepHeight = 6.0;
 		numberOfSteps = 3;
 		torqueLimits = new HashMap<String, Double>();
 		linkMassKg = new HashMap<String, Double>();
+		velocityLimits = new HashMap<String, Double>();
+		positionLimits = new HashMap<String, ArrayList<Double> >();
 		showGui = true;
 		testType = TestType.STAIRS;
 		footstepsFile = null;
@@ -56,23 +64,44 @@ class ValkyrieTorqueSpeedTestConfig {
 		stepLengthInches = 0.5 * 100.0 / 2.54; // 0.5 meters in inches
 		globalMassScale = 1.0;
 		globalSizeScale = 1.0;
+		torsoPitchDegrees = 0.0; // 0.0 == vertical
+		walkingValues = new ValkyrieWalkingParameterValues();
+	}
+	
+	private String hashDoubleToString(HashMap<String, Double> map, String description) {
+		String value = "";
+		for (String key: map.keySet()) {
+			value += String.format("%s %s: %f\n", key, description, map.get(key).doubleValue());
+		}
+		return value;
 	}
 
+	private String hashDoubleArrayToString(HashMap<String, ArrayList<Double>> map, String description) {
+		String value = "";
+		for (String key: map.keySet()) {
+			value += String.format("%s %s: [", key, description);
+			for (Double number: map.get(key) ) {
+				value += String.valueOf(number) + " ";
+			}
+			value += "]\n";
+		}
+		return value;
+	}	
+	
 	public String toString() {
 		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\nDisable Ankle Limits: %b\n",
 				testType, stepStartingDistance, stepHeight, numberOfSteps, showGui, disableAnkleLimits);
 		value += String.format("Slope Degrees: %f\nStep Length (Inches): %f\nMass scale: %f\nSize scale: %f\n",
 				slopeDegrees, stepLengthInches, globalMassScale, globalSizeScale);
+		value += walkingValues.toString();
 
 		if (footstepsFile != null) {
 			value += String.format("Footsteps Filename: %s\n", footstepsFile);
 		}
-		for (String joint : torqueLimits.keySet()) {
-			value += String.format("%s joint torque limit: %f\n", joint, torqueLimits.get(joint).doubleValue());
-		}
-		for (String joint : linkMassKg.keySet()) {
-			value += String.format("%s link mass: %f\n", joint, linkMassKg.get(joint).doubleValue());
-		}
+		value += hashDoubleToString(torqueLimits, "torque limit");
+		value += hashDoubleToString(linkMassKg, "link mass");
+		value += hashDoubleToString(velocityLimits, "velocity limit");
+		value += hashDoubleArrayToString(positionLimits, "velocity limit");
 		return value;
 	}
 	

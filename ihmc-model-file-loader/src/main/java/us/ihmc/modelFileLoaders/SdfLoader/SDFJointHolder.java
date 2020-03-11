@@ -24,7 +24,7 @@ public class SDFJointHolder
    private double lowerLimit;
    
    private double effortLimit;
-   private final double velocityLimit;
+   private double velocityLimit;
    
    
    private final RigidBodyTransform transformFromChildLink;
@@ -366,5 +366,10 @@ public class SDFJointHolder
    public void setEffortLimit(double effortLimit)
    {
       this.effortLimit = effortLimit;
+   }
+   
+   public void setVelocityLimit(double velocityLimit)
+   {
+	   this.velocityLimit = velocityLimit;
    }
 }

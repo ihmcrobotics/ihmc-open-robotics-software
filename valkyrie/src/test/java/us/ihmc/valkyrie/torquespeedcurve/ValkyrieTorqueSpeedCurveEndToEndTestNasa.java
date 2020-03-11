@@ -15,14 +15,19 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -34,6 +39,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -51,6 +57,7 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -372,6 +379,80 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		}
 	}	
 	
+	public File testSpeedWalk(DRCRobotModel robotModel, WalkingControllerParameters walkingControllerParameters,
+			File dataOutputFolder) throws SimulationExceededMaximumTimeException
+	{
+		showMemoryUsageBeforeTest();
+		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+		
+		try {
+			SlopeEnvironment ground = new SlopeEnvironment(0.0);
+			HeightMapWithNormals heightMap = ground.getTerrainObject3D().getHeightMapIfAvailable();
+			
+			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, ground);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(0.0, heightMap, robotModel));
+			drcSimulationTestHelper.createSimulation("Walking");
+			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
+			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+			final double courseLength = 5.0; // Length of course in meters. Should be long enough that course time
+			                                 // is not dominated by startup time, and short enough that tests
+			                                 // don't take forever to run.
+			
+			double cameraX = courseLength/2.0;
+			double cameraZ = 0.8 + heightMap.heightAt(cameraX, 0.0, 0.0);
+			scs.setCameraFix(cameraX, 0.0, cameraZ);
+			scs.setCameraPosition(cameraX, -8.0, cameraZ);
+			setCustomSteppingParams(scs);
+
+			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+			double walkingDuration = -1.0;
+
+			if (success) {
+				scs.setInPoint();
+
+				FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+				double stepWidth = steppingParameters.getInPlaceWidth();
+
+				double stepLength = steppingParameters.getMaxStepLength()*0.9;
+				// Set up the steps. Initial step is at the robot location.
+				stepTo(0.0, courseLength, stepLength, stepWidth, 
+						RobotSide.LEFT, heightMap, footsteps, true, true);
+				setTimings(footsteps, walkingControllerParameters);
+				//footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
+				computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75}, 0.075);
+				footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+
+				drcSimulationTestHelper.publishToController(footsteps);
+
+				walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+			}
+
+			String dataNameSuffix = "Flat_Ground_Walking";
+			final double metersPerSecToMilesPerHour = 2.23694;
+			
+			String info = "Speed walking\n";
+
+			if (success) {
+				info += String.format("\nWalking time: %f s for %f m = %f mph\n", 
+						walkingDuration, courseLength, metersPerSecToMilesPerHour*courseLength/walkingDuration);
+				System.out.println(info);
+			} else {
+				dataNameSuffix += "_FAILED";
+				info += "_FAILED";
+			}
+			
+			return exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+		}
+		finally
+		{
+			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+			destroySimulationAndRecycleMemory();
+		}
+	}
+	
 	public File testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength, 
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps, 
 			File dataOutputFolder)
@@ -385,8 +466,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
-			drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable()));
-			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+			drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(slopeAngle, slope.getTerrainObject3D().getHeightMapIfAvailable(), robotModel));
+			drcSimulationTestHelper.createSimulation("Slope");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 			double cameraX = 2.0;
@@ -512,7 +593,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 		}
 	}
 
-	private static ValkyrieInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap)
+	private static ValkyrieInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap, DRCRobotModel robotModel)
 	{
 		return new ValkyrieInitialSetup(0.0, 0.0)
 		{
@@ -531,6 +612,21 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 					hipPitchJoint.setQ(hipPitchJoint.getQ() - 0.05);
 					anklePitchJoint.setQ(anklePitchJoint.getQ() + slopeAngle - 0.05);
 				}
+				
+				// Check that we obey positional limits
+				String[] joints = robotModel.getJointMap().getOrderedJointNames();
+				for (String joint: joints) {
+					OneDegreeOfFreedomJoint oneDofJoint= robot.getOneDegreeOfFreedomJoint(joint);
+					if (oneDofJoint == null) continue;
+					if (oneDofJoint.getQ() < oneDofJoint.getJointLowerLimit() ) {
+						System.out.printf("Enforced lower joint limit of %f for %s\n", oneDofJoint.getJointLowerLimit(), joint);
+						oneDofJoint.setQ(oneDofJoint.getJointLowerLimit());
+					} else if (oneDofJoint.getQ() > oneDofJoint.getJointUpperLimit()) {
+						System.out.printf("Enforced upper joint limit of %f for %s\n", oneDofJoint.getJointLowerLimit(), joint);
+						oneDofJoint.setQ(oneDofJoint.getJointUpperLimit());
+					}
+				}
+				
 				robot.update();
 			}
 
