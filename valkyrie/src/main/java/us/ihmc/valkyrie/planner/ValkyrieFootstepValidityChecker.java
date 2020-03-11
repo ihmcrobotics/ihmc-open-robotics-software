@@ -218,8 +218,8 @@ public class ValkyrieFootstepValidityChecker
       }
 
       // Check for ankle collision
-      cliffAvoider.setPlanarRegions(planarRegionsList);
-      if(!cliffAvoider.isNodeValidInternal(candidateNode, stanceNode))
+      cliffAvoider.setPlanarRegionsList(planarRegionsList);
+      if(!cliffAvoider.isNodeValid(candidateNode))
       {
          return StepRejectionReason.TOO_CLOSE_TO_LEDGE;
       }

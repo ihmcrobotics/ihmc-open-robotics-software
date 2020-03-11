@@ -82,6 +82,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Boolean> ignorePartialFootholds;
+   private final AtomicReference<Boolean> autoPostProcess;
    private final AtomicReference<Double> goalDistanceProximity;
    private final AtomicReference<Double> goalYawProximity;
 
@@ -146,6 +147,7 @@ public class RemoteUIMessageConverter
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholds, false);
+      autoPostProcess = messager.createInput(FootstepPlannerMessagerAPI.AutoPostProcess, false);
       goalDistanceProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalDistanceProximity, 0.0);
       goalYawProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalYawProximity, 0.0);
 
@@ -250,6 +252,8 @@ public class RemoteUIMessageConverter
          walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
          walkingPreviewRequestPublisher.publish(request);
       });
+
+
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage ->
       {
@@ -370,6 +374,9 @@ public class RemoteUIMessageConverter
 
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");
+
+      if (autoPostProcess.get())
+         requestPostProcessing();
    }
 
    private void processFootstepPostProcessingResult(FootstepPostProcessingPacket packet)

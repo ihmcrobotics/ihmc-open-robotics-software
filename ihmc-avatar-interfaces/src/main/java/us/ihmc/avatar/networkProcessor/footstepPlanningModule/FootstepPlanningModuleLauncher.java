@@ -46,15 +46,32 @@ public class FootstepPlanningModuleLauncher
       return createModule(robotModel, pubSubImplementation, null);
    }
 
-   public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation, AdaptiveSwingParameters swingParameters)
+   public static FootstepPlanningModule createModule(DRCRobotModel robotModel,
+                                                     DomainFactory.PubSubImplementation pubSubImplementation,
+                                                     AdaptiveSwingParameters swingParameters)
+   {
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
+      return createModule(ros2Node, robotModel, swingParameters);
+   }
+
+   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel)
+   {
+      return createModule(ros2Node, robotModel, null);
+   }
+
+   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel, AdaptiveSwingParameters swingParameters)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
+
       footstepPlanningModule.registerRosNode(ros2Node);
 
       String name = footstepPlanningModule.getName();
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                                         ROS2Tools.FOOTSTEP_PLANNER_MODULE,
+                                                                                                         ROS2Tools.ROS2TopicQualifier.INPUT);
+      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                                        ROS2Tools.FOOTSTEP_PLANNER_MODULE,
+                                                                                                        ROS2Tools.ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerParametersPacket.class, subscriberTopicNameGenerator, s ->
@@ -77,7 +94,9 @@ public class FootstepPlanningModuleLauncher
       });
 
       // Body path plan publisher
-      IHMCROS2Publisher<BodyPathPlanMessage> bodyPathPlanPublisher = ROS2Tools.createPublisher(ros2Node, BodyPathPlanMessage.class, publisherTopicNameGenerator);
+      IHMCROS2Publisher<BodyPathPlanMessage> bodyPathPlanPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                                                               BodyPathPlanMessage.class,
+                                                                                               publisherTopicNameGenerator);
       footstepPlanningModule.addBodyPathPlanCallback(bodyPathPlanPublisher::publish);
 
       // Status publisher
@@ -108,20 +127,24 @@ public class FootstepPlanningModuleLauncher
       IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                               FootstepPlannerOccupancyMapMessage.class,
                                                                                                               publisherTopicNameGenerator);
-      RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(plannerNodeDataPublisher, occupancyMapPublisher, footstepPlanningModule.getSnapper(), updateFrequency);
-      footstepPlanningModule.getChecker().addPlannerListener(plannerListener);
+
+      RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(plannerNodeDataPublisher,
+                                                                            occupancyMapPublisher,
+                                                                            footstepPlanningModule.getSnapper(),
+                                                                            updateFrequency);
+      footstepPlanningModule.getChecker().setListener(plannerListener);
 
       footstepPlanningModule.addRequestCallback(request -> plannerListener.reset());
       footstepPlanningModule.addIterationCallback(iterationData ->
-                           {
-                              if (iterationData.getParentNode() == null)
-                                 return;
-                              for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
-                                 plannerListener.addNode(iterationData.getValidChildNodes().get(i), iterationData.getParentNode());
-                              for (int i = 0; i < iterationData.getInvalidChildNodes().size(); i++)
-                                 plannerListener.addNode(iterationData.getInvalidChildNodes().get(i), iterationData.getParentNode());
-                              plannerListener.tickAndUpdate();
-                           });
+                                                  {
+                                                     if (iterationData.getParentNode() == null)
+                                                        return;
+                                                     for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
+                                                        plannerListener.addNode(iterationData.getValidChildNodes().get(i), iterationData.getParentNode());
+                                                     for (int i = 0; i < iterationData.getInvalidChildNodes().size(); i++)
+                                                        plannerListener.addNode(iterationData.getInvalidChildNodes().get(i), iterationData.getParentNode());
+                                                     plannerListener.tickAndUpdate();
+                                                  });
 
       // status publisher
       IHMCROS2Publisher<FootstepPlannerStatusMessage> statusPublisher = ROS2Tools.createPublisher(ros2Node,
@@ -130,7 +153,9 @@ public class FootstepPlanningModuleLauncher
       footstepPlanningModule.addRequestCallback(request ->
                                                 {
                                                    FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                   statusMessage.setFootstepPlannerStatus((request.getPlanBodyPath() ? PLANNING_PATH : PLANNING_STEPS).toByte());
+                                                   statusMessage.setFootstepPlannerStatus((request.getPlanBodyPath() ?
+                                                         PLANNING_PATH :
+                                                         PLANNING_STEPS).toByte());
                                                    statusPublisher.publish(statusMessage);
                                                 });
       footstepPlanningModule.addBodyPathPlanCallback(bodyPathPlanMessage ->
@@ -155,7 +180,7 @@ public class FootstepPlanningModuleLauncher
       // cancel planning request
       ROS2Tools.createCallbackSubscription(ros2Node, ToolboxStateMessage.class, subscriberTopicNameGenerator, s ->
       {
-         if(ToolboxState.fromByte(s.takeNextData().getRequestedToolboxState()) == ToolboxState.SLEEP)
+         if (ToolboxState.fromByte(s.takeNextData().getRequestedToolboxState()) == ToolboxState.SLEEP)
             footstepPlanningModule.halt();
       });
 

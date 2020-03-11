@@ -18,8 +18,6 @@ public class FootstepPlannerParametersUIController
 
    @FXML
    private CheckBox returnBestEffortPlan;
-   @FXML
-   private CheckBox performHeuristicSearchPolicies;
 
    @FXML
    private Spinner<Double> idealStepWidth;
@@ -159,7 +157,6 @@ public class FootstepPlannerParametersUIController
       javaFXStoredPropertyMap.put(idealStepLength, FootstepPlannerParameterKeys.idealFootstepLength);
       javaFXStoredPropertyMap.put(idealStepWidth, FootstepPlannerParameterKeys.idealFootstepWidth);
       javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
-      javaFXStoredPropertyMap.put(performHeuristicSearchPolicies, FootstepPlannerParameterKeys.performHeuristicSearchPolicies);
       javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
       javaFXStoredPropertyMap.put(maxStepWidth, FootstepPlannerParameterKeys.maxStepWidth);
       javaFXStoredPropertyMap.put(minStepWidth, FootstepPlannerParameterKeys.minStepWidth);

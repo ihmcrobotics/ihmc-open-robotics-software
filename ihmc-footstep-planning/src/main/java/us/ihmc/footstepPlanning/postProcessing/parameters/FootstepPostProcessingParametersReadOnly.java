@@ -84,6 +84,15 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
    }
 
    /**
+    * If using the swing over planar regions module, this sets up how much less clearance is required on the fast approximation, since it doesn't usually have
+    * the same amount of curve to the trajectory.
+    */
+   default double getFastApproximationLessClearance()
+   {
+      return get(FootstepPostProcessingKeys.fastApproximationLessClearance);
+   }
+
+   /**
     * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
     */
    default int getNumberOfChecksPerSwing()
@@ -109,11 +118,27 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
    }
 
    /**
-    * If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
+    * If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
     */
-   default double getIncrementalWaypointAdjustmentDistance()
+   default double getMinimumAdjustmentIncrementDistance()
    {
-      return get(FootstepPostProcessingKeys.incrementalWaypointAdjustmentDistance);
+      return get(FootstepPostProcessingKeys.minimumAdjustmentIncrementDistance);
+   }
+
+   /**
+    * If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
+    */
+   default double getMaximumAdjustmentIncrementDistance()
+   {
+      return get(FootstepPostProcessingKeys.maximumAdjustmentIncrementDistance);
+   }
+
+   /**
+    * If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
+    */
+   default double getAdjustmentIncrementDistanceGain()
+   {
+      return get(FootstepPostProcessingKeys.adjustmentIncrementDistanceGain);
    }
 
    default double getMinimumHeightAboveFloorForCollision()
@@ -175,10 +200,13 @@ public interface FootstepPostProcessingParametersReadOnly extends StoredProperty
 
       packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
       packet.setDoInitialFastApproximation(getDoInitialFastApproximation());
+      packet.setFastApproximationLessClearance(getFastApproximationLessClearance());
       packet.setNumberOfChecksPerSwing(getNumberOfChecksPerSwing());
       packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
       packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
-      packet.setIncrementalWaypointAdjustmentDistance(getIncrementalWaypointAdjustmentDistance());
+      packet.setMinimumAdjustmentIncrementDistance(getMinimumAdjustmentIncrementDistance());
+      packet.setMaximumAdjustmentIncrementDistance(getMaximumAdjustmentIncrementDistance());
+      packet.setAdjustmentIncrementDistanceGain(getAdjustmentIncrementDistanceGain());
       packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
 
       packet.setFractionLoadIfFootHasFullSupport(getFractionLoadIfFootHasFullSupport());

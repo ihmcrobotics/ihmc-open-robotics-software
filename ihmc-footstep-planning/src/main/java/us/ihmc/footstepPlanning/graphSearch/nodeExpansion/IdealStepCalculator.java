@@ -14,6 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashMap;
+import java.util.function.BiPredicate;
 
 public class IdealStepCalculator
 {
@@ -26,14 +27,14 @@ public class IdealStepCalculator
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private SideDependentList<FootstepNode> goalNodes;
-   private final FootstepNodeChecker nodeChecker;
+   private final BiPredicate<FootstepNode, FootstepNode> nodeChecker;
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D idealStep = new Pose2D();
    private final Pose3D projectionPose = new Pose3D();
    private double pathLength;
 
-   public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters, FootstepNodeChecker nodeChecker, WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
+   public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters, BiPredicate<FootstepNode, FootstepNode> nodeChecker, WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
    {
       this.parameters = parameters;
       this.nodeChecker = nodeChecker;
@@ -59,7 +60,7 @@ public class IdealStepCalculator
    private FootstepNode computeIdealStepInternal(FootstepNode stanceNode)
    {
       FootstepNode goalNode = goalNodes.get(stanceNode.getRobotSide().getOppositeSide());
-      if (nodeChecker.isNodeValid(goalNode, stanceNode))
+      if (nodeChecker.test(goalNode, stanceNode))
       {
          return goalNode;
       }

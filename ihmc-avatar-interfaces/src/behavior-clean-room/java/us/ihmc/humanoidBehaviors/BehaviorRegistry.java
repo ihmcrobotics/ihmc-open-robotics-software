@@ -1,48 +1,58 @@
 package us.ihmc.humanoidBehaviors;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.ros2.Ros2Node;
 
-public enum BehaviorRegistry
+import java.util.LinkedHashSet;
+
+public class BehaviorRegistry
 {
-   STEP_IN_PLACE(StepInPlaceBehavior::new, StepInPlaceBehavior.API.create()),
-   PATROL(PatrolBehavior::new, PatrolBehaviorAPI.create()),
-   FANCY_POSES(FancyPosesBehavior::new, FancyPosesBehavior.API.create()),
-   EXPLORE(ExploreAreaBehavior::new, ExploreAreaBehavior.ExploreAreaBehaviorAPI.create()),
-   ;
-
-   public static final BehaviorRegistry[] values = values();
-
-   private final BehaviorSupplier behaviorSupplier;
-   private final MessagerAPI behaviorAPI;
-
-   private BehaviorInterface constructedBehavior;
-
-   BehaviorRegistry(BehaviorSupplier behaviorSupplier, MessagerAPI behaviorAPI)
+   public static final BehaviorRegistry DEFAULT_BEHAVIORS = new BehaviorRegistry();
+   static
    {
-      this.behaviorSupplier = behaviorSupplier;
-      this.behaviorAPI = behaviorAPI;
+      DEFAULT_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(PatrolBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(FancyPosesBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ExploreAreaBehavior.DEFINITION);
    }
 
-   public void build(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
+   private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
+   private MessagerAPI messagerAPI;
+
+   public static BehaviorRegistry of(BehaviorDefinition... entries)
    {
-      constructedBehavior = behaviorSupplier.build(new BehaviorHelper(robotModel, messager, ros2Node));
+      BehaviorRegistry registry = new BehaviorRegistry();
+      for (BehaviorDefinition entry : entries)
+      {
+         registry.register(entry);
+      }
+      return registry;
    }
 
-   public MessagerAPI getBehaviorAPI()
+   public void register(BehaviorDefinition definition)
    {
-      return behaviorAPI;
+      definitionEntries.add(definition);
    }
 
-   public BehaviorInterface getConstructedBehavior()
+   public synchronized MessagerAPI getMessagerAPI()
    {
-      return constructedBehavior;
+      if (messagerAPI == null) // MessagerAPI can only be created once
+      {
+         MessagerAPI[] behaviorAPIs = new MessagerAPI[definitionEntries.size()];
+         int i = 0;
+         for (BehaviorDefinition definitionEntry : definitionEntries)
+         {
+            behaviorAPIs[i++] = definitionEntry.getBehaviorAPI();
+         }
+         messagerAPI = BehaviorModule.API.create(behaviorAPIs);
+      }
+      return messagerAPI;
+   }
+
+   public LinkedHashSet<BehaviorDefinition> getDefinitionEntries()
+   {
+      return definitionEntries;
    }
 }
