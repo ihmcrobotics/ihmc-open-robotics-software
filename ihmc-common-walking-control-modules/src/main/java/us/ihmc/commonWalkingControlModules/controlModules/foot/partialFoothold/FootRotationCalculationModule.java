@@ -36,6 +36,7 @@ public class FootRotationCalculationModule
    private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
    private final YoBoolean isRotating;
+   private final YoBoolean isEdgeStable;
 
    public FootRotationCalculationModule(RobotSide side,
                                         MovingReferenceFrame soleFrame,
@@ -49,18 +50,18 @@ public class FootRotationCalculationModule
       parentRegistry.addChild(registry);
 
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
+      isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
 
-      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
+      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
       RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
                                                                                              soleFrame,
                                                                                              rotationParameters,
                                                                                              dt,
                                                                                              registry,
-                                                                                             graphicsRegistry);
-      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
+                                                                                             null);
+      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
       RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side,
                                                                                                      soleFrame,
-                                                                                                     copHistoryEdgeCalculator,
                                                                                                      velocityEdgeCalculator,
                                                                                                      rotationParameters,
                                                                                                      dt,
@@ -101,12 +102,14 @@ public class FootRotationCalculationModule
       if (!isRotating.getBooleanValue())
       {
          resetEdgeCalculators();
+         isEdgeStable.set(false);
          return;
       }
 
       RotationEdgeCalculator edgeCalculator = edgeCalculators.get(edgeCalculatorType.getEnumValue());
       edgeCalculator.compute(measuredCoP);
-      if (!edgeCalculator.isRotationEdgeTrusted())
+      isEdgeStable.set(edgeCalculator.isRotationEdgeTrusted());
+      if (!isEdgeStable.getBooleanValue())
          return;
 
       croppedFootholdCalculator.computeShrunkenFoothold(edgeCalculator.getLineOfRotation());
@@ -172,7 +175,9 @@ public class FootRotationCalculationModule
    public void reset()
    {
       isRotating.set(false);
+      isEdgeStable.set(false);
       resetRotationDetectors();
       resetEdgeCalculators();
+      croppedFootholdCalculator.reset();
    }
 }

@@ -24,6 +24,7 @@ public class CroppedFootholdCalculator
 {
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
+   private final YoFrameConvexPolygon2D shrunkenFootPolygonInWorld;
    private final FrameConvexPolygon2D controllerFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D controllerFootPolygonInWorld = new FrameConvexPolygon2D();
 
@@ -56,12 +57,14 @@ public class CroppedFootholdCalculator
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
+      shrunkenFootPolygonInWorld = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygonInWorld", "", ReferenceFrame.getWorldFrame(), 20, registry);
       shrunkenFootPolygon.set(defaultFootPolygon);
 
       shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
-      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, 0.5, 0.5, rotationParameters, yoGraphicsListRegistry, registry);
-      footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, 0.5, 0.5, yoGraphicsListRegistry, registry);
+      double resolution = 0.05;
+      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, resolution, resolution, rotationParameters, null, registry);
+      footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, resolution, resolution, null, registry);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
@@ -69,7 +72,7 @@ public class CroppedFootholdCalculator
       minAreaToConsider = rotationParameters.getMinimumAreaForCropping();
 
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
-      doPartialFootholdDetection.set(false);
+      doPartialFootholdDetection.set(true);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
@@ -77,8 +80,8 @@ public class CroppedFootholdCalculator
       {
          String listName = getClass().getSimpleName();
 
-         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygon, Color.CYAN, false);
-         yoShrunkPolygon.setVisible(false);
+         YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, Color.BLUE, false);
+         yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
       }
 
@@ -92,7 +95,9 @@ public class CroppedFootholdCalculator
 
    public void reset(FrameConvexPolygon2DReadOnly polygon)
    {
+      sideOfFootToCrop.set(null);
       shrunkenFootPolygon.set(polygon);
+      shrunkenFootPolygonInWorld.clear();
 
       footCoPHullCropper.reset();
       footCoPOccupancyGrid.reset();
@@ -122,7 +127,7 @@ public class CroppedFootholdCalculator
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
       {
          shouldShrinkFoothold.set(true);
-         sideOfFootToCrop.set(sideOfFootToCropFromHull);
+         sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
          convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
       }
       else
@@ -155,9 +160,11 @@ public class CroppedFootholdCalculator
       // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, numberOfFootCornerPoints);
-      controllerFootPolygonInWorld.setIncludingFrame(controllerFootPolygon);
+      controllerFootPolygonInWorld.setIncludingFrame(shrunkenFootPolygon);
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      shrunkenFootPolygonInWorld.set(controllerFootPolygonInWorld);
 
+      /*
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
       int i = 0;
       for (; i < controllerFootPolygon.getNumberOfVertices(); i++)
@@ -170,6 +177,7 @@ public class CroppedFootholdCalculator
       {
          contactPoints.get(i).setInContact(false);
       }
+      */
 
       shrinkCounter.increment();
       return true;
