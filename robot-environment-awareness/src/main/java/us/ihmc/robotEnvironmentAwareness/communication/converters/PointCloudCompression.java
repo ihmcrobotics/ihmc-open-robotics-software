@@ -312,8 +312,8 @@ public class PointCloudCompression
    public static void decompressColors(TByteArrayList compressedColors, int numberOfPoints, IntConsumer colorConsumer)
    {
       ByteBuffer compressedColorByteBuffer = ByteBuffer.wrap(compressedColors.toArray());
-      ByteBuffer decompressedColorByteBuffer = ByteBuffer.allocate(numberOfPoints * 3 * 4);
-      compressorThreadLocal.get().decompress(compressedColorByteBuffer, decompressedColorByteBuffer, numberOfPoints * 3 * 4);
+      ByteBuffer decompressedColorByteBuffer = ByteBuffer.allocate(numberOfPoints * 4);
+      compressorThreadLocal.get().decompress(compressedColorByteBuffer, decompressedColorByteBuffer, numberOfPoints * 4);
       decompressedColorByteBuffer.flip();
       IntBuffer colorIntBuffer = decompressedColorByteBuffer.asIntBuffer();
 
