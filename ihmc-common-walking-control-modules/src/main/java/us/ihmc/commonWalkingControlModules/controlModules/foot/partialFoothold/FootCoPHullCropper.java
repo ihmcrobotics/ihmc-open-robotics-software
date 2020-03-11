@@ -28,16 +28,12 @@ public class FootCoPHullCropper
    private static final double defaultDecayRate = 0.0;
    private static final double defaultAreaRatioThreshold = 0.6;
 
-   private final ReferenceFrame soleFrame;
-
    private final YoDouble areaOnRightSideOfLine;
    private final YoDouble areaOnLeftSideOfLine;
    private final YoDouble areaRatioThreshold;
 
    private final OccupancyGrid occupancyGrid;
    private final OccupancyGridVisualizer visualizer;
-
-   private final FramePoint2D cellCenter = new FramePoint2D();
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final YoEnum<RobotSide> sideOfFootToCrop;
@@ -49,8 +45,6 @@ public class FootCoPHullCropper
                              YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoVariableRegistry parentRegistry)
    {
-      this.soleFrame = soleFrame;
-
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
 

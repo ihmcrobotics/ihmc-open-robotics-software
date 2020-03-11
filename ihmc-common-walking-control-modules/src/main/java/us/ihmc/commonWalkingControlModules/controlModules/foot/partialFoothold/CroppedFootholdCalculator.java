@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -128,7 +129,10 @@ public class CroppedFootholdCalculator
       {
          shouldShrinkFoothold.set(true);
          sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
+         LogTools.info("Polygon to crop = " + shrunkenFootPolygon);
          convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
+         LogTools.info("Line of rotation = " + lineOfRotation);
+         LogTools.info("Cropped polygon = " + shrunkenFootPolygon);
       }
       else
       {
@@ -145,9 +149,14 @@ public class CroppedFootholdCalculator
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
       // if we are not doing partial foothold detection exit
-      if (!doPartialFootholdDetection.getBooleanValue() || !shouldShrinkFoothold.getBooleanValue())
+      if (!doPartialFootholdDetection.getBooleanValue())
       {
          shrunkenFootPolygon.set(defaultFootPolygon);
+         return false;
+      }
+
+      if (!shouldShrinkFoothold.getBooleanValue())
+      {
          return false;
       }
 
