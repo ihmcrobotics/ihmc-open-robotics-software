@@ -42,6 +42,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                                               rotationParameters.getStableRotationDirectionThreshold(),
                                                               rotationParameters.getStableRotationPositionThreshold(),
                                                               rotationParameters.getMinimumTicksForEstimate(),
+                                                              rotationParameters.getStableEdgeWindowSize(),
                                                               dt,
                                                               registry);
 

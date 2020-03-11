@@ -69,6 +69,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                               rotationParameters.getStableRotationDirectionThreshold(),
                                                               rotationParameters.getStableRotationPositionThreshold(),
                                                               rotationParameters.getMinimumTicksForEstimate(),
+                                                              rotationParameters.getStableEdgeWindowSize(),
                                                               dt,
                                                               registry);
 
