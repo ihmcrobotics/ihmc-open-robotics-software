@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.EnumMap;
 
-public class FootRotationCalculationModule
+public class PartialFootholdCropperModule
 {
    private enum RotationDetectorType
    {
@@ -31,20 +31,20 @@ public class FootRotationCalculationModule
    private final YoEnum<RotationDetectorType> rotationDetectorType;
    private final EnumMap<EdgeCalculatorType, RotationEdgeCalculator> edgeCalculators = new EnumMap<>(EdgeCalculatorType.class);
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
-   private final CroppedFootholdCalculator croppedFootholdCalculator;
+   private final FootholdCropper croppedFootholdCalculator;
 
    private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
    private final YoBoolean isRotating;
    private final YoBoolean isEdgeStable;
 
-   public FootRotationCalculationModule(RobotSide side,
-                                        MovingReferenceFrame soleFrame,
-                                        ContactableFoot contactableFoot,
-                                        FootholdRotationParameters rotationParameters,
-                                        double dt,
-                                        YoVariableRegistry parentRegistry,
-                                        YoGraphicsListRegistry graphicsRegistry)
+   public PartialFootholdCropperModule(RobotSide side,
+                                       MovingReferenceFrame soleFrame,
+                                       ContactableFoot contactableFoot,
+                                       FootholdRotationParameters rotationParameters,
+                                       double dt,
+                                       YoVariableRegistry parentRegistry,
+                                       YoGraphicsListRegistry graphicsRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
@@ -85,11 +85,11 @@ public class FootRotationCalculationModule
       rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
       edgeCalculatorType.set(EdgeCalculatorType.VELOCITY_AND_COP);
 
-      croppedFootholdCalculator = new CroppedFootholdCalculator(side.getLowerCaseName(),
-                                                                contactableFoot,
-                                                                rotationParameters,
-                                                                registry,
-                                                                graphicsRegistry);
+      croppedFootholdCalculator = new FootholdCropper(side.getLowerCaseName(),
+                                                      contactableFoot,
+                                                      rotationParameters,
+                                                      registry,
+                                                      graphicsRegistry);
 
       reset();
    }

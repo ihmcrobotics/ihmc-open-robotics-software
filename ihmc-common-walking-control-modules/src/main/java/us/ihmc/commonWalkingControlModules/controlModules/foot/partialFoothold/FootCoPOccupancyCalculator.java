@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.*;
 
 import java.util.List;
 
-public class FootCoPOccupancyCropper
+public class FootCoPOccupancyCalculator
 {
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 0.0;
@@ -40,13 +40,13 @@ public class FootCoPOccupancyCropper
 
    private final YoEnum<RobotSide> sideOfFootToCrop;
 
-   public FootCoPOccupancyCropper(String namePrefix,
-                                  ReferenceFrame soleFrame,
-                                  double lengthResolution,
-                                  double widthResoultion,
-                                  FootholdRotationParameters explorationParameters,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyCalculator(String namePrefix,
+                                     ReferenceFrame soleFrame,
+                                     double lengthResolution,
+                                     double widthResoultion,
+                                     FootholdRotationParameters explorationParameters,
+                                     YoGraphicsListRegistry yoGraphicsListRegistry,
+                                     YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
