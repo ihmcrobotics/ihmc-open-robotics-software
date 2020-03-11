@@ -19,6 +19,8 @@ public class FootholdRotationParameters
    private final DoubleProvider stableRotationPositionThreshold;
    private final IntegerProvider minimumTicksForEstimate;
    private final IntegerProvider stableEdgeWindowSize;
+   private final DoubleProvider perpendicularCoPError;
+   private final IntegerProvider numberOfDesiredCopsOnCropSide;
 
    private final DoubleProvider omegaThresholdForEstimation;
    private final DoubleProvider decayBreakFrequency;
@@ -44,6 +46,8 @@ public class FootholdRotationParameters
       stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.1);
       minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 5);
       stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
+      perpendicularCoPError = new DoubleParameter(namePrefix + "PerpendicularCoPErrorThreshold", registry, 0.005);
+      numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
 
       namePrefix = "Kinematic_";
       angularVelocityAroundLoRThreshold = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 0.5);
@@ -146,5 +150,15 @@ public class FootholdRotationParameters
    public IntegerProvider getShrinkMaxLimit()
    {
       return shrinkMaxLimit;
+   }
+
+   public DoubleProvider getPerpendicularCoPErrorThreshold()
+   {
+      return perpendicularCoPError;
+   }
+
+   public IntegerProvider getNumberOfDesiredCopsOnCropSide()
+   {
+      return numberOfDesiredCopsOnCropSide;
    }
 }
