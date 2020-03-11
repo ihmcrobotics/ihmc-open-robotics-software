@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -20,6 +21,7 @@ public class EdgeVelocityStabilityEvaluator
 
    private final YoInteger numberOfTicksInEstimate;
    private final IntegerProvider minimumTicksToEstimate;
+   private final IntegerProvider stableWindowWize;
 
    /** Absolute angle of the line of rotation. */
    private final YoDouble angleOfLineOfRotation;
@@ -35,6 +37,7 @@ public class EdgeVelocityStabilityEvaluator
    private final YoBoolean isLineOfRotationStable;
 
    private final YoBoolean isEdgeVelocityStable;
+   private final GlitchFilteredYoBoolean isEdgeStable;
 
    private final FrameLine2DReadOnly lineOfRotation;
 
@@ -43,6 +46,7 @@ public class EdgeVelocityStabilityEvaluator
                                          DoubleProvider lineOfRotationStableVelocityThreshold,
                                          DoubleProvider centerOfRotationStableVelocityThreshold,
                                          IntegerProvider minimumTicksToEstimate,
+                                         IntegerProvider stableWindowWize,
                                          double dt,
                                          YoVariableRegistry registry)
    {
@@ -50,6 +54,7 @@ public class EdgeVelocityStabilityEvaluator
       this.lineOfRotationStableVelocityThreshold = lineOfRotationStableVelocityThreshold;
       this.centerOfRotationStableVelocityThreshold = centerOfRotationStableVelocityThreshold;
       this.minimumTicksToEstimate = minimumTicksToEstimate;
+      this.stableWindowWize = stableWindowWize;
 
       numberOfTicksInEstimate = new YoInteger(namePrefix + "NumberOfTicksInEstimate", registry);
 
@@ -74,6 +79,8 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable = new YoBoolean(namePrefix + "IsLineOfRotationStable", registry);
       isCenterOfRotationStable = new YoBoolean(namePrefix + "IsCenterOfRotationStable", registry);
       isEdgeVelocityStable = new YoBoolean(namePrefix + "IsEdgeVelocityStable", registry);
+
+      isEdgeStable = new GlitchFilteredYoBoolean(namePrefix + "IsEdgeStable", registry, isEdgeVelocityStable, 10);
    }
 
    public void reset()
@@ -89,10 +96,12 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable.set(false);
       isCenterOfRotationStable.set(false);
       isEdgeVelocityStable.set(false);
+      isEdgeStable.set(false);
    }
 
    public void update()
    {
+      isEdgeStable.setWindowSize(stableWindowWize.getValue());
       numberOfTicksInEstimate.increment();
       centerOfRotationVelocity.update();
 
@@ -109,10 +118,15 @@ public class EdgeVelocityStabilityEvaluator
          isEdgeVelocityStable.set(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
       else
          isEdgeVelocityStable.set(false);
+
+      if (!isEdgeVelocityStable.getBooleanValue())
+         isEdgeStable.set(false);
+      else
+         isEdgeStable.update();
    }
 
    public boolean isEdgeVelocityStable()
    {
-      return isEdgeVelocityStable.getBooleanValue();
+      return isEdgeStable.getBooleanValue();
    }
 }

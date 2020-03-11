@@ -18,6 +18,7 @@ public class FootholdRotationParameters
    private final DoubleProvider stableRotationDirectionThreshold;
    private final DoubleProvider stableRotationPositionThreshold;
    private final IntegerProvider minimumTicksForEstimate;
+   private final IntegerProvider stableEdgeWindowSize;
 
    private final DoubleProvider omegaThresholdForEstimation;
    private final DoubleProvider decayBreakFrequency;
@@ -42,6 +43,7 @@ public class FootholdRotationParameters
       stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThrehsold", registry, 10.0);
       stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.1);
       minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 5);
+      stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
 
       namePrefix = "Kinematic_";
       angularVelocityAroundLoRThreshold = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 0.5);
@@ -99,6 +101,11 @@ public class FootholdRotationParameters
    public IntegerProvider getMinimumTicksForEstimate()
    {
       return minimumTicksForEstimate;
+   }
+
+   public IntegerProvider getStableEdgeWindowSize()
+   {
+      return stableEdgeWindowSize;
    }
 
    public DoubleProvider getOmegaMagnitudeThresholdForEstimation()
