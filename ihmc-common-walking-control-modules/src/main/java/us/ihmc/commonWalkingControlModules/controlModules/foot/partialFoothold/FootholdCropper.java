@@ -161,7 +161,7 @@ public class FootholdCropper
       // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, numberOfFootCornerPoints);
-      controllerFootPolygonInWorld.setIncludingFrame(shrunkenFootPolygon);
+      controllerFootPolygonInWorld.setIncludingFrame(controllerFootPolygon);
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       shrunkenFootPolygonInWorld.set(controllerFootPolygonInWorld);
 
