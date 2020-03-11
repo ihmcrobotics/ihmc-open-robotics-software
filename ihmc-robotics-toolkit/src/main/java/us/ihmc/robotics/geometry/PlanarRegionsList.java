@@ -15,6 +15,11 @@ public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
 
+   public PlanarRegionsList()
+   {
+      regions = new ArrayList<>();
+   }
+
    public PlanarRegionsList(PlanarRegion... planarRegions)
    {
       regions = new ArrayList<>();

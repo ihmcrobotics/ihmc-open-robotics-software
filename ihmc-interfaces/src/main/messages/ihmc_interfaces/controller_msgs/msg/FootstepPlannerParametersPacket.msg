@@ -13,9 +13,6 @@ bool check_for_body_box_collisions false
 # between consecutive steps and invalidates steps with collisions, see: ObstacleBetweenNodesChecker
 bool check_for_path_collisions false
 
-# Sets whether or not to perform the defined heuristic search policies.
-bool perform_heuristic_search_policies false
-
 # Returns the ideal step width for walking on flat ground.
 float64 ideal_footstep_width -11.1
 
