@@ -1,16 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -19,9 +15,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
 import java.awt.*;
-import java.util.List;
 
-public class CroppedFootholdCalculator
+public class FootholdCropper
 {
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
@@ -32,8 +27,8 @@ public class CroppedFootholdCalculator
    private final DoubleProvider minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
 
-   private final FootCoPOccupancyCropper footCoPOccupancyGrid;
-   private final FootCoPHullCropper footCoPHullCropper;
+   private final FootCoPOccupancyCalculator footCoPOccupancyGrid;
+   private final FootCoPHullCalculator footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final YoBoolean doPartialFootholdDetection;
@@ -45,11 +40,11 @@ public class CroppedFootholdCalculator
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
-   public CroppedFootholdCalculator(String namePrefix,
-                                    ContactableFoot contactableFoot,
-                                    FootholdRotationParameters rotationParameters,
-                                    YoVariableRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FootholdCropper(String namePrefix,
+                          ContactableFoot contactableFoot,
+                          FootholdRotationParameters rotationParameters,
+                          YoVariableRegistry parentRegistry,
+                          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
       numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
@@ -64,8 +59,8 @@ public class CroppedFootholdCalculator
       shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
       double resolution = 0.05;
-      footCoPOccupancyGrid = new FootCoPOccupancyCropper(namePrefix, soleFrame, resolution, resolution, rotationParameters, null, registry);
-      footCoPHullCropper = new FootCoPHullCropper(namePrefix, soleFrame, resolution, resolution, null, registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, soleFrame, resolution, resolution, rotationParameters, null, registry);
+      footCoPHullCropper = new FootCoPHullCalculator(namePrefix, soleFrame, resolution, resolution, null, registry);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
@@ -129,10 +124,7 @@ public class CroppedFootholdCalculator
       {
          shouldShrinkFoothold.set(true);
          sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
-         LogTools.info("Polygon to crop = " + shrunkenFootPolygon);
          convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
-         LogTools.info("Line of rotation = " + lineOfRotation);
-         LogTools.info("Cropped polygon = " + shrunkenFootPolygon);
       }
       else
       {

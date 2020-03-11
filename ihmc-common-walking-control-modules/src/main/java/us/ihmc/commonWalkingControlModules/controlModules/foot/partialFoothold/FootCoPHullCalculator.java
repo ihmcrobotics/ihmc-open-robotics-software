@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-public class FootCoPHullCropper
+public class FootCoPHullCalculator
 {
    private static final double defaultThresholdForCellActivation = 1.0;
    private static final double defaultDecayRate = 0.0;
@@ -38,12 +38,12 @@ public class FootCoPHullCropper
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final YoEnum<RobotSide> sideOfFootToCrop;
 
-   public FootCoPHullCropper(String namePrefix,
-                             ReferenceFrame soleFrame,
-                             double lengthResolution,
-                             double widthResolution,
-                             YoGraphicsListRegistry yoGraphicsListRegistry,
-                             YoVariableRegistry parentRegistry)
+   public FootCoPHullCalculator(String namePrefix,
+                                ReferenceFrame soleFrame,
+                                double lengthResolution,
+                                double widthResolution,
+                                YoGraphicsListRegistry yoGraphicsListRegistry,
+                                YoVariableRegistry parentRegistry)
    {
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
