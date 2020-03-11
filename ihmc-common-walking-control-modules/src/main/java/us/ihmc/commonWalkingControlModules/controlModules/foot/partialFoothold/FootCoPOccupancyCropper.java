@@ -23,7 +23,7 @@ import java.util.List;
 public class FootCoPOccupancyCropper
 {
    private static final double defaultThresholdForCellActivation = 1.0;
-   private static final double defaultDecayRate = 1.0;
+   private static final double defaultDecayRate = 0.0;
 
    private final ReferenceFrame soleFrame;
 

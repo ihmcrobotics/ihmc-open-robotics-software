@@ -5,6 +5,8 @@ import us.ihmc.yoVariables.providers.IntegerProvider;
 
 public class OccupancyGridCell
 {
+   private static final int maxExpectedIndex = 10000;
+
    private DoubleProvider occupancyThreshold = () -> 1;
    private DoubleProvider occupancyDecayRate = () -> 1.0;
    private boolean isOccupied = false;
@@ -61,25 +63,26 @@ public class OccupancyGridCell
       this.occupancyDecayRate = occupancyDecayRate;
    }
 
-   public void update()
+   public boolean update()
    {
       if (occupancyDecayRate.getValue() >= 1.0)
-         return;
+         return isOccupied;
 
-      numberOfHits *= occupancyDecayRate.getValue();
+      numberOfHits *= (1.0 - occupancyDecayRate.getValue());
 
-      updateOccupancyEstimate();
+      return updateOccupancyEstimate();
    }
 
-   public void registerHit()
+   public boolean registerHit()
    {
       numberOfHits += 1.0;
-      updateOccupancyEstimate();
+      return updateOccupancyEstimate();
    }
 
-   private void updateOccupancyEstimate()
+   private boolean updateOccupancyEstimate()
    {
       isOccupied = numberOfHits >= occupancyThreshold.getValue();
+      return isOccupied;
    }
 
    public static int computeHashCode(OccupancyGridCell cell)
@@ -91,8 +94,8 @@ public class OccupancyGridCell
    {
       int result = 1;
       int prime = 31;
-      result += prime * xIndex;
-      result += prime * yIndex;
+      result += (xIndex + maxExpectedIndex);
+      result += prime * (maxExpectedIndex + yIndex);
 
       return result;
    }
