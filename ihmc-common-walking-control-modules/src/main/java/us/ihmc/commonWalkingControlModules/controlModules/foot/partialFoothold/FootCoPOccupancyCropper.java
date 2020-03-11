@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -15,7 +13,6 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -72,7 +69,7 @@ public class FootCoPOccupancyCropper
       numberOfOccupiedCells = new SideDependentList<>(numberOfCellsOccupiedOnLeftSideOfLine, numberOfCellsOccupiedOnRightSideOfLine);
 
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix + "Occupancy", occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
       else
          visualizer = null;
 
@@ -98,9 +95,8 @@ public class FootCoPOccupancyCropper
       boolean rightOccupied = numberOfOccupiedCells.get(RobotSide.RIGHT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue();
 
       if (leftOccupied && rightOccupied)
-         throw new RuntimeException("Error: both can't be occupied.");
-
-      if (leftOccupied)
+         sideOfFootToCrop.set(null);
+      else if (leftOccupied)
          sideOfFootToCrop.set(RobotSide.RIGHT);
       else if (rightOccupied)
          sideOfFootToCrop.set(RobotSide.LEFT);

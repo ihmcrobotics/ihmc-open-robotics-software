@@ -68,7 +68,7 @@ public class FootCoPHullCropper
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix, occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix + "Hull", occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
       else
          visualizer = null;
 

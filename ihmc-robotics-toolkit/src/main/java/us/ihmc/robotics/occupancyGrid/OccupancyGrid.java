@@ -26,8 +26,8 @@ public class OccupancyGrid
 
    private final AtomicBoolean resetOccupancyGrid = new AtomicBoolean();
 
-   private final IntMap<OccupancyGridCell> occupancyCellMap = new IntMap<>();
-   private final List<OccupancyGridCell> allCellsPool = new ArrayList<>();
+   final IntMap<OccupancyGridCell> occupancyCellMap = new IntMap<>();
+   final List<OccupancyGridCell> allCellsPool = new ArrayList<>();
    private final List<OccupancyGridCell> allActiveCells = new ArrayList<>();
 
    public OccupancyGrid(String namePrefix, ReferenceFrame gridFrame, YoVariableRegistry parentRegistry)
@@ -165,6 +165,7 @@ public class OccupancyGrid
       {
          cell = new OccupancyGridCell(xIndex, yIndex, thresholdForCellActivation, decayRate);
          allCellsPool.add(cell);
+         occupancyCellMap.put(hashCode, cell);
       }
       if (!allActiveCells.contains(cell))
          allActiveCells.add(cell);

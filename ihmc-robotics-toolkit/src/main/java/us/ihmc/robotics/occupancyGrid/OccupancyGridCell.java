@@ -73,13 +73,13 @@ public class OccupancyGridCell
 
    public void registerHit()
    {
-      numberOfHits++;
+      numberOfHits += 1.0;
       updateOccupancyEstimate();
    }
 
    private void updateOccupancyEstimate()
    {
-      isOccupied = numberOfHits > occupancyThreshold.getValue();
+      isOccupied = numberOfHits >= occupancyThreshold.getValue();
    }
 
    public static int computeHashCode(OccupancyGridCell cell)
