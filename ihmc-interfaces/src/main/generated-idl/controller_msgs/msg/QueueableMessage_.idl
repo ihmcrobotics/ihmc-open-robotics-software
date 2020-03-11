@@ -68,6 +68,11 @@ module controller_msgs
          * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
          */
         double stream_integration_duration;
+        /**
+         * Timestamp (in nanoseconds) when this message was created.
+         * The timestamp can be generated from the computer where this message originates.
+         */
+        long long timestamp;
       };
     };
   };

@@ -52,6 +52,8 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -69,6 +71,9 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -101,6 +106,8 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getStreamIntegrationDuration());
 
+      cdr.write_type_11(data.getTimestamp());
+
    }
 
    public static void read(controller_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.CDR cdr)
@@ -117,6 +124,8 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setStreamIntegrationDuration(cdr.read_type_6());
       	
+      data.setTimestamp(cdr.read_type_11());
+      	
 
    }
 
@@ -129,6 +138,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_11("previous_message_id", data.getPreviousMessageId());
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
       ser.write_type_6("stream_integration_duration", data.getStreamIntegrationDuration());
+      ser.write_type_11("timestamp", data.getTimestamp());
    }
 
    @Override
@@ -140,6 +150,7 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setPreviousMessageId(ser.read_type_11("previous_message_id"));
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
       data.setStreamIntegrationDuration(ser.read_type_6("stream_integration_duration"));
+      data.setTimestamp(ser.read_type_11("timestamp"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QueueableMessage src, controller_msgs.msg.dds.QueueableMessage dest)
