@@ -1,21 +1,19 @@
-package us.ihmc.valkyrie.planner.log;
+package us.ihmc.footstepPlanning.log;
 
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-public class ValkyriePlannerIterationData
+public class FootstepPlannerIterationData
 {
    private FootstepNode stanceNode = null;
    private FootstepNode idealStep = null;
    private final List<FootstepNode> childNodes = new ArrayList<>();
    private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
 
-   public ValkyriePlannerIterationData()
+   public FootstepPlannerIterationData()
    {
       clear();
    }

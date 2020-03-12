@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,6 +23,7 @@ public class FootstepNodeChecker
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final FootstepPlannerEdgeData edgeData;
 
    private final PlanarRegionBaseOfCliffAvoider cliffAvoider;
    private final ObstacleBetweenNodesChecker obstacleBetweenNodesChecker;
@@ -31,17 +33,21 @@ public class FootstepNodeChecker
    private PlanarRegionsList planarRegionsList = null;
    private BipedalFootstepPlannerListener listener = null;
 
+   // Variables to log
+   private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
+   private double footAreaPercentage;
+
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
-                              SideDependentList<ConvexPolygon2D> footPolygons,
-                              FootstepNodeSnapper snapper)
+                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, FootstepPlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
+      this.edgeData = edgeData;
       this.footPolygons = footPolygons;
       this.cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenNodesChecker = new ObstacleBetweenNodesChecker(parameters, snapper);
       this.collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
-      this.goodPositionChecker = new GoodFootstepPositionChecker(parameters, snapper);
+      this.goodPositionChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
    }
 
    public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -51,18 +57,21 @@ public class FootstepNodeChecker
          throw new RuntimeException(getClass().getSimpleName() + " received a pair stance and swing footsteps both on the " + candidateNode.getRobotSide() + " side");
       }
 
+      clearLoggedVariables();
       BipedalFootstepPlannerNodeRejectionReason rejectionReason = isNodeValidInternal(candidateNode, stanceNode);
       if (listener != null && rejectionReason != null)
       {
          listener.rejectNode(candidateNode, stanceNode, rejectionReason);
       }
 
+      logVariables(candidateNode, stanceNode, rejectionReason);
+
       return rejectionReason == null;
    }
 
    private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)
    {
-      FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
+      candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())
@@ -82,7 +91,7 @@ public class FootstepNodeChecker
       ConvexPolygon2D footholdAfterSnap = candidateNodeSnapData.getCroppedFoothold();
       double croppedFootArea = footholdAfterSnap.getArea();
       double fullFootArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
-      double footAreaPercentage = croppedFootArea / fullFootArea;
+      footAreaPercentage = croppedFootArea / fullFootArea;
 
       double epsilonAreaPercentage = 1e-4;
       if (!footholdAfterSnap.isEmpty() && footAreaPercentage < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
@@ -168,5 +177,25 @@ public class FootstepNodeChecker
    public BipedalFootstepPlannerListener getListener()
    {
       return listener;
+   }
+
+   private void logVariables(FootstepNode candidateNode, FootstepNode stanceNode, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
+   {
+      if (edgeData != null)
+      {
+         edgeData.setStanceNode(stanceNode);
+         edgeData.setCandidateNode(candidateNode);
+         edgeData.setCandidateNodeSnapData(candidateNodeSnapData);
+         edgeData.setFootAreaPercentage(footAreaPercentage);
+         edgeData.setRejectionReason(rejectionReason);
+         goodPositionChecker.logVariables();
+      }
+   }
+
+   private void clearLoggedVariables()
+   {
+      footAreaPercentage = Double.NaN;
+      candidateNodeSnapData.clear();
+      goodPositionChecker.clearLoggedVariables();
    }
 }

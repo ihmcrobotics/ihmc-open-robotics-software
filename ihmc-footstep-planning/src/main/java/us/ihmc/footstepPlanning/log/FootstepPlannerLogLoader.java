@@ -1,39 +1,36 @@
-package us.ihmc.valkyrie.planner.log;
+package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacketPubSubType;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatus;
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningStatusPubSubType;
+import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class ValkyriePlannerLogLoader
+public class FootstepPlannerLogLoader
 {
-   private final JSONSerializer<ValkyrieFootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<ValkyrieFootstepPlanningStatus> statusPacketSerializer = new JSONSerializer<>(new ValkyrieFootstepPlanningStatusPubSubType());
-   private ValkyriePlannerLog log = null;
+   private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
+   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
+   private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
+
+   private FootstepPlannerLog log = null;
+   private final ObjectMapper objectMapper = new ObjectMapper();
 
    public boolean load()
    {
       JFileChooser fileChooser = new JFileChooser();
-      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs");
+      File logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
       fileChooser.setCurrentDirectory(logDirectory);
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int chooserState = fileChooser.showOpenDialog(null);
@@ -41,28 +38,55 @@ public class ValkyriePlannerLogLoader
       if (chooserState != JFileChooser.APPROVE_OPTION)
          return false;
 
+      return load(fileChooser.getSelectedFile());
+   }
+
+   /**
+    * Loads the given log file. If successful, retreive the log by calling {@link #getLog}
+    * @return if the log loaded successfully
+    */
+   public boolean load(File logDirectory)
+   {
+      if (!logDirectory.isDirectory())
+      {
+         LogTools.error("The given file isn't a directory. This method should receive a directory as input");
+         return false;
+      }
+
       try
       {
-         File selectedFile = fileChooser.getSelectedFile();
-         log = new ValkyriePlannerLog(selectedFile.getName());
+         log = new FootstepPlannerLog(logDirectory.getName());
 
          // load request packet
-         File requestFile = new File(selectedFile, ValkyriePlannerLogger.requestPacketFileName);
+         File requestFile = new File(logDirectory, FootstepPlannerLogger.requestPacketFileName);
          InputStream requestPacketInputStream = new FileInputStream(requestFile);
-         ObjectMapper objectMapper = new ObjectMapper();
          JsonNode jsonNode = objectMapper.readTree(requestPacketInputStream);
-         log.requestPacket.set(requestPacketSerializer.deserialize(jsonNode.toString()));
+         log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
+         // load footstep parameters packet
+         File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
+         InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
+         jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
+         log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
+         footstepParametersPacketInputStream.close();
+
+         // load footstep parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+         bodyPathParametersPacketInputStream.close();
+
          // load status packet
-         File statusFile = new File(selectedFile, ValkyriePlannerLogger.statusPacketFileName);
+         File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
-         log.statusPacket.set(statusPacketSerializer.deserialize(jsonNode.toString()));
+         log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
          // load data file
-         File dataFile = new File(selectedFile, ValkyriePlannerLogger.dataFileName);
+         File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
          BufferedReader dataFileReader = new BufferedReader(new FileReader(dataFile));
 
          // data variables
@@ -70,26 +94,27 @@ public class ValkyriePlannerLogLoader
 
          while(dataFileReader.readLine() != null)
          {
-            ValkyriePlannerIterationData iterationData = new ValkyriePlannerIterationData();
+            FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealStep(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-            log.iterationData.add(iterationData);
+            log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
             {
                // edge marker
                dataFileReader.readLine();
 
-               ValkyriePlannerEdgeData edgeData = new ValkyriePlannerEdgeData();
+               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+               edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
 
                double[] doubleCSV = getDoubleCSV(dataFileReader.readLine());
-               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : StepRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
+               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
                edgeData.setFootAreaPercentage(doubleCSV[1]);
                edgeData.setStepWidth(doubleCSV[2]);
                edgeData.setStepLength(doubleCSV[3]);
@@ -101,7 +126,7 @@ public class ValkyriePlannerLogLoader
                edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
                iterationData.getChildNodes().add(edgeData.getCandidateNode());
 
-               log.edgeDataMap.put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
+               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
 
@@ -115,45 +140,7 @@ public class ValkyriePlannerLogLoader
       }
    }
 
-   public class ValkyriePlannerLog
-   {
-      private final String logName;
-      private final ValkyrieFootstepPlanningRequestPacket requestPacket = new ValkyrieFootstepPlanningRequestPacket();
-      private final ValkyrieFootstepPlanningStatus statusPacket = new ValkyrieFootstepPlanningStatus();
-      private final Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap = new HashMap<>();
-      private final List<ValkyriePlannerIterationData> iterationData = new ArrayList<>();
-
-      public ValkyriePlannerLog(String logName)
-      {
-         this.logName = logName;
-      }
-
-      public String getLogName()
-      {
-         return logName;
-      }
-      public ValkyrieFootstepPlanningRequestPacket getRequestPacket()
-      {
-         return requestPacket;
-      }
-
-      public ValkyrieFootstepPlanningStatus getStatusPacket()
-      {
-         return statusPacket;
-      }
-
-      public Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> getEdgeDataMap()
-      {
-         return edgeDataMap;
-      }
-
-      public List<ValkyriePlannerIterationData> getIterationData()
-      {
-         return iterationData;
-      }
-   }
-
-   public ValkyriePlannerLog getLog()
+   public FootstepPlannerLog getLog()
    {
       return log;
    }
@@ -218,10 +205,5 @@ public class ValkyriePlannerLogLoader
       }
       polygon.update();
       return polygon;
-   }
-
-   public static void main(String[] args)
-   {
-      new ValkyriePlannerLogLoader().load();
    }
 }
