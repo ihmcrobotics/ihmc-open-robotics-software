@@ -2,8 +2,6 @@ package us.ihmc.footstepPlanning.ui.components;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.BodyPathData;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootPosition;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InitialSupportSide;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
@@ -29,7 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -64,11 +61,11 @@ public class FootstepPathCalculatorModule
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
+   private final AtomicReference<RobotSide> initialStanceSideReference;
    private final AtomicReference<Pose3DReadOnly> leftFootStartPose;
    private final AtomicReference<Pose3DReadOnly> rightFootStartPose;
-   private final AtomicReference<RobotSide> initialStanceSideReference;
-   private final AtomicReference<Point3D> goalPositionReference;
-   private final AtomicReference<Quaternion> goalOrientationReference;
+   private final AtomicReference<Pose3DReadOnly> leftFootGoalPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -86,11 +83,11 @@ public class FootstepPathCalculatorModule
       this.messager = messager;
 
       planarRegionsReference = messager.createInput(PlanarRegionData);
+      initialStanceSideReference = messager.createInput(InitialSupportSide, RobotSide.LEFT);
       leftFootStartPose = messager.createInput(LeftFootPose);
       rightFootStartPose = messager.createInput(RightFootPose);
-      initialStanceSideReference = messager.createInput(InitialSupportSide, RobotSide.LEFT);
-      goalPositionReference = messager.createInput(GoalMidFootPosition);
-      goalOrientationReference = messager.createInput(GoalMidFootOrientation, new Quaternion());
+      leftFootGoalPose = messager.createInput(LeftFootGoalPose);
+      rightFootGoalPose = messager.createInput(RightFootGoalPose);
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
@@ -101,16 +98,18 @@ public class FootstepPathCalculatorModule
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
       messager.registerTopicListener(RequestPlannerStatistics, request -> sendPlannerStatistics());
+
+      new FootPoseFromMidFootUpdater(messager).start();
    }
 
    public void clear()
    {
       planarRegionsReference.set(null);
+      initialStanceSideReference.set(null);
       leftFootStartPose.set(null);
       rightFootStartPose.set(null);
-      initialStanceSideReference.set(null);
-      goalPositionReference.set(null);
-      goalOrientationReference.set(null);
+      leftFootGoalPose.set(null);
+      rightFootGoalPose.set(null);
       plannerTimeoutReference.set(null);
       plannerBestEffortTimeoutReference.set(null);
       plannerHorizonLengthReference.set(null);
@@ -145,9 +144,7 @@ public class FootstepPathCalculatorModule
       if (leftFootStartPose.get() == null || rightFootStartPose.get() == null)
          return;
 
-      Point3D goal = goalPositionReference.get();
-
-      if (goal == null)
+      if (leftFootGoalPose.get() == null || rightFootGoalPose.get() == null)
          return;
 
       if (VERBOSE)
@@ -159,9 +156,9 @@ public class FootstepPathCalculatorModule
          request.setPlanarRegionsList(planarRegionsList);
          request.setTimeout(plannerTimeoutReference.get());
          request.setHorizonLength(plannerHorizonLengthReference.get());
-         request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setRequestedInitialStanceSide(initialStanceSideReference.get());
-         request.setGoalFootPoses(parameters.get().getIdealFootstepWidth(), new Pose3D(goalPositionReference.get(), goalOrientationReference.get()));
+         request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
+         request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(footstepPlannerTypeReference.get().plansPath());
 
          planningModule.getFootstepPlannerParameters().set(parameters.get());
@@ -199,6 +196,11 @@ public class FootstepPathCalculatorModule
          LogTools.error(e.getMessage());
          e.printStackTrace();
       }
+   }
+
+   public FootstepPlanningModule getPlanningModule()
+   {
+      return planningModule;
    }
 
    private void sendPlannerStatistics()

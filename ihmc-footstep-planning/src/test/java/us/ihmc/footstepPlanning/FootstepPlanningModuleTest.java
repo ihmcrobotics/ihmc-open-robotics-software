@@ -27,14 +27,15 @@ public class FootstepPlanningModuleTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(3.5);
-      request.setStartFootPose(new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0)));
+      Pose3D initialMidFootPose = new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
       request.setPlanBodyPath(false);
 
       // goal is unreachable
       Pose3D goalPose = new Pose3D(500.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-      request.setGoalPose(goalPose);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
       planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       // disable wiggling. causes latency of around 0.15s
@@ -81,8 +82,10 @@ public class FootstepPlanningModuleTest
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setGoalPose(new Pose3D(3.5, 0.0, 0.0, 0.0, 0.0, 0.0));
-      request.setStartFootPose(new Pose3D());
+      Pose3D initialMidFootPose = new Pose3D();
+      Pose3D goalMidFootPose = new Pose3D(3.5, 0.0, 0.0, 0.0, 0.0, 0.0);
+      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
       request.setPlanBodyPath(false);

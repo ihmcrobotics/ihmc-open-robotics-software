@@ -62,7 +62,10 @@ public class StartGoalPositionEditor extends AnimationTimer
       this.startOrientationEditModeEnabledTopic = startOrientationEditModeEnabledTopic;
       this.goalOrientationEditModeEnabledTopic = goalOrientationEditModeEnabledTopic;
 
-      startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
+      if (startEditModeEnabledTopic != null)
+         startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
+      else
+         startEditModeEnabled = null;
       goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
 
       if (planarRegionDataTopic != null)
@@ -83,10 +86,10 @@ public class StartGoalPositionEditor extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      if (startEditModeEnabled.get() && goalEditModeEnabled.get())
+      if (startEditModeEnabled != null && startEditModeEnabled.get() && goalEditModeEnabled.get())
          throw new RuntimeException("Cannot edit start AND goal together.");
 
-      if (startEditModeEnabled.get() || goalEditModeEnabled.get())
+      if (startEditModeEnabled != null && startEditModeEnabled.get() || goalEditModeEnabled.get())
       {
          attachEvenHandlers();
       }
@@ -96,7 +99,7 @@ public class StartGoalPositionEditor extends AnimationTimer
          return;
       }
 
-      if (startEditModeEnabled.get())
+      if (startEditModeEnabled != null && startEditModeEnabled.get())
       {
          Point3D interception = planarRegionSelector.pollSelectedPoint();
          if (interception != null)

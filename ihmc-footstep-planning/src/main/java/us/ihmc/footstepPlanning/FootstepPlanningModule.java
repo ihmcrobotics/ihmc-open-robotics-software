@@ -189,11 +189,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-      RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
 
       if (bodyPathPlanRequested.getAsBoolean())
       {
-         bodyPathPlanner.setInitialStanceFoot(request.getStartFootPoses().get(initialStanceSide), initialStanceSide);
+         bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
 
          FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
