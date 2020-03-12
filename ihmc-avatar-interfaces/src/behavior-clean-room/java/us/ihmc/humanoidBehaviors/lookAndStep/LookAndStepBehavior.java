@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -31,6 +32,7 @@ import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -144,6 +146,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.setZ(midFeetZ);
 
       RobotSide initialStanceFootSide = null;
+      FramePose3D initialStanceFootPose = null;
       FramePose3D leftSolePose = new FramePose3D();
       leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
       leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -154,17 +157,19 @@ public class LookAndStepBehavior implements BehaviorInterface
       if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
       {
          initialStanceFootSide = RobotSide.LEFT;
+         initialStanceFootPose = leftSolePose;
       }
       else
       {
          initialStanceFootSide = RobotSide.RIGHT;
+         initialStanceFootPose = rightSolePose;
       }
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
 
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setInitialStanceSide(initialStanceFootSide);
-      footstepPlannerRequest.setInitialStancePose(initialPoseBetweenFeet);
+      footstepPlannerRequest.setInitialStancePose(initialStanceFootPose);
       footstepPlannerRequest.setGoalPose(goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
 
@@ -181,6 +186,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerOutputNotification.add(footstepPlannerOutput);
 
       latestFootstepPlannerOutput.set(footstepPlannerOutput);
+
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+      footstepPlannerLogger.logSession();
+      footstepPlannerLogger.deleteOldLogs(10);
 
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
    }
