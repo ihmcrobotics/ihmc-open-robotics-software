@@ -141,6 +141,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             planId.increment();
             FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
                                                                                                                     goalPose, footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+            request.setTimeout(timeout);
+            request.setBestEffortTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
             {
@@ -176,7 +178,15 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          public boolean isDone()
          {
 
-            return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
+        	 if(footPlanStatusQueue.isNewPacketAvailable())
+        	 {
+        		 footstepPlanningToolboxOutputStatus= footPlanStatusQueue.getLatestPacket();
+        		 planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+        	 }
+        	 
+        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
+        	 
+            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
 
          }
       };
@@ -187,16 +197,22 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            if (footPlanStatusQueue.isNewPacketAvailable())
+            if (footstepPlanningToolboxOutputStatus!=null)
             {
 
-               footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
-               planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+              // footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
+              // planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
 
                if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
+               }
+               else if (planningResult == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+               {
+            	   publishTextToSpeech("PlanPathToLocationBehavior: planner timed out after "+timeout+" seconds");
+
+                   planningSuccess = false;
                }
                else
                {
@@ -207,7 +223,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             }
             else
             {
-               publishTextToSpeech("PlanPathToLocationBehavior: never got a plan");
+               publishTextToSpeech("PlanPathToLocationBehavior: never head back frm footstep planner");
 
                planningSuccess = false;
             }

@@ -10,7 +10,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
@@ -26,12 +25,15 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -46,7 +48,7 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
@@ -91,6 +93,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private Consumer<BodyPathPlanMessage> bodyPathResultCallback = bodyPathPlanMessage -> {};
    private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
 
+   private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+   private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
+
    public FootstepPlanningModule(String name)
    {
       this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons());
@@ -112,18 +118,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
-      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-      this.checker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder);
+      this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
-      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder);
-      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons);
+      this.distanceAndYawHeuristics = new DistanceAndYawBasedHeuristics(snapper, footstepPlannerParameters.getAStarHeuristicsWeight(), footstepPlannerParameters, bodyPathPlanHolder, edgeData);
+      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, edgeData);
 
       this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
-      checker.addFootstepGraph(footstepPlanner.getGraph());
+      checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
+      footstepPlanner.getGraph().setGraphExpansionCallback(edge ->
+                                                           {
+                                                              edgeData.setCostFromStart(footstepPlanner.getGraph().getCostFromStart(edge.getEndNode()));
+                                                              edgeDataMap.put(edge, edgeData.getCopyAndClear());
+                                                           });
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -134,6 +141,25 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return null;
       }
 
+      try
+      {
+         return handleRequestInternal(request);
+      }
+      catch (Exception exception)
+      {
+         exception.printStackTrace();
+
+         output.clear();
+         output.setPlanId(request.getRequestId());
+         output.setResult(FootstepPlanningResult.EXCEPTION);
+         output.setException(exception);
+         statusCallback.accept(output);
+         return output;
+      }
+   }
+
+   private FootstepPlannerOutput handleRequestInternal(FootstepPlannerRequest request)
+   {
       // Start timer
       stopwatch.start();
 
@@ -144,6 +170,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanHolder.getPlan().clear();
       goalPose.set(request.getGoalPose());
       requestCallback.accept(request);
+
+      // Reset logged variables
+      edgeData.clear();
+      edgeDataMap.clear();
+      iterationData.clear();
 
       // Update planar regions
       PlanarRegionsList planarRegionsList = null;
@@ -242,8 +273,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
+         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
-
+         
          if (iterationData.getParentNode() == null)
          {
             result = FootstepPlanningResult.NO_PATH_EXISTS;
@@ -262,6 +294,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       reportStatus();
+      markSolutionEdges();
       isPlanning.set(false);
       return output;
    }
@@ -333,6 +366,31 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathResultCallback.accept(bodyPathPlanMessage);
    }
 
+   private void markSolutionEdges()
+   {
+      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
+   }
+
+   private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
+   {
+      if (iterationData.getParentNode() == null)
+      {
+         return;
+      }
+
+      FootstepPlannerIterationData loggedData = new FootstepPlannerIterationData();
+      loggedData.setStanceNode(iterationData.getParentNode());
+      iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
+      iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
+      loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
+      loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
+      this.iterationData.add(loggedData);
+   }
+
    private boolean validGoal(SideDependentList<FootstepNode> goalNodes)
    {
       for (RobotSide side : RobotSide.values)
@@ -392,6 +450,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return request;
    }
 
+   public FootstepPlannerOutput getOutput()
+   {
+      return output;
+   }
+
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
@@ -420,6 +483,21 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public VisibilityGraphPathPlanner getBodyPathPlanner()
    {
       return bodyPathPlanner;
+   }
+
+   public FootstepNode getEndNode()
+   {
+      return endNode;
+   }
+
+   public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
+   {
+      return edgeDataMap;
+   }
+
+   public List<FootstepPlannerIterationData> getIterationData()
+   {
+      return iterationData;
    }
 
    public void setStatusPublishPeriod(double statusPublishPeriod)

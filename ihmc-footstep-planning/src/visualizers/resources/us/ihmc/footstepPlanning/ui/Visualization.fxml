@@ -15,9 +15,9 @@
     <children>
         <GridPane hgap="10.0" layoutX="23.0" layoutY="28.0" prefHeight="228.0" prefWidth="1042.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="153.0" minWidth="10.0" prefWidth="130.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="445.0" minWidth="10.0" prefWidth="281.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="402.0" minWidth="10.0" prefWidth="268.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="281.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="268.0" />
             <ColumnConstraints maxWidth="410.0" minWidth="201.0" prefWidth="229.0" />
             <ColumnConstraints maxWidth="385.0" minWidth="117.0" prefWidth="133.0" />
             <ColumnConstraints />
@@ -37,6 +37,7 @@
             <children>
                 <Button mnemonicParsing="false" onAction="#requestStatistics" text="Request Statistics" GridPane.rowIndex="1" />
                 <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2" />
+                <CheckBox fx:id="showRobotToggleButton" mnemonicParsing="false" selected="true" text="Show robot" GridPane.rowIndex="3" />
 
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <CheckBox fx:id="showClusterPreferredNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show pref navigable extrusions" GridPane.columnIndex="1" GridPane.rowIndex="2" />

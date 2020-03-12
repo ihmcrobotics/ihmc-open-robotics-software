@@ -9,10 +9,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +21,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -32,6 +31,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -42,10 +42,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,8 +55,6 @@ public class MainTabController
 {
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
-   private final ObservableList<RejectionPercentageProperty> rejectionTableItems = FXCollections.observableArrayList();
-   private static final DecimalFormat percentageFormat = new DecimalFormat("#0.00");
    private final TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
 
    // control
@@ -86,9 +81,7 @@ public class MainTabController
    @FXML
    private TextField receivedRequestId;
    @FXML
-   private TableView rejectionTable;
-   @FXML
-   private TextField rejectionPercentage;
+   private Button viewExceptionButton;
 
    @FXML
    private TextField timeTaken;
@@ -96,12 +89,22 @@ public class MainTabController
    private TextField planningResult;
    @FXML
    private TextField plannerStatus;
+   @FXML
+   private ComboBox<DataSetName> dataSetSelector;
+   @FXML
+   private TextField logGenerationStatus;
+   @FXML
+   private TextField logLoadStatus;
+   @FXML
+   private Button loadLogButton;
 
    // goal placement
    @FXML
    private Button placeStart;
    @FXML
    private Button placeGoal;
+   @FXML
+   private CheckBox bindStartToRobot;
 
    @FXML
    private Button computePath;
@@ -155,7 +158,8 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked compute path...");
 
-      setStartFromRobot();
+      if (bindStartToRobot.isSelected())
+        setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, newRequestID);
       messager.submitMessage(ComputePath, true);
@@ -241,7 +245,6 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-   private AnimationTimer robotPoseHandler;
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepDataListMessage> footstepPlanReference;
@@ -321,6 +324,21 @@ public class MainTabController
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
 
+      AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
+      viewExceptionButton.setOnAction(e ->
+                                      {
+                                         TextArea textArea = new TextArea(stackTrace.toString());
+                                         textArea.setEditable(false);
+
+                                         Alert alert = new Alert(Alert.AlertType.NONE);
+                                         alert.getButtonTypes().add(ButtonType.CLOSE);
+                                         alert.setHeaderText("Planner Stack Trace");
+                                         alert.setResizable(true);
+                                         alert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                                         alert.getDialogPane().setContent(textArea);
+                                         alert.show();
+                                      });
+
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
@@ -330,9 +348,9 @@ public class MainTabController
                                  true);
 
       messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
+      messager.registerTopicListener(AbortPlanning, b -> timeElapsedManager.stop());
       messager.registerTopicListener(PlanningResult, result ->
       {
-         System.out.println(result);
          if (result.terminalResult())
             timeElapsedManager.stop();
       });
@@ -372,7 +390,8 @@ public class MainTabController
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
-      setupRejectionTable();
+      messager.registerTopicListener(GenerateLogStatus, logGenerationStatus::setText);
+      messager.registerTopicListener(LoadLogStatus, logLoadStatus::setText);
    }
 
    @FXML
@@ -387,6 +406,18 @@ public class MainTabController
    {
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled, true);
       messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, true);
+   }
+
+   @FXML
+   public void generateLog()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestGenerateLog, true);
+   }
+
+   @FXML
+   public void loadLog()
+   {
+      messager.submitMessage(RequestLoadLog, true);
    }
 
    private void setStartFromRobot()
@@ -595,50 +626,6 @@ public class MainTabController
       }
    }
 
-   private void setupRejectionTable()
-   {
-      TableColumn<String, RejectionPercentageProperty> column1 = new TableColumn<>("Reason");
-      column1.setCellValueFactory(new PropertyValueFactory<>("reason"));
-
-      TableColumn<String, RejectionPercentageProperty> column2 = new TableColumn<>("Percentage");
-      column2.setCellValueFactory(new PropertyValueFactory<>("percentage"));
-
-      column1.setSortable(false);
-      column2.setSortable(false);
-
-      rejectionTable.getColumns().add(column1);
-      rejectionTable.getColumns().add(column2);
-
-      rejectionTableItems.clear();
-      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-      {
-         RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(0.0));
-         rejectionTableItems.add(rejectionPercentageProperty);
-      }
-
-      rejectionTable.setItems(rejectionTableItems);
-
-      messager.registerTopicListener(PlannerStatistics, statisticsMessage ->
-      {
-         if(statisticsMessage.getRejectionFractions().isEmpty())
-            return;
-
-         String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getFractionOfRejectedSteps());
-         rejectionPercentage.setText(percentageRejectionSteps);
-
-         rejectionTableItems.clear();
-         for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-         {
-            double percent = 100 * statisticsMessage.getRejectionFractions().get(rejectionReason.ordinal());
-            RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(percent));
-            rejectionTableItems.add(rejectionPercentageProperty);
-         }
-
-         rejectionTableItems.sort(Collections.reverseOrder(Comparator.comparingDouble(p -> Double.parseDouble(p.percentage))));
-         rejectionTable.setItems(rejectionTableItems);
-      });
-   }
-
    private class WalkingPreviewPlaybackManager extends AnimationTimer
    {
       final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
@@ -801,38 +788,6 @@ public class MainTabController
       public void handle(long now)
       {
          timeTaken.setText(String.format("%.2f", stopwatch.totalElapsed()));
-      }
-   }
-
-   public class RejectionPercentageProperty
-   {
-      private String reason;
-      private String percentage;
-
-      public RejectionPercentageProperty(String reason, String percentage)
-      {
-         this.reason = reason;
-         this.percentage = percentage;
-      }
-
-      public String getReason()
-      {
-         return reason;
-      }
-
-      public void setReason(String reason)
-      {
-         this.reason = reason;
-      }
-
-      public String getPercentage()
-      {
-         return percentage;
-      }
-
-      public void setPercentage(String percentage)
-      {
-         this.percentage = percentage;
       }
    }
 }

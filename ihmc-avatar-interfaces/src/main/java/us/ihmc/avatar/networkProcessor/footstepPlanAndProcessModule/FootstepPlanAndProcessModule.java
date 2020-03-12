@@ -25,6 +25,16 @@ public class FootstepPlanAndProcessModule implements CloseableAndDisposable
       this.postProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(ros2Node, robotModel);
    }
 
+   public FootstepPlanningModule getPlanningModule()
+   {
+      return planningModule;
+   }
+
+   public FootstepPlanPostProcessingModule getPostProcessingModule()
+   {
+      return postProcessingModule;
+   }
+
    @Override
    public void closeAndDispose()
    {

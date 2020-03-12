@@ -15,6 +15,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.Footstep
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -66,6 +67,11 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       if (launchPlannerToolbox)
       {
          planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
+
+         // Create logger and connect to messager
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(planningAndProcessingModule.getPlanningModule());
+         Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
       }
    }
 

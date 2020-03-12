@@ -233,36 +233,6 @@ public class NavigationBehavior implements BehaviorInterface
       goalPose.setY(finalPose.getY());
       goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
-      // TODO: Figure out how to best effort plan with footstep snapping
-      // Use BodyPathBasedAStarPlanner instead of manual?
-
-      boolean useFastFlatInvalidFootsteps = true;
-      footstepPlannerParameters.setReturnBestEffortPlan(true);
-      footstepPlannerParameters.setMaximumStepYaw(1.5);
-      FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-      FootstepNodeSnapper snapper;
-      if (useFastFlatInvalidFootsteps)
-      {
-         snapper = new FlatGroundFootstepNodeSnapper();
-      }
-      else
-      {
-         snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-      }
-      FootstepNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(footstepPlannerParameters, footPolygons, snapper);
-      BodyCollisionNodeChecker bodyCollisionNodeChecker = new BodyCollisionNodeChecker(collisionDetector, footstepPlannerParameters, snapper);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(footstepPlannerParameters, snapper, footPolygons);
-      FootstepNodeChecker nodeChecker;
-      if (useFastFlatInvalidFootsteps)
-      {
-         nodeChecker = new AlwaysValidNodeChecker();
-      }
-      else
-      {
-         // nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, bodyCollisionNodeChecker, cliffAvoider));
-         nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
-      }
-
 //      LogTools.info("Creating A* planner");
 //      YoVariableRegistry registry = new YoVariableRegistry("registry");
 //      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,

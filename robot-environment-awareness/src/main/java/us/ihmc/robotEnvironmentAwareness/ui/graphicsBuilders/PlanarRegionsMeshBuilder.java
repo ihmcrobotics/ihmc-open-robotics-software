@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -31,18 +32,29 @@ public class PlanarRegionsMeshBuilder implements Runnable
 
    private final REAUIMessager uiMessager;
 
-   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager)
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate)
+   {
+      this(uiMessager, planarregionsstate, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear);
+   }
+
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate, Topic<Boolean> enableTopic,
+                                   Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic)
    {
       this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
-      clear = uiMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerClear, false);
-      clearOcTree = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      enable = uiMessager.createInput(enableTopic, false);
+      clear = uiMessager.createInput(clearTopic, false);
+      clearOcTree = uiMessager.createInput(octreeClearTopic, false);
 
-      planarRegionsListMessage = uiMessager.createInput(REAModuleAPI.PlanarRegionsState);
+      planarRegionsListMessage = uiMessager.createInput(planarregionsstate);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);
       meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+   }
+
+   public void clear()
+   {
+      meshAndMaterialToRender.set(new Pair<>(null, null));
    }
 
    @Override
