@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,6 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
 import java.awt.*;
+import java.util.List;
 
 public class FootholdCropper
 {
@@ -32,6 +34,7 @@ public class FootholdCropper
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final YoBoolean doPartialFootholdDetection;
+   private final YoBoolean applyPartialFootholds;
    private final IntegerProvider shrinkMaxLimit;
    private final YoInteger shrinkCounter;
 
@@ -73,7 +76,9 @@ public class FootholdCropper
       minAreaToConsider = rotationParameters.getMinimumAreaForCropping();
 
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
+      applyPartialFootholds = new YoBoolean(namePrefix + "ApplyPartialFootholds", registry);
       doPartialFootholdDetection.set(true);
+      applyPartialFootholds.set(true);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
@@ -123,7 +128,8 @@ public class FootholdCropper
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
 
-      boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
+      boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromHull != null;
+      sidesAreConsistent &= sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
       hasEnoughAreaToCrop.set(shrunkenFootPolygon.getArea() > minAreaToConsider.getValue());
 
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
@@ -132,7 +138,7 @@ public class FootholdCropper
          shouldShrinkFoothold.set(verifier.verifyFootholdCrop(desiredCoP, sideOfFootToCrop.getEnumValue(), lineOfRotation));
 
          if (shouldShrinkFoothold.getBooleanValue())
-            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
+            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue().getOppositeSide());
       }
       else
       {
@@ -173,20 +179,21 @@ public class FootholdCropper
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       shrunkenFootPolygonInWorld.set(controllerFootPolygonInWorld);
 
-      /*
-      List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
-      int i = 0;
-      for (; i < controllerFootPolygon.getNumberOfVertices(); i++)
+      if (applyPartialFootholds.getBooleanValue())
       {
-         YoContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.setPosition(controllerFootPolygon.getVertex(i));
-         contactPoint.setInContact(true);
+         List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
+         int i = 0;
+         for (; i < controllerFootPolygon.getNumberOfVertices(); i++)
+         {
+            YoContactPoint contactPoint = contactPoints.get(i);
+            contactPoint.setPosition(controllerFootPolygon.getVertex(i));
+            contactPoint.setInContact(true);
+         }
+         for (; i < contactPoints.size(); i++)
+         {
+            contactPoints.get(i).setInContact(false);
+         }
       }
-      for (; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).setInContact(false);
-      }
-      */
 
       shrinkCounter.increment();
       return true;

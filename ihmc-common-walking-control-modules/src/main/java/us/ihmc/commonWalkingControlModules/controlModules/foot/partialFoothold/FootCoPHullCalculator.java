@@ -48,7 +48,7 @@ public class FootCoPHullCalculator
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
 
-      sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
+      sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
       this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
 
       occupancyGrid.setCellXSize(lengthResolution);
