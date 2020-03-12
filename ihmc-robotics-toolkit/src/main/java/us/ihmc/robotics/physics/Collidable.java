@@ -38,12 +38,6 @@ public class Collidable
     * frame after it parent joint.
     */
    private final ReferenceFrame shapeFrame;
-   /**
-    * TODO: This feature is only partially implemented and is meant to define an additional region
-    * enveloping the shape that needs to be treated more carefully. At this moment, it used to grow the
-    * shape.
-    */
-   private final double minimumSafeDistance;
 
    /**
     * Creates a new collidable that represents entirely or partially the geometry of the given
@@ -63,38 +57,11 @@ public class Collidable
     */
    public Collidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
    {
-      this(rigidBody, collisionMask, collisionGroup, shape, shapeFrame, 0.0);
-   }
-
-   /**
-    * Creates a new collidable that represents entirely or partially the geometry of the given
-    * {@code rigidBody}.
-    * 
-    * @param rigidBody           the rigid-body this collidable represents.
-    * @param collisionMask       collision identifier for this collidable. Use
-    *                            {@link CollidableHelper} to compute collision masks and
-    *                            groups.
-    * @param collisionGroup      collision identifiers of other collidables that this collidable is
-    *                            allowed to collide with. Use {@link CollidableHelper} to
-    *                            compute collision masks and groups.
-    * @param shape               the shape of this collidable. It is strongly recommended to use only
-    *                            {@link Sphere3D} and {@link Capsule3D} as collision evaluations are
-    *                            extremely fast with these shapes.
-    * @param shapeFrame          the frame the shape is expressed in. Usually the body-fixed frame of
-    *                            {@code rigidBody} or the frame after it parent joint.
-    * @param minimumSafeDistance this feature is only partially implemented and is meant to define an
-    *                            additional region enveloping the shape that needs to be treated more
-    *                            carefully. At this moment, it used to grow the shape.
-    */
-   public Collidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame,
-                               double minimumSafeDistance)
-   {
       this.rigidBody = rigidBody;
       this.collisionMask = collisionMask;
       this.collisionGroup = collisionGroup;
       this.shape = shape;
       this.shapeFrame = shapeFrame;
-      this.minimumSafeDistance = minimumSafeDistance;
    }
 
    /**
@@ -191,15 +158,5 @@ public class Collidable
    public ReferenceFrame getShapeFrame()
    {
       return shapeFrame;
-   }
-
-   /**
-    * Gets the distance from the shape that needs to be treated more carefully.
-    * 
-    * @return the distance value.
-    */
-   public double getMinimumSafeDistance()
-   {
-      return minimumSafeDistance;
    }
 }

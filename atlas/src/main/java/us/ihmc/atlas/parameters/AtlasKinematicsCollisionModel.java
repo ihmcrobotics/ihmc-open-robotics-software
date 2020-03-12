@@ -32,8 +32,6 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
       CollidableHelper helper = new CollidableHelper();
       List<Collidable> collidables = new ArrayList<>();
 
-      double minimumSafeDistance = 0.0;
-
       /*
        * The following is only meant for the arms (forearm and hand) collision vs body (head, chest,
        * pelvis, and legs) and collision between the 2 arms. For other types of collisions, it's probably
@@ -56,7 +54,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          Capsule3D headShapeMultisense = new Capsule3D(0.08, 0.115);
          headShapeMultisense.getPosition().set(0.03, 0.0, 0.03);
          headShapeMultisense.setAxis(Axis.Z);
-         collidables.add(new Collidable(head, collisionMask, collisionGroup, headShapeMultisense, headFrame, minimumSafeDistance));
+         collidables.add(new Collidable(head, collisionMask, collisionGroup, headShapeMultisense, headFrame));
 
          // Torso ---------------------------------------------------------------------
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
@@ -66,30 +64,30 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          Capsule3D headguardShapeFront = new Capsule3D(0.25, 0.11);
          headguardShapeFront.getPosition().set(0.0, 0.0, 0.0);
          headguardShapeFront.setAxis(Axis.Y);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, headguardShapeFront, beforeNeckFrame, minimumSafeDistance));
+         collidables.add(new Collidable(torso, collisionMask, collisionGroup, headguardShapeFront, beforeNeckFrame));
 
          // Sideway capsule covering the shoulders and "pecs"-part
          Capsule3D torsoShapeFrontShoulder = new Capsule3D(0.2, 0.2);
          torsoShapeFrontShoulder.getPosition().set(0.14, 0.0, 0.415);
          torsoShapeFrontShoulder.getAxis().set(Axis.Y);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeFrontShoulder, torsoFrame, minimumSafeDistance));
+         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeFrontShoulder, torsoFrame));
          // Capsule along the forward axis covering the top part of the "abdomen".
          Capsule3D torsoShapeCenter = new Capsule3D(0.25, 0.2);
          torsoShapeCenter.getPosition().set(-0.015, 0.0, 0.265);
          torsoShapeCenter.setAxis(Axis.X);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeCenter, torsoFrame, minimumSafeDistance));
+         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeCenter, torsoFrame));
          // Capsule along the forward axis covering the bottom part of the "abdomen" and of the chest.
          Capsule3D torsoShapeBottomCenter = new Capsule3D(0.25, 0.2);
          torsoShapeBottomCenter.getPosition().set(-0.045, 0.0, 0.115);
          torsoShapeBottomCenter.setAxis(Axis.X);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomCenter, torsoFrame, minimumSafeDistance));
+         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomCenter, torsoFrame));
          // Capsule along the forward axis covering the bottom left corner of the chest.
          for (RobotSide robotSide : RobotSide.values)
          {
             Capsule3D torsoShapeBottomSideCorner = new Capsule3D(0.25, 0.1);
             torsoShapeBottomSideCorner.getPosition().set(-0.115, robotSide.negateIfRightSide(0.1), 0.067);
             torsoShapeBottomSideCorner.setAxis(Axis.X);
-            collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomSideCorner, torsoFrame, minimumSafeDistance));
+            collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomSideCorner, torsoFrame));
          }
 
          // Pelvis ---------------------------------------------------------------------
@@ -97,7 +95,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          Capsule3D pelvisShape = new Capsule3D(0.05, 0.22);
          pelvisShape.setAxis(Axis.Z);
          pelvisShape.getPosition().set(0.0, 0.0, 0.01);
-         collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame, minimumSafeDistance));
+         collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame));
 
          // Legs ---------------------------------------------------------------------
          for (RobotSide robotSide : RobotSide.values)
@@ -109,17 +107,17 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
             Capsule3D thighShapeTop = new Capsule3D(0.1, 0.09);
             thighShapeTop.getPosition().set(0.0, 0.0, -0.1);
             thighShapeTop.setAxis(Axis.Z);
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeTop, thighFrame, minimumSafeDistance));
+            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeTop, thighFrame));
 
             Capsule3D thighShapeBottom = new Capsule3D(0.15, 0.085);
             thighShapeBottom.getPosition().set(-0.018, 0.0, -0.25);
             thighShapeBottom.setAxis(new Vector3D(0.22, 0.0, 1.0));
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBottom, thighFrame, minimumSafeDistance));
+            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBottom, thighFrame));
 
             Capsule3D thighShapeBack = new Capsule3D(0.15, 0.085);
             thighShapeBack.getPosition().set(-0.05, 0.0, -0.15);
             thighShapeBack.setAxis(Axis.Z);
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBack, thighFrame, minimumSafeDistance));
+            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBack, thighFrame));
 
             OneDoFJointBasics shinPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
@@ -128,7 +126,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
             Capsule3D shinShape = new Capsule3D(0.3, 0.08);
             shinShape.getPosition().set(0.015, 0.0, -0.2);
             shinShape.setAxis(new Vector3D(0.1, 0.0, 1.0));
-            collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape, shinFrame, minimumSafeDistance));
+            collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape, shinFrame));
          }
       }
 
@@ -142,7 +140,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          Capsule3D handShapeKnob = new Capsule3D(0.07, 0.06);
          handShapeKnob.getPosition().set(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          handShapeKnob.setAxis(Axis.Y);
-         collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapeKnob, handFrame, minimumSafeDistance));
+         collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapeKnob, handFrame));
 
          OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL);
          RigidBodyBasics forearm = elbowJoint.getSuccessor();
@@ -150,7 +148,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          Capsule3D forearmShape = new Capsule3D(0.31, 0.1);
          forearmShape.getPosition().set(-0.01, robotSide.negateIfRightSide(0.12), -0.01);
          forearmShape.setAxis(Axis.Y);
-         collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, elbowFrame, minimumSafeDistance));
+         collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, elbowFrame));
       }
 
       return collidables;
