@@ -203,6 +203,7 @@ public class TorqueSpeedTestRunner {
 						walkingParameters, 
 						recordedFootsteps,
 						outputPrefixDirectory);
+				break;
 			case SPEED:
 				outputResultsDirectory = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory);		
 				break;
