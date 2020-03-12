@@ -15,8 +15,8 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -33,8 +33,8 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
-      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
+      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
       previewModel.setTransparency(0.0);
       previewModel.setUseOBJGraphics(true);
 
@@ -48,7 +48,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
                                               model.getWalkingControllerParameters());
       ui.show();
 
-      if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
+      if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
       {
          FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
 
