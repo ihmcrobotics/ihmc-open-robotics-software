@@ -43,8 +43,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.physics.KinematicsCollidable;
-import us.ihmc.robotics.physics.KinematicsCollisionResult;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -384,20 +384,20 @@ public final class KinematicsToolboxControllerTest
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
                                                                                             .findFirst().get());
 
-      KinematicsCollidable torsoCollidable = new KinematicsCollidable(torso,
+      Collidable torsoCollidable = new Collidable(torso,
                                                                       0b001,
                                                                       0b110,
                                                                       torsoCollisionShape,
                                                                       torso.getParentJoint().getFrameAfterJoint(),
                                                                       0.0);
 
-      SideDependentList<KinematicsCollidable> handCollidables = new SideDependentList<>(side ->
+      SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
       {
          RigidBodyBasics hand = hands.get(side);
          int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
          int collisionGroup = 0b001;
          ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new KinematicsCollidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame, 0.0);
+         return new Collidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame, 0.0);
       });
 
       toolboxController.registerCollidable(torsoCollidable);
@@ -439,7 +439,7 @@ public final class KinematicsToolboxControllerTest
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            KinematicsCollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
+            CollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
             assertTrue(collision.getSignedDistance() > -1.0e-3);
          }
       }

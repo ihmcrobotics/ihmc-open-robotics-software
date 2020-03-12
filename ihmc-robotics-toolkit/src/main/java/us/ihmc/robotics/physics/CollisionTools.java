@@ -17,11 +17,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 /**
  * Tools for evaluating collisions. It is mainly used via
- * {@link KinematicsCollidable#evaluateCollision(KinematicsCollidable)}.
+ * {@link Collidable#evaluateCollision(Collidable)}.
  * 
  * @author Sylvain Bertrand
  */
-public class KinematicsCollisionTools
+public class CollisionTools
 {
    public static Box3D changeFrame(Box3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
    {
@@ -79,7 +79,7 @@ public class KinematicsCollisionTools
 
    static interface FrameShape3DCollisionEvaluator<A extends Shape3DReadOnly, B extends Shape3DReadOnly>
    {
-      void evaluateCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB, KinematicsCollisionResult resultToPack);
+      void evaluateCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB, CollisionResult resultToPack);
    }
 
    static interface FrameChanger<A extends Shape3DReadOnly>
@@ -87,13 +87,13 @@ public class KinematicsCollisionTools
       A changeFrame(A original, ReferenceFrame from, ReferenceFrame to);
    }
 
-   static final FrameChanger<Box3DReadOnly> box3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<Capsule3DReadOnly> capsule3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<Cylinder3DReadOnly> cylinder3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<Ellipsoid3DReadOnly> ellipsoid3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<PointShape3DReadOnly> pointShape3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<Ramp3DReadOnly> ramp3DFrameChanger = KinematicsCollisionTools::changeFrame;
-   static final FrameChanger<Sphere3DReadOnly> sphere3DFrameChanger = KinematicsCollisionTools::changeFrame;
+   static final FrameChanger<Box3DReadOnly> box3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<Capsule3DReadOnly> capsule3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<Cylinder3DReadOnly> cylinder3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<Ellipsoid3DReadOnly> ellipsoid3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<PointShape3DReadOnly> pointShape3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<Ramp3DReadOnly> ramp3DFrameChanger = CollisionTools::changeFrame;
+   static final FrameChanger<Sphere3DReadOnly> sphere3DFrameChanger = CollisionTools::changeFrame;
 
    @SuppressWarnings("unchecked")
    static <A extends Shape3DReadOnly> FrameChanger<A> getFrameChanger(A shape)
@@ -149,7 +149,7 @@ public class KinematicsCollisionTools
    static <A extends Shape3DReadOnly, B extends Shape3DReadOnly> void evaluateFrameCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB,
                                                                                              Shape3DCollisionEvaluator<A, B> collisionEvaluator,
                                                                                              FrameChanger<A> shapeAFrameChanger,
-                                                                                             KinematicsCollisionResult resultToPack)
+                                                                                             CollisionResult resultToPack)
    {
       collisionEvaluator.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, frameB), shapeB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -162,7 +162,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateCapsule3DCapsule3DCollision(Capsule3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          KinematicsCollisionResult resultToPack)
+                                                          CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -223,7 +223,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DBox3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         KinematicsCollisionResult resultToPack)
+                                                         CollisionResult resultToPack)
    {
       evaluatePoint3DBox3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -231,7 +231,7 @@ public class KinematicsCollisionTools
    }
 
    private static void evaluatePoint3DBox3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Box3DReadOnly box3D, ReferenceFrame boxFrame,
-                                                     KinematicsCollisionResult resultToPack)
+                                                     CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -264,7 +264,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DCapsule3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB,
-                                                             ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
+                                                             ReferenceFrame frameB, CollisionResult resultToPack)
    {
       evaluatePoint3DCapsule3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -272,7 +272,7 @@ public class KinematicsCollisionTools
    }
 
    private static void evaluatePoint3DCapsule3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Capsule3DReadOnly capsule3D,
-                                                         ReferenceFrame capsuleFrame, KinematicsCollisionResult resultToPack)
+                                                         ReferenceFrame capsuleFrame, CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -302,7 +302,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DCylinder3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB,
-                                                              ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
+                                                              ReferenceFrame frameB, CollisionResult resultToPack)
    {
       evaluatePoint3DCylinder3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -310,7 +310,7 @@ public class KinematicsCollisionTools
    }
 
    private static void evaluatePoint3DCylinder3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Cylinder3DReadOnly cylinder3D,
-                                                          ReferenceFrame cylinderFrame, KinematicsCollisionResult resultToPack)
+                                                          ReferenceFrame cylinderFrame, CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -340,7 +340,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DEllipsoid3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB,
-                                                               ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
+                                                               ReferenceFrame frameB, CollisionResult resultToPack)
    {
       evaluatePoint3DEllipsoid3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -348,7 +348,7 @@ public class KinematicsCollisionTools
    }
 
    private static void evaluatePoint3DEllipsoid3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ellipsoid3DReadOnly ellipsoid3D,
-                                                           ReferenceFrame ellipsoidFrame, KinematicsCollisionResult resultToPack)
+                                                           ReferenceFrame ellipsoidFrame, CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -381,7 +381,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DPointShape3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB,
-                                                                ReferenceFrame frameB, KinematicsCollisionResult resultToPack)
+                                                                ReferenceFrame frameB, CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -405,7 +405,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DRamp3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          KinematicsCollisionResult resultToPack)
+                                                          CollisionResult resultToPack)
    {
       evaluatePoint3DRamp3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -413,7 +413,7 @@ public class KinematicsCollisionTools
    }
 
    private static void evaluatePoint3DRamp3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ramp3DReadOnly ramp3D, ReferenceFrame rampFrame,
-                                                      KinematicsCollisionResult resultToPack)
+                                                      CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -445,7 +445,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluatePointShape3DSphere3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                            KinematicsCollisionResult resultToPack)
+                                                            CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -470,7 +470,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DBox3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     KinematicsCollisionResult resultToPack)
+                                                     CollisionResult resultToPack)
    {
       evaluatePoint3DBox3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -484,7 +484,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DCapsule3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         KinematicsCollisionResult resultToPack)
+                                                         CollisionResult resultToPack)
    {
       evaluatePoint3DCapsule3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -498,7 +498,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DCylinder3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          KinematicsCollisionResult resultToPack)
+                                                          CollisionResult resultToPack)
    {
       evaluatePoint3DCylinder3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -512,7 +512,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DEllipsoid3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                           KinematicsCollisionResult resultToPack)
+                                                           CollisionResult resultToPack)
    {
       evaluatePoint3DEllipsoid3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -526,7 +526,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DRamp3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      KinematicsCollisionResult resultToPack)
+                                                      CollisionResult resultToPack)
    {
       evaluatePoint3DRamp3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -540,7 +540,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateSphere3DSphere3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                        KinematicsCollisionResult resultToPack)
+                                                        CollisionResult resultToPack)
    {
       FramePoint3D pointOnA = resultToPack.getPointOnA();
       FramePoint3D pointOnB = resultToPack.getPointOnB();
@@ -567,7 +567,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateShape3DBox3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                    KinematicsCollisionResult resultToPack)
+                                                    CollisionResult resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DBox3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -578,13 +578,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DBox3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                KinematicsCollisionResult resultToPack)
+                                                CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, box3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DCapsule3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                        KinematicsCollisionResult resultToPack)
+                                                        CollisionResult resultToPack)
    {
       if (shapeA instanceof Capsule3DReadOnly)
       {
@@ -600,13 +600,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DCapsule3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                    KinematicsCollisionResult resultToPack)
+                                                    CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, capsule3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DCylinder3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         KinematicsCollisionResult resultToPack)
+                                                         CollisionResult resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DCylinder3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -617,13 +617,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DCylinder3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     KinematicsCollisionResult resultToPack)
+                                                     CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, cylinder3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DEllipsoid3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          KinematicsCollisionResult resultToPack)
+                                                          CollisionResult resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DEllipsoid3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -634,13 +634,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DEllipsoid3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      KinematicsCollisionResult resultToPack)
+                                                      CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, ellipsoid3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DPointShape3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                           KinematicsCollisionResult resultToPack)
+                                                           CollisionResult resultToPack)
    {
       if (shapeA instanceof Box3DReadOnly)
       {
@@ -684,13 +684,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DPointShape3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                       KinematicsCollisionResult resultToPack)
+                                                       CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, pointShape3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DRamp3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     KinematicsCollisionResult resultToPack)
+                                                     CollisionResult resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DRamp3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -701,13 +701,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DRamp3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                 KinematicsCollisionResult resultToPack)
+                                                 CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, ramp3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DSphere3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                       KinematicsCollisionResult resultToPack)
+                                                       CollisionResult resultToPack)
    {
       if (shapeA instanceof Box3DReadOnly)
       {
@@ -750,13 +750,13 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DSphere3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                   KinematicsCollisionResult resultToPack)
+                                                   CollisionResult resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, sphere3DFrameChanger, resultToPack);
    }
 
    static <B extends Shape3DReadOnly> void evaluateFrameCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB,
-                                                                     FrameChanger<B> shapeBFrameChanger, KinematicsCollisionResult resultToPack)
+                                                                     FrameChanger<B> shapeBFrameChanger, CollisionResult resultToPack)
    {
       resultToPack.setToZero();
       boolean colliding = new ExpandingPolytopeAlgorithm().evaluateCollision(shapeA, shapeBFrameChanger.changeFrame(shapeB, frameB, frameA), resultToPack);
@@ -771,7 +771,7 @@ public class KinematicsCollisionTools
    }
 
    public static void evaluateShape3DShape3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Shape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      KinematicsCollisionResult resultToPack)
+                                                      CollisionResult resultToPack)
    {
       if (shapeB instanceof Box3DReadOnly)
          evaluateShape3DBox3DCollision(shapeA, frameA, (Box3DReadOnly) shapeB, frameB, resultToPack);
@@ -793,7 +793,7 @@ public class KinematicsCollisionTools
    }
 
    static void evaluateShape3DShape3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Shape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                  KinematicsCollisionResult resultToPack)
+                                                  CollisionResult resultToPack)
    {
       RigidBodyTransform transformToA = frameB.getTransformToDesiredFrame(frameA);
       Vector3D localSupportDirection = new Vector3D();

@@ -19,9 +19,9 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.physics.KinematicsCollidable;
+import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -159,11 +159,11 @@ public class AtlasSDFViewer
       }
    }
 
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, HumanoidRobotKinematicsCollisionModel collisionModel)
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, HumanoidRobotCollisionModel collisionModel)
    {
-      List<KinematicsCollidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel);
+      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel);
 
-      for (KinematicsCollidable collidable : robotCollidables)
+      for (Collidable collidable : robotCollidables)
       {
          Link link = robot.getLink(collidable.getRigidBody().getName());
          Graphics3DObject linkGraphics = link.getLinkGraphics();
@@ -176,7 +176,7 @@ public class AtlasSDFViewer
       }
    }
 
-   private static Graphics3DObject getGraphics(KinematicsCollidable collidable)
+   private static Graphics3DObject getGraphics(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
       RigidBodyTransform transformToParentJoint = collidable.getShapeFrame()
