@@ -142,6 +142,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.createSimulation("StepUpWithSquareUpFast");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -216,6 +217,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			StepUpEnvironment stepUp = new StepUpEnvironment(stepStart, stepHeight);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepUp);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -321,6 +323,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			StepDownEnvironment stepDown = new StepDownEnvironment(stepEnd, stepHeight);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, stepDown);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.setStartingLocation(startingLocation);
 			drcSimulationTestHelper.createSimulation("StepDown");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
@@ -390,7 +393,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			HeightMapWithNormals heightMap = ground.getTerrainObject3D().getHeightMapIfAvailable();
 			
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, ground);
-			drcSimulationTestHelper.setInitialSetup(initialSetupForSlope(0.0, heightMap, robotModel));
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.createSimulation("Walking");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -531,6 +534,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight, stairStepLength);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -592,10 +596,10 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			destroySimulationAndRecycleMemory();
 		}
 	}
-
-	private static ValkyrieInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap, DRCRobotModel robotModel)
+	
+	private static ValkyrieModifiableInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap, DRCRobotModel robotModel)
 	{
-		return new ValkyrieInitialSetup(0.0, 0.0)
+		return new ValkyrieModifiableInitialSetup(0.0, 0.0)
 		{
 			@Override
 			protected void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
@@ -606,28 +610,14 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 				{
 					String hipPitch = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
 					String anklePitch = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH);
-
 					OneDegreeOfFreedomJoint anklePitchJoint = robot.getOneDegreeOfFreedomJoint(anklePitch);
 					OneDegreeOfFreedomJoint hipPitchJoint = robot.getOneDegreeOfFreedomJoint(hipPitch);
-					hipPitchJoint.setQ(hipPitchJoint.getQ() - 0.05);
-					anklePitchJoint.setQ(anklePitchJoint.getQ() + slopeAngle - 0.05);
+
+					setJointPosition(robot, hipPitch, hipPitchJoint.getQ() - 0.05);
+					setJointPosition(robot, anklePitch, anklePitchJoint.getQ() + slopeAngle - 0.05);
 				}
 				
-				// Check that we obey positional limits
-				String[] joints = robotModel.getJointMap().getOrderedJointNames();
-				for (String joint: joints) {
-					OneDegreeOfFreedomJoint oneDofJoint= robot.getOneDegreeOfFreedomJoint(joint);
-					if (oneDofJoint == null) continue;
-					if (oneDofJoint.getQ() < oneDofJoint.getJointLowerLimit() ) {
-						System.out.printf("Enforced lower joint limit of %f for %s\n", oneDofJoint.getJointLowerLimit(), joint);
-						oneDofJoint.setQ(oneDofJoint.getJointLowerLimit());
-					} else if (oneDofJoint.getQ() > oneDofJoint.getJointUpperLimit()) {
-						System.out.printf("Enforced upper joint limit of %f for %s\n", oneDofJoint.getJointLowerLimit(), joint);
-						oneDofJoint.setQ(oneDofJoint.getJointUpperLimit());
-					}
-				}
-				
-				robot.update();
+				enforceLimits(robot, robotModel);
 			}
 
 			@Override
@@ -646,6 +636,18 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 						robot.update();
 					}
 				}
+			}
+		};
+	}
+	
+	private static ValkyrieModifiableInitialSetup initialSetupForFlat(DRCRobotModel robotModel)
+	{
+		return new ValkyrieModifiableInitialSetup(0.0, 0.0)	{
+			@Override
+			protected void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+			{
+				super.setActuatorPositions(robot, jointMap);
+				enforceLimits(robot, robotModel);
 			}
 		};
 	}
