@@ -16,7 +16,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.eventHandlers.PlaneIntersectionCalculator;
 
-public class StartGoalOrientationEditor extends AnimationTimer
+public class GoalOrientationEditor extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
 
@@ -26,7 +26,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
    private boolean isRayCastInterceptorAttached = false;
    private boolean isLeftClickInterceptorAttached = false;
 
-   private final AtomicReference<Point3D> startPositionReference;
+   private final AtomicReference<Boolean> goalEditModeEnabled;
    private final AtomicReference<Point3D> goalPositionReference;
 
    private final AtomicBoolean orientationValidated = new AtomicBoolean(false);
@@ -34,18 +34,12 @@ public class StartGoalOrientationEditor extends AnimationTimer
    private final Messager messager;
    private final SubScene subScene;
 
-   private final AtomicReference<Boolean> startEditModeEnabled;
-   private final AtomicReference<Boolean> goalEditModeEnabled;
-
-   public StartGoalOrientationEditor(Messager messager, SubScene subScene)
+   public GoalOrientationEditor(Messager messager, SubScene subScene)
    {
       this.messager = messager;
       this.subScene = subScene;
 
-      startEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled, false);
       goalEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled, false);
-
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
       goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
 
       planeIntersectionCalculator = new PlaneIntersectionCalculator(subScene.getCamera());
@@ -64,10 +58,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      if (startEditModeEnabled.get() && goalEditModeEnabled.get())
-         throw new RuntimeException("Cannot edit start AND goal together.");
-
-      if (startEditModeEnabled.get() || goalEditModeEnabled.get())
+      if (goalEditModeEnabled.get())
       {
          attachEvenHandlers();
       }
@@ -75,28 +66,6 @@ public class StartGoalOrientationEditor extends AnimationTimer
       {
          removeEventHandlers();
          return;
-      }
-
-      if(startEditModeEnabled.get())
-      {
-         Point3D startPosition = startPositionReference.get();
-         Point3D interception = planeIntersectionCalculator.pollIntersection();
-
-         if(startPosition != null && interception != null)
-         {
-            Vector3D difference = new Vector3D();
-            difference.sub(interception, startPosition);
-            double startYaw = Math.atan2(difference.getY(), difference.getX());
-            Quaternion orientation = new Quaternion(startYaw, 0.0, 0.0);
-
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, orientation);
-         }
-
-         if(orientationValidated.getAndSet(false))
-         {
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled, false);
-            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, false);
-         }
       }
 
       if(goalEditModeEnabled.get())
