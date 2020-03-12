@@ -173,6 +173,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerRequest.setGoalPose(goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
 
+      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
+
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
 
       footstepPlanningModule.addStatusCallback(status -> LogTools.trace("Planning steps: {}", status.getFootstepPlan().getNumberOfSteps()));
