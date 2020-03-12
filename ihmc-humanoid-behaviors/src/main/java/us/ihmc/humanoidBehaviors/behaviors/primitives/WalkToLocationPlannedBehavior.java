@@ -145,12 +145,14 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          {
             goalLocationChanged = false;
             RobotSide initialStanceSide = RobotSide.LEFT;
-            RigidBodyTransform soleToWorld = referenceFrames.getSoleFrame(initialStanceSide).getTransformToWorldFrame();
-            FramePose3D stanceFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), soleToWorld);
+            FramePose3D leftFootPose = new FramePose3D();
+            FramePose3D rightFootPose = new FramePose3D();
+            leftFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.LEFT));
+            rightFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.RIGHT));
             if (currentGoalPose.get() == null)
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), stanceFootPose, initialStanceSide,footStepPlannerToUse, assumeFlatGround);
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose,footStepPlannerToUse, assumeFlatGround);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
          
