@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,19 +15,19 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -78,31 +77,50 @@ public class FootstepPlannerLogger
 
    public boolean logSession()
    {
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
-      latestLogDirectory = sessionDirectory;
+      String sessionDirectory = defaultLogsDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
+      return logSession(sessionDirectory);
+   }
+
+   /**
+    * Generates log in the given directory. For example calling with the input "/home/user/.ihmc/logs/20200320_testLog/" will create (if empty)
+    * and populate that directy with log files.
+    *
+    * <p> Contents of the log file include: json of footstep parameters packet, json of visibility parameters packet, json of request packet,
+    * json of terminal output packet, log file containing graph structure and data
+    *
+    * @return if the logger succeeded
+    */
+   public boolean logSession(String logDirectory)
+   {
+      if (!logDirectory.endsWith(File.separator))
+      {
+         logDirectory += File.separator;
+      }
+
+      latestLogDirectory = logDirectory;
 
       try
       {
          // log request packet
-         String requestPacketFile = sessionDirectory + requestPacketFileName;
+         String requestPacketFile = logDirectory + requestPacketFileName;
          planner.getRequest().setPacket(requestPacket);
          byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
          // log footstep planner parameters packet
-         String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
+         String footstepParametersPacketFile = logDirectory + footstepParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log footstep planner parameters packet
-         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
+         String bodyPathParametersPacketFile = logDirectory + bodyPathParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
          byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log status packet
-         String statusPacketFile = sessionDirectory + statusPacketFileName;
+         String statusPacketFile = logDirectory + statusPacketFileName;
          planner.getOutput().setPacket(outputStatus);
          byte[] serializedStatus = statusPacketSerializer.serializeToBytes(outputStatus);
          writeToFile(statusPacketFile, serializedStatus);
@@ -117,11 +135,11 @@ public class FootstepPlannerLogger
       }
 
       // log planner iteration data
-      String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
+      String plannerIterationDataFileName = logDirectory + "PlannerIterationData.log";
       try
       {
          File plannerDataFile = new File(plannerIterationDataFileName);
-         FileTools.ensureFileExists(plannerDataFile.toPath());
+         ensureFileExists(plannerDataFile.toPath());
          fileWriter = new FileWriter(plannerIterationDataFileName);
 
          fileWriter.write(
@@ -182,7 +200,7 @@ public class FootstepPlannerLogger
 
    private void writeToFile(String file, byte[] fileContents) throws Exception
    {
-      FileTools.ensureFileExists(new File(file).toPath());
+      ensureFileExists(new File(file).toPath());
       outputStream = new FileOutputStream(file);
       printStream = new PrintStream(outputStream);
 
@@ -238,5 +256,50 @@ public class FootstepPlannerLogger
       }
 
       fileWriter.write("\n");
+   }
+
+   public static String getDefaultLogsDirectory()
+   {
+      return defaultLogsDirectory;
+   }
+
+   // TODO replace with updated method in commons once it's released
+
+   private static void ensureFileExists(Path path) throws IOException
+   {
+      if (path.getParent() != null && !Files.exists(path.getParent()))
+      {
+         ensureDirectoryExists(path.getParent());
+      }
+
+      if (Files.exists(path) && Files.isDirectory(path))
+      {
+         Files.delete(path);
+         Files.createFile(path);
+      }
+
+      if (!Files.exists(path))
+      {
+         Files.createFile(path);
+      }
+   }
+
+   public static void ensureDirectoryExists(Path path) throws IOException
+   {
+      if (path.getParent() != null && !Files.exists(path.getParent()))
+      {
+         ensureDirectoryExists(path.getParent());
+      }
+
+      if (Files.exists(path) && !Files.isDirectory(path))
+      {
+         Files.delete(path);
+         Files.createDirectory(path);
+      }
+
+      if (!Files.exists(path))
+      {
+         Files.createDirectory(path);
+      }
    }
 }
