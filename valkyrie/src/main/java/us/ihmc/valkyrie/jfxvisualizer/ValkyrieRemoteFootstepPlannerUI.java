@@ -48,7 +48,7 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
                                               model.getWalkingControllerParameters());
       ui.show();
 
-      if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
+      if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
       {
          FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
 
