@@ -9,23 +9,23 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 /**
  * Defines a collision shape that represents entirely or partially the geometry of a rigid-body.
  * <p>
- * Multiple {@link KinematicsCollidable}s can be used to more accurately represent a rigid-body.
+ * Multiple {@link Collidable}s can be used to more accurately represent a rigid-body.
  * </p>
  * 
  * @author Sylvain Bertrand
  */
-public class KinematicsCollidable
+public class Collidable
 {
    /** The rigid-body this collidable represents. */
    private final RigidBodyBasics rigidBody;
    /**
-    * Collision identifier for this collidable. Use {@link KinematicsCollidableHelper} to compute
+    * Collision identifier for this collidable. Use {@link CollidableHelper} to compute
     * collision masks and groups.
     */
    private final int collisionMask;
    /**
     * Collision identifiers of other collidables that this collidable is allowed to collide with. Use
-    * {@link KinematicsCollidableHelper} to compute collision masks and groups.
+    * {@link CollidableHelper} to compute collision masks and groups.
     */
    private final int collisionGroup;
    /**
@@ -51,9 +51,9 @@ public class KinematicsCollidable
     * 
     * @param rigidBody      the rigid-body this collidable represents.
     * @param collisionMask  collision identifier for this collidable. Use
-    *                       {@link KinematicsCollidableHelper} to compute collision masks and groups.
+    *                       {@link CollidableHelper} to compute collision masks and groups.
     * @param collisionGroup collision identifiers of other collidables that this collidable is allowed
-    *                       to collide with. Use {@link KinematicsCollidableHelper} to compute
+    *                       to collide with. Use {@link CollidableHelper} to compute
     *                       collision masks and groups.
     * @param shape          the shape of this collidable. It is strongly recommended to use only
     *                       {@link Sphere3D} and {@link Capsule3D} as collision evaluations are
@@ -61,7 +61,7 @@ public class KinematicsCollidable
     * @param shapeFrame     the frame the shape is expressed in. Usually the body-fixed frame of
     *                       {@code rigidBody} or the frame after it parent joint.
     */
-   public KinematicsCollidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
+   public Collidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
    {
       this(rigidBody, collisionMask, collisionGroup, shape, shapeFrame, 0.0);
    }
@@ -72,10 +72,10 @@ public class KinematicsCollidable
     * 
     * @param rigidBody           the rigid-body this collidable represents.
     * @param collisionMask       collision identifier for this collidable. Use
-    *                            {@link KinematicsCollidableHelper} to compute collision masks and
+    *                            {@link CollidableHelper} to compute collision masks and
     *                            groups.
     * @param collisionGroup      collision identifiers of other collidables that this collidable is
-    *                            allowed to collide with. Use {@link KinematicsCollidableHelper} to
+    *                            allowed to collide with. Use {@link CollidableHelper} to
     *                            compute collision masks and groups.
     * @param shape               the shape of this collidable. It is strongly recommended to use only
     *                            {@link Sphere3D} and {@link Capsule3D} as collision evaluations are
@@ -86,7 +86,7 @@ public class KinematicsCollidable
     *                            additional region enveloping the shape that needs to be treated more
     *                            carefully. At this moment, it used to grow the shape.
     */
-   public KinematicsCollidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame,
+   public Collidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame,
                                double minimumSafeDistance)
    {
       this.rigidBody = rigidBody;
@@ -104,7 +104,7 @@ public class KinematicsCollidable
     * @param other the query.
     * @return {@code true} if the 2 collidables are allowed to collide, {@code false} ortherwise.
     */
-   public boolean isCollidableWith(KinematicsCollidable other)
+   public boolean isCollidableWith(Collidable other)
    {
       if ((collisionGroup & other.collisionMask) == 0x00)
          return false;
@@ -120,9 +120,9 @@ public class KinematicsCollidable
     * @param other the query.
     * @return the result of the evaluation.
     */
-   public KinematicsCollisionResult evaluateCollision(KinematicsCollidable other)
+   public CollisionResult evaluateCollision(Collidable other)
    {
-      KinematicsCollisionResult result = new KinematicsCollisionResult();
+      CollisionResult result = new CollisionResult();
       evaluateCollision(other, result);
       return result;
    }
@@ -134,9 +134,9 @@ public class KinematicsCollidable
     * @param other        the query. Not modified.
     * @param resultToPack where the result of the evaluation is stored. Modified.
     */
-   public void evaluateCollision(KinematicsCollidable other, KinematicsCollisionResult resultToPack)
+   public void evaluateCollision(Collidable other, CollisionResult resultToPack)
    {
-      KinematicsCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame, resultToPack);
+      CollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame, resultToPack);
       resultToPack.setCollidableA(this);
       resultToPack.setCollidableB(other);
    }
@@ -153,7 +153,7 @@ public class KinematicsCollidable
 
    /**
     * Collision identifier for this collidable used with
-    * {@link #isCollidableWith(KinematicsCollidable)}.
+    * {@link #isCollidableWith(Collidable)}.
     * 
     * @return the mask's value.
     */
@@ -164,7 +164,7 @@ public class KinematicsCollidable
 
    /**
     * Collision identifiers of other collidables that this collidable is allowed to collide with. It is
-    * used with {@link #isCollidableWith(KinematicsCollidable)}.
+    * used with {@link #isCollidableWith(Collidable)}.
     * 
     * @return the group's value.
     */

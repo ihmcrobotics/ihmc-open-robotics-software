@@ -17,7 +17,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -93,7 +93,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       tools.getIKController().setInitialRobotConfigurationNamedMap(initialConfiguration);
    }
 
-   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   public void setCollisionModel(HumanoidRobotCollisionModel collisionModel)
    {
       tools.getIKController().setCollisionModel(collisionModel);
    }

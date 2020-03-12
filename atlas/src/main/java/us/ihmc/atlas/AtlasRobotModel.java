@@ -43,7 +43,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
@@ -929,7 +929,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public HumanoidRobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
       return new AtlasKinematicsCollisionModel();
    }

@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -133,7 +133,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new DefaultShapeCollisionSettings();
    }
 
-   default HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   default HumanoidRobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
       return null;
    }

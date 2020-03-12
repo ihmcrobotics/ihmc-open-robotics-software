@@ -1,7 +1,7 @@
 package us.ihmc.robotics.physics;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.physics.KinematicsCollisionTools.changeFrame;
+import static us.ihmc.robotics.physics.CollisionTools.changeFrame;
 
 import java.util.Random;
 import java.util.function.Function;
@@ -28,11 +28,11 @@ import us.ihmc.euclid.shape.tools.EuclidShapeRandomTools;
 import us.ihmc.euclid.shape.tools.EuclidShapeTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.physics.KinematicsCollisionResult;
-import us.ihmc.robotics.physics.KinematicsCollisionTools;
-import us.ihmc.robotics.physics.KinematicsCollisionTools.FrameChanger;
-import us.ihmc.robotics.physics.KinematicsCollisionTools.FrameShape3DCollisionEvaluator;
-import us.ihmc.robotics.physics.KinematicsCollisionTools.Shape3DCollisionEvaluator;
+import us.ihmc.robotics.physics.CollisionResult;
+import us.ihmc.robotics.physics.CollisionTools;
+import us.ihmc.robotics.physics.CollisionTools.FrameChanger;
+import us.ihmc.robotics.physics.CollisionTools.FrameShape3DCollisionEvaluator;
+import us.ihmc.robotics.physics.CollisionTools.Shape3DCollisionEvaluator;
 
 class KinematicsCollisionToolsTest
 {
@@ -161,7 +161,7 @@ class KinematicsCollisionToolsTest
    {
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in world frame
-         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         CollisionResult actual = new CollisionResult();
          EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = worldFrame;
@@ -174,7 +174,7 @@ class KinematicsCollisionToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in a random frame (frameA == frameB)
-         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         CollisionResult actual = new CollisionResult();
          EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("aFrame", random, worldFrame);
@@ -195,7 +195,7 @@ class KinematicsCollisionToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Test in random frames (frameA != frameB)
-         KinematicsCollisionResult actual = new KinematicsCollisionResult();
+         CollisionResult actual = new CollisionResult();
          EuclidShape3DCollisionResult expected = new EuclidShape3DCollisionResult();
          A shapeA = shapeARandomGenerator.apply(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame("frameA", random, worldFrame);
@@ -216,7 +216,7 @@ class KinematicsCollisionToolsTest
    }
 
    private static void assertCollisionResultsEqual(EuclidShape3DCollisionResult expected, ReferenceFrame expectedFrameA, ReferenceFrame expectedFrameB,
-                                                   KinematicsCollisionResult actual, boolean testNormal, double epsilon)
+                                                   CollisionResult actual, boolean testNormal, double epsilon)
    {
       assertTrue(actual.getFrameA() == expectedFrameA);
       assertTrue(actual.getFrameB() == expectedFrameB);
@@ -242,32 +242,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(345);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateCapsule3DCapsule3DCollision,
-                                             KinematicsCollisionTools.capsule3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateCapsule3DCapsule3DCollision,
+                                             CollisionTools.capsule3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionEPA,
-                                             KinematicsCollisionTools.capsule3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateShape3DCapsule3DCollisionEPA,
+                                             CollisionTools.capsule3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.capsule3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.capsule3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextCapsule3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -277,32 +277,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(5165);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DBox3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToBox3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DBox3DCollision,
+                                             CollisionTools.pointShape3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextBox3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DBox3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToBox3DEvaluator,
+                                             CollisionTools::evaluateShape3DBox3DCollisionEPA,
+                                             CollisionTools.pointShape3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextBox3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToBox3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextBox3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -312,32 +312,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(54687);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DCapsule3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DCapsule3DCollision,
+                                             CollisionTools.pointShape3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCapsule3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateShape3DCapsule3DCollisionEPA,
+                                             CollisionTools.pointShape3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -347,32 +347,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(86);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DCylinder3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToCylinder3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DCylinder3DCollision,
+                                             CollisionTools.pointShape3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DCylinder3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToCylinder3DEvaluator,
+                                             CollisionTools::evaluateShape3DCylinder3DCollisionEPA,
+                                             CollisionTools.pointShape3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToCylinder3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -382,32 +382,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(285);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DEllipsoid3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToEllipsoid3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DEllipsoid3DCollision,
+                                             CollisionTools.pointShape3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DEllipsoid3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToEllipsoid3DEvaluator,
+                                             CollisionTools::evaluateShape3DEllipsoid3DCollisionEPA,
+                                             CollisionTools.pointShape3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToEllipsoid3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -417,32 +417,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(6);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DPointShape3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToPointShape3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DPointShape3DCollision,
+                                             CollisionTools.pointShape3DToPointShape3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextPointShape3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DPointShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToPointShape3DEvaluator,
+                                             CollisionTools::evaluateShape3DPointShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToPointShape3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextPointShape3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToPointShape3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToPointShape3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextPointShape3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -452,32 +452,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(98587621);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DRamp3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToRamp3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DRamp3DCollision,
+                                             CollisionTools.pointShape3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextRamp3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DRamp3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToRamp3DEvaluator,
+                                             CollisionTools::evaluateShape3DRamp3DCollisionEPA,
+                                             CollisionTools.pointShape3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextRamp3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToRamp3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextRamp3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -487,32 +487,32 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(74275);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluatePointShape3DSphere3DCollision,
-                                             KinematicsCollisionTools.pointShape3DToSphere3DEvaluator,
+                                             CollisionTools::evaluatePointShape3DSphere3DCollision,
+                                             CollisionTools.pointShape3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextSphere3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DSphere3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToSphere3DEvaluator,
+                                             CollisionTools::evaluateShape3DSphere3DCollisionEPA,
+                                             CollisionTools.pointShape3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextSphere3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
 
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateShape3DShape3DCollisionEPA,
-                                             KinematicsCollisionTools.pointShape3DToSphere3DEvaluator,
+                                             CollisionTools::evaluateShape3DShape3DCollisionEPA,
+                                             CollisionTools.pointShape3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextPointShape3D,
                                              EuclidShapeRandomTools::nextSphere3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              false,
                                              EPA_EPSILON);
    }
@@ -522,12 +522,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(5165);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DBox3DCollision,
-                                             KinematicsCollisionTools.sphere3DToBox3DEvaluator,
+                                             CollisionTools::evaluateSphere3DBox3DCollision,
+                                             CollisionTools.sphere3DToBox3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextBox3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }
@@ -537,12 +537,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(54687);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DCapsule3DCollision,
-                                             KinematicsCollisionTools.sphere3DToCapsule3DEvaluator,
+                                             CollisionTools::evaluateSphere3DCapsule3DCollision,
+                                             CollisionTools.sphere3DToCapsule3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextCapsule3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }
@@ -552,12 +552,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(86);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DCylinder3DCollision,
-                                             KinematicsCollisionTools.sphere3DToCylinder3DEvaluator,
+                                             CollisionTools::evaluateSphere3DCylinder3DCollision,
+                                             CollisionTools.sphere3DToCylinder3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextCylinder3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }
@@ -567,12 +567,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(285);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DEllipsoid3DCollision,
-                                             KinematicsCollisionTools.sphere3DToEllipsoid3DEvaluator,
+                                             CollisionTools::evaluateSphere3DEllipsoid3DCollision,
+                                             CollisionTools.sphere3DToEllipsoid3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextEllipsoid3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }
@@ -582,12 +582,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(98587621);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DRamp3DCollision,
-                                             KinematicsCollisionTools.sphere3DToRamp3DEvaluator,
+                                             CollisionTools::evaluateSphere3DRamp3DCollision,
+                                             CollisionTools.sphere3DToRamp3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextRamp3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }
@@ -597,12 +597,12 @@ class KinematicsCollisionToolsTest
    {
       Random random = new Random(74275);
       performAssertionsForCollisionEvaluator(random,
-                                             KinematicsCollisionTools::evaluateSphere3DSphere3DCollision,
-                                             KinematicsCollisionTools.sphere3DToSphere3DEvaluator,
+                                             CollisionTools::evaluateSphere3DSphere3DCollision,
+                                             CollisionTools.sphere3DToSphere3DEvaluator,
                                              EuclidShapeRandomTools::nextSphere3D,
                                              EuclidShapeRandomTools::nextSphere3D,
-                                             KinematicsCollisionTools::changeFrame,
-                                             KinematicsCollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
+                                             CollisionTools::changeFrame,
                                              true,
                                              EPSILON);
    }

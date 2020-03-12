@@ -4,11 +4,11 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * Helper class that can be used to simplify the generation of collision masks and groups used with
- * {@link KinematicsCollidable}s.
+ * {@link Collidable}s.
  * 
  * @author Sylvain Bertrand
  */
-public class KinematicsCollidableHelper
+public class CollidableHelper
 {
    private static final int EMPTY_VALUE = -1;
    private int nextCollisionMask = 0b1;
@@ -18,7 +18,7 @@ public class KinematicsCollidableHelper
     * A single instance of this helper should be used when creating multiple collidables for a robot
     * for instance.
     */
-   public KinematicsCollidableHelper()
+   public CollidableHelper()
    {
    }
 

@@ -17,16 +17,16 @@ import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
  * 
  * @author Sylvain Bertrand
  */
-public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBasics, EpsilonComparable<KinematicsCollisionResult>,
-      GeometricallyComparable<KinematicsCollisionResult>
+public class CollisionResult implements EuclidShape3DCollisionResultBasics, EpsilonComparable<CollisionResult>,
+      GeometricallyComparable<CollisionResult>
 {
    /** Whether the shapes are colliding. */
    private boolean shapesAreColliding;
    /** The collision distance, either separation distance or penetration depth. */
    private double signedDistance;
 
-   private KinematicsCollidable collidableA;
-   private KinematicsCollidable collidableB;
+   private Collidable collidableA;
+   private Collidable collidableB;
 
    /** The first shape in the collision. */
    private Shape3DReadOnly shapeA;
@@ -51,7 +51,7 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
    /**
     * Creates a new empty collision result.
     */
-   public KinematicsCollisionResult()
+   public CollisionResult()
    {
    }
 
@@ -69,12 +69,12 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
       this.signedDistance = distance;
    }
 
-   public void setCollidableA(KinematicsCollidable collidableA)
+   public void setCollidableA(Collidable collidableA)
    {
       this.collidableA = collidableA;
    }
 
-   public void setCollidableB(KinematicsCollidable collidableB)
+   public void setCollidableB(Collidable collidableB)
    {
       this.collidableB = collidableB;
    }
@@ -133,12 +133,12 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
       return signedDistance;
    }
 
-   public KinematicsCollidable getCollidableA()
+   public Collidable getCollidableA()
    {
       return collidableA;
    }
 
-   public KinematicsCollidable getCollidableB()
+   public Collidable getCollidableB()
    {
       return collidableB;
    }
@@ -218,7 +218,7 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
     *         otherwise.
     */
    @Override
-   public boolean epsilonEquals(KinematicsCollisionResult other, double epsilon)
+   public boolean epsilonEquals(CollisionResult other, double epsilon)
    {
       if (frameA == null ? other.frameA != null : frameA != other.frameA)
          return false;
@@ -238,7 +238,7 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
     *                                         as {@code this}.
     */
    @Override
-   public boolean geometricallyEquals(KinematicsCollisionResult other, double epsilon)
+   public boolean geometricallyEquals(CollisionResult other, double epsilon)
    {
       if (frameA != null)
          frameA.checkReferenceFrameMatch(other.frameA);
@@ -261,8 +261,8 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof KinematicsCollisionResult)
-         return equals((KinematicsCollisionResult) object);
+      if (object instanceof CollisionResult)
+         return equals((CollisionResult) object);
       if (object instanceof EuclidShape3DCollisionResultReadOnly)
          return EuclidShape3DCollisionResultBasics.super.equals((EuclidShape3DCollisionResultReadOnly) object);
       else
@@ -280,7 +280,7 @@ public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBa
     * @return {@code true} if the two collision results are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(KinematicsCollisionResult other)
+   public boolean equals(CollisionResult other)
    {
       if (other == this)
          return true;

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.physics.KinematicsCollisionResult;
+import us.ihmc.robotics.physics.CollisionResult;
 
 public class KinematicsCollisionFrame extends ReferenceFrame
 {
@@ -24,7 +24,7 @@ public class KinematicsCollisionFrame extends ReferenceFrame
    private final FrameVector3D collisionNormal1 = new FrameVector3D();
    private final FrameVector3D collisionAxis = new FrameVector3D();
 
-   public void update(KinematicsCollisionResult collision, boolean centerFrameAtA)
+   public void update(CollisionResult collision, boolean centerFrameAtA)
    {
       if (centerFrameAtA)
       {

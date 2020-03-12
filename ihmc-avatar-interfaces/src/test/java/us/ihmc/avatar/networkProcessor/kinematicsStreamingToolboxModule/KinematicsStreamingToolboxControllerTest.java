@@ -61,13 +61,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.physics.KinematicsCollidable;
-import us.ihmc.robotics.physics.KinematicsCollisionResult;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -207,7 +207,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       scs = drcSimulationTestHelper.getSimulationConstructionSet();
    }
 
-   public void setupNoWalkingController(HumanoidRobotKinematicsCollisionModel collisionModel)
+   public void setupNoWalkingController(HumanoidRobotCollisionModel collisionModel)
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
@@ -240,15 +240,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void setupCollisions(HumanoidRobotKinematicsCollisionModel collisionModel, HumanoidFloatingRootJointRobot robot)
+   private void setupCollisions(HumanoidRobotCollisionModel collisionModel, HumanoidFloatingRootJointRobot robot)
    {
       toolboxController.setCollisionModel(collisionModel);
 
       if (collisionModel != null)
       {
-         List<KinematicsCollidable> collidables = collisionModel.getRobotCollidables(desiredFullRobotModel);
+         List<Collidable> collidables = collisionModel.getRobotCollidables(desiredFullRobotModel);
 
-         for (KinematicsCollidable collidable : collidables)
+         for (Collidable collidable : collidables)
          {
             Graphics3DObject graphics = getGraphics(collidable);
             Link link = robot.getLink(collidable.getRigidBody().getName());
@@ -325,7 +325,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
    
-      List<KinematicsCollidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel);
+      List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel);
    
       assertTrue(toolboxController.initialize());
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);
@@ -368,15 +368,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
    
          for (int collidable1Index = 0; collidable1Index < collidables.size(); collidable1Index++)
          {
-            KinematicsCollidable collidable1 = collidables.get(collidable1Index);
+            Collidable collidable1 = collidables.get(collidable1Index);
    
             for (int collidable2Index = 0; collidable2Index < collidables.size(); collidable2Index++)
             {
-               KinematicsCollidable collidable2 = collidables.get(collidable2Index);
+               Collidable collidable2 = collidables.get(collidable2Index);
    
                if (collidable1.isCollidableWith(collidable2))
                {
-                  KinematicsCollisionResult collision = collidable1.evaluateCollision(collidable2);
+                  CollisionResult collision = collidable1.evaluateCollision(collidable2);
                   assertTrue(collision.getSignedDistance() > -1.5e-3, collidable1.getRigidBody().getName() + ", " + collidable2.getRigidBody().getName() + ": " + collision.getSignedDistance());
                }
             }
@@ -600,7 +600,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          MultiBodySystemTools.copyJointsState(source.getRootJoint().subtreeList(), destination.getRootJoint().subtreeList(), stateSelection);
    }
 
-   public static Graphics3DObject getGraphics(KinematicsCollidable collidable)
+   public static Graphics3DObject getGraphics(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
       RigidBodyTransform transformToParentJoint = collidable.getShapeFrame()
