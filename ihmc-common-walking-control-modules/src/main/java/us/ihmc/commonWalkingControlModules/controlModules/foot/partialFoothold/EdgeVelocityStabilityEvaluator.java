@@ -119,10 +119,7 @@ public class EdgeVelocityStabilityEvaluator
       else
          isEdgeVelocityStable.set(false);
 
-      if (!isEdgeVelocityStable.getBooleanValue())
-         isEdgeStable.set(false);
-      else
-         isEdgeStable.update();
+      isEdgeStable.update();
    }
 
    public boolean isEdgeVelocityStable()

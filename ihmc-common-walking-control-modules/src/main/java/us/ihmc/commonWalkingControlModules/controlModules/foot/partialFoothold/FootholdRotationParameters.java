@@ -42,9 +42,9 @@ public class FootholdRotationParameters
       copHistoryAlphaFilter = new DoubleParameter(namePrefix + "CoPHistoryAlphaFilter", registry, 0.0);
 
       namePrefix = "Verification_";
-      stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThrehsold", registry, 10.0);
-      stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.1);
-      minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 5);
+      stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThreshold", registry, 1.5);
+      stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.9);
+      minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 3);
       stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
       perpendicularCoPError = new DoubleParameter(namePrefix + "PerpendicularCoPErrorThreshold", registry, 0.005);
       numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
