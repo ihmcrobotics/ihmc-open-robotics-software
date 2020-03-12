@@ -44,6 +44,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -135,7 +136,7 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
-      ikController.setPublishingSolutionPeriod(1.0 / 60.0); // 60Hz
+      ikController.setPublishingSolutionPeriod(UnitConversions.hertzToSeconds(60.0));
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
