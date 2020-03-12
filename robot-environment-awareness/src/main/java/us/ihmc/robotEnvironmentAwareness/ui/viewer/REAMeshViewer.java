@@ -14,6 +14,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
+import us.ihmc.javaFXToolkit.shapes.TextureColorPalette2D;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -60,7 +61,7 @@ public class REAMeshViewer
                                                                         REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState,
                                                                         Color.DARKORANGE);
       ocTreeViewer = new OcTreeMeshBuilder(uiMessager);
-      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager);
+      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.PlanarRegionsState);
       intersectionsMeshBuilder = new PlanarRegionsIntersectionsMeshBuilder(uiMessager);
       boundingBoxMeshView = new BoundingBoxMeshView(uiMessager);
 

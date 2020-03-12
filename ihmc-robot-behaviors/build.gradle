@@ -17,7 +17,7 @@ mainDependencies {
    api("us.ihmc.thirdparty.org.kc7bfi:jflac:1.4.0")
    api("commons-io:commons-io:2.6")
 
-   api("us.ihmc:ihmc-commons:0.27.0")
+   api("us.ihmc:ihmc-commons:0.28.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -25,6 +25,6 @@ mainDependencies {
 
 testDependencies {
 
-   api("us.ihmc:ihmc-commons-testing:0.27.0")
+   api("us.ihmc:ihmc-commons-testing:0.28.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

@@ -475,9 +475,17 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
-                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
-                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(),
+                                     message.getScanHeight(),
+                                     message.getSweepYawMin(),
+                                     message.getSweepYawMax(),
+                                     message.getHeightPitchMin(),
+                                     message.getHeightPitchMax(),
+                                     message.getTimeIncrement(),
+                                     message.getMinRange(),
+                                     message.getMaxRange(),
+                                     message.getScanTime(),
+                                     message.getTimestamp());
    }
 
    /**
@@ -1127,5 +1135,10 @@ public class MessageTools
          scanPoints[index] = scanPoint;
       }
       return scanPoints;
+   }
+
+   public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
+   {
+      return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
    }
 }

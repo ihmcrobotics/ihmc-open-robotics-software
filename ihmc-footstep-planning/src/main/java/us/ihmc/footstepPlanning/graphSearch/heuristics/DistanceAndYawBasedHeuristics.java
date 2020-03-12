@@ -8,6 +8,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -16,15 +17,17 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
+   private final FootstepPlannerEdgeData edgeData;
 
    private final Point2D midFootPoint = new Point2D();
    private final Pose3D projectionPose = new Pose3D();
 
-   public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
+   public DistanceAndYawBasedHeuristics(FootstepNodeSnapperReadOnly snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters, WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder, FootstepPlannerEdgeData edgeData)
    {
       super(weight::getValue, parameters::getIdealFootstepWidth, snapper);
       this.parameters = parameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
+      this.edgeData = edgeData;
    }
 
    @Override
@@ -52,6 +55,12 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
          finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
-      return initialTurnDistance + walkDistance + finalTurnDistance;
+      double heuristicCost = initialTurnDistance + walkDistance + finalTurnDistance;
+      if (edgeData != null)
+      {
+         edgeData.setHeuristicCost(heuristicCost * getWeight());
+      }
+
+      return heuristicCost;
    }
 }
