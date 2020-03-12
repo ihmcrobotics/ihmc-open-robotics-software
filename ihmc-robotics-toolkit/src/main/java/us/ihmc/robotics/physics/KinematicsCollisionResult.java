@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.GeometricallyComparable;
@@ -17,13 +17,16 @@ import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
  * 
  * @author Sylvain Bertrand
  */
-public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollisionResultBasics, EpsilonComparable<EuclidShape3DCollisionFrameResult>,
-      GeometricallyComparable<EuclidShape3DCollisionFrameResult>
+public class KinematicsCollisionResult implements EuclidShape3DCollisionResultBasics, EpsilonComparable<KinematicsCollisionResult>,
+      GeometricallyComparable<KinematicsCollisionResult>
 {
    /** Whether the shapes are colliding. */
    private boolean shapesAreColliding;
    /** The collision distance, either separation distance or penetration depth. */
    private double signedDistance;
+
+   private KinematicsCollidable collidableA;
+   private KinematicsCollidable collidableB;
 
    /** The first shape in the collision. */
    private Shape3DReadOnly shapeA;
@@ -48,7 +51,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    /**
     * Creates a new empty collision result.
     */
-   public EuclidShape3DCollisionFrameResult()
+   public KinematicsCollisionResult()
    {
    }
 
@@ -64,6 +67,16 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    public void setSignedDistance(double distance)
    {
       this.signedDistance = distance;
+   }
+
+   public void setCollidableA(KinematicsCollidable collidableA)
+   {
+      this.collidableA = collidableA;
+   }
+
+   public void setCollidableB(KinematicsCollidable collidableB)
+   {
+      this.collidableB = collidableB;
    }
 
    /** {@inheritDoc} */
@@ -118,6 +131,16 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    public double getSignedDistance()
    {
       return signedDistance;
+   }
+
+   public KinematicsCollidable getCollidableA()
+   {
+      return collidableA;
+   }
+
+   public KinematicsCollidable getCollidableB()
+   {
+      return collidableB;
    }
 
    /** {@inheritDoc} */
@@ -195,7 +218,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     *         otherwise.
     */
    @Override
-   public boolean epsilonEquals(EuclidShape3DCollisionFrameResult other, double epsilon)
+   public boolean epsilonEquals(KinematicsCollisionResult other, double epsilon)
    {
       if (frameA == null ? other.frameA != null : frameA != other.frameA)
          return false;
@@ -215,7 +238,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     *                                         as {@code this}.
     */
    @Override
-   public boolean geometricallyEquals(EuclidShape3DCollisionFrameResult other, double epsilon)
+   public boolean geometricallyEquals(KinematicsCollisionResult other, double epsilon)
    {
       if (frameA != null)
          frameA.checkReferenceFrameMatch(other.frameA);
@@ -238,8 +261,8 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof EuclidShape3DCollisionFrameResult)
-         return equals((EuclidShape3DCollisionFrameResult) object);
+      if (object instanceof KinematicsCollisionResult)
+         return equals((KinematicsCollisionResult) object);
       if (object instanceof EuclidShape3DCollisionResultReadOnly)
          return EuclidShape3DCollisionResultBasics.super.equals((EuclidShape3DCollisionResultReadOnly) object);
       else
@@ -257,7 +280,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     * @return {@code true} if the two collision results are exactly equal component-wise, {@code false}
     *         otherwise.
     */
-   public boolean equals(EuclidShape3DCollisionFrameResult other)
+   public boolean equals(KinematicsCollisionResult other)
    {
       if (other == this)
          return true;

@@ -1,14 +1,12 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.humanoidRobotics.physics;
 
 import java.util.List;
 
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.KinematicsCollidable;
 
 /**
- * Defines a factory for creating the collision shapes of a humanoid robot that is compatible with
- * {@link HumanoidKinematicsToolboxController} and {@link KinematicsToolboxController}.
+ * Defines a factory for creating the collision shapes of a humanoid robot.
  * 
  * @author Sylvain Bertrand
  */

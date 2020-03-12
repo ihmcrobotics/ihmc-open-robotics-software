@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;

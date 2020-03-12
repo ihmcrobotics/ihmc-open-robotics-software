@@ -3,18 +3,18 @@ package us.ihmc.valkyrie;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidableHelper;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.physics.KinematicsCollidable;
+import us.ihmc.robotics.physics.KinematicsCollidableHelper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

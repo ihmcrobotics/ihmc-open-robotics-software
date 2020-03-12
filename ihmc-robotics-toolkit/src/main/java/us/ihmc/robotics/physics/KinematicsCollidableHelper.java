@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.robotics.physics;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 
