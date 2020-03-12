@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 
 public class StereoVisionPointCloudDataLoader
@@ -22,7 +23,7 @@ public class StereoVisionPointCloudDataLoader
          new NullPointerException("No dataFile");
 
       int maximumNumberOfPoints = 200000;
-      double[] pointCloudBuffer = new double[maximumNumberOfPoints * 3];
+      Point3D[] pointCloudBuffer = new Point3D[maximumNumberOfPoints];
       int[] colorBuffer = new int[maximumNumberOfPoints];
       BufferedReader bufferedReader = null;
       try
@@ -55,23 +56,18 @@ public class StereoVisionPointCloudDataLoader
          {
             idxyzcolorArray = lineJustFetched.split("\t");
             Integer.parseInt(idxyzcolorArray[0]);
-            pointCloudBuffer[3 * lineIndex + 0] = Double.parseDouble(idxyzcolorArray[1]);
-            pointCloudBuffer[3 * lineIndex + 1] = Double.parseDouble(idxyzcolorArray[2]);
-            pointCloudBuffer[3 * lineIndex + 2] = Double.parseDouble(idxyzcolorArray[3]);
+            pointCloudBuffer[lineIndex] = new Point3D(Double.parseDouble(idxyzcolorArray[1]),
+                                                      Double.parseDouble(idxyzcolorArray[2]),
+                                                      Double.parseDouble(idxyzcolorArray[3]));
             colorBuffer[lineIndex] = Integer.parseInt(idxyzcolorArray[4]);
 
             lineIndex++;
          }
       }
 
-      float[] resizedPointCloudBuffer = new float[lineIndex * 3];
-      int[] resizedColorBuffer = new int[lineIndex];
-      for (int i = 0; i < resizedPointCloudBuffer.length; i++)
-         resizedPointCloudBuffer[i] = (float) pointCloudBuffer[i];
-      for (int i = 0; i < resizedColorBuffer.length; i++)
-         resizedColorBuffer[i] = colorBuffer[i];
-
-      StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(System.nanoTime(), resizedPointCloudBuffer, resizedColorBuffer);
+      long timestamp = System.nanoTime();
+      double minimumResolution = 0.001;
+      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorBuffer, lineIndex, minimumResolution, null);
       return message;
    }
 

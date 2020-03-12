@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
@@ -51,7 +52,7 @@ public class SLAMFrame
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
       optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
-      originalPointCloudToWorld = MessageTools.unpackScanPoint3ds(message);
+      originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
@@ -74,7 +75,7 @@ public class SLAMFrame
       transformToWorld.multiply(transformFromPreviousFrame);
       sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
 
-      originalPointCloudToWorld = MessageTools.unpackScanPoint3ds(message);
+      originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
       optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
       for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
