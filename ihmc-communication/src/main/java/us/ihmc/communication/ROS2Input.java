@@ -62,9 +62,23 @@ public class ROS2Input<T>
                     T initialValue,
                     MessageFilter<T> messageFilter)
    {
+      this(ros2Node,
+           messageType,
+           ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier),
+           initialValue,
+           messageFilter);
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   {
+      this(ros2Node, messageType, topicName, ROS2Tools.newMessageInstance(messageType), message -> true);
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, T initialValue, MessageFilter<T> messageFilter)
+   {
       atomicReference = new AtomicReference<>(initialValue);
       this.messageFilter = messageFilter;
-      ros2Callback = new ROS2Callback<>(ros2Node, messageType, robotName, moduleTopicQualifier, ioTopicQualifier, this::messageReceivedCallback);
+      ros2Callback = new ROS2Callback<>(ros2Node, messageType, topicName, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>
