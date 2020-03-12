@@ -47,7 +47,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
       // This needs to be identity to allow for consistent conversions of the control frame point if a message with a control frame is recieved.
       bodyFrame = bodyToControl.getBodyFixedFrame();
-      if (!controlFrame.getTransformToDesiredFrame(bodyFrame).getRotationMatrix().isIdentity())
+      if (!controlFrame.getTransformToDesiredFrame(bodyFrame).getRotation().isIdentity())
       {
          throw new RuntimeException("The control frame orientation of a position controlled body must be identity!");
       }
@@ -55,7 +55,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
       positionHelper = new RigidBodyPositionControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                          usingWeightFromMessage, registry, graphicsListRegistry);
+                                                          usingWeightFromMessage, yoTime, registry, graphicsListRegistry);
 
       graphics.addAll(positionHelper.getGraphics());
       hideGraphics();
@@ -142,7 +142,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    {
       // For a position controlled body the control frame orientation must remain identity so the current orientation can be used to
       // transform the desired from the old control frame position to the new.
-      if (command.useCustomControlFrame() && !command.getControlFramePose().getRotationMatrix().isIdentity())
+      if (command.useCustomControlFrame() && !command.getControlFramePose().getRotation().isIdentity())
       {
          LogTools.warn("Specifying a control frame orientation for a body position controller is not supported!");
          clear();

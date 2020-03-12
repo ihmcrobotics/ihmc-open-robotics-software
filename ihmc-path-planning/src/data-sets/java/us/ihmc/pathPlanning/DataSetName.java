@@ -20,6 +20,8 @@ public enum DataSetName
 	_20190327_175120_QuadrupedEnvironment2,
 	_20190327_174535_QuadrupedEnvironment1,
 	_20190327_163532_QuadrupedEnvironment0,
+	_20190402_114002_Jersey_17_KneeCollision,
+	_20190402_113344_Jersey_18_KneeCollision,
 	_20190220_172417_Jersey_Barriers_JSC_78cm,
 	_20190220_172417_Jersey_Barriers_JSC_60cm,
 	_20190220_172417_Jersey_Barriers_IHMC_65cm,

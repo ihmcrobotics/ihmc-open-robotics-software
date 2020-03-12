@@ -13,6 +13,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class KinematicsStreamingToolboxInputCommand implements Command<KinematicsStreamingToolboxInputCommand, KinematicsStreamingToolboxInputMessage>
 {
    private long sequenceId;
+   private long timestamp;
    private final RecyclingArrayList<KinematicsToolboxRigidBodyCommand> inputs = new RecyclingArrayList<>(KinematicsToolboxRigidBodyCommand::new);
    private boolean streamToController = false;
    private double streamInitialBlendDuration = -1.0;
@@ -23,6 +24,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    public void clear()
    {
       sequenceId = 0;
+      timestamp = 0;
       inputs.clear();
       streamToController = false;
       streamInitialBlendDuration = -1.0;
@@ -34,6 +36,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    public void set(KinematicsStreamingToolboxInputCommand other)
    {
       sequenceId = other.sequenceId;
+      timestamp = other.timestamp;
       inputs.clear();
       for (int i = 0; i < other.inputs.size(); i++)
          inputs.add().set(other.inputs.get(i));
@@ -53,6 +56,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       sequenceId = message.getSequenceId();
+      timestamp = message.getTimestamp();
       inputs.clear();
       for (int i = 0; i < message.getInputs().size(); i++)
          inputs.add().set(message.getInputs().get(i), rigidBodyHashCodeResolver, referenceFrameResolver);
@@ -60,6 +64,16 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       streamInitialBlendDuration = message.getStreamInitialBlendDuration();
       angularRateLimitation = message.getAngularRateLimitation();
       linearRateLimitation = message.getLinearRateLimitation();
+   }
+
+   public void setTimestamp(long timestamp)
+   {
+      this.timestamp = timestamp;
+   }
+
+   public long getTimestamp()
+   {
+      return timestamp;
    }
 
    public void addInputs(List<KinematicsToolboxRigidBodyCommand> inputs)

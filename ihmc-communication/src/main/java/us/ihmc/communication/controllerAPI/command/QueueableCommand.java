@@ -33,6 +33,11 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
     * and reset the desired velocity to 0.
     */
    public double streamIntegrationDuration;
+   /**
+    * Timestamp (in nanoseconds) when this message was created. The timestamp can be generated from the
+    * computer where this message originates.
+    */
+   public long timestamp;
 
    /**
     * Clears all variables associated with command queuing and sets them to their default values.
@@ -45,6 +50,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       executionDelayTime = 0.0;
       adjustedExecutionTime = 0.0;
       streamIntegrationDuration = 0.0;
+      timestamp = 0;
    }
 
    /**
@@ -59,6 +65,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       executionDelayTime = other.getExecutionDelayTime();
       adjustedExecutionTime = other.getExecutionTime();
       streamIntegrationDuration = other.getStreamIntegrationDuration();
+      timestamp = other.getTimestamp();
    }
 
    /**
@@ -74,6 +81,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
       executionDelayTime = messageQueueingProperties.getExecutionDelayTime();
       streamIntegrationDuration = messageQueueingProperties.getStreamIntegrationDuration();
+      timestamp = messageQueueingProperties.getTimestamp();
    }
 
    /**
@@ -203,6 +211,15 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    public double getStreamIntegrationDuration()
    {
       return streamIntegrationDuration;
+   }
+
+   /**
+    * Timestamp (in nanoseconds) when this message was created. The timestamp can be generated from the
+    * computer where this message originates.
+    */
+   public long getTimestamp()
+   {
+      return timestamp;
    }
 
    public boolean epsilonEquals(C other, double epsilon)
