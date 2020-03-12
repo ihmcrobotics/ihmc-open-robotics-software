@@ -10,7 +10,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Window;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -19,6 +18,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataLoader;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 
@@ -109,21 +109,19 @@ public class DataImporterAnchorPaneController
       int numberOfPoints = pointCloud.length;
 
       long timestamp = 870612L;
-      float[] pointCloudBuffer = new float[3 * numberOfPoints];
+      Point3D[] pointCloudBuffer = new Point3D[numberOfPoints];
       int[] colorsInteger = new int[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D scanPoint = new Point3D(pointCloud[i]);
          manualTransform.transform(scanPoint);
 
-         pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
-         pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
-         pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
-
+         pointCloudBuffer[i] = scanPoint;
          colorsInteger[i] = DEFAULT_STEREO_POINT_COLOR;
       }
 
-      StereoVisionPointCloudMessage dummyMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
+      double minimumResolution = 0.001;
+      StereoVisionPointCloudMessage dummyMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorsInteger, numberOfPoints, minimumResolution, null);
       reaMessager.submitMessageToModule(REAModuleAPI.StereoVisionPointCloudState, dummyMessage);
 
       if (messager != null)

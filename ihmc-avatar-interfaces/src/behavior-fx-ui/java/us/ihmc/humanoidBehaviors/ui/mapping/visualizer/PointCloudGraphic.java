@@ -20,6 +20,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 
 public class PointCloudGraphic extends Group
 {
@@ -98,7 +99,7 @@ public class PointCloudGraphic extends Group
       Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
       addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), confidenceColor);
 
-      addPointsMeshes(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage), pointCloudColor);
+      addPointsMeshes(PointCloudCompression.decompressPointCloudToArray(stereoVisionPointCloudMessage), pointCloudColor);
    }
 
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)

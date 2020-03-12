@@ -13,8 +13,8 @@ import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
@@ -22,6 +22,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -181,30 +182,24 @@ public class SLAMModule
    {
       int numberOfPointsToPack = originalPointCloud.length + sourcePointsToWorld.length + correctedPointCloud.length;
 
-      float[] pointCloudBuffer = new float[numberOfPointsToPack * 3];
-      int[] colorBuffer = new int[numberOfPointsToPack * 3];
+      Point3D[] pointCloudBuffer = new Point3D[numberOfPointsToPack];
+      int[] colorBuffer = new int[numberOfPointsToPack];
       for (int i = 0; i < originalPointCloud.length; i++)
       {
-         pointCloudBuffer[3 * i + 0] = (float) originalPointCloud[i].getX();
-         pointCloudBuffer[3 * i + 1] = (float) originalPointCloud[i].getY();
-         pointCloudBuffer[3 * i + 2] = (float) originalPointCloud[i].getZ();
+         pointCloudBuffer[i] = new Point3D(originalPointCloud[i]);
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_ORIGINAL_POINT_CLOUD_COLOR);
       }
       for (int i = originalPointCloud.length; i < originalPointCloud.length + sourcePointsToWorld.length; i++)
       {
-         pointCloudBuffer[3 * i + 0] = (float) sourcePointsToWorld[i - originalPointCloud.length].getX();
-         pointCloudBuffer[3 * i + 1] = (float) sourcePointsToWorld[i - originalPointCloud.length].getY();
-         pointCloudBuffer[3 * i + 2] = (float) sourcePointsToWorld[i - originalPointCloud.length].getZ();
+         pointCloudBuffer[i] = new Point3D(sourcePointsToWorld[i - originalPointCloud.length]);
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(SOURCE_POINT_CLOUD_COLOR);
       }
       for (int i = originalPointCloud.length + sourcePointsToWorld.length; i < numberOfPointsToPack; i++)
       {
-         pointCloudBuffer[3 * i + 0] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getX();
-         pointCloudBuffer[3 * i + 1] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getY();
-         pointCloudBuffer[3 * i + 2] = (float) correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length].getZ();
+         pointCloudBuffer[i] = new Point3D(correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length]);
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
       }
-      return MessageTools.createStereoVisionPointCloudMessage(19870612L, pointCloudBuffer, colorBuffer);
+      return PointCloudCompression.compressPointCloud(19870612L, pointCloudBuffer, colorBuffer, numberOfPointsToPack, 0.001, null);
    }
 
    public void updateMain()
