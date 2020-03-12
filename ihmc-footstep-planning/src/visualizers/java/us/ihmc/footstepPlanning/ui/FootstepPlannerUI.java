@@ -1,16 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegion;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 import java.util.ArrayList;
 
@@ -85,6 +75,7 @@ public class FootstepPlannerUI
    private final FullGraphRenderer fullGraphRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
+   private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -100,6 +91,8 @@ public class FootstepPlannerUI
    private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
    @FXML
    private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
+   @FXML
+   private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
    @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
@@ -161,6 +154,7 @@ public class FootstepPlannerUI
       footstepPostProcessingParametersUIController.attachMessager(messager);
       bodyCollisionCheckingUIController.attachMessager(messager);
       footstepPlannerCostsUIController.attachMessager(messager);
+      footstepPlannerLogVisualizerController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
@@ -174,6 +168,7 @@ public class FootstepPlannerUI
       footstepPostProcessingParametersUIController.bindControls();
       bodyCollisionCheckingUIController.bindControls();
       footstepPlannerCostsUIController.bindControls();
+      footstepPlannerLogVisualizerController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
@@ -214,6 +209,7 @@ public class FootstepPlannerUI
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
       this.fullGraphRenderer = new FullGraphRenderer(messager);
+      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(contactPointParameters, messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -226,6 +222,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
       view3dFactory.addNodeToView(expandedNodesRenderer.getRoot());
       view3dFactory.addNodeToView(fullGraphRenderer.getRoot());
+      view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -238,6 +235,7 @@ public class FootstepPlannerUI
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
+         messager.registerTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
       }
 
       if(previewModelFactory == null)
@@ -268,6 +266,7 @@ public class FootstepPlannerUI
          startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
          expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
          fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
+         footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
       }
 
       planarRegionViewer.start();
@@ -284,6 +283,7 @@ public class FootstepPlannerUI
       occupancyMapRenderer.start();
       expandedNodesRenderer.start();
       fullGraphRenderer.start();
+      footstepPlannerLogRenderer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -347,6 +347,7 @@ public class FootstepPlannerUI
    public void show()
    {
       primaryStage.show();
+      footstepPlannerLogVisualizerController.setup();
    }
 
    public void stop()

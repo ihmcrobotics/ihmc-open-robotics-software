@@ -57,6 +57,11 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +97,13 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getCdrSerializedSize(data.getFootstepPlanningStatistics(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExceptionMessage().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getStacktrace().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStacktrace().get(i0).length() + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -112,6 +124,14 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getLowLevelPlannerGoal(), cdr);
       controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.write(data.getFootstepPlanningStatistics(), cdr);
+      if(data.getExceptionMessage().length() <= 255)
+      cdr.write_type_d(data.getExceptionMessage());else
+          throw new RuntimeException("exception_message field exceeds the maximum length");
+
+      if(data.getStacktrace().size() <= 20)
+      cdr.write_type_e(data.getStacktrace());else
+          throw new RuntimeException("stacktrace field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
@@ -127,6 +147,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       cdr.read_type_e(data.getBodyPath());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
       controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.read(data.getFootstepPlanningStatistics(), cdr);	
+      cdr.read_type_d(data.getExceptionMessage());	
+      cdr.read_type_e(data.getStacktrace());	
 
    }
 
@@ -145,6 +167,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       ser.write_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
 
+      ser.write_type_d("exception_message", data.getExceptionMessage());
+      ser.write_type_e("stacktrace", data.getStacktrace());
    }
 
    @Override
@@ -162,6 +186,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       ser.read_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
 
+      ser.read_type_d("exception_message", data.getExceptionMessage());
+      ser.read_type_e("stacktrace", data.getStacktrace());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus src, controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus dest)

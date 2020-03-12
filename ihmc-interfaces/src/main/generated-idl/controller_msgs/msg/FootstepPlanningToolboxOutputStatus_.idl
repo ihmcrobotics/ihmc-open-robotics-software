@@ -35,6 +35,9 @@ module controller_msgs
       const octet FOOTSTEP_PLANNING_RESULT_INVALID_GOAL =
       7;
 
+      const octet FOOTSTEP_PLANNING_RESULT_EXCEPTION =
+      8;
+
       const long NO_PLAN_ID =
       -1;
 
@@ -58,6 +61,11 @@ module controller_msgs
         sequence<geometry_msgs::msg::dds::Pose> body_path;
         geometry_msgs::msg::dds::Pose low_level_planner_goal;
         controller_msgs::msg::dds::FootstepPlanningStatistics footstep_planning_statistics;
+        /**
+         * Contains planner stack trace if failure is due to an exception
+         */
+        string exception_message;
+        sequence<string, 20> stacktrace;
       };
     };
   };

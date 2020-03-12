@@ -1,53 +1,65 @@
-package us.ihmc.valkyrie.planner.ui;
+package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.SortType;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.planner.log.ValkyriePlannerEdgeData;
-import us.ihmc.valkyrie.planner.log.ValkyriePlannerIterationData;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner.createFootPolygons;
-
-public class ValkyriePlannerDebuggerController
+public class FootstepPlannerLogVisualizerController
 {
    private final ObservableList<ChildStepProperty> childTableItems = FXCollections.observableArrayList();
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();
    private TableColumnHolder parentColumnHolder;
    private TableColumnHolder childColumnHolder;
-   private Messager messager;
+   private JavaFXMessager messager;
+   private FootstepPlannerLog footstepPlannerLog = null;
    private List<FootstepNode> path = new ArrayList<>();
    private final Stack<FootstepNode> parentStepStack = new Stack<>();
    private final AtomicReference<ChildStepProperty> selectedRow = new AtomicReference<>();
 
-   private List<ValkyriePlannerIterationData> iterationDataList;
-   private Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap;
-   private FootstepNodeSnapper snapper;
+   private List<FootstepPlannerIterationData> iterationDataList;
+   private Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap;
+   private FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(PlannerTools.createDefaultFootPolygons());
+
+   private final AtomicBoolean loadingLog = new AtomicBoolean();
 
    @FXML
    private TableView debugParentStepTable;
@@ -55,21 +67,27 @@ public class ValkyriePlannerDebuggerController
    private TableView debugChildStepTable;
 
    @FXML
+   private CheckBox showLogGraphics;
+   @FXML
    private Button reset;
    @FXML
    private Button stepInto;
    @FXML
    private Button stepBack;
 
-   void setMessager(Messager messager)
+   public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
    }
 
-   void setup()
+   public void bindControls()
    {
-      snapper = new SimplePlanarRegionFootstepNodeSnapper(createFootPolygons(new ValkyrieRobotModel(RobotTarget.SCS)));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, b -> loadLog());
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLogGraphics, showLogGraphics.selectedProperty(), true);
+   }
 
+   public void setup()
+   {
       parentColumnHolder = new TableColumnHolder(debugParentStepTable, true);
       childColumnHolder = new TableColumnHolder(debugChildStepTable, false);
 
@@ -86,10 +104,7 @@ public class ValkyriePlannerDebuggerController
          header.setPrefHeight(0);
          header.setVisible(false);
       }
-   }
 
-   public void initialize()
-   {
       debugChildStepTable.setRowFactory(tableValue ->
                                         {
                                            TableRow<ChildStepProperty> row = new TableRow<>();
@@ -121,10 +136,91 @@ public class ValkyriePlannerDebuggerController
       debugParentStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
    }
 
-   public void reset(List<ValkyriePlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap, PlanarRegionsList planarRegionsList)
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
    {
-      this.iterationDataList = iterationDataList;
-      this.edgeDataMap = edgeDataMap;
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
+                                                                                {
+                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints()
+                                                                                                                                         .get(side);
+                                                                                   return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+                                                                                });
+      snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+   }
+
+   public void loadLog()
+   {
+      if(loadingLog.get())
+         return;
+
+      loadingLog.set(true);
+      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+      messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Loading log...");
+
+      if(logLoader.load())
+      {
+         footstepPlannerLog = logLoader.getLog();
+         loadLog(footstepPlannerLog);
+      }
+      else
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Error loading log");
+      }
+
+      loadingLog.set(false);
+   }
+
+   private void loadLog(FootstepPlannerLog footstepPlannerLog)
+   {
+      // publish log name
+      messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, footstepPlannerLog.getLogName());
+
+      // publish footstep parameters
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
+
+      // publish body parameters
+      DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
+      visibilityGraphParameters.set(footstepPlannerLog.getBodyPathParametersPacket());
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, visibilityGraphParameters);
+
+      // publish request parameters
+      messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getInitialStanceRobotSide()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, footstepPlannerLog.getRequestPacket().getGoalPositionInWorld());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, footstepPlannerLog.getRequestPacket().getGoalOrientationInWorld());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, footstepPlannerLog.getRequestPacket().getGoalDistanceProximity());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalYawProximity, footstepPlannerLog.getRequestPacket().getGoalYawProximity());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, footstepPlannerLog.getRequestPacket().getTimeout());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
+      messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, footstepPlannerLog.getRequestPacket().getStanceFootPositionInWorld());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, footstepPlannerLog.getRequestPacket().getStanceFootOrientationInWorld());
+
+      // publish status
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, FootstepPlanningResult.fromByte(footstepPlannerLog.getStatusPacket().getFootstepPlanningResult()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
+
+      // set graphics
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowExpandedNodes, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowRejectedNodes, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true); // hide plan by default
+
+      this.iterationDataList = footstepPlannerLog.getIterationData();
+      this.edgeDataMap = footstepPlannerLog.getEdgeDataMap();
       this.snapper.setPlanarRegions(planarRegionsList);
 
       parentStepStack.clear();
@@ -138,7 +234,7 @@ public class ValkyriePlannerDebuggerController
       updateTable();
    }
 
-   private void recursivelyBuildPath(ValkyriePlannerIterationData iterationData, List<ValkyriePlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, ValkyriePlannerEdgeData> edgeDataMap)
+   private void recursivelyBuildPath(FootstepPlannerIterationData iterationData, List<FootstepPlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap)
    {
       FootstepNode stanceNode = iterationData.getStanceNode();
       path.add(stanceNode);
@@ -157,9 +253,9 @@ public class ValkyriePlannerDebuggerController
    private void updateTable()
    {
       FootstepNode parentNode = parentStepStack.peek();
-      Optional<ValkyriePlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
+      Optional<FootstepPlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
 
-      ValkyriePlannerIterationData iterationData = iterationDataOptional.get();
+      FootstepPlannerIterationData iterationData = iterationDataOptional.get();
 
       parentTableItems.clear();
       childTableItems.clear();
@@ -167,7 +263,7 @@ public class ValkyriePlannerDebuggerController
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
          FootstepNode childNode = iterationData.getChildNodes().get(i);
-         ValkyriePlannerEdgeData edgeData = edgeDataMap.get(new GraphEdge<>(iterationData.getStanceNode(), childNode));
+         FootstepPlannerEdgeData edgeData = edgeDataMap.get(new GraphEdge<>(iterationData.getStanceNode(), childNode));
          boolean expanded = iterationDataList.stream().anyMatch(data -> data.getStanceNode().equals(childNode));
          ChildStepProperty stepProperty = new ChildStepProperty(edgeData, expanded);
          childTableItems.add(stepProperty);
@@ -178,20 +274,20 @@ public class ValkyriePlannerDebuggerController
 
       debugChildStepTable.getSortOrder().clear();
       debugChildStepTable.getSortOrder().add(childColumnHolder.solutionStep);
-      childColumnHolder.solutionStep.setSortType(SortType.DESCENDING);
+      childColumnHolder.solutionStep.setSortType(TableColumn.SortType.DESCENDING);
       debugChildStepTable.getSortOrder().add(childColumnHolder.totalCostColumn);
-      childColumnHolder.totalCostColumn.setSortType(SortType.ASCENDING);
+      childColumnHolder.totalCostColumn.setSortType(TableColumn.SortType.ASCENDING);
       debugChildStepTable.sort();
 
-      messager.submitMessage(ValkyriePlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
-      messager.submitMessage(ValkyriePlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
+      messager.submitMessage(FootstepPlannerMessagerAPI.parentDebugStep, Pair.of(stepProperty.transform, stepProperty.snapData.getCroppedFoothold()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.idealDebugStep, stepProperty.idealStepTransform);
 
       debugChildStepTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
                                                                                  {
                                                                                     if (newValue != null)
                                                                                     {
                                                                                        ChildStepProperty property = (ChildStepProperty) newValue;
-                                                                                       messager.submitMessage(ValkyriePlannerMessagerAPI.childDebugStep,
+                                                                                       messager.submitMessage(FootstepPlannerMessagerAPI.childDebugStep,
                                                                                                               Pair.of(property.transform,
                                                                                                                       property.edgeData.getCandidateNodeSnapData().getCroppedFoothold()));
                                                                                        selectedRow.set(property);
@@ -238,6 +334,7 @@ public class ValkyriePlannerDebuggerController
       private final TableColumn<ChildStepProperty, String> heightColumn = new TableColumn<>("Height");
       private final TableColumn<ChildStepProperty, String> reachColumn = new TableColumn<>("Reach");
       private final TableColumn<ChildStepProperty, String> stepYawColumn = new TableColumn<>("dYaw");
+      private final TableColumn<ChildStepProperty, String> areaPercentageColumn = new TableColumn<>("Area %");
       private final TableColumn<ChildStepProperty, String> edgeCostColumn = new TableColumn<>("Edge Cost");
       private final TableColumn<ChildStepProperty, String> heuristicCostColumn = new TableColumn<>("Heuristic Cost");
       private final TableColumn<ChildStepProperty, String> totalCostColumn = new TableColumn<>("Total Cost");
@@ -245,24 +342,25 @@ public class ValkyriePlannerDebuggerController
       private final TableColumn<ChildStepProperty, String> expandedColumn = new TableColumn<>("Expanded");
       private final TableColumn<ChildStepProperty, String> solutionStep = new TableColumn<>("Solution");
 
-      public TableColumnHolder(TableView table, boolean parentTable)
+      public TableColumnHolder(TableView<ChildStepProperty> table, boolean parentTable)
       {
-         xColumn.setCellValueFactory(new PropertyValueFactory("x"));
-         yColumn.setCellValueFactory(new PropertyValueFactory("y"));
-         zColumn.setCellValueFactory(new PropertyValueFactory("z"));
-         yawColumn.setCellValueFactory(new PropertyValueFactory("yaw"));
-         pitchColumn.setCellValueFactory(new PropertyValueFactory("pitch"));
-         rollColumn.setCellValueFactory(new PropertyValueFactory("roll"));
+         xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
+         yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
+         zColumn.setCellValueFactory(new PropertyValueFactory<>("z"));
+         yawColumn.setCellValueFactory(new PropertyValueFactory<>("yaw"));
+         pitchColumn.setCellValueFactory(new PropertyValueFactory<>("pitch"));
+         rollColumn.setCellValueFactory(new PropertyValueFactory<>("roll"));
          widthColumn.setCellValueFactory(new PropertyValueFactory<>("width"));
          lengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
          heightColumn.setCellValueFactory(new PropertyValueFactory<>("height"));
          reachColumn.setCellValueFactory(new PropertyValueFactory<>("reach"));
          stepYawColumn.setCellValueFactory(new PropertyValueFactory<>("stepYaw"));
-         edgeCostColumn.setCellValueFactory(new PropertyValueFactory("edgeCost"));
-         heuristicCostColumn.setCellValueFactory(new PropertyValueFactory("heuristicCost"));
-         totalCostColumn.setCellValueFactory(new PropertyValueFactory("totalCost"));
-         rejectionReasonColumn.setCellValueFactory(new PropertyValueFactory("rejectionReason"));
-         expandedColumn.setCellValueFactory(new PropertyValueFactory("expanded"));
+         areaPercentageColumn.setCellValueFactory(new PropertyValueFactory<>("areaPercentage"));
+         edgeCostColumn.setCellValueFactory(new PropertyValueFactory<>("edgeCost"));
+         heuristicCostColumn.setCellValueFactory(new PropertyValueFactory<>("heuristicCost"));
+         totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+         rejectionReasonColumn.setCellValueFactory(new PropertyValueFactory<>("rejectionReason"));
+         expandedColumn.setCellValueFactory(new PropertyValueFactory<>("expanded"));
          solutionStep.setCellValueFactory(new PropertyValueFactory<>("solution"));
 
          table.getColumns().add(xColumn);
@@ -279,6 +377,7 @@ public class ValkyriePlannerDebuggerController
             table.getColumns().add(heightColumn);
             table.getColumns().add(reachColumn);
             table.getColumns().add(stepYawColumn);
+            table.getColumns().add(areaPercentageColumn);
             table.getColumns().add(edgeCostColumn);
             table.getColumns().add(heuristicCostColumn);
             table.getColumns().add(totalCostColumn);
@@ -298,6 +397,7 @@ public class ValkyriePlannerDebuggerController
          heightColumn.setPrefWidth(60);
          reachColumn.setPrefWidth(60);
          stepYawColumn.setPrefWidth(60);
+         areaPercentageColumn.setPrefWidth(60);
          edgeCostColumn.setPrefWidth(80);
          heuristicCostColumn.setPrefWidth(80);
          totalCostColumn.setPrefWidth(110);
@@ -314,7 +414,7 @@ public class ValkyriePlannerDebuggerController
       private final RigidBodyTransform transform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
 
-      public ParentStepProperty(ValkyriePlannerIterationData iterationData)
+      public ParentStepProperty(FootstepPlannerIterationData iterationData)
       {
          this.stanceNode = iterationData.getStanceNode();
          this.snapData = iterationData.getStanceNodeSnapData();
@@ -366,19 +466,19 @@ public class ValkyriePlannerDebuggerController
 
    public class ChildStepProperty
    {
-      private final ValkyriePlannerEdgeData edgeData;
+      private final FootstepPlannerEdgeData edgeData;
       private final RigidBodyTransform transform = new RigidBodyTransform();
       private final boolean expanded;
       private final double stepYaw;
 
-      public ChildStepProperty(ValkyriePlannerEdgeData edgeData,
+      public ChildStepProperty(FootstepPlannerEdgeData edgeData,
                                boolean expanded)
       {
          this.edgeData = edgeData;
          this.expanded = expanded;
 
          FootstepNode candidateNode = edgeData.getCandidateNode();
-         FootstepNode stanceNode = edgeData.getCandidateNode();
+         FootstepNode stanceNode = edgeData.getStanceNode();
 
          if (edgeData.getCandidateNodeSnapData().getSnapTransform().containsNaN())
          {
@@ -445,6 +545,11 @@ public class ValkyriePlannerDebuggerController
       public String getStepYaw()
       {
          return doubleFormat.format(stepYaw);
+      }
+
+      public String getAreaPercentage()
+      {
+         return doubleFormat.format(edgeData.getFootAreaPercentage());
       }
 
       public String getEdgeCost()
