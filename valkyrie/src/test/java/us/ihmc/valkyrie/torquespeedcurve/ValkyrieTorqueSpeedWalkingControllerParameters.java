@@ -5,15 +5,33 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
-public class ValkyrieFlatGroundWalkingControllerParameters extends ValkyrieWalkingControllerParameters {
+public class ValkyrieTorqueSpeedWalkingControllerParameters extends ValkyrieWalkingControllerParameters {
 	ValkyrieWalkingParameterValues walkingValues;
 
-	public ValkyrieFlatGroundWalkingControllerParameters(ValkyrieJointMap jointMap,
+	public ValkyrieTorqueSpeedWalkingControllerParameters(ValkyrieJointMap jointMap,
 			ValkyriePhysicalProperties physicalProperties, RobotTarget target, ValkyrieWalkingParameterValues values) {
 		super(jointMap, physicalProperties, target);
 		walkingValues = values;
 	}
 
+	@Override
+	public double getDefaultTransferTime()
+	{
+		return walkingValues.defaultTransferTime;
+	}
+
+	@Override
+	public double getDefaultSwingTime()
+	{
+		return walkingValues.defaultSwingTime;
+	}
+
+	@Override
+	public double getDefaultInitialTransferTime()
+	{
+		return walkingValues.defaultInitialTransferTime;
+	}
+	
 	//	@Override
 	//	public double nominalHeightAboveAnkle() {
 	//		// TODO Auto-generated method stub
@@ -157,23 +175,5 @@ public class ValkyrieFlatGroundWalkingControllerParameters extends ValkyrieWalki
 	//		// TODO Auto-generated method stub
 	//		return false;
 
-	@Override
-	public double getDefaultTransferTime()
-	{
-		return walkingValues.defaultTransferTime;
-	}
-
-	@Override
-	public double getDefaultSwingTime()
-	{
-		return walkingValues.defaultSwingTime;
-	}
-
-	/** @inheritDoc */
-	@Override
-	public double getDefaultInitialTransferTime()
-	{
-		return walkingValues.defaultInitialTransferTime;
-	}
 
 }

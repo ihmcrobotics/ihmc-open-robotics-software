@@ -101,7 +101,7 @@ class ValkyrieTorqueSpeedTestConfig {
 		value += hashDoubleToString(torqueLimits, "torque limit");
 		value += hashDoubleToString(linkMassKg, "link mass");
 		value += hashDoubleToString(velocityLimits, "velocity limit");
-		value += hashDoubleArrayToString(positionLimits, "velocity limit");
+		value += hashDoubleArrayToString(positionLimits, "position limit");
 		return value;
 	}
 	

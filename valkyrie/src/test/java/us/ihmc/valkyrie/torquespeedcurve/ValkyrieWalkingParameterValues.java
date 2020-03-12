@@ -8,7 +8,7 @@ public class ValkyrieWalkingParameterValues {
 	public double defaultInitialTransferTime;
 	
 	public ValkyrieWalkingParameterValues() {
-		this(RobotTarget.SCS);
+		this(RobotTarget.REAL_ROBOT);
 	}
 	
 	public ValkyrieWalkingParameterValues(RobotTarget target) {

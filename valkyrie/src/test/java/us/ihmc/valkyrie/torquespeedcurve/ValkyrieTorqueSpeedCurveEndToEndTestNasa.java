@@ -535,7 +535,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
 			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
-			drcSimulationTestHelper.createSimulation("StepUpWithoutSquareUp");
+			drcSimulationTestHelper.createSimulation("Stairs");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 			setCustomSteppingParams(scs);

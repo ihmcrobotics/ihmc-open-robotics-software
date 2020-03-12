@@ -104,26 +104,6 @@ public class TorqueSpeedTestRunner {
 		return argumentParser;
 	}
 
-	public void disableAnkleLimits(ValkyrieRobotModel robotModel) {
-		robotModel.setSDFDescriptionMutator(new ValkyrieSDFDescriptionMutator(robotModel.getJointMap(), true) {
-			@Override
-			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder) {
-				if (jointHolder.getName().contains("AnklePitch"))
-					jointHolder.setLimits(-Math.PI, Math.PI);
-			}
-		});
-	}
-
-	private ValkyrieSDFDescriptionMutator getAnkleLimitMutator(ValkyrieRobotModel robot) {
-		return new ValkyrieSDFDescriptionMutator(robot.getJointMap(), true) {
-			@Override
-			public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder) {
-				if (jointHolder.getName().contains("AnklePitch"))
-					jointHolder.setLimits(-Math.PI, Math.PI);
-			}
-		};
-	}
-
 	public static void main(String[] args) {
 
 		JSAP argumentParser = getArgumentParser();
@@ -166,15 +146,14 @@ public class TorqueSpeedTestRunner {
 		robot.setModelSizeScale(config.globalSizeScale);
 
 		// Set walking parameters
-//		WalkingControllerParameters walkingParameters = robot.getWalkingControllerParameters();
-		ValkyrieFlatGroundWalkingControllerParameters walkingParameters = new ValkyrieFlatGroundWalkingControllerParameters(
+		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
 				robot.getJointMap(),
 				robot.getRobotPhysicalProperties(), 
-				RobotTarget.SCS,
+				RobotTarget.REAL_ROBOT,
 				config.walkingValues);
 
 		// Apply SDF modifications
-		SDFDescriptionMutatorList mutator = getSdfMutators(config, robot);
+		SDFDescriptionMutatorList mutators = getSdfMutators(config, robot);
 
 		// Create test runner and test case class
 		TorqueSpeedTestRunner runner = new TorqueSpeedTestRunner();
@@ -182,10 +161,15 @@ public class TorqueSpeedTestRunner {
 
 		// Disable ankle limits on the robot
 		if (config.disableAnkleLimits) {
-			mutator.addMutator(runner.getAnkleLimitMutator(robot));
+			ArrayList<Double> limits = new ArrayList<Double>();
+			limits.add(-180.0);
+			limits.add(180.0);
+			mutators.addMutator(new ValkyrieJointPositionLimitMutator(robot.getJointMap(), "leftAnklePitch", limits));
+			mutators.addMutator(new ValkyrieJointPositionLimitMutator(robot.getJointMap(), "rightAnklePitch", limits));
 		}
 
-		robot.setSDFDescriptionMutator(mutator);
+		// Apply mutators to the robot. There is always at least one mutator.
+	    robot.setSDFDescriptionMutator(mutators);
 
 		// Set whether tester should show a GUI
 		tester.setGuiEnabled(config.showGui);
@@ -262,20 +246,22 @@ public class TorqueSpeedTestRunner {
 
 	private static SDFDescriptionMutatorList getSdfMutators(ValkyrieTorqueSpeedTestConfig config,
 			ValkyrieRobotModel robot) {
-		// Create a list of mutators based on the torque limits defined in the params
-		// file
-		SDFDescriptionMutatorList mutator = new SDFDescriptionMutatorList();
 
 		// Create a list of joint names with the format we need
 		ValkyrieJointMap jointMap = robot.getJointMap();
 		HashSet<String> validJointNames = new HashSet<>(Arrays.asList(jointMap.getOrderedJointNames()));
 		HashSet<String> validLinkNames = getLinkNames(validJointNames);
+		
+		// Create a list of mutators based on the torque limits defined in the params file.
+		// The first mutator is of a different type, and exists to fix up various things in the Valkyrie model.
+		SDFDescriptionMutatorList mutator_list = new SDFDescriptionMutatorList(
+				new ValkyrieSDFDescriptionMutator(jointMap, false), new ValkyrieJointTorqueLimitMutator(jointMap));
 
 		// Add a mutator for each joint torque limit specified in the parameter file
 		for (String joint : config.torqueLimits.keySet()) {
 			HashSet<String> jointNames = getCanonicalNames(joint, validJointNames, "torque limit joint name");
 			for (String fullJointName: jointNames) {
-				mutator.addMutator(new ValkyrieJointTorqueLimitMutator(jointMap, fullJointName,
+				mutator_list.addMutator(new ValkyrieJointTorqueLimitMutator(jointMap, fullJointName,
 						config.torqueLimits.get(joint)));
 			}
 		}		
@@ -284,7 +270,7 @@ public class TorqueSpeedTestRunner {
 		for (String joint : config.velocityLimits.keySet()) {
 			HashSet<String> jointNames = getCanonicalNames(joint, validJointNames, "velocity limit joint name");
 			for (String fullJointName: jointNames) {
-				mutator.addMutator(new ValkyrieJointVelocityLimitMutator(jointMap, fullJointName,
+				mutator_list.addMutator(new ValkyrieJointVelocityLimitMutator(jointMap, fullJointName,
 						config.velocityLimits.get(joint)));
 			}
 		}
@@ -293,14 +279,8 @@ public class TorqueSpeedTestRunner {
 		for (String link : config.linkMassKg.keySet()) {
 			HashSet<String> linkNames = getCanonicalNames(link, validLinkNames, "mass link name");
 			for (String fullLinkName: linkNames) {
-				// By default, the Valkyrie model will remove 8.6 kg from the robot to account
-				// for an absent battery. If we're overriding the torso weight, we don't want this
-				// compensation, so pre-emptively add 8.6 to desired mass.
 				double desiredMass = config.linkMassKg.get(link);
-				if (link.equals("torso") && ValkyrieRosControlController.HAS_LIGHTER_BACKPACK) {
-					desiredMass += BACKPACK_MASS_KG;
-				}
-				mutator.addMutator(new ValkyrieLinkMassMutator(jointMap, fullLinkName, desiredMass));
+				mutator_list.addMutator(new ValkyrieLinkMassMutator(jointMap, fullLinkName, desiredMass));
 			}
 		}
 		
@@ -308,11 +288,11 @@ public class TorqueSpeedTestRunner {
 		for (String joint : config.positionLimits.keySet()) {
 			HashSet<String> jointNames = getCanonicalNames(joint, validJointNames, "position limit joint name");
 			for (String fullJointName: jointNames) {
-				mutator.addMutator(new ValkyrieJointPositionLimitMutator(jointMap, fullJointName,
+				mutator_list.addMutator(new ValkyrieJointPositionLimitMutator(jointMap, fullJointName,
 						config.positionLimits.get(joint)));
 			}
 		}
-		return mutator;
+		return mutator_list;
 	}
 
 	/**
