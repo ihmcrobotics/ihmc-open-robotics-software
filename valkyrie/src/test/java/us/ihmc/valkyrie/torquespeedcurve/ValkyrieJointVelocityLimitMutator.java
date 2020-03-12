@@ -21,7 +21,7 @@ public class ValkyrieJointVelocityLimitMutator implements SDFDescriptionMutator
    public ValkyrieJointVelocityLimitMutator(ValkyrieJointMap jointMap, String jointName, double velocityLimit)
    {
 	   System.out.printf("Adding mutator velocity limit of %s to %f\n", jointName, velocityLimit);
-	   customJointVelocityLimitMap.put(jointName, Math.toRadians(velocityLimit));
+	   customJointVelocityLimitMap.put(jointName, velocityLimit);
    }
 
    @Override
