@@ -8,8 +8,8 @@ import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
+import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -30,7 +30,9 @@ public class ValkyrieNetworkProcessor
       }
    };
 
-   public static final boolean launchFootstepPlannerModule = false;
+   /** Whether or not to start the footstep planner when running the IHMC network processor. */
+   private static final boolean ihmc_launchFootstepPlannerModule = false;
+
    private static final String REAConfigurationFilePath = System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt";
 
    public static void startIHMCNetworkProcessor(ValkyrieRobotModel robotModel)
@@ -40,7 +42,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsToolboxModule(false);
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
-      if (launchFootstepPlannerModule)
+      if (ihmc_launchFootstepPlannerModule)
          networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
 
@@ -94,6 +96,18 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupShutdownHook();
       networkProcessor.start();
+   }
+
+   public static boolean isFootstepPlanningModuleStarted()
+   {
+      if (NetworkProcessorVersion.fromEnvironment() == NetworkProcessorVersion.IHMC)
+      {
+         return ihmc_launchFootstepPlannerModule;
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public static void main(String[] args) throws JSAPException
