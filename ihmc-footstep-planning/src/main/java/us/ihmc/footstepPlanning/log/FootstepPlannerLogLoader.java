@@ -30,7 +30,7 @@ public class FootstepPlannerLogLoader
    public boolean load()
    {
       JFileChooser fileChooser = new JFileChooser();
-      File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs");
+      File logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
       fileChooser.setCurrentDirectory(logDirectory);
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int chooserState = fileChooser.showOpenDialog(null);
@@ -38,41 +38,55 @@ public class FootstepPlannerLogLoader
       if (chooserState != JFileChooser.APPROVE_OPTION)
          return false;
 
+      return load(fileChooser.getSelectedFile());
+   }
+
+   /**
+    * Loads the given log file. If successful, retreive the log by calling {@link #getLog}
+    * @return if the log loaded successfully
+    */
+   public boolean load(File logDirectory)
+   {
+      if (!logDirectory.isDirectory())
+      {
+         LogTools.error("The given file isn't a directory. This method should receive a directory as input");
+         return false;
+      }
+
       try
       {
-         File selectedFile = fileChooser.getSelectedFile();
-         log = new FootstepPlannerLog(selectedFile.getName());
+         log = new FootstepPlannerLog(logDirectory.getName());
 
          // load request packet
-         File requestFile = new File(selectedFile, FootstepPlannerLogger.requestPacketFileName);
+         File requestFile = new File(logDirectory, FootstepPlannerLogger.requestPacketFileName);
          InputStream requestPacketInputStream = new FileInputStream(requestFile);
          JsonNode jsonNode = objectMapper.readTree(requestPacketInputStream);
          log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
          // load footstep parameters packet
-         File footstepParametersFile = new File(selectedFile, FootstepPlannerLogger.footstepParametersFileName);
+         File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
          InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
          jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
 
          // load footstep parameters packet
-         File bodyPathParametersFile = new File(selectedFile, FootstepPlannerLogger.bodyPathParametersFileName);
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
          InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
          jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
          log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
          bodyPathParametersPacketInputStream.close();
 
          // load status packet
-         File statusFile = new File(selectedFile, FootstepPlannerLogger.statusPacketFileName);
+         File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
          // load data file
-         File dataFile = new File(selectedFile, FootstepPlannerLogger.dataFileName);
+         File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
          BufferedReader dataFileReader = new BufferedReader(new FileReader(dataFile));
 
          // data variables

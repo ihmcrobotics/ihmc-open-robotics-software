@@ -43,7 +43,7 @@ public class FootstepPlannerRequest
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
       timeout = 5.0;
-      horizonLength = Double.POSITIVE_INFINITY;
+      horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
@@ -220,8 +220,11 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
-      requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      if(getPlanarRegionsList() != null)
+      {
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
+         requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      }
    }
 
    public void set(FootstepPlannerRequest other)
