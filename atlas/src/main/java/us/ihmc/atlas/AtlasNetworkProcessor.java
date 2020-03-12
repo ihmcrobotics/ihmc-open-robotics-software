@@ -17,10 +17,10 @@ public class AtlasNetworkProcessor
 {
    private enum Application
    {
-      DEFAULT, VR
+      DEFAULT, VR, MINIMAL
    };
 
-   private static final Application APPLICATION = Application.DEFAULT;
+   private static final Application APPLICATION = Application.MINIMAL;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -86,11 +86,26 @@ public class AtlasNetworkProcessor
          case VR:
             vrNetworkProcessor(args, model);
             break;
+         case MINIMAL:
+            minimalNetworkProcessor(args, model);
+            break;
          case DEFAULT:
          default:
             defaultNetworkProcessor(args, model);
             break;
       }
+   }
+
+   private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel)
+   {
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupShutdownHook();
+      networkProcessor.start();
    }
 
    private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel)
