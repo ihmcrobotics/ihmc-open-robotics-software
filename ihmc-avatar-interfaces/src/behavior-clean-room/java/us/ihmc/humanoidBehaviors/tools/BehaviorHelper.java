@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -61,6 +62,7 @@ public class BehaviorHelper
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
+   private RemoteEnvironmentMapInterface environmentMap;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -93,6 +95,13 @@ public class BehaviorHelper
       if (rea == null)
          rea = new RemoteREAInterface(managedROS2Node);
       return rea; // REA toolbox
+   }
+
+   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
+   {
+      if (environmentMap == null)
+         environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
+      return environmentMap;
    }
 
    // UI Communication Methods:

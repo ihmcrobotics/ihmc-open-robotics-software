@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -57,6 +58,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final StateMachine<LookAndStepBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
    private final RemoteREAInterface rea;
+   private final RemoteEnvironmentMapInterface environmentMap;
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
@@ -71,6 +73,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       this.helper = helper;
       rea = helper.getOrCreateREAInterface();
+      environmentMap = helper.getOrCreateEnvironmentMapInterface();
       robot = helper.getOrCreateRobotInterface();
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       rePlanNotification = helper.createUINotification(RePlan);
@@ -131,7 +134,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void onPlanStateEntry()
    {
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionsList();
+      PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestPlanarRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
@@ -264,7 +267,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                                                                                 ExecutionMode.OVERRIDE),
                                                     robot.pollHumanoidRobotState(),
                                                     swingOverPlanarRegions,
-                                                    rea.getLatestPlanarRegionsList());
+                                                    environmentMap.getLatestPlanarRegionsList());
    }
 
    private void doStepStateAction(double timeInState)
@@ -291,7 +294,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean arePlanarRegionsExpired()
    {
-      return rea.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration());
+      return environmentMap.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration());
    }
 
    public static class LookAndStepBehaviorAPI
