@@ -96,8 +96,8 @@
                         <RowConstraints maxHeight="38.0" minHeight="10.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <Button fx:id="placeGoal" mnemonicParsing="false" onAction="#placeGoal" prefWidth="130.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="bindStartToRobot" text="Bind start to robot" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2" selected="true" GridPane.halignment="CENTER"/>
+                        <Button fx:id="placeGoal" mnemonicParsing="false" onAction="#placeGoal" prefWidth="130.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
+                        <CheckBox fx:id="bindStartToRobot" text="Bind start to robot" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2" selected="true" GridPane.halignment="CENTER"/>
                         <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="x" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
                         <Label text="y" textAlignment="RIGHT" GridPane.columnIndex="3" GridPane.halignment="CENTER" />

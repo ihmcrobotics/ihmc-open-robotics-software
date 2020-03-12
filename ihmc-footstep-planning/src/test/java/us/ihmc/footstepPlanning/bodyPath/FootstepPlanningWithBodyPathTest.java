@@ -50,9 +50,8 @@ public class FootstepPlanningWithBodyPathTest
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       double goalDistance = 5.0;
-      FramePose3D initialStanceFootPose = new FramePose3D();
+      FramePose3D initialMidFootPose = new FramePose3D();
       RobotSide initialStanceFootSide = RobotSide.LEFT;
-      initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(goalDistance);
 
@@ -68,9 +67,9 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
-      request.setStartFootPose(initialStanceFootPose);
+      request.setStartFootPoses(defaultStepWidth, initialMidFootPose);
       request.setRequestedInitialStanceSide(initialStanceFootSide);
-      request.setGoalPose(goalPose);
+      request.setGoalFootPoses(defaultStepWidth, goalPose);
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
@@ -135,9 +134,9 @@ public class FootstepPlanningWithBodyPathTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
       request.setPlanarRegionsList(planarRegionsList);
-      request.setStartFootPose(initialStanceFootPose);
+      request.setStartFootPoses(defaultStepWidth, initialStanceFootPose);
       request.setRequestedInitialStanceSide(initialStanceFootSide);
-      request.setGoalPose(goalPose);
+      request.setGoalFootPoses(defaultStepWidth, goalPose);
       request.getBodyPathWaypoints().addAll(waypoints);
 
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);

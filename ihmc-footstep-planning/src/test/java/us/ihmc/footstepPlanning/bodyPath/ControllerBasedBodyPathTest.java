@@ -209,18 +209,17 @@ public class ControllerBasedBodyPathTest
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
-            initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
-            initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            FramePose3D midFootPose = new FramePose3D(midFootFrame);
+            midFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             FramePose3D goalPose = new FramePose3D();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
             goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
-            request.setStartFootPose(initialStanceFootPose);
+            request.setStartFootPoses(parameters.getIdealFootstepWidth(), midFootPose);
             request.setRequestedInitialStanceSide(initialStanceFootSide);
-            request.setGoalPose(goalPose);
+            request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
             FootstepPlannerOutput output = footstepPlanningModule.handleRequest(request);
 
             if (output.getResult().validForExecution())

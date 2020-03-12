@@ -7,11 +7,9 @@ import java.util.ArrayList;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.AmbientLight;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -62,7 +60,7 @@ public class FootstepPlannerUI
    private final StartGoalPositionEditor startGoalEditor;
    private final NodeCheckerEditor nodeCheckerEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
-   private final StartGoalOrientationViewer startGoalOrientationViewer;
+   private final GoalOrientationViewer goalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
    private final FootstepPostProcessingMeshViewer postProcessingViewer;
    private final GoalOrientationEditor orientationEditor;
@@ -171,26 +169,15 @@ public class FootstepPlannerUI
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
-      {
-         /** TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ is released */
-         double ambientValue = 0.7;
-         double pointValue = 0.2;
-         double pointDistance = 1000.0;
-         Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
-         view3dFactory.addNodeToView(new AmbientLight(ambientColor));
-         Color indoorColor = Color.color(pointValue, pointValue, pointValue);
-         view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
-      }
+      view3dFactory.addDefaultLighting();
+
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled,
                                                                  null, LowLevelGoalPosition, GoalMidFootPosition);
-      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-      this.startGoalOrientationViewer.setPlannerParameters(plannerParameters);
+      this.goalOrientationViewer = new GoalOrientationViewer(messager);
+      this.goalOrientationViewer.setPlannerParameters(plannerParameters);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, null, GoalPositionEditModeEnabled,
                                                          null, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
                                                          null, GoalOrientationEditModeEnabled);
@@ -208,7 +195,7 @@ public class FootstepPlannerUI
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
-      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+      view3dFactory.addNodeToView(goalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
@@ -269,7 +256,7 @@ public class FootstepPlannerUI
       {
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
-         startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
+         goalOrientationViewer.setDefaultContactPoints(contactPointParameters);
          expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
          fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
          footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
@@ -277,7 +264,7 @@ public class FootstepPlannerUI
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
-      startGoalOrientationViewer.start();
+      goalOrientationViewer.start();
       startGoalEditor.start();
       orientationEditor.start();
       pathViewer.start();
@@ -290,6 +277,7 @@ public class FootstepPlannerUI
       expandedNodesRenderer.start();
       fullGraphRenderer.start();
       footstepPlannerLogRenderer.start();
+      new FootPoseFromMidFootUpdater(messager).start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -360,7 +348,7 @@ public class FootstepPlannerUI
    {
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
-      startGoalOrientationViewer.stop();
+      goalOrientationViewer.stop();
       startGoalEditor.stop();
       orientationEditor.stop();
       pathViewer.stop();

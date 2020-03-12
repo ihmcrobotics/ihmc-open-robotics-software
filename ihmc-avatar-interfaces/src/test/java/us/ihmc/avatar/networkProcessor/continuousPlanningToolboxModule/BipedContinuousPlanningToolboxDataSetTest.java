@@ -562,7 +562,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootPosition, dataset.getPlannerInput().getGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, goalOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, dataset.getPlannerInput().getStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartMidFootPosition, dataset.getPlannerInput().getStartPosition());
 
       if (DEBUG)
          LogTools.info("Sending out planning request.");

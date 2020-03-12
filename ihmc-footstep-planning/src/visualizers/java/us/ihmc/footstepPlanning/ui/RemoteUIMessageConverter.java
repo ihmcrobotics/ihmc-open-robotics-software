@@ -69,8 +69,8 @@ public class RemoteUIMessageConverter
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
    private final AtomicReference<Pose3DReadOnly> rightFootPose;
-   private final AtomicReference<Point3D> plannerGoalPositionReference;
-   private final AtomicReference<Quaternion> plannerGoalOrientationReference;
+   private final AtomicReference<Pose3DReadOnly> goalLeftFootPose;
+   private final AtomicReference<Pose3DReadOnly> goalRightFootPose;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -130,8 +130,8 @@ public class RemoteUIMessageConverter
       visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, null);
       leftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
       rightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootPose);
-      plannerGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
-      plannerGoalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation, new Quaternion());
+      goalLeftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
+      goalRightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
@@ -423,8 +423,6 @@ public class RemoteUIMessageConverter
          return;
       }
 
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
       if (verbose)
          LogTools.info("Told the toolbox to wake up.");
 
@@ -459,9 +457,9 @@ public class RemoteUIMessageConverter
       String errorMessage = "";
 
       if (leftFootPose.get() == null || rightFootPose.get() == null)
-         errorMessage += "Need to set start position.\n";
-      if (plannerGoalPositionReference.get() == null)
-         errorMessage += "Need to set goal position.";
+         errorMessage += "Need to set start poses.\n";
+      if (goalLeftFootPose.get() == null || goalRightFootPose.get() == null)
+         errorMessage += "Need to set goal poses.";
 
       if (!errorMessage.isEmpty())
       {
@@ -523,7 +521,9 @@ public class RemoteUIMessageConverter
    {
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
       packet.getStartLeftFootPose().set(leftFootPose.get());
-      packet.getStartLeftFootPose().set(rightFootPose.get());
+      packet.getStartRightFootPose().set(rightFootPose.get());
+      packet.getGoalLeftFootPose().set(goalLeftFootPose.get());
+      packet.getGoalRightFootPose().set(goalRightFootPose.get());
 
       if (plannerInitialSupportSideReference.get() != null)
          packet.setRequestedInitialStanceSide(plannerInitialSupportSideReference.get().toByte());

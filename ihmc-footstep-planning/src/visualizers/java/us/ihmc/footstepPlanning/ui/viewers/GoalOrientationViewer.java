@@ -35,7 +35,7 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class StartGoalOrientationViewer extends AnimationTimer
+public class GoalOrientationViewer extends AnimationTimer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Group root = new Group();
@@ -61,7 +61,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
    private final PoseReferenceFrame goalFrame = new PoseReferenceFrame("goalFrame", ReferenceFrame.getWorldFrame());
 
-   public StartGoalOrientationViewer(Messager messager)
+   public GoalOrientationViewer(Messager messager)
    {
       lowLevelGoalArrow.setMouseTransparent(true);
       goalArrow.setMouseTransparent(true);
