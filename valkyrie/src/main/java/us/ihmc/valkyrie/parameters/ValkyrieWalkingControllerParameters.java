@@ -109,13 +109,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowUpperBodyMotionDuringLocomotion()
    {
-      return true;
+      if (target == RobotTarget.SCS)
+         return false;
+      else
+         return true;
    }
 
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
-      return false;
+      if (target == RobotTarget.SCS)
+         return true;
+      else
+         return false;
    }
 
    @Override
