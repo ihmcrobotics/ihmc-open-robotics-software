@@ -5,7 +5,9 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -48,7 +50,12 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
 
       if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
       {
-         FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
+
+         // Create logger and connect to messager
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
+         Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
       }
    }
 

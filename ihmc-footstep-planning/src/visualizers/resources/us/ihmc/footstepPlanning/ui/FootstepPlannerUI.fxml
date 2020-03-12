@@ -51,6 +51,12 @@
                     </content>
                 </Tab>
 
+                <Tab text="Log Table">
+                    <content>
+                        <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml"/>
+                    </content>
+                </Tab>
+
                 <Tab text="Node checking">
                     <content>
                         <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />

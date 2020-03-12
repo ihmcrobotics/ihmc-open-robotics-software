@@ -9,6 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,6 +23,7 @@ public class FootstepCostCalculator
    private final UnaryOperator<FootstepNode> idealStepCalculator;
    private final ToDoubleFunction<FootstepNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+   private final FootstepPlannerEdgeData edgeData;
 
    private final RigidBodyTransform stanceNodeTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
@@ -31,13 +33,15 @@ public class FootstepCostCalculator
                                  FootstepNodeSnapperReadOnly snapper,
                                  UnaryOperator<FootstepNode> idealStepCalculator,
                                  ToDoubleFunction<FootstepNode> heuristics,
-                                 SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
+                                 SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
+                                 FootstepPlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
       this.footPolygons = footPolygons;
+      this.edgeData = edgeData;
    }
 
    public double computeCost(FootstepNode stanceNode, FootstepNode candidateNode)
@@ -78,6 +82,9 @@ public class FootstepCostCalculator
          cost += deltaHeuristics;
       else
          cost = Math.max(0.0, cost - deltaHeuristics);
+
+      if (edgeData != null)
+         edgeData.setEdgeCost(cost);
 
       return cost;
    }

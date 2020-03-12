@@ -10,7 +10,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
-import us.ihmc.valkyrie.planner.ValkyrieAStarFootstepPlanner;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -31,7 +30,7 @@ public class ValkyrieNetworkProcessor
       }
    };
 
-   public static final boolean launchFootstepPlannerModule = true;
+   public static final boolean launchFootstepPlannerModule = false;
    private static final String REAConfigurationFilePath = System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt";
 
    public static void startIHMCNetworkProcessor(ValkyrieRobotModel robotModel)
@@ -41,7 +40,6 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsToolboxModule(false);
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
-      new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
       if (launchFootstepPlannerModule)
          networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
@@ -78,9 +76,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
-      new ValkyrieAStarFootstepPlanner(robotModel).setupWithRos(PubSubImplementation.FAST_RTPS);
-      if (launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);

@@ -16,6 +16,7 @@ public class FootstepPlannerOutput
    private PlanarRegionsList planarRegionsList;
    private final ArrayList<Pose3D> bodyPath = new ArrayList<>();
    private final Pose3D lowLevelGoal = new Pose3D();
+   private Exception exception;
 
    public void clear()
    {
@@ -25,6 +26,7 @@ public class FootstepPlannerOutput
       planarRegionsList = null;
       bodyPath.clear();
       lowLevelGoal.setToNaN();
+      exception = null;
    }
 
    public int getPlanId()
@@ -57,6 +59,11 @@ public class FootstepPlannerOutput
       return lowLevelGoal;
    }
 
+   public Exception getException()
+   {
+      return exception;
+   }
+
    public void setPlanId(int planId)
    {
       this.planId = planId;
@@ -77,14 +84,37 @@ public class FootstepPlannerOutput
       this.lowLevelGoal.set(lowLevelGoal);
    }
 
+   public void setException(Exception exception)
+   {
+      this.exception = exception;
+   }
+
    public void setPacket(FootstepPlanningToolboxOutputStatus outputStatus)
    {
       outputStatus.setPlanId(getPlanId());
       outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
       outputStatus.setFootstepPlanningResult(getResult().toByte());
-      outputStatus.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList()));
       outputStatus.getBodyPath().clear();
       outputStatus.getLowLevelPlannerGoal().set(getLowLevelGoal());
+
+      if(getException() != null)
+      {
+         outputStatus.setExceptionMessage(getException().toString());
+         StackTraceElement[] stackTrace = getException().getStackTrace();
+         if(stackTrace != null)
+         {
+            int numberOfElements = Math.min(exception.getStackTrace().length, 20);
+            for (int i = 0; i < numberOfElements; i++)
+            {
+               outputStatus.getStacktrace().add(exception.getStackTrace()[i].toString());
+            }
+         }
+      }
+
+      if(getPlanarRegionsList() != null)
+      {
+         outputStatus.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList()));
+      }
 
       for (int i = 0; i < bodyPath.size(); i++)
       {

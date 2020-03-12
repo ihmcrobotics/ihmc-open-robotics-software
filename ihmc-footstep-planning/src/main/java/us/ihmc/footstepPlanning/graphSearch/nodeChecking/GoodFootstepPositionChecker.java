@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -22,6 +23,7 @@ public class GoodFootstepPositionChecker
 {
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapper snapper;
+   private final FootstepPlannerEdgeData edgeData;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
@@ -34,10 +36,17 @@ public class GoodFootstepPositionChecker
    private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
    private UnaryOperator<FootstepNode> parentNodeSupplier;
 
-   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
+   // Variables to log
+   private double stepWidth;
+   private double stepLength;
+   private double stepHeight;
+   private double stepReachXY;
+
+   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper, FootstepPlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
+      this.edgeData = edgeData;
    }
 
    public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
@@ -62,11 +71,11 @@ public class GoodFootstepPositionChecker
       stanceFootPose.setToZero(stanceFootFrame);
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double stepLength = candidateFootPose.getX();
-      double stepWidth = stepSide.negateIfRightSide(candidateFootPose.getY());
-      double stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()),
+      stepLength = candidateFootPose.getX();
+      stepWidth = stepSide.negateIfRightSide(candidateFootPose.getY());
+      stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()),
                                                                        Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
-      double stepHeight = candidateFootPose.getZ();
+      stepHeight = candidateFootPose.getZ();
 
       if (stepWidth < parameters.getMinimumStepWidth())
       {
@@ -180,6 +189,25 @@ public class GoodFootstepPositionChecker
       }
 
       return true;
+   }
+
+   void logVariables()
+   {
+      if (edgeData != null)
+      {
+         edgeData.setStepWidth(stepWidth);
+         edgeData.setStepLength(stepLength);
+         edgeData.setStepHeight(stepHeight);
+         edgeData.setStepReach(stepReachXY);
+      }
+   }
+
+   void clearLoggedVariables()
+   {
+      stepWidth = Double.NaN;
+      stepLength = Double.NaN;
+      stepHeight = Double.NaN;
+      stepReachXY = Double.NaN;
    }
 
    public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
