@@ -4,8 +4,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startOpaqueMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -43,7 +41,6 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final Group root = new Group();
 
    private static final double cylinderLength = 5.0 * RADIUS;
-   private final ArrowGraphic startArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.GREEN);
    private final ArrowGraphic lowLevelGoalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.DARKRED);
    private final ArrowGraphic goalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.RED);
    private final SideDependentList<FootGraphic> footGraphics = new SideDependentList<>();
@@ -53,15 +50,12 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private SideDependentList<Material> opaqueFootMaterial = new SideDependentList<>();
 
    private FootstepPlannerParametersReadOnly parameters;
-   private final AtomicReference<Boolean> startRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalPositionEditModeEnabled;
 
-   private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> lowLevelGoalPositionReference;
    private final AtomicReference<Point3D> goalPositionReference;
 
-   private final AtomicReference<Quaternion> startQuaternionReference;
    private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
    private final AtomicReference<Quaternion> goalQuaternionReference;
 
@@ -69,23 +63,18 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
    public StartGoalOrientationViewer(Messager messager)
    {
-      startArrow.setMouseTransparent(true);
       lowLevelGoalArrow.setMouseTransparent(true);
       goalArrow.setMouseTransparent(true);
 
-      root.getChildren().add(startArrow);
       root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
-      startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabled, false);
       goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabled, false);
       goalPositionEditModeEnabled = messager.createInput(GoalPositionEditModeEnabled, false);
 
-      startPositionReference = messager.createInput(StartPosition, new Point3D());
       lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
       goalPositionReference = messager.createInput(GoalMidFootPosition, new Point3D());
 
-      startQuaternionReference = messager.createInput(StartOrientation, new Quaternion());
       lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
       goalQuaternionReference = messager.createInput(GoalMidFootOrientation, new Quaternion());
    }
@@ -115,17 +104,6 @@ public class StartGoalOrientationViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      if (startRotationEditModeEnabled.get())
-         startArrow.setMaterial(startTransparentMaterial);
-      else
-         startArrow.setMaterial(startOpaqueMaterial);
-
-      Point3D startPosition = startPositionReference.get();
-      if (startPosition != null)
-      {
-         setArrowPose(startArrow, startPosition, startQuaternionReference.get().getYaw());
-      }
-
       if (goalRotationEditModeEnabled.get())
          goalArrow.setMaterial(goalTransparentMaterial);
       else

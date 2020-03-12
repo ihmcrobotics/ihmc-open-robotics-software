@@ -72,10 +72,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
-   public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
    public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
-
-   public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");

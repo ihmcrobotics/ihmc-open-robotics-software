@@ -65,7 +65,7 @@ public class FootstepPlannerUI
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
    private final FootstepPostProcessingMeshViewer postProcessingViewer;
-   private final StartGoalOrientationEditor orientationEditor;
+   private final GoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
@@ -187,15 +187,15 @@ public class FootstepPlannerUI
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
-                                                                 StartPosition, LowLevelGoalPosition, GoalMidFootPosition);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled,
+                                                                 null, LowLevelGoalPosition, GoalMidFootPosition);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
       this.startGoalOrientationViewer.setPlannerParameters(plannerParameters);
-      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
-                                                         StartPosition, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
-                                                         StartOrientationEditModeEnabled, GoalOrientationEditModeEnabled);
+      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, null, GoalPositionEditModeEnabled,
+                                                         null, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
+                                                         null, GoalOrientationEditModeEnabled);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
-      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
+      this.orientationEditor = new GoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
