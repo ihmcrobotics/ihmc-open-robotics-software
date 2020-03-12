@@ -27,7 +27,6 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -44,6 +43,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;

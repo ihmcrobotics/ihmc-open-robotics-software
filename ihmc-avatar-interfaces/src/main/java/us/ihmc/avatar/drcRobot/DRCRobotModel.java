@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSetting
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -15,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.humanoidRobotics.physics.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;

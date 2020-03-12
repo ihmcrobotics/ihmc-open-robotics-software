@@ -1,16 +1,13 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.robotics.physics;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionTools.changeFrame;
+import static us.ihmc.robotics.physics.KinematicsCollisionTools.changeFrame;
 
 import java.util.Random;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionTools.FrameChanger;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionTools.FrameShape3DCollisionEvaluator;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionTools.Shape3DCollisionEvaluator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -31,6 +28,11 @@ import us.ihmc.euclid.shape.tools.EuclidShapeRandomTools;
 import us.ihmc.euclid.shape.tools.EuclidShapeTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.physics.KinematicsCollisionResult;
+import us.ihmc.robotics.physics.KinematicsCollisionTools;
+import us.ihmc.robotics.physics.KinematicsCollisionTools.FrameChanger;
+import us.ihmc.robotics.physics.KinematicsCollisionTools.FrameShape3DCollisionEvaluator;
+import us.ihmc.robotics.physics.KinematicsCollisionTools.Shape3DCollisionEvaluator;
 
 class KinematicsCollisionToolsTest
 {
