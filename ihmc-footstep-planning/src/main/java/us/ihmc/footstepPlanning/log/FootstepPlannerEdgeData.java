@@ -1,23 +1,24 @@
-package us.ihmc.valkyrie.planner.log;
+package us.ihmc.footstepPlanning.log;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.valkyrie.planner.ValkyrieFootstepValidityChecker.StepRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 
-public class ValkyriePlannerEdgeData
+public class FootstepPlannerEdgeData
 {
    private FootstepNode stanceNode = null;
    private FootstepNode candidateNode = null;
-
    private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
 
-   private StepRejectionReason rejectionReason = null;
+   private BipedalFootstepPlannerNodeRejectionReason rejectionReason = null;
    private double footAreaPercentage = Double.NaN;
    private double stepWidth = Double.NaN;
    private double stepLength = Double.NaN;
    private double stepHeight = Double.NaN;
    private double stepReach = Double.NaN;
-
    private double costFromStart = Double.NaN;
    private double edgeCost = Double.POSITIVE_INFINITY;
    private double heuristicCost = Double.NaN;
@@ -40,9 +41,9 @@ public class ValkyriePlannerEdgeData
       solutionEdge = false;
    }
 
-   public ValkyriePlannerEdgeData getCopyAndClear()
+   public FootstepPlannerEdgeData getCopyAndClear()
    {
-      ValkyriePlannerEdgeData copy = new ValkyriePlannerEdgeData();
+      FootstepPlannerEdgeData copy = new FootstepPlannerEdgeData();
       copy.stanceNode = stanceNode;
       copy.candidateNode = candidateNode;
       copy.candidateNodeSnapData.set(candidateNodeSnapData);
@@ -77,7 +78,7 @@ public class ValkyriePlannerEdgeData
       return candidateNodeSnapData;
    }
 
-   public StepRejectionReason getRejectionReason()
+   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
    {
       return rejectionReason;
    }
@@ -144,7 +145,7 @@ public class ValkyriePlannerEdgeData
       this.candidateNodeSnapData.set(candidateNodeSnapData);
    }
 
-   public void setRejectionReason(StepRejectionReason rejectionReason)
+   public void setRejectionReason(BipedalFootstepPlannerNodeRejectionReason rejectionReason)
    {
       this.rejectionReason = rejectionReason;
    }

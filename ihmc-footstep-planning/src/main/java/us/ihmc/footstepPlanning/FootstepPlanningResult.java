@@ -14,7 +14,8 @@ public enum FootstepPlanningResult
    NO_PATH_EXISTS,
    SNAPPING_FAILED,
    PLANNER_FAILED,
-   INVALID_GOAL;
+   INVALID_GOAL,
+   EXCEPTION;
 
    public static final FootstepPlanningResult[] values = values();
 
