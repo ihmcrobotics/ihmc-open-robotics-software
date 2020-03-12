@@ -34,7 +34,7 @@ import us.ihmc.robotics.physics.CollisionTools.FrameChanger;
 import us.ihmc.robotics.physics.CollisionTools.FrameShape3DCollisionEvaluator;
 import us.ihmc.robotics.physics.CollisionTools.Shape3DCollisionEvaluator;
 
-class KinematicsCollisionToolsTest
+class CollisionToolsTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 1000;
