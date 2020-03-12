@@ -384,12 +384,7 @@ public final class KinematicsToolboxControllerTest
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
                                                                                             .findFirst().get());
 
-      Collidable torsoCollidable = new Collidable(torso,
-                                                                      0b001,
-                                                                      0b110,
-                                                                      torsoCollisionShape,
-                                                                      torso.getParentJoint().getFrameAfterJoint(),
-                                                                      0.0);
+      Collidable torsoCollidable = new Collidable(torso, 0b001, 0b110, torsoCollisionShape, torso.getParentJoint().getFrameAfterJoint());
 
       SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
       {
@@ -397,7 +392,7 @@ public final class KinematicsToolboxControllerTest
          int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
          int collisionGroup = 0b001;
          ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new Collidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame, 0.0);
+         return new Collidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame);
       });
 
       toolboxController.registerCollidable(torsoCollidable);
