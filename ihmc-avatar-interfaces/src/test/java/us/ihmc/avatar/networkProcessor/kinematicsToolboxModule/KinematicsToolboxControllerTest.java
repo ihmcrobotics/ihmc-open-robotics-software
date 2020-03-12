@@ -435,7 +435,7 @@ public final class KinematicsToolboxControllerTest
          for (RobotSide robotSide : RobotSide.values)
          {
             CollisionResult collision = torsoCollidable.evaluateCollision(handCollidables.get(robotSide));
-            assertTrue(collision.getSignedDistance() > -1.0e-3);
+            assertTrue(collision.getCollisionData().getSignedDistance() > -1.0e-3);
          }
       }
    }

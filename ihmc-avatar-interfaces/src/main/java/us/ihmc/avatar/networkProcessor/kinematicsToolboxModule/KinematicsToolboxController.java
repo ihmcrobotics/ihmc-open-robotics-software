@@ -60,6 +60,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gain
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
+import us.ihmc.robotics.physics.EuclidFrameShape3DCollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -898,14 +899,16 @@ public class KinematicsToolboxController extends ToolboxController
             CollisionResult collisionResult = collisionResults.add();
             collidableA.evaluateCollision(collidableB, collisionResult);
 
-            if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+            EuclidFrameShape3DCollisionResult collisionData = collisionResult.getCollisionData();
+
+            if (collisionData.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
                continue;
 
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
-               yoCollisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
-               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
-               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+               yoCollisionDistances[collisionIndex].set(collisionData.getSignedDistance());
+               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionData.getPointOnA());
+               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionData.getPointOnB());
             }
 
             collisionIndex++;
@@ -933,12 +936,14 @@ public class KinematicsToolboxController extends ToolboxController
          Collidable collidableA = collision.getCollidableA();
          Collidable collidableB = collision.getCollidableB();
 
-         if (collision.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+         EuclidFrameShape3DCollisionResult collisionData = collision.getCollisionData();
+
+         if (collisionData.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
             continue;
 
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
-         double sigma = -collision.getSignedDistance();
+         double sigma = -collisionData.getSignedDistance();
          double sigmaDot = sigma / updateDT;
          sigmaDot = Math.min(sigmaDot, maxCollisionResolutionVelocity.getValue());
 

@@ -1,77 +1,22 @@
 package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.shape.collision.EuclidShapeCollisionTools;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.shape.collision.interfaces.EuclidShape3DCollisionResultBasics;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
-import us.ihmc.euclid.shape.primitives.*;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.shape.tools.EuclidShapeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.physics.EuclidFrameShapeTools.FrameChanger;
 
-/**
- * Tools for evaluating collisions. It is mainly used via
- * {@link Collidable#evaluateCollision(Collidable)}.
- * 
- * @author Sylvain Bertrand
- */
-public class CollisionTools
+public class EuclidFrameShapeCollisionTools
 {
-   public static Box3D changeFrame(Box3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Box3D transformed = new Box3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static Capsule3D changeFrame(Capsule3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Capsule3D transformed = new Capsule3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static Cylinder3D changeFrame(Cylinder3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Cylinder3D transformed = new Cylinder3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static Ellipsoid3D changeFrame(Ellipsoid3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Ellipsoid3D transformed = new Ellipsoid3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static PointShape3D changeFrame(PointShape3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      PointShape3D transformed = new PointShape3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static Ramp3D changeFrame(Ramp3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Ramp3D transformed = new Ramp3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
-   public static Sphere3D changeFrame(Sphere3DReadOnly original, ReferenceFrame from, ReferenceFrame to)
-   {
-      Sphere3D transformed = new Sphere3D(original);
-      from.transformFromThisToDesiredFrame(to, transformed);
-      return transformed;
-   }
-
    static interface Shape3DCollisionEvaluator<A extends Shape3DReadOnly, B extends Shape3DReadOnly>
    {
       void evaluateCollision(A shapeA, B shapeB, EuclidShape3DCollisionResultBasics resultToPack);
@@ -79,42 +24,16 @@ public class CollisionTools
 
    static interface FrameShape3DCollisionEvaluator<A extends Shape3DReadOnly, B extends Shape3DReadOnly>
    {
-      void evaluateCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB, CollisionResult resultToPack);
+      void evaluateCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB, EuclidFrameShape3DCollisionResultBasics resultToPack);
    }
 
-   static interface FrameChanger<A extends Shape3DReadOnly>
-   {
-      A changeFrame(A original, ReferenceFrame from, ReferenceFrame to);
-   }
-
-   static final FrameChanger<Box3DReadOnly> box3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<Capsule3DReadOnly> capsule3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<Cylinder3DReadOnly> cylinder3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<Ellipsoid3DReadOnly> ellipsoid3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<PointShape3DReadOnly> pointShape3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<Ramp3DReadOnly> ramp3DFrameChanger = CollisionTools::changeFrame;
-   static final FrameChanger<Sphere3DReadOnly> sphere3DFrameChanger = CollisionTools::changeFrame;
-
-   @SuppressWarnings("unchecked")
-   static <A extends Shape3DReadOnly> FrameChanger<A> getFrameChanger(A shape)
-   {
-      if (shape instanceof Box3DReadOnly)
-         return (FrameChanger<A>) box3DFrameChanger;
-      else if (shape instanceof Capsule3DReadOnly)
-         return (FrameChanger<A>) capsule3DFrameChanger;
-      else if (shape instanceof Cylinder3DReadOnly)
-         return (FrameChanger<A>) cylinder3DFrameChanger;
-      else if (shape instanceof Ellipsoid3DReadOnly)
-         return (FrameChanger<A>) ellipsoid3DFrameChanger;
-      else if (shape instanceof PointShape3DReadOnly)
-         return (FrameChanger<A>) pointShape3DFrameChanger;
-      else if (shape instanceof Ramp3DReadOnly)
-         return (FrameChanger<A>) ramp3DFrameChanger;
-      else if (shape instanceof Sphere3DReadOnly)
-         return (FrameChanger<A>) sphere3DFrameChanger;
-      else
-         return null;
-   }
+   static final FrameChanger<Box3DReadOnly> box3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<Capsule3DReadOnly> capsule3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<Cylinder3DReadOnly> cylinder3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<Ellipsoid3DReadOnly> ellipsoid3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<PointShape3DReadOnly> pointShape3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<Ramp3DReadOnly> ramp3DFrameChanger = EuclidFrameShapeTools::changeFrame;
+   static final FrameChanger<Sphere3DReadOnly> sphere3DFrameChanger = EuclidFrameShapeTools::changeFrame;
 
    static final Shape3DCollisionEvaluator<Capsule3DReadOnly, Capsule3DReadOnly> capsule3DToCapsule3DEvaluator = EuclidShapeCollisionTools::evaluateCapsule3DCapsule3DCollision;
    static final Shape3DCollisionEvaluator<PointShape3DReadOnly, Box3DReadOnly> pointShape3DToBox3DEvaluator = EuclidShapeCollisionTools::evaluatePointShape3DBox3DCollision;
@@ -149,7 +68,7 @@ public class CollisionTools
    static <A extends Shape3DReadOnly, B extends Shape3DReadOnly> void evaluateFrameCollision(A shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB,
                                                                                              Shape3DCollisionEvaluator<A, B> collisionEvaluator,
                                                                                              FrameChanger<A> shapeAFrameChanger,
-                                                                                             CollisionResult resultToPack)
+                                                                                             EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       collisionEvaluator.evaluateCollision(shapeAFrameChanger.changeFrame(shapeA, frameA, frameB), shapeB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -162,10 +81,10 @@ public class CollisionTools
    }
 
    public static void evaluateCapsule3DCapsule3DCollision(Capsule3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          CollisionResult resultToPack)
+                                                          EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
       pointOnA.setIncludingFrame(frameA, shapeA.getTopCenter());
       pointOnA.changeFrame(frameB);
       double topAX = pointOnA.getX();
@@ -200,8 +119,8 @@ public class CollisionTools
       pointOnA.setReferenceFrame(frameB);
       pointOnB.setReferenceFrame(frameB);
 
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
       normalOnA.setReferenceFrame(frameB);
       normalOnB.setReferenceFrame(frameB);
 
@@ -223,7 +142,7 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DBox3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         CollisionResult resultToPack)
+                                                         EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DBox3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -231,13 +150,13 @@ public class CollisionTools
    }
 
    private static void evaluatePoint3DBox3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Box3DReadOnly box3D, ReferenceFrame boxFrame,
-                                                     CollisionResult resultToPack)
+                                                     EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
 
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(pointFrame, point3D);
       pointOnA.changeFrame(boxFrame);
@@ -264,7 +183,7 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DCapsule3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB,
-                                                             ReferenceFrame frameB, CollisionResult resultToPack)
+                                                             ReferenceFrame frameB, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DCapsule3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -272,12 +191,12 @@ public class CollisionTools
    }
 
    private static void evaluatePoint3DCapsule3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Capsule3DReadOnly capsule3D,
-                                                         ReferenceFrame capsuleFrame, CollisionResult resultToPack)
+                                                         ReferenceFrame capsuleFrame, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(pointFrame, point3D);
       pointOnA.changeFrame(capsuleFrame);
@@ -302,7 +221,7 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DCylinder3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB,
-                                                              ReferenceFrame frameB, CollisionResult resultToPack)
+                                                              ReferenceFrame frameB, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DCylinder3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -310,12 +229,12 @@ public class CollisionTools
    }
 
    private static void evaluatePoint3DCylinder3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Cylinder3DReadOnly cylinder3D,
-                                                          ReferenceFrame cylinderFrame, CollisionResult resultToPack)
+                                                          ReferenceFrame cylinderFrame, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(pointFrame, point3D);
       pointOnA.changeFrame(cylinderFrame);
@@ -340,7 +259,7 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DEllipsoid3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB,
-                                                               ReferenceFrame frameB, CollisionResult resultToPack)
+                                                               ReferenceFrame frameB, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DEllipsoid3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -348,12 +267,12 @@ public class CollisionTools
    }
 
    private static void evaluatePoint3DEllipsoid3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ellipsoid3DReadOnly ellipsoid3D,
-                                                           ReferenceFrame ellipsoidFrame, CollisionResult resultToPack)
+                                                           ReferenceFrame ellipsoidFrame, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(pointFrame, point3D);
       pointOnA.changeFrame(ellipsoidFrame);
@@ -381,12 +300,12 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DPointShape3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB,
-                                                                ReferenceFrame frameB, CollisionResult resultToPack)
+                                                                ReferenceFrame frameB, EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(frameA, shapeA);
       pointOnA.changeFrame(frameB);
@@ -405,7 +324,7 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DRamp3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          CollisionResult resultToPack)
+                                                          EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DRamp3DCollision(shapeA, frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -413,12 +332,12 @@ public class CollisionTools
    }
 
    private static void evaluatePoint3DRamp3DCollision(Point3DReadOnly point3D, ReferenceFrame pointFrame, Ramp3DReadOnly ramp3D, ReferenceFrame rampFrame,
-                                                      CollisionResult resultToPack)
+                                                      EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(pointFrame, point3D);
       pointOnA.changeFrame(rampFrame);
@@ -445,12 +364,12 @@ public class CollisionTools
    }
 
    public static void evaluatePointShape3DSphere3DCollision(PointShape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                            CollisionResult resultToPack)
+                                                            EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(frameA, shapeA);
       pointOnA.changeFrame(frameB);
@@ -470,7 +389,7 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DBox3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     CollisionResult resultToPack)
+                                                     EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DBox3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -484,7 +403,7 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DCapsule3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         CollisionResult resultToPack)
+                                                         EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DCapsule3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -498,7 +417,7 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DCylinder3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          CollisionResult resultToPack)
+                                                          EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DCylinder3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -512,7 +431,7 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DEllipsoid3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                           CollisionResult resultToPack)
+                                                           EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DEllipsoid3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -526,7 +445,7 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DRamp3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      CollisionResult resultToPack)
+                                                      EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluatePoint3DRamp3DCollision(shapeA.getPosition(), frameA, shapeB, frameB, resultToPack);
       resultToPack.setShapeA(shapeA);
@@ -540,12 +459,12 @@ public class CollisionTools
    }
 
    public static void evaluateSphere3DSphere3DCollision(Sphere3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                        CollisionResult resultToPack)
+                                                        EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
-      FramePoint3D pointOnA = resultToPack.getPointOnA();
-      FramePoint3D pointOnB = resultToPack.getPointOnB();
-      FrameVector3D normalOnA = resultToPack.getNormalOnA();
-      FrameVector3D normalOnB = resultToPack.getNormalOnB();
+      FramePoint3DBasics pointOnA = resultToPack.getPointOnA();
+      FramePoint3DBasics pointOnB = resultToPack.getPointOnB();
+      FrameVector3DBasics normalOnA = resultToPack.getNormalOnA();
+      FrameVector3DBasics normalOnB = resultToPack.getNormalOnB();
 
       pointOnA.setIncludingFrame(frameA, shapeA.getPosition());
       pointOnA.changeFrame(frameB);
@@ -567,7 +486,7 @@ public class CollisionTools
    }
 
    public static void evaluateShape3DBox3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                    CollisionResult resultToPack)
+                                                    EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DBox3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -578,13 +497,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DBox3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Box3DReadOnly shapeB, ReferenceFrame frameB,
-                                                CollisionResult resultToPack)
+                                                EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, box3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DCapsule3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                        CollisionResult resultToPack)
+                                                        EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof Capsule3DReadOnly)
       {
@@ -600,13 +519,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DCapsule3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Capsule3DReadOnly shapeB, ReferenceFrame frameB,
-                                                    CollisionResult resultToPack)
+                                                    EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, capsule3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DCylinder3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                         CollisionResult resultToPack)
+                                                         EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DCylinder3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -617,13 +536,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DCylinder3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Cylinder3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     CollisionResult resultToPack)
+                                                     EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, cylinder3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DEllipsoid3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                          CollisionResult resultToPack)
+                                                          EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DEllipsoid3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -634,13 +553,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DEllipsoid3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ellipsoid3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      CollisionResult resultToPack)
+                                                      EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, ellipsoid3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DPointShape3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                           CollisionResult resultToPack)
+                                                           EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof Box3DReadOnly)
       {
@@ -684,13 +603,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DPointShape3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, PointShape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                       CollisionResult resultToPack)
+                                                       EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, pointShape3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DRamp3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                     CollisionResult resultToPack)
+                                                     EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof PointShape3DReadOnly)
          evaluatePointShape3DRamp3DCollision((PointShape3DReadOnly) shapeA, frameA, shapeB, frameB, resultToPack);
@@ -701,13 +620,13 @@ public class CollisionTools
    }
 
    static void evaluateShape3DRamp3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Ramp3DReadOnly shapeB, ReferenceFrame frameB,
-                                                 CollisionResult resultToPack)
+                                                 EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, ramp3DFrameChanger, resultToPack);
    }
 
    public static void evaluateShape3DSphere3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                       CollisionResult resultToPack)
+                                                       EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeA instanceof Box3DReadOnly)
       {
@@ -750,13 +669,14 @@ public class CollisionTools
    }
 
    static void evaluateShape3DSphere3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Sphere3DReadOnly shapeB, ReferenceFrame frameB,
-                                                   CollisionResult resultToPack)
+                                                   EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       evaluateFrameCollisionEPA(shapeA, frameA, shapeB, frameB, sphere3DFrameChanger, resultToPack);
    }
 
    static <B extends Shape3DReadOnly> void evaluateFrameCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, B shapeB, ReferenceFrame frameB,
-                                                                     FrameChanger<B> shapeBFrameChanger, CollisionResult resultToPack)
+                                                                     FrameChanger<B> shapeBFrameChanger,
+                                                                     EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       resultToPack.setToZero();
       boolean colliding = new ExpandingPolytopeAlgorithm().evaluateCollision(shapeA, shapeBFrameChanger.changeFrame(shapeB, frameB, frameA), resultToPack);
@@ -771,7 +691,7 @@ public class CollisionTools
    }
 
    public static void evaluateShape3DShape3DCollision(Shape3DReadOnly shapeA, ReferenceFrame frameA, Shape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                      CollisionResult resultToPack)
+                                                      EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       if (shapeB instanceof Box3DReadOnly)
          evaluateShape3DBox3DCollision(shapeA, frameA, (Box3DReadOnly) shapeB, frameB, resultToPack);
@@ -793,7 +713,7 @@ public class CollisionTools
    }
 
    static void evaluateShape3DShape3DCollisionEPA(Shape3DReadOnly shapeA, ReferenceFrame frameA, Shape3DReadOnly shapeB, ReferenceFrame frameB,
-                                                  CollisionResult resultToPack)
+                                                  EuclidFrameShape3DCollisionResultBasics resultToPack)
    {
       RigidBodyTransform transformToA = frameB.getTransformToDesiredFrame(frameA);
       Vector3D localSupportDirection = new Vector3D();
