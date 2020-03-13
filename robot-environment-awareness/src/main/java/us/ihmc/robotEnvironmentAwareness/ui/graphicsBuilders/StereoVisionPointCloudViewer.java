@@ -48,7 +48,7 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
 
       meshBuilder.clear();
-      int numberOfScanPoints = message.getPointCloud().size() / 3;
+      int numberOfScanPoints = pointcloud.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, sizeOfPointCloud.get());
 
       Random random = new Random();
