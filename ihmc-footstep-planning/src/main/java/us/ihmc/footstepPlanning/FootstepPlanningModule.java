@@ -82,6 +82,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private double statusPublishPeriod = defaultStatusPublishPeriod;
 
    private FootstepPlanningResult result = null;
+   private FootstepNode startNode;
    private FootstepNode endNode = null;
    private double endNodeCost;
    private final FramePose3D goalPose = new FramePose3D();
@@ -243,7 +244,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       // Setup footstep planner
-      FootstepNode startNode = createStartNode(request);
+      startNode = createStartNode(request);
       endNode = startNode;
       addStartPoseToSnapper(request, startNode);
       footstepPlanner.initialize(startNode);
@@ -543,7 +544,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          double cost = footstepPlanner.getGraph().getCostFromStart(childNode) + distanceAndYawHeuristics.compute(childNode);
-         if (cost < endNodeCost)
+         if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;
             endNodeCost = cost;
