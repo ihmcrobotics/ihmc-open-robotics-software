@@ -98,7 +98,10 @@ public class MultiContactImpulseCalculator
             alpha = alpha_min + gamma * (alpha - alpha_min);
 
             if (iterationCounter > maxNumberOfIterations)
-               throw new IllegalStateException("Unable to converge during Successive Over-Relaxation method");
+            {
+               System.err.println("Unable to converge during Successive Over-Relaxation method");
+               break;
+            }
          }
 
          return maxUpdateMagnitude;
