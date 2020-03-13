@@ -37,6 +37,7 @@ public class SingleContactImpulseCalculator
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
+   private double springConstant = 5.0;
    private boolean isInitialized = false;
 
    private final ForwardDynamicsCalculator forwardDynamicsCalculatorA;
@@ -204,6 +205,8 @@ public class SingleContactImpulseCalculator
       updateImpulse(1.0);
    }
 
+   private final FrameVector3D collisionPositionTerm = new FrameVector3D();
+
    public void updateImpulse(double alpha)
    {
       boolean isFirstUpdate = !isInitialized;
@@ -258,6 +261,11 @@ public class SingleContactImpulseCalculator
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
+         collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
+         collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
+         collisionPositionTerm.scale(springConstant);
+         collisionPositionTerm.changeFrame(contactVelocity.getReferenceFrame());
+         contactVelocity.sub(collisionPositionTerm);
 
          if (isFirstUpdate)
          {
