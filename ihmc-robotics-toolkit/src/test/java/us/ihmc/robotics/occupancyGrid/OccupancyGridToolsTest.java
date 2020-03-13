@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
@@ -111,6 +113,71 @@ public class OccupancyGridToolsTest
       FrameConvexPolygon2D hull = new FrameConvexPolygon2D();
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, hull);
       EuclidGeometryTestTools.assertConvexPolygon2DEquals(polygon2D, hull, 1e-8);
+   }
 
+
+   @Test
+   public void testCellsOnSideOfLine()
+   {
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      FrameLine2D verticalLine = new FrameLine2D();
+      FrameLine2D horizontalLine = new FrameLine2D();
+      verticalLine.setDirection(1.0, 0.0);
+      horizontalLine.setDirection(0.0, 1.0);
+
+      occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 0.0, 1.0));
+
+      int onLeftSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.0);
+      int onRightSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.RIGHT, 0.0);
+      int above = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.RIGHT, 0.0);
+      int below = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.LEFT, 0.0);
+
+      assertEquals(1, onLeftSide);
+      assertEquals(0, onRightSide);
+      assertEquals(0, above);
+      assertEquals(0, below);
+
+      occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 0.0, -1.0));
+
+      onLeftSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.0);
+      onRightSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.RIGHT, 0.0);
+      above = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.RIGHT, 0.0);
+      below = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.LEFT, 0.0);
+
+      assertEquals(1, onLeftSide);
+      assertEquals(1, onRightSide);
+      assertEquals(0, above);
+      assertEquals(0, below);
+
+      occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 1.0, 0.0));
+
+      onLeftSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.0);
+      onRightSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.RIGHT, 0.0);
+      above = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.RIGHT, 0.0);
+      below = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.LEFT, 0.0);
+
+      assertEquals(1, onLeftSide);
+      assertEquals(1, onRightSide);
+      assertEquals(1, above);
+      assertEquals(0, below);
+
+      occupancyGrid.registerPoint(new FramePoint2D(worldFrame, -1.0, 0.0));
+
+      onLeftSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.0);
+      onRightSide = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.RIGHT, 0.0);
+      above = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.RIGHT, 0.0);
+      below = OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, horizontalLine, RobotSide.LEFT, 0.0);
+
+      assertEquals(1, onLeftSide);
+      assertEquals(1, onRightSide);
+      assertEquals(1, above);
+      assertEquals(1, below);
+
+
+      assertEquals(1, OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.95));
+      assertEquals(1, OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 0.99));
+      assertEquals(1, OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 1.0 - 1e-4));
+      assertEquals(0, OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 1.0));
+      assertEquals(0, OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, verticalLine, RobotSide.LEFT, 1.5));
    }
 }

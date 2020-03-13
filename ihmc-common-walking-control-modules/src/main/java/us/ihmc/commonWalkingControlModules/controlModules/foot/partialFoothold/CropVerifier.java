@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -10,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
-import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -19,8 +18,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
 
 public class CropVerifier
 {
@@ -34,11 +31,6 @@ public class CropVerifier
    private final YoBoolean perpendicularCopErrorAboveThreshold;
    private final YoBoolean enoughDesiredCopOnCropSide;
 
-   private final FrameLine2D shiftedLine = new FrameLine2D();
-   private final FrameVector2D shiftingVector = new FrameVector2D();
-   private final FramePoint2D cellCenter = new FramePoint2D();
-   private final ReferenceFrame soleFrame;
-
    private final OccupancyGridVisualizer visualizer;
 
    public CropVerifier(String namePrefix,
@@ -49,8 +41,6 @@ public class CropVerifier
                        YoVariableRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.soleFrame = soleFrame;
-
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoP", soleFrame, registry);
       occupancyGrid.setCellXSize(lengthResolution);
@@ -96,50 +86,9 @@ public class CropVerifier
       perpendicularCopErrorAboveThreshold.set(perpendicularCoPError.getDoubleValue() > perpendicularCopErrorThreshold.getValue());
 
       desiredCopOnCorrectSide.set(lineOfRotation.isPointOnSideOfLine(desiredCoP, sideToCrop == RobotSide.LEFT));
-      numberOfCellsOccupiedOnCropSide.set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation, sideToCrop, 0.0));
+      numberOfCellsOccupiedOnCropSide.set(OccupancyGridTools.computeNumberOfCellsOccupiedOnSideOfLine(occupancyGrid, lineOfRotation, sideToCrop, 0.0));
       enoughDesiredCopOnCropSide.set(numberOfCellsOccupiedOnCropSide.getValue() > numberOfCellsThreshold.getValue());
 
       return perpendicularCopErrorAboveThreshold.getBooleanValue() && desiredCopOnCorrectSide.getBooleanValue() && enoughDesiredCopOnCropSide.getBooleanValue();
    }
-
-   private int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2DReadOnly frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
-   {
-      // First create a shifted line towards the sideToLookAt such that we don't check the cells for which the line goes through.
-      frameLine.checkReferenceFrameMatch(soleFrame);
-      shiftingVector.setIncludingFrame(frameLine.getDirection());
-      shiftedLine.setIncludingFrame(frameLine);
-
-      // The shiftingVector is used to shift the line.
-      // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
-      EuclidGeometryTools.perpendicularVector2D(shiftingVector);
-      if (sideToLookAt == RobotSide.RIGHT)
-      {
-         shiftingVector.negate();
-      }
-
-      double theta = Math.atan2(shiftedLine.getDirection().getY(), shiftedLine.getDirection().getX());
-
-      // It is scaled such that the line is being shifted by one cell or minDistanceFromLine depending on which one is the greatest.
-      double cellXSize = occupancyGrid.getCellXSize();
-      double cellYSize = occupancyGrid.getCellYSize();
-      double distanceToMoveAwayFromLine = Math.max(minDistanceFromLine, Math.abs(cellXSize * Math.cos(theta) + cellYSize * Math.sin(theta)));
-      shiftingVector.scale(distanceToMoveAwayFromLine);
-
-      // The point of the shiftedLine is shifted using the shiftingVector.
-      shiftedLine.getPoint().add(shiftingVector);
-
-      int numberOfCellsActivatedOnSideToLookAt = 0;
-      List<OccupancyGridCell> activeCells = occupancyGrid.getAllActiveCells();
-      for (int i = 0; i < activeCells.size(); i++)
-      {
-         OccupancyGridCell cell = activeCells.get(i);
-         cellCenter.setIncludingFrame(soleFrame, occupancyGrid.getXLocation(cell.getXIndex()), occupancyGrid.getYLocation(cell.getYIndex()));
-         if (shiftedLine.isPointOnSideOfLine(cellCenter, sideToLookAt == RobotSide.LEFT) && cell.getIsOccupied())
-            numberOfCellsActivatedOnSideToLookAt++;
-      }
-
-      return numberOfCellsActivatedOnSideToLookAt;
-   }
-
-
 }
