@@ -80,7 +80,7 @@ public class StereoVisionPointCloudPublisher
    private final AtomicDouble linearVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
 
-   private long publisherPeriodInMillisecond = 1L;
+   private long publisherPeriodInMillisecond = 200L;
    private double minimumResolution = 0.005;
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
