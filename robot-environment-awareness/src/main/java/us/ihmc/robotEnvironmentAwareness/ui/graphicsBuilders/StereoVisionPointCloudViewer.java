@@ -45,6 +45,8 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
    public void unpackPointCloud(StereoVisionPointCloudMessage message)
    {
       Point3D32[] pointcloud = PointCloudCompression.decompressPointCloudToArray32(message);
+      int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+
       meshBuilder.clear();
       int numberOfScanPoints = message.getPointCloud().size() / 3;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, sizeOfPointCloud.get());
@@ -58,8 +60,7 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
          else
             indexToVisualize = random.nextInt(numberOfScanPoints);
 
-         int colorValue = message.getColors().get(indexToVisualize);
-         Color color = intToColor(colorValue);
+         Color color = intToColor(colors[indexToVisualize]);
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), pointcloud[indexToVisualize], color);
       }
