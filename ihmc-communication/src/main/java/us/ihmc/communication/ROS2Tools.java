@@ -61,6 +61,7 @@ public class ROS2Tools
 
    public static final String STEREO_REA_MODULE = STEREO_REA.getModuleTopicQualifier();
    public static final String REALSENSE_SLAM_MAP_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/planar_regions_list_slam";
+   public static final String REA_SUPPORT_REGIONS_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/rea/custom_region/input/planar_regions_list";
 
    public enum ROS2TopicQualifier
    {

@@ -28,7 +28,7 @@ public class RemoteEnvironmentMapInterface
 
       new ROS2Callback<>(ros2Node,
                          PlanarRegionsListMessage.class,
-                         "/ihmc/rea/custom_region/input/planar_regions_list",
+                         ROS2Tools.REA_SUPPORT_REGIONS_TOPIC_NAME,
                          this::acceptAdditionalRegionList);
    }
 
