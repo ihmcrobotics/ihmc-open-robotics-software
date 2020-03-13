@@ -175,6 +175,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
+      footstepPlannerParameters.setReturnBestEffortPlan(lookAndStepParameters.get(LookAndStepBehaviorParameters.returnBestEffortPlanOverride));
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
 
