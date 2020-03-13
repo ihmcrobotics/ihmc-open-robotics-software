@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
-import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.*;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
@@ -30,6 +29,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
