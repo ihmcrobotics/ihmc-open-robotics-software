@@ -26,6 +26,7 @@ public class SimulatedREAModule
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
    private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
    private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
@@ -45,6 +46,7 @@ public class SimulatedREAModule
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA.getNodeName());
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
 
       if (robotModel != null)
       {
@@ -105,6 +107,7 @@ public class SimulatedREAModule
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
+         realsenseSLAMPublisher.publish(message);
       }
    }
 

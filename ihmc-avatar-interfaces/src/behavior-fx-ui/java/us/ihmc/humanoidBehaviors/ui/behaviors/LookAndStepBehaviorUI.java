@@ -30,6 +30,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
    private FootstepPlanGraphic footstepPlanGraphic;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private PoseGraphic goalGraphic;
 
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
@@ -49,6 +50,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       getChildren().add(livePlanarRegionsGraphic);
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
+      goalGraphic = new PoseGraphic();
+      behaviorMessager.registerTopicListener(GoalForUI, goalGraphic::setPose);
+
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
 
@@ -66,6 +70,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       {
          livePlanarRegionsGraphic.clear();
          footstepPlanGraphic.clear();
+         getChildren().remove(goalGraphic);
+      }
+      else
+      {
+         getChildren().add(goalGraphic);
       }
    }
 
