@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.tools;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -72,6 +74,16 @@ public class PlannerTools
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createFootPolygon(footLength, heelWidth, toeWidth));
       return footPolygons;
+   }
+
+   public static SideDependentList<Pose3D> createSquaredUpFootsteps(Pose3DReadOnly midFootPose, double stanceWidth)
+   {
+      return new SideDependentList<>(side ->
+                                     {
+                                        Pose3D footstepPose = new Pose3D(midFootPose);
+                                        footstepPose.appendTranslation(0.0, 0.5 * side.negateIfRightSide(stanceWidth), 0.0);
+                                        return footstepPose;
+                                     });
    }
 
    public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)

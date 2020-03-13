@@ -68,8 +68,8 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
-      request.setInitialStancePose(initialStanceFootPose);
-      request.setInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalPose(goalPose);
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
@@ -135,8 +135,8 @@ public class FootstepPlanningWithBodyPathTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
       request.setPlanarRegionsList(planarRegionsList);
-      request.setInitialStancePose(initialStanceFootPose);
-      request.setInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalPose(goalPose);
       request.getBodyPathWaypoints().addAll(waypoints);
 

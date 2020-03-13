@@ -13,8 +13,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
@@ -118,12 +116,8 @@ public class RemotePlannerMessageConverter
          this.planarRegionsList = Optional.of(planarRegionsList);
       }
 
-      Point3D goalPosition = packet.getGoalPositionInWorld();
-      Quaternion goalOrientation = packet.getGoalOrientationInWorld();
-      Point3D startPosition = packet.getStanceFootPositionInWorld();
-      Quaternion startOrientation = packet.getStanceFootOrientationInWorld();
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
-      RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
+      RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
@@ -131,11 +125,10 @@ public class RemotePlannerMessageConverter
       double horizonLength = packet.getHorizonLength();
 
       this.planarRegionsList.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, regions));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, packet.getGoalRightFootPose());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 

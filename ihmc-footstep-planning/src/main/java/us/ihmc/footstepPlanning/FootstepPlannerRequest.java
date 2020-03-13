@@ -211,7 +211,9 @@ public class FootstepPlannerRequest
       clear();
 
       setRequestId(requestPacket.getPlannerRequestId());
-      setRequestedInitialStanceSide(RobotSide.fromByte(requestPacket.getRequestedInitialStanceSide()));
+      RobotSide requestedInitialStanceSide = RobotSide.fromByte(requestPacket.getRequestedInitialStanceSide());
+      if (requestedInitialStanceSide != null)
+         setRequestedInitialStanceSide(requestedInitialStanceSide);
       setStartFootPose(RobotSide.LEFT, requestPacket.getStartLeftFootPose());
       setStartFootPose(RobotSide.RIGHT, requestPacket.getStartRightFootPose());
       setGoalFootPose(RobotSide.LEFT, requestPacket.getGoalLeftFootPose());

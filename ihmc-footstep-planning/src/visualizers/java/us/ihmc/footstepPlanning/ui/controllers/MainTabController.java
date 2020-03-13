@@ -9,7 +9,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -374,7 +373,7 @@ public class MainTabController
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZPosition.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(GoalPosition, goalPositionProperty, false);
+      messager.bindBidirectional(GoalMidFootPosition, goalPositionProperty, false);
 
       messager.bindBidirectional(GoalDistanceProximity, distanceProximity.getValueFactory().valueProperty(), true);
       messager.bindBidirectional(GoalYawProximity, yawProximity.getValueFactory().valueProperty(), true);
@@ -383,7 +382,7 @@ public class MainTabController
       messager.bindBidirectional(StartOrientation, startRotationProperty, false);
 
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
-      messager.bindBidirectional(GoalOrientation, goalRotationProperty, false);
+      messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
       messager.registerTopicListener(GlobalReset, reset -> clearStartGoalTextFields());
 

@@ -38,7 +38,7 @@ public class VisibilityGraphsRenderer
    {
       planarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,

@@ -232,8 +232,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootPosition, goalPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, goalOrientation);
          messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
@@ -285,10 +285,10 @@ public class RemoteFootstepPlannerUIMessagingTest
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT));
       localNode.spin();
 
-      AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
       AtomicReference<Point3D> startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
 
-      AtomicReference<Quaternion> goalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientation);
+      AtomicReference<Quaternion> goalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation);
       AtomicReference<Quaternion> startOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientation);
 
       AtomicReference<FootstepPlannerType> planningTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType);
@@ -383,8 +383,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootPosition, goalPosition);
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, goalOrientation);
          messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);

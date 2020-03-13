@@ -3,25 +3,18 @@ package us.ihmc.footstepPlanning.ui.components;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.sun.javafx.scene.CameraHelper;
-
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
-import javafx.scene.Camera;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.eventHandlers.PlaneIntersectionCalculator;
-import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class StartGoalOrientationEditor extends AnimationTimer
 {
@@ -53,7 +46,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
       goalEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled, false);
 
       startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
+      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
 
       planeIntersectionCalculator = new PlaneIntersectionCalculator(subScene.getCamera());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedRegion, planeIntersectionCalculator::setPlanarRegion);
@@ -118,7 +111,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
             double goalYaw = Math.atan2(difference.getY(), difference.getX());
             Quaternion orientation = new Quaternion(goalYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, orientation);
+            messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, orientation);
          }
 
          if(orientationValidated.getAndSet(false))

@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -40,6 +41,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -159,10 +161,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       startingFrame.setOrientationAndUpdate(new Quaternion(startingLocation.getYaw(), 0.0, 0.0));
 
       FramePose3D goalPose = new FramePose3D(startingFrame);
-      goalPose.setPosition(1.0, 0.0, 0.0);
+      goalPose.setPosition(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose);
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
 
       runTest(request);
    }
@@ -196,7 +198,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.setPosition(2.0, 0.0, 0.0);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose);
+      FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
       runTest(requestPacket);
    }
 
@@ -391,18 +393,21 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
    }
 
-   private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
+   private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel, PlanarRegionsList planarRegionsList, FramePose3D goalPose, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       FramePose3D leftFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.RIGHT));
       leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-      request.setInitialStanceRobotSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
-      request.getStanceFootPositionInWorld().set(leftFoot.getPosition());
-      request.getStanceFootOrientationInWorld().set(leftFoot.getOrientation());
+      request.setRequestedInitialStanceSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
+      request.getStartLeftFootPose().set(leftFoot);
+      request.getStartRightFootPose().set(rightFoot);
 
-      request.getGoalPositionInWorld().set(goalPose.getPosition());
-      request.getGoalOrientationInWorld().set(goalPose.getOrientation());
+      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalPose, footstepPlannerParameters.getIdealFootstepWidth());
+      request.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
+      request.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
       request.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
@@ -420,7 +425,10 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
       YoFramePoint3D goalPosition = new YoFramePoint3D("goalPosition", ReferenceFrame.getWorldFrame(), registry);
       YoGraphicPosition goalGraphic = new YoGraphicPosition("goalGraphic", goalPosition, 0.05, YoAppearance.Green());
-      goalPosition.set(requestPacket.getGoalPositionInWorld());
+
+      Pose3D goalMidFootPose = new Pose3D();
+      goalMidFootPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      goalPosition.set(goalMidFootPose.getPosition());
       yoGraphicsListRegistry.registerYoGraphic("Test", goalGraphic);
       drcSimulationTestHelper.addChildRegistry(registry);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -488,7 +496,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3D center = new Point3D(requestPacket.getGoalPositionInWorld());
+      Point3D center = new Point3D(goalMidFootPose.getPosition());
       center.addZ(0.7);
 
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);

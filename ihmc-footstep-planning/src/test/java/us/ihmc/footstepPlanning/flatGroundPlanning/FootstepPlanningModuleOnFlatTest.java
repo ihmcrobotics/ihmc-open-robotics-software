@@ -42,8 +42,8 @@ public class FootstepPlanningModuleOnFlatTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
       request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose3d);
 
       runTest(goalPose3d, request);
    }
@@ -69,8 +69,8 @@ public class FootstepPlanningModuleOnFlatTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
       request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose3d);
 
       runTest(goalPose3d, request);
    }
@@ -96,8 +96,8 @@ public class FootstepPlanningModuleOnFlatTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
       request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose3d);
 
       runTest(goalPose3d, request);
    }
@@ -123,8 +123,8 @@ public class FootstepPlanningModuleOnFlatTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
       request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose3d);
 
       runTest(goalPose3d, request);
    }
@@ -150,8 +150,8 @@ public class FootstepPlanningModuleOnFlatTest
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setAssumeFlatGround(true);
       request.setGoalPose(goalPose3d);
-      request.setInitialStanceSide(initialStanceFootSide);
-      request.setInitialStancePose(initialStanceFootPose3d);
+      request.setRequestedInitialStanceSide(initialStanceFootSide);
+      request.setStartFootPose(initialStanceFootPose3d);
 
       runTest(goalPose3d, request);
    }
