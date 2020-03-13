@@ -8,6 +8,8 @@ import java.util.List;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
@@ -19,6 +21,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
@@ -35,7 +38,8 @@ public class ValkyrieSDFLoadingDemo
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_SIM_COLLISIONS = true;
 
    private SimulationConstructionSet scs;
 
@@ -66,6 +70,13 @@ public class ValkyrieSDFLoadingDemo
 
       if (SHOW_KINEMATICS_COLLISIONS)
          addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+
+      if (SHOW_SIM_COLLISIONS)
+      {
+         ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(robotModel.getJointMap());
+         collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
+         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
+      }
 
       scs = new SimulationConstructionSet(valkyrieRobot);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -156,6 +167,13 @@ public class ValkyrieSDFLoadingDemo
          graphics.addCapsule(capsule.getRadius(),
                              capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
                              appearance);
+      }
+      else if (shape instanceof Box3DReadOnly)
+      {
+         Box3DReadOnly box = (Box3DReadOnly) shape;
+         graphics.translate(box.getPosition());
+         graphics.rotate(new RotationMatrix(box.getOrientation()));
+         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), true, appearance);
       }
       else
       {

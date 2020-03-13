@@ -40,6 +40,8 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       YoVariable.SAVE_STACK_TRACE = false;
    }
 
+   public abstract RobotCollisionModel getRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks);
+
    public void testZeroTorque(TestInfo testInfo) throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -53,8 +55,16 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
 
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
       Vector3D gravity = new Vector3D(scsRobot.getGravityX(), scsRobot.getGravityY(), scsRobot.getGravityZ());
-      PhysicsEngine customPhysicsEngine = setupCustomPhysicsEngine(drcSimulationTestHelper);
-      customPhysicsEngine.addEnvironmentCollidables(toCollidables(-1, -1, testEnvironment));
+
+      CollidableHelper helper = new CollidableHelper();
+      String environmentCollisionMask = "ground";
+      String robotCollisionMask = "robot";
+      RobotCollisionModel robotCollisionModel = getRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
+
+      PhysicsEngine customPhysicsEngine = setupCustomPhysicsEngine(drcSimulationTestHelper, robotCollisionModel);
+      customPhysicsEngine.addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask),
+                                                                  helper.createCollisionGroup(robotCollisionMask),
+                                                                  testEnvironment));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       simulate(2.5, customPhysicsEngine, scs, gravity);
@@ -76,7 +86,7 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       }
    }
 
-   private PhysicsEngine setupCustomPhysicsEngine(DRCSimulationTestHelper drcSimulationTestHelper)
+   private PhysicsEngine setupCustomPhysicsEngine(DRCSimulationTestHelper drcSimulationTestHelper, RobotCollisionModel robotCollisionModel)
    {
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
 
@@ -84,7 +94,6 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
 
       String robotName = getSimpleRobotName();
       RigidBodyBasics rootBody = getRobotModel().createFullRobotModel().getElevator();
-      RobotCollisionModel robotCollisionModel = getRobotModel().getHumanoidRobotKinematicsCollisionModel();
       MultiBodySystemStateWriter controllerOutputWriter = createControllerOutputWriter(scsRobot);
       MultiBodySystemStateWriter robotInitialStateWriter = createRobotInitialStateWriter(getRobotModel().getJointMap());
       MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
@@ -186,8 +195,8 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
          @Override
          public void setMultiBodySystem(MultiBodySystemBasics multiBodySystem)
          {
-            rootJoint = multiBodySystem.getAllJoints().stream().filter(FloatingJointBasics.class::isInstance)
-                                                           .map(FloatingJointBasics.class::cast).findFirst().get();
+            rootJoint = multiBodySystem.getAllJoints().stream().filter(FloatingJointBasics.class::isInstance).map(FloatingJointBasics.class::cast).findFirst()
+                                       .get();
          }
       };
    }

@@ -35,7 +35,8 @@ public class PhysicsEngine
    }
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
-                        MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel, MultiBodySystemStateReader physicsOutputReader)
+                        MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
+                        MultiBodySystemStateReader physicsOutputReader)
    {
       PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotInitialStateWriter, robotCollisionModel);
       multiRobotPhysicsEnginePlugin.addMultiBodySystem(robot.getMultiBodySystem(), controllerOutputWriter);
