@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -16,7 +15,6 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerLoggerTest
 {
@@ -27,8 +25,8 @@ public class FootstepPlannerLoggerTest
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setInitialStancePose(new Pose3D(dataSet.getPlannerInput().getStartPosition(), new Quaternion(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0)));
-      request.setInitialStanceSide(RobotSide.LEFT);
+      request.setStartFootPose(new Pose3D(dataSet.getPlannerInput().getStartPosition(), new Quaternion(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0)));
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setGoalPose(new Pose3D(dataSet.getPlannerInput().getGoalPosition(), new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0)));
       request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
       request.setAssumeFlatGround(false);

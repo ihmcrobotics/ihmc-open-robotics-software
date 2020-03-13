@@ -105,15 +105,15 @@ public class StartGoalTabController
       goalPositionProperty.bindBidirectionalY(goalYSpinner.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZSpinner.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalPosition, goalPositionProperty, false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalMidFootPosition, goalPositionProperty, false);
 
-      messager.bindBidirectional(GoalPosition, goalPositionProperty, false);
+      messager.bindBidirectional(GoalMidFootPosition, goalPositionProperty, false);
 
       startRotationProperty.bindBidirectionalYaw(startYawSpinner.getValueFactory().valueProperty());
       messager.bindBidirectional(StartOrientation, startRotationProperty, false);
 
       goalRotationProperty.bindBidirectionalYaw(goalYawSpinner.getValueFactory().valueProperty());
-      messager.bindBidirectional(GoalOrientation, goalRotationProperty, false);
+      messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
       messager.registerTopicListener(GlobalReset, reset -> clearStartGoalTextFields());
    }

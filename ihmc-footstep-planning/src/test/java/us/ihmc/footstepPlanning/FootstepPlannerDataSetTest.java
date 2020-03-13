@@ -242,7 +242,7 @@ public abstract class FootstepPlannerDataSetTest
    {
       PlannerInput plannerInput = dataset.getPlannerInput();
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, plannerInput.getStartPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, plannerInput.getGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootPosition, plannerInput.getGoalPosition());
       messager.submitMessage(PlannerType, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
@@ -255,7 +255,7 @@ public abstract class FootstepPlannerDataSetTest
       double startYaw = plannerInput.hasStartOrientation() ? plannerInput.getStartYaw() : 0.0;
       double goalYaw = plannerInput.hasGoalOrientation() ? plannerInput.getGoalYaw() : 0.0;
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startYaw, 0.0, 0.0));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(goalYaw, 0.0, 0.0));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, new Quaternion(goalYaw, 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 

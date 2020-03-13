@@ -560,10 +560,9 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       requestPublisher.publish(requestPacket);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, dataset.getPlannerInput().getGoalPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootPosition, dataset.getPlannerInput().getGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalMidFootOrientation, goalOrientation);
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, dataset.getPlannerInput().getStartPosition());
-
 
       if (DEBUG)
          LogTools.info("Sending out planning request.");
@@ -748,8 +747,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
          if (fullStepListFromContinuousToolbox.get().getFootstepDataList().size() > 0)
          {
             FramePose3D startPose = feetPoses.get(RobotSide.fromByte(fullStepListFromContinuousToolbox.get().getFootstepDataList().get(0).getRobotSide()).getOppositeSide());
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, new Point3D(startPose.getPosition()));
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startPose.getOrientation()));
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartMidFootPosition, new Point3D(startPose.getPosition()));
+            messager.submitMessage(FootstepPlannerMessagerAPI.StartMidFootOrientation, new Quaternion(startPose.getOrientation()));
          }
 //         else
 //         {

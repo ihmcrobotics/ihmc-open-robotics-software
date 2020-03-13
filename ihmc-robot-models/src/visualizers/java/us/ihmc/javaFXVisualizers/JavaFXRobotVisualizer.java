@@ -38,6 +38,7 @@ public class JavaFXRobotVisualizer
    private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
    private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
 
+   private Runnable robotLoadedCallback;
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
 
@@ -77,6 +78,9 @@ public class JavaFXRobotVisualizer
             fullRobotModel.getElevator().updateFramesRecursively();
             graphicsRobot.update();
             robotRootNode.update();
+
+            if (robotLoadedCallback != null)
+               robotLoadedCallback.run();
          }
       };
    }
@@ -149,6 +153,11 @@ public class JavaFXRobotVisualizer
          jointAngleArray[i] = (float) jointAngles.applyAsDouble(allJoints[i].getName());
       }
       newJointConfigurationReference.set(jointAngleArray);
+   }
+
+   public void setRobotLoadedCallback(Runnable robotLoadedCallback)
+   {
+      this.robotLoadedCallback = robotLoadedCallback;
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

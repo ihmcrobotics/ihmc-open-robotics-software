@@ -11,7 +11,6 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -28,8 +27,8 @@ public class FootstepPlanningModuleTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(3.5);
-      request.setInitialStancePose(new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0)));
-      request.setInitialStanceSide(RobotSide.LEFT);
+      request.setStartFootPose(new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0)));
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
       request.setPlanBodyPath(false);
 
@@ -83,8 +82,8 @@ public class FootstepPlanningModuleTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setGoalPose(new Pose3D(3.5, 0.0, 0.0, 0.0, 0.0, 0.0));
-      request.setInitialStancePose(new Pose3D());
-      request.setInitialStanceSide(RobotSide.LEFT);
+      request.setStartFootPose(new Pose3D());
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
       request.setPlanBodyPath(false);
       request.setGoalDistanceProximity(0.65);

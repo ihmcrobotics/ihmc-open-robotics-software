@@ -258,8 +258,8 @@ public class SimpleOcclusionTests
 
          request.setGoalPose(goalPose);
          request.setPlanarRegionsList(visiblePlanarRegions);
-         request.setInitialStanceSide(stanceSide);
-         request.setInitialStancePose(stancePose);
+         request.setRequestedInitialStanceSide(stanceSide);
+         request.setStartFootPose(stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);
          request.setPlanBodyPath(true);
          request.setHorizonLength(1.0);

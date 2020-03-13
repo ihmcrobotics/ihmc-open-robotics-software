@@ -8,9 +8,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPosition
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -27,10 +25,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
@@ -87,11 +83,11 @@ public class StartGoalOrientationViewer extends AnimationTimer
 
       startPositionReference = messager.createInput(StartPosition, new Point3D());
       lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
-      goalPositionReference = messager.createInput(GoalPosition, new Point3D());
+      goalPositionReference = messager.createInput(GoalMidFootPosition, new Point3D());
 
       startQuaternionReference = messager.createInput(StartOrientation, new Quaternion());
       lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
-      goalQuaternionReference = messager.createInput(GoalOrientation, new Quaternion());
+      goalQuaternionReference = messager.createInput(GoalMidFootOrientation, new Quaternion());
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)

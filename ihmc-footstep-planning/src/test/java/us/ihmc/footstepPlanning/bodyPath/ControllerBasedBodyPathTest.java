@@ -218,8 +218,8 @@ public class ControllerBasedBodyPathTest
             goalPose.setY(finalPose.getY());
             goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
-            request.setInitialStancePose(initialStanceFootPose);
-            request.setInitialStanceSide(initialStanceFootSide);
+            request.setStartFootPose(initialStanceFootPose);
+            request.setRequestedInitialStanceSide(initialStanceFootSide);
             request.setGoalPose(goalPose);
             FootstepPlannerOutput output = footstepPlanningModule.handleRequest(request);
 
