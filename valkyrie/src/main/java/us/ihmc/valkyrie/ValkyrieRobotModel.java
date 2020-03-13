@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.*;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
@@ -577,9 +577,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidRobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel();
+      return new ValkyrieKinematicsCollisionModel(jointMap);
    }
 
    @Override

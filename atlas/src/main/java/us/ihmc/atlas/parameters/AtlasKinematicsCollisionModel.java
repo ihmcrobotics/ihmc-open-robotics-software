@@ -7,27 +7,31 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionModel
+public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 {
-   public AtlasKinematicsCollisionModel()
+   private final DRCRobotJointMap jointMap;
+
+   public AtlasKinematicsCollisionModel(DRCRobotJointMap jointMap)
    {
+      this.jointMap = jointMap;
    }
 
    // TODO Need to implement the RobotiQ hands, this implementation only cover the knobs.
    @Override
-   public List<Collidable> getRobotCollidables(FullHumanoidRobotModel fullRobotModel)
+   public List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem)
    {
       CollidableHelper helper = new CollidableHelper();
       List<Collidable> collidables = new ArrayList<>();
@@ -44,9 +48,9 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          int collisionMask = helper.getCollisionMask(bodyName);
          int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
-         RigidBodyBasics head = fullRobotModel.getHead();
-         RigidBodyBasics torso = fullRobotModel.getChest();
-         RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+         RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
+         RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
+         RigidBodyBasics pelvis = RobotCollisionModel.findRigidBody(jointMap.getPelvisName(), multiBodySystem);
 
          // Head ---------------------------------------------------------------------
          MovingReferenceFrame headFrame = head.getBodyFixedFrame();
@@ -100,7 +104,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          // Legs ---------------------------------------------------------------------
          for (RobotSide robotSide : RobotSide.values)
          {
-            OneDoFJointBasics hipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH);
+            JointBasics hipPitchJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), multiBodySystem);
             RigidBodyBasics thigh = hipPitchJoint.getSuccessor();
             ReferenceFrame thighFrame = hipPitchJoint.getFrameAfterJoint();
 
@@ -119,7 +123,7 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
             thighShapeBack.setAxis(Axis.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBack, thighFrame));
 
-            OneDoFJointBasics shinPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+            JointBasics shinPitchJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem);
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
@@ -135,14 +139,14 @@ public class AtlasKinematicsCollisionModel implements HumanoidRobotCollisionMode
          int collisionMask = helper.getCollisionMask(armNames.get(robotSide));
          int collisionGroup = helper.createCollisionGroup(bodyName, armNames.get(robotSide.getOppositeSide()));
 
-         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
          ReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
          Capsule3D handShapeKnob = new Capsule3D(0.07, 0.06);
          handShapeKnob.getPosition().set(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          handShapeKnob.setAxis(Axis.Y);
          collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapeKnob, handFrame));
 
-         OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL);
+         JointBasics elbowJoint = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), multiBodySystem);
          RigidBodyBasics forearm = elbowJoint.getSuccessor();
          ReferenceFrame elbowFrame = elbowJoint.getFrameAfterJoint();
          Capsule3D forearmShape = new Capsule3D(0.31, 0.1);

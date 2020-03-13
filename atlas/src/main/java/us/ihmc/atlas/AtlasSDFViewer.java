@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -159,9 +159,9 @@ public class AtlasSDFViewer
       }
    }
 
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, HumanoidRobotCollisionModel collisionModel)
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
    {
-      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel);
+      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 
       for (Collidable collidable : robotCollidables)
       {

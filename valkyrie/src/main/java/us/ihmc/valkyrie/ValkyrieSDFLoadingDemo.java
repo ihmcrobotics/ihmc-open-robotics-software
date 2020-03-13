@@ -17,7 +17,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -119,9 +119,9 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   public void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, HumanoidRobotCollisionModel collisionModel)
+   public void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
    {
-      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel);
+      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 
       for (Collidable collidable : robotCollidables)
       {
