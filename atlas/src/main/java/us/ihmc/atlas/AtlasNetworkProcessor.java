@@ -15,12 +15,11 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasNetworkProcessor
 {
-   private enum Application
-   {
-      DEFAULT, VR, MINIMAL
-   };
+   private static final Application DEFAULT = AtlasNetworkProcessor::defaultNetworkProcessor;
+   private static final Application VR = AtlasNetworkProcessor::vrNetworkProcessor;
+   private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
 
-   private static final Application APPLICATION = Application.MINIMAL;
+   private static final Application APPLICATION = DEFAULT;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -81,51 +80,32 @@ public class AtlasNetworkProcessor
 
       LogTools.info("Selected model: {}", model);
 
-      switch (APPLICATION)
-      {
-         case VR:
-            vrNetworkProcessor(args, model);
-            break;
-         case MINIMAL:
-            minimalNetworkProcessor(args, model);
-            break;
-         case DEFAULT:
-         default:
-            defaultNetworkProcessor(args, model);
-            break;
-      }
-   }
-
-   private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel)
-   {
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
       LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
-      networkProcessor.setupRosModule();
-      networkProcessor.setupSensorModule();
-      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+
+      APPLICATION.setup(args, model, networkProcessor);
+
       networkProcessor.setupShutdownHook();
       networkProcessor.start();
    }
 
-   private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel)
+   private interface Application
    {
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
-      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
+      void setup(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor);
+   }
+
+   private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
       networkProcessor.setupRosModule();
       networkProcessor.setupSensorModule();
       networkProcessor.setupBehaviorModule(false, false, 0);
       networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
-      networkProcessor.setupShutdownHook();
-      networkProcessor.start();
    }
 
-   private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel)
+   private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
    {
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
-      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
       networkProcessor.setupRosModule();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -145,7 +125,11 @@ public class AtlasNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
-      networkProcessor.setupShutdownHook();
-      networkProcessor.start();
+   }
+
+   private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
    }
 }
