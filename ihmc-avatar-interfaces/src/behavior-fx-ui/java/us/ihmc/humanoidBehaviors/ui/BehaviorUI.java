@@ -115,7 +115,7 @@ public class BehaviorUI
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
-         Scene mainScene = new Scene(mainPane, 1554, 1000);
+         Scene mainScene = new Scene(mainPane, 1750, 1000);
 
          primaryStage.setScene(mainScene);
          primaryStage.show();
