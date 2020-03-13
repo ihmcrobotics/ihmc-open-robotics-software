@@ -55,7 +55,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -202,7 +202,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       scs = drcSimulationTestHelper.getSimulationConstructionSet();
    }
 
-   public void setupNoWalkingController(HumanoidRobotCollisionModel collisionModel)
+   public void setupNoWalkingController(RobotCollisionModel collisionModel)
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
@@ -235,13 +235,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void setupCollisions(HumanoidRobotCollisionModel collisionModel, HumanoidFloatingRootJointRobot robot)
+   private void setupCollisions(RobotCollisionModel collisionModel, HumanoidFloatingRootJointRobot robot)
    {
       toolboxController.setCollisionModel(collisionModel);
 
       if (collisionModel != null)
       {
-         List<Collidable> collidables = collisionModel.getRobotCollidables(desiredFullRobotModel);
+         List<Collidable> collidables = collisionModel.getRobotCollidables(desiredFullRobotModel.getElevator());
 
          for (Collidable collidable : collidables)
          {
@@ -320,7 +320,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
    
-      List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel);
+      List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());
    
       assertTrue(toolboxController.initialize());
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);

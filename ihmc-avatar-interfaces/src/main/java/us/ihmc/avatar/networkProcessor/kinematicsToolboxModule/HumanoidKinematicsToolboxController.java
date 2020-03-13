@@ -44,7 +44,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -280,10 +280,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       setInitialRobotConfiguration(privilegedConfiguration);
    }
 
-   public void setCollisionModel(HumanoidRobotCollisionModel collisionModel)
+   public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       if (collisionModel != null)
-         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel()));
+         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel().getElevator()));
    }
 
    @Override

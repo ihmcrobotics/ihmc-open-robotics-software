@@ -7,34 +7,38 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.physics.HumanoidRobotCollisionModel;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.humanoidRobotics.physics.RobotCollisionModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionModel
+public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 {
-   public ValkyrieKinematicsCollisionModel()
+   private final DRCRobotJointMap jointMap;
+
+   public ValkyrieKinematicsCollisionModel(DRCRobotJointMap jointMap)
    {
+      this.jointMap = jointMap;
    }
 
    @Override
-   public List<Collidable> getRobotCollidables(FullHumanoidRobotModel fullRobotModel)
+   public List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem)
    {
       CollidableHelper helper = new CollidableHelper();
       List<Collidable> allCollidables = new ArrayList<>();
-      allCollidables.addAll(setupArmCollisions(fullRobotModel, helper));
-      allCollidables.addAll(setupNeckCollisions(fullRobotModel, helper));
+      allCollidables.addAll(setupArmCollisions(multiBodySystem, helper));
+      allCollidables.addAll(setupNeckCollisions(multiBodySystem, helper));
       return allCollidables;
    }
 
-   private List<Collidable> setupArmCollisions(FullHumanoidRobotModel fullRobotModel, CollidableHelper helper)
+   private List<Collidable> setupArmCollisions(MultiBodySystemBasics multiBodySystem, CollidableHelper helper)
    {
       List<Collidable> collidables = new ArrayList<>();
 
@@ -46,7 +50,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          int collisionMask = helper.getCollisionMask(bodyName);
          int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
-         RigidBodyBasics torso = fullRobotModel.getChest();
+         RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
          Capsule3D torsoShapeTop = new Capsule3D(0.08, 0.15);
          torsoShapeTop.getPosition().set(0.1, 0.0, 0.01);
          torsoShapeTop.getAxis().set(Axis.Y);
@@ -56,7 +60,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          torsoShapeBottom.setAxis(Axis.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottom, torso.getBodyFixedFrame()));
 
-         RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+         RigidBodyBasics pelvis = RobotCollisionModel.findRigidBody(jointMap.getPelvisName(), multiBodySystem);
          Capsule3D pelvisShapeTop = new Capsule3D(0.15, 0.1);
          pelvisShapeTop.setAxis(Axis.Y);
          pelvisShapeTop.getPosition().set(0.0, 0.0, -0.08);
@@ -67,7 +71,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            RigidBodyBasics hip = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getSuccessor();
+            RigidBodyBasics hip = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), multiBodySystem).getSuccessor();
             Sphere3D hipShape = new Sphere3D(0.125);
             hipShape.getPosition().set(-0.01, robotSide.negateIfLeftSide(0.01), -0.07);
             collidables.add(new Collidable(hip, collisionMask, collisionGroup, hipShape, hip.getBodyFixedFrame()));
@@ -77,10 +81,13 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
       for (RobotSide robotSide : RobotSide.values)
       { // Arms
          int collisionMask = helper.getCollisionMask(armNames.get(robotSide));
-         int collisionGroup = helper.createCollisionGroup(bodyName, armNames.get(robotSide.getOppositeSide()), legNames.get(RobotSide.LEFT), legNames.get(RobotSide.RIGHT));
+         int collisionGroup = helper.createCollisionGroup(bodyName,
+                                                          armNames.get(robotSide.getOppositeSide()),
+                                                          legNames.get(RobotSide.LEFT),
+                                                          legNames.get(RobotSide.RIGHT));
 
-         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         OneDoFJointBasics elbowRollJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL);
+         RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
+         JointBasics elbowRollJoint = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), multiBodySystem);
 
          if (elbowRollJoint != null)
          {
@@ -92,7 +99,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
             handShapePalm.getPosition().set(-0.015, robotSide.negateIfLeftSide(0.01), -0.01);
             handShapePalm.getAxis().set(Axis.Z);
             collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapePalm, hand.getBodyFixedFrame()));
-            
+
             RigidBodyBasics forearm = elbowRollJoint.getSuccessor();
             Capsule3D forearmShape = new Capsule3D(0.21, 0.08);
             forearmShape.getPosition().setX(-0.02);
@@ -103,7 +110,8 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          }
          else
          { // Assuming this val with arm mass sim
-            RigidBodyBasics massSim = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getSuccessor();
+            RigidBodyBasics massSim = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem)
+                                                         .getSuccessor();
             Capsule3D massSimShape = new Capsule3D(0.36, 0.065);
             massSimShape.getPosition().set(-0.015, robotSide.negateIfRightSide(0.04), -0.02);
             massSimShape.getAxis().set(Axis.Y);
@@ -116,7 +124,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          int collisionMask = helper.getCollisionMask(legNames.get(robotSide));
          int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
-         RigidBodyBasics upperLeg = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getSuccessor();
+         RigidBodyBasics upperLeg = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), multiBodySystem).getSuccessor();
          Capsule3D upperLegShapeTop = new Capsule3D(0.25, 0.1);
          upperLegShapeTop.getPosition().set(0.015, 0.0, 0.10);
          upperLegShapeTop.setAxis(new Vector3D(-0.139, robotSide.negateIfLeftSide(0.1), 0.99));
@@ -126,7 +134,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          upperLegShapeBottom.setAxis(new Vector3D(0.208, robotSide.negateIfRightSide(0.1), 0.978));
          collidables.add(new Collidable(upperLeg, collisionMask, collisionGroup, upperLegShapeBottom, upperLeg.getBodyFixedFrame()));
 
-         RigidBodyBasics lowerLeg = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getSuccessor();
+         RigidBodyBasics lowerLeg = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
          Capsule3D lowerLegShape = new Capsule3D(0.23, 0.11);
          lowerLegShape.getPosition().set(0.01, robotSide.negateIfLeftSide(0.0025), 0.0);
          lowerLegShape.setAxis(new Vector3D(0.08, 0.0, 1.0));
@@ -136,7 +144,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
       return collidables;
    }
 
-   private List<Collidable> setupNeckCollisions(FullHumanoidRobotModel fullRobotModel, CollidableHelper helper)
+   private List<Collidable> setupNeckCollisions(MultiBodySystemBasics multiBodySystem, CollidableHelper helper)
    {
       List<Collidable> collidables = new ArrayList<>();
 
@@ -147,7 +155,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          int collisionMask = helper.getCollisionMask(bodyName);
          int collisionGroup = helper.createCollisionGroup(chinName);
 
-         RigidBodyBasics torso = fullRobotModel.getChest();
+         RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
          Capsule3D torsoShapeTop = new Capsule3D(0.15, 0.15);
          torsoShapeTop.getPosition().set(0.11, 0.0, -0.0);
          torsoShapeTop.getAxis().set(Axis.Y);
@@ -158,7 +166,7 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotCollisionM
          int collisionMask = helper.getCollisionMask(chinName);
          int collisionGroup = helper.createCollisionGroup(bodyName);
 
-         RigidBodyBasics head = fullRobotModel.getHead();
+         RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
          Capsule3D chinShape = new Capsule3D(0.05, 0.02);
          chinShape.getPosition().set(0.07, 0.0, -0.17);
          chinShape.getAxis().set(Axis.Y);
