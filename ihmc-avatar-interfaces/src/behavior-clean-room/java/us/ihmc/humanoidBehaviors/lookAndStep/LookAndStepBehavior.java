@@ -6,7 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.RemoteEnvironmentMapInterface;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -123,7 +124,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void onPlanStateEntry()
    {
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestPlanarRegionsList();
+      PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
@@ -157,7 +158,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootPose = rightSolePose;
       }
 
-      helper.publishToUI(GoalForUI, goalPoseBetweenFeet);
+      helper.publishToUI(GoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
@@ -254,7 +255,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                                                                                 ExecutionMode.OVERRIDE),
                                                     robot.pollHumanoidRobotState(),
                                                     swingOverPlanarRegions,
-                                                    environmentMap.getLatestPlanarRegionsList());
+                                                    environmentMap.getLatestCombinedRegionsList());
    }
 
    private boolean transitionFromStep(double timeInState)
@@ -290,7 +291,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> RePlan = topic("RePlan");
       public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<FramePose3D> GoalForUI = topic("GoalForUI");
+      public static final Topic<Point3D> GoalForUI = topic("GoalForUI");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");

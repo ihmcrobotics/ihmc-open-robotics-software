@@ -29,7 +29,7 @@ public class SimulatedREAModule
    private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
    private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
-   private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
+   private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
@@ -61,7 +61,7 @@ public class SimulatedREAModule
                          PlanarRegionsListMessage.class,
                          null,
                          ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
-                         this::acceptAdditionalRegionList);
+                         this::acceptSupportRegionsList);
 
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
@@ -103,7 +103,7 @@ public class SimulatedREAModule
 
       synchronized (this)
       {
-         combinedRegionsList.addAll(additionalPlanarRegions.values());
+         combinedRegionsList.addAll(supportRegions.values());
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
@@ -111,7 +111,7 @@ public class SimulatedREAModule
       }
    }
 
-   private void acceptAdditionalRegionList(PlanarRegionsListMessage message)
+   private void acceptSupportRegionsList(PlanarRegionsListMessage message)
    {
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
 
@@ -125,12 +125,12 @@ public class SimulatedREAModule
             }
             else if (region.isEmpty())
             {
-               additionalPlanarRegions.remove(region.getRegionId());
+               supportRegions.remove(region.getRegionId());
             }
             else
             {
                CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(region);
-               additionalPlanarRegions.put(region.getRegionId(), region);
+               supportRegions.put(region.getRegionId(), region);
             }
          }
       }

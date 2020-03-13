@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -22,8 +21,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.StepThroughAlgorithm;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop

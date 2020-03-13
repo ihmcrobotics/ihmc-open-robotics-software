@@ -6,6 +6,7 @@ import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -14,7 +15,9 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 
@@ -30,7 +33,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
    private FootstepPlanGraphic footstepPlanGraphic;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
-   private PoseGraphic goalGraphic;
+   private PositionGraphic goalGraphic;
 
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
@@ -50,8 +53,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       getChildren().add(livePlanarRegionsGraphic);
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
-      goalGraphic = new PoseGraphic();
-      behaviorMessager.registerTopicListener(GoalForUI, goalGraphic::setPose);
+      goalGraphic = new PositionGraphic(Color.YELLOW, 0.05);
+      behaviorMessager.registerTopicListener(GoalForUI, position -> Platform.runLater(() -> goalGraphic.setPosition(position)));
 
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
@@ -79,11 +82,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       {
          livePlanarRegionsGraphic.clear();
          footstepPlanGraphic.clear();
-         getChildren().remove(goalGraphic);
+         Platform.runLater(() -> getChildren().remove(goalGraphic.getNode()));
       }
       else
       {
-         getChildren().add(goalGraphic);
+         Platform.runLater(() -> getChildren().add(goalGraphic.getNode()));
       }
    }
 
