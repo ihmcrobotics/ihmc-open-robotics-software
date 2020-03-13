@@ -110,7 +110,10 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
       stabilityEvaluator.reset();
 
       if (edgeVisualizer != null)
+      {
+         edgeVisualizer.visualize(false);
          edgeVisualizer.reset();
+      }
    }
 
    @Override
