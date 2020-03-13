@@ -131,7 +131,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       double midFeetZ = initialPoseBetweenFeet.getZ();
 
-      FramePose3D goalPoseBetweenFeet = new FramePose3D(initialPoseBetweenFeet);
+      FramePose3D goalPoseBetweenFeet = new FramePose3D();
       goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
       goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
       goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
@@ -168,6 +168,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
+      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
 
