@@ -9,21 +9,23 @@ import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.robotics.physics.MultiBodySystemStateReader;
-import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
-import us.ihmc.robotics.physics.PhysicsEngine;
-import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.physics.*;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -41,7 +43,8 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
    public void testZeroTorque(TestInfo testInfo) throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
-      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
+      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
 
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
       // Switch to zero-torque controller.
@@ -51,20 +54,24 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
       Vector3D gravity = new Vector3D(scsRobot.getGravityX(), scsRobot.getGravityY(), scsRobot.getGravityZ());
       PhysicsEngine customPhysicsEngine = setupCustomPhysicsEngine(drcSimulationTestHelper);
+      customPhysicsEngine.addEnvironmentCollidables(toCollidables(-1, -1, testEnvironment));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      simulate(10.0, customPhysicsEngine, scs, gravity);
+      simulate(2.5, customPhysicsEngine, scs, gravity);
+
+      ThreadTools.sleepForever();
    }
 
    private void simulate(double duration, PhysicsEngine physicsEngine, SimulationConstructionSet scs, Vector3DReadOnly gravity)
    {
+      double dt = scs.getDT();
       double initialTime = scs.getTime();
 
       while ((scs.getTime() - initialTime) < duration)
       {
          Stream.of(scs.getRobots()).forEach(Robot::doControllers);
-         physicsEngine.simulate(scs.getDT(), gravity);
-         Stream.of(scs.getRobots()).forEach(robot -> robot.getYoTime().add(scs.getDT()));
+         physicsEngine.simulate(dt, gravity);
+         Stream.of(scs.getRobots()).forEach(robot -> robot.getYoTime().add(dt));
          scs.tickAndUpdate();
       }
    }
@@ -83,6 +90,23 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
       physicsEngine.addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
       return physicsEngine;
+   }
+
+   private static List<Collidable> toCollidables(int collisionMask, int collisionGroup, CommonAvatarEnvironmentInterface environment)
+   {
+      return toCollidables(collisionMask, collisionGroup, environment.getTerrainObject3D());
+   }
+
+   private static List<Collidable> toCollidables(int collisionMask, int collisionGroup, TerrainObject3D terrainObject3D)
+   {
+      List<Collidable> collidables = new ArrayList<>();
+
+      for (Shape3DReadOnly terrainShape : terrainObject3D.getTerrainCollisionShapes())
+      {
+         collidables.add(new Collidable(null, collisionMask, collisionGroup, terrainShape, ReferenceFrame.getWorldFrame()));
+      }
+
+      return collidables;
    }
 
    private MultiBodySystemStateReader createPhysicsOutputWriter(HumanoidFloatingRootJointRobot scsRobot)
@@ -151,17 +175,19 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
    {
       return new MultiBodySystemStateWriter()
       {
+         private FloatingJointBasics rootJoint;
 
          @Override
          public void write()
          {
-            // TODO Auto-generated method stub
+            rootJoint.getJointPose().setPosition(0.0, 0.0, 1.5);
          }
 
          @Override
          public void setMultiBodySystem(MultiBodySystemBasics multiBodySystem)
          {
-            // TODO Auto-generated method stub
+            rootJoint = multiBodySystem.getAllJoints().stream().filter(FloatingJointBasics.class::isInstance)
+                                                           .map(FloatingJointBasics.class::cast).findFirst().get();
          }
       };
    }

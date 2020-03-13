@@ -1,6 +1,7 @@
 package us.ihmc.robotics.physics;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -45,12 +46,10 @@ public class PhysicsEngine
       robotList.add(robot);
    }
 
-   public void initialize()
+   public boolean initialize()
    {
       if (!initialize)
-         return;
-
-      robotList.forEach(PhysicsEngineRobotData::initialize);
+         return false;
 
       for (int i = 0; i < robotList.size(); i++)
       {
@@ -59,10 +58,14 @@ public class PhysicsEngine
          physicsOutputReaders.get(i).read();
       }
       initialize = false;
+      return true;
    }
 
    public void simulate(double dt, Vector3DReadOnly gravity)
    {
+      if (initialize())
+         return;
+
       for (PhysicsEngineRobotData robot : robotList)
       {
          robot.updateCollidableBoundingBoxes();
@@ -80,8 +83,13 @@ public class PhysicsEngine
       for (int i = 0; i < robotList.size(); i++)
       {
          PhysicsEngineRobotData robot = robotList.get(i);
-         robot.initialize();
+         robot.updateFrames();
          physicsOutputReaders.get(i).read();
       }
+   }
+
+   public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
+   {
+      environmentCollidables.addAll(collidables);
    }
 }
