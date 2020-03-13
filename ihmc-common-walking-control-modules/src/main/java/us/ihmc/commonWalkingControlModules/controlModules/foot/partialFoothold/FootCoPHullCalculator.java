@@ -49,7 +49,7 @@ public class FootCoPHullCalculator
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
-      this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
+      this.occupancyGrid = new OccupancyGrid(namePrefix + "CoPHull", soleFrame, registry);
 
       occupancyGrid.setCellXSize(lengthResolution);
       occupancyGrid.setCellYSize(widthResolution);
@@ -63,7 +63,7 @@ public class FootCoPHullCalculator
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
 
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix + "Hull", occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix + "Hull", occupancyGrid, 50, registry, null);
       else
          visualizer = null;
 

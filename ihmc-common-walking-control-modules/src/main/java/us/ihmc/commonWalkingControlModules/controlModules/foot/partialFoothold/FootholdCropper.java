@@ -58,7 +58,7 @@ public class FootholdCropper
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      verifier = new CropVerifier(namePrefix, contactableFoot.getSoleFrame(), 0.02, 0.02, rotationParameters, registry);
+      verifier = new CropVerifier(namePrefix, contactableFoot.getSoleFrame(), 0.001, 0.001, rotationParameters, registry, yoGraphicsListRegistry);
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygonInWorld = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygonInWorld", "", ReferenceFrame.getWorldFrame(), 20, registry);
@@ -66,8 +66,8 @@ public class FootholdCropper
 
       shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
-      double resolution = 0.05;
-      footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, soleFrame, resolution, resolution, rotationParameters, null, registry);
+      double resolution = 0.005;
+      footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, soleFrame, resolution, resolution, rotationParameters, yoGraphicsListRegistry, registry);
       footCoPHullCropper = new FootCoPHullCalculator(namePrefix, soleFrame, resolution, resolution, null, registry);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
@@ -107,6 +107,7 @@ public class FootholdCropper
 
       footCoPHullCropper.reset();
       footCoPOccupancyGrid.reset();
+      verifier.reset();
    }
 
    public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
@@ -138,7 +139,7 @@ public class FootholdCropper
          shouldShrinkFoothold.set(verifier.verifyFootholdCrop(desiredCoP, sideOfFootToCrop.getEnumValue(), lineOfRotation));
 
          if (shouldShrinkFoothold.getBooleanValue())
-            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue().getOppositeSide());
+            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
       }
       else
       {

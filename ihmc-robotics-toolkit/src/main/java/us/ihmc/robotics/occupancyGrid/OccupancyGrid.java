@@ -46,7 +46,7 @@ public class OccupancyGrid
       cellXSize = new YoDouble(namePrefix + "CellXSize", registry);
       cellYSize = new YoDouble(namePrefix + "CellYSize", registry);
       cellArea = new YoDouble(namePrefix + "CellArea", registry);
-      numberOfOccupiedCells = new YoInteger(name + "NumberOfOccupiedCells", registry);
+      numberOfOccupiedCells = new YoInteger(namePrefix + "NumberOfOccupiedCells", registry);
 
       thresholdForCellActivation = new YoDouble(namePrefix + "ThresholdForCellOccupancy", registry);
       decayRate = new YoDouble(namePrefix + "CellOccupancyDecayRate", registry);

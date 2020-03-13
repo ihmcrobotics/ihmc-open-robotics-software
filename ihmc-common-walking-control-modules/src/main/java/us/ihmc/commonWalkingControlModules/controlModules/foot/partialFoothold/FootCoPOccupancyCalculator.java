@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
@@ -23,11 +24,14 @@ import java.util.List;
 public class FootCoPOccupancyCalculator
 {
    private static final double defaultThresholdForCellActivation = 1.0;
-   private static final double defaultDecayRate = 0.0;
+   private static final double defaultDecayRate = 0.02;
 
    private final ReferenceFrame soleFrame;
 
-   private final SideDependentList<YoInteger> numberOfOccupiedCells;
+   private final YoBoolean leftSideIsOccupied;
+   private final YoBoolean rightSideIsOccupied;
+   private final YoInteger numberOfOccupiedCellsOnLeft;
+   private final YoInteger numberOfOccupiedCellsOnRight;
    private final IntegerProvider thresholdForCoPRegionOccupancy;
    private final DoubleProvider distanceFromLineOfRotationToComputeCoPOccupancy;
 
@@ -53,7 +57,7 @@ public class FootCoPOccupancyCalculator
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "OccupancySideOfFootToCrop", registry, RobotSide.class, true);
-      this.occupancyGrid = new OccupancyGrid(namePrefix, soleFrame, registry);
+      this.occupancyGrid = new OccupancyGrid(namePrefix + "CoPOccupancy", soleFrame, registry);
 
       occupancyGrid.setCellXSize(lengthResolution);
       occupancyGrid.setCellYSize(widthResoultion);
@@ -63,13 +67,14 @@ public class FootCoPOccupancyCalculator
       thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
       distanceFromLineOfRotationToComputeCoPOccupancy = explorationParameters.getDistanceFromLineOfRotationToComputeCoPOccupancy();
 
-      YoInteger numberOfCellsOccupiedOnRightSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
-      YoInteger numberOfCellsOccupiedOnLeftSideOfLine = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);
+      numberOfOccupiedCellsOnRight = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnRightSideOfLine", registry);
+      numberOfOccupiedCellsOnLeft = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnLeftSideOfLine", registry);
 
-      numberOfOccupiedCells = new SideDependentList<>(numberOfCellsOccupiedOnLeftSideOfLine, numberOfCellsOccupiedOnRightSideOfLine);
+      leftSideIsOccupied = new YoBoolean(namePrefix + "FootLeftSideOfLineIsOccupied", registry);
+      rightSideIsOccupied = new YoBoolean(namePrefix + "FootRightSideOfLineIsOccupied", registry);
 
       if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix + "Occupancy", occupancyGrid, 50, 25, registry, yoGraphicsListRegistry);
+         visualizer = new OccupancyGridVisualizer(namePrefix + "Occupancy", occupancyGrid, 50, YoAppearance.Red(), registry, yoGraphicsListRegistry);
       else
          visualizer = null;
 
@@ -83,22 +88,21 @@ public class FootCoPOccupancyCalculator
 
    public RobotSide computeSideOfFootholdToCrop(FrameLine2DReadOnly lineOfRotation)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         numberOfOccupiedCells.get(robotSide)
-                              .set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
-                                                                            robotSide,
-                                                                            distanceFromLineOfRotationToComputeCoPOccupancy.getValue()));
-      }
+      numberOfOccupiedCellsOnLeft.set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
+                                                                               RobotSide.LEFT,
+                                                                               distanceFromLineOfRotationToComputeCoPOccupancy.getValue()));
+      numberOfOccupiedCellsOnRight.set(computeNumberOfCellsOccupiedOnSideOfLine(lineOfRotation,
+                                                                                RobotSide.RIGHT,
+                                                                                distanceFromLineOfRotationToComputeCoPOccupancy.getValue()));
 
-      boolean leftOccupied = numberOfOccupiedCells.get(RobotSide.LEFT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue();
-      boolean rightOccupied = numberOfOccupiedCells.get(RobotSide.RIGHT).getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue();
+      leftSideIsOccupied.set(numberOfOccupiedCellsOnLeft.getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue());
+      rightSideIsOccupied.set(numberOfOccupiedCellsOnRight.getIntegerValue() >= thresholdForCoPRegionOccupancy.getValue());
 
-      if (leftOccupied && rightOccupied)
+      if (leftSideIsOccupied.getBooleanValue() && rightSideIsOccupied.getBooleanValue())
          sideOfFootToCrop.set(null);
-      else if (leftOccupied)
+      else if (leftSideIsOccupied.getBooleanValue())
          sideOfFootToCrop.set(RobotSide.RIGHT);
-      else if (rightOccupied)
+      else if (rightSideIsOccupied.getBooleanValue())
          sideOfFootToCrop.set(RobotSide.LEFT);
       else
          sideOfFootToCrop.set(null);
@@ -147,6 +151,9 @@ public class FootCoPOccupancyCalculator
 
    public void reset()
    {
+      leftSideIsOccupied.set(false);
+      rightSideIsOccupied.set(false);
+
       occupancyGrid.reset();
       sideOfFootToCrop.set(null);
       if (visualizer != null)

@@ -74,10 +74,39 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
 
       setupTest(environment);
 
+      double width = 0.25;
+
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.05, 0.15, topHeight);
+      step.getLocation().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
+
+      drcSimulationTestHelper.publishToController(message);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      assertTrue(success);
+   }
+
+   @Test
+   public void testWalkingOverBlock() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      double blockWidth = 0.3;
+      double blockDistanceFromOrigin = 0.2;
+      double topHeight = 0.1;
+      SimpleBlockEnvironment environment = new SimpleBlockEnvironment(blockDistanceFromOrigin + blockWidth * 0.5, blockWidth, 0.4, topHeight);
+
+      setupTest(environment);
+
+      double width = 0.25;
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage step = message.getFootstepDataList().add();
+      step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
+      step.getLocation().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
+
+      FootstepDataMessage step2 = message.getFootstepDataList().add();
+      step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      step2.getLocation().set(blockDistanceFromOrigin + 0.3, -width / 2, topHeight);
 
       drcSimulationTestHelper.publishToController(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -132,15 +161,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       damping_r_akx.set(1.0);
       damping_r_aky.set(1.0);
 
-
-      // setup camera
-      Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
-      Point3D cameraPosition = new Point3D(-10.0, 0.0, 1.0);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-
-
-      ThreadTools.sleep(1000);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
    }
 
 
