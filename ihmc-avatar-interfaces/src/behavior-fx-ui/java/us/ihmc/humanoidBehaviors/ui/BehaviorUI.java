@@ -93,6 +93,7 @@ public class BehaviorUI
          Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
          behaviorSelector.getItems().add("None");
+         behaviorSelector.setValue("None");
 
          for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
