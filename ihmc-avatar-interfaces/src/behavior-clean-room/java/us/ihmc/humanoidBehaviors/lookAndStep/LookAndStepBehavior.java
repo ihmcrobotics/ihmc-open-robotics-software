@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
@@ -48,7 +49,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    public enum LookAndStepBehaviorState
    {
-      PERCEPT, PLAN, USER, STEP
+      PERCEPT, PLAN, USER, STEP, PLAN_FAILED
    }
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
@@ -68,6 +69,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final TypedNotification<FootstepPlannerOutput> footstepPlannerOutputNotification = new TypedNotification<>();
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
+   private final Stopwatch planFailedWait = new Stopwatch();
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -89,12 +91,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
       stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
       stateMachineFactory.setDoAction(PLAN, this::pollInterrupts);
-      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(USER, PERCEPT, STEP), this::transitionFromPlan);
+      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(USER, STEP, PLAN_FAILED), this::transitionFromPlan);
       stateMachineFactory.setDoAction(USER, this::pollInterrupts);
       stateMachineFactory.addTransition(USER, Lists.newArrayList(STEP, PERCEPT), this::transitionFromUser);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
       stateMachineFactory.setDoAction(STEP, this::pollInterrupts);
       stateMachineFactory.addTransition(STEP, PERCEPT, this::transitionFromStep);
+      stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);
+      stateMachineFactory.setDoAction(PLAN_FAILED, this::pollInterrupts);
+      stateMachineFactory.addTransition(PLAN_FAILED, PERCEPT, this::transitionFromPlanFailed);
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
       stateMachine = stateMachineFactory.getFactory().build(PERCEPT);
 
@@ -118,7 +123,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean transitionFromPercept(double timeInState)
    {
-      return !arePlanarRegionsExpired();
+      return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
    }
 
    private void onPlanStateEntry()
@@ -214,11 +219,21 @@ public class LookAndStepBehavior implements BehaviorInterface
          }
          else
          {
-            return PERCEPT;
+            return PLAN_FAILED;
          }
       }
 
       return null;
+   }
+
+   private void onPlanFailedStateEntry()
+   {
+      planFailedWait.start();
+   }
+
+   private boolean transitionFromPlanFailed(double timeInState)
+   {
+      return planFailedWait.lapElapsed() > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
    }
 
    private LookAndStepBehaviorState transitionFromUser(double timeInState)
