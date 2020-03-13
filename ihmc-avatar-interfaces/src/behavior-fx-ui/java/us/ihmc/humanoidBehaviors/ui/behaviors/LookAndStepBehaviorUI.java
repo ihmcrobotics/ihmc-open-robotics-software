@@ -61,6 +61,15 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
+
+//      try
+//      {
+//         Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+//      }
+//      catch (JoystickNotFoundException e)
+//      {
+//         e.printStackTrace();
+//      }
    }
 
    @Override
