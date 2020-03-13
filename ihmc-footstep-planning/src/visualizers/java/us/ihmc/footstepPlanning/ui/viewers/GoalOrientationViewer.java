@@ -17,6 +17,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -54,12 +55,12 @@ public class GoalOrientationViewer extends AnimationTimer
    private final AtomicReference<Boolean> goalPositionEditModeEnabled;
 
    private final AtomicReference<Point3D> lowLevelGoalPositionReference;
-   private final AtomicReference<Point3D> goalPositionReference;
-
    private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
-   private final AtomicReference<Quaternion> goalQuaternionReference;
 
-   private final PoseReferenceFrame goalFrame = new PoseReferenceFrame("goalFrame", ReferenceFrame.getWorldFrame());
+   private final AtomicReference<Point3D> goalMidFootPosition;
+   private final AtomicReference<Quaternion> goalMidFootOrientation;
+   private final AtomicReference<Pose3DReadOnly> leftFootGoalPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
 
    public GoalOrientationViewer(Messager messager)
    {
@@ -73,32 +74,17 @@ public class GoalOrientationViewer extends AnimationTimer
       goalPositionEditModeEnabled = messager.createInput(GoalPositionEditModeEnabled, false);
 
       lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
-      goalPositionReference = messager.createInput(GoalMidFootPosition, new Point3D());
-
       lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
-      goalQuaternionReference = messager.createInput(GoalMidFootOrientation, new Quaternion());
+
+      goalMidFootPosition = messager.createInput(GoalMidFootPosition, new Point3D());
+      goalMidFootOrientation = messager.createInput(GoalMidFootOrientation, new Quaternion());
+      leftFootGoalPose = messager.createInput(LeftFootGoalPose);
+      rightFootGoalPose = messager.createInput(RightFootGoalPose);
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.parameters = parameters;
-   }
-
-   private void updateGoalFrame(Point3D goalPosition)
-   {
-      goalFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, goalPosition));
-      goalFrame.setOrientationAndUpdate(goalQuaternionReference.get());
-
-      if (footGraphics.isEmpty())
-         return;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         double width = parameters.getIdealFootstepWidth() / 2.0;
-         FramePoint3D footPose = new FramePoint3D(goalFrame, 0.0, robotSide.negateIfRightSide(width), 0.0);
-         footPose.changeFrame(worldFrame);
-         setFootPose(footGraphics.get(robotSide), footPose, goalQuaternionReference.get().getYaw());
-      }
    }
 
    @Override
@@ -123,10 +109,10 @@ public class GoalOrientationViewer extends AnimationTimer
          }
       }
 
-      Point3D goalPosition = goalPositionReference.get();
+      Point3D goalPosition = goalMidFootPosition.get();
       if (goalPosition != null)
       {
-         setArrowPose(goalArrow, goalPosition, goalQuaternionReference.get().getYaw());
+         setArrowPose(goalArrow, goalPosition, goalMidFootOrientation.get().getYaw());
       }
 
       Point3D lowLevelGoalPosition = lowLevelGoalPositionReference.get();
@@ -135,9 +121,17 @@ public class GoalOrientationViewer extends AnimationTimer
          setArrowPose(lowLevelGoalArrow, lowLevelGoalPosition, lowLevelGoalQuaternionReference.get().getYaw());
       }
 
-      if (goalPosition != null)
+      if (!footGraphics.isEmpty())
       {
-         updateGoalFrame(goalPosition);
+         if (leftFootGoalPose.get() != null)
+         {
+            setFootPose(footGraphics.get(RobotSide.LEFT), leftFootGoalPose.getAndSet(null));
+         }
+
+         if (rightFootGoalPose.get() != null)
+         {
+            setFootPose(footGraphics.get(RobotSide.RIGHT), rightFootGoalPose.getAndSet(null));
+         }
       }
    }
 
@@ -149,12 +143,12 @@ public class GoalOrientationViewer extends AnimationTimer
       arrow.setRotate(Math.toDegrees(orientationRadians));
    }
 
-   private static void setFootPose(FootGraphic foot, Point3DReadOnly position, double orienationInRadians)
+   private static void setFootPose(FootGraphic foot, Pose3DReadOnly footPose)
    {
-      foot.setTranslateX(position.getX());
-      foot.setTranslateY(position.getY());
-      foot.setTranslateZ(position.getZ());
-      foot.setRotate(Math.toDegrees(orienationInRadians));
+      foot.setTranslateX(footPose.getX());
+      foot.setTranslateY(footPose.getY());
+      foot.setTranslateZ(footPose.getZ());
+      foot.setRotate(Math.toDegrees(footPose.getYaw()));
    }
 
    public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
