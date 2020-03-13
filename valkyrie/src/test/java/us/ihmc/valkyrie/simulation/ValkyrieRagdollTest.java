@@ -6,7 +6,10 @@ import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.HumanoidRagdollTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.ValkyrieSimulationCollisionModel;
 
 public class ValkyrieRagdollTest extends HumanoidRagdollTest
 {
@@ -14,6 +17,14 @@ public class ValkyrieRagdollTest extends HumanoidRagdollTest
    public DRCRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS);
+   }
+
+   @Override
+   public RobotCollisionModel getRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getRobotModel().getJointMap());
+      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+      return collisionModel;
    }
 
    @Test
