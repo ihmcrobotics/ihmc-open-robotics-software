@@ -70,6 +70,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
    private final Stopwatch planFailedWait = new Stopwatch();
+   private FramePose3D goalPoseBetweenFeet = null;
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -137,10 +138,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       double midFeetZ = initialPoseBetweenFeet.getZ();
 
-      FramePose3D goalPoseBetweenFeet = new FramePose3D();
-      goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
-      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength), 0.0, 0.0);
-      goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+      if (goalPoseBetweenFeet == null)
+      {
+         goalPoseBetweenFeet = new FramePose3D();
+         goalPoseBetweenFeet.setToZero(latestHumanoidRobotState.getPelvisFrame());
+         goalPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+      }
+
+      double trailingBy = goalPoseBetweenFeet.getX() - initialPoseBetweenFeet.getX();
+
+      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength) - trailingBy, 0.0, 0.0);
       goalPoseBetweenFeet.setZ(midFeetZ);
 
       RobotSide initialStanceFootSide = null;
