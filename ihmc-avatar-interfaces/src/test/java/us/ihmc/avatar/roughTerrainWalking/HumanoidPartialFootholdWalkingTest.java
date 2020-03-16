@@ -63,6 +63,33 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+
+   @Test
+   public void testSteppingOntoInside() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      double stepWidth = 0.25;
+
+      double blockWidth = 0.4;
+      double blockDepth = 0.5;
+      double blockDistanceFromOrigin = 0.25;
+      double blockY = 0.5 * (stepWidth - blockWidth);
+      double topHeight = 0.1;
+      SimpleBlockEnvironment environment = new SimpleBlockEnvironment(blockDistanceFromOrigin + 0.5 * blockDepth, blockY,  blockDepth, blockWidth, topHeight);
+
+      setupTest(environment);
+
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage step = message.getFootstepDataList().add();
+      step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
+      step.getLocation().set(blockDistanceFromOrigin + 0.15, stepWidth / 2, topHeight);
+
+      drcSimulationTestHelper.publishToController(message);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      assertTrue(success);
+   }
+
    @Test
    public void testSteppingOntoBlock() throws SimulationExceededMaximumTimeException
    {
@@ -167,15 +194,26 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
 
    public class SimpleBlockEnvironment extends PlanarRegionEnvironmentInterface
    {
-      public SimpleBlockEnvironment(double blockPosition, double blockWidth, double blockLength, double blockHeight)
+      public SimpleBlockEnvironment(double blockPosition, double blockDepth, double blockWidth, double blockHeight)
+      {
+         this(blockPosition, 0.0, blockDepth, blockWidth, blockHeight);
+      }
+
+      public SimpleBlockEnvironment(double blockXPosition, double blockYPosition, double blockDepth, double blockWidth, double blockHeight)
+      {
+         this(blockXPosition, blockYPosition, 0.0, blockDepth, blockWidth, blockHeight);
+      }
+
+      public SimpleBlockEnvironment(double blockXPosition, double blockYPosition, double blockYaw, double blockDepth, double blockWidth, double blockHeight)
       {
          // first ground plane
          generator.identity();
          generator.addRectangle(10.0, 10.0);
 
-         generator.translate(blockPosition, 0.0, 0.0);
+         generator.translate(blockXPosition, blockYPosition, 0.0);
+         generator.rotateEuler(new Vector3D(0.0, 0.0, blockYaw));
 
-         generator.addCubeReferencedAtBottomMiddle(blockWidth, blockLength, blockHeight);
+         generator.addCubeReferencedAtBottomMiddle(blockDepth, blockWidth, blockHeight);
 
          addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
