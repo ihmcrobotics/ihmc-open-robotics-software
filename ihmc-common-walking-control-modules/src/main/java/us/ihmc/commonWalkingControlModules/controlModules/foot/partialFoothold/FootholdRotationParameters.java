@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import org.apache.commons.math3.ml.clustering.DoublePoint;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -31,6 +32,7 @@ public class FootholdRotationParameters
 
    private final DoubleProvider minimumAreaForCropping;
    private final IntegerProvider shrinkMaxLimit;
+   private final DoubleProvider distanceFromRotationToCrop;
 
    public FootholdRotationParameters(YoVariableRegistry registry)
    {
@@ -62,7 +64,8 @@ public class FootholdRotationParameters
       thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 3);
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.001);
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
-      shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 3);
+      shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 1);
+      distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.01);
    }
 
    public DoubleProvider getGeometricDetectionAngleThreshold()
@@ -153,5 +156,10 @@ public class FootholdRotationParameters
    public IntegerProvider getNumberOfDesiredCopsOnCropSide()
    {
       return numberOfDesiredCopsOnCropSide;
+   }
+
+   public DoubleProvider getDistanceFromRotationToCrop()
+   {
+      return distanceFromRotationToCrop;
    }
 }

@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -32,6 +34,7 @@ public class FootholdCropper
    private final FrameConvexPolygon2D controllerFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D controllerFootPolygonInWorld = new FrameConvexPolygon2D();
 
+   private final DoubleProvider distanceFromRotationToCrop;
    private final DoubleProvider minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
 
@@ -96,6 +99,7 @@ public class FootholdCropper
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
 
       minAreaToConsider = rotationParameters.getMinimumAreaForCropping();
+      distanceFromRotationToCrop = rotationParameters.getDistanceFromRotationToCrop();
 
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       applyPartialFootholds = new YoBoolean(namePrefix + "ApplyPartialFootholds", registry);
@@ -163,6 +167,8 @@ public class FootholdCropper
    }
 
    private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+   private final FrameLine2D cropLine = new FrameLine2D();
+   private final FrameVector2D shiftVector = new FrameVector2D();
 
    public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)
    {
@@ -182,7 +188,8 @@ public class FootholdCropper
          {
             // FIXME this is a work around for a bug in the cut polygon with line class that doens't work with yo frame convex polygons.
             tempPolygon.setIncludingFrame(shrunkenFootPolygon);
-            convexPolygonTools.cutPolygonWithLine(lineOfRotation, tempPolygon, sideOfFootToCrop.getEnumValue());
+            shiftLine(lineOfRotation, cropLine, sideOfFootToCrop.getEnumValue().getOppositeSide(), distanceFromRotationToCrop.getValue());
+            convexPolygonTools.cutPolygonWithLine(cropLine, tempPolygon, sideOfFootToCrop.getEnumValue());
             shrunkenFootPolygon.set(tempPolygon);
          }
       }
@@ -191,6 +198,23 @@ public class FootholdCropper
          shouldShrinkFoothold.set(false);
          sideOfFootToCrop.set(null);
       }
+   }
+
+   private void shiftLine(FrameLine2DReadOnly lineToShift, FrameLine2DBasics shiftedLineToPack, RobotSide sideToShift, double distanceToShift)
+   {
+      double shiftingVectorX = -lineToShift.getDirectionY();
+      double shiftingVectorY = lineToShift.getDirectionX();
+      if (sideToShift == RobotSide.RIGHT)
+      {
+         shiftingVectorX = -shiftingVectorX;
+         shiftingVectorY = -shiftingVectorY;
+      }
+
+      shiftingVectorX *= distanceToShift;
+      shiftingVectorY *= distanceToShift;
+
+      shiftedLineToPack.setIncludingFrame(lineToShift);
+      shiftedLineToPack.getPoint().add(shiftingVectorX, shiftingVectorY);
    }
 
    public boolean shouldShrinkFoothold()
