@@ -71,7 +71,6 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
                                                               lineOfRotationInSole,
                                                               rotationParameters.getStableRotationDirectionThreshold(),
                                                               rotationParameters.getStableRotationPositionThreshold(),
-                                                              rotationParameters.getMinimumTicksForEstimate(),
                                                               rotationParameters.getStableEdgeWindowSize(),
                                                               dt,
                                                               registry);

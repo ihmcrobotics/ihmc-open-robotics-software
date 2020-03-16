@@ -67,6 +67,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    @Test
    public void testSteppingOntoInside() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setKeepSCSUp(true);
       double stepWidth = 0.25;
 

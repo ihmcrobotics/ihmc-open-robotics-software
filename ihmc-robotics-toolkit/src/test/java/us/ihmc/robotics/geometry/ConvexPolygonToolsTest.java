@@ -1,10 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertNotNull;
-import static us.ihmc.robotics.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -24,13 +21,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -41,6 +38,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class ConvexPolygonToolsTest
 {
@@ -1227,6 +1227,73 @@ public class ConvexPolygonToolsTest
 
       // assert equal
       assertTrue(croppedResult.geometricallyEquals(aboveYAxisRectangle, 1e-7));
+   }
+
+   @Test
+   public void testCutTickyCase1()
+   {
+      // create simple convex polygon
+      ConvexPolygon2D originalPolygon = new ConvexPolygon2D();
+      originalPolygon.addVertex(0.11, -0.043);
+      originalPolygon.addVertex(-0.11, -0.055);
+      originalPolygon.addVertex(-0.110,  0.055);
+      originalPolygon.addVertex(0.11, 0.043);
+      originalPolygon.update();
+
+      ConvexPolygon2DBasics cutPolygon = new ConvexPolygon2D(originalPolygon);
+
+      // create line and up direction
+      Line2D line = new Line2D();
+      line.setPoint(-0.05179904195117536, -0.008439905252682183);
+      line.setDirection(-0.9810546246114557, -0.11996474862287523);
+
+      // cut it above a line
+      ConvexPolygonTools tools = new ConvexPolygonTools();
+      tools.cutPolygonWithLine(line, cutPolygon, RobotSide.RIGHT);
+
+      List<Point2DReadOnly> clockwisePoints = new ArrayList<>();
+      originalPolygon.getPointsInClockwiseOrder(0, 3, clockwisePoints);
+
+      Point2D intersection01 = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), clockwisePoints.get(0), clockwisePoints.get(1));
+      Point2D intersection12 = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), clockwisePoints.get(1), clockwisePoints.get(2));
+      Point2D intersection23 = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), clockwisePoints.get(2), clockwisePoints.get(3));
+      Point2D intersection30 = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line.getPoint(), line.getDirection(), clockwisePoints.get(3), clockwisePoints.get(0));
+
+      assertNull(intersection01);
+      assertNotNull(intersection12);
+      assertNull(intersection23);
+      assertNotNull(intersection30);
+
+      ConvexPolygon2D expectedPolygon = new ConvexPolygon2D();
+      expectedPolygon.addVertex(0.11, -0.043);
+      expectedPolygon.addVertex(-0.11, -0.055);
+      expectedPolygon.addVertex(intersection12);
+      expectedPolygon.addVertex(intersection30);
+      expectedPolygon.update();
+
+      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedPolygon, cutPolygon, 1e-8);
+
+      // create simple convex polygon
+      cutPolygon = new YoFrameConvexPolygon2D("Test", ReferenceFrame.getWorldFrame(), 20, new YoVariableRegistry("test"));
+
+      Point2DReadOnly point1 = new Point2D(0.111, 0.222);
+      Point2DReadOnly point2 = new Point2D(0.222, 0.333);
+      cutPolygon.addVertex(point1);
+      cutPolygon.addVertex(point2);
+      cutPolygon.update();
+      assertEquals(2, cutPolygon.getNumberOfVertices());
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(point1, cutPolygon.getVertex(0), 1e-8);
+      cutPolygon.removeVertex(0);
+      cutPolygon.update();
+      assertEquals(1, cutPolygon.getNumberOfVertices());
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(point2, cutPolygon.getVertex(0), 1e-8);
+
+      cutPolygon.set(originalPolygon);
+      cutPolygon.update();
+
+      tools.cutPolygonWithLine(line, cutPolygon, RobotSide.RIGHT);
+
+      EuclidGeometryTestTools.assertConvexPolygon2DEquals(expectedPolygon, cutPolygon, 1e-8);
    }
 
    @Test

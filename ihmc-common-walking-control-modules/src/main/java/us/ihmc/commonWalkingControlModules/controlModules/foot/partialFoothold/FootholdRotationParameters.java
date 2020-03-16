@@ -17,7 +17,6 @@ public class FootholdRotationParameters
    private final DoubleProvider angularVelocityFilterBreakFrequency;
    private final DoubleProvider stableRotationDirectionThreshold;
    private final DoubleProvider stableRotationPositionThreshold;
-   private final IntegerProvider minimumTicksForEstimate;
    private final IntegerProvider stableEdgeWindowSize;
    private final DoubleProvider perpendicularCoPError;
    private final IntegerProvider numberOfDesiredCopsOnCropSide;
@@ -42,9 +41,8 @@ public class FootholdRotationParameters
       copHistoryAlphaFilter = new DoubleParameter(namePrefix + "CoPHistoryAlphaFilter", registry, 0.0);
 
       namePrefix = "Verification_";
-      stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThreshold", registry, 1.5);
+      stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThreshold", registry, 10.0);
       stableRotationPositionThreshold = new DoubleParameter(namePrefix + "StableRotationPositionThreshold", registry, 0.9);
-      minimumTicksForEstimate = new IntegerParameter(namePrefix + "MinimumTicksForRotationEstimate", registry, 3);
       stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
       perpendicularCoPError = new DoubleParameter(namePrefix + "PerpendicularCoPErrorThreshold", registry, 0.005);
       numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
@@ -58,11 +56,11 @@ public class FootholdRotationParameters
       omegaThresholdForEstimation = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 1.5);
       decayBreakFrequency = new DoubleParameter(namePrefix + "rotationAngleDecayBreakFrequency", registry, 1.0);
       rotationAngleThreshold = new DoubleParameter(namePrefix + "rotationAngleThreshold", registry, 0.05);
-      velocityEdgeFilterBreakFrequency = new DoubleParameter(namePrefix + "velocityEdgeFilterBreakFrequency", registry, 1.0);
+      velocityEdgeFilterBreakFrequency = new DoubleParameter(namePrefix + "velocityEdgeFilterBreakFrequency", registry, 20.0);
 
       namePrefix = "Cropping_";
-      thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 5);
-      distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.025);
+      thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 3);
+      distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.001);
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
       shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 6);
    }
@@ -100,11 +98,6 @@ public class FootholdRotationParameters
    public DoubleProvider getStableRotationPositionThreshold()
    {
       return stableRotationPositionThreshold;
-   }
-
-   public IntegerProvider getMinimumTicksForEstimate()
-   {
-      return minimumTicksForEstimate;
    }
 
    public IntegerProvider getStableEdgeWindowSize()

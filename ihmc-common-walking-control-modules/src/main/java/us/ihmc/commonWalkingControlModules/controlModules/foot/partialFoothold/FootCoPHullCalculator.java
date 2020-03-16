@@ -45,12 +45,13 @@ public class FootCoPHullCalculator
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
 
-
       areaRatioThreshold = new YoDouble("areaRatioThreshold", registry);
       areaRatioThreshold.set(defaultAreaRatioThreshold);
 
       areaOnRightSideOfLine = new YoDouble(namePrefix + "AreaOnRightSideOfLine", registry);
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
+
+      reset();
 
       parentRegistry.addChild(registry);
    }
@@ -85,5 +86,7 @@ public class FootCoPHullCalculator
    public void reset()
    {
       sideOfFootToCrop.set(null);
+      areaOnLeftSideOfLine.setToNaN();
+      areaOnRightSideOfLine.setToNaN();
    }
 }
