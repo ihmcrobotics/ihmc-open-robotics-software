@@ -18,11 +18,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 @Tag("humanoid-rough-terrain-slow")
 public class AtlasPartialFootholdWalkingTest extends HumanoidPartialFootholdWalkingTest
 {
-   @BeforeAll
-   public static void disableStackTrace()
-   {
-      YoVariable.SAVE_STACK_TRACE = false;
-   }
 
    @Override
    public DRCRobotModel getRobotModel()

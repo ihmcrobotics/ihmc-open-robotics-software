@@ -34,7 +34,8 @@ public class EdgeVelocityStabilityEvaluator
    private final DoubleProvider lineOfRotationStableVelocityThreshold;
    private final YoBoolean isLineOfRotationStable;
 
-   private final GlitchFilteredYoBoolean isEdgeStable;
+   private final YoBoolean isEdgeStable;
+   private final YoInteger stableCounter;
 
    private final FrameLine2DReadOnly lineOfRotation;
 
@@ -72,7 +73,8 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable = new YoBoolean(namePrefix + "IsLineOfRotationStable", registry);
       isCenterOfRotationStable = new YoBoolean(namePrefix + "IsCenterOfRotationStable", registry);
 
-      isEdgeStable = new GlitchFilteredYoBoolean(namePrefix + "IsEdgeStable", registry, 10);
+      isEdgeStable = new YoBoolean(namePrefix + "IsEdgeStable", registry);
+      stableCounter = new YoInteger(namePrefix + "IsEdgeStableCount", registry);
    }
 
    public void reset()
@@ -83,6 +85,7 @@ public class EdgeVelocityStabilityEvaluator
       angleOfLineOfRotation.set(0.0);
       lineOfRotationAngularVelocity.set(Double.NaN);
       lineOfRotationAngularVelocity.reset();
+      stableCounter.set(0);
 
       isLineOfRotationStable.set(false);
       isCenterOfRotationStable.set(false);
@@ -91,7 +94,6 @@ public class EdgeVelocityStabilityEvaluator
 
    public void update()
    {
-      isEdgeStable.setWindowSize(stableWindowWize.getValue());
       centerOfRotationVelocity.update();
 
       FrameVector2DReadOnly directionOfRotation = lineOfRotation.getDirection();
@@ -103,7 +105,27 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable.set(Math.abs(lineOfRotationAngularVelocity.getDoubleValue()) < lineOfRotationStableVelocityThreshold.getValue());
       isCenterOfRotationStable.set(Math.abs(centerOfRotationTransverseVelocity.getDoubleValue()) < centerOfRotationStableVelocityThreshold.getValue());
 
-      isEdgeStable.update(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
+      updateStableCount(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
+   }
+
+   private void updateStableCount(boolean stableValue)
+   {
+      if (isEdgeStable.getBooleanValue() != stableValue)
+      {
+         stableCounter.increment();
+      }
+      else
+      {
+         stableCounter.decrement();
+         if (stableCounter.getIntegerValue() < 0)
+            stableCounter.set(0);
+      }
+
+      if (stableCounter.getIntegerValue() > stableWindowWize.getValue() - 1)
+      {
+         isEdgeStable.set(stableValue);
+         stableCounter.set(0);
+      }
    }
 
    public boolean isEdgeVelocityStable()
