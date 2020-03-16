@@ -5,8 +5,12 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
+import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
+import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -16,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -49,9 +54,17 @@ public class AtlasLookAndStepBehaviorDemo
 
    private void reaModule()
    {
-      LogTools.info("Creating simulated REA module");
-      SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
-      simulatedREAModule.start();
+      LogTools.info("Creating simulated multisense stereo regions module");
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA.getNodeName());
+      VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node,
+                                                                                             new MultisenseHeadStereoSimulator(ENVIRONMENT.get(),
+                                                                                                                               createRobotModel(),
+                                                                                                                               ros2Node));
+      visiblePlanarRegionService.start();
+
+      PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
+      //      SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
+//      simulatedREAModule.start();
    }
 
    private void kinematicSimulation()

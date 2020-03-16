@@ -49,7 +49,7 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAPPING_MODULE, false));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME, false));
 //         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 

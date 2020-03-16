@@ -18,11 +18,16 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAModuleMode.*;
+
 /**
  * Acts as REA, reporting currently visible area as planar regions.
  */
 public class SimulatedREAModule
 {
+   enum SimulatedREAModuleMode { REPUBLISH_FULL_MAP, REDUCE_TO_VIEWABLE_AREA }
+   private final SimulatedREAModuleMode mode;
+
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
@@ -48,7 +53,9 @@ public class SimulatedREAModule
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
       realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
 
-      if (robotModel != null)
+      mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
+
+      if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
          remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
@@ -85,7 +92,7 @@ public class SimulatedREAModule
    {
       remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
-      if (remoteSyncedHumanoidRobotState != null)
+      if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
          {
@@ -96,7 +103,7 @@ public class SimulatedREAModule
             // blank result
          }
       }
-      else
+      else // republish full map
       {
          combinedRegionsList.addAll(map.getPlanarRegionsAsList());
       }

@@ -35,9 +35,19 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2ModuleIdentifier regionsSource, boolean initializeToFlatGround)
    {
+      this(ros2Node,
+           ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
+                                              null,
+                                              regionsSource.getModuleTopicQualifier(),
+                                              regionsSource.deriveIOTopicQualifierForSubscriber(ros2Node.getName())),
+           initializeToFlatGround);
+   }
+
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, String regionsSourceTopicName, boolean initializeToFlatGround)
+   {
       super(initializeToFlatGround);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, regionsSource, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, regionsSourceTopicName, this::acceptPlanarRegions);
       animationTimer.start();
    }
 
