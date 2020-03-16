@@ -273,6 +273,8 @@ public class FootstepPlannerUI
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
 
+      mainScene.getStylesheets().add("us/ihmc/footstepPlanning/ui/FootstepPlannerUI.css");
+
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
    }
@@ -331,6 +333,7 @@ public class FootstepPlannerUI
    {
       primaryStage.show();
       footstepPlannerLogVisualizerController.setup();
+      footstepPlannerParametersUIController.setup();
    }
 
    public void stop()
