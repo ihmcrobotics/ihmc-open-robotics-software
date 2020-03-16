@@ -98,14 +98,6 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
 
-   public static final Topic<Boolean> EnableNodeChecking = topic("EnableNodeChecking");
-   public static final Topic<Point3D> NodeCheckingPosition = topic("NodeCheckingPosition");
-   public static final Topic<Quaternion> NodeCheckingOrientation = topic("NodeCheckingOrientation");
-   public static final Topic<Boolean> EnableNodeCheckingPositionEditing = topic("EnableNodeCheckingPositionEditing");
-
-   public static final Topic<Boolean> ExportUnitTestDataFile = topic("ExportUnitTestDataFile");
-   public static final Topic<String> ExportUnitTestPath = topic("ExportUnitTestPath");
-
    public static final Topic<List<? extends Pose3DReadOnly>> BodyPathData = topic("BodyPathData");
 
    public static final Topic<Boolean> ShowBodyPath = topic("ShowBodyPath");

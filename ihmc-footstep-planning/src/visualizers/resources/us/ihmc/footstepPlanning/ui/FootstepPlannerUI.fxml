@@ -20,10 +20,7 @@
 
                 <Tab text="Footstep Parameters">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
-                        </children>
+                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
                     </content>
                 </Tab>
 
@@ -42,12 +39,6 @@
                 <Tab text="Log Table">
                     <content>
                         <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml"/>
-                    </content>
-                </Tab>
-
-                <Tab text="Node checking">
-                    <content>
-                        <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />
                     </content>
                 </Tab>
 
