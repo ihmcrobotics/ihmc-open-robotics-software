@@ -48,6 +48,7 @@ public class FootCoPOccupancyCalculator
       leftSideIsOccupied = new YoBoolean(namePrefix + "FootLeftSideOfLineIsOccupied", registry);
       rightSideIsOccupied = new YoBoolean(namePrefix + "FootRightSideOfLineIsOccupied", registry);
 
+      reset();
 
       parentRegistry.addChild(registry);
    }
@@ -83,6 +84,9 @@ public class FootCoPOccupancyCalculator
    {
       leftSideIsOccupied.set(false);
       rightSideIsOccupied.set(false);
+
+      numberOfOccupiedCellsOnLeft.set(-1);
+      numberOfOccupiedCellsOnRight.set(-1);
 
       sideOfFootToCrop.set(null);
    }

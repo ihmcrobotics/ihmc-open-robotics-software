@@ -88,6 +88,7 @@ public class PartialFootholdCropperModule
       croppedFootholdCalculator = new FootholdCropper(side.getLowerCaseName(),
                                                       contactableFoot,
                                                       rotationParameters,
+                                                      dt,
                                                       registry,
                                                       graphicsRegistry);
 

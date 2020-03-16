@@ -24,7 +24,7 @@ import java.util.List;
 public class FootholdCropper
 {
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
-   private static final double defaultMeasuredDecayRate = 0.0;
+   private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
 
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
@@ -58,12 +58,12 @@ public class FootholdCropper
    public FootholdCropper(String namePrefix,
                           ContactableFoot contactableFoot,
                           FootholdRotationParameters rotationParameters,
+                          double dt,
                           YoVariableRegistry parentRegistry,
                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
       numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
-
 
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -82,7 +82,7 @@ public class FootholdCropper
       measuredCoPOccupancy.setCellXSize(resolution);
       measuredCoPOccupancy.setCellYSize(resolution);
       measuredCoPOccupancy.setThresholdForCellOccupancy(defaultThresholdForMeasuredCellActivation);
-      measuredCoPOccupancy.setOccupancyDecayRate(defaultMeasuredDecayRate);
+      measuredCoPOccupancy.setOccupancyDecayRate(1.0 - Math.pow(defaultMeasuredDecayRatePerSecond, dt));
       desiredCoPOccupancy.setCellXSize(resolution);
       desiredCoPOccupancy.setCellYSize(resolution);
 
@@ -162,6 +162,8 @@ public class FootholdCropper
          desiredVisualizer.update();
    }
 
+   private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+
    public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)
    {
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
@@ -177,7 +179,12 @@ public class FootholdCropper
          shouldShrinkFoothold.set(verifier.verifyFootholdCrop(desiredCoP, sideOfFootToCrop.getEnumValue(), lineOfRotation));
 
          if (shouldShrinkFoothold.getBooleanValue())
-            convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkenFootPolygon, sideOfFootToCrop.getEnumValue());
+         {
+            // FIXME this is a work around for a bug in the cut polygon with line class that doens't work with yo frame convex polygons.
+            tempPolygon.setIncludingFrame(shrunkenFootPolygon);
+            convexPolygonTools.cutPolygonWithLine(lineOfRotation, tempPolygon, sideOfFootToCrop.getEnumValue());
+            shrunkenFootPolygon.set(tempPolygon);
+         }
       }
       else
       {
