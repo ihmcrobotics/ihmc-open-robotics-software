@@ -19,7 +19,7 @@ public class BehaviorPlanarRegionEnvironments
    private static double cinderThickness = 0.145;
    private static double topRegionHeight = 5 * Z_STEP_UP_PER_ROW - cinderThickness;
    private static double superGridSize = cinderSquareSurfaceSize * 3;
-   private static double topSquareSize = 20.0;
+   private static double groundSize = 20.0;
    private static int greenId = 6;
 
    public static PlanarRegionsList createTraversalRegionsRegions()
@@ -60,14 +60,41 @@ public class BehaviorPlanarRegionEnvironments
       Random random = new Random(8349829898174L);
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.setId(greenId);
-      generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+      generator.addRectangle(groundSize, groundSize); // ground TODO form around terrain with no overlap?
 
       generator.translate(1.0, -superGridSize / 2, 0.0);
 
-      addTopFlatRegion(generator);
+      addTopFlatRegionOld(generator);
       addPlusFormationSlopes(random, generator);
       addXFormationSlopes(random, generator);
       return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList crateRoughUpAndDownStairsWithFlatTop()
+   {
+      return generate((random, generator) -> {
+         offsetGrid(generator, 1.0, 1.0, 1.0, () -> {
+            addTopFlatRegion(generator);
+         });
+         offsetGrid(generator, -1.0, -1.0, -1.0, () -> {
+            addTopFlatRegion(generator);
+         });
+      });
+   }
+
+   private static PlanarRegionsList generate(GenerationInterface generationInterface)
+   {
+      Random random = new Random(8349829898174L);
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(groundSize, groundSize); // ground TODO form around terrain with no overlap?
+      generationInterface.generate(random, generator);
+      return generator.getPlanarRegionsList();
+   }
+
+   interface GenerationInterface
+   {
+      void generate(Random random, PlanarRegionsListGenerator generator);
    }
 
    public static PlanarRegionsList createUpDownTwoHighWithFlatBetween()
@@ -75,16 +102,16 @@ public class BehaviorPlanarRegionEnvironments
       Random random = new Random(8349829898174L);
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.setId(greenId);
-      generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+      generator.addRectangle(groundSize, groundSize); // ground TODO form around terrain with no overlap?
 
       generator.translate(1.0, -superGridSize / 2, 0.0);
-      addTopFlatRegion(generator);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      addTopFlatRegionOld(generator);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
       generator.rotate(Math.PI, Axis.Z);
       generator.translate(2.0, -1.2, 0.0);
-      addTopFlatRegion(generator);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      addTopFlatRegionOld(generator);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
       return generator.getPlanarRegionsList();
    }
@@ -94,7 +121,7 @@ public class BehaviorPlanarRegionEnvironments
       Random random = new Random(8349829898174L);
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.setId(greenId);
-      generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+      generator.addRectangle(groundSize, groundSize); // ground TODO form around terrain with no overlap?
 
       generator.rotate(Math.PI/4, Axis.Z);
 
@@ -124,16 +151,16 @@ public class BehaviorPlanarRegionEnvironments
 
    private static void addHighCorner(Random random, PlanarRegionsListGenerator generator)
    {
-      addTopFlatRegion(generator);
+      addTopFlatRegionOld(generator);
 
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
 
@@ -168,28 +195,33 @@ public class BehaviorPlanarRegionEnvironments
 
    private static void addPlusFormationSlopes(Random random, PlanarRegionsListGenerator generator)
    {
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
-      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis.Z);
+   }
+
+   private static void addTopFlatRegionOld(PlanarRegionsListGenerator generator)
+   {
+      offsetGrid(generator, superGridSize, 0.0, topRegionHeight, () -> {
+         generator.addCubeReferencedAtBottomNegativeXYCorner(superGridSize, superGridSize, cinderThickness);
+      });
    }
 
    private static void addTopFlatRegion(PlanarRegionsListGenerator generator)
    {
-      generator.translate(superGridSize, 0.0, topRegionHeight);
       generator.addCubeReferencedAtBottomNegativeXYCorner(superGridSize, superGridSize, cinderThickness);
-      generator.translate(-superGridSize, 0.0, -topRegionHeight);
    }
 
-   private static void generateSlope(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
+   private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
       PlanarRegionsListExamples.generateCinderBlockSlope(generator,
                                                          random,
@@ -217,6 +249,18 @@ public class BehaviorPlanarRegionEnvironments
                                                                0.0,
                                                                Math.toRadians(0.0),
                                                                0.0);
+   }
+
+   private static void offsetGrid(PlanarRegionsListGenerator generator, double x, double y, Runnable runnable)
+   {
+      offsetGrid(generator, x, y, 0.0, runnable);
+   }
+
+   private static void offsetGrid(PlanarRegionsListGenerator generator, double x, double y, double z, Runnable runnable)
+   {
+      generator.translate(x * superGridSize, y * superGridSize, z * superGridSize);
+      runnable.run();
+      generator.translate(-x * superGridSize, -y * superGridSize, -z * superGridSize);
    }
 
    public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()
