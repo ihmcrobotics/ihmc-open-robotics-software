@@ -30,7 +30,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
-   private static final Supplier<PlanarRegionsList> ENVIRONMENT = BehaviorPlanarRegionEnvironments::createUpDownTwoHighWithFlatBetween;
+   private static final Supplier<PlanarRegionsList> ENVIRONMENT = BehaviorPlanarRegionEnvironments::crateRoughUpAndDownStairsWithFlatTop;
 
    public AtlasLookAndStepBehaviorDemo()
    {
