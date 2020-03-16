@@ -69,8 +69,10 @@ public class PlanarRegionSLAM
       return result;
    }
 
-   private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
-                                                                                      PlanarRegionSLAMParameters parameters, ConcaveHullMergerListener listener)
+   public static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map,
+                                                                                     PlanarRegionsList transformedNewData,
+                                                                                     PlanarRegionSLAMParameters parameters,
+                                                                                     ConcaveHullMergerListener listener)
    {
       Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
                                                                                                                                         transformedNewData,
