@@ -9,6 +9,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -16,9 +17,10 @@ public class FootstepPlannerRequest
 {
    private int requestId;
 
-   private RobotSide initialStanceSide;
-   private final Pose3D stanceFootPose = new Pose3D();
-   private final Pose3D goalPose = new Pose3D();
+   private RobotSide requestedInitialStanceSide;
+   private final SideDependentList<Pose3D> startFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> goalFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+
    private boolean planBodyPath;
    private double goalDistanceProximity;
    private double goalYawProximity;
@@ -36,9 +38,9 @@ public class FootstepPlannerRequest
    private void clear()
    {
       requestId = -1;
-      initialStanceSide = null;
-      stanceFootPose.setToNaN();
-      goalPose.setToNaN();
+      requestedInitialStanceSide = RobotSide.LEFT;
+      startFootPoses.forEach(Pose3D::setToNaN);
+      goalFootPoses.forEach(Pose3D::setToNaN);
       planBodyPath = false;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
@@ -54,29 +56,59 @@ public class FootstepPlannerRequest
       this.requestId = requestId;
    }
 
-   public void setInitialStanceSide(RobotSide initialStanceSide)
+   public void setRequestedInitialStanceSide(RobotSide requestedInitialStanceSide)
    {
-      this.initialStanceSide = initialStanceSide;
+      this.requestedInitialStanceSide = requestedInitialStanceSide;
    }
 
-   public void setInitialStancePose(Pose3DReadOnly stanceFootPose)
+   public void setStartFootPoses(double idealStepWidth, Pose3DReadOnly midFootStartPose)
    {
-      this.stanceFootPose.set(stanceFootPose);
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootPoses.get(side).set(midFootStartPose);
+         startFootPoses.get(side).appendTranslation(0.0, 0.5 * side.negateIfRightSide(idealStepWidth), 0.0);
+      }
    }
 
-   public void setInitialStancePose(Tuple3DReadOnly stanceFootPosition, Orientation3DReadOnly stanceFootOrientation)
+   public void setStartFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
    {
-      this.stanceFootPose.set(stanceFootPosition, stanceFootOrientation);
+      this.startFootPoses.get(RobotSide.LEFT).set(leftFootPose);
+      this.startFootPoses.get(RobotSide.RIGHT).set(rightFootPose);
    }
 
-   public void setGoalPose(Pose3DReadOnly goalPose)
+   public void setStartFootPose(RobotSide side, Pose3DReadOnly footPose)
    {
-      this.goalPose.set(goalPose);
+      this.startFootPoses.get(side).set(footPose);
    }
 
-   public void setGoalPose(Tuple3DReadOnly goalPosition, Orientation3DReadOnly goalOrientation)
+   public void setStartFootPose(RobotSide side, Tuple3DReadOnly stanceFootPosition, Orientation3DReadOnly stanceFootOrientation)
    {
-      this.goalPose.set(goalPosition, goalOrientation);
+      this.startFootPoses.get(side).set(stanceFootPosition, stanceFootOrientation);
+   }
+
+   public void setGoalFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
+   {
+      this.goalFootPoses.get(RobotSide.LEFT).set(leftFootPose);
+      this.goalFootPoses.get(RobotSide.RIGHT).set(rightFootPose);
+   }
+
+   public void setGoalFootPoses(double idealStepWidth, Pose3DReadOnly midFootGoalPose)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         goalFootPoses.get(side).set(midFootGoalPose);
+         goalFootPoses.get(side).appendTranslation(0.0, 0.5 * side.negateIfRightSide(idealStepWidth), 0.0);
+      }
+   }
+
+   public void setGoalFootPose(RobotSide side, Pose3DReadOnly goalPose)
+   {
+      this.goalFootPoses.get(side).set(goalPose);
+   }
+
+   public void setGoalFootPose(RobotSide side, Tuple3DReadOnly goalPosition, Orientation3DReadOnly goalOrientation)
+   {
+      this.goalFootPoses.get(side).set(goalPosition, goalOrientation);
    }
 
    public void setPlanBodyPath(boolean planBodyPath)
@@ -119,19 +151,19 @@ public class FootstepPlannerRequest
       return requestId;
    }
 
-   public RobotSide getInitialStanceSide()
+   public RobotSide getRequestedInitialStanceSide()
    {
-      return initialStanceSide;
+      return requestedInitialStanceSide;
    }
 
-   public Pose3D getStanceFootPose()
+   public SideDependentList<Pose3D> getStartFootPoses()
    {
-      return stanceFootPose;
+      return startFootPoses;
    }
 
-   public Pose3D getGoalPose()
+   public SideDependentList<Pose3D> getGoalFootPoses()
    {
-      return goalPose;
+      return goalFootPoses;
    }
 
    public boolean getPlanBodyPath()
@@ -179,9 +211,14 @@ public class FootstepPlannerRequest
       clear();
 
       setRequestId(requestPacket.getPlannerRequestId());
-      setInitialStanceSide(RobotSide.fromByte(requestPacket.getInitialStanceRobotSide()));
-      setInitialStancePose(requestPacket.getStanceFootPositionInWorld(), requestPacket.getStanceFootOrientationInWorld());
-      setGoalPose(requestPacket.getGoalPositionInWorld(), requestPacket.getGoalOrientationInWorld());
+      RobotSide requestedInitialStanceSide = RobotSide.fromByte(requestPacket.getRequestedInitialStanceSide());
+      if (requestedInitialStanceSide != null)
+         setRequestedInitialStanceSide(requestedInitialStanceSide);
+      setStartFootPose(RobotSide.LEFT, requestPacket.getStartLeftFootPose());
+      setStartFootPose(RobotSide.RIGHT, requestPacket.getStartRightFootPose());
+      setGoalFootPose(RobotSide.LEFT, requestPacket.getGoalLeftFootPose());
+      setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
+
       setPlanBodyPath(FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
@@ -202,11 +239,13 @@ public class FootstepPlannerRequest
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
    {
       requestPacket.setPlannerRequestId(getRequestId());
-      requestPacket.setInitialStanceRobotSide(getInitialStanceSide().toByte());
-      requestPacket.getStanceFootPositionInWorld().set(getStanceFootPose().getPosition());
-      requestPacket.getStanceFootOrientationInWorld().set(getStanceFootPose().getOrientation());
-      requestPacket.getGoalPositionInWorld().set(getGoalPose().getPosition());
-      requestPacket.getGoalOrientationInWorld().set(getGoalPose().getOrientation());
+
+      requestPacket.setRequestedInitialStanceSide(getRequestedInitialStanceSide().toByte());
+      requestPacket.getStartLeftFootPose().set(getStartFootPoses().get(RobotSide.LEFT));
+      requestPacket.getStartRightFootPose().set(getStartFootPoses().get(RobotSide.RIGHT));
+      requestPacket.getGoalLeftFootPose().set(getGoalFootPoses().get(RobotSide.LEFT));
+      requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
+
       requestPacket.setRequestedFootstepPlannerType((getPlanBodyPath() ? FootstepPlannerType.VIS_GRAPH_WITH_A_STAR : FootstepPlannerType.A_STAR).toByte());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
@@ -232,9 +271,13 @@ public class FootstepPlannerRequest
       clear();
 
       this.requestId = other.requestId;
-      this.initialStanceSide = other.initialStanceSide;
-      this.stanceFootPose.set(other.stanceFootPose);
-      this.goalPose.set(other.goalPose);
+
+      this.requestedInitialStanceSide = other.requestedInitialStanceSide;
+      this.startFootPoses.get(RobotSide.LEFT).set(other.startFootPoses.get(RobotSide.LEFT));
+      this.startFootPoses.get(RobotSide.RIGHT).set(other.startFootPoses.get(RobotSide.RIGHT));
+      this.goalFootPoses.get(RobotSide.LEFT).set(other.goalFootPoses.get(RobotSide.LEFT));
+      this.goalFootPoses.get(RobotSide.RIGHT).set(other.goalFootPoses.get(RobotSide.RIGHT));
+
       this.planBodyPath = other.planBodyPath;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;

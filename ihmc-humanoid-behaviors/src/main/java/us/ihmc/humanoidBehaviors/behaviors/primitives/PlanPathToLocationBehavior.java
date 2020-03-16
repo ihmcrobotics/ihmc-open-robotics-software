@@ -14,6 +14,8 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -46,7 +48,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private FramePose3D goalPose = null;
    private double timeout = 5.0;
    private final SleepBehavior sleepBehavior;
-   private final FramePose3D initialStanceFootPose = new FramePose3D();
+   private final FramePose3D startLeftFootPose = new FramePose3D();
+   private final FramePose3D startRightFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
@@ -78,15 +81,19 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
 
-   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerType footStepPlannerToUse,
+   public void setInputs(FramePose3D goalPose,
+                         RobotSide initialStanceSide,
+                         Pose3DReadOnly leftFootPose,
+                         Pose3DReadOnly rightFootPose,
+                         FootstepPlannerType footStepPlannerToUse,
                          boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
       this.footStepPlannerToUse = footStepPlannerToUse;
       this.initialStanceSide = initialStanceSide;
-      this.initialStanceFootPose.setIncludingFrame(initialStanceFootPose);
-      this.initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      this.startLeftFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), leftFootPose);
+      this.startRightFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), rightFootPose);
    }
 
    public FootstepDataListMessage getFootStepList()
@@ -139,8 +146,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             }
 
             planId.increment();
-            FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
-                                                                                                                    goalPose, footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+            FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
+                                                                                                                    startLeftFootPose,
+                                                                                                                    startRightFootPose,
+                                                                                                                    goalPose,
+                                                                                                                    footstepPlannerParameters.getIdealFootstepWidth(),
+                                                                                                                    footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
             request.setTimeout(timeout);
             request.setBestEffortTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);

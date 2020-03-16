@@ -41,7 +41,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class VisibilityGraphPathPlanner
 {
    private static final boolean debug = false;
-   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
 
    private final NavigableRegionsManager navigableRegionsManager;
    private final PathOrientationCalculator pathOrientationCalculator;
@@ -129,25 +128,9 @@ public class VisibilityGraphPathPlanner
       return visibilityGraphStatistics;
    }
 
-   public void setInitialStanceFoot(Pose3DReadOnly stanceFootPose, RobotSide side)
+   public void setStanceFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
    {
-      if (side == null)
-      {
-         if (debug)
-            PrintTools.info("Start node needs a side, but trying to set it to null. Setting it to " + defaultStartNodeSide);
-
-         side = defaultStartNodeSide;
-      }
-
-      double defaultStepWidth = parameters.getIdealFootstepWidth();
-      ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", new FramePose3D(stanceFootPose));
-      FramePoint2D bodyStartPoint = new FramePoint2D(stanceFrame);
-      bodyStartPoint.setY(side.negateIfLeftSide(defaultStepWidth / 2.0));
-      bodyStartPoint.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-
-      bodyStartPose.setToZero(ReferenceFrame.getWorldFrame());
-      bodyStartPose.setPosition(bodyStartPoint.getX(), bodyStartPoint.getY(), 0.0);
-      bodyStartPose.setOrientationYawPitchRoll(stanceFootPose.getYaw(), 0.0, 0.0);
+      bodyStartPose.interpolate(leftFootPose, rightFootPose, 0.5);
    }
 
    public void setGoal(Pose3DReadOnly goalPose)

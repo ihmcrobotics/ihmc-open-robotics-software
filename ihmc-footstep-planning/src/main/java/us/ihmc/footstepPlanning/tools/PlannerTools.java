@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.tools;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,6 +11,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -72,6 +77,22 @@ public class PlannerTools
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createFootPolygon(footLength, heelWidth, toeWidth));
       return footPolygons;
+   }
+
+   public static SideDependentList<Pose3D> createSquaredUpFootsteps(Point3DReadOnly midFootPosition, double midFootYaw, double stanceWidth)
+   {
+      Pose3D midFootPose = new Pose3D(midFootPosition, new Quaternion(midFootYaw, 0.0, 0.0));
+      return createSquaredUpFootsteps(midFootPose, stanceWidth);
+   }
+
+   public static SideDependentList<Pose3D> createSquaredUpFootsteps(Pose3DReadOnly midFootPose, double stanceWidth)
+   {
+      return new SideDependentList<>(side ->
+                                     {
+                                        Pose3D footstepPose = new Pose3D(midFootPose);
+                                        footstepPose.appendTranslation(0.0, 0.5 * side.negateIfRightSide(stanceWidth), 0.0);
+                                        return footstepPose;
+                                     });
    }
 
    public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)

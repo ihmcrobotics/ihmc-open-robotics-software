@@ -29,7 +29,6 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -185,9 +184,9 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, visibilityGraphParameters);
 
       // publish request parameters
-      messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getInitialStanceRobotSide()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, footstepPlannerLog.getRequestPacket().getGoalPositionInWorld());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, footstepPlannerLog.getRequestPacket().getGoalOrientationInWorld());
+      messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, footstepPlannerLog.getRequestPacket().getGoalDistanceProximity());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalYawProximity, footstepPlannerLog.getRequestPacket().getGoalYawProximity());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType()));
@@ -197,8 +196,8 @@ public class FootstepPlannerLogVisualizerController
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, footstepPlannerLog.getRequestPacket().getStanceFootPositionInWorld());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, footstepPlannerLog.getRequestPacket().getStanceFootOrientationInWorld());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
 
       // publish status
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());

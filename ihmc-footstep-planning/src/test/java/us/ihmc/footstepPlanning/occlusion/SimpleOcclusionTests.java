@@ -126,7 +126,7 @@ public class SimpleOcclusionTests
 
       FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setGoalPose(goalPose);
+      request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
 
       FramePose3D stancePose = new FramePose3D();
       RobotSide stanceSide = computeStanceFootPose(startPose, parameters, stancePose);
@@ -256,10 +256,10 @@ public class SimpleOcclusionTests
             }
          }
 
-         request.setGoalPose(goalPose);
+         request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
          request.setPlanarRegionsList(visiblePlanarRegions);
-         request.setInitialStanceSide(stanceSide);
-         request.setInitialStancePose(stancePose);
+         request.setRequestedInitialStanceSide(stanceSide);
+         request.setStartFootPoses(parameters.getIdealFootstepWidth(), stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);
          request.setPlanBodyPath(true);
          request.setHorizonLength(1.0);
