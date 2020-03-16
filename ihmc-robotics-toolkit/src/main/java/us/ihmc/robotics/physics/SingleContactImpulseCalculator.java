@@ -38,7 +38,9 @@ public class SingleContactImpulseCalculator
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
    private double springConstant = 5.0;
+
    private boolean isInitialized = false;
+   private boolean isInertiaUpToDate = false;
 
    private final ForwardDynamicsCalculator forwardDynamicsCalculatorA;
    private final ForwardDynamicsCalculator forwardDynamicsCalculatorB;
@@ -179,6 +181,7 @@ public class SingleContactImpulseCalculator
          noImpulseVelocityB.changeFrame(contactFrame);
       }
 
+      isInertiaUpToDate = false;
       isInitialized = true;
    }
 
@@ -267,7 +270,7 @@ public class SingleContactImpulseCalculator
          collisionPositionTerm.changeFrame(contactVelocity.getReferenceFrame());
          contactVelocity.sub(collisionPositionTerm);
 
-         if (isFirstUpdate)
+         if (!isInertiaUpToDate)
          {
             // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
             collisionCalculatorA.computeApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
@@ -281,6 +284,8 @@ public class SingleContactImpulseCalculator
             {
                M_inv.set(inverseApparentInertiaA);
             }
+
+            isInertiaUpToDate = true;
          }
 
          contactVelocity.get(c);
