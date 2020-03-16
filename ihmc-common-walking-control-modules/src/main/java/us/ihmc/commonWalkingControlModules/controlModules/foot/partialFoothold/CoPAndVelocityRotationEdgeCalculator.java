@@ -85,9 +85,13 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    @Override
    public void compute(FramePoint2DReadOnly measuredCoP)
    {
-      velocityEdgeCalculator.compute(measuredCoP);
+      if (!measuredCoP.containsNaN())
+         pointOfRotation.update(measuredCoP);
 
-      pointOfRotation.update(measuredCoP);
+      if (pointOfRotation.containsNaN())
+         pointOfRotation.set(measuredCoP);
+
+      velocityEdgeCalculator.compute(measuredCoP);
       axisOfRotation.set(velocityEdgeCalculator.getLineOfRotation().getDirection());
 
       stabilityEvaluator.update();
@@ -103,6 +107,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    public void reset()
    {
       velocityEdgeCalculator.reset();
+      pointOfRotation.setToNaN();
+      axisOfRotation.setToNaN();
 
       lineOfRotationInSole.setToNaN();
 
