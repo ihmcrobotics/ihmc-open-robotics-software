@@ -83,10 +83,6 @@ public class FootstepPlannerUI
    @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
-   private BodyCollisionCheckingUIController bodyCollisionCheckingUIController;
-   @FXML
-   private FootstepPlannerCostsUIController footstepPlannerCostsUIController;
-   @FXML
    private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
    @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
@@ -136,19 +132,15 @@ public class FootstepPlannerUI
 
       mainPane = loader.load();
 
-      footstepPlannerCostsUIController.setPlannerParameters(plannerParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
       footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
-      bodyCollisionCheckingUIController.setPlannerParameters(plannerParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepPostProcessingParametersUIController.attachMessager(messager);
-      bodyCollisionCheckingUIController.attachMessager(messager);
-      footstepPlannerCostsUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
@@ -160,8 +152,6 @@ public class FootstepPlannerUI
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepPostProcessingParametersUIController.bindControls();
-      bodyCollisionCheckingUIController.bindControls();
-      footstepPlannerCostsUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsUIController.bindControls();
@@ -170,7 +160,6 @@ public class FootstepPlannerUI
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
-
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
