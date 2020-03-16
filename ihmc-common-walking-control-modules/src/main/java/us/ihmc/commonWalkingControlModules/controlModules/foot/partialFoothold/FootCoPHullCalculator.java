@@ -24,8 +24,6 @@ import java.util.List;
 
 public class FootCoPHullCalculator
 {
-   private static final double defaultThresholdForCellActivation = 1.0;
-   private static final double defaultDecayRate = 0.0;
    private static final double defaultAreaRatioThreshold = 0.6;
 
    private final YoDouble areaOnRightSideOfLine;
@@ -33,28 +31,20 @@ public class FootCoPHullCalculator
    private final YoDouble areaRatioThreshold;
 
    private final OccupancyGrid occupancyGrid;
-   private final OccupancyGridVisualizer visualizer;
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final YoEnum<RobotSide> sideOfFootToCrop;
 
    public FootCoPHullCalculator(String namePrefix,
-                                ReferenceFrame soleFrame,
-                                double lengthResolution,
-                                double widthResolution,
-                                YoGraphicsListRegistry yoGraphicsListRegistry,
+                                OccupancyGrid occupancyGrid,
                                 YoVariableRegistry parentRegistry)
    {
+      this.occupancyGrid = occupancyGrid;
       String name = getClass().getSimpleName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
-      this.occupancyGrid = new OccupancyGrid(namePrefix + "CoPHull", soleFrame, registry);
 
-      occupancyGrid.setCellXSize(lengthResolution);
-      occupancyGrid.setCellYSize(widthResolution);
-      occupancyGrid.setThresholdForCellOccupancy(defaultThresholdForCellActivation);
-      occupancyGrid.setOccupancyDecayRate(defaultDecayRate);
 
       areaRatioThreshold = new YoDouble("areaRatioThreshold", registry);
       areaRatioThreshold.set(defaultAreaRatioThreshold);
@@ -62,17 +52,7 @@ public class FootCoPHullCalculator
       areaOnRightSideOfLine = new YoDouble(namePrefix + "AreaOnRightSideOfLine", registry);
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
 
-      if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix + "Hull", occupancyGrid, 50, registry, null);
-      else
-         visualizer = null;
-
       parentRegistry.addChild(registry);
-   }
-
-   public void registerCenterOfPressureLocation(FramePoint2DReadOnly copToRegister)
-   {
-      occupancyGrid.registerPoint(copToRegister);
    }
 
    private FrameConvexPolygon2D convexHullOfCoPs = new FrameConvexPolygon2D();
@@ -104,16 +84,6 @@ public class FootCoPHullCalculator
 
    public void reset()
    {
-      occupancyGrid.reset();
       sideOfFootToCrop.set(null);
-      if (visualizer != null)
-         visualizer.update();
-   }
-
-   public void update()
-   {
-      occupancyGrid.update();
-      if (visualizer != null)
-         visualizer.update();
    }
 }
