@@ -210,7 +210,9 @@ public class HumanoidKinematicsSimulation
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      double groundHeight = 0.0;
+      double initialYaw = 0.0;
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
       KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
                                                        fullRobotModel.getRootJoint(),
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
