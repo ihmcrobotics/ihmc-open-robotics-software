@@ -5,10 +5,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
@@ -20,6 +23,9 @@ import java.util.List;
 
 public class FootholdCropper
 {
+   private static final double defaultThresholdForMeasuredCellActivation = 1.0;
+   private static final double defaultMeasuredDecayRate = 0.0;
+
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygonInWorld;
@@ -29,6 +35,8 @@ public class FootholdCropper
    private final DoubleProvider minAreaToConsider;
    private final YoBoolean hasEnoughAreaToCrop;
 
+   private final OccupancyGrid measuredCoPOccupancy;
+   private final OccupancyGrid desiredCoPOccupancy;
    private final FootCoPOccupancyCalculator footCoPOccupancyGrid;
    private final FootCoPHullCalculator footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -44,6 +52,8 @@ public class FootholdCropper
    private final int numberOfFootCornerPoints;
 
    private final CropVerifier verifier;
+   private final OccupancyGridVisualizer measuredVisualizer;
+   private final OccupancyGridVisualizer desiredVisualizer;
 
    public FootholdCropper(String namePrefix,
                           ContactableFoot contactableFoot,
@@ -58,7 +68,6 @@ public class FootholdCropper
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-      verifier = new CropVerifier(namePrefix, contactableFoot.getSoleFrame(), 0.001, 0.001, rotationParameters, registry, yoGraphicsListRegistry);
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygonInWorld = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygonInWorld", "", ReferenceFrame.getWorldFrame(), 20, registry);
@@ -66,9 +75,22 @@ public class FootholdCropper
 
       shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
+      measuredCoPOccupancy = new OccupancyGrid(namePrefix + "MeasuredCoPOccupancy", soleFrame, registry);
+      desiredCoPOccupancy = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
+
       double resolution = 0.005;
-      footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, soleFrame, resolution, resolution, rotationParameters, yoGraphicsListRegistry, registry);
-      footCoPHullCropper = new FootCoPHullCalculator(namePrefix, soleFrame, resolution, resolution, null, registry);
+      measuredCoPOccupancy.setCellXSize(resolution);
+      measuredCoPOccupancy.setCellYSize(resolution);
+      measuredCoPOccupancy.setThresholdForCellOccupancy(defaultThresholdForMeasuredCellActivation);
+      measuredCoPOccupancy.setOccupancyDecayRate(defaultMeasuredDecayRate);
+      desiredCoPOccupancy.setCellXSize(resolution);
+      desiredCoPOccupancy.setCellYSize(resolution);
+
+      footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, measuredCoPOccupancy,rotationParameters, registry);
+      footCoPHullCropper = new FootCoPHullCalculator(namePrefix, measuredCoPOccupancy, registry);
+
+      verifier = new CropVerifier(namePrefix, desiredCoPOccupancy, rotationParameters, registry);
+
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
       hasEnoughAreaToCrop = new YoBoolean(namePrefix + "HasEnoughAreaToCrop", registry);
@@ -89,6 +111,14 @@ public class FootholdCropper
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, Color.BLUE, false);
          yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
+
+         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuaredCoP", measuredCoPOccupancy, 50, YoAppearance.Red(), registry, yoGraphicsListRegistry);
+         desiredVisualizer =  new OccupancyGridVisualizer(namePrefix + "DesiredCoP", desiredCoPOccupancy, 50, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         measuredVisualizer = null;
+         desiredVisualizer = null;
       }
 
       parentRegistry.addChild(registry);
@@ -105,23 +135,31 @@ public class FootholdCropper
       shrunkenFootPolygon.set(polygon);
       shrunkenFootPolygonInWorld.clear();
 
+      measuredCoPOccupancy.reset();
+      desiredCoPOccupancy.reset();
       footCoPHullCropper.reset();
       footCoPOccupancyGrid.reset();
-      verifier.reset();
+      if (measuredVisualizer != null)
+         measuredVisualizer.update();
+      if (desiredVisualizer != null)
+         desiredVisualizer.update();
    }
 
    public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
       shouldShrinkFoothold.set(false);
-      footCoPOccupancyGrid.update();
-      footCoPHullCropper.update();
-      verifier.update(desiredCoP);
+      measuredCoPOccupancy.update();
+      desiredCoPOccupancy.update();
 
-      if (measuredCoP.containsNaN())
-         return;
+      if (!measuredCoP.containsNaN())
+         measuredCoPOccupancy.registerPoint(measuredCoP);
+      if (!desiredCoP.containsNaN())
+         desiredCoPOccupancy.registerPoint(desiredCoP);
 
-      footCoPOccupancyGrid.registerCenterOfPressureLocation(measuredCoP);
-      footCoPHullCropper.registerCenterOfPressureLocation(measuredCoP);
+      if (measuredVisualizer != null)
+         measuredVisualizer.update();
+      if (desiredVisualizer != null)
+         desiredVisualizer.update();
    }
 
    public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)

@@ -31,20 +31,13 @@ public class CropVerifier
    private final YoBoolean perpendicularCopErrorAboveThreshold;
    private final YoBoolean enoughDesiredCopOnCropSide;
 
-   private final OccupancyGridVisualizer visualizer;
-
    public CropVerifier(String namePrefix,
-                       ReferenceFrame soleFrame,
-                       double lengthResolution,
-                       double widthResoultion,
+                       OccupancyGrid occupancyGrid,
                        FootholdRotationParameters explorationParameters,
-                       YoVariableRegistry parentRegistry,
-                       YoGraphicsListRegistry yoGraphicsListRegistry)
+                       YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoP", soleFrame, registry);
-      occupancyGrid.setCellXSize(lengthResolution);
-      occupancyGrid.setCellYSize(widthResoultion);
+      this.occupancyGrid = occupancyGrid;
 
       perpendicularCoPError = new YoDouble(namePrefix + "PerpendicularCopError", registry);
       perpendicularCopErrorThreshold = explorationParameters.getPerpendicularCoPErrorThreshold();
@@ -56,29 +49,9 @@ public class CropVerifier
 
       desiredCopOnCorrectSide = new YoBoolean(namePrefix + "DesiredCopOnCorrectSide", registry);
 
-      if (yoGraphicsListRegistry != null)
-         visualizer = new OccupancyGridVisualizer(namePrefix + "CropVerifier", occupancyGrid, 50, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
-      else
-         visualizer = null;
-
       parentRegistry.addChild(registry);
    }
 
-   public void reset()
-   {
-      occupancyGrid.reset();
-      if (visualizer != null)
-         visualizer.update();
-   }
-
-   public void update(FramePoint2DReadOnly desiredCoP)
-   {
-      occupancyGrid.update();
-      if (!desiredCoP.containsNaN())
-         occupancyGrid.registerPoint(desiredCoP);
-      if (visualizer != null)
-         visualizer.update();
-   }
 
    public boolean verifyFootholdCrop(FramePoint2DReadOnly desiredCoP, RobotSide sideToCrop, FrameLine2DReadOnly lineOfRotation)
    {
