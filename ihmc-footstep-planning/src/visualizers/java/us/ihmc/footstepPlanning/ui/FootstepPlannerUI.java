@@ -58,13 +58,11 @@ public class FootstepPlannerUI
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionEditor startGoalEditor;
-   private final NodeCheckerEditor nodeCheckerEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final GoalOrientationViewer goalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
    private final FootstepPostProcessingMeshViewer postProcessingViewer;
    private final GoalOrientationEditor orientationEditor;
-   private final NodeCheckerRenderer nodeCheckerRenderer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final OccupancyMapRenderer occupancyMapRenderer;
@@ -76,8 +74,6 @@ public class FootstepPlannerUI
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
-   @FXML
-   private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
@@ -142,7 +138,6 @@ public class FootstepPlannerUI
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepPostProcessingParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
-      footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       uiRobotController.attachMessager(messager);
 
@@ -153,7 +148,6 @@ public class FootstepPlannerUI
       visibilityGraphsParametersUIController.bindControls();
       footstepPostProcessingParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
-      footstepNodeCheckingUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -170,11 +164,9 @@ public class FootstepPlannerUI
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, null, GoalPositionEditModeEnabled,
                                                          null, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
                                                          null, GoalOrientationEditModeEnabled);
-      this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
       this.orientationEditor = new GoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
-      this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
@@ -187,7 +179,6 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(goalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
-      view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
@@ -258,8 +249,6 @@ public class FootstepPlannerUI
       orientationEditor.start();
       pathViewer.start();
       postProcessingViewer.start();
-      nodeCheckerRenderer.start();
-      nodeCheckerEditor.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
       occupancyMapRenderer.start();
@@ -345,7 +334,6 @@ public class FootstepPlannerUI
       orientationEditor.stop();
       pathViewer.stop();
       postProcessingViewer.stop();
-      nodeCheckerRenderer.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       occupancyMapRenderer.stop();
