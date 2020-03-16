@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSegment;
@@ -198,11 +199,17 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       }
       else
       {
+         double xyStiffness = 50000.0;
+         double zStiffness = 5000.0;
+         double xyZeta = 4.5;
+         double zZeta = 16.5;
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
-         linearGroundContactModel.setZStiffness(2000.0 * scale);
-         linearGroundContactModel.setZDamping(1500.0 * scale);
-         linearGroundContactModel.setXYStiffness(50000.0 * scale);
-         linearGroundContactModel.setXYDamping(2000.0 * scale);
+         double xyDamping = GainCalculator.computeDerivativeGain(xyStiffness * scale, xyZeta);
+         double zDamping = GainCalculator.computeDerivativeGain(zStiffness * scale, zZeta);
+         linearGroundContactModel.setZStiffness(zStiffness);
+         linearGroundContactModel.setZDamping(zDamping);
+         linearGroundContactModel.setXYStiffness(xyStiffness);
+         linearGroundContactModel.setXYDamping(xyDamping);
       }
    }
 
