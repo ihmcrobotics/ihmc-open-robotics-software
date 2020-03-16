@@ -225,13 +225,16 @@ public class FootstepPlannerLogVisualizerController
 
       parentStepStack.clear();
       selectedRow.set(null);
-
       path.clear();
-      recursivelyBuildPath(iterationDataList.get(0), iterationDataList, edgeDataMap);
 
-      FootstepNode startNode = path.get(0);
-      parentStepStack.push(startNode);
-      updateTable();
+      if (!iterationDataList.isEmpty())
+      {
+         recursivelyBuildPath(iterationDataList.get(0), iterationDataList, edgeDataMap);
+         FootstepNode startNode = path.get(0);
+         parentStepStack.push(startNode);
+         updateTable();
+
+      }
    }
 
    private void recursivelyBuildPath(FootstepPlannerIterationData iterationData, List<FootstepPlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap)
@@ -255,11 +258,15 @@ public class FootstepPlannerLogVisualizerController
       FootstepNode parentNode = parentStepStack.peek();
       Optional<FootstepPlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
 
-      FootstepPlannerIterationData iterationData = iterationDataOptional.get();
-
       parentTableItems.clear();
       childTableItems.clear();
 
+      if (!iterationDataOptional.isPresent())
+      {
+         return;
+      }
+
+      FootstepPlannerIterationData iterationData = iterationDataOptional.get();
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
          FootstepNode childNode = iterationData.getChildNodes().get(i);
