@@ -137,6 +137,11 @@ public class SingleContactImpulseCalculator
          collisionCalculatorB = null;
    }
 
+   public void setSpringConstant(double springConstant)
+   {
+      this.springConstant = springConstant;
+   }
+
    public void setTolerance(double gamma)
    {
       this.gamma = gamma;

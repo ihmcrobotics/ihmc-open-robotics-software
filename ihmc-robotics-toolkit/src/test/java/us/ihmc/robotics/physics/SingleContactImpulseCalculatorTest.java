@@ -66,6 +66,7 @@ public class SingleContactImpulseCalculatorTest
                                                                                                dt,
                                                                                                forwardDynamicsCalculatorA,
                                                                                                null);
+         impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
          impulseCalculator.computeImpulse();
          updateVelocities(impulseCalculator);
@@ -101,6 +102,7 @@ public class SingleContactImpulseCalculatorTest
                                                                                                dt,
                                                                                                forwardDynamicsCalculatorA,
                                                                                                forwardDynamicsCalculatorB);
+         impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
          try
          {
@@ -234,6 +236,7 @@ public class SingleContactImpulseCalculatorTest
          collisionResult.setCollidableB(nextCollidable(random, contactingBodyB));
          pointInBodyFrameB.setIncludingFrame(pointInBodyFrameA);
          pointOnBRootFrame.setIncludingFrame(pointInBodyFrameB);
+         pointOnBRootFrame.changeFrame(worldFrame);
          pointInBodyFrameB.changeFrame(contactingBodyB.getBodyFixedFrame());
       }
       else
