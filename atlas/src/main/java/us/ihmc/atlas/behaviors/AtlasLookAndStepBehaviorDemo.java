@@ -36,8 +36,8 @@ public class AtlasLookAndStepBehaviorDemo
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      ThreadTools.startAThread(this::reaModule, "REAModule");
-      ThreadTools.startAThread(this::kinematicSimulation, "KinematicsSimulation");
+      ThreadTools.startAsDaemon(this::reaModule, "REAModule");
+      ThreadTools.startAsDaemon(this::kinematicSimulation, "KinematicsSimulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
