@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -37,6 +38,8 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public abstract class FootstepPlannerDataSetTest
 {
@@ -241,29 +244,38 @@ public abstract class FootstepPlannerDataSetTest
    protected void packPlanningRequest(DataSet dataset, Messager messager)
    {
       PlannerInput plannerInput = dataset.getPlannerInput();
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, plannerInput.getStartPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, plannerInput.getGoalPosition());
+
+      double startYaw = plannerInput.hasStartOrientation() ? plannerInput.getStartYaw() : 0.0;
+      double goalYaw = plannerInput.hasGoalOrientation() ? plannerInput.getGoalYaw() : 0.0;
+      SideDependentList<Pose3D> startSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getStartPosition(),
+                                                                                   startYaw,
+                                                                                   module.getPlanningModule()
+                                                                                         .getFootstepPlannerParameters()
+                                                                                         .getIdealFootstepWidth());
+      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getGoalPosition(),
+                                                                                  goalYaw,
+                                                                                  module.getPlanningModule()
+                                                                                        .getFootstepPlannerParameters()
+                                                                                        .getIdealFootstepWidth());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startSteps.get(RobotSide.LEFT));
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, startSteps.get(RobotSide.RIGHT));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, goalSteps.get(RobotSide.LEFT));
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalSteps.get(RobotSide.RIGHT));
+
       messager.submitMessage(PlannerType, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
-      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 2.0;
       double timeout = plannerInput.getTimeoutFlag(getPlannerType().toString().toLowerCase());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeMultiplier * timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
-
-      double startYaw = plannerInput.hasStartOrientation() ? plannerInput.getStartYaw() : 0.0;
-      double goalYaw = plannerInput.hasGoalOrientation() ? plannerInput.getGoalYaw() : 0.0;
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startYaw, 0.0, 0.0));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(goalYaw, 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
       if (DEBUG)
          LogTools.info("Sending out planning request packet.");
    }
-
-
 
    protected String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plan, Point3D goal)
    {
