@@ -73,11 +73,23 @@ public class BehaviorPlanarRegionEnvironments
    public static PlanarRegionsList crateRoughUpAndDownStairsWithFlatTop()
    {
       return generate((random, generator) -> {
-         offsetGrid(generator, 1.0, 1.0, 1.0, () -> {
-            addTopFlatRegion(generator);
-         });
-         offsetGrid(generator, -1.0, -1.0, -1.0, () -> {
-            addTopFlatRegion(generator);
+         offsetGrid(generator, 1.0, -0.5, 0.0, () ->
+         {
+            offsetGrid(generator, 0.0, 0.0, 0.0, () ->
+            {
+               generateAngledCinderBlockStairs(random, generator);
+            });
+            offsetGrid(generator, 1.0, 0.0, topRegionHeight, () ->
+            {
+               addTopFlatRegion(generator);
+            });
+            offsetGrid(generator, 3.0, 1.0, 0.0, () ->
+            {
+               rotate(generator, Math.PI, () ->
+               {
+                  generateAngledCinderBlockStairs(random, generator);
+               });
+            });
          });
       });
    }
@@ -221,6 +233,20 @@ public class BehaviorPlanarRegionEnvironments
       generator.addCubeReferencedAtBottomNegativeXYCorner(superGridSize, superGridSize, cinderThickness);
    }
 
+   private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator)
+   {
+      PlanarRegionsListExamples.generateCinderBlockSlope(generator,
+                                                         random,
+                                                         cinderSquareSurfaceSize,
+                                                         cinderThickness,
+                                                         3,
+                                                         3,
+                                                         Z_STEP_UP_PER_ROW,
+                                                         0.0,
+                                                         0.0,
+                                                         Math.toRadians(CINDER_SLOPE_ANGLE),
+                                                         0.0);
+   }
    private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
       PlanarRegionsListExamples.generateCinderBlockSlope(generator,
@@ -261,6 +287,13 @@ public class BehaviorPlanarRegionEnvironments
       generator.translate(x * superGridSize, y * superGridSize, z * superGridSize);
       runnable.run();
       generator.translate(-x * superGridSize, -y * superGridSize, -z * superGridSize);
+   }
+
+   private static void rotate(PlanarRegionsListGenerator generator, double yaw, Runnable runnable)
+   {
+      generator.rotate(yaw, Axis.Z);
+      runnable.run();
+      generator.rotate(-yaw, Axis.Z);
    }
 
    public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()
