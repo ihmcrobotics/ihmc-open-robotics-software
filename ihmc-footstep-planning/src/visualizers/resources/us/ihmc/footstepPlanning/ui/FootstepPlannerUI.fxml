@@ -33,18 +33,6 @@
                     </content>
                 </Tab>
 
-                <Tab text="Body Collisions">
-                    <content>
-                        <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Footstep Costs">
-                    <content>
-                        <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml" />
-                    </content>
-                </Tab>
-
                 <Tab text="Footstep Post Processing">
                     <content>
                         <fx:include fx:id="footstepPostProcessingParametersUI" source="FootstepPostProcessingParametersUI.fxml" />
