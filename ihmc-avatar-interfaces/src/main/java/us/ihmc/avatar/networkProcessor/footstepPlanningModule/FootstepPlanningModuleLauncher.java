@@ -17,6 +17,8 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
@@ -44,23 +46,27 @@ public class FootstepPlanningModuleLauncher
 
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      return createModule(robotModel, pubSubImplementation, null);
+      return createModule(robotModel, pubSubImplementation, null, false);
    }
 
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel,
                                                      DomainFactory.PubSubImplementation pubSubImplementation,
-                                                     AdaptiveSwingParameters swingParameters)
+                                                     AdaptiveSwingParameters swingParameters,
+                                                     boolean automaticallySaveLogs)
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
-      return createModule(ros2Node, robotModel, swingParameters);
+      return createModule(ros2Node, robotModel, swingParameters, automaticallySaveLogs);
    }
 
    public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      return createModule(ros2Node, robotModel, null);
+      return createModule(ros2Node, robotModel, null, false);
    }
 
-   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel, AdaptiveSwingParameters swingParameters)
+   public static FootstepPlanningModule createModule(Ros2Node ros2Node,
+                                                     DRCRobotModel robotModel,
+                                                     AdaptiveSwingParameters swingParameters,
+                                                     boolean automaticallySaveLogs)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
 
@@ -185,6 +191,19 @@ public class FootstepPlanningModuleLauncher
          if (ToolboxState.fromByte(s.takeNextData().getRequestedToolboxState()) == ToolboxState.SLEEP)
             footstepPlanningModule.halt();
       });
+
+      // automatically save logs if requested
+      if (automaticallySaveLogs)
+      {
+         String requestedLogDirectory = System.getenv("IHMC_FOOTSTEP_PLANNER_LOG_DIR");
+         final String logDirectory = requestedLogDirectory == null ? FootstepPlannerLogger.getDefaultLogsDirectory() : requestedLogDirectory;
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(footstepPlanningModule);
+         footstepPlanningModule.addStatusCallback(status ->
+                                                  {
+                                                     if (status.getResult().terminalResult())
+                                                        logger.logSession(logDirectory);
+                                                  });
+      }
 
       return footstepPlanningModule;
    }

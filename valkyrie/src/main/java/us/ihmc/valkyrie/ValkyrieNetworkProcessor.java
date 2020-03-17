@@ -43,7 +43,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       if (ihmc_launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters(), false);
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
@@ -78,7 +78,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
-      networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters(), true);
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
