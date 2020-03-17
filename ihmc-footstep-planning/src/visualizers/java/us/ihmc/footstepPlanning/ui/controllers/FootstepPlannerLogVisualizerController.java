@@ -221,7 +221,8 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
       // set graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());

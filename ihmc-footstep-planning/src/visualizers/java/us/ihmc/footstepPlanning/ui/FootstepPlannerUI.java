@@ -194,17 +194,6 @@ public class FootstepPlannerUI
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
-         robotVisualizer.setRobotLoadedCallback(() ->
-                                                {
-                                                   for(RobotSide side : RobotSide.values)
-                                                   {
-                                                      FramePose3D footPose = new FramePose3D();
-                                                      footPose.setToZero(robotVisualizer.getFullRobotModel().getSoleFrames().get(side));
-                                                      footPose.changeFrame(ReferenceFrame.getWorldFrame());
-                                                      messager.submitMessage(side == RobotSide.LEFT ? LeftFootPose : RightFootPose, footPose);
-                                                   }
-                                                });
-
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
