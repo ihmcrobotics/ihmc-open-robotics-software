@@ -1,34 +1,21 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
-import us.ihmc.robotics.occupancyGrid.OccupancyGridCell;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
-import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
 
 public class FootCoPHullCalculator
 {
-   private static final double defaultAreaRatioThreshold = 0.6;
-
    private final YoDouble areaOnRightSideOfLine;
    private final YoDouble areaOnLeftSideOfLine;
-   private final YoDouble areaRatioThreshold;
+   private final DoubleProvider areaRatioThreshold;
 
    private final OccupancyGrid occupancyGrid;
 
@@ -37,6 +24,7 @@ public class FootCoPHullCalculator
 
    public FootCoPHullCalculator(String namePrefix,
                                 OccupancyGrid occupancyGrid,
+                                FootholdRotationParameters rotationParameters,
                                 YoVariableRegistry parentRegistry)
    {
       this.occupancyGrid = occupancyGrid;
@@ -45,8 +33,7 @@ public class FootCoPHullCalculator
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
 
-      areaRatioThreshold = new YoDouble("areaRatioThreshold", registry);
-      areaRatioThreshold.set(defaultAreaRatioThreshold);
+      areaRatioThreshold = rotationParameters.getCopHullAreaRatioThreshold();
 
       areaOnRightSideOfLine = new YoDouble(namePrefix + "AreaOnRightSideOfLine", registry);
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
@@ -73,9 +60,9 @@ public class FootCoPHullCalculator
       areaOnLeftSideOfLine.set(rightSideCut.getArea());
       areaOnRightSideOfLine.set(leftSideCut.getArea());
 
-      if (areaOnLeftSideOfLine.getDoubleValue() / areaOnRightSideOfLine.getDoubleValue() > areaRatioThreshold.getDoubleValue())
+      if (areaOnLeftSideOfLine.getDoubleValue() / areaOnRightSideOfLine.getDoubleValue() > areaRatioThreshold.getValue())
          sideOfFootToCrop.set(RobotSide.RIGHT);
-      else if (areaOnRightSideOfLine.getDoubleValue() / areaOnLeftSideOfLine.getDoubleValue() > areaRatioThreshold.getDoubleValue())
+      else if (areaOnRightSideOfLine.getDoubleValue() / areaOnLeftSideOfLine.getDoubleValue() > areaRatioThreshold.getValue())
          sideOfFootToCrop.set(RobotSide.LEFT);
       else
          sideOfFootToCrop.set(null);

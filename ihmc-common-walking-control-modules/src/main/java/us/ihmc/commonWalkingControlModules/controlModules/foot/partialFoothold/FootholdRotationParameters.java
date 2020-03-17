@@ -21,6 +21,7 @@ public class FootholdRotationParameters
    private final IntegerProvider stableEdgeWindowSize;
    private final DoubleProvider perpendicularCoPError;
    private final IntegerProvider numberOfDesiredCopsOnCropSide;
+   private final DoubleProvider copAreaThreshold;
 
    private final DoubleProvider omegaThresholdForEstimation;
    private final DoubleProvider decayBreakFrequency;
@@ -48,6 +49,7 @@ public class FootholdRotationParameters
       stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
       perpendicularCoPError = new DoubleParameter(namePrefix + "PerpendicularCoPErrorThreshold", registry, 0.005);
       numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
+      copAreaThreshold = new DoubleParameter(namePrefix + "CopHullAreaRatioThreshold", registry, 0.9);
 
       namePrefix = "Kinematic_";
       angularVelocityAroundLoRThreshold = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 0.5);
@@ -65,7 +67,7 @@ public class FootholdRotationParameters
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.001);
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
       shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 1);
-      distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.01);
+      distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.0);
    }
 
    public DoubleProvider getGeometricDetectionAngleThreshold()
@@ -161,5 +163,10 @@ public class FootholdRotationParameters
    public DoubleProvider getDistanceFromRotationToCrop()
    {
       return distanceFromRotationToCrop;
+   }
+
+   public DoubleProvider getCopHullAreaRatioThreshold()
+   {
+      return copAreaThreshold;
    }
 }
