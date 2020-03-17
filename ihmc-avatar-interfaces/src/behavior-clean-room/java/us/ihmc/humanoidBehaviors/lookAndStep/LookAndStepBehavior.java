@@ -181,7 +181,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceFootSide);
-      footstepPlannerRequest.setStartFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), initialStanceFootPose);
+      footstepPlannerRequest.setStartFootPoses(leftSolePose, rightSolePose);
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
