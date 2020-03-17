@@ -24,9 +24,10 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
 
       remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-      double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
-      double horizontalFOV = 180.0;
-      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
+      double verticalFOV = 80.0; // TODO: Reduce FOV when behaviors support it better
+      double horizontalFOV = 80.0;
+      double range = 20.0;
+      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, neckFrame);
    }
 
    @Override
