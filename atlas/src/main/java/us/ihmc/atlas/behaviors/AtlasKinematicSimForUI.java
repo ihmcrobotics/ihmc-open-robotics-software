@@ -47,7 +47,7 @@ public class AtlasKinematicSimForUI
          }).start();
       }
 
-      new SCSLidarAndCameraSimulator(ros2Node, createRobotModel());
+      new SCSLidarAndCameraSimulator(ros2Node, environment, createRobotModel());
    }
 
    private AtlasRobotModel createRobotModel()
