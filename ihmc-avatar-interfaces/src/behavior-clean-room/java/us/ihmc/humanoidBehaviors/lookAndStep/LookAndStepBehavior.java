@@ -88,6 +88,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
+      stateMachineFactory.setOnEntry(PERCEPT, this::onPerceptStateEntry);
       stateMachineFactory.setDoAction(PERCEPT, this::pollInterrupts);
       stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
       stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
@@ -120,6 +121,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       helper.publishToUI(CurrentState, to.name());
       LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+   }
+
+   private void onPerceptStateEntry()
+   {
+      robot.pitchHeadDown();
    }
 
    private boolean transitionFromPercept(double timeInState)

@@ -8,7 +8,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
-import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -62,9 +61,7 @@ public class AtlasLookAndStepBehaviorDemo
                                                                                                                                ros2Node));
       visiblePlanarRegionService.start();
 
-      PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
-      //      SimulatedREAModule simulatedREAModule = new SimulatedREAModule(ENVIRONMENT.get(), createRobotModel(), pubSubMode);
-//      simulatedREAModule.start();
+      new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
    }
 
    private void kinematicSimulation()

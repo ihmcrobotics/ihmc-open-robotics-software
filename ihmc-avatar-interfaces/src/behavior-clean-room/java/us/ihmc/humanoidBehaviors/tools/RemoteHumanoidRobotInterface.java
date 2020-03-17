@@ -213,6 +213,21 @@ public class RemoteHumanoidRobotInterface
       requestChestOrientationTrajectory(chestOrientationMessage);
    }
 
+   public void pitchHeadDown()
+   {
+      pitchHeadWithRespectToChest(20.0);
+   }
+
+   public void pitchHeadWithRespectToChest(double headPitch)
+   {
+      HumanoidRobotState referenceFrames = pollHumanoidRobotState();
+
+      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+      FrameQuaternion headOrientation = new FrameQuaternion(chestFrame, 0.0, headPitch, 0.0);
+      headOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      requestHeadOrientationTrajectory(1.0, headOrientation, ReferenceFrame.getWorldFrame(), referenceFrames.getPelvisZUpFrame());
+   }
+
    public void requestHeadOrientationTrajectory(double trajectoryTime, FrameQuaternion headOrientation, ReferenceFrame dataFrame,
                                                 ReferenceFrame trajectoryFrame)
    {
