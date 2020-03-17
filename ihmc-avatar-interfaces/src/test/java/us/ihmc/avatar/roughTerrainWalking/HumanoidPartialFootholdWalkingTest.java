@@ -73,7 +73,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    public void setup()
    {
       simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-//      simulationTestingParameters.setRunMultiThreaded(false);
+      simulationTestingParameters.setRunMultiThreaded(false);
    }
 
    @Test

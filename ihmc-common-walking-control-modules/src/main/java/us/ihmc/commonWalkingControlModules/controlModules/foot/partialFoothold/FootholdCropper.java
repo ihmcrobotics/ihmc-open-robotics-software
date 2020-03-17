@@ -2,11 +2,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -168,7 +171,7 @@ public class FootholdCropper
 
    private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
    private final FrameLine2D cropLine = new FrameLine2D();
-   private final FrameVector2D shiftVector = new FrameVector2D();
+   private final Vector2D shiftVector = new Vector2D();
 
    public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)
    {
@@ -202,19 +205,14 @@ public class FootholdCropper
 
    private void shiftLine(FrameLine2DReadOnly lineToShift, FrameLine2DBasics shiftedLineToPack, RobotSide sideToShift, double distanceToShift)
    {
-      double shiftingVectorX = -lineToShift.getDirectionY();
-      double shiftingVectorY = lineToShift.getDirectionX();
+      EuclidGeometryTools.perpendicularVector2D(lineToShift.getDirection(), shiftVector);
       if (sideToShift == RobotSide.RIGHT)
-      {
-         shiftingVectorX = -shiftingVectorX;
-         shiftingVectorY = -shiftingVectorY;
-      }
+         shiftVector.negate();
 
-      shiftingVectorX *= distanceToShift;
-      shiftingVectorY *= distanceToShift;
+      shiftVector.scale(distanceToShift);
 
       shiftedLineToPack.setIncludingFrame(lineToShift);
-      shiftedLineToPack.getPoint().add(shiftingVectorX, shiftingVectorY);
+      shiftedLineToPack.getPoint().add(shiftVector);
    }
 
    public boolean shouldShrinkFoothold()

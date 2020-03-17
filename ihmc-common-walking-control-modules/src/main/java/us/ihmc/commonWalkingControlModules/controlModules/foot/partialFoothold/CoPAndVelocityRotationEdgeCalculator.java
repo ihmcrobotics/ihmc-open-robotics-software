@@ -8,6 +8,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -58,8 +59,9 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
       String namePrefix = side.getLowerCaseName() + "CoPAndVelocity";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      DoubleProvider copAlpha = rotationParameters.getCopHistoryAlphaFilter();
-      pointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "PointOfRotation", "", registry, copAlpha, soleFrame);
+      DoubleProvider filterBreakFrequency = rotationParameters.getCopHistoryBreakFrequency();
+      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+      pointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "PointOfRotation", "", registry, alpha, soleFrame);
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
 
       lineOfRotationInSole = new YoFrameLine2D(pointOfRotation, axisOfRotation);
