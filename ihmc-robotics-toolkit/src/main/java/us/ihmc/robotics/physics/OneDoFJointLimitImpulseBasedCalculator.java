@@ -120,6 +120,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
          }
 
          impulse = -inverseApparentInertia * jointVelocity;
+         responseCalculator.applyJointImpulse(joint, impulse);
       }
       else
       {
@@ -155,15 +156,6 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
    public boolean isConstraintActive()
    {
       return isConstraintActive;
-   }
-
-   @Override
-   public void applyImpulseLazy()
-   {
-      if (!isConstraintActive)
-         return;
-
-      responseCalculator.applyJointImpulse(joint, impulse);
    }
 
    @Override

@@ -41,11 +41,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    private boolean isInitialized = false;
    private boolean isInertiaUpToDate = false;
+   private boolean isImpulseZero = false;
+   private boolean isContactClosing = false;
 
    private final ForwardDynamicsCalculator forwardDynamicsCalculatorA;
    private final ForwardDynamicsCalculator forwardDynamicsCalculatorB;
 
-   private final MultiBodyResponseCalculator reponseCalculatorA;
+   private final MultiBodyResponseCalculator responseCalculatorA;
    private final MultiBodyResponseCalculator responseCalculatorB;
 
    private final FramePoint3D contactPointA = new FramePoint3D();
@@ -91,8 +93,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private CollisionResult collisionResult;
    private RigidBodyTwistProvider externalRigidBodyTwistModifier;
 
-   private boolean isContactClosing;
-
    public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt,
                                          ForwardDynamicsCalculator forwardDynamicsCalculatorA, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
    {
@@ -126,7 +126,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       previousImpulseA.setReferenceFrame(contactFrame);
       impulseChangeA.setReferenceFrame(contactFrame);
 
-      reponseCalculatorA = new MultiBodyResponseCalculator(forwardDynamicsCalculatorA);
+      responseCalculatorA = new MultiBodyResponseCalculator(forwardDynamicsCalculatorA);
 
       if (forwardDynamicsCalculatorB != null)
          responseCalculatorB = new MultiBodyResponseCalculator(forwardDynamicsCalculatorB);
@@ -272,7 +272,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          if (!isInertiaUpToDate)
          {
             // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
-            reponseCalculatorA.computeRigidBodyApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
+            responseCalculatorA.computeRigidBodyApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
 
             if (forwardDynamicsCalculatorB != null)
             {
@@ -308,30 +308,51 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
             ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, coefficientOfFriction, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
          }
       }
-      else
-      {
-         reponseCalculatorA.reset();
-         if (responseCalculatorB != null)
-            responseCalculatorB.reset();
-      }
 
       if (impulseA.getLinearPart().getZ() < 0.0)
          throw new IllegalStateException("Malformed impulse");
 
       if (isFirstUpdate)
       {
-         impulseChangeA.set(impulseA.getLinearPart());
+         if (isContactClosing)
+         {
+            impulseChangeA.set(impulseA.getLinearPart());
+            isImpulseZero = !isContactClosing;
+         }
+         else
+         {
+            impulseChangeA.setToZero(contactFrame);
+            isImpulseZero = true;
+         }
       }
       else
       {
          impulseA.getLinearPart().interpolate(previousImpulseA, impulseA.getLinearPart(), alpha);
          impulseChangeA.sub(impulseA.getLinearPart(), previousImpulseA);
+         isImpulseZero = impulseA.getLinearPart().length() < 1.0e-10;
       }
 
-      if (forwardDynamicsCalculatorB != null)
+
+      if (isImpulseZero)
       {
-         impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
-         impulseB.negate();
+         responseCalculatorA.reset();
+
+         if (responseCalculatorB != null)
+         {
+            impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
+            responseCalculatorB.reset();
+         }
+      }
+      else
+      {
+         responseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
+
+         if (responseCalculatorB != null)
+         {
+            impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
+            impulseB.negate();
+            responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
+         }
       }
 
       previousImpulseA.set(impulseA.getLinearPart());
@@ -352,19 +373,12 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public boolean isConstraintActive()
    {
-      return isContactClosing;
+      return !isImpulseZero;
    }
 
-   @Override
-   public void applyImpulseLazy()
+   public boolean isContactClosing()
    {
-      if (!isContactClosing)
-         return;
-
-      reponseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
-
-      if (responseCalculatorB != null)
-         responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
+      return isContactClosing;
    }
 
    @Override
@@ -409,7 +423,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public JointStateProvider getJointTwistChangeProvider(int index)
    {
-      return index == 0 ? JointStateProvider.toJointTwistProvider(reponseCalculatorA) : JointStateProvider.toJointTwistProvider(responseCalculatorB);
+      return index == 0 ? JointStateProvider.toJointTwistProvider(responseCalculatorA) : JointStateProvider.toJointTwistProvider(responseCalculatorB);
    }
 
    @Override
@@ -430,7 +444,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    public RigidBodyTwistProvider getTwistChangeProviderA()
    {
-      return reponseCalculatorA.getTwistChangeProvider();
+      return responseCalculatorA.getTwistChangeProvider();
    }
 
    public RigidBodyTwistProvider getTwistChangeProviderB()
@@ -443,10 +457,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    public DenseMatrix64F getJointVelocityChangeA()
    {
-      if (!isContactClosing)
-         return null;
-
-      return reponseCalculatorA.propagateImpulse();
+      return isImpulseZero ? null : responseCalculatorA.propagateImpulse();
    }
 
    public RigidBodyBasics getContactingBodyB()
@@ -463,10 +474,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    {
       if (responseCalculatorB == null)
          return null;
-      if (!isContactClosing)
-         return null;
-
-      return responseCalculatorB.propagateImpulse();
+      return isImpulseZero ? null : responseCalculatorB.propagateImpulse();
    }
 
    public SpatialImpulseReadOnly getContactImpulseA()

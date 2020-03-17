@@ -45,8 +45,6 @@ public interface ImpulseBasedConstraintCalculator
 
    }
    
-   void applyImpulseLazy();
-   
    double getDT();
 
    int getNumberOfRobotsInvolved();

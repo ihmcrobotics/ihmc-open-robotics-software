@@ -3,10 +3,14 @@ package us.ihmc.robotics.physics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.JointStateType;
 
 /**
@@ -16,9 +20,11 @@ import us.ihmc.mecano.tools.JointStateType;
  */
 public class MultiContactImpulseCalculator
 {
-   private final List<SingleContactImpulseCalculator> impulseCalculators = new ArrayList<>();
+   private final List<SingleContactImpulseCalculator> contactCalculators = new ArrayList<>();
+   private final List<OneDoFJointLimitImpulseBasedCalculator> jointLimitCalculators = new ArrayList<>();
+   private final List<ImpulseBasedConstraintCalculator> calculators = new ArrayList<>();
 
-   private double alpha_min = 0.3;
+   private double alpha_min = 0.7;
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
 
@@ -28,6 +34,18 @@ public class MultiContactImpulseCalculator
    public MultiContactImpulseCalculator(ReferenceFrame rootFrame, double dt, Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap,
                                         MultiRobotCollisionGroup collisionGroup)
    {
+      for (RigidBodyBasics rootBody : collisionGroup.getRootBodies())
+      {
+         List<OneDoFJointBasics> jointsAtLimit = findOneDoFJointAtLimit(rootBody);
+
+         if (jointsAtLimit.isEmpty())
+            continue;
+
+         ForwardDynamicsCalculator robot = robotForwardDynamicsCalculatorMap.get(rootBody);
+
+         jointsAtLimit.stream().map(joint -> new OneDoFJointLimitImpulseBasedCalculator(dt, joint, robot)).forEach(jointLimitCalculators::add);
+      }
+
       for (CollisionResult collisionResult : collisionGroup.getGroupCollisions())
       {
          RigidBodyBasics rootA = collisionResult.getCollidableA().getRootBody();
@@ -35,24 +53,37 @@ public class MultiContactImpulseCalculator
          ForwardDynamicsCalculator robotA = robotForwardDynamicsCalculatorMap.get(rootA);
          ForwardDynamicsCalculator robotB = rootB != null ? robotForwardDynamicsCalculatorMap.get(rootB) : null;
 
-         impulseCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, dt, robotA, robotB));
+         contactCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, dt, robotA, robotB));
       }
 
-      for (SingleContactImpulseCalculator impulseCalculator : impulseCalculators)
+      calculators.addAll(contactCalculators);
+      calculators.addAll(jointLimitCalculators);
+
+      for (ImpulseBasedConstraintCalculator calculator : calculators)
       {
-         CombinedRigidBodyTwistProviders externalRigidBodyTwistModifier = impulseCalculators.stream().filter(other -> other != impulseCalculator)
-                                                                                            .collect(CombinedRigidBodyTwistProviders.collectFromCalculator(rootFrame));
-         CombinedJointStateProviders externalJointTwistModifier = impulseCalculators.stream().filter(other -> other != impulseCalculator)
-                                                                                    .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
-         impulseCalculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
+         CombinedRigidBodyTwistProviders externalRigidBodyTwistModifier = calculators.stream().filter(other -> other != calculator)
+                                                                                     .collect(CombinedRigidBodyTwistProviders.collectFromCalculator(rootFrame));
+         CombinedJointStateProviders externalJointTwistModifier = calculators.stream().filter(other -> other != calculator)
+                                                                             .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
+         calculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
       }
+   }
+
+   private static List<OneDoFJointBasics> findOneDoFJointAtLimit(RigidBodyBasics rootBody)
+   {
+      return SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).filter(joint -> isOneDoFJointAtLimit(joint)).collect(Collectors.toList());
+   }
+
+   private static boolean isOneDoFJointAtLimit(OneDoFJointReadOnly joint)
+   {
+      return joint.getQ() <= joint.getJointLimitLower() || joint.getEffortLimitUpper() <= joint.getQ();
    }
 
    public double computeImpulses(boolean verbose)
    {
-      if (impulseCalculators.size() == 1)
+      if (calculators.size() == 1)
       {
-         impulseCalculators.get(0).computeImpulse();
+         calculators.get(0).computeImpulse();
          return 0.0;
       }
       else
@@ -67,18 +98,30 @@ public class MultiContactImpulseCalculator
             maxUpdateMagnitude = Double.NEGATIVE_INFINITY;
             int numberOfClosingContacts = 0;
 
-            for (int i = 0; i < impulseCalculators.size(); i++)
+            for (int i = 0; i < calculators.size(); i++)
             {
-               SingleContactImpulseCalculator impulseCalculator = impulseCalculators.get(i);
-               impulseCalculator.updateImpulse(alpha);
-               double updateMagnitude = impulseCalculator.getVelocityUpdate();
+               ImpulseBasedConstraintCalculator calculator = calculators.get(i);
+               calculator.updateImpulse(alpha);
+               double updateMagnitude = calculator.getVelocityUpdate();
                if (verbose)
-                  System.out.println("Calc index: " + i + ", closing contact: " + impulseCalculator.isConstraintActive() + ", impulse update: "
-                        + impulseCalculator.getImpulseUpdate() + ", velocity update: " + impulseCalculator.getVelocityUpdate());
+               {
+                  if (calculator instanceof SingleContactImpulseCalculator)
+                  {
+                     SingleContactImpulseCalculator contactCalculator = (SingleContactImpulseCalculator) calculator;
+                     System.out.println("Calc index: " + i + ", active: " + contactCalculator.isConstraintActive() + ", closing: "
+                           + contactCalculator.isContactClosing() + ", impulse update: " + contactCalculator.getImpulseUpdate() + ", velocity update: "
+                           + contactCalculator.getVelocityUpdate());
+                  }
+                  else if (calculator instanceof OneDoFJointLimitImpulseBasedCalculator)
+                  {
+                     OneDoFJointLimitImpulseBasedCalculator jointCalculator = (OneDoFJointLimitImpulseBasedCalculator) calculator;
+                     System.out.println("Calc index: " + i + ", active: " + jointCalculator.isConstraintActive() + ", impulse update: "
+                           + jointCalculator.getImpulseUpdate() + ", velocity update: " + jointCalculator.getVelocityUpdate());
+                  }
+               }
                maxUpdateMagnitude = Math.max(maxUpdateMagnitude, updateMagnitude);
-               impulseCalculator.applyImpulseLazy();
 
-               if (impulseCalculator.isConstraintActive())
+               if (calculator.isConstraintActive())
                   numberOfClosingContacts++;
             }
 
@@ -107,27 +150,26 @@ public class MultiContactImpulseCalculator
 
    public void setSingleContactTolerance(double gamma)
    {
-      impulseCalculators.forEach(calculator -> calculator.setTolerance(gamma));
+      contactCalculators.forEach(calculator -> calculator.setTolerance(gamma));
+   }
+
+   public void setSpringConstant(double springConstant)
+   {
+      contactCalculators.forEach(calculator -> calculator.setSpringConstant(springConstant));
    }
 
    public void applyJointVelocityChange(Map<RigidBodyBasics, SingleRobotForwardDynamicsPlugin> singleRobotPluginMap)
    {
-      for (SingleContactImpulseCalculator impulseCalculator : impulseCalculators)
+      for (ImpulseBasedConstraintCalculator calculator : calculators)
       {
-         if (!impulseCalculator.isConstraintActive())
+         if (!calculator.isConstraintActive())
             continue;
 
-         CollisionResult collision = impulseCalculator.getCollisionResult();
-         RigidBodyBasics rootBodyA = collision.getCollidableA().getRootBody();
-         RigidBodyBasics rootBodyB = collision.getCollidableB().getRootBody();
-
-         SingleRobotForwardDynamicsPlugin robotPluginA = singleRobotPluginMap.get(rootBodyA);
-         robotPluginA.addJointVelocities(impulseCalculator.getJointVelocityChangeA());
-
-         if (rootBodyB != null)
+         for (int i = 0; i < calculator.getNumberOfRobotsInvolved(); i++)
          {
-            SingleRobotForwardDynamicsPlugin robotPluginB = singleRobotPluginMap.get(rootBodyB);
-            robotPluginB.addJointVelocities(impulseCalculator.getJointVelocityChangeB());
+            RigidBodyBasics rootBody = calculator.getRootBody(i);
+            SingleRobotForwardDynamicsPlugin robotPlugin = singleRobotPluginMap.get(rootBody);
+            robotPlugin.addJointVelocities(calculator.getJointVelocityChange(i));
          }
       }
    }
@@ -139,20 +181,6 @@ public class MultiContactImpulseCalculator
 
    public List<SingleContactImpulseCalculator> getImpulseCalculators()
    {
-      return impulseCalculators;
-   }
-
-   public static List<MultiContactImpulseCalculator> createMultiRobotCollisionGroups(ReferenceFrame rootFrame, double dt,
-                                                                                     Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap,
-                                                                                     List<MultiRobotCollisionGroup> collisionGroups)
-   {
-      List<MultiContactImpulseCalculator> calculators = new ArrayList<>();
-
-      for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
-      {
-         calculators.add(new MultiContactImpulseCalculator(rootFrame, dt, robotForwardDynamicsCalculatorMap, collisionGroup));
-      }
-
-      return calculators;
+      return contactCalculators;
    }
 }
