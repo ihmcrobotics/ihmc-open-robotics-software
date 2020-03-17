@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
@@ -11,7 +12,7 @@ import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsLi
 
 import java.util.Random;
 
-public class BehaviorPlanarRegionEnvironments
+public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 {
    public static final double CINDER_SLOPE_ANGLE = 13.0;
    public static final double Z_STEP_UP_PER_ROW = 0.10;
@@ -70,7 +71,7 @@ public class BehaviorPlanarRegionEnvironments
       return generator.getPlanarRegionsList();
    }
 
-   public static PlanarRegionsList crateRoughUpAndDownStairsWithFlatTop()
+   public static PlanarRegionsList createRoughUpAndDownStairsWithFlatTop()
    {
       return generate((random, generator) -> {
          offsetGrid(generator, 1.0, -0.5, 0.0, () ->

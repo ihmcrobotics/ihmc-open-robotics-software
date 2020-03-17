@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class PlanarRegionsFromCodeViewer extends Application
 {
    public static final Supplier<PlanarRegionsList> PLANNER_ENVIRONMENT = PlannerTestEnvironments::getMazeCorridor;
-   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::crateRoughUpAndDownStairsWithFlatTop;
+   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
 
    public static final Supplier<PlanarRegionsList> PLANAR_REGIONS_TO_VIEW = BEHAVIOR_ENVIRONMENT;
 
