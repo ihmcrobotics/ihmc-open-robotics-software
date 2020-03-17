@@ -11,7 +11,7 @@ public class FootholdRotationParameters
 {
    private final DoubleProvider geometricDetectionAngleThreshold;
 
-   private final DoubleProvider copHistoryAlphaFilter;
+   private final DoubleProvider copHistoryBreakFrequency;
 
    private final DoubleProvider angularVelocityAroundLoRThreshold;
    private final DoubleProvider footDropThreshold;
@@ -40,7 +40,7 @@ public class FootholdRotationParameters
       geometricDetectionAngleThreshold = new DoubleParameter(namePrefix + "AngleThreshold", registry, Math.toRadians(10.0));
 
       namePrefix = "CoPHistory_";
-      copHistoryAlphaFilter = new DoubleParameter(namePrefix + "CoPHistoryAlphaFilter", registry, 0.0);
+      copHistoryBreakFrequency = new DoubleParameter(namePrefix + "CoPHistoryBreakFrequency", registry, 100.0);
 
       namePrefix = "Verification_";
       stableRotationDirectionThreshold = new DoubleParameter(namePrefix + "StableRotationDirectionThreshold", registry, 10.0);
@@ -58,7 +58,7 @@ public class FootholdRotationParameters
       omegaThresholdForEstimation = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 1.5);
       decayBreakFrequency = new DoubleParameter(namePrefix + "rotationAngleDecayBreakFrequency", registry, 1.0);
       rotationAngleThreshold = new DoubleParameter(namePrefix + "rotationAngleThreshold", registry, 0.05);
-      velocityEdgeFilterBreakFrequency = new DoubleParameter(namePrefix + "velocityEdgeFilterBreakFrequency", registry, 20.0);
+      velocityEdgeFilterBreakFrequency = new DoubleParameter(namePrefix + "velocityEdgeFilterBreakFrequency", registry, 5.0);
 
       namePrefix = "Cropping_";
       thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 3);
@@ -73,9 +73,9 @@ public class FootholdRotationParameters
       return geometricDetectionAngleThreshold;
    }
 
-   public DoubleProvider getCopHistoryAlphaFilter()
+   public DoubleProvider getCopHistoryBreakFrequency()
    {
-      return copHistoryAlphaFilter;
+      return copHistoryBreakFrequency;
    }
 
    public DoubleProvider getAngularVelocityAroundLoRThreshold()

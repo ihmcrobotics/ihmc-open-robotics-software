@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.statistics.OnlineStandardDeviationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -15,17 +16,21 @@ public class OnlineLine2DLinearRegression
    private final OnlineLeastSquaresRegression onlineLeastSquaresRegression;
    private final YoFrameLine2D line;
 
-   private final YoDouble residual;
+   private final YoDouble transverseResidual;
+   private final YoDouble inlineResidual;
 
-   private final OnlineStandardDeviationCalculator deviationCalculator;
+   private final OnlineStandardDeviationCalculator transverseDeviationCalculator;
+   private final OnlineStandardDeviationCalculator inlineDeviationCalculator;
 
    public OnlineLine2DLinearRegression(String prefix, YoVariableRegistry registry)
    {
       onlineLeastSquaresRegression = new OnlineLeastSquaresRegression(prefix, registry);
-      deviationCalculator = new OnlineStandardDeviationCalculator(prefix, registry);
+      transverseDeviationCalculator = new OnlineStandardDeviationCalculator(prefix + "Transverse", registry);
+      inlineDeviationCalculator = new OnlineStandardDeviationCalculator(prefix + "Inline", registry);
 
       line = new YoFrameLine2D(prefix + "_MeanLine", ReferenceFrame.getWorldFrame(), registry);
-      residual = new YoDouble(prefix + "_NormalResidual", registry);
+      transverseResidual = new YoDouble(prefix + "_TransverseResidual", registry);
+      inlineResidual = new YoDouble(prefix + "_InlineResidual", registry);
    }
 
    private final Point2D firstPointOnLine = new Point2D();
@@ -34,8 +39,10 @@ public class OnlineLine2DLinearRegression
    public void reset()
    {
       onlineLeastSquaresRegression.reset();
-      deviationCalculator.reset();
-      residual.set(0.0);
+      transverseDeviationCalculator.reset();
+      inlineDeviationCalculator.reset();
+      inlineResidual.set(0.0);
+      transverseResidual.set(0.0);
    }
 
    public void update(Point2DReadOnly point)
@@ -51,9 +58,21 @@ public class OnlineLine2DLinearRegression
       secondPointOnLine.set(offsetX, onlineLeastSquaresRegression.computeY(offsetX));
 
       line.set(firstPointOnLine, secondPointOnLine);
-      residual.set(EuclidGeometryTools.distanceFromPoint2DToLine2D(x, y, line.getPoint(), line.getDirection()));
-      if (!residual.isNaN())
-         deviationCalculator.update(residual.getDoubleValue());
+      transverseResidual.set(EuclidGeometryTools.distanceFromPoint2DToLine2D(x, y, line.getPoint(), line.getDirection()));
+      if (!transverseResidual.isNaN())
+         transverseDeviationCalculator.update(transverseResidual.getDoubleValue());
+
+      inlineResidual.set(dotProduct(firstPointOnLine, x, y, line.getDirection()));
+      if (!inlineResidual.isNaN())
+         inlineDeviationCalculator.update(inlineResidual.getDoubleValue());
+   }
+
+   public static double dotProduct(Point2DReadOnly start1, double end1X, double end1Y, Vector2DReadOnly vector2)
+   {
+      double vector1X = end1X- start1.getX();
+      double vector1Y = end1Y - start1.getY();
+
+      return vector1X * vector2.getX() + vector1Y * vector2.getY();
    }
 
    public Line2DReadOnly getMeanLine()
@@ -61,19 +80,24 @@ public class OnlineLine2DLinearRegression
       return line;
    }
 
-   public double getVariance()
+   public double getTransverseVariance()
    {
-      return deviationCalculator.getVariance();
+      return transverseDeviationCalculator.getVariance();
    }
 
-   public double getStandardDeviation()
+   public double getTransverseStandardDeviation()
    {
-      return deviationCalculator.getStandardDeviation();
+      return transverseDeviationCalculator.getStandardDeviation();
+   }
+
+   public double getInlineVariance()
+   {
+      return inlineDeviationCalculator.getVariance();
    }
 
    public double getProbabilityPointIsOnLine(Point2DReadOnly point)
    {
       double distanceToMean = line.distance(point);
-      return ProbabilityDensityFunction.getProbabilityUsingNormalDistribution(distanceToMean, 0.0, getStandardDeviation());
+      return ProbabilityDensityFunction.getProbabilityUsingNormalDistribution(distanceToMean, 0.0, getTransverseStandardDeviation());
    }
 }
