@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -67,11 +68,20 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       if (launchPlannerToolbox)
       {
          planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule planningModule = planningAndProcessingModule.getPlanningModule();
 
          // Create logger and connect to messager
-         FootstepPlannerLogger logger = new FootstepPlannerLogger(planningAndProcessingModule.getPlanningModule());
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+
+         // Automatically send graph data over messager
+         planningModule.addStatusCallback(status ->
+                                          {
+                                             if (status.getResult().terminalResult())
+                                                messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                                                       Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
+                                          });
       }
    }
 
