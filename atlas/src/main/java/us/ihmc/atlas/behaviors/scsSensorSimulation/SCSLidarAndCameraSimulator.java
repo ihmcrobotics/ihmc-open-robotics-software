@@ -15,14 +15,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.tools.gui.AWTTools;
@@ -35,7 +38,7 @@ public class SCSLidarAndCameraSimulator
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
    {
       robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
 
@@ -64,6 +67,7 @@ public class SCSLidarAndCameraSimulator
 //      floatingHeadJoint.addJoint(gimbalJoint);
 
       robot.addRootJoint(floatingHeadJoint);
+      robot.setGravity(0.0);
 
       scs = new SimulationConstructionSet(robot);
       scs.setDT(0.001, 100); // TODO: Check this, might greatly alter performance
@@ -93,6 +97,9 @@ public class SCSLidarAndCameraSimulator
                                   new VideoDataServerImageCallback(new SCSVideoDataROS2Bridge(scsCameraPublisher::publish)),
                                   () -> robotConfigurationData.getLatest().getSyncTimestamp(),
                                   framesPerSecond);
+
+      scs.setGroundVisible(false);
+      scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
       if (!SystemUtils.IS_OS_WINDOWS)
          scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
@@ -144,5 +151,13 @@ public class SCSLidarAndCameraSimulator
 
       floatingHeadJoint.setPosition(tempNeckFramePose.getPosition());
       floatingHeadJoint.setQuaternion(tempNeckFramePose.getOrientation());
+   }
+
+   private Graphics3DObject createGroundLinkGraphicsFromGroundProfile(GroundProfile3D groundProfile)
+   {
+      Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
+      HeightMap heightMap = groundProfile.getHeightMapIfAvailable();
+      texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
+      return texturedGroundLinkGraphics;
    }
 }

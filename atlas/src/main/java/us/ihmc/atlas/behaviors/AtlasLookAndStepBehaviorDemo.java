@@ -2,6 +2,7 @@ package us.ihmc.atlas.behaviors;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,12 +16,14 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -64,16 +67,21 @@ public class AtlasLookAndStepBehaviorDemo
       visiblePlanarRegionService.start();
 
       new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
+
+      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
+      new JavaFXROS2VideoViewer(ros2Node);
    }
 
    private void dynamicsSimulation()
    {
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 10; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
-      AtlasBehaviorSimulation.create(createRobotModel(),
-                                     new PlanarRegionsListDefinedEnvironment(environment.get(), 0.02, false),
-                                     pubSubMode,
-                                     recordFrequencySpeedup).simulate();
+      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), pubSubMode, recordFrequencySpeedup).simulate();
+   }
+
+   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
+   {
+      return new PlanarRegionsListDefinedEnvironment(environment.get(), 0.02, false);
    }
 
    private void kinematicSimulation()
