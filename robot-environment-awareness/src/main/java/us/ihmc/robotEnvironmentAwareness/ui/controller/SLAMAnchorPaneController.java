@@ -92,10 +92,10 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(REAModuleAPI.SLAMVizClear, true);
    }
 
-   @FXML
-   public void initialize()
-   {
-      attachREAMessager(PointCloudAnchorPaneController.uiStaticMessager);
-      bindControls();
-   }
+//   @FXML
+//   public void initialize()
+//   {
+//      attachREAMessager(PointCloudAnchorPaneController.uiStaticMessager);
+//      bindControls();
+//   }
 }
