@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -223,19 +224,21 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
-         Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion startOrientation = EuclidCoreRandomTools.nextQuaternion(random);
-         Point3D goalPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion goalOrientation = EuclidCoreRandomTools.nextQuaternion(random);
+
+         Pose3D startLeftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D startRightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D goalLeftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D goalRightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, startRightFootPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, goalLeftFootPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalRightFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
@@ -257,15 +260,13 @@ public class RemoteFootstepPlannerUIMessagingTest
 
          FootstepPlanningRequestPacket packet = planningRequestReference.getAndSet(null);
 
-         EuclidCoreTestTools
-               .assertPoint3DGeometricallyEquals("Start goal positions aren't equal.", startPosition, packet.getStanceFootPositionInWorld(), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("End goal positions aren't equal.", goalPosition, packet.getGoalPositionInWorld(), epsilon);
-         EuclidCoreTestTools
-               .assertQuaternionEquals("Start goal orientations aren't equal.", startOrientation, packet.getStanceFootOrientationInWorld(), epsilon);
-         EuclidCoreTestTools.assertQuaternionEquals("End goal orientations aren't equal.", goalOrientation, packet.getGoalOrientationInWorld(), epsilon);
+         assertTrue("Left foot poses aren't equal", packet.getStartLeftFootPose().epsilonEquals(startLeftFootPose, epsilon));
+         assertTrue("Right foot poses aren't equal", packet.getStartRightFootPose().epsilonEquals(startRightFootPose, epsilon));
+         assertTrue("Left goal foot poses aren't equal", packet.getGoalLeftFootPose().epsilonEquals(goalLeftFootPose, epsilon));
+         assertTrue("Right goal foot poses aren't equal", packet.getGoalRightFootPose().epsilonEquals(goalRightFootPose, epsilon));
          assertEquals("Timeouts aren't equal.", timeout, packet.getTimeout(), 1e-5);
          assertEquals("Planner types aren't equal.", planningType, FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType()));
-         assertEquals("Initial support sides aren't equal.", robotSide, RobotSide.fromByte(packet.getInitialStanceRobotSide()));
+         assertEquals("Initial support sides aren't equal.", robotSide, RobotSide.fromByte(packet.getRequestedInitialStanceSide()));
 
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, packet.getPlannerRequestId(), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, packet.getHorizonLength(), epsilon);
@@ -285,18 +286,15 @@ public class RemoteFootstepPlannerUIMessagingTest
                              ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2Tools.ROS2TopicQualifier.INPUT));
       localNode.spin();
 
-      AtomicReference<Point3D> goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
-      AtomicReference<Point3D> startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
-
-      AtomicReference<Quaternion> goalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientation);
-      AtomicReference<Quaternion> startOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientation);
+      AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
+      AtomicReference<Pose3DReadOnly> rightFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootPose);
+      AtomicReference<Pose3DReadOnly> leftFootGoalPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
+      AtomicReference<Pose3DReadOnly> rightFootGoalPoseReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
 
       AtomicReference<FootstepPlannerType> planningTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType);
       AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout);
       AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide);
-
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
-
       AtomicReference<Double> plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
 
       for (int iter = 0; iter < iters; iter++)
@@ -305,22 +303,22 @@ public class RemoteFootstepPlannerUIMessagingTest
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
-         Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion startOrientation = EuclidCoreRandomTools.nextQuaternion(random);
-         Point3D goalPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion goalOrientation = EuclidCoreRandomTools.nextQuaternion(random);
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+         Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D rightFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
          FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-         packet.getStanceFootPositionInWorld().set(startPosition);
-         packet.getGoalPositionInWorld().set(goalPosition);
          packet.setRequestedFootstepPlannerType(planningType.toByte());
+         packet.getStartLeftFootPose().set(leftFootPose);
+         packet.getStartRightFootPose().set(rightFootPose);
+         packet.getGoalLeftFootPose().set(leftFootGoalPose);
+         packet.getGoalRightFootPose().set(rightFootGoalPose);
          packet.setTimeout(timeout);
-         packet.setInitialStanceRobotSide(robotSide.toByte());
-         packet.getGoalOrientationInWorld().set(goalOrientation);
-         packet.getStanceFootOrientationInWorld().set(startOrientation);
+         packet.setRequestedInitialStanceSide(robotSide.toByte());
          packet.setPlannerRequestId(plannerRequestId);
          packet.setSequenceId(sequenceId);
          packet.setHorizonLength(horizonLength);
@@ -331,10 +329,9 @@ public class RemoteFootstepPlannerUIMessagingTest
          double maxWaitTime = 5.0;
          double currentWaitTime = 0.0;
          long sleepDuration = 10;
-         while (startPositionReference.get() == null || goalPositionReference.get() == null || timeoutReference.get() == null
-               || planningTypeReference.get() == null || robotSideReference.get() == null || startOrientationReference.get() == null
-               || goalOrientationReference.get() == null || plannerRequestIdReference.get() == null
-               || plannerHorizonLengthReference.get() == null )
+         while (leftFootPoseReference.get() == null || rightFootPoseReference.get() == null || leftFootGoalPoseReference.get() == null || rightFootGoalPoseReference.get() == null
+                || timeoutReference.get() == null || planningTypeReference.get() == null || robotSideReference.get() == null
+                || plannerRequestIdReference.get() == null || plannerHorizonLengthReference.get() == null)
          {
             assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
 
@@ -342,13 +339,13 @@ public class RemoteFootstepPlannerUIMessagingTest
             currentWaitTime += Conversions.millisecondsToSeconds(sleepDuration);
          }
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Start positions aren't equal.", startPosition, startPositionReference.getAndSet(null), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("End goal positions aren't equal.", goalPosition, goalPositionReference.getAndSet(null), epsilon);
+         Assertions.assertTrue(leftFootPose.epsilonEquals(leftFootPoseReference.get(), epsilon), "leftFootPose values aren't equal");
+         Assertions.assertTrue(rightFootPose.epsilonEquals(rightFootPoseReference.get(), epsilon), "rightFootPose values aren't equal");
+         Assertions.assertTrue(leftFootGoalPose.epsilonEquals(leftFootGoalPoseReference.get(), epsilon), "leftFootGoalPose values aren't equal");
+         Assertions.assertTrue(rightFootGoalPose.epsilonEquals(rightFootGoalPoseReference.get(), epsilon), "rightFootGoalPose values aren't equal");
          assertEquals("Timeouts aren't equal.", timeout, timeoutReference.getAndSet(null), epsilon);
          assertEquals("Planner types aren't equal.", planningType, planningTypeReference.getAndSet(null));
          assertEquals("Initial support sides aren't equal.", robotSide, robotSideReference.getAndSet(null));
-         EuclidCoreTestTools.assertQuaternionEquals("Start orientations aren't equal.", startOrientation, startOrientationReference.getAndSet(null), epsilon);
-         EuclidCoreTestTools.assertQuaternionEquals("Goal orientations aren't equal.", goalOrientation, goalOrientationReference.getAndSet(null), epsilon);
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
 
@@ -374,19 +371,19 @@ public class RemoteFootstepPlannerUIMessagingTest
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
-         Point3D startPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion startOrientation = EuclidCoreRandomTools.nextQuaternion(random);
-         Point3D goalPosition = EuclidCoreRandomTools.nextPoint3D(random);
-         Quaternion goalOrientation = EuclidCoreRandomTools.nextQuaternion(random);
+         Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         Pose3D rightFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, leftFootGoalPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, rightFootGoalPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, leftFootPose);
+         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, rightFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);

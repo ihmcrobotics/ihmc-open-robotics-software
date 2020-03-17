@@ -69,12 +69,6 @@
                     </content>
                 </Tab>
 
-                <Tab text="Unit Test Exporter">
-                    <content>
-                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
-                    </content>
-                </Tab>
-
                 <Tab text="Robot Operation">
                     <content>
                         <fx:include fx:id="uiRobot" source="UIRobot.fxml" />

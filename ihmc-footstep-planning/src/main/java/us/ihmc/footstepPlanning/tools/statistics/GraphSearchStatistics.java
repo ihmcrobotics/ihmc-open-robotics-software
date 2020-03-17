@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.tools.statistics;
 
-import org.jgrapht.Graph;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -16,7 +15,6 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.StatisticsType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,8 +73,8 @@ public class GraphSearchStatistics implements PlannerStatistics<GraphSearchStati
       PlannerLatticeMap expandedNodeMap = new PlannerLatticeMap();
 
       FootstepPlannerRequest request = planningModule.getRequest();
-      Pose3D stanceFootPose = request.getStanceFootPose();
-      FootstepNode startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), request.getInitialStanceSide());
+      Pose3D stanceFootPose = request.getStartFootPoses().get(request.getRequestedInitialStanceSide());
+      FootstepNode startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), request.getRequestedInitialStanceSide());
       SimplePlanarRegionFootstepNodeSnapper snapper = planningModule.getSnapper();
       DirectedGraph<FootstepNode> graph = planningModule.getFootstepPlanner().getGraph();
 

@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.communication;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -71,28 +72,25 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
-   public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
    public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
-
-   public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
-   public static final Topic<Point3D> StartPosition = topic("StartPosition");
-   public static final Topic<Point3D> GoalPosition = topic("GoalPosition");
+   public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
+   public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
+   public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");
+   public static final Topic<Pose3DReadOnly> RightFootGoalPose = topic("RightFootGoalPose");
+   public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
+   public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
+   public static final Topic<Point3D> GoalMidFootPosition = topic("GoalMidFootPosition");
+   public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
 
-   public static final Topic<Quaternion> StartOrientation = topic("StartOrientation");
-   public static final Topic<Quaternion> GoalOrientation = topic("GoalOrientation");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
 
-   public static final Topic<Point3D> LeftFootStartPosition = topic("LeftFootStartPosition");
-   public static final Topic<Point3D> RightFootStartPosition = topic("RightFootStartPosition");
-   public static final Topic<Quaternion> LeftFootStartOrientation = topic("LeftFootStartOrientation");
-   public static final Topic<Quaternion> RightFootStartOrientation = topic("RightFootStartOrientation");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
 

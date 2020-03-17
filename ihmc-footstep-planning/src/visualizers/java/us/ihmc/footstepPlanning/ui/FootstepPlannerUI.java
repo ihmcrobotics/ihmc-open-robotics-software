@@ -7,23 +7,21 @@ import java.util.ArrayList;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.AmbientLight;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
@@ -62,12 +60,11 @@ public class FootstepPlannerUI
    private final StartGoalPositionEditor startGoalEditor;
    private final NodeCheckerEditor nodeCheckerEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
-   private final StartGoalOrientationViewer startGoalOrientationViewer;
+   private final GoalOrientationViewer goalOrientationViewer;
    private final FootstepPathMeshViewer pathViewer;
    private final FootstepPostProcessingMeshViewer postProcessingViewer;
-   private final StartGoalOrientationEditor orientationEditor;
+   private final GoalOrientationEditor orientationEditor;
    private final NodeCheckerRenderer nodeCheckerRenderer;
-   private final FootstepPlannerDataExporter dataExporter;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final OccupancyMapRenderer occupancyMapRenderer;
@@ -93,8 +90,6 @@ public class FootstepPlannerUI
    private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
    @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
-   @FXML
-   private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
    @FXML
    private MainTabController mainTabController;
    @FXML
@@ -157,7 +152,6 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
-      dataExporterAnchorPaneController.attachMessager(messager);
       uiRobotController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
@@ -175,35 +169,23 @@ public class FootstepPlannerUI
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
-      {
-         /** TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ is released */
-         double ambientValue = 0.7;
-         double pointValue = 0.2;
-         double pointDistance = 1000.0;
-         Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
-         view3dFactory.addNodeToView(new AmbientLight(ambientColor));
-         Color indoorColor = Color.color(pointValue, pointValue, pointValue);
-         view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
-      }
+      view3dFactory.addDefaultLighting();
+
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
-                                                                 StartPosition, LowLevelGoalPosition, GoalPosition);
-      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
-      this.startGoalOrientationViewer.setPlannerParameters(plannerParameters);
-      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabled, GoalPositionEditModeEnabled,
-                                                         StartPosition, GoalPosition, PlanarRegionData, SelectedRegion,
-                                                         StartOrientationEditModeEnabled, GoalOrientationEditModeEnabled);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled,
+                                                                 null, LowLevelGoalPosition, GoalMidFootPosition);
+      this.goalOrientationViewer = new GoalOrientationViewer(messager);
+      this.goalOrientationViewer.setPlannerParameters(plannerParameters);
+      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, null, GoalPositionEditModeEnabled,
+                                                         null, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
+                                                         null, GoalOrientationEditModeEnabled);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
-      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
+      this.orientationEditor = new GoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new FootstepPostProcessingMeshViewer(messager);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager, contactPointParameters);
-      this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
@@ -213,7 +195,7 @@ public class FootstepPlannerUI
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
-      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
+      view3dFactory.addNodeToView(goalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
@@ -232,6 +214,17 @@ public class FootstepPlannerUI
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
+         robotVisualizer.setRobotLoadedCallback(() ->
+                                                {
+                                                   for(RobotSide side : RobotSide.values)
+                                                   {
+                                                      FramePose3D footPose = new FramePose3D();
+                                                      footPose.setToZero(robotVisualizer.getFullRobotModel().getSoleFrames().get(side));
+                                                      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+                                                      messager.submitMessage(side == RobotSide.LEFT ? LeftFootPose : RightFootPose, footPose);
+                                                   }
+                                                });
+
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
@@ -263,7 +256,7 @@ public class FootstepPlannerUI
       {
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
-         startGoalOrientationViewer.setDefaultContactPoints(contactPointParameters);
+         goalOrientationViewer.setDefaultContactPoints(contactPointParameters);
          expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
          fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
          footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
@@ -271,7 +264,7 @@ public class FootstepPlannerUI
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
-      startGoalOrientationViewer.start();
+      goalOrientationViewer.start();
       startGoalEditor.start();
       orientationEditor.start();
       pathViewer.start();
@@ -284,6 +277,7 @@ public class FootstepPlannerUI
       expandedNodesRenderer.start();
       fullGraphRenderer.start();
       footstepPlannerLogRenderer.start();
+      new FootPoseFromMidFootUpdater(messager).start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -354,13 +348,12 @@ public class FootstepPlannerUI
    {
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
-      startGoalOrientationViewer.stop();
+      goalOrientationViewer.stop();
       startGoalEditor.stop();
       orientationEditor.stop();
       pathViewer.stop();
       postProcessingViewer.stop();
       nodeCheckerRenderer.stop();
-      dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       occupancyMapRenderer.stop();

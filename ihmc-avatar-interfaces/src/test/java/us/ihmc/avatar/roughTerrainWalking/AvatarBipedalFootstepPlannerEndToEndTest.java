@@ -293,16 +293,22 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
          humanoidRobotDataReceiver.updateRobotModel();
       }
 
-      ReferenceFrame soleFrame = humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
-      FramePose3D initialStancePose = new FramePose3D(soleFrame, new Point3D(0.0, 0.0, 0.001), new AxisAngle());
-      initialStancePose.changeFrame(ReferenceFrame.getWorldFrame());
       RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose3D leftSolePose = new FramePose3D(humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightSolePose = new FramePose3D(humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
+      YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(leftSolePose, goalPose);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
+      double stanceWidth = footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth();
 
-      FootstepPlanningRequestPacket requestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose,
-                                                 plannerType);
+      FootstepPlanningRequestPacket requestPacket = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
+                                                                                                                    leftSolePose,
+                                                                                                                    rightSolePose,
+                                                                                                                    goalPose,
+                                                                                                                    stanceWidth,
+                                                                                                                    plannerType);
       if(planarRegionsList != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);

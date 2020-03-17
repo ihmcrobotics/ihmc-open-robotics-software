@@ -4,13 +4,9 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startOpaqueMaterial;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -21,16 +17,15 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
@@ -41,13 +36,12 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class StartGoalOrientationViewer extends AnimationTimer
+public class GoalOrientationViewer extends AnimationTimer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Group root = new Group();
 
    private static final double cylinderLength = 5.0 * RADIUS;
-   private final ArrowGraphic startArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.GREEN);
    private final ArrowGraphic lowLevelGoalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.DARKRED);
    private final ArrowGraphic goalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.RED);
    private final SideDependentList<FootGraphic> footGraphics = new SideDependentList<>();
@@ -57,41 +51,35 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private SideDependentList<Material> opaqueFootMaterial = new SideDependentList<>();
 
    private FootstepPlannerParametersReadOnly parameters;
-   private final AtomicReference<Boolean> startRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalPositionEditModeEnabled;
 
-   private final AtomicReference<Point3D> startPositionReference;
    private final AtomicReference<Point3D> lowLevelGoalPositionReference;
-   private final AtomicReference<Point3D> goalPositionReference;
-
-   private final AtomicReference<Quaternion> startQuaternionReference;
    private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
-   private final AtomicReference<Quaternion> goalQuaternionReference;
 
-   private final PoseReferenceFrame goalFrame = new PoseReferenceFrame("goalFrame", ReferenceFrame.getWorldFrame());
+   private final AtomicReference<Point3D> goalMidFootPosition;
+   private final AtomicReference<Quaternion> goalMidFootOrientation;
+   private final AtomicReference<Pose3DReadOnly> leftFootGoalPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
 
-   public StartGoalOrientationViewer(Messager messager)
+   public GoalOrientationViewer(Messager messager)
    {
-      startArrow.setMouseTransparent(true);
       lowLevelGoalArrow.setMouseTransparent(true);
       goalArrow.setMouseTransparent(true);
 
-      root.getChildren().add(startArrow);
       root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
-      startRotationEditModeEnabled = messager.createInput(StartOrientationEditModeEnabled, false);
       goalRotationEditModeEnabled = messager.createInput(GoalOrientationEditModeEnabled, false);
       goalPositionEditModeEnabled = messager.createInput(GoalPositionEditModeEnabled, false);
 
-      startPositionReference = messager.createInput(StartPosition, new Point3D());
       lowLevelGoalPositionReference = messager.createInput(LowLevelGoalPosition, new Point3D());
-      goalPositionReference = messager.createInput(GoalPosition, new Point3D());
-
-      startQuaternionReference = messager.createInput(StartOrientation, new Quaternion());
       lowLevelGoalQuaternionReference = messager.createInput(LowLevelGoalOrientation, new Quaternion());
-      goalQuaternionReference = messager.createInput(GoalOrientation, new Quaternion());
+
+      goalMidFootPosition = messager.createInput(GoalMidFootPosition, new Point3D());
+      goalMidFootOrientation = messager.createInput(GoalMidFootOrientation, new Quaternion());
+      leftFootGoalPose = messager.createInput(LeftFootGoalPose);
+      rightFootGoalPose = messager.createInput(RightFootGoalPose);
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
@@ -99,37 +87,9 @@ public class StartGoalOrientationViewer extends AnimationTimer
       this.parameters = parameters;
    }
 
-   private void updateGoalFrame(Point3D goalPosition)
-   {
-      goalFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, goalPosition));
-      goalFrame.setOrientationAndUpdate(goalQuaternionReference.get());
-
-      if (footGraphics.isEmpty())
-         return;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         double width = parameters.getIdealFootstepWidth() / 2.0;
-         FramePoint3D footPose = new FramePoint3D(goalFrame, 0.0, robotSide.negateIfRightSide(width), 0.0);
-         footPose.changeFrame(worldFrame);
-         setFootPose(footGraphics.get(robotSide), footPose, goalQuaternionReference.get().getYaw());
-      }
-   }
-
    @Override
    public void handle(long now)
    {
-      if (startRotationEditModeEnabled.get())
-         startArrow.setMaterial(startTransparentMaterial);
-      else
-         startArrow.setMaterial(startOpaqueMaterial);
-
-      Point3D startPosition = startPositionReference.get();
-      if (startPosition != null)
-      {
-         setArrowPose(startArrow, startPosition, startQuaternionReference.get().getYaw());
-      }
-
       if (goalRotationEditModeEnabled.get())
          goalArrow.setMaterial(goalTransparentMaterial);
       else
@@ -149,10 +109,10 @@ public class StartGoalOrientationViewer extends AnimationTimer
          }
       }
 
-      Point3D goalPosition = goalPositionReference.get();
+      Point3D goalPosition = goalMidFootPosition.get();
       if (goalPosition != null)
       {
-         setArrowPose(goalArrow, goalPosition, goalQuaternionReference.get().getYaw());
+         setArrowPose(goalArrow, goalPosition, goalMidFootOrientation.get().getYaw());
       }
 
       Point3D lowLevelGoalPosition = lowLevelGoalPositionReference.get();
@@ -161,9 +121,17 @@ public class StartGoalOrientationViewer extends AnimationTimer
          setArrowPose(lowLevelGoalArrow, lowLevelGoalPosition, lowLevelGoalQuaternionReference.get().getYaw());
       }
 
-      if (goalPosition != null)
+      if (!footGraphics.isEmpty())
       {
-         updateGoalFrame(goalPosition);
+         if (leftFootGoalPose.get() != null)
+         {
+            setFootPose(footGraphics.get(RobotSide.LEFT), leftFootGoalPose.getAndSet(null));
+         }
+
+         if (rightFootGoalPose.get() != null)
+         {
+            setFootPose(footGraphics.get(RobotSide.RIGHT), rightFootGoalPose.getAndSet(null));
+         }
       }
    }
 
@@ -175,12 +143,12 @@ public class StartGoalOrientationViewer extends AnimationTimer
       arrow.setRotate(Math.toDegrees(orientationRadians));
    }
 
-   private static void setFootPose(FootGraphic foot, Point3DReadOnly position, double orienationInRadians)
+   private static void setFootPose(FootGraphic foot, Pose3DReadOnly footPose)
    {
-      foot.setTranslateX(position.getX());
-      foot.setTranslateY(position.getY());
-      foot.setTranslateZ(position.getZ());
-      foot.setRotate(Math.toDegrees(orienationInRadians));
+      foot.setTranslateX(footPose.getX());
+      foot.setTranslateY(footPose.getY());
+      foot.setTranslateZ(footPose.getZ());
+      foot.setRotate(Math.toDegrees(footPose.getYaw()));
    }
 
    public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
