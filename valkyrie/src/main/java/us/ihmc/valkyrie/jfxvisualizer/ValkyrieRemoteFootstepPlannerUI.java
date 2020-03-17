@@ -5,7 +5,9 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -13,8 +15,8 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -31,8 +33,8 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
-      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.DEFAULT);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
+      ValkyrieRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
       previewModel.setTransparency(0.0);
       previewModel.setUseOBJGraphics(true);
 
@@ -46,9 +48,14 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
                                               model.getWalkingControllerParameters());
       ui.show();
 
-      if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
+      if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
       {
-         new FootstepPlanningToolboxModule(model, model.getLogModelProvider(), false);
+         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
+
+         // Create logger and connect to messager
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
+         Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
       }
    }
 

@@ -6,15 +6,19 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -24,6 +28,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToWalkingSingleSupportState extends TransferState
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private static final int numberOfFootstepsToConsider = 3;
    private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
    private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
@@ -38,19 +44,23 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
 
+   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
+   private final TouchdownErrorCompensator touchdownErrorCompensator;
+
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
-                                              HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                                              WalkingControllerParameters walkingControllerParameters,
+                                              TouchdownErrorCompensator touchdownErrorCompensator, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
                                               DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
             rhoMin, parentRegistry);
 
       this.minimumTransferTime = minimumTransferTime;
+      this.touchdownErrorCompensator = touchdownErrorCompensator;
 
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
@@ -147,6 +157,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
          legConfigurationManager.collapseLegDuringTransfer(transferToSide);
       }
 
+      updateFootPlanOffset();
+
       double toeOffDuration = footstepTimings[0].getLiftoffDuration();
       if (doManualLiftOff() && transferDuration - timeInState < toeOffDuration)
       {
@@ -173,6 +185,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       super.onEntry();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
+
+      updateFootPlanOffset();
    }
 
    @Override
@@ -220,5 +234,25 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       // keep swing times and only adjust transfers for now
       stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
+   }
+
+   private void updateFootPlanOffset()
+   {
+      WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+      if (previousStateEnum == null)
+         return;
+
+      RobotSide previousSupportSide = previousStateEnum.getSupportSide();
+      if (previousSupportSide == null)
+         return;
+
+      RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
+      if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
+      {
+         actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
+         actualFootPositionInWorld.changeFrame(worldFrame);
+
+         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
+      }
    }
 }

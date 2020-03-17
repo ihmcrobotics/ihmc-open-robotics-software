@@ -8,7 +8,103 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
+import controller_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
+import controller_msgs.msg.dds.AtlasElectricMotorEnablePacket;
+import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import controller_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
+import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
+import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
+import controller_msgs.msg.dds.BDIBehaviorStatusPacket;
+import controller_msgs.msg.dds.BehaviorControlModePacket;
+import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import controller_msgs.msg.dds.BehaviorStatusPacket;
+import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.ClearDelayQueueMessage;
+import controller_msgs.msg.dds.DesiredAccelerationsMessage;
+import controller_msgs.msg.dds.DetectedObjectPacket;
+import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.FisheyePacket;
+import controller_msgs.msg.dds.FootLoadBearingMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPathPlanPacket;
+import controller_msgs.msg.dds.FootstepPlanRequestPacket;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandCollisionDetectedPacket;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.msg.dds.HandPowerCyclePacket;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import controller_msgs.msg.dds.IntrinsicParametersMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.LegCompliancePacket;
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.LocalizationPointMapPacket;
+import controller_msgs.msg.dds.LocalizationStatusPacket;
+import controller_msgs.msg.dds.ManualHandControlPacket;
+import controller_msgs.msg.dds.MultisenseParameterPacket;
+import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
+import controller_msgs.msg.dds.ObjectWeightPacket;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
+import controller_msgs.msg.dds.PointCloudWorldPacket;
+import controller_msgs.msg.dds.PrepareForLocomotionMessage;
+import controller_msgs.msg.dds.QueueableMessage;
+import controller_msgs.msg.dds.ReachingManifoldMessage;
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.SnapFootstepPacket;
+import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.StateEstimatorModePacket;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.ValveLocationPacket;
+import controller_msgs.msg.dds.VehiclePosePacket;
+import controller_msgs.msg.dds.VideoPacket;
+import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
+import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.WallPosePacket;
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -1241,6 +1337,7 @@ public class HumanoidMessageTools
       message.setDefaultSwingDuration(defaultSwingDuration);
       message.setDefaultTransferDuration(defaultTransferDuration);
       message.setFinalTransferDuration(finalTransferDuration);
+      message.getQueueingProperties().setExecutionMode(executionMode.toByte());
       return message;
    }
 
@@ -1721,44 +1818,45 @@ public class HumanoidMessageTools
                                         trajectoryReferenceFrame.hashCode());
    }
 
-   public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
-      configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getRightArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getLeftFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getRightFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getLeftHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getRightHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration);
-      configureForStreaming(messageToModify.getSpineTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getRightArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getLeftFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getRightFootTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getLeftHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getRightHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getSpineTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
    }
 
-   public static void configureForStreaming(JointspaceTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(JointspaceTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
-      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration, timestamp);
    }
 
-   public static void configureForStreaming(EuclideanTrajectoryMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(EuclideanTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
-      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration, timestamp);
    }
 
-   public static void configureForStreaming(SO3TrajectoryMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(SO3TrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
-      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration, timestamp);
    }
 
-   public static void configureForStreaming(SE3TrajectoryMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(SE3TrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
-      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration);
+      configureForStreaming(messageToModify.getQueueingProperties(), streamIntegrationDuration, timestamp);
    }
 
-   public static void configureForStreaming(QueueableMessage messageToModify, double streamIntegrationDuration)
+   public static void configureForStreaming(QueueableMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
       messageToModify.setExecutionMode(ExecutionMode.STREAM.toByte());
       messageToModify.setStreamIntegrationDuration(streamIntegrationDuration);
+      messageToModify.setTimestamp(timestamp);
    }
 
    public static void configureForOverriding(WholeBodyTrajectoryMessage messageToModify)
@@ -2427,5 +2525,15 @@ public class HumanoidMessageTools
          }
       }
       return trajectoryTime;
+   }
+
+   /**
+    * Empty message used to reset any {@link WholeBodyTrajectoryMessage}. Do NOT modify.
+    */
+   private static final WholeBodyTrajectoryMessage EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE = new WholeBodyTrajectoryMessage();
+
+   public static void resetWholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryMessage message)
+   {
+      message.set(EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE);
    }
 }

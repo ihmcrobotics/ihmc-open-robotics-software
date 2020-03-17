@@ -16,6 +16,11 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
             */
    public long sequence_id_;
    /**
+            * The timestamp (in nanoseconds) at which this message was generated.
+            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+            */
+   public long timestamp_;
+   /**
             * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
             * that the solver is working properly.
             * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
@@ -65,6 +70,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
    {
       sequence_id_ = other.sequence_id_;
 
+      timestamp_ = other.timestamp_;
+
       stream_to_controller_ = other.stream_to_controller_;
 
       stream_initial_blend_duration_ = other.stream_initial_blend_duration_;
@@ -89,6 +96,23 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * The timestamp (in nanoseconds) at which this message was generated.
+            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+            */
+   public void setTimestamp(long timestamp)
+   {
+      timestamp_ = timestamp;
+   }
+   /**
+            * The timestamp (in nanoseconds) at which this message was generated.
+            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+            */
+   public long getTimestamp()
+   {
+      return timestamp_;
    }
 
    /**
@@ -203,6 +227,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.stream_to_controller_, other.stream_to_controller_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stream_initial_blend_duration_, other.stream_initial_blend_duration_, epsilon)) return false;
@@ -233,6 +259,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
+
       if(this.stream_to_controller_ != otherMyClass.stream_to_controller_) return false;
 
       if(this.stream_initial_blend_duration_ != otherMyClass.stream_initial_blend_duration_) return false;
@@ -254,6 +282,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       builder.append("KinematicsStreamingToolboxInputMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("timestamp=");
+      builder.append(this.timestamp_);      builder.append(", ");
       builder.append("stream_to_controller=");
       builder.append(this.stream_to_controller_);      builder.append(", ");
       builder.append("stream_initial_blend_duration=");

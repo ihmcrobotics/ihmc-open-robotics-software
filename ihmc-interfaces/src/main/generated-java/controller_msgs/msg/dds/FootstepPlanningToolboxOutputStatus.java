@@ -19,6 +19,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 5;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 6;
    public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 7;
+   public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 8;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -31,6 +32,11 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
    public controller_msgs.msg.dds.FootstepPlanningStatistics footstep_planning_statistics_;
+   /**
+            * Contains planner stack trace if failure is due to an exception
+            */
+   public java.lang.StringBuilder exception_message_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  stacktrace_;
 
    public FootstepPlanningToolboxOutputStatus()
    {
@@ -39,6 +45,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
       footstep_planning_statistics_ = new controller_msgs.msg.dds.FootstepPlanningStatistics();
+      exception_message_ = new java.lang.StringBuilder(255);
+      stacktrace_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (20, "type_d");
 
    }
 
@@ -61,6 +69,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       body_path_.set(other.body_path_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
       controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.staticCopy(other.footstep_planning_statistics_, footstep_planning_statistics_);
+      exception_message_.setLength(0);
+      exception_message_.append(other.exception_message_);
+
+      stacktrace_.set(other.stacktrace_);
    }
 
    /**
@@ -126,6 +138,36 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       return footstep_planning_statistics_;
    }
 
+   /**
+            * Contains planner stack trace if failure is due to an exception
+            */
+   public void setExceptionMessage(java.lang.String exception_message)
+   {
+      exception_message_.setLength(0);
+      exception_message_.append(exception_message);
+   }
+
+   /**
+            * Contains planner stack trace if failure is due to an exception
+            */
+   public java.lang.String getExceptionMessageAsString()
+   {
+      return getExceptionMessage().toString();
+   }
+   /**
+            * Contains planner stack trace if failure is due to an exception
+            */
+   public java.lang.StringBuilder getExceptionMessage()
+   {
+      return exception_message_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getStacktrace()
+   {
+      return stacktrace_;
+   }
+
 
    public static Supplier<FootstepPlanningToolboxOutputStatusPubSubType> getPubSubType()
    {
@@ -161,6 +203,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!this.low_level_planner_goal_.epsilonEquals(other.low_level_planner_goal_, epsilon)) return false;
       if (!this.footstep_planning_statistics_.epsilonEquals(other.footstep_planning_statistics_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.exception_message_, other.exception_message_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.stacktrace_, other.stacktrace_, epsilon)) return false;
+
 
       return true;
    }
@@ -185,6 +231,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
       if (!this.low_level_planner_goal_.equals(otherMyClass.low_level_planner_goal_)) return false;
       if (!this.footstep_planning_statistics_.equals(otherMyClass.footstep_planning_statistics_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.exception_message_, otherMyClass.exception_message_)) return false;
+
+      if (!this.stacktrace_.equals(otherMyClass.stacktrace_)) return false;
 
       return true;
    }
@@ -210,7 +259,11 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append("low_level_planner_goal=");
       builder.append(this.low_level_planner_goal_);      builder.append(", ");
       builder.append("footstep_planning_statistics=");
-      builder.append(this.footstep_planning_statistics_);
+      builder.append(this.footstep_planning_statistics_);      builder.append(", ");
+      builder.append("exception_message=");
+      builder.append(this.exception_message_);      builder.append(", ");
+      builder.append("stacktrace=");
+      builder.append(this.stacktrace_);
       builder.append("}");
       return builder.toString();
    }

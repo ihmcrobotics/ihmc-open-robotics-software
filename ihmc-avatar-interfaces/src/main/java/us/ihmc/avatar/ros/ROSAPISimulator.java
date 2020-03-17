@@ -1,7 +1,6 @@
 package us.ihmc.avatar.ros;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,11 +13,10 @@ import com.martiansoftware.jsap.*;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -52,19 +50,15 @@ abstract public class ROSAPISimulator
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, createEnvironment());
       simulationStarter.setRunMultiThreaded(true);
 
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      
-      URI rosUri = NetworkParameters.getROSURI();
-      networkProcessorParameters.setRosUri(rosUri);
+      HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       PacketCommunicator rosAPI_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_API_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
-      networkProcessorParameters.enableBehaviorModule(true);
-      networkProcessorParameters.enableBehaviorVisualizer(true);
+      networkProcessorParameters.setUseBehaviorModule(true, true);
 
       if (runAutomaticDiagnosticRoutine)
       {
-         networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
+         networkProcessorParameters.setUseAutomaticDiagnostic(true, true, 5.0);
       }
 
       if(disableViz)
@@ -85,7 +79,7 @@ abstract public class ROSAPISimulator
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       RobotROSClockCalculator rosClockCalculator = new RobotROSClockCalculatorFromPPSOffset(new SimulationRosClockPPSTimestampOffsetProvider());
-      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, rosClockCalculator, robotModel, nameSpace, tfPrefix, additionalPacketTypes,
+      new ThePeoplesGloriousNetworkProcessor(networkProcessorParameters.getRosURI(), rosAPI_communicator, sensorCommunicator, rosClockCalculator, robotModel, nameSpace, tfPrefix, additionalPacketTypes,
             createCustomSubscribers(nameSpace, rosAPI_communicator), createCustomPublishers(nameSpace, rosAPI_communicator));
    }
 

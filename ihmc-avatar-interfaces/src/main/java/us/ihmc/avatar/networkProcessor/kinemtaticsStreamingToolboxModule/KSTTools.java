@@ -17,8 +17,15 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -28,10 +35,14 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTTools
@@ -41,6 +52,7 @@ public class KSTTools
    private final StatusMessageOutputManager statusOutputManager;
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final DoubleProvider time;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoVariableRegistry registry;
 
@@ -66,8 +78,20 @@ public class KSTTools
 
    private long currentMessageId = 1L;
 
+   private final YoBoolean hasNewInputCommand, hasPreviousInput;
+   private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
+   private KinematicsStreamingToolboxInputCommand latestInput = null;
+   private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
+
+   private final KinematicsStreamingToolboxOutputConfigurationCommand outputConfiguration = new KinematicsStreamingToolboxOutputConfigurationCommand();
+   private final YoBoolean isNeckJointspaceOutputEnabled;
+   private final YoBoolean isChestTaskspaceOutputEnabled;
+   private final YoBoolean isPelvisTaskspaceOutputEnabled;
+   private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
+
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
-                   FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod,
+                   FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.commandInputManager = commandInputManager;
@@ -76,6 +100,7 @@ public class KSTTools
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.walkingControllerPeriod = walkingControllerPeriod;
       this.toolboxControllerPeriod = toolboxControllerPeriod;
+      this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
 
@@ -97,15 +122,49 @@ public class KSTTools
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
       ikController.setPreserveUserCommandHistory(false);
+      ikController.minimizeAngularMomentum(true);
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
       streamIntegrationDuration.set(0.2);
+
+      hasNewInputCommand = new YoBoolean("hasNewInputCommand", registry);
+      hasPreviousInput = new YoBoolean("hasPreviousInput", registry);
+      latestInputReceivedTime = new YoDouble("latestInputReceivedTime", registry);
+      previousInputReceivedTime = new YoDouble("previousInputReceivedTime", registry);
+      flushInputCommands();
+
+      isNeckJointspaceOutputEnabled = new YoBoolean("isNeckJointspaceOutputEnabled", registry);
+      isChestTaskspaceOutputEnabled = new YoBoolean("isChestTaskspaceOutputEnabled", registry);
+      isPelvisTaskspaceOutputEnabled = new YoBoolean("isPelvisTaskspaceOutputEnabled", registry);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoBoolean isHandTaskspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "HandTaskspaceOutputEnabled", registry);
+         areHandTaskspaceOutputsEnabled.put(robotSide, isHandTaskspaceOutputEnabled);
+         YoBoolean isArmJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "ArmJointspaceOutputEnabled", registry);
+         areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
+      }
    }
 
    public void update()
    {
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxOutputConfigurationCommand.class))
+      {
+         outputConfiguration.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxOutputConfigurationCommand.class));
+      }
+
+      isNeckJointspaceOutputEnabled.set(outputConfiguration.isNeckJointspaceEnabled());
+      isChestTaskspaceOutputEnabled.set(outputConfiguration.isChestTaskspaceEnabled());
+      isPelvisTaskspaceOutputEnabled.set(outputConfiguration.isPelvisTaskspaceEnabled());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         areHandTaskspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isHandTaskspaceEnabled(robotSide));
+         areArmJointspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isArmJointspaceEnabled(robotSide));
+      }
+
       RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
       if (newRobotConfigurationData != null)
       {
@@ -136,6 +195,11 @@ public class KSTTools
       }
    }
 
+   public double getTime()
+   {
+      return time.getValue();
+   }
+
    public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
    {
       MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
@@ -148,55 +212,121 @@ public class KSTTools
       currentStateToPack.set(status);
    }
 
-   private KinematicsStreamingToolboxInputCommand latestInput = null;
-   private boolean hasNewInputCommand = false;
-
-   public KinematicsStreamingToolboxInputCommand pollInputCommand()
+   public void pollInputCommand()
    {
-      hasNewInputCommand = commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class);
+      hasNewInputCommand.set(commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class));
 
-      if (hasNewInputCommand)
+      if (hasNewInputCommand.getValue())
+      {
+         if (latestInput != null)
+         {
+            previousInput.set(latestInput);
+            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
+            hasPreviousInput.set(true);
+         }
          latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
 
+         if (latestInput.getTimestamp() <= 0)
+            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+
+         latestInputReceivedTime.set(time.getValue());
+      }
+   }
+   
+   public boolean hasNewInputCommand()
+   {
+      return hasNewInputCommand.getValue();
+   }
+
+   public KinematicsStreamingToolboxInputCommand getLatestInput()
+   {
       return latestInput;
    }
 
-   public boolean hasNewInputCommand()
+   public double getLatestInputReceivedTime()
    {
-      return hasNewInputCommand;
+      return latestInputReceivedTime.getValue();
+   }
+
+   public boolean hasPreviousInput()
+   {
+      return hasPreviousInput.getValue();
+   }
+
+   public KinematicsStreamingToolboxInputCommand getPreviousInput()
+   {
+      return hasPreviousInput.getValue() ? previousInput : null;
+   }
+
+   public double getPreviousInputReceivedTime()
+   {
+      return previousInputReceivedTime.getValue();
+   }
+
+   public void flushInputCommands()
+   {
+      latestInput = null;
+      commandInputManager.clearAllCommands();
+      hasNewInputCommand.set(false);
+      hasPreviousInput.set(false);
+      latestInputReceivedTime.set(-1.0);
+      previousInputReceivedTime.set(-1.0);
    }
 
    public WholeBodyTrajectoryMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
       outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.0);
       outputConverter.setEnableVelocity(true);
 
-      outputConverter.computeHandTrajectoryMessages();
-      outputConverter.computeArmTrajectoryMessages();
-      outputConverter.computeNeckTrajectoryMessage();
-      outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
-      outputConverter.computePelvisTrajectoryMessage();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            outputConverter.computeHandTrajectoryMessage(robotSide);
+
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
+            outputConverter.computeArmTrajectoryMessage(robotSide);
+      }
+
+      if (isNeckJointspaceOutputEnabled.getValue())
+         outputConverter.computeNeckTrajectoryMessage();
+      if (isChestTaskspaceOutputEnabled.getValue())
+         outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+      if (isPelvisTaskspaceOutputEnabled.getValue())
+         outputConverter.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
-      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue());
+      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue(), Conversions.secondsToNanoseconds(time.getValue()));
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
       return wholeBodyTrajectoryMessage;
    }
 
    public WholeBodyTrajectoryMessage setupFinalizeStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
       outputConverter.updateFullRobotModel(solutionToConvert);
       outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
       outputConverter.setTrajectoryTime(0.5);
 
-      outputConverter.computeHandTrajectoryMessages();
-      outputConverter.computeArmTrajectoryMessages();
-      outputConverter.computeNeckTrajectoryMessage();
-      outputConverter.computeChestTrajectoryMessage();
-      outputConverter.computePelvisTrajectoryMessage();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            outputConverter.computeHandTrajectoryMessage(robotSide);
 
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
+            outputConverter.computeArmTrajectoryMessage(robotSide);
+      }
+
+      if (isNeckJointspaceOutputEnabled.getValue())
+         outputConverter.computeNeckTrajectoryMessage();
+      if (isChestTaskspaceOutputEnabled.getValue())
+         outputConverter.computeChestTrajectoryMessage();
+      if (isPelvisTaskspaceOutputEnabled.getValue())
+         outputConverter.computePelvisTrajectoryMessage();
+
+      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
 
@@ -353,5 +483,70 @@ public class KSTTools
                                            Collections.singletonList(destination.getRootJoint()),
                                            stateSelection);
       MultiBodySystemTools.copyJointsState(Arrays.asList(source.getOneDoFJoints()), Arrays.asList(destination.getOneDoFJoints()), stateSelection);
+   }
+
+   public static void computeLinearVelocity(double dt, FramePoint3DReadOnly previousPosition, FramePoint3DReadOnly currentPosition,
+                                            FixedFrameVector3DBasics linearVelocityToPack)
+   {
+      linearVelocityToPack.sub(currentPosition, previousPosition);
+      linearVelocityToPack.scale(1.0 / dt);
+   }
+
+   /**
+    * Computes the angular velocity from finite difference. The result is the angular velocity
+    * expressed in the local frame described by {@code currentOrientation}.
+    */
+   public static void computeAngularVelocity(double dt, FrameQuaternionReadOnly previousOrientation, FrameQuaternionReadOnly currentOrientation,
+                                             FixedFrameVector3DBasics angularVelocityToPack)
+   {
+      previousOrientation.checkReferenceFrameMatch(currentOrientation);
+      previousOrientation.checkReferenceFrameMatch(angularVelocityToPack);
+
+      double qDot_x = currentOrientation.getX() - previousOrientation.getX();
+      double qDot_y = currentOrientation.getY() - previousOrientation.getY();
+      double qDot_z = currentOrientation.getZ() - previousOrientation.getZ();
+      double qDot_s = currentOrientation.getS() - previousOrientation.getS();
+
+      double qx = -currentOrientation.getX();
+      double qy = -currentOrientation.getY();
+      double qz = -currentOrientation.getZ();
+      double qs = currentOrientation.getS();
+
+      double wx = qs * qDot_x + qx * qDot_s + qy * qDot_z - qz * qDot_y;
+      double wy = qs * qDot_y - qx * qDot_z + qy * qDot_s + qz * qDot_x;
+      double wz = qs * qDot_z + qx * qDot_y - qy * qDot_x + qz * qDot_s;
+      angularVelocityToPack.set(wx, wy, wz);
+      angularVelocityToPack.scale(2.0 / dt);
+   }
+
+   public static void integrateLinearVelocity(double dt, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly linearVelocity,
+                                              FixedFramePoint3DBasics finalPosition)
+   {
+      finalPosition.scaleAdd(dt, linearVelocity, initialPosition);
+   }
+
+   public static void integrateAngularVelocity(double dt, FrameQuaternionReadOnly initialOrientation, FrameVector3DReadOnly angularVelocity,
+                                               FixedFrameQuaternionBasics finalOrientation)
+   {
+      double qInit_x = initialOrientation.getX();
+      double qInit_y = initialOrientation.getY();
+      double qInit_z = initialOrientation.getZ();
+      double qInit_s = initialOrientation.getS();
+
+      double x = angularVelocity.getX() * dt;
+      double y = angularVelocity.getY() * dt;
+      double z = angularVelocity.getZ() * dt;
+      finalOrientation.setRotationVector(x, y, z);
+
+      double qInt_x = finalOrientation.getX();
+      double qInt_y = finalOrientation.getY();
+      double qInt_z = finalOrientation.getZ();
+      double qInt_s = finalOrientation.getS();
+
+      double qFinal_x = qInit_s * qInt_x + qInit_x * qInt_s + qInit_y * qInt_z - qInit_z * qInt_y;
+      double qFinal_y = qInit_s * qInt_y - qInit_x * qInt_z + qInit_y * qInt_s + qInit_z * qInt_x;
+      double qFinal_z = qInit_s * qInt_z + qInit_x * qInt_y - qInit_y * qInt_x + qInit_z * qInt_s;
+      double qFinal_s = qInit_s * qInt_s - qInit_x * qInt_x - qInit_y * qInt_y - qInit_z * qInt_z;
+      finalOrientation.set(qFinal_x, qFinal_y, qFinal_z, qFinal_s);
    }
 }

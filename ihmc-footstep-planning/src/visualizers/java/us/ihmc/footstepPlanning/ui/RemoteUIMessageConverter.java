@@ -67,10 +67,10 @@ public class RemoteUIMessageConverter
    private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<FootstepPostProcessingParametersReadOnly> postProcessingParametersReference;
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
-   private final AtomicReference<Point3D> plannerStartPositionReference;
-   private final AtomicReference<Quaternion> plannerStartOrientationReference;
-   private final AtomicReference<Point3D> plannerGoalPositionReference;
-   private final AtomicReference<Quaternion> plannerGoalOrientationReference;
+   private final AtomicReference<Pose3DReadOnly> leftFootPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootPose;
+   private final AtomicReference<Pose3DReadOnly> goalLeftFootPose;
+   private final AtomicReference<Pose3DReadOnly> goalRightFootPose;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -82,13 +82,10 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Boolean> ignorePartialFootholds;
+   private final AtomicReference<Boolean> autoPostProcess;
    private final AtomicReference<Double> goalDistanceProximity;
    private final AtomicReference<Double> goalYawProximity;
 
-   private final AtomicReference<Point3D> postProcessingLeftFootPositionReference;
-   private final AtomicReference<Point3D> postProcessingRightFootPositionReference;
-   private final AtomicReference<Quaternion> postProcessingLeftFootOrientationReference;
-   private final AtomicReference<Quaternion> postProcessingRightFootOrientationReference;
    private final AtomicReference<ConvexPolygon2D> postProcessingLeftFootSupportPolygonReference;
    private final AtomicReference<ConvexPolygon2D> postProcessingRightFootSupportPolygonReference;
    private final AtomicReference<FootstepDataListMessage> footstepPlanResponseReference;
@@ -131,10 +128,10 @@ public class RemoteUIMessageConverter
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParameters, null);
       postProcessingParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PostProcessingParametersTopic, null);
       visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, null);
-      plannerStartPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPosition);
-      plannerStartOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion());
-      plannerGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPosition);
-      plannerGoalOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion());
+      leftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
+      rightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootPose);
+      goalLeftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
+      goalRightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
@@ -146,13 +143,10 @@ public class RemoteUIMessageConverter
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholds, false);
+      autoPostProcess = messager.createInput(FootstepPlannerMessagerAPI.AutoPostProcess, false);
       goalDistanceProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalDistanceProximity, 0.0);
       goalYawProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalYawProximity, 0.0);
 
-      postProcessingLeftFootPositionReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootStartPosition, null);
-      postProcessingRightFootPositionReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootStartPosition, null);
-      postProcessingLeftFootOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootStartOrientation, null);
-      postProcessingRightFootOrientationReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootStartOrientation, null);
       postProcessingLeftFootSupportPolygonReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootStartSupportPolygon, null);
       postProcessingRightFootSupportPolygonReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootStartSupportPolygon, null);
       footstepPlanResponseReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse, null);
@@ -251,6 +245,8 @@ public class RemoteUIMessageConverter
          walkingPreviewRequestPublisher.publish(request);
       });
 
+
+
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage ->
       {
          if(ignorePartialFootholds.get())
@@ -280,23 +276,17 @@ public class RemoteUIMessageConverter
       if (verbose)
          LogTools.info("Received a planning request.");
 
-      Point3D goalPosition = packet.getGoalPositionInWorld();
-      Quaternion goalOrientation = packet.getGoalOrientationInWorld();
-      Point3D startPosition = packet.getStanceFootPositionInWorld();
-      Quaternion startOrientation = packet.getStanceFootOrientationInWorld();
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, packet.getGoalRightFootPose());
       FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
-      RobotSide initialSupportSide = RobotSide.fromByte(packet.getInitialStanceRobotSide());
+      RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
       double bestEffortTimeout = packet.getBestEffortTimeout();
       double horizonLength = packet.getHorizonLength();
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPosition, startPosition);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPosition, goalPosition);
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, startOrientation);
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, goalOrientation);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 
@@ -359,18 +349,35 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeTaken, packet.getFootstepPlanningStatistics().getTimeTaken());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, lowLevelGoal.getOrientation());
       }
+      if (result == FootstepPlanningResult.EXCEPTION)
+      {
+         StringBuilder stackTrace = new StringBuilder();
+         stackTrace.append(packet.getExceptionMessage()).append("\n");
+         for (int i = 0; i < packet.getStacktrace().size(); i++)
+         {
+            stackTrace.append(packet.getStacktrace().get(i)).append("\n");
+         }
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace, stackTrace.toString());
+      }
+      else
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace,
+                                "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + result);
+      }
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatistics, packet.getFootstepPlanningStatistics());
 
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");
+
+      if (autoPostProcess.get())
+         requestPostProcessing();
    }
 
    private void processFootstepPostProcessingResult(FootstepPostProcessingPacket packet)
@@ -416,8 +423,6 @@ public class RemoteUIMessageConverter
          return;
       }
 
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
-
       if (verbose)
          LogTools.info("Told the toolbox to wake up.");
 
@@ -451,10 +456,10 @@ public class RemoteUIMessageConverter
    {
       String errorMessage = "";
 
-      if (plannerStartPositionReference.get() == null)
-         errorMessage += "Need to set start position.\n";
-      if (plannerGoalPositionReference.get() == null)
-         errorMessage += "Need to set goal position.";
+      if (leftFootPose.get() == null || rightFootPose.get() == null)
+         errorMessage += "Need to set start poses.\n";
+      if (goalLeftFootPose.get() == null || goalRightFootPose.get() == null)
+         errorMessage += "Need to set goal poses.";
 
       if (!errorMessage.isEmpty())
       {
@@ -481,19 +486,10 @@ public class RemoteUIMessageConverter
    {
       String errorMessage = "";
 
-      if (postProcessingLeftFootPositionReference.get() == null)
-         errorMessage += "Need to set left foot position.\n";
-      if (postProcessingLeftFootOrientationReference.get() == null)
-         errorMessage += "Need to set left foot orientation.\n";
-      if (postProcessingLeftFootSupportPolygonReference.get() == null)
-         errorMessage += "Need to set left foot support polygon.\n";
-
-      if (postProcessingRightFootPositionReference.get() == null)
-         errorMessage += "Need to set right foot position.\n";
-      if (postProcessingRightFootOrientationReference.get() == null)
-         errorMessage += "Need to set right foot orientation.\n";
-      if (postProcessingRightFootSupportPolygonReference.get() == null)
-         errorMessage += "Need to set right foot support polygon.\n";
+      if (leftFootPose.get() == null || rightFootPose.get() == null)
+         errorMessage += "Need to set foot poses.\n";
+      if (postProcessingLeftFootSupportPolygonReference.get() == null || postProcessingRightFootSupportPolygonReference.get() == null)
+         errorMessage += "Need to set foot polygons.\n";
 
       if (footstepPlanResponseReference.get() == null)
          errorMessage += "Need a footstep plan to post process.\n";
@@ -508,7 +504,6 @@ public class RemoteUIMessageConverter
 
       return true;
    }
-
 
    private void requestPlannerStatistics()
    {
@@ -525,12 +520,13 @@ public class RemoteUIMessageConverter
    private void submitFootstepPlanningRequestPacket()
    {
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-      packet.getStanceFootPositionInWorld().set(plannerStartPositionReference.get());
-      packet.getStanceFootOrientationInWorld().set(plannerStartOrientationReference.get());
-      packet.getGoalPositionInWorld().set(plannerGoalPositionReference.get());
-      packet.getGoalOrientationInWorld().set(plannerGoalOrientationReference.get());
+      packet.getStartLeftFootPose().set(leftFootPose.get());
+      packet.getStartRightFootPose().set(rightFootPose.get());
+      packet.getGoalLeftFootPose().set(goalLeftFootPose.get());
+      packet.getGoalRightFootPose().set(goalRightFootPose.get());
+
       if (plannerInitialSupportSideReference.get() != null)
-         packet.setInitialStanceRobotSide(plannerInitialSupportSideReference.get().toByte());
+         packet.setRequestedInitialStanceSide(plannerInitialSupportSideReference.get().toByte());
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
       if (plannerBestEffortTimeoutReference.get() != null)
@@ -554,11 +550,11 @@ public class RemoteUIMessageConverter
    {
       FootstepPostProcessingPacket packet = new FootstepPostProcessingPacket();
 
-      packet.getLeftFootPositionInWorld().set(postProcessingLeftFootPositionReference.get());
-      packet.getLeftFootOrientationInWorld().set(postProcessingLeftFootOrientationReference.get());
+      packet.getLeftFootPositionInWorld().set(leftFootPose.get().getPosition());
+      packet.getLeftFootOrientationInWorld().set(leftFootPose.get().getOrientation());
       postProcessingLeftFootSupportPolygonReference.get().getVertexBufferView().forEach(point -> packet.getLeftFootContactPoints2d().add().set(point));
-      packet.getRightFootPositionInWorld().set(postProcessingRightFootPositionReference.get());
-      packet.getRightFootOrientationInWorld().set(postProcessingRightFootOrientationReference.get());
+      packet.getRightFootPositionInWorld().set(rightFootPose.get().getPosition());
+      packet.getRightFootOrientationInWorld().set(rightFootPose.get().getOrientation());
       postProcessingRightFootSupportPolygonReference.get().getVertexBufferView().forEach(point -> packet.getRightFootContactPoints2d().add().set(point));
 
       packet.getFootstepDataList().set(footstepPlanResponseReference.get());

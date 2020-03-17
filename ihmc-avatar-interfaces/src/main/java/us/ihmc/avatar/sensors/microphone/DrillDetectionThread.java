@@ -5,7 +5,9 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
-import sun.audio.AudioPlayer;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DrillDetectionThread extends Thread
@@ -13,8 +15,8 @@ public abstract class DrillDetectionThread extends Thread
    // The annoying audio.cgi disconnects us every ~33 seconds
    private static final int reconnectPeriodSeconds = 30;
    private static final double checkForDrillFrequencyHz = 5.0;
-   private static final int iterationsCount = (int)((double)reconnectPeriodSeconds * checkForDrillFrequencyHz);
-   private static final long iterationSleep = (long)(1000.0 / checkForDrillFrequencyHz);
+   private static final int iterationsCount = (int) ((double) reconnectPeriodSeconds * checkForDrillFrequencyHz);
+   private static final long iterationSleep = (long) (1000.0 / checkForDrillFrequencyHz);
 
    private DrillDetectionAlgorithm algorithm = null;
    private boolean isRunning = false;
@@ -24,7 +26,10 @@ public abstract class DrillDetectionThread extends Thread
       // set webcam authentification
       Authenticator.setDefault(new Authenticator()
       {
-         protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication("admin", "unknownpw".toCharArray()); }
+         protected PasswordAuthentication getPasswordAuthentication()
+         {
+            return new PasswordAuthentication("admin", "unknownpw".toCharArray());
+         }
       });
 
       this.isRunning = true;
@@ -73,22 +78,52 @@ public abstract class DrillDetectionThread extends Thread
          }
 
          System.out.println("Connected to the webcam. Opening the stream...");
-         AudioPlayer.player.start(inputStream);
+         // AudioPlayer is gone
+//         AudioPlayer.player.start(inputStream);
+         // Untested replacement code using javax.sound library
+
+         Clip clip = null;
+         try
+         {
+            clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(inputStream));
+            clip.start();
+         }
+         catch (Exception e)
+         {
+            System.err.println(e.getMessage());
+         }
 
          for (int i = 0; i < iterationsCount; i++)
          {
             ThreadTools.sleep(iterationSleep);
 
             DrillDetectionResult result = algorithm.isDrillOn(inputStream);
-            if (result != null) { onDrillDetectionResult(result); }
+            if (result != null)
+            {
+               onDrillDetectionResult(result);
+            }
 
-            if (!isRunning) { break; }
+            if (!isRunning)
+            {
+               break;
+            }
          }
 
          System.out.println("Closing the stream...");
-         AudioPlayer.player.stop(inputStream);
-         try { inputStream.close(); }
-         catch (Exception ignored) { }
+         if (clip != null)
+         {
+            clip.stop();
+            clip.close();
+         }
+
+         try
+         {
+            inputStream.close();
+         }
+         catch (Exception ignored)
+         {
+         }
 
          System.out.println("Waiting for reconnect...");
       }

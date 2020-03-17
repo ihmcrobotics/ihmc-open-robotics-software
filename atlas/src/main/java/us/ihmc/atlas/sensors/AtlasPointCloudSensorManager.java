@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
@@ -31,7 +32,7 @@ public class AtlasPointCloudSensorManager
    private static final String trackingTopicNameToSubscribe = AtlasSensorInformation.trackingCameraTopic;
 
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
-
+   
    public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String rcdTopicName,
                                        RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
    {
@@ -68,6 +69,11 @@ public class AtlasPointCloudSensorManager
    {
       realsenseDepthPointCloudPublisher.shutdown();
       trackingCameraPublisher.shutdown();
+   }
+   
+   public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
+   {
+      realsenseDepthPointCloudPublisher.setSelfCollisionFilter(collisionBoxProvider);
    }
 
    private StereoVisionWorldTransformCalculator createDepthPointCloudWorldTransformCalculator()

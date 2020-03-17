@@ -9,19 +9,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Object;
@@ -31,20 +27,17 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,8 +50,7 @@ public class MainTabController
 {
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
-   private final ObservableList<RejectionPercentageProperty> rejectionTableItems = FXCollections.observableArrayList();
-   private static final DecimalFormat percentageFormat = new DecimalFormat("#0.00");
+   private final TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
 
    // control
    @FXML
@@ -69,6 +61,8 @@ public class MainTabController
    private CheckBox assumeFlatGround;
    @FXML
    private CheckBox ignorePartialFootholds;
+   @FXML
+   private CheckBox autoPostProcess;
    @FXML
    private Spinner<Double> timeout;
    @FXML
@@ -82,9 +76,7 @@ public class MainTabController
    @FXML
    private TextField receivedRequestId;
    @FXML
-   private TableView rejectionTable;
-   @FXML
-   private TextField rejectionPercentage;
+   private Button viewExceptionButton;
 
    @FXML
    private TextField timeTaken;
@@ -92,12 +84,20 @@ public class MainTabController
    private TextField planningResult;
    @FXML
    private TextField plannerStatus;
+   @FXML
+   private ComboBox<DataSetName> dataSetSelector;
+   @FXML
+   private TextField logGenerationStatus;
+   @FXML
+   private TextField logLoadStatus;
+   @FXML
+   private Button loadLogButton;
 
    // goal placement
    @FXML
-   private Button placeStart;
-   @FXML
    private Button placeGoal;
+   @FXML
+   private CheckBox bindStartToRobot;
 
    @FXML
    private Button computePath;
@@ -107,12 +107,6 @@ public class MainTabController
    private Button abortPlanning;
 
    @FXML
-   private Spinner<Double> startXPosition;
-   @FXML
-   private Spinner<Double> startYPosition;
-   @FXML
-   private Spinner<Double> startZPosition;
-   @FXML
    private Spinner<Double> goalXPosition;
    @FXML
    private Spinner<Double> goalYPosition;
@@ -121,8 +115,6 @@ public class MainTabController
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
 
-   @FXML
-   private Spinner<Double> startYaw;
    @FXML
    private Spinner<Double> goalYaw;
 
@@ -151,7 +143,8 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked compute path...");
 
-      setStartFromRobot();
+      if (bindStartToRobot.isSelected())
+        setStartFromRobot();
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, newRequestID);
       messager.submitMessage(ComputePath, true);
@@ -171,8 +164,6 @@ public class MainTabController
    {
       if (verbose)
          LogTools.info("Clicked post process...");
-
-      setInitialStateFromRobot();
       messager.submitMessage(PostProcessPlan, true);
    }
 
@@ -237,17 +228,12 @@ public class MainTabController
    private JavaFXMessager messager;
 
    private AtomicReference<Integer> currentPlannerRequestId;
-   private AnimationTimer robotPoseHandler;
    private WalkingPreviewPlaybackManager walkingPreviewPlaybackManager;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepDataListMessage> footstepPlanReference;
    private final ArrayList<List<Point3D>> contactPointHolder = new ArrayList<>();
    private SideDependentList<ArrayList<Point3D>> defaultContactPoints = new SideDependentList<>();
-
-   private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
-
-   private final YawProperty startRotationProperty = new YawProperty(this, "startRotationProperty", 0.0);
    private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
 
    private final AtomicInteger walkingPreviewRequestId = new AtomicInteger(0);
@@ -262,16 +248,10 @@ public class MainTabController
 
    private void setupControls()
    {
-      startXPosition.setValueFactory(createStartGoalPositionValueFactory());
-      startYPosition.setValueFactory(createStartGoalPositionValueFactory());
-      startZPosition.setValueFactory(createStartGoalPositionValueFactory());
-
-      goalXPosition.setValueFactory(createStartGoalPositionValueFactory());
-      goalYPosition.setValueFactory(createStartGoalPositionValueFactory());
-      goalZPosition.setValueFactory(createStartGoalPositionValueFactory());
-
-      startYaw.setValueFactory(createStartGoalOrientationValueFactory());
-      goalYaw.setValueFactory(createStartGoalOrientationValueFactory());
+      goalXPosition.setValueFactory(createGoalPositionValueFactory());
+      goalYPosition.setValueFactory(createGoalPositionValueFactory());
+      goalZPosition.setValueFactory(createGoalPositionValueFactory());
+      goalYaw.setValueFactory(createGoalOrientationValueFactory());
 
       distanceProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-100.0, 100.0, 0.0, 0.1));
       yawProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, Math.PI, 0.0, 0.1));
@@ -303,6 +283,7 @@ public class MainTabController
       initialSupportSide.setValue(RobotSide.LEFT);
 
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
+      messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
    }
 
    public void bindControls()
@@ -313,9 +294,23 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerType, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTaken, new TextViewerListener<>(timeTaken));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
+
+      AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
+      viewExceptionButton.setOnAction(e ->
+                                      {
+                                         TextArea textArea = new TextArea(stackTrace.toString());
+                                         textArea.setEditable(false);
+
+                                         Alert alert = new Alert(Alert.AlertType.NONE);
+                                         alert.getButtonTypes().add(ButtonType.CLOSE);
+                                         alert.setHeaderText("Planner Stack Trace");
+                                         alert.setResizable(true);
+                                         alert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+                                         alert.getDialogPane().setContent(textArea);
+                                         alert.show();
+                                      });
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
 
@@ -325,49 +320,41 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
 
+      messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
+      messager.registerTopicListener(AbortPlanning, b -> timeElapsedManager.stop());
+      messager.registerTopicListener(PlanningResult, result ->
+      {
+         if (result.terminalResult())
+            timeElapsedManager.stop();
+      });
+
       // set goal
-      messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, placeStart.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, placeGoal.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, computePath.disableProperty());
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, abortPlanning.disableProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide.valueProperty(), true);
-
-      startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
-      startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());
-      startPositionProperty.bindBidirectionalZ(startZPosition.getValueFactory().valueProperty());
-      messager.bindBidirectional(StartPosition, startPositionProperty, false);
 
       goalPositionProperty.bindBidirectionalX(goalXPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalZ(goalZPosition.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(GoalPosition, goalPositionProperty, false);
+      messager.bindBidirectional(GoalMidFootPosition, goalPositionProperty, false);
 
       messager.bindBidirectional(GoalDistanceProximity, distanceProximity.getValueFactory().valueProperty(), true);
       messager.bindBidirectional(GoalYawProximity, yawProximity.getValueFactory().valueProperty(), true);
 
-      startRotationProperty.bindBidirectionalYaw(startYaw.getValueFactory().valueProperty());
-      messager.bindBidirectional(StartOrientation, startRotationProperty, false);
-
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
-      messager.bindBidirectional(GoalOrientation, goalRotationProperty, false);
+      messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
-      messager.registerTopicListener(GlobalReset, reset -> clearStartGoalTextFields());
+      messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
-      setupRejectionTable();
-   }
-
-   @FXML
-   public void placeStart()
-   {
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionEditModeEnabled, true);
-      messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, true);
+      messager.registerTopicListener(GenerateLogStatus, logGenerationStatus::setText);
+      messager.registerTopicListener(LoadLogStatus, logLoadStatus::setText);
    }
 
    @FXML
@@ -377,67 +364,30 @@ public class MainTabController
       messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabled, true);
    }
 
+   @FXML
+   public void generateLog()
+   {
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestGenerateLog, true);
+   }
+
+   @FXML
+   public void loadLog()
+   {
+      messager.submitMessage(RequestLoadLog, true);
+   }
+
    private void setStartFromRobot()
    {
       if (humanoidReferenceFrames == null)
          return;
 
       humanoidReferenceFrames.updateFrames();
-      FramePose3D startPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(initialSupportSide.getValue()));
-      startPose.changeFrame(ReferenceFrame.getWorldFrame());
-      startPositionProperty.set(new Point3D(startPose.getPosition()));
-      startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
-   }
-
-   private void setInitialStateFromRobot()
-   {
-      if (humanoidReferenceFrames == null)
-      {
-         PoseReferenceFrame startFrame = new PoseReferenceFrame("StartFrame", ReferenceFrame.getWorldFrame());
-         startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), startPositionProperty.get()));
-         startFrame.setOrientationAndUpdate(startRotationProperty.get());
-
-         if (initialSupportSide.getValue() == RobotSide.LEFT)
-         {
-            messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartPosition, startPositionProperty.get());
-            messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartOrientation, startRotationProperty.get());
-
-            FramePoint3D rightFoot = new FramePoint3D(startFrame);
-            rightFoot.setY(-0.2);
-            rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
-
-            messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartPosition, new Point3D(rightFoot));
-            messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartOrientation, startRotationProperty.get());
-         }
-         else
-         {
-            messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartPosition, startPositionProperty.get());
-            messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartOrientation, startRotationProperty.get());
-
-            FramePoint3D leftFoot = new FramePoint3D(startFrame);
-            leftFoot.setY(0.2);
-            leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
-
-            messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartPosition, new Point3D(leftFoot));
-            messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartOrientation, startRotationProperty.get());
-         }
-
-         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartSupportPolygon, PlannerTools.createDefaultFootPolygon());
-         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartSupportPolygon, PlannerTools.createDefaultFootPolygon());
-      }
-      else
-      {
-         humanoidReferenceFrames.updateFrames();
-         FramePose3D leftFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
-         leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-         FramePose3D rightFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
-         rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartPosition, new Point3D(leftFootPose.getPosition()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartPosition, new Point3D(rightFootPose.getPosition()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootStartOrientation, new Quaternion(leftFootPose.getOrientation()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.RightFootStartOrientation, new Quaternion(rightFootPose.getOrientation()));
-      }
+      FramePose3D leftFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
+      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      messager.submitMessage(LeftFootPose, leftFootPose);
+      messager.submitMessage(RightFootPose, rightFootPose);
    }
 
    @FXML
@@ -504,21 +454,15 @@ public class MainTabController
       swingHeightSpinner.getValueFactory().setValue(swingHeight);
    }
 
-   private void clearStartGoalTextFields()
+   private void clearGoalTextFields()
    {
-      startXPosition.valueFactoryProperty().getValue().setValue(0.0);
-      startYPosition.valueFactoryProperty().getValue().setValue(0.0);
-      startZPosition.valueFactoryProperty().getValue().setValue(0.0);
-
       goalXPosition.valueFactoryProperty().getValue().setValue(0.0);
       goalYPosition.valueFactoryProperty().getValue().setValue(0.0);
       goalZPosition.valueFactoryProperty().getValue().setValue(0.0);
-
-      startYaw.valueFactoryProperty().getValue().setValue(0.0);
       goalYaw.valueFactoryProperty().getValue().setValue(0.0);
    }
 
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createStartGoalPositionValueFactory()
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createGoalPositionValueFactory()
    {
       double min = -100.0;
       double max = 100.0;
@@ -526,7 +470,7 @@ public class MainTabController
       return new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, 0.0, amountToStepBy);
    }
 
-   private SpinnerValueFactory.DoubleSpinnerValueFactory createStartGoalOrientationValueFactory()
+   private SpinnerValueFactory.DoubleSpinnerValueFactory createGoalOrientationValueFactory()
    {
       double min = -Math.PI;
       double max = Math.PI;
@@ -537,7 +481,7 @@ public class MainTabController
    private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
    {
       double min = 0.0;
-      double max = 500.0;
+      double max = Double.MAX_VALUE;
       double amountToStepBy = 5;
       return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
    }
@@ -581,47 +525,6 @@ public class MainTabController
          if (messageContent != null)
             textField.promptTextProperty().setValue(messageContent.toString());
       }
-   }
-
-   private void setupRejectionTable()
-   {
-      TableColumn<String, RejectionPercentageProperty> column1 = new TableColumn<>("Reason");
-      column1.setCellValueFactory(new PropertyValueFactory<>("reason"));
-
-      TableColumn<String, RejectionPercentageProperty> column2 = new TableColumn<>("Percentage");
-      column2.setCellValueFactory(new PropertyValueFactory<>("percentage"));
-
-      column1.setSortable(false);
-      column2.setSortable(false);
-
-      rejectionTable.getColumns().add(column1);
-      rejectionTable.getColumns().add(column2);
-
-      rejectionTableItems.clear();
-      for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-      {
-         RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(0.0));
-         rejectionTableItems.add(rejectionPercentageProperty);
-      }
-
-      rejectionTable.setItems(rejectionTableItems);
-
-      messager.registerTopicListener(PlannerStatistics, statisticsMessage ->
-      {
-         String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getFractionOfRejectedSteps());
-         rejectionPercentage.setText(percentageRejectionSteps);
-
-         rejectionTableItems.clear();
-         for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-         {
-            double percent = 100 * statisticsMessage.getRejectionFractions().get(rejectionReason.ordinal());
-            RejectionPercentageProperty rejectionPercentageProperty = new RejectionPercentageProperty(rejectionReason.toString(), percentageFormat.format(percent));
-            rejectionTableItems.add(rejectionPercentageProperty);
-         }
-
-         rejectionTableItems.sort(Collections.reverseOrder(Comparator.comparingDouble(p -> Double.parseDouble(p.percentage))));
-         rejectionTable.setItems(rejectionTableItems);
-      });
    }
 
    private class WalkingPreviewPlaybackManager extends AnimationTimer
@@ -759,35 +662,33 @@ public class MainTabController
       }
    }
 
-   public class RejectionPercentageProperty
+   private class TimeElapsedManager extends AnimationTimer
    {
-      private String reason;
-      private String percentage;
+      private boolean active = false;
+      private final Stopwatch stopwatch = new Stopwatch();
 
-      public RejectionPercentageProperty(String reason, String percentage)
+      @Override
+      public void start()
       {
-         this.reason = reason;
-         this.percentage = percentage;
+         if(!active)
+         {
+            active = true;
+            stopwatch.start();
+            super.start();
+         }
       }
 
-      public String getReason()
+      @Override
+      public void stop()
       {
-         return reason;
+         active = false;
+         super.stop();
       }
 
-      public void setReason(String reason)
+      @Override
+      public void handle(long now)
       {
-         this.reason = reason;
-      }
-
-      public String getPercentage()
-      {
-         return percentage;
-      }
-
-      public void setPercentage(String percentage)
-      {
-         this.percentage = percentage;
+         timeTaken.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
    }
 }

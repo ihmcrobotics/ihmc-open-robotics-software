@@ -58,7 +58,7 @@ public class REAOcTreeUpdater
       maxRange = reaMessager.createInput(REAModuleAPI.LidarMaxRange, 5.0);
       useBoundingBox = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters,
-                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(0.0f, -2.0f, -3.0f, 5.0f, 2.0f,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f, -2.0f, -3.0f, 5.0f, 2.0f,
                                                                                                                            0.5f));
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 

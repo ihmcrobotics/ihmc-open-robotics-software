@@ -51,6 +51,12 @@
                     </content>
                 </Tab>
 
+                <Tab text="Log Table">
+                    <content>
+                        <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml"/>
+                    </content>
+                </Tab>
+
                 <Tab text="Node checking">
                     <content>
                         <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />
@@ -60,12 +66,6 @@
                 <Tab text="Visualization Control">
                     <content>
                         <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Unit Test Exporter">
-                    <content>
-                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
                     </content>
                 </Tab>
 

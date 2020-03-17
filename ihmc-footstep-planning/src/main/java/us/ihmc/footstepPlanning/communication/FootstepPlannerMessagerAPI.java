@@ -1,8 +1,11 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
@@ -10,6 +13,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -31,6 +35,7 @@ public class FootstepPlannerMessagerAPI
    private static final Category Root = apiFactory.createRootCategory("FootstepPlannerRoot");
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
+   public static final Topic<Boolean> ShowRobot = topic("ShowRobot");
    public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
@@ -54,40 +59,38 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
+   public static final Topic<Boolean> AutoPostProcess = topic("AutoPostProcess");
 
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
    public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");
-   public static final Topic<Double> PlannerTimeTaken = topic("PlannerTimeTaken");
    public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
    public static final Topic<FootstepPlannerType> PlannerType = topic("PlannerType");
    public static final Topic<FootstepPlanningResult> PlanningResult = topic("PlanningResult");
    public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
    public static final Topic<Integer> PlannerRequestId = topic("PlannerRequestId");
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
+   public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
-   public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
    public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
-
-   public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
-   public static final Topic<Point3D> StartPosition = topic("StartPosition");
-   public static final Topic<Point3D> GoalPosition = topic("GoalPosition");
+   public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
+   public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
+   public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");
+   public static final Topic<Pose3DReadOnly> RightFootGoalPose = topic("RightFootGoalPose");
+   public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
+   public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
+   public static final Topic<Point3D> GoalMidFootPosition = topic("GoalMidFootPosition");
+   public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
 
-   public static final Topic<Quaternion> StartOrientation = topic("StartOrientation");
-   public static final Topic<Quaternion> GoalOrientation = topic("GoalOrientation");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
 
-   public static final Topic<Point3D> LeftFootStartPosition = topic("LeftFootStartPosition");
-   public static final Topic<Point3D> RightFootStartPosition = topic("RightFootStartPosition");
-   public static final Topic<Quaternion> LeftFootStartOrientation = topic("LeftFootStartOrientation");
-   public static final Topic<Quaternion> RightFootStartOrientation = topic("RightFootStartOrientation");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
 
@@ -138,14 +141,24 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowRejectedNodes = topic("ShowRejectedNodes");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
+   public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
+   public static final Topic<Boolean> RequestLoadLog = topic("RequestLoadLog");
+   public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
+   public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
+   public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
+
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");
    public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = topic("WalkingPreviewOutput");
 
+   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> parentDebugStep = topic("ParentDebugStep");
+   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> childDebugStep = topic("ChildDebugStep");
+   public static final Topic<RigidBodyTransform> idealDebugStep = topic("IdealDebugStep");
+
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
-   private static final <T> Topic<T> topic(String name)
+   private static <T> Topic<T> topic(String name)
    {
       return Root.child(FootstepPlanner).topic(apiFactory.createTypedTopicTheme(name));
    }

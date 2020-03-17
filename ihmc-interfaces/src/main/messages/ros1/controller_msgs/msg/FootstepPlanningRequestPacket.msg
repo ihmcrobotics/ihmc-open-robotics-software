@@ -16,21 +16,21 @@ int32 NO_PLAN_ID=-1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# Initial stance foot side
+# Starting left foot pose
+geometry_msgs/Pose start_left_foot_pose
+
+# Starting right foot pose
+geometry_msgs/Pose start_right_foot_pose
+
+# Goal left foot pose
+geometry_msgs/Pose goal_left_foot_pose
+
+# Goal right foot pose
+geometry_msgs/Pose goal_right_foot_pose
+
+# Requested initial stance side. If not specified the planner will choose
 # Field default value 255
-int8 initial_stance_robot_side
-
-# Stance foot sole frame z up position, z must be correct
-geometry_msgs/Point stance_foot_position_in_world
-
-# Stance foot sole frame z up orientation, only the "yaw" is considered
-geometry_msgs/Quaternion stance_foot_orientation_in_world
-
-# Goal mid feet z up position
-geometry_msgs/Point goal_position_in_world
-
-# Goal mid feet z up orientation, only the "yaw" is considered
-geometry_msgs/Quaternion goal_orientation_in_world
+int8 requested_initial_stance_side
 
 # Footstep planner type, see above
 # Field default value 255
@@ -62,5 +62,8 @@ bool assume_flat_ground
 # Set this id to keep track of your request
 # Field default value -1
 int32 planner_request_id
+
+# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+geometry_msgs/Pose[] body_path_waypoints
 
 

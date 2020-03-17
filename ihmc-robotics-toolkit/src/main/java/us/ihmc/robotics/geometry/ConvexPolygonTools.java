@@ -982,51 +982,23 @@ public class ConvexPolygonTools
       while (vertices > desiredVertices)
       {
          int removeVertex = -1;
-         double shortestEdgeLength = Double.POSITIVE_INFINITY;
-         Point2DReadOnly lastVertex = polygon.getVertex(0);
-         for (int i = 1; i < vertices + 1; i++)
+         double leastAreaLost = Double.POSITIVE_INFINITY;
+         for (int i = 0; i < vertices; i++)
          {
-            Point2DReadOnly nextVertex = null;
-            if (i == vertices)
+            Point2DReadOnly previousVertex = polygon.getPreviousVertex(i);
+            Point2DReadOnly vertex = polygon.getVertex(i);
+            Point2DReadOnly nextVertex = polygon.getNextVertex(i);
+            double areaLostWithoutVertex = EuclidGeometryTools.triangleArea(previousVertex, vertex, nextVertex);
+
+            if (areaLostWithoutVertex < leastAreaLost)
             {
-               nextVertex = polygon.getVertex(0);
-            }
-            else
-            {
-               nextVertex = polygon.getVertex(i);
-            }
-            double edgeLength = lastVertex.distance(nextVertex);
-            if (edgeLength < shortestEdgeLength)
-            {
-               shortestEdgeLength = edgeLength;
+               leastAreaLost = areaLostWithoutVertex;
                removeVertex = i;
             }
-            lastVertex = nextVertex;
          }
 
-         int idx1 = -1;
-         int idx2 = -1;
-         if (removeVertex == vertices)
-         {
-            idx1 = vertices - 1;
-            idx2 = 0;
-         }
-         else
-         {
-            idx1 = removeVertex;
-            idx2 = removeVertex - 1;
-         }
-
-         Point2DReadOnly vertexA = polygon.getVertex(idx1);
-         Point2DReadOnly vertexB = polygon.getVertex(idx2);
-         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
-         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
-
-         polygon.removeVertex(idx1);
-         polygon.removeVertex(idx2);
-         polygon.addVertex(xNew, yNew);
+         polygon.removeVertex(removeVertex);
          polygon.update();
-
          vertices = polygon.getNumberOfVertices();
       }
 
@@ -1036,41 +1008,20 @@ public class ConvexPolygonTools
       {
          int index = -1;
          double longestEdgeLength = Double.NEGATIVE_INFINITY;
-         Point2DReadOnly lastVertex = polygon.getVertex(0);
-         for (int i = 1; i < vertices + 1; i++)
+         for (int i = 0; i < vertices; i++)
          {
-            Point2DReadOnly nextVertex = null;
-            if (i == vertices)
-            {
-               nextVertex = polygon.getVertex(0);
-            }
-            else
-            {
-               nextVertex = polygon.getVertex(i);
-            }
-
-            double edgeLength = lastVertex.distance(nextVertex);
+            Point2DReadOnly vertex = polygon.getVertex(i);
+            Point2DReadOnly nextVertex = polygon.getNextVertex(i);
+            double edgeLength = vertex.distance(nextVertex);
             if (edgeLength > longestEdgeLength)
             {
                longestEdgeLength = edgeLength;
                index = i;
             }
-            lastVertex = nextVertex;
          }
 
-         int idx1 = -1;
-         int idx2 = -1;
-
-         if (index == vertices)
-         {
-            idx1 = vertices - 1;
-            idx2 = 0;
-         }
-         else
-         {
-            idx1 = index - 1;
-            idx2 = index;
-         }
+         int idx1 = index;
+         int idx2 = polygon.getNextVertexIndex(index);
 
          Point2DReadOnly vertexA = polygon.getVertex(idx1);
          Point2DReadOnly vertexB = polygon.getVertex(idx2);
@@ -1885,5 +1836,19 @@ public class ConvexPolygonTools
          return intersectionToThrowAway.getArea();
       else
          return 0.0;
+   }
+
+   public static void main(String[] args)
+   {
+      ConvexPolygon2D testPolygon = new ConvexPolygon2D();
+      testPolygon.addVertex(-0.11999999991888388, 0.0700000001158462);
+      testPolygon.addVertex(0.060091502969015664, 0.07000000011584623);
+      testPolygon.addVertex(0.12000000008111611, 0.0700000001158462);
+      testPolygon.addVertex(0.12000000008111678, -0.06999999988415362);
+      testPolygon.addVertex(-0.11999999991888366, -0.0699999998841539);
+      testPolygon.update();
+
+      limitVerticesConservative(testPolygon, 4);
+      System.out.println(testPolygon);
    }
 }

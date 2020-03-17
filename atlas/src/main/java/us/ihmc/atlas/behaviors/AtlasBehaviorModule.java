@@ -3,9 +3,11 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 
@@ -15,32 +17,27 @@ public class AtlasBehaviorModule
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
    private static final boolean START_FOOTSTEP_PLANNING_TOOLBOX = false;
 
-   private FootstepPlanningToolboxModule footstepPlanningModule;
+   private FootstepPlanningModule footstepPlanningModule;
 
    public AtlasBehaviorModule()
    {
-      if (START_FOOTSTEP_PLANNING_TOOLBOX)
-      {
-         ThreadTools.startAsDaemon(() ->
-         {
-            LogTools.info("Creating footstep toolbox");
-            footstepPlanningModule = new FootstepPlanningToolboxModule(createRobotModel(),
-                                                                       null,
-                                                                       false,
-                                                                       DomainFactory.PubSubImplementation.FAST_RTPS);
-         }, "MultiStageFootstepPlanningModule");
-      }
+      if (START_FOOTSTEP_PLANNING_TOOLBOX) ThreadTools.startAsDaemon(this::footstepPlanningToolbox, "FootstepPlanningModule");
 
       LogTools.info("Creating behavior module");
-      BehaviorModule.createForBackpack(createRobotModel());
+      BehaviorModule.createInterprocess(BehaviorRegistry.DEFAULT_BEHAVIORS, createRobotModel());
 
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      { // add cleanup actions here
-         if (START_FOOTSTEP_PLANNING_TOOLBOX)
-         {
-            footstepPlanningModule.destroy();
-         }
-      }, "Cleanup"));
+      Runtime.getRuntime().addShutdownHook(ThreadTools.startAThread(this::shutdown, "Cleanup"));
+   }
+
+   private void footstepPlanningToolbox()
+   {
+      LogTools.info("Creating footstep toolbox");
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(createRobotModel(), DomainFactory.PubSubImplementation.FAST_RTPS);
+   }
+
+   private void shutdown() // add cleanup actions here
+   {
+      if (START_FOOTSTEP_PLANNING_TOOLBOX) footstepPlanningModule.closeAndDispose();
    }
 
    private AtlasRobotModel createRobotModel()

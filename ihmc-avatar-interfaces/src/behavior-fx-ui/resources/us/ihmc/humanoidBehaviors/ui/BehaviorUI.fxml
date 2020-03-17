@@ -30,55 +30,7 @@
               <TabPane prefHeight="250.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                   <tabs>
       
-                      <Tab text="Patrol">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="601.0">
-                                  <children>
-                                      <fx:include fx:id="patrolBehaviorUI" source="PatrolBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-      
-                      <Tab text="Step in Place">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="stepInPlaceBehaviorUI" source="StepInPlaceBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-                      
-                      <Tab text="FancyPoses">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="fancyPosesBehaviorUI" source="FancyPosesBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-                      
-                      <Tab text="ExploreArea">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="exploreAreaBehaviorUI" source="ExploreAreaBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
 
-                      <Tab text="Planner Parameters">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="plannerParametersUI" source="PlannerParametersUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
       
                   </tabs>
               </TabPane>

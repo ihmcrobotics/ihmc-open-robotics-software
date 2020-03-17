@@ -199,6 +199,114 @@ public abstract class PacketValidityChecker
    }
 
    /**
+    * Checks the validity of a {@link FootstepDataMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateExoStepDataMessage(ExoStepDataMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s robotSide field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getStepLength());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s step length field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getStepHeight());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s step height field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getSwingHeight());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s swing height field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getStepPitch());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s step pitch field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      //TODO Check if thats supposed to be checked
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getSwingHeight());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s swingHeight field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link ExoStepDataListMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateExoStepDataListMessage(ExoStepDataListMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getDefaultSwingDuration());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s swingTime field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getDefaultTransferDuration());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s transferTime field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      if (message.getStepDataList() != null)
+      {
+         for (int arrayListIndex = 0; arrayListIndex < message.getStepDataList().size(); arrayListIndex++)
+         {
+            ExoStepDataMessage footstepData = message.getStepDataList().get(arrayListIndex);
+            String footstepDataListErrorMessage = validateExoStepDataMessage(footstepData);
+
+            if (footstepDataListErrorMessage != null)
+            {
+               String messageClassName = message.getClass().getSimpleName();
+               String errorMessage = messageClassName + " field contains a FootstepData in which " + footstepDataListErrorMessage;
+               return errorMessage;
+            }
+         }
+      }
+
+      return null;
+   }
+
+   /**
     * Checks the validity of a {@link QuadrupedStepMessage}.
     *
     * @param message
