@@ -10,7 +10,6 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -195,10 +194,11 @@ public class SingleContactImpulseCalculatorTest
       }
       else
       {
-         assertTrue(MatrixFeatures.isZeros(jointVelocityChangeA, epsilon), messagePrefix);
+         assertNull(jointVelocityChangeA, messagePrefix);
          if (bodyB != null)
-            assertTrue(MatrixFeatures.isZeros(jointVelocityChangeB, epsilon), messagePrefix);
+            assertNull(jointVelocityChangeB, messagePrefix);
       }
+
       if (bodyB == null)
          assertNull(jointVelocityChangeB);
    }
