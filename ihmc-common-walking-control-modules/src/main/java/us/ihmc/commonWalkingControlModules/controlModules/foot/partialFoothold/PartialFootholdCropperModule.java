@@ -27,13 +27,11 @@ public class PartialFootholdCropperModule
       VELOCITY, COP_HISTORY, GEOMETRIC, VELOCITY_AND_COP
    }
 
-   private final YoEnum<EdgeCalculatorType> edgeCalculatorType;
    private final YoEnum<RotationDetectorType> rotationDetectorType;
-   private final EnumMap<EdgeCalculatorType, RotationEdgeCalculator> edgeCalculators = new EnumMap<>(EdgeCalculatorType.class);
+   private final RotationEdgeCalculator copHistoryEdgeCalculator;
+   private final CoPAndVelocityRotationEdgeCalculator copAndVelocityEdgeCalculator;
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
    private final FootholdCropper croppedFootholdCalculator;
-
-   private final EdgeCalculatorType[] edgeCalculatorTypes = EdgeCalculatorType.values();
 
    private final YoBoolean isRotating;
    private final YoBoolean isEdgeStable;
@@ -53,24 +51,20 @@ public class PartialFootholdCropperModule
       isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
 
 //      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
-      RotationEdgeCalculator copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
+      copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
                                                                                              soleFrame,
                                                                                              rotationParameters,
                                                                                              dt,
                                                                                              registry,
                                                                                              graphicsRegistry);
 //      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
-      RotationEdgeCalculator copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side,
+      copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side,
                                                                                                      soleFrame,
 //                                                                                                     velocityEdgeCalculator,
                                                                                                      rotationParameters,
                                                                                                      dt,
                                                                                                      registry,
                                                                                                      graphicsRegistry);
-//      edgeCalculators.put(EdgeCalculatorType.VELOCITY, velocityEdgeCalculator);
-      edgeCalculators.put(EdgeCalculatorType.COP_HISTORY, copHistoryEdgeCalculator);
-//      edgeCalculators.put(EdgeCalculatorType.GEOMETRIC, geometricEdgeCalculator);
-      edgeCalculators.put(EdgeCalculatorType.VELOCITY_AND_COP, copAndVelocityEdgeCalculator);
 
 //      FootRotationDetector geometricRotationDetector = new GeometricRotationDetector(side, soleFrame, rotationParameters, registry);
       FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
@@ -79,11 +73,9 @@ public class PartialFootholdCropperModule
       rotationDetectors.put(RotationDetectorType.KINEMATIC, kinematicRotationDetector);
       rotationDetectors.put(RotationDetectorType.VELOCITY, velocityRotationDetector);
 
-      edgeCalculatorType = YoEnum.create(side.getCamelCaseName() + "EdgeCalculatorType", EdgeCalculatorType.class, registry);
       rotationDetectorType = YoEnum.create(side.getCamelCaseName() + "RotationDetectorType", RotationDetectorType.class, registry);
 
       rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
-      edgeCalculatorType.set(EdgeCalculatorType.VELOCITY_AND_COP);
 
       croppedFootholdCalculator = new FootholdCropper(side.getLowerCaseName(),
                                                       contactableFoot,
@@ -134,15 +126,13 @@ public class PartialFootholdCropperModule
 
    public FrameLine2DReadOnly getLineOfRotation(FramePoint2DReadOnly measuredCoP)
    {
-      RotationEdgeCalculator copHistoryCalculator = edgeCalculators.get(EdgeCalculatorType.COP_HISTORY);
-      RotationEdgeCalculator velocityAndCopCalculator = edgeCalculators.get(EdgeCalculatorType.VELOCITY_AND_COP);
-      copHistoryCalculator.compute(measuredCoP);
-      velocityAndCopCalculator.compute(measuredCoP);
+      copHistoryEdgeCalculator.compute(measuredCoP);
+      copAndVelocityEdgeCalculator.compute(measuredCoP);
 
-      if (copHistoryCalculator.isRotationEdgeTrusted())
-         return copHistoryCalculator.getLineOfRotation();
-      else if (velocityAndCopCalculator.isRotationEdgeTrusted())
-         return velocityAndCopCalculator.getLineOfRotation();
+//      if (copHistoryEdgeCalculator.isRotationEdgeTrusted())
+//         return copHistoryEdgeCalculator.getLineOfRotation();
+      if (copAndVelocityEdgeCalculator.isRotationEdgeTrusted())
+         return copAndVelocityEdgeCalculator.getLineOfRotation();
       else
          return null;
    }
@@ -180,15 +170,8 @@ public class PartialFootholdCropperModule
 
    private void resetEdgeCalculators()
    {
-      edgeCalculators.get(EdgeCalculatorType.COP_HISTORY).reset();
-      edgeCalculators.get(EdgeCalculatorType.VELOCITY_AND_COP).reset();
-//      for (EdgeCalculatorType type : edgeCalculatorTypes)
-         edgeCalculators.get(edgeCalculatorType.getEnumValue()).reset();
-   }
-
-   public FrameLine2DReadOnly getLineOfRotation()
-   {
-      return edgeCalculators.get(edgeCalculatorType.getEnumValue()).getLineOfRotation();
+      copAndVelocityEdgeCalculator.reset();
+      copHistoryEdgeCalculator.reset();
    }
 
    public void reset()
