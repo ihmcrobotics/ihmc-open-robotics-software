@@ -284,6 +284,7 @@ public class MainTabController
 
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
+      messager.bindBidirectional(BindStartToRobot, bindStartToRobot.selectedProperty(), false);
    }
 
    public void bindControls()

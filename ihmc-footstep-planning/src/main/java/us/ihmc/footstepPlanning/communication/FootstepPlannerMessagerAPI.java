@@ -81,6 +81,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
+   public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
    public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
    public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");
