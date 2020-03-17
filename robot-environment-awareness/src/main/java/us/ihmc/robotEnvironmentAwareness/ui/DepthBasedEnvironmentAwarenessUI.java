@@ -27,7 +27,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
 public class DepthBasedEnvironmentAwarenessUI
