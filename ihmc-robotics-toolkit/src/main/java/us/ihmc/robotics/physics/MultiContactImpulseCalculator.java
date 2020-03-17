@@ -7,6 +7,7 @@ import java.util.Map;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
 
 /**
  * Inspired from: <i>Per-Contact Iteration Method for Solving Contact Dynamics</i>
@@ -27,8 +28,6 @@ public class MultiContactImpulseCalculator
    public MultiContactImpulseCalculator(ReferenceFrame rootFrame, double dt, Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap,
                                         MultiRobotCollisionGroup collisionGroup)
    {
-      CombinedRigidBodyTwistProviders combinedRigidBodyTwistProviders = new CombinedRigidBodyTwistProviders(rootFrame);
-
       for (CollisionResult collisionResult : collisionGroup.getGroupCollisions())
       {
          RigidBodyBasics rootA = collisionResult.getCollidableA().getRootBody();
@@ -36,23 +35,16 @@ public class MultiContactImpulseCalculator
          ForwardDynamicsCalculator robotA = robotForwardDynamicsCalculatorMap.get(rootA);
          ForwardDynamicsCalculator robotB = rootB != null ? robotForwardDynamicsCalculatorMap.get(rootB) : null;
 
-         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult,
-                                                                                               rootFrame,
-                                                                                               dt,
-                                                                                               robotA,
-                                                                                               robotB);
-         impulseCalculators.add(impulseCalculator);
-
-         combinedRigidBodyTwistProviders.addRigidBodyTwistProvider(impulseCalculator.getTwistChangeProviderA());
-         combinedRigidBodyTwistProviders.addRigidBodyTwistProvider(impulseCalculator.getTwistChangeProviderB());
+         impulseCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, dt, robotA, robotB));
       }
 
       for (SingleContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
-         CombinedRigidBodyTwistProviders externalTwistModifier = new CombinedRigidBodyTwistProviders(combinedRigidBodyTwistProviders);
-         externalTwistModifier.removeRigidBodyTwistProvider(impulseCalculator.getTwistChangeProviderA());
-         externalTwistModifier.removeRigidBodyTwistProvider(impulseCalculator.getTwistChangeProviderB());
-         impulseCalculator.setExternalTwistModifier(externalTwistModifier);
+         CombinedRigidBodyTwistProviders externalRigidBodyTwistModifier = impulseCalculators.stream().filter(other -> other != impulseCalculator)
+                                                                                            .collect(CombinedRigidBodyTwistProviders.collectFromCalculator(rootFrame));
+         CombinedJointStateProviders externalJointTwistModifier = impulseCalculators.stream().filter(other -> other != impulseCalculator)
+                                                                                    .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
+         impulseCalculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
       }
    }
 
@@ -81,12 +73,12 @@ public class MultiContactImpulseCalculator
                impulseCalculator.updateImpulse(alpha);
                double updateMagnitude = impulseCalculator.getVelocityUpdate();
                if (verbose)
-                  System.out.println("Calc index: " + i + ", closing contact: " + impulseCalculator.isContactClosing() + ", impulse update: "
+                  System.out.println("Calc index: " + i + ", closing contact: " + impulseCalculator.isConstraintActive() + ", impulse update: "
                         + impulseCalculator.getImpulseUpdate() + ", velocity update: " + impulseCalculator.getVelocityUpdate());
                maxUpdateMagnitude = Math.max(maxUpdateMagnitude, updateMagnitude);
                impulseCalculator.applyImpulseLazy();
 
-               if (impulseCalculator.isContactClosing())
+               if (impulseCalculator.isConstraintActive())
                   numberOfClosingContacts++;
             }
 
@@ -122,7 +114,7 @@ public class MultiContactImpulseCalculator
    {
       for (SingleContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
-         if (!impulseCalculator.isContactClosing())
+         if (!impulseCalculator.isConstraintActive())
             continue;
 
          CollisionResult collision = impulseCalculator.getCollisionResult();
@@ -130,12 +122,12 @@ public class MultiContactImpulseCalculator
          RigidBodyBasics rootBodyB = collision.getCollidableB().getRootBody();
 
          SingleRobotForwardDynamicsPlugin robotPluginA = singleRobotPluginMap.get(rootBodyA);
-         robotPluginA.addJointVelocities(impulseCalculator.computeJointVelocityChangeA());
+         robotPluginA.addJointVelocities(impulseCalculator.getJointVelocityChangeA());
 
          if (rootBodyB != null)
          {
             SingleRobotForwardDynamicsPlugin robotPluginB = singleRobotPluginMap.get(rootBodyB);
-            robotPluginB.addJointVelocities(impulseCalculator.computeJointVelocityChangeB());
+            robotPluginB.addJointVelocities(impulseCalculator.getJointVelocityChangeB());
          }
       }
    }

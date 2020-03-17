@@ -72,7 +72,7 @@ public class SingleContactImpulseCalculatorTest
          updateVelocities(impulseCalculator);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
-         assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isContactClosing(), "Iteration " + i);
+         assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isConstraintActive(), "Iteration " + i);
 
          assertContactResponseProperties("Iteration " + i, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
       }
@@ -116,7 +116,7 @@ public class SingleContactImpulseCalculatorTest
          updateVelocities(impulseCalculator);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
-         assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isContactClosing(), "Iteration " + i);
+         assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isConstraintActive(), "Iteration " + i);
          assertContactResponseProperties("Iteration " + i, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
       }
    }
@@ -135,7 +135,7 @@ public class SingleContactImpulseCalculatorTest
 
       double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionAxisForA);
 
-      if (impulseCalculator.isContactClosing())
+      if (impulseCalculator.isConstraintActive())
       { // Contact was closing
          FrameVector3D contactLinearVelocityPostImpulse = computeContactVelocity(dt, collisionResult);
          double normalVelocityPostImpulse = contactLinearVelocityPostImpulse.dot(collisionAxisForA);
@@ -270,18 +270,18 @@ public class SingleContactImpulseCalculatorTest
 
    static void updateVelocities(SingleContactImpulseCalculator impulseCalculator)
    {
-      if (!impulseCalculator.isContactClosing())
+      if (!impulseCalculator.isConstraintActive())
          return;
 
       updateJointVelocities(impulseCalculator.getDT(),
                             impulseCalculator.getContactingBodyA(),
                             impulseCalculator.getForwardDynamicsCalculatorA(),
-                            impulseCalculator.computeJointVelocityChangeA());
+                            impulseCalculator.getJointVelocityChangeA());
       if (impulseCalculator.getContactingBodyB() != null)
          updateJointVelocities(impulseCalculator.getDT(),
                                impulseCalculator.getContactingBodyB(),
                                impulseCalculator.getForwardDynamicsCalculatorB(),
-                               impulseCalculator.computeJointVelocityChangeB());
+                               impulseCalculator.getJointVelocityChangeB());
    }
 
    static void updateJointVelocities(double dt, RigidBodyBasics rigidBody, ForwardDynamicsCalculator forwardDynamicsCalculator,
