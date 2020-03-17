@@ -190,6 +190,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
+      idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
       if (bodyPathPlanRequested.getAsBoolean())
       {
