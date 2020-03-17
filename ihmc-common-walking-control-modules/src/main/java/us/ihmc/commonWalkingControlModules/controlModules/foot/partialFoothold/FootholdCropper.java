@@ -141,6 +141,7 @@ public class FootholdCropper
       sideOfFootToCrop.set(null);
       shrunkenFootPolygon.set(polygon);
       shrunkenFootPolygonInWorld.clear();
+      shrinkCounter.set(0);
 
       measuredCoPOccupancy.reset();
       desiredCoPOccupancy.reset();
