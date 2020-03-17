@@ -292,8 +292,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
       }
 
-      reportStatus();
       markSolutionEdges();
+      reportStatus();
       isPlanning.set(false);
       return output;
    }
