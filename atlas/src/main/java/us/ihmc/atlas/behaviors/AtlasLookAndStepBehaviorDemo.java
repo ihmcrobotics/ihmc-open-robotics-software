@@ -9,6 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
+import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
@@ -55,10 +56,9 @@ public class AtlasLookAndStepBehaviorDemo
    {
       LogTools.info("Creating simulated multisense stereo regions module");
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA.getNodeName());
-      VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node,
-                                                                                             new MultisenseHeadStereoSimulator(ENVIRONMENT.get(),
-                                                                                                                               createRobotModel(),
-                                                                                                                               ros2Node));
+      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(ENVIRONMENT.get(), createRobotModel(), ros2Node);
+      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(ENVIRONMENT.get(), createRobotModel(), ros2Node);
+      VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense);
       visiblePlanarRegionService.start();
 
       new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
