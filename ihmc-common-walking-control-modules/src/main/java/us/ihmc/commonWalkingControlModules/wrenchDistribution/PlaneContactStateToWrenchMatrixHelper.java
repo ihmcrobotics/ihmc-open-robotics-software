@@ -8,7 +8,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -77,7 +76,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoBoolean resetRequested;
 
    private final FrameVector3D contactNormalVector = new FrameVector3D();
-   private final AxisAngle normalContactVectorRotation = new AxisAngle();
 
    private final ReferenceFrame centerOfMassFrame;
    private final PoseReferenceFrame planeFrame;
@@ -479,9 +477,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    {
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
-      contactNormalVector.normalize();
-      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector, normalContactVectorRotation);
-      normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(contactNormalVector, normalContactVectorRotationMatrixToPack);
    }
 
    private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix,

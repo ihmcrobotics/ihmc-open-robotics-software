@@ -11,4 +11,6 @@ byte ESTIMATOR_RUN = 5
 uint32 sequence_id
 
 byte controller_crash_location 255
-string stacktrace
+string exception_type
+string error_message
+string[<=50] stacktrace

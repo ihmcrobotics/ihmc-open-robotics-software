@@ -11,6 +11,7 @@ byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = 4
 byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = 5
 byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 6
 byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = 7
+byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = 8
 
 int32 NO_PLAN_ID = -1
 
@@ -24,3 +25,7 @@ geometry_msgs/Pose[] body_path
 geometry_msgs/Pose low_level_planner_goal
 
 FootstepPlanningStatistics footstep_planning_statistics
+
+# Contains planner stack trace if failure is due to an exception
+string exception_message
+string[<=20] stacktrace

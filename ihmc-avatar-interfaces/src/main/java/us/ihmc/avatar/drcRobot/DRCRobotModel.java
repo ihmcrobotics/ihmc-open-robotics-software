@@ -13,7 +13,6 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -33,6 +32,11 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
+   public default RobotTarget getTarget()
+   {
+      return null;
+   }
+
    public abstract DRCRobotJointMap getJointMap();
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
@@ -103,11 +107,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return parameters used in the user interface only.
     */
    public default UIParameters getUIParameters()
-   {
-      return null;
-   }
-
-   public default PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
    {
       return null;
    }

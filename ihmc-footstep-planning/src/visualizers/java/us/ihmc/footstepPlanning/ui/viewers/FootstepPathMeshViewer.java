@@ -19,12 +19,14 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -62,8 +64,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> showPostProcessingInfo;
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
    private final AtomicReference<Boolean> ignorePartialFootholds;
-   private final AtomicReference<Point3D> leftFootPosition;
-   private final AtomicReference<Point3D> rightFootPosition;
+   private final AtomicReference<Pose3DReadOnly> leftFootPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
    private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
@@ -80,8 +82,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
       footstepDataListMessage = messager.createInput(FootstepPlanResponse, null);
-      leftFootPosition = messager.createInput(LeftFootStartPosition, null);
-      rightFootPosition = messager.createInput(RightFootStartPosition, null);
+      leftFootPose = messager.createInput(LeftFootPose, null);
+      rightFootPose = messager.createInput(RightFootPose, null);
 
       messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
@@ -145,20 +147,20 @@ public class FootstepPathMeshViewer extends AnimationTimer
          }
       }
 
-      boolean hasInfoToRenderFootsteps = leftFootPosition.get() != null && rightFootPosition.get() != null;
+      boolean hasInfoToRenderFootsteps = leftFootPose.get() != null && rightFootPose.get() != null;
 
       FramePoint3D stanceFootPosition = new FramePoint3D();
       FramePoint3D previousStanceFootPosition = new FramePoint3D();
       RobotSide firstStepSide = plan.getFootstep(0).getRobotSide();
       if (hasInfoToRenderFootsteps && firstStepSide == RobotSide.LEFT)
       {
-         previousStanceFootPosition.set(leftFootPosition.get());
-         stanceFootPosition.set(rightFootPosition.get());
+         previousStanceFootPosition.set(leftFootPose.get().getPosition());
+         stanceFootPosition.set(rightFootPose.get().getPosition());
       }
       else if (hasInfoToRenderFootsteps)
       {
-         previousStanceFootPosition.set(rightFootPosition.get());
-         stanceFootPosition.set(leftFootPosition.get());
+         previousStanceFootPosition.set(rightFootPose.get().getPosition());
+         stanceFootPosition.set(leftFootPose.get().getPosition());
       }
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)

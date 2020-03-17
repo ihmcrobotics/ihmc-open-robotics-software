@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.comPlanning;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSequenceCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -67,7 +68,9 @@ public class QuadrupedCoMTrajectoryPlanner implements DCMPlannerInterface
       nominalContactPhaseCalculator = new QuadrupedNominalContactPhaseCalculator(100);
       contactSequenceCalculator = new ContactSequenceCalculator<>(new QuadrupedCoPWaypointCalculator(plannerParameters), registry);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry, graphicsListRegistry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
+      if (graphicsListRegistry != null)
+         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
 
       parentRegistry.addChild(registry);
    }

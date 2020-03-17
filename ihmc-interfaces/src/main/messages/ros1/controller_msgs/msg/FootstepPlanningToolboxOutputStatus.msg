@@ -16,6 +16,8 @@ int8 FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED=6
 
 int8 FOOTSTEP_PLANNING_RESULT_INVALID_GOAL=7
 
+int8 FOOTSTEP_PLANNING_RESULT_EXCEPTION=8
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -36,5 +38,10 @@ geometry_msgs/Pose[] body_path
 geometry_msgs/Pose low_level_planner_goal
 
 controller_msgs/FootstepPlanningStatistics footstep_planning_statistics
+
+# Contains planner stack trace if failure is due to an exception
+string exception_message
+
+string[] stacktrace
 
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -66,7 +66,7 @@ public class AtlasFootstepPlanBehaviorTest
    @Test
    public void testWalkNegativePiToPi() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
@@ -153,7 +153,7 @@ public class AtlasFootstepPlanBehaviorTest
 
    private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+      FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 

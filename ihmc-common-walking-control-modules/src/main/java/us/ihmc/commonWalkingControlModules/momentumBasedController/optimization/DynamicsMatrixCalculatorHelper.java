@@ -8,7 +8,6 @@ import org.ejml.ops.CommonOps;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -16,7 +15,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 public class DynamicsMatrixCalculatorHelper
 {
    private final GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator;
-   private final JointIndexHandler jointIndexHandler;
 
    private final LinkedHashMap<JointBasics, int[]> bodyOnlyIndices = new LinkedHashMap<>();
 
@@ -29,7 +27,6 @@ public class DynamicsMatrixCalculatorHelper
    public DynamicsMatrixCalculatorHelper(GravityCoriolisExternalWrenchMatrixCalculator coriolisMatrixCalculator, JointIndexHandler jointIndexHandler)
    {
       this.coriolisMatrixCalculator = coriolisMatrixCalculator;
-      this.jointIndexHandler = jointIndexHandler;
 
       degreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(jointIndexHandler.getIndexedJoints());
       OneDoFJointBasics[] bodyJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -51,25 +48,9 @@ public class DynamicsMatrixCalculatorHelper
       this.rhoSize = rhoSize;
    }
 
-   private final DenseMatrix64F tmpCoriolisMatrix = new DenseMatrix64F(SpatialForce.SIZE);
    public void computeCoriolisMatrix(DenseMatrix64F coriolisMatrix)
    {
-      JointBasics[] jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
-
-      for (int jointID = 0; jointID < jointsToOptimizeFor.length; jointID++)
-      {
-         JointBasics joint = jointsToOptimizeFor[jointID];
-         int jointDoFs = joint.getDegreesOfFreedom();
-         tmpCoriolisMatrix.reshape(jointDoFs, 1);
-         coriolisMatrixCalculator.getJointCoriolisMatrix(joint, tmpCoriolisMatrix);
-         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
-
-         for (int i = 0; i < jointDoFs; i++)
-         {
-            int jointIndex = jointIndices[i];
-            CommonOps.extract(tmpCoriolisMatrix, i, i + 1, 0, 1, coriolisMatrix, jointIndex, 0);
-         }
-      }
+      coriolisMatrix.set(coriolisMatrixCalculator.getJointTauMatrix());
    }
 
    public void extractFloatingBaseCoriolisMatrix(DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)

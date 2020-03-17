@@ -19,7 +19,6 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
       setReturnBestEffortPlan(false);
       setCheckForBodyBoxCollisions(false);
       setCheckForPathCollisions(true);
-      setPerformHeuristicSearchPolicies(true);
       setMinimumStepsForBestEffortPlan(3);
       setCliffHeightToAvoid(0.05);
       setMinimumDistanceFromCliffBottoms(0.1);

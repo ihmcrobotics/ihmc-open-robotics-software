@@ -29,7 +29,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
       @Override
       public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
-         return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties());
+         return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties(), target);
       }
 
       @Override

@@ -14,7 +14,8 @@ public enum FootstepPlanningResult
    NO_PATH_EXISTS,
    SNAPPING_FAILED,
    PLANNER_FAILED,
-   INVALID_GOAL;
+   INVALID_GOAL,
+   EXCEPTION;
 
    public static final FootstepPlanningResult[] values = values();
 
@@ -34,6 +35,11 @@ public enum FootstepPlanningResult
       default:
          return false;
       }
+   }
+
+   public boolean terminalResult()
+   {
+      return this != SOLUTION_DOES_NOT_REACH_GOAL;
    }
 
    public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)

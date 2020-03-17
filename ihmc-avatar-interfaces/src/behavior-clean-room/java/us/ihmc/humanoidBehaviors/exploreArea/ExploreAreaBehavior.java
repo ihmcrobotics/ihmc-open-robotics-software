@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -67,6 +68,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area", ExploreAreaBehavior::new, ExploreAreaBehaviorAPI.create());
+
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

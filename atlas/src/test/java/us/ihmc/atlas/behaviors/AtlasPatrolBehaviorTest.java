@@ -6,20 +6,15 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
-import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -30,7 +25,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Tag("humanoid-behaviors")
 public class AtlasPatrolBehaviorTest
@@ -47,13 +41,11 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testPatrolBehavior() throws IOException
    {
-      new FootstepPlanningToolboxModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
-
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.MessagerAPI);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
       LogTools.info("Creating behavior module");
-      BehaviorModule.createForTest(robotModel, messager);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(PatrolBehavior.DEFINITION), robotModel);
+      Messager messager = behaviorModule.getMessager();
 
       LogTools.info("Creating behavior messager");
       messager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));

@@ -9,14 +9,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.*;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
+   public static final long HEAD_MICROSTRAIN_SERIAL_NUMBER = 625476543L;
+
    private static final String multisense_namespace = "/multisense";
    private static final String realsense_namespace = "/realsense";
    private static final String depth_camera_namespace = "/depthcam";
@@ -124,8 +122,8 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final String trackingCameraTopic = tracking_camera_namespace + "/odom/sample";
 
    private static final double depthOffsetX = 0.058611;
-   private static final double depthOffsetZ = 0.038959;
-   private static final double depthPitchingAngle = 75.0 / 180.0 * Math.PI;
+   private static final double depthOffsetZ = 0.01;
+   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
    private static final double depthThickness = 0.0245;
 
    private static final double trackingOffsetX = 0.0358;

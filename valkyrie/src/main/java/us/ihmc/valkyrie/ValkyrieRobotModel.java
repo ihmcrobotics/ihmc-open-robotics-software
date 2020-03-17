@@ -13,22 +13,16 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
-import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.*;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -46,19 +40,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
-import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
-import us.ihmc.valkyrie.parameters.ValkyriePlanarRegionFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieSmoothCMPPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.parameters.*;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -82,20 +64,22 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private FootContactPoints<RobotSide> simulationContactPoints = null;
    private GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
+   private SDFDescriptionMutator sdfDescriptionMutator;
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
-   private ValkyrieContactPointParameters contactPointParameters;
+   private RobotContactPointParameters<RobotSide> contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
 
-   private PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
+
+   private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
    public ValkyrieRobotModel(RobotTarget target)
    {
@@ -113,6 +97,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotVersion;
    }
 
+   @Override
    public RobotTarget getTarget()
    {
       return target;
@@ -135,7 +120,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Overrides the transparency of the robot visuals.
-    * 
+    *
     * @param transparency the new transparency, default value {@link Double#NaN}.
     */
    public void setTransparency(double transparency)
@@ -147,7 +132,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Indicates whether to use the OBJ or DAE meshes for the robot visuals.
-    * 
+    *
     * @param useOBJGraphics switch to use OBJ when {@code true}, use DAE otherwise. Default value is
     *                       {@code true}.
     */
@@ -160,7 +145,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets whether the simulation contact engine should use point-to-shape or shape-to-shape model.
-    * 
+    *
     * @param useShapeCollision switch to use shape-to-shape when {@code true}, use point-to-shape
     *                          otherwise. Default value is {@code false}.
     */
@@ -175,7 +160,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Overrides the default set of contact points to use for the simulation for the feet.
-    * 
+    *
     * @param simulationContactPoints the new set of foot contact points. Default value is {@code null}.
     */
    public void setSimulationContactPoints(FootContactPoints<RobotSide> simulationContactPoints)
@@ -187,7 +172,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Overrides the model to load.
-    * 
+    *
     * @param customModel the file's fullname of the model to load. Default value is {@code null}.
     */
    public void setCustomModel(String customModel)
@@ -199,7 +184,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Scale to apply to the robot mass.
-    * 
+    *
     * @param modelMassScale the new scale value. Default value is {@code 1.0}.
     */
    public void setModelMassScale(double modelMassScale)
@@ -211,7 +196,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Scale to apply to the robot size.
-    * 
+    *
     * @param modelSizeScale the new scale value. Default value is {@code 1.0}.
     */
    public void setModelSizeScale(double modelSizeScale)
@@ -221,13 +206,25 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.modelSizeScale = modelSizeScale;
    }
 
+   public void setSDFDescriptionMutator(SDFDescriptionMutator sdfDescriptionMutator)
+   {
+      if (generalizedRobotModel != null)
+         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+      this.sdfDescriptionMutator = sdfDescriptionMutator;
+   }
+
+   public SDFDescriptionMutator getSDFDescriptionMutator()
+   {
+      if (sdfDescriptionMutator == null)
+         sdfDescriptionMutator = new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics);
+      return sdfDescriptionMutator;
+   }
+
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       if (generalizedRobotModel == null)
       {
-         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(),
-                                                               getSDFModelInputStream(),
-                                                               new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics));
+         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), getSDFDescriptionMutator());
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
@@ -400,15 +397,19 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCSensorSuiteManager getSensorSuiteManager()
+   public ValkyrieSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(getSimpleRobotName(),
-                                            this,
-                                            getCollisionBoxProvider(),
-                                            getROSClockCalculator(),
-                                            getSensorInformation(),
-                                            getJointMap(),
-                                            target);
+      if (sensorSuiteManager == null)
+      {
+         sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
+                                                             this,
+                                                             getCollisionBoxProvider(),
+                                                             getROSClockCalculator(),
+                                                             getSensorInformation(),
+                                                             getJointMap(),
+                                                             target);
+      }
+      return sensorSuiteManager;
    }
 
    @Override
@@ -535,17 +536,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return calibrationParameters;
    }
 
-   /**
-    * Adds robot specific footstep parameters
-    */
-   @Override
-   public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
-   {
-      if (planarRegionFootstepPlannerParameters == null)
-         planarRegionFootstepPlannerParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
-      return planarRegionFootstepPlannerParameters;
-   }
-
    @Override
    public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
    {
@@ -558,6 +548,16 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (capturePointPlannerParameters == null)
          capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(getRobotPhysicalProperties(), target);
       return capturePointPlannerParameters;
+   }
+
+   public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
+   {
+      this.walkingControllerParameters = walkingControllerParameters;
+   }
+
+   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      this.contactPointParameters = contactPointParameters;
    }
 
    @Override

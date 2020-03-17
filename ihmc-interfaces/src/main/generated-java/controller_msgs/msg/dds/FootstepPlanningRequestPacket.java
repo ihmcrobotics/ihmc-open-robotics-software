@@ -25,25 +25,25 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public long sequence_id_;
    /**
-            * Initial stance foot side
+            * Starting left foot pose
             */
-   public byte initial_stance_robot_side_ = (byte) 255;
+   public us.ihmc.euclid.geometry.Pose3D start_left_foot_pose_;
    /**
-            * Stance foot sole frame z up position, z must be correct
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
+   public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
    /**
-            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            * Goal left foot pose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
+   public us.ihmc.euclid.geometry.Pose3D goal_left_foot_pose_;
    /**
-            * Goal mid feet z up position
+            * Goal right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
+   public us.ihmc.euclid.geometry.Pose3D goal_right_foot_pose_;
    /**
-            * Goal mid feet z up orientation, only the "yaw" is considered
+            * Requested initial stance side. If not specified the planner will choose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
+   public byte requested_initial_stance_side_ = (byte) 255;
    /**
             * Footstep planner type, see above
             */
@@ -80,14 +80,20 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Set this id to keep track of your request
             */
    public int planner_request_id_ = -1;
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
 
    public FootstepPlanningRequestPacket()
    {
-      stance_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      stance_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      start_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      start_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+      body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
+
    }
 
    public FootstepPlanningRequestPacket(FootstepPlanningRequestPacket other)
@@ -100,12 +106,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       sequence_id_ = other.sequence_id_;
 
-      initial_stance_robot_side_ = other.initial_stance_robot_side_;
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_left_foot_pose_, start_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_right_foot_pose_, start_right_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_left_foot_pose_, goal_left_foot_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
+      requested_initial_stance_side_ = other.requested_initial_stance_side_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.stance_foot_position_in_world_, stance_foot_position_in_world_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.stance_foot_orientation_in_world_, stance_foot_orientation_in_world_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_position_in_world_, goal_position_in_world_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.goal_orientation_in_world_, goal_orientation_in_world_);
       requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
 
       goal_distance_proximity_ = other.goal_distance_proximity_;
@@ -123,6 +129,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       planner_request_id_ = other.planner_request_id_;
 
+      body_path_waypoints_.set(other.body_path_waypoints_);
    }
 
    /**
@@ -140,55 +147,55 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return sequence_id_;
    }
 
+
    /**
-            * Initial stance foot side
+            * Starting left foot pose
             */
-   public void setInitialStanceRobotSide(byte initial_stance_robot_side)
+   public us.ihmc.euclid.geometry.Pose3D getStartLeftFootPose()
    {
-      initial_stance_robot_side_ = initial_stance_robot_side;
-   }
-   /**
-            * Initial stance foot side
-            */
-   public byte getInitialStanceRobotSide()
-   {
-      return initial_stance_robot_side_;
+      return start_left_foot_pose_;
    }
 
 
    /**
-            * Stance foot sole frame z up position, z must be correct
+            * Starting right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D getStanceFootPositionInWorld()
+   public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
-      return stance_foot_position_in_world_;
+      return start_right_foot_pose_;
    }
 
 
    /**
-            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            * Goal left foot pose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getStanceFootOrientationInWorld()
+   public us.ihmc.euclid.geometry.Pose3D getGoalLeftFootPose()
    {
-      return stance_foot_orientation_in_world_;
+      return goal_left_foot_pose_;
    }
 
 
    /**
-            * Goal mid feet z up position
+            * Goal right foot pose
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalPositionInWorld()
+   public us.ihmc.euclid.geometry.Pose3D getGoalRightFootPose()
    {
-      return goal_position_in_world_;
+      return goal_right_foot_pose_;
    }
 
-
    /**
-            * Goal mid feet z up orientation, only the "yaw" is considered
+            * Requested initial stance side. If not specified the planner will choose
             */
-   public us.ihmc.euclid.tuple4D.Quaternion getGoalOrientationInWorld()
+   public void setRequestedInitialStanceSide(byte requested_initial_stance_side)
    {
-      return goal_orientation_in_world_;
+      requested_initial_stance_side_ = requested_initial_stance_side;
+   }
+   /**
+            * Requested initial stance side. If not specified the planner will choose
+            */
+   public byte getRequestedInitialStanceSide()
+   {
+      return requested_initial_stance_side_;
    }
 
    /**
@@ -321,6 +328,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
 
+   /**
+            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
+   {
+      return body_path_waypoints_;
+   }
+
+
    public static Supplier<FootstepPlanningRequestPacketPubSubType> getPubSubType()
    {
       return FootstepPlanningRequestPacketPubSubType::new;
@@ -340,12 +356,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_stance_robot_side_, other.initial_stance_robot_side_, epsilon)) return false;
+      if (!this.start_left_foot_pose_.epsilonEquals(other.start_left_foot_pose_, epsilon)) return false;
+      if (!this.start_right_foot_pose_.epsilonEquals(other.start_right_foot_pose_, epsilon)) return false;
+      if (!this.goal_left_foot_pose_.epsilonEquals(other.goal_left_foot_pose_, epsilon)) return false;
+      if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_initial_stance_side_, other.requested_initial_stance_side_, epsilon)) return false;
 
-      if (!this.stance_foot_position_in_world_.epsilonEquals(other.stance_foot_position_in_world_, epsilon)) return false;
-      if (!this.stance_foot_orientation_in_world_.epsilonEquals(other.stance_foot_orientation_in_world_, epsilon)) return false;
-      if (!this.goal_position_in_world_.epsilonEquals(other.goal_position_in_world_, epsilon)) return false;
-      if (!this.goal_orientation_in_world_.epsilonEquals(other.goal_orientation_in_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
@@ -363,6 +379,13 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
+      if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.body_path_waypoints_.size(); i++)
+         {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -378,12 +401,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.initial_stance_robot_side_ != otherMyClass.initial_stance_robot_side_) return false;
+      if (!this.start_left_foot_pose_.equals(otherMyClass.start_left_foot_pose_)) return false;
+      if (!this.start_right_foot_pose_.equals(otherMyClass.start_right_foot_pose_)) return false;
+      if (!this.goal_left_foot_pose_.equals(otherMyClass.goal_left_foot_pose_)) return false;
+      if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
+      if(this.requested_initial_stance_side_ != otherMyClass.requested_initial_stance_side_) return false;
 
-      if (!this.stance_foot_position_in_world_.equals(otherMyClass.stance_foot_position_in_world_)) return false;
-      if (!this.stance_foot_orientation_in_world_.equals(otherMyClass.stance_foot_orientation_in_world_)) return false;
-      if (!this.goal_position_in_world_.equals(otherMyClass.goal_position_in_world_)) return false;
-      if (!this.goal_orientation_in_world_.equals(otherMyClass.goal_orientation_in_world_)) return false;
       if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
 
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
@@ -401,6 +424,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
+      if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
 
       return true;
    }
@@ -413,16 +437,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("FootstepPlanningRequestPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("initial_stance_robot_side=");
-      builder.append(this.initial_stance_robot_side_);      builder.append(", ");
-      builder.append("stance_foot_position_in_world=");
-      builder.append(this.stance_foot_position_in_world_);      builder.append(", ");
-      builder.append("stance_foot_orientation_in_world=");
-      builder.append(this.stance_foot_orientation_in_world_);      builder.append(", ");
-      builder.append("goal_position_in_world=");
-      builder.append(this.goal_position_in_world_);      builder.append(", ");
-      builder.append("goal_orientation_in_world=");
-      builder.append(this.goal_orientation_in_world_);      builder.append(", ");
+      builder.append("start_left_foot_pose=");
+      builder.append(this.start_left_foot_pose_);      builder.append(", ");
+      builder.append("start_right_foot_pose=");
+      builder.append(this.start_right_foot_pose_);      builder.append(", ");
+      builder.append("goal_left_foot_pose=");
+      builder.append(this.goal_left_foot_pose_);      builder.append(", ");
+      builder.append("goal_right_foot_pose=");
+      builder.append(this.goal_right_foot_pose_);      builder.append(", ");
+      builder.append("requested_initial_stance_side=");
+      builder.append(this.requested_initial_stance_side_);      builder.append(", ");
       builder.append("requested_footstep_planner_type=");
       builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
@@ -440,7 +464,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("assume_flat_ground=");
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
-      builder.append(this.planner_request_id_);
+      builder.append(this.planner_request_id_);      builder.append(", ");
+      builder.append("body_path_waypoints=");
+      builder.append(this.body_path_waypoints_);
       builder.append("}");
       return builder.toString();
    }

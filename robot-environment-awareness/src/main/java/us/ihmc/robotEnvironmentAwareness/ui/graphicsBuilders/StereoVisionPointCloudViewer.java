@@ -6,12 +6,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 
 public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVisionPointCloudMessage>
@@ -44,9 +44,11 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
    @Override
    public void unpackPointCloud(StereoVisionPointCloudMessage message)
    {
-      Point3D32 scanPoint = new Point3D32();
+      Point3D32[] pointcloud = PointCloudCompression.decompressPointCloudToArray32(message);
+      int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+
       meshBuilder.clear();
-      int numberOfScanPoints = message.getPointCloud().size() / 3;
+      int numberOfScanPoints = pointcloud.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, sizeOfPointCloud.get());
 
       Random random = new Random();
@@ -58,12 +60,9 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
          else
             indexToVisualize = random.nextInt(numberOfScanPoints);
 
-         int colorValue = message.getColors().get(indexToVisualize);
-         Color color = intToColor(colorValue);
+         Color color = intToColor(colors[indexToVisualize]);
 
-         MessageTools.unpackScanPoint(message, indexToVisualize, scanPoint);
-
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), pointcloud[indexToVisualize], color);
       }
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());
@@ -78,5 +77,11 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
       int g = value >> 8 & 0xFF;
       int b = value >> 0 & 0xFF;
       return Color.rgb(r, g, b);
+   }
+   
+   public static int colorToInt(javafx.scene.paint.Color color)
+   {
+      int rgb = (int) (color.getRed() * 0xFF) << 16 | (int) (color.getGreen() * 0xFF) << 8 | (int) (color.getBlue() * 0xFF) << 0;
+      return rgb;
    }
 }

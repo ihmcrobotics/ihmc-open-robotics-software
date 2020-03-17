@@ -10,6 +10,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -81,22 +82,35 @@ public class ValkyrieKinematicsCollisionModel implements HumanoidRobotKinematics
          int collisionGroup = helper.createCollisionGroup(bodyName, armNames.get(robotSide.getOppositeSide()), legNames.get(RobotSide.LEFT), legNames.get(RobotSide.RIGHT));
 
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         Capsule3D handShapeFist = new Capsule3D(0.04, 0.035);
-         handShapeFist.getPosition().set(-0.01, robotSide.negateIfRightSide(0.033), -0.012);
-         handShapeFist.getAxis().set(Axis.Z);
-         collidables.add(new KinematicsCollidable(hand, collisionMask, collisionGroup, handShapeFist, hand.getBodyFixedFrame(), minimumSafeDistance));
-         Capsule3D handShapePalm = new Capsule3D(0.035, 0.04);
-         handShapePalm.getPosition().set(-0.015, robotSide.negateIfLeftSide(0.01), -0.01);
-         handShapePalm.getAxis().set(Axis.Z);
-         collidables.add(new KinematicsCollidable(hand, collisionMask, collisionGroup, handShapePalm, hand.getBodyFixedFrame(), minimumSafeDistance));
+         OneDoFJointBasics elbowRollJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL);
 
-         RigidBodyBasics forearm = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL).getSuccessor();
-         Capsule3D forearmShape = new Capsule3D(0.21, 0.08);
-         forearmShape.getPosition().setX(-0.02);
-         forearmShape.getPosition().setY(robotSide.negateIfLeftSide(0.02));
-         forearmShape.getPosition().setZ(-0.02);
-         forearmShape.setAxis(Axis.Y);
-         collidables.add(new KinematicsCollidable(forearm, collisionMask, collisionGroup, forearmShape, forearm.getBodyFixedFrame(), minimumSafeDistance));
+         if (elbowRollJoint != null)
+         {
+            Capsule3D handShapeFist = new Capsule3D(0.04, 0.035);
+            handShapeFist.getPosition().set(-0.01, robotSide.negateIfRightSide(0.033), -0.012);
+            handShapeFist.getAxis().set(Axis.Z);
+            collidables.add(new KinematicsCollidable(hand, collisionMask, collisionGroup, handShapeFist, hand.getBodyFixedFrame(), minimumSafeDistance));
+            Capsule3D handShapePalm = new Capsule3D(0.035, 0.04);
+            handShapePalm.getPosition().set(-0.015, robotSide.negateIfLeftSide(0.01), -0.01);
+            handShapePalm.getAxis().set(Axis.Z);
+            collidables.add(new KinematicsCollidable(hand, collisionMask, collisionGroup, handShapePalm, hand.getBodyFixedFrame(), minimumSafeDistance));
+            
+            RigidBodyBasics forearm = elbowRollJoint.getSuccessor();
+            Capsule3D forearmShape = new Capsule3D(0.21, 0.08);
+            forearmShape.getPosition().setX(-0.02);
+            forearmShape.getPosition().setY(robotSide.negateIfLeftSide(0.02));
+            forearmShape.getPosition().setZ(-0.02);
+            forearmShape.setAxis(Axis.Y);
+            collidables.add(new KinematicsCollidable(forearm, collisionMask, collisionGroup, forearmShape, forearm.getBodyFixedFrame(), minimumSafeDistance));
+         }
+         else
+         { // Assuming this val with arm mass sim
+            RigidBodyBasics massSim = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getSuccessor();
+            Capsule3D massSimShape = new Capsule3D(0.36, 0.065);
+            massSimShape.getPosition().set(-0.015, robotSide.negateIfRightSide(0.04), -0.02);
+            massSimShape.getAxis().set(Axis.Y);
+            collidables.add(new KinematicsCollidable(massSim, collisionMask, collisionGroup, massSimShape, massSim.getBodyFixedFrame(), minimumSafeDistance));
+         }
       }
 
       for (RobotSide robotSide : RobotSide.values)

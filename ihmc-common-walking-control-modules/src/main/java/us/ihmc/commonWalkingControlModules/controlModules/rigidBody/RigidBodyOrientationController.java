@@ -53,7 +53,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       // Must be the body frame until the controller core allows custom control frame rotations for orientation commands:
       MovingReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       orientationHelper = new RigidBodyOrientationControlHelper(prefix, bodyToControl, baseBody, elevator, controlFrame, baseFrame, useBaseFrameForControl,
-                                                                usingWeightFromMessage, registry);
+                                                                usingWeightFromMessage, yoTime, registry);
 
       this.jointControlHelper = jointControlHelper;
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
