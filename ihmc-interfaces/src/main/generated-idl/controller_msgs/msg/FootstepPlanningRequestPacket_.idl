@@ -2,9 +2,7 @@
 #define __controller_msgs__msg__FootstepPlanningRequestPacket__idl__
 
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
-#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
-#include "geometry_msgs/msg/./Quaternion_.idl"
 module controller_msgs
 {
   module msg
@@ -44,26 +42,26 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Initial stance foot side
+         * Starting left foot pose
+         */
+        geometry_msgs::msg::dds::Pose start_left_foot_pose;
+        /**
+         * Starting right foot pose
+         */
+        geometry_msgs::msg::dds::Pose start_right_foot_pose;
+        /**
+         * Goal left foot pose
+         */
+        geometry_msgs::msg::dds::Pose goal_left_foot_pose;
+        /**
+         * Goal right foot pose
+         */
+        geometry_msgs::msg::dds::Pose goal_right_foot_pose;
+        /**
+         * Requested initial stance side. If not specified the planner will choose
          */
         @defaultValue(value=255)
-        octet initial_stance_robot_side;
-        /**
-         * Stance foot sole frame z up position, z must be correct
-         */
-        geometry_msgs::msg::dds::Point stance_foot_position_in_world;
-        /**
-         * Stance foot sole frame z up orientation, only the "yaw" is considered
-         */
-        geometry_msgs::msg::dds::Quaternion stance_foot_orientation_in_world;
-        /**
-         * Goal mid feet z up position
-         */
-        geometry_msgs::msg::dds::Point goal_position_in_world;
-        /**
-         * Goal mid feet z up orientation, only the "yaw" is considered
-         */
-        geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        octet requested_initial_stance_side;
         /**
          * Footstep planner type, see above
          */

@@ -333,10 +333,10 @@ public class AtlasCorridorNavigationTest
 
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          request.setHorizonLength(100.0);
-         request.setGoalPose(goalPose);
+         request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
          request.setPlanarRegionsList(latestMap);
-         request.setInitialStancePose(initialStanceFootPose);
-         request.setInitialStanceSide(initialStanceFootSide);
+         request.setStartFootPoses(leftSolePose, rightSolePose);
+         request.setRequestedInitialStanceSide(initialStanceFootSide);
          request.setTimeout(2.0);
 
          Stopwatch footstepPlannerStopwatch = new Stopwatch().start();
