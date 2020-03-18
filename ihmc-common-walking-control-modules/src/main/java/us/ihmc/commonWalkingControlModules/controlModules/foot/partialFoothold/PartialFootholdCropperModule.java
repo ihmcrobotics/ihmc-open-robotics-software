@@ -28,7 +28,7 @@ public class PartialFootholdCropperModule
    }
 
    private final YoEnum<RotationDetectorType> rotationDetectorType;
-   private final RotationEdgeCalculator copHistoryEdgeCalculator;
+//   private final RotationEdgeCalculator copHistoryEdgeCalculator;
    private final CoPAndVelocityRotationEdgeCalculator copAndVelocityEdgeCalculator;
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
    private final FootholdCropper croppedFootholdCalculator;
@@ -51,12 +51,12 @@ public class PartialFootholdCropperModule
       isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
 
 //      RotationEdgeCalculator velocityEdgeCalculator = new VelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
-      copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
-                                                                                             soleFrame,
-                                                                                             rotationParameters,
-                                                                                             dt,
-                                                                                             registry,
-                                                                                             graphicsRegistry);
+//      copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side,
+//                                                                                             soleFrame,
+//                                                                                             rotationParameters,
+//                                                                                             dt,
+//                                                                                             registry,
+//                                                                                             graphicsRegistry);
 //      RotationEdgeCalculator geometricEdgeCalculator = new GeometricRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, null);
       copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side,
                                                                                                      soleFrame,
@@ -126,7 +126,7 @@ public class PartialFootholdCropperModule
 
    public FrameLine2DReadOnly getLineOfRotation(FramePoint2DReadOnly measuredCoP)
    {
-      copHistoryEdgeCalculator.compute(measuredCoP);
+//      copHistoryEdgeCalculator.compute(measuredCoP);
       copAndVelocityEdgeCalculator.compute(measuredCoP);
 
 //      if (copHistoryEdgeCalculator.isRotationEdgeTrusted())
@@ -171,7 +171,7 @@ public class PartialFootholdCropperModule
    private void resetEdgeCalculators()
    {
       copAndVelocityEdgeCalculator.reset();
-      copHistoryEdgeCalculator.reset();
+//      copHistoryEdgeCalculator.reset();
    }
 
    public void reset()
