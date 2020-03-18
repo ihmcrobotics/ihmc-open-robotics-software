@@ -60,6 +60,16 @@ public class OnlineLeastSquaresRegression
       return MathTools.square(covarianceCalculator.getCorrelation());
    }
 
+   public double getXStandardDeviation()
+   {
+      return covarianceCalculator.getXStandardDeviation();
+   }
+
+   public double getYStandardDeviation()
+   {
+      return covarianceCalculator.getYStandardDeviation();
+   }
+
    public double getXMean()
    {
       return covarianceCalculator.getXMean();
