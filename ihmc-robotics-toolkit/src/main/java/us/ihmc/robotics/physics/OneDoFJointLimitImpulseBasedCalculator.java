@@ -1,5 +1,8 @@
 package us.ihmc.robotics.physics;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -7,11 +10,28 @@ import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.algorithms.MultiBodyResponseCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConstraintCalculator
 {
+   public static List<OneDoFJointBasics> findOneDoFJointsAtLimit(RigidBodyBasics rootBody, double dt, ForwardDynamicsCalculator forwardDynamicsCalculator)
+   {
+      return SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).filter(joint -> isOneDoFJointAtLimit(joint, dt, forwardDynamicsCalculator))
+                           .collect(Collectors.toList());
+   }
+
+   public static boolean isOneDoFJointAtLimit(OneDoFJointReadOnly joint, double dt, ForwardDynamicsCalculator forwardDynamicsCalculator)
+   {
+      double q = joint.getQ();
+      double qd = joint.getQd();
+      double qdd = forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
+      double projected_q = q + dt * qd + 0.5 * dt * dt * qdd;
+      return projected_q <= joint.getJointLimitLower() || joint.getJointLimitUpper() <= projected_q;
+   }
+
    private double springConstant = 5.0;
 
    private final double dt;
@@ -22,7 +42,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
 
    private boolean isInitialized = false;
    private boolean isInertiaUpToDate = false;
-   private boolean isConstraintActive = false;
+   private boolean isImpulseZero = false;
 
    private JointStateProvider externalJointTwistModifier;
 
@@ -59,7 +79,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
       if (isInitialized)
          return;
 
-      jointVelocityNoImpulse = joint.getQ() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
+      jointVelocityNoImpulse = joint.getQd() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
 
       isInertiaUpToDate = false;
       isInitialized = true;
@@ -96,22 +116,24 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
       double distanceToLowerLimit = joint.getQ() - joint.getJointLimitLower();
       double distanceToUpperLimit = joint.getQ() - joint.getJointLimitUpper();
 
+      boolean isNearingLimit;
+
       if (distanceToLowerLimit <= 0.0)
       { // Violating lower limit
          jointVelocity += springConstant * distanceToLowerLimit;
-         isConstraintActive = jointVelocity <= 0.0;
+         isNearingLimit = jointVelocity <= 0.0;
       }
       else if (distanceToUpperLimit >= 0.0)
       { // Violating upper limit
          jointVelocity += springConstant * distanceToUpperLimit;
-         isConstraintActive = jointVelocity >= 0.0;
+         isNearingLimit = jointVelocity >= 0.0;
       }
       else
       {
-         isConstraintActive = false;
+         isNearingLimit = false;
       }
 
-      if (isConstraintActive)
+      if (isNearingLimit)
       {
          if (!isInertiaUpToDate)
          {
@@ -119,12 +141,9 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
             isInertiaUpToDate = true;
          }
 
-         impulse = -inverseApparentInertia * jointVelocity;
-         responseCalculator.applyJointImpulse(joint, impulse);
-      }
-      else
-      {
-         responseCalculator.reset();
+         impulse = -jointVelocity / inverseApparentInertia;
+         if (Double.isNaN(impulse))
+            throw new IllegalStateException("The impulse is NaN");
       }
 
       if (isFirstUpdate)
@@ -137,7 +156,23 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
          impulseUpdate = impulse - previousImpulse;
       }
 
+      isImpulseZero = EuclidCoreTools.epsilonEquals(0.0, impulse, 1.0 - 12);
+
+      if (isImpulseZero)
+      {
+         responseCalculator.reset();
+      }
+      else
+      {
+         responseCalculator.applyJointImpulse(joint, impulse);
+      }
+
       previousImpulse = impulse;
+   }
+
+   public void setSpringConstant(double springConstant)
+   {
+      this.springConstant = springConstant;
    }
 
    @Override
@@ -155,7 +190,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
    @Override
    public boolean isConstraintActive()
    {
-      return isConstraintActive;
+      return !isImpulseZero;
    }
 
    @Override
@@ -176,10 +211,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
 
    public DenseMatrix64F computeJointVelocityChange()
    {
-      if (!isConstraintActive)
-         return null;
-
-      return responseCalculator.propagateImpulse();
+      return isImpulseZero ? null : responseCalculator.propagateImpulse();
    }
 
    @Override
@@ -215,9 +247,6 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
    @Override
    public DenseMatrix64F getJointVelocityChange(int index)
    {
-      if (!isConstraintActive)
-         return null;
-      else
-         return responseCalculator.propagateImpulse();
+      return isImpulseZero ? null : responseCalculator.propagateImpulse();
    }
 }

@@ -1,16 +1,15 @@
 package us.ihmc.robotics.physics;
 
+import static us.ihmc.robotics.physics.OneDoFJointLimitImpulseBasedCalculator.findOneDoFJointsAtLimit;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.JointStateType;
 
 /**
@@ -24,7 +23,7 @@ public class MultiContactImpulseCalculator
    private final List<OneDoFJointLimitImpulseBasedCalculator> jointLimitCalculators = new ArrayList<>();
    private final List<ImpulseBasedConstraintCalculator> calculators = new ArrayList<>();
 
-   private double alpha_min = 0.7;
+   private double alpha_min = 0.3;
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
 
@@ -36,12 +35,11 @@ public class MultiContactImpulseCalculator
    {
       for (RigidBodyBasics rootBody : collisionGroup.getRootBodies())
       {
-         List<OneDoFJointBasics> jointsAtLimit = findOneDoFJointAtLimit(rootBody);
+         ForwardDynamicsCalculator robot = robotForwardDynamicsCalculatorMap.get(rootBody);
+         List<OneDoFJointBasics> jointsAtLimit = findOneDoFJointsAtLimit(rootBody, dt, robot);
 
          if (jointsAtLimit.isEmpty())
             continue;
-
-         ForwardDynamicsCalculator robot = robotForwardDynamicsCalculatorMap.get(rootBody);
 
          jointsAtLimit.stream().map(joint -> new OneDoFJointLimitImpulseBasedCalculator(dt, joint, robot)).forEach(jointLimitCalculators::add);
       }
@@ -67,16 +65,6 @@ public class MultiContactImpulseCalculator
                                                                              .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
          calculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
       }
-   }
-
-   private static List<OneDoFJointBasics> findOneDoFJointAtLimit(RigidBodyBasics rootBody)
-   {
-      return SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).filter(joint -> isOneDoFJointAtLimit(joint)).collect(Collectors.toList());
-   }
-
-   private static boolean isOneDoFJointAtLimit(OneDoFJointReadOnly joint)
-   {
-      return joint.getQ() <= joint.getJointLimitLower() || joint.getEffortLimitUpper() <= joint.getQ();
    }
 
    public double computeImpulses(boolean verbose)
