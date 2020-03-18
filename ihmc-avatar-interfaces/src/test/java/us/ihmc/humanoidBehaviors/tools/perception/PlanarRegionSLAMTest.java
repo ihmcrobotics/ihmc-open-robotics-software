@@ -767,7 +767,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion floor = createASingleSquare(new Vector3D(), 0.0, 0.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         floor.transformByPreMultiply(transform);
+         floor.applyTransform(transform);
          floor.setRegionId(regionIdStart + 1);
          planarRegionsList.addPlanarRegion(floor);
 
@@ -777,8 +777,8 @@ class PlanarRegionSLAMTest
 
             RigidBodyTransform floorToCeiling = new RigidBodyTransform();
             floorToCeiling.setTranslation(0.0, 0.0, 1.0);
-            ceiling.transformByPreMultiply(floorToCeiling);
-            ceiling.transformByPreMultiply(transform);
+            ceiling.applyTransform(floorToCeiling);
+            ceiling.applyTransform(transform);
 
             ceiling.setRegionId(regionIdStart + 4);
             planarRegionsList.addPlanarRegion(ceiling);
@@ -789,7 +789,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion wallOne = createASingleSquare(new Vector3D(), 0.0, -Math.PI / 2.0, 0.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         wallOne.transformByPreMultiply(transform);
+         wallOne.applyTransform(transform);
          wallOne.setRegionId(regionIdStart + 2);
          planarRegionsList.addPlanarRegion(wallOne);
 
@@ -799,8 +799,8 @@ class PlanarRegionSLAMTest
 
             RigidBodyTransform wallToWall = new RigidBodyTransform();
             wallToWall.setTranslation(1.0, 0.0, 0.0);
-            oppositeWallOne.transformByPreMultiply(wallToWall);
-            oppositeWallOne.transformByPreMultiply(transform);
+            oppositeWallOne.applyTransform(wallToWall);
+            oppositeWallOne.applyTransform(transform);
 
             oppositeWallOne.setRegionId(regionIdStart + 5);
             planarRegionsList.addPlanarRegion(oppositeWallOne);
@@ -811,7 +811,7 @@ class PlanarRegionSLAMTest
       {
          PlanarRegion wallTwo = createASingleSquare(new Vector3D(), 0.0, 0.0, Math.PI / 2.0, new Point2D(0.0, 0.0), new Point2D(1.0, 1.0));
 
-         wallTwo.transformByPreMultiply(transform);
+         wallTwo.applyTransform(transform);
          wallTwo.setRegionId(regionIdStart + 3);
          planarRegionsList.addPlanarRegion(wallTwo);
          if (includeOppositeSide)
@@ -820,8 +820,8 @@ class PlanarRegionSLAMTest
 
             RigidBodyTransform wallToWall = new RigidBodyTransform();
             wallToWall.setTranslation(0.0, 1.0, 0.0);
-            oppositeWallTwo.transformByPreMultiply(wallToWall);
-            oppositeWallTwo.transformByPreMultiply(transform);
+            oppositeWallTwo.applyTransform(wallToWall);
+            oppositeWallTwo.applyTransform(transform);
 
             oppositeWallTwo.setRegionId(regionIdStart + 5);
             planarRegionsList.addPlanarRegion(oppositeWallTwo);

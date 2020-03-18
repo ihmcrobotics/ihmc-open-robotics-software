@@ -61,7 +61,7 @@ public class PlanarRegionSLAM
          totalDriftCorrectionTransform.preMultiply(driftCorrectionTransform);
 
          transformedNewData = transformedNewData.copy();
-         transformedNewData.transformByPreMultiply(driftCorrectionTransform);
+         transformedNewData.applyTransform(driftCorrectionTransform);
       }
 
       PlanarRegionsList mergedMap = generateMergedMapByMergingAllPlanarRegionsMatches(map, transformedNewData, parameters, listener);
@@ -167,7 +167,7 @@ public class PlanarRegionSLAM
       Vector3D smallTranslation = new Vector3D((random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
       PlanarRegionsList transformedNewData = newData.copy();
-      transformedNewData.transformByPreMultiply(smallTransform);
+      transformedNewData.applyTransform(smallTransform);
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;
