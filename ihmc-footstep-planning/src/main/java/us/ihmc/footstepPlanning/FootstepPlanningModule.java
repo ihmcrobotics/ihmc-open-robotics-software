@@ -292,8 +292,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
       }
 
-      reportStatus();
       markSolutionEdges();
+      reportStatus();
       isPlanning.set(false);
       return output;
    }
@@ -317,7 +317,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
 
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
+         FootstepNodeSnapData snapData;
+         if (footstepPlannerParameters.getMaximumXYWiggleDistance() > 0.0 || footstepPlannerParameters.getMaximumYawWiggle() > 0.0)
+         {
+            snapData = snapAndWiggler.snapFootstepNode(path.get(i));
+         }
+         else
+         {
+            snapData = snapper.snapFootstepNode(path.get(i));
+         }
+
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
          footstep.getSoleFramePose().set(footstepPose);

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -83,6 +84,10 @@ public class FootstepPlannerLogVisualizerController
    {
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, b -> loadLog());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLogGraphics, showLogGraphics.selectedProperty(), true);
+
+      AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
+                                     graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(), graphData.getLeft(), graphData.getRight())));
    }
 
    public void setup()
@@ -216,10 +221,19 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
-      this.iterationDataList = footstepPlannerLog.getIterationData();
-      this.edgeDataMap = footstepPlannerLog.getEdgeDataMap();
+      // set graph data
+      updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());
+   }
+
+   private void updateGraphData(PlanarRegionsList planarRegionsList,
+                                Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap,
+                                List<FootstepPlannerIterationData> iterationData)
+   {
+      this.iterationDataList = iterationData;
+      this.edgeDataMap = edgeDataMap;
       this.snapper.setPlanarRegions(planarRegionsList);
 
       parentStepStack.clear();
@@ -228,11 +242,10 @@ public class FootstepPlannerLogVisualizerController
 
       if (!iterationDataList.isEmpty())
       {
-         recursivelyBuildPath(iterationDataList.get(0), iterationDataList, edgeDataMap);
+         recursivelyBuildPath(iterationDataList.get(0), iterationDataList, this.edgeDataMap);
          FootstepNode startNode = path.get(0);
          parentStepStack.push(startNode);
          updateTable();
-
       }
    }
 
