@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class OnlineLine2DLinearRegression
 {
@@ -47,18 +48,24 @@ public class OnlineLine2DLinearRegression
    public void update(double x, double y)
    {
       onlineLeastSquaresRegression.update(x, y);
-      firstPointOnLine.set(onlineLeastSquaresRegression.getXMean(), onlineLeastSquaresRegression.getYMean());
-      double offsetX = onlineLeastSquaresRegression.getXMean() + 0.5; // any offset will do
-      secondPointOnLine.set(offsetX, onlineLeastSquaresRegression.computeY(offsetX));
 
-      line.set(firstPointOnLine, secondPointOnLine);
+      if (onlineLeastSquaresRegression.getPointsInRegression() > 1)
+      {
+         firstPointOnLine.set(onlineLeastSquaresRegression.getXMean(), onlineLeastSquaresRegression.getYMean());
+         double offsetX = onlineLeastSquaresRegression.getXMean() + 0.5; // any offset will do
+         secondPointOnLine.set(offsetX, onlineLeastSquaresRegression.computeY(offsetX));
 
-      Vector2DReadOnly direction = line.getDirection();
-      deviationVector.set(Math.signum(direction.getX()) * onlineLeastSquaresRegression.getXStandardDeviation(),
-                          Math.signum(direction.getY()) * onlineLeastSquaresRegression.getYStandardDeviation());
+         line.set(firstPointOnLine, secondPointOnLine);
 
-      inlineStandardDeviation.set(Math.abs(deviationVector.dot(direction)));
-      transverseStandardDeviation.set(Math.abs(deviationVector.cross(direction)));
+         if (line.getDirection().containsNaN())
+            throw new RuntimeException("WHat?");
+
+         Vector2DReadOnly direction = line.getDirection();
+         deviationVector.set(Math.signum(direction.getX()) * onlineLeastSquaresRegression.getXStandardDeviation(), Math.signum(direction.getY()) * onlineLeastSquaresRegression.getYStandardDeviation());
+
+         inlineStandardDeviation.set(Math.abs(deviationVector.dot(direction)));
+         transverseStandardDeviation.set(Math.abs(deviationVector.cross(direction)));
+      }
    }
 
    public static double dotProduct(Point2DReadOnly start1, double end1X, double end1Y, Vector2DReadOnly vector2)

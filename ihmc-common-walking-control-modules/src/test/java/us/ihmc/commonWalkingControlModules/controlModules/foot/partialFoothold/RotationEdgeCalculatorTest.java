@@ -4,12 +4,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
@@ -18,6 +20,8 @@ import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class RotationEdgeCalculatorTest
 {
@@ -106,9 +110,8 @@ public abstract class RotationEdgeCalculatorTest
       Random random = new Random(429L);
 
       RotationEdgeCalculator footRotationDetector = getEdgeCalculator();
-      new DefaultParameterReader().readParametersInRegistry(registry);
 
-      int historyRequirement = 10;
+      int historyRequirement = 20;
 
       // Test for non-planar measurement:
       for (int i = 0; i < 100; i++)
@@ -117,7 +120,7 @@ public abstract class RotationEdgeCalculatorTest
          double omegaNorm = random.nextDouble() + 10.0;
          FramePoint3D pointOfRotation = new FramePoint3D(soleFrame, EuclidCoreRandomTools.nextPoint3D(random));
          FrameVector3D rotationAngularVelocity = new FrameVector3D(soleFrame, EuclidCoreRandomTools.nextVector3DWithFixedLength(random, omegaNorm));
-         Vector3D direction = new Vector3D(rotationAngularVelocity);
+         Vector2D direction = new Vector2D(rotationAngularVelocity);
          direction.normalize();
 
          // update the sole twist based on the cop location and the angular velocity
@@ -126,10 +129,12 @@ public abstract class RotationEdgeCalculatorTest
 
          footRotationDetector.reset();
 
+         double distance = 0.08;
          for (int increment = 0; increment < historyRequirement; increment++)
          {
             FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);
-            measuredCoP.scale(random.nextDouble() * 0.05);
+            double scale = InterpolationTools.linearInterpolate(-distance, distance, ((double) increment) / ((double) historyRequirement));
+            measuredCoP.scale(scale);
             measuredCoP.add(pointOfRotation.getX(), pointOfRotation.getY());
 
             // try to estimate the line of rotation which should go through the cop and have the direction of omega
@@ -141,6 +146,7 @@ public abstract class RotationEdgeCalculatorTest
          expectedLine.getDirection().set(direction);
          expectedLine.getPoint().set(pointOfRotation);
          EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         assertTrue(footRotationDetector.isRotationEdgeTrusted());
       }
    }
 

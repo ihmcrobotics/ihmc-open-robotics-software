@@ -29,6 +29,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    private final EdgeVisualizer edgeVisualizer;
    private final DoubleProvider lineStdDevThreshold = () -> 0.01;
    private final DoubleProvider transverseStdDevThreshold = () -> 0.002;
+   private final YoBoolean statisticsStable;
    private final YoBoolean lineStable;
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side,
@@ -60,6 +61,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       lineStable = new YoBoolean(namePrefix + "IsStable", registry);
+      statisticsStable = new YoBoolean(namePrefix + "StatisticsStable", registry);
 
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
@@ -96,9 +98,11 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineCalculator.update(measuredCoP);
       lineOfRotationInSole.set(lineCalculator.getMeanLine());
 
-      boolean stable = lineCalculator.getTransverseStandardDeviation() < transverseStdDevThreshold.getValue()
-                       && lineCalculator.getInlineStandardDeviation() > lineStdDevThreshold.getValue();
-      lineStable.set(stable && stabilityEvaluator.isEdgeVelocityStable());
+      stabilityEvaluator.update();
+
+      statisticsStable.set(lineCalculator.getTransverseStandardDeviation() < transverseStdDevThreshold.getValue()
+                       && lineCalculator.getInlineStandardDeviation() > lineStdDevThreshold.getValue());
+      lineStable.set(statisticsStable.getBooleanValue() && stabilityEvaluator.isEdgeVelocityStable());
 
       if (edgeVisualizer != null)
       {
@@ -116,6 +120,9 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    @Override
    public boolean isRotationEdgeTrusted()
    {
-      return lineStable.getBooleanValue();
+      if (lineStable.getBooleanValue())
+         return true;
+      else
+         return false;
    }
 }
