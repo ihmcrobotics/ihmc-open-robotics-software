@@ -11,6 +11,9 @@
                         </registry>
                     </registry>
                     <registry name="LinearMomentumRateControlModule">
+                        <registry name="ICPOptimizationController">
+                            <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        </registry>
                         <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
@@ -212,7 +215,7 @@
                             </registry>
                         </registry>
                         <registry name="BalanceManager">
-                            <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>         
+                            <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
                             <registry name="PelvisICPBasedTranslationManager">
 <parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                             </registry>
