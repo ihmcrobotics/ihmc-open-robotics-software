@@ -84,7 +84,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble transferDuration = new YoDouble(yoNamePrefix + "TransferDuration", registry);
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
    private final YoDouble finalTransferDuration = new YoDouble(yoNamePrefix + "FinalTransferDuration", registry);
-   private final  
 
    private final DoubleProvider transferDurationSplitFraction;
 
