@@ -1705,8 +1705,12 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
    public static CombinedTerrainObject3D addFiducial(Vector3D position, double yaw, Fiducial fiducial)
    {
+      return addFiducial(1.0, position, yaw, fiducial);
+   }
+
+   public static CombinedTerrainObject3D addFiducial(double boxSideLength, Vector3D position, double yaw, Fiducial fiducial)
+   {
       YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(fiducial.getPathString());
-      double boxSideLength = 1.0;
 
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
 
