@@ -8,9 +8,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -52,6 +54,7 @@ public class SLAMModule
    private final Topic<PlanarRegionsListMessage> planarRegionsStateTopicToSubmit;
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
+   private final LinkedList<CapturabilityBasedStatus> robotStatusQueue = new LinkedList<CapturabilityBasedStatus>();
 
    private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -66,6 +69,8 @@ public class SLAMModule
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+
+   private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);
 
    public SLAMModule(Messager messager, File configurationFile)
    {
@@ -84,7 +89,8 @@ public class SLAMModule
 
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, true);
-      
+      reaMessager.submitMessage(REAModuleAPI.UISensorPoseHistoryFrames, 1000);
+
       enable = reaMessager.createInput(REAModuleAPI.SLAMEnable, true);
       planarRegionsStateTopicToSubmit = REAModuleAPI.SLAMPlanarRegionsState;
 
@@ -95,6 +101,13 @@ public class SLAMModule
       MessageTopicNameGenerator publisherTopicNameGenerator;
       publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+
+      // TODO: currently, available for Atlas only.
+      // TODO: put proper topic name of the atlas status message.
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           CapturabilityBasedStatus.class,
+                                           "topic name of the capturability based status of atlas",
+                                           subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
    }
 
    public void start() throws IOException
@@ -142,6 +155,12 @@ public class SLAMModule
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
+   
+   private boolean isStationaryStatus(CapturabilityBasedStatus robotStatusToCompute)
+   {
+      // TODO: implement detection of the stationary status.
+      return false;
+   }
 
    public void updateSLAM()
    {
@@ -154,6 +173,7 @@ public class SLAMModule
       updateSLAMParameters();
 
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
+      CapturabilityBasedStatus robotStatusToCompute = robotStatusQueue.getFirst();
 
       String stringToReport = "";
       boolean success;
@@ -164,9 +184,18 @@ public class SLAMModule
       }
       else
       {
-         success = slam.addFrame(pointCloudToCompute);
+         if (isStationaryStatus(robotStatusToCompute))
+         {
+            slam.addKeyFrame(pointCloudToCompute);
+            success = true;
+         }
+         else
+         {
+            success = slam.addFrame(pointCloudToCompute);
+         }
       }
       pointCloudQueue.removeFirst();
+      robotStatusQueue.removeFirst();
       reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
       stringToReport = stringToReport + success + " " + slam.getSensorPoses().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(REAModuleAPI.SLAMStatus, stringToReport);
@@ -236,6 +265,12 @@ public class SLAMModule
             return;
 
          pointCloudQueue.add(pointCloud);
+
+         CapturabilityBasedStatus robotStatus = latestCapturabilityBasedStatusMessage.getAndSet(null);
+         if (robotStatus == null)
+            return;
+
+         robotStatusQueue.add(robotStatus);
       }
    }
 
@@ -248,10 +283,11 @@ public class SLAMModule
    public void clearSLAM()
    {
       pointCloudQueue.clear();
+      robotStatusQueue.clear();
       slam.clear();
       newPointCloud.set(null);
    }
-   
+
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
