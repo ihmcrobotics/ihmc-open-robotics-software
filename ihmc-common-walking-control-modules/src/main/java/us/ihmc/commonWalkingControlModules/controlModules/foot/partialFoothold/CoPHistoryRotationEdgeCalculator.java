@@ -6,7 +6,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -24,10 +23,10 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    private final OnlineLine2DLinearRegression lineCalculator;
    private final YoFrameLine2D lineOfRotationInSole;
 
-//   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
+   private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
-   private final DoubleProvider lineVarianceThreshold = () -> 0.01;
-   private final DoubleProvider transverseVarianceThreshold = () -> 0.002;
+   private final DoubleProvider lineStdDevThreshold = () -> 0.01;
+   private final DoubleProvider transverseStdDevThreshold = () -> 0.002;
    private final YoBoolean lineStable;
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side,
@@ -44,13 +43,13 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
 
-//      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
-//                                                              lineOfRotationInSole,
-//                                                              rotationParameters.getStableRotationDirectionThreshold(),
-//                                                              rotationParameters.getStableRotationPositionThreshold(),
-//                                                              rotationParameters.getStableEdgeWindowSize(),
-//                                                              dt,
-//                                                              registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
+                                                              lineOfRotationInSole,
+                                                              rotationParameters.getStableRotationDirectionThreshold(),
+                                                              rotationParameters.getStableRotationPositionThreshold(),
+                                                              rotationParameters.getStableEdgeWindowSize(),
+                                                              dt,
+                                                              registry);
 
       if (graphicsListRegistry != null)
          edgeVisualizer = new EdgeVisualizer(namePrefix, Color.BLUE, registry, graphicsListRegistry);
@@ -66,7 +65,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       if (edgeVisualizer != null)
          edgeVisualizer.reset();
 
-//      stabilityEvaluator.reset();
+      stabilityEvaluator.reset();
       lineCalculator.reset();
    }
 
@@ -76,8 +75,9 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       lineCalculator.update(measuredCoP);
       lineOfRotationInSole.set(lineCalculator.getMeanLine());
 
-      boolean stable = lineCalculator.getTransverseVariance() < transverseVarianceThreshold.getValue() && lineCalculator.getInlineVariance() > lineVarianceThreshold.getValue();
-      lineStable.set(stable);
+      boolean stable = lineCalculator.getTransverseStandardDeviation() < transverseStdDevThreshold.getValue()
+                       && lineCalculator.getInlineStandardDeviation() > lineStdDevThreshold.getValue();
+      lineStable.set(stable && stabilityEvaluator.isEdgeVelocityStable());
 
       if (edgeVisualizer != null)
       {
