@@ -78,8 +78,7 @@ public class PointCloudCompression
       {
          for (Point3D scanPoint : pointCloud)
          {
-            if (scanPoint != null)
-               boundingBox.updateToIncludePoint(scanPoint);
+            boundingBox.updateToIncludePoint(scanPoint);
          }
       }
 
