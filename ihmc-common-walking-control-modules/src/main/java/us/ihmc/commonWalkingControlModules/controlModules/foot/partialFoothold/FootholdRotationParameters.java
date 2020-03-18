@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import org.apache.commons.math3.ml.clustering.DoublePoint;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
