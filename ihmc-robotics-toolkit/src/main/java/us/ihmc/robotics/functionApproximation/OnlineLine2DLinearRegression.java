@@ -4,9 +4,9 @@ import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.statistics.OnlineStandardDeviationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
@@ -16,21 +16,17 @@ public class OnlineLine2DLinearRegression
    private final OnlineLeastSquaresRegression onlineLeastSquaresRegression;
    private final YoFrameLine2D line;
 
-   private final YoDouble transverseResidual;
-   private final YoDouble inlineResidual;
-
-   private final OnlineStandardDeviationCalculator transverseDeviationCalculator;
-   private final OnlineStandardDeviationCalculator inlineDeviationCalculator;
+   private final Vector2D deviationVector = new Vector2D();
+   private final YoDouble transverseStandardDeviation;
+   private final YoDouble inlineStandardDeviation;
 
    public OnlineLine2DLinearRegression(String prefix, YoVariableRegistry registry)
    {
       onlineLeastSquaresRegression = new OnlineLeastSquaresRegression(prefix, registry);
-      transverseDeviationCalculator = new OnlineStandardDeviationCalculator(prefix + "Transverse", registry);
-      inlineDeviationCalculator = new OnlineStandardDeviationCalculator(prefix + "Inline", registry);
+      transverseStandardDeviation = new YoDouble(prefix + "TransverseStandardDeviation", registry);
+      inlineStandardDeviation = new YoDouble(prefix + "InlineStandardDeviation", registry);
 
       line = new YoFrameLine2D(prefix + "_MeanLine", ReferenceFrame.getWorldFrame(), registry);
-      transverseResidual = new YoDouble(prefix + "_TransverseResidual", registry);
-      inlineResidual = new YoDouble(prefix + "_InlineResidual", registry);
    }
 
    private final Point2D firstPointOnLine = new Point2D();
@@ -39,10 +35,8 @@ public class OnlineLine2DLinearRegression
    public void reset()
    {
       onlineLeastSquaresRegression.reset();
-      transverseDeviationCalculator.reset();
-      inlineDeviationCalculator.reset();
-      inlineResidual.set(0.0);
-      transverseResidual.set(0.0);
+      transverseStandardDeviation.set(0.0);
+      inlineStandardDeviation.set(0.0);
    }
 
    public void update(Point2DReadOnly point)
@@ -58,13 +52,13 @@ public class OnlineLine2DLinearRegression
       secondPointOnLine.set(offsetX, onlineLeastSquaresRegression.computeY(offsetX));
 
       line.set(firstPointOnLine, secondPointOnLine);
-      transverseResidual.set(EuclidGeometryTools.distanceFromPoint2DToLine2D(x, y, line.getPoint(), line.getDirection()));
-      if (!transverseResidual.isNaN())
-         transverseDeviationCalculator.update(transverseResidual.getDoubleValue());
 
-      inlineResidual.set(dotProduct(firstPointOnLine, x, y, line.getDirection()));
-      if (!inlineResidual.isNaN())
-         inlineDeviationCalculator.update(inlineResidual.getDoubleValue());
+      Vector2DReadOnly direction = line.getDirection();
+      deviationVector.set(Math.signum(direction.getX()) * onlineLeastSquaresRegression.getXStandardDeviation(),
+                          Math.signum(direction.getY()) * onlineLeastSquaresRegression.getYStandardDeviation());
+
+      inlineStandardDeviation.set(deviationVector.dot(direction));
+      transverseStandardDeviation.set(deviationVector.cross(direction));
    }
 
    public static double dotProduct(Point2DReadOnly start1, double end1X, double end1Y, Vector2DReadOnly vector2)
@@ -80,19 +74,24 @@ public class OnlineLine2DLinearRegression
       return line;
    }
 
-   public double getTransverseVariance()
+   public double getXStandardDeviation()
    {
-      return transverseDeviationCalculator.getVariance();
+      return onlineLeastSquaresRegression.getXStandardDeviation();
+   }
+
+   public double getYStandardDeviation()
+   {
+      return onlineLeastSquaresRegression.getYStandardDeviation();
    }
 
    public double getTransverseStandardDeviation()
    {
-      return transverseDeviationCalculator.getStandardDeviation();
+      return transverseStandardDeviation.getDoubleValue();
    }
 
-   public double getInlineVariance()
+   public double getInlineStandardDeviation()
    {
-      return inlineDeviationCalculator.getVariance();
+      return inlineStandardDeviation.getDoubleValue();
    }
 
    public double getProbabilityPointIsOnLine(Point2DReadOnly point)
