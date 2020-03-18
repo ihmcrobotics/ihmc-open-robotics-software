@@ -7,8 +7,10 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -94,6 +96,50 @@ public abstract class RotationEdgeCalculatorTest
 
          FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
          FrameLine2D expectedLine = new FrameLine2D(soleFrame, new FramePoint2D(point), new FrameVector2D(omega));
+         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+      }
+   }
+
+   @Test
+   public void testRotationDetectionWithHistory()
+   {
+      Random random = new Random(429L);
+
+      RotationEdgeCalculator footRotationDetector = getEdgeCalculator();
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      int historyRequirement = 10;
+
+      // Test for non-planar measurement:
+      for (int i = 0; i < 100; i++)
+      {
+         // create random cop location (zero linear velocity) and a rotational velocity
+         double omegaNorm = random.nextDouble() + 10.0;
+         FramePoint3D pointOfRotation = new FramePoint3D(soleFrame, EuclidCoreRandomTools.nextPoint3D(random));
+         FrameVector3D rotationAngularVelocity = new FrameVector3D(soleFrame, EuclidCoreRandomTools.nextVector3DWithFixedLength(random, omegaNorm));
+         Vector3D direction = new Vector3D(rotationAngularVelocity);
+         direction.normalize();
+
+         // update the sole twist based on the cop location and the angular velocity
+         soleTwist.setIncludingFrame(rotationAngularVelocity, new FrameVector3D(soleFrame), pointOfRotation);
+         soleFrame.update();
+
+         footRotationDetector.reset();
+
+         for (int increment = 0; increment < historyRequirement; increment++)
+         {
+            FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);
+            measuredCoP.scale(random.nextDouble() * 0.05);
+            measuredCoP.add(pointOfRotation.getX(), pointOfRotation.getY());
+
+            // try to estimate the line of rotation which should go through the cop and have the direction of omega
+            footRotationDetector.compute(measuredCoP);
+         }
+
+         FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
+         FrameLine2D expectedLine = new FrameLine2D(soleFrame);
+         expectedLine.getDirection().set(direction);
+         expectedLine.getPoint().set(pointOfRotation);
          EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       }
    }
