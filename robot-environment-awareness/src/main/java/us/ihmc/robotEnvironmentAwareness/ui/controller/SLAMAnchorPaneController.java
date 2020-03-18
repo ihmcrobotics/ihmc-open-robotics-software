@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -45,11 +46,26 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @FXML
    private Slider minimumInliersRatioSlider;
 
+   @FXML
+   private Label stationaryFlag;
+
    private final RandomICPSLAMParametersProperty ihmcSLAMParametersProperty = new RandomICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
    {
 
+   }
+
+   private void updateRobotStatusViz(boolean walking)
+   {
+      if (walking)
+      {
+         stationaryFlag.setStyle("-fx-background-color: green;");
+      }
+      else
+      {
+         stationaryFlag.setStyle("-fx-background-color: red;");
+      }
    }
 
    @Override
@@ -74,6 +90,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.SLAMParameters, ihmcSLAMParametersProperty);
 
       initializeSetup();
+
+      uiMessager.registerTopicListener(REAModuleAPI.RobotStatus, (moving) -> updateRobotStatusViz(moving));
    }
 
    private void initializeSetup()
