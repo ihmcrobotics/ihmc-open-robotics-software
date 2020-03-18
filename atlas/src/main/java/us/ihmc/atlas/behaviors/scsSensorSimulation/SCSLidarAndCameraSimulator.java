@@ -1,10 +1,17 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
+import boofcv.gui.image.ShowImages;
+import boofcv.io.image.UtilImageIO;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
 import org.apache.commons.lang3.SystemUtils;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -17,19 +24,45 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.gui.AWTTools;
+import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Objects;
+
+/**
+ * Potential improvements:
+ * - Show camera view only
+ * - Hide as much of SCS as possible
+ * - Remove SCS entirely?
+ * - Add textures
+ */
 public class SCSLidarAndCameraSimulator
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
@@ -39,6 +72,11 @@ public class SCSLidarAndCameraSimulator
    private final FloatingJoint floatingHeadJoint;
 
    public SCSLidarAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
+   {
+      this(ros2Node, environment.getTerrainObject3D(), robotModel);
+   }
+
+   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
       robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
 
@@ -99,7 +137,7 @@ public class SCSLidarAndCameraSimulator
                                   framesPerSecond);
 
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
+      scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
 
       if (!SystemUtils.IS_OS_WINDOWS)
          scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
@@ -159,5 +197,37 @@ public class SCSLidarAndCameraSimulator
       HeightMap heightMap = groundProfile.getHeightMapIfAvailable();
       texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
       return texturedGroundLinkGraphics;
+   }
+
+   private static AtlasRobotModel createRobotModel()
+   {
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+   }
+
+   private static CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
+   {
+      String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
+//      ImageIO.read(
+//            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
+      BufferedImage image = ExceptionTools.handle(() -> ImageIO.read(Class.class.getResourceAsStream("/sampleMeshes/cinderblock.png")),
+                                                  DefaultExceptionHandler.PRINT_STACKTRACE);
+      YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture(image);
+      return new PlanarRegionsListDefinedEnvironment(environmentName,
+                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(),
+                                                     cinderBlockTexture,
+                                                     0.02,
+                                                     false);
+   }
+
+   public static void main(String[] args) throws IOException
+   {
+//      ShowImages.showWindow(ImageIO.read(Objects.requireNonNull(Class.class.getResourceAsStream("/sampleMeshes/cinderblock.png"))), "video");
+//      ImageIO.read(
+//            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
+
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
+//      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
+      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
    }
 }
