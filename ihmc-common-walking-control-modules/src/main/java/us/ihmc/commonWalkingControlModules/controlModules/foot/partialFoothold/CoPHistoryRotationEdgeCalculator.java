@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -7,6 +8,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
@@ -30,8 +32,27 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    private final YoBoolean lineStable;
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side,
-                                           MovingReferenceFrame soleFrame,
+                                           ReferenceFrame soleFrame,
                                            FootholdRotationParameters rotationParameters,
+                                           double dt,
+                                           YoVariableRegistry parentRegistry,
+                                           YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(side,
+           soleFrame,
+           rotationParameters.getStableRotationDirectionThreshold(),
+           rotationParameters.getStableRotationPositionThreshold(),
+           rotationParameters.getStableEdgeWindowSize(),
+           dt,
+           parentRegistry,
+           graphicsListRegistry);
+   }
+
+   public CoPHistoryRotationEdgeCalculator(RobotSide side,
+                                           ReferenceFrame soleFrame,
+                                           DoubleProvider stableRotationDirectionThreshold,
+                                           DoubleProvider stableRotationPositionThreshold,
+                                           IntegerProvider stableEdgeWindowSize,
                                            double dt,
                                            YoVariableRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsListRegistry)
@@ -45,9 +66,9 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
       stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
                                                               lineOfRotationInSole,
-                                                              rotationParameters.getStableRotationDirectionThreshold(),
-                                                              rotationParameters.getStableRotationPositionThreshold(),
-                                                              rotationParameters.getStableEdgeWindowSize(),
+                                                              stableRotationDirectionThreshold,
+                                                              stableRotationPositionThreshold,
+                                                              stableEdgeWindowSize,
                                                               dt,
                                                               registry);
 
