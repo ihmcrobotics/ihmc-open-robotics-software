@@ -7,6 +7,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
@@ -20,14 +22,17 @@ import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class AtlasLookAndStepBehaviorDemo
@@ -68,7 +73,8 @@ public class AtlasLookAndStepBehaviorDemo
 
       new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
 
-      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
+//      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
+      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
       new JavaFXROS2VideoViewer(ros2Node);
    }
 
@@ -81,7 +87,9 @@ public class AtlasLookAndStepBehaviorDemo
 
    private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
    {
-      return new PlanarRegionsListDefinedEnvironment(environment.get(), 0.02, false);
+      String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
+      YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
+      return new PlanarRegionsListDefinedEnvironment(environmentName, environment.get(), cinderBlockTexture, 0.02, false);
    }
 
    private void kinematicSimulation()
