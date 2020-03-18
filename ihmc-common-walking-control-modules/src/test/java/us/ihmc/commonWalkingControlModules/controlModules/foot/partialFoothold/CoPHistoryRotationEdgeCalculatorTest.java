@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,6 +33,13 @@ public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculator
                                                   dt,
                                                   registry,
                                                   null);
+   }
+
+   // method relies on history, so that's bad
+   @Disabled
+   @Test
+   public void testRotationDetectionMath()
+   {
    }
 
    @Test
