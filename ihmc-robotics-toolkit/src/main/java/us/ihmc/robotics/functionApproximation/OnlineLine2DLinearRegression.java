@@ -57,8 +57,8 @@ public class OnlineLine2DLinearRegression
       deviationVector.set(Math.signum(direction.getX()) * onlineLeastSquaresRegression.getXStandardDeviation(),
                           Math.signum(direction.getY()) * onlineLeastSquaresRegression.getYStandardDeviation());
 
-      inlineStandardDeviation.set(deviationVector.dot(direction));
-      transverseStandardDeviation.set(deviationVector.cross(direction));
+      inlineStandardDeviation.set(Math.abs(deviationVector.dot(direction)));
+      transverseStandardDeviation.set(Math.abs(deviationVector.cross(direction)));
    }
 
    public static double dotProduct(Point2DReadOnly start1, double end1X, double end1Y, Vector2DReadOnly vector2)
