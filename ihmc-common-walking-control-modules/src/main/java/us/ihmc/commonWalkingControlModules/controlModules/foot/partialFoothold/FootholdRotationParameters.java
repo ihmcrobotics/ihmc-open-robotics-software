@@ -67,7 +67,7 @@ public class FootholdRotationParameters
       thresholdForCoPRegionOccupancy = new IntegerParameter(namePrefix + "ThresholdForCoPRegionOccupancy", registry, 3);
       distanceFromLineOfRotationToComputeCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineOfRotationToComputeCoPOccupancy", registry, 0.001);
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
-      shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 6);
+      shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 1);
       distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.0);
    }
 

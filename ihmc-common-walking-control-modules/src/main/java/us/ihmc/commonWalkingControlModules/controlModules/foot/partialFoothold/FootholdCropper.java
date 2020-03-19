@@ -95,7 +95,7 @@ public class FootholdCropper
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       applyPartialFootholds = new YoBoolean(namePrefix + "ApplyPartialFootholds", registry);
       doPartialFootholdDetection.set(true);
-      applyPartialFootholds.set(true);
+      applyPartialFootholds.set(false);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
