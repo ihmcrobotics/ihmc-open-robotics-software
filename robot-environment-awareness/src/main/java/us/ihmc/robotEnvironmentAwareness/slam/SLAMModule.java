@@ -19,6 +19,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -71,8 +73,10 @@ public class SLAMModule
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
+   private final AtomicReference<Boolean> robotStatus;
    private final AtomicLong latestRobotTimeStamp = new AtomicLong();
-   protected final AtomicReference<StampedPosePacket> sensorPosePacketToPublish = new AtomicReference<>(null);
+   protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
+   protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
    public SLAMModule(Messager messager, File configurationFile)
    {
@@ -103,6 +107,8 @@ public class SLAMModule
       MessageTopicNameGenerator publisherTopicNameGenerator;
       publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      
+      robotStatus = reaMessager.createInput(REAModuleAPI.RobotStatus, false);
    }
 
    public void start() throws IOException
@@ -151,17 +157,20 @@ public class SLAMModule
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
 
-   protected boolean isStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
+   protected void updateStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
    {
+      System.out.println("hello configuration");
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
       latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
 
-      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.01)
+      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.001)
       {
          reaMessager.submitMessage(REAModuleAPI.RobotStatus, true);
       }
-
-      return false;
+      else
+      {
+         reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
+      }
    }
 
    public void updateSLAM()
@@ -223,24 +232,30 @@ public class SLAMModule
          StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
                                                                                                             sourcePointsToWorld,
                                                                                                             correctedPointCloud);
-         latestStereoMessage.getSensorPosition().set(latestFrame.getSensorPose().getTranslation());
-         latestStereoMessage.getSensorOrientation().set(latestFrame.getSensorPose().getRotation());
+         RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
+         latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());
+         latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
          reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
 
-         StampedPosePacket posePacket = new StampedPosePacket();
-         posePacket.setTimestamp(latestRobotTimeStamp.get());
-         int maximumBufferOfQueue = 10;
-         if (pointCloudQueue.size() >= maximumBufferOfQueue)
+         if(estimatedPelvisPublisher != null)
          {
-            posePacket.setConfidenceFactor(0.0);
+            StampedPosePacket posePacket = new StampedPosePacket();
+            posePacket.setTimestamp(latestRobotTimeStamp.get());
+            int maximumBufferOfQueue = 10;
+            if (pointCloudQueue.size() >= maximumBufferOfQueue)
+            {
+               posePacket.setConfidenceFactor(0.0);
+            }
+            else
+            {
+               //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
+               posePacket.setConfidenceFactor(1.0);
+            }
+            RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPose);
+            sensorPoseToPelvisTransformer.transform(estimatedPelvisPose);
+            posePacket.getPose().set(estimatedPelvisPose);
+            estimatedPelvisPublisher.publish(posePacket);
          }
-         else
-         {
-            //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
-            posePacket.setConfidenceFactor(1.0);
-         }
-         posePacket.getPose().set(latestFrame.getSensorPose());
-         sensorPosePacketToPublish.set(posePacket);
       }
    }
 
@@ -282,6 +297,7 @@ public class SLAMModule
             return;
 
          pointCloudQueue.add(pointCloud);
+         stationaryFlagQueue.add(robotStatus.get());
       }
    }
 
