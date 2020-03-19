@@ -1,18 +1,15 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -78,24 +75,6 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
    public FootstepPostProcessingPacket postProcessFootstepPlan(FootstepPostProcessingPacket inputPlan)
    {
       FootstepPostProcessingPacket processedPlan = new FootstepPostProcessingPacket(inputPlan);
-      postProcessFootstepPlan(processedPlan.getFootstepDataList(),
-                              inputPlan.getLeftFootPositionInWorld(),
-                              inputPlan.getLeftFootOrientationInWorld(),
-                              inputPlan.getRightFootPositionInWorld(),
-                              inputPlan.getRightFootOrientationInWorld(),
-                              inputPlan.getLeftFootContactPoints2d(),
-                              inputPlan.getRightFootContactPoints2d());
-      return processedPlan;
-   }
-
-   public void postProcessFootstepPlan(FootstepDataListMessage footstepDataListMessage,
-                                       Point3DReadOnly leftFootPositionInWorld,
-                                       Orientation3DReadOnly leftFootOrientationInWorld,
-                                       Point3DReadOnly rightFootPositionInWorld,
-                                       Orientation3DReadOnly rightFootOrientationInWorld,
-                                       Iterable<Point3D> leftFootContactPoints2d,
-                                       Iterable<Point3D> rightFootContactPoints2d)
-   {
 
       ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
       ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
@@ -103,13 +82,13 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
       PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
       PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
 
-      List<FootstepDataMessage> footstepDataMessageList = footstepDataListMessage.getFootstepDataList();
+      List<FootstepDataMessage> footstepDataMessageList = processedPlan.getFootstepDataList().getFootstepDataList();
       if (RobotSide.fromByte(footstepDataMessageList.get(0).getRobotSide()) == RobotSide.LEFT)
       {
-         previousFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, rightFootPositionInWorld));
-         previousFrame.setOrientationAndUpdate(rightFootOrientationInWorld);
+         previousFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, inputPlan.getRightFootPositionInWorld()));
+         previousFrame.setOrientationAndUpdate(inputPlan.getRightFootOrientationInWorld());
 
-         for (Point3DReadOnly vertex : rightFootContactPoints2d)
+         for (Point3DReadOnly vertex : inputPlan.getRightFootContactPoints2d())
          {
             FramePoint3D vertexInSoleFrame = new FramePoint3D(worldFrame, vertex);
             vertexInSoleFrame.changeFrame(previousFrame);
@@ -120,10 +99,10 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
       }
       else
       {
-         previousFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, leftFootPositionInWorld));
-         previousFrame.setOrientationAndUpdate(leftFootOrientationInWorld);
+         previousFrame.setPositionAndUpdate(new FramePoint3D(worldFrame, inputPlan.getLeftFootPositionInWorld()));
+         previousFrame.setOrientationAndUpdate(inputPlan.getLeftFootOrientationInWorld());
 
-         for (Point3DReadOnly vertex : leftFootContactPoints2d)
+         for (Point3DReadOnly vertex : inputPlan.getLeftFootContactPoints2d())
          {
             FramePoint3D vertexInSoleFrame = new FramePoint3D(worldFrame, vertex);
             vertexInSoleFrame.changeFrame(previousFrame);
@@ -214,14 +193,14 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
 
          if (stepNumber == footstepDataMessageList.size() - 1)
          { // this is the last step
-            double currentSplitFraction = footstepDataListMessage.getFinalTransferSplitFraction();
-            double currentWeightDistribution = footstepDataListMessage.getFinalTransferWeightDistribution();
+            double currentSplitFraction = processedPlan.getFootstepDataList().getFinalTransferSplitFraction();
+            double currentWeightDistribution = processedPlan.getFootstepDataList().getFinalTransferWeightDistribution();
 
             double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
             double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
-            footstepDataListMessage.setFinalTransferSplitFraction(splitFractionToSet);
-            footstepDataListMessage.setFinalTransferWeightDistribution(weightDistributionToSet);
+            processedPlan.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
+            processedPlan.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
          }
          else
          {
@@ -235,6 +214,8 @@ public class AreaSplitFractionPostProcessingElement implements FootstepPlanPostP
             footstepDataMessageList.get(stepNumber + 1).setTransferWeightDistribution(weightDistributionToSet);
          }
       }
+
+      return processedPlan;
    }
 
    /** {@inheritDoc} **/
