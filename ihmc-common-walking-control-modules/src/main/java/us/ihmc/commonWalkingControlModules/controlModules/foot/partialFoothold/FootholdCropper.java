@@ -5,10 +5,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -42,7 +40,6 @@ public class FootholdCropper
    private final YoBoolean hasEnoughAreaToCrop;
 
    private final OccupancyGrid measuredCoPOccupancy;
-   private final OccupancyGrid desiredCoPOccupancy;
    private final FootCoPOccupancyCalculator footCoPOccupancyGrid;
    private final FootCoPHullCalculator footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -59,7 +56,6 @@ public class FootholdCropper
 
    private final CropVerifier verifier;
    private final OccupancyGridVisualizer measuredVisualizer;
-   private final OccupancyGridVisualizer desiredVisualizer;
 
    public FootholdCropper(String namePrefix,
                           ContactableFoot contactableFoot,
@@ -82,20 +78,16 @@ public class FootholdCropper
       shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
       measuredCoPOccupancy = new OccupancyGrid(namePrefix + "MeasuredCoPOccupancy", soleFrame, registry);
-      desiredCoPOccupancy = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
 
       double resolution = 0.005;
-      measuredCoPOccupancy.setCellXSize(resolution);
-      measuredCoPOccupancy.setCellYSize(resolution);
+      measuredCoPOccupancy.setCellSize(resolution);
       measuredCoPOccupancy.setThresholdForCellOccupancy(defaultThresholdForMeasuredCellActivation);
       measuredCoPOccupancy.setOccupancyDecayRate(1.0 - Math.pow(defaultMeasuredDecayRatePerSecond, dt));
-      desiredCoPOccupancy.setCellXSize(resolution);
-      desiredCoPOccupancy.setCellYSize(resolution);
 
       footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
       footCoPHullCropper = new FootCoPHullCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
 
-      verifier = new CropVerifier(namePrefix, desiredCoPOccupancy, rotationParameters, registry);
+      verifier = new CropVerifier(namePrefix, soleFrame, resolution, rotationParameters, registry, yoGraphicsListRegistry);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
@@ -120,12 +112,10 @@ public class FootholdCropper
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
 
          measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP", measuredCoPOccupancy, 50, YoAppearance.Red(), registry, yoGraphicsListRegistry);
-         desiredVisualizer =  new OccupancyGridVisualizer(namePrefix + "DesiredCoP", desiredCoPOccupancy, 50, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
       }
       else
       {
          measuredVisualizer = null;
-         desiredVisualizer = null;
       }
 
       parentRegistry.addChild(registry);
@@ -144,30 +134,25 @@ public class FootholdCropper
       shrinkCounter.set(0);
 
       measuredCoPOccupancy.reset();
-      desiredCoPOccupancy.reset();
       footCoPHullCropper.reset();
       footCoPOccupancyGrid.reset();
       if (measuredVisualizer != null)
          measuredVisualizer.update();
-      if (desiredVisualizer != null)
-         desiredVisualizer.update();
+      verifier.reset();
    }
 
    public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
       shouldShrinkFoothold.set(false);
       measuredCoPOccupancy.update();
-      desiredCoPOccupancy.update();
+
+      verifier.update(desiredCoP);
 
       if (!measuredCoP.containsNaN())
          measuredCoPOccupancy.registerPoint(measuredCoP);
-      if (!desiredCoP.containsNaN())
-         desiredCoPOccupancy.registerPoint(desiredCoP);
 
       if (measuredVisualizer != null)
          measuredVisualizer.update();
-      if (desiredVisualizer != null)
-         desiredVisualizer.update();
    }
 
    private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
@@ -192,7 +177,7 @@ public class FootholdCropper
          {
             // FIXME this is a work around for a bug in the cut polygon with line class that doens't work with yo frame convex polygons.
             tempPolygon.setIncludingFrame(shrunkenFootPolygon);
-            shiftLine(lineOfRotation, cropLine, sideOfFootToCrop.getEnumValue().getOppositeSide(), distanceFromRotationToCrop.getValue());
+            shiftLineNormally(lineOfRotation, cropLine, sideOfFootToCrop.getEnumValue().getOppositeSide(), distanceFromRotationToCrop.getValue());
             convexPolygonTools.cutPolygonWithLine(cropLine, tempPolygon, sideOfFootToCrop.getEnumValue());
             shrunkenFootPolygon.set(tempPolygon);
          }
@@ -204,7 +189,7 @@ public class FootholdCropper
       }
    }
 
-   private void shiftLine(FrameLine2DReadOnly lineToShift, FrameLine2DBasics shiftedLineToPack, RobotSide sideToShift, double distanceToShift)
+   private void shiftLineNormally(FrameLine2DReadOnly lineToShift, FrameLine2DBasics shiftedLineToPack, RobotSide sideToShift, double distanceToShift)
    {
       EuclidGeometryTools.perpendicularVector2D(lineToShift.getDirection(), shiftVector);
       if (sideToShift == RobotSide.RIGHT)
@@ -231,19 +216,11 @@ public class FootholdCropper
       }
 
       // if we shrunk the foothold too many times exit
-      if (shrinkCounter.getIntegerValue() >= shrinkMaxLimit.getValue())
-      {
-         return false;
-      }
-
-      return true;
+      return shrinkCounter.getIntegerValue() < shrinkMaxLimit.getValue();
    }
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
-      if (!shouldApplyShrunkenFoothold())
-         return false;
-
       // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, numberOfFootCornerPoints);

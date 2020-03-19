@@ -10,6 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
 import java.util.EnumMap;
@@ -106,6 +107,9 @@ public class PartialFootholdCropperModule
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
+      if (!footholdCropper.shouldApplyShrunkenFoothold())
+         return false;
+
       return footholdCropper.applyShrunkenFoothold(contactStateToModify);
    }
 
