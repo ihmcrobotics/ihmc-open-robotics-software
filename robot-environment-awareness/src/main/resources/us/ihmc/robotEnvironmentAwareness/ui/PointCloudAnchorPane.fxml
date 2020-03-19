@@ -95,8 +95,7 @@
                         </Slider>
                      </children>
                   </HBox>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear" textAlignment="CENTER" alignment="CENTER" />
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openSLAM" text="Open SLAM" textAlignment="CENTER" alignment="CENTER"/>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear"/>
                </children>
             </VBox>
          </children>

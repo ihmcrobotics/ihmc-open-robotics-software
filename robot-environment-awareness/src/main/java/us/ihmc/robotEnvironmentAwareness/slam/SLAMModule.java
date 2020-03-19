@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -14,16 +15,22 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
+import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -58,11 +65,28 @@ public class SLAMModule
    private static final String PLANAR_REGIONS_LIST_TOPIC_SURFIX = "_slam";
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   public SLAMModule(Ros2Node ros2Node, Messager reaMessager, Topic<Boolean> slamEnableTopic, Topic<PlanarRegionsListMessage> slamPlanarRegionsStateTopic)
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+
+   public SLAMModule(Messager messager, File configurationFile)
    {
-      this.reaMessager = reaMessager;
-      enable = reaMessager.createInput(slamEnableTopic, true);
-      planarRegionsStateTopicToSubmit = slamPlanarRegionsStateTopic;
+      this.reaMessager = messager;
+
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
+                                                                   reaMessager,
+                                                                   REASourceType.STEREO_POINT_CLOUD,
+                                                                   StereoVisionPointCloudMessage.class,
+                                                                   this::handlePointCloud);
+      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
+                                                                   reaMessager,
+                                                                   REASourceType.DEPTH_POINT_CLOUD,
+                                                                   StereoVisionPointCloudMessage.class,
+                                                                   this::handlePointCloud);
+
+      reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, true);
+      
+      enable = reaMessager.createInput(REAModuleAPI.SLAMEnable, true);
+      planarRegionsStateTopicToSubmit = REAModuleAPI.SLAMPlanarRegionsState;
 
       ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
 
@@ -88,8 +112,6 @@ public class SLAMModule
 
    public void stop() throws Exception
    {
-      LogTools.info("IhmcSLAMModule is going down.");
-
       reaMessager.closeMessager();
 
       if (scheduledMain != null)
@@ -229,9 +251,33 @@ public class SLAMModule
       slam.clear();
       newPointCloud.set(null);
    }
-
-   public void handlePointCloud(StereoVisionPointCloudMessage message)
+   
+   private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
+      StereoVisionPointCloudMessage message = subscriber.takeNextData();
       newPointCloud.set(message);
+   }
+
+   public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
+   {
+      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API,
+                                                              NetworkPorts.REA_MODULE_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
+      messager.startMessager();
+
+      File configurationFile = new File(configurationFilePath);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
+      return new SLAMModule(messager, configurationFile);
    }
 }
