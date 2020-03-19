@@ -34,6 +34,7 @@ public class FootControlHelper
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final ToeSlippingDetector toeSlippingDetector;
 
@@ -80,10 +81,12 @@ public class FootControlHelper
          legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
                                                                                                                        walkingControllerParameters,
                                                                                                                        controllerToolbox, registry);
+         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix, contactableFoot, robotSide, walkingControllerParameters, controllerToolbox, registry);
       }
       else
       {
          legSingularityAndKneeCollapseAvoidanceControlModule = null;
+         workspaceLimiterControlModule = null;
       }
 
       if (walkingControllerParameters.enableToeOffSlippingDetection())
@@ -171,6 +174,11 @@ public class FootControlHelper
    public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
    {
       return legSingularityAndKneeCollapseAvoidanceControlModule;
+   }
+
+   public WorkspaceLimiterControlModule getWorkspaceLimiterControlModule()
+   {
+      return workspaceLimiterControlModule;
    }
 
    public ToeSlippingDetector getToeSlippingDetector()
