@@ -105,25 +105,49 @@ public class EdgeVelocityStabilityEvaluator
       isLineOfRotationStable.set(Math.abs(lineOfRotationAngularVelocity.getDoubleValue()) < lineOfRotationStableVelocityThreshold.getValue());
       isCenterOfRotationStable.set(Math.abs(centerOfRotationTransverseVelocity.getDoubleValue()) < centerOfRotationStableVelocityThreshold.getValue());
 
-      updateStableCount(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue());
+      updateStableCount(isLineOfRotationStable.getBooleanValue(), isCenterOfRotationStable.getBooleanValue());
    }
 
-   private void updateStableCount(boolean stableValue)
+   private void updateStableCount(boolean isLineOfRotationStable, boolean isCenterOfRotationStable)
    {
-      if (isEdgeStable.getBooleanValue() != stableValue)
+      boolean isStable = isLineOfRotationStable && isCenterOfRotationStable;
+      
+      if (isEdgeStable.getBooleanValue())
       {
-         stableCounter.increment();
+         if (!isCenterOfRotationStable)
+         {
+            isEdgeStable.set(false);
+            stableCounter.set(0);
+            return;
+         }
+         else if (!isLineOfRotationStable)  
+         {
+            stableCounter.increment();
+         }
+         else
+         {
+            stableCounter.decrement();
+            if (stableCounter.getIntegerValue() < 0)
+               stableCounter.set(0);
+         }
       }
       else
       {
-         stableCounter.decrement();
-         if (stableCounter.getIntegerValue() < 0)
-            stableCounter.set(0);
+         if (isStable)
+         {
+            stableCounter.increment();
+         }
+         else
+         {
+            stableCounter.decrement();
+            if (stableCounter.getIntegerValue() < 0)
+               stableCounter.set(0);
+         }
       }
 
       if (stableCounter.getIntegerValue() > stableWindowWize.getValue() - 1)
       {
-         isEdgeStable.set(stableValue);
+         isEdgeStable.set(isStable);
          stableCounter.set(0);
       }
    }
