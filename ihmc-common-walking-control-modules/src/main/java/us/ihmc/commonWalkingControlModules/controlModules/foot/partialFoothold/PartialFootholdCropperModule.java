@@ -29,9 +29,11 @@ public class PartialFootholdCropperModule
    private final CoPAndVelocityRotationEdgeCalculator copAndVelocityEdgeCalculator;
    private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
    private final FootholdCropper footholdCropper;
+   private final CropVerifier cropVerifier;
 
    private final YoBoolean isRotating;
    private final YoBoolean isEdgeStable;
+   private final YoBoolean shouldShrinkFoothold;
 
    private final EdgeVisualizer edgeVisualizer;
 
@@ -48,6 +50,8 @@ public class PartialFootholdCropperModule
 
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
       isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
+      shouldShrinkFoothold = new YoBoolean(side.getLowerCaseName() + "ShouldShrinkFoothold", registry);
+
 
       copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.BLUE, null);
       copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.GRAY, null);
@@ -66,6 +70,7 @@ public class PartialFootholdCropperModule
       else
          edgeVisualizer = null;
 
+      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, graphicsRegistry);
       footholdCropper = new FootholdCropper(side.getLowerCaseName(), contactableFoot, rotationParameters, dt, registry, graphicsRegistry);
 
       reset();
@@ -75,6 +80,9 @@ public class PartialFootholdCropperModule
    {
       boolean wasRotating = isRotating.getBooleanValue();
       isRotating.set(computeIsRotating());
+      shouldShrinkFoothold.set(false);
+
+      cropVerifier.update(desiredCoP);
       footholdCropper.update(measuredCoP, desiredCoP);
 
       if (!isRotating.getBooleanValue())
@@ -96,7 +104,13 @@ public class PartialFootholdCropperModule
          edgeVisualizer.updateGraphics(lineOfRotation);
       }
 
-      footholdCropper.computeShrunkenFoothold(lineOfRotation, desiredCoP);
+      RobotSide sideToCrop = footholdCropper.computeSideToCrop(lineOfRotation);
+      if (sideToCrop != null)
+      {
+         shouldShrinkFoothold.set(cropVerifier.verifyFootholdCrop(desiredCoP, sideToCrop, lineOfRotation));
+         if (shouldShrinkFoothold.getBooleanValue())
+            footholdCropper.computeShrunkenFoothold(lineOfRotation, sideToCrop);
+      }
    }
 
    public boolean isRotating()
@@ -104,9 +118,11 @@ public class PartialFootholdCropperModule
       return isRotating.getBooleanValue();
    }
 
-
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
+      if (!shouldShrinkFoothold.getBooleanValue())
+         return false;
+
       if (!footholdCropper.shouldApplyShrunkenFoothold())
          return false;
 
@@ -175,6 +191,7 @@ public class PartialFootholdCropperModule
       isEdgeStable.set(false);
       resetRotationDetectors();
       resetEdgeCalculators();
+      cropVerifier.reset();
       footholdCropper.reset();
    }
 }

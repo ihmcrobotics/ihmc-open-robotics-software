@@ -19,7 +19,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
 import java.util.List;
@@ -49,8 +52,6 @@ public class FootholdCropper
    private final IntegerProvider shrinkMaxLimit;
    private final YoInteger shrinkCounter;
 
-   private final YoBoolean shouldShrinkFoothold;
-
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
@@ -70,12 +71,9 @@ public class FootholdCropper
       ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
       shrunkenFootPolygonInWorld = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygonInWorld", "", ReferenceFrame.getWorldFrame(), 20, registry);
       shrunkenFootPolygon.set(defaultFootPolygon);
-
-      shouldShrinkFoothold = new YoBoolean(namePrefix + "ShouldShrinkFoothold", registry);
 
       measuredCoPOccupancy = new OccupancyGrid(namePrefix + "MeasuredCoPOccupancy", soleFrame, registry);
 
@@ -111,7 +109,12 @@ public class FootholdCropper
          yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
 
-         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP", measuredCoPOccupancy, 50, YoAppearance.Red(), registry, yoGraphicsListRegistry);
+         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP",
+                                                          measuredCoPOccupancy,
+                                                          50,
+                                                          YoAppearance.Red(),
+                                                          registry,
+                                                          yoGraphicsListRegistry);
       }
       else
       {
@@ -143,7 +146,6 @@ public class FootholdCropper
 
    public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
-      shouldShrinkFoothold.set(false);
       measuredCoPOccupancy.update();
 
       verifier.update(desiredCoP);
@@ -159,7 +161,7 @@ public class FootholdCropper
    private final FrameLine2D cropLine = new FrameLine2D();
    private final Vector2D shiftVector = new Vector2D();
 
-   public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, FramePoint2DReadOnly desiredCoP)
+   public RobotSide computeSideToCrop(FrameLine2DReadOnly lineOfRotation)
    {
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
@@ -171,22 +173,25 @@ public class FootholdCropper
       if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
       {
          sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
-         shouldShrinkFoothold.set(verifier.verifyFootholdCrop(desiredCoP, sideOfFootToCrop.getEnumValue(), lineOfRotation));
-
-         if (shouldShrinkFoothold.getBooleanValue())
-         {
-            // FIXME this is a work around for a bug in the cut polygon with line class that doens't work with yo frame convex polygons.
-            tempPolygon.setIncludingFrame(shrunkenFootPolygon);
-            shiftLineNormally(lineOfRotation, cropLine, sideOfFootToCrop.getEnumValue().getOppositeSide(), distanceFromRotationToCrop.getValue());
-            convexPolygonTools.cutPolygonWithLine(cropLine, tempPolygon, sideOfFootToCrop.getEnumValue());
-            shrunkenFootPolygon.set(tempPolygon);
-         }
       }
       else
       {
-         shouldShrinkFoothold.set(false);
          sideOfFootToCrop.set(null);
       }
+
+      return sideOfFootToCrop.getEnumValue();
+   }
+
+   public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, RobotSide sideOfFootToCrop)
+   {
+      if (sideOfFootToCrop == null)
+         return;
+
+      // FIXME this is a work around for a bug in the cut polygon with line class that doens't work with yo frame convex polygons.
+      tempPolygon.setIncludingFrame(shrunkenFootPolygon);
+      shiftLineNormally(lineOfRotation, cropLine, sideOfFootToCrop.getOppositeSide(), distanceFromRotationToCrop.getValue());
+      convexPolygonTools.cutPolygonWithLine(cropLine, tempPolygon, sideOfFootToCrop);
+      shrunkenFootPolygon.set(tempPolygon);
    }
 
    private void shiftLineNormally(FrameLine2DReadOnly lineToShift, FrameLine2DBasics shiftedLineToPack, RobotSide sideToShift, double distanceToShift)
@@ -207,11 +212,6 @@ public class FootholdCropper
       if (!doPartialFootholdDetection.getBooleanValue())
       {
          shrunkenFootPolygon.set(defaultFootPolygon);
-         return false;
-      }
-
-      if (!shouldShrinkFoothold.getBooleanValue())
-      {
          return false;
       }
 
