@@ -67,6 +67,7 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
                                                                   testEnvironment));
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.setDT(scs.getDT(), 1);
       simulate(2.5, customPhysicsEngine, scs, gravity);
 
       ThreadTools.sleepForever();
