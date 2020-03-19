@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StampedPosePacket;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -23,8 +25,14 @@ public class AtlasSLAMModule extends SLAMModule
 
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getSubscriberTopicNameGenerator(drcRobotModel.getSimpleRobotName()),
-                                           this::isStationaryStatus);
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName()),
+                                           this::updateStationaryStatus);
+
+      String generateTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName())
+                                                        .generateTopicName(StampedPosePacket.class);
+      estimatedPelvisPublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, generateTopicName);
+      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
+      sensorPoseToPelvisTransformer.invert();
    }
 
    public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel, String configurationFilePath) throws Exception
