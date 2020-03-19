@@ -27,18 +27,6 @@ public class ICPQPConstraintCalculator
     * inequality constraints.
     *
     * @param inputToPack the object in which to store the inequality constraint.
-    * @param maxMagnitudes the maximum feedback magnitudes in X and Y.
-    */
-   public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, FrameTuple2DReadOnly maxMagnitudes)
-   {
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, maxMagnitudes.getX(), maxMagnitudes.getY());
-   }
-
-   /**
-    * Computes the inequality constraint for the total feedback (CoP and CMP, if available). This returns a set of 4
-    * inequality constraints.
-    *
-    * @param inputToPack the object in which to store the inequality constraint.
     * @param maxXMagnitude the maximum feedback magnitude in X.
     * @param maxYMagnitude the maximum feedback magnitude in Y.
     */
@@ -118,35 +106,6 @@ public class ICPQPConstraintCalculator
          }
          inputToPack.bineq.set(offset, -minYMagnitude);
       }
-   }
-
-   /**
-    * Computes the inequality constraint for the to limit the total feedback rate (CoP and CMP, if available). This returns a set of 4
-    * inequality constraints.
-    *
-    * @param inputToPack the object in which to store the inequality constraint.
-    * @param maxRate the maximum feedback rate in X and Y.
-    * @param previousValue the value of the previous feedback term in X and Y.
-    * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
-    */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, FrameTuple2DReadOnly maxRate, FrameTuple2DReadOnly previousValue,
-                                                  double controlDT)
-   {
-      calculateMaxFeedbackRateConstraint(inputToPack, maxRate.getX(), maxRate.getY(), previousValue.getX(), previousValue.getY(), controlDT);
-   }
-
-   /**
-    * Computes the inequality constraint for the to limit the total feedback rate (CoP and CMP, if available). This returns a set of 4
-    * inequality constraints.
-    *
-    * @param inputToPack the object in which to store the inequality constraint.
-    * @param maxRate the maximum feedback rate in X and Y.
-    * @param previousValue the value of the previous feedback term in X and Y.
-    * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
-    */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, FrameTuple2DReadOnly previousValue, double controlDT)
-   {
-      calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.getX(), previousValue.getY(), controlDT);
    }
 
    /**
