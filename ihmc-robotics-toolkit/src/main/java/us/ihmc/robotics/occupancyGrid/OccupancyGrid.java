@@ -82,6 +82,12 @@ public class OccupancyGrid
       this.decayRate.set(occupancyDecayRate);
    }
 
+   public void setCellSize(double size)
+   {
+      setCellXSize(size);
+      setCellYSize(size);
+   }
+
    public void setCellXSize(double xSize)
    {
       this.cellXSize.set(xSize);

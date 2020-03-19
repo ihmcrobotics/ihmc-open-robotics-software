@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
+import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
@@ -25,10 +29,19 @@ public class CropVerifier
    private final YoBoolean perpendicularCopErrorAboveThreshold;
    private final YoBoolean enoughDesiredCopOnCropSide;
 
-   public CropVerifier(String namePrefix, OccupancyGrid occupancyGrid, FootholdRotationParameters explorationParameters, YoVariableRegistry parentRegistry)
+   private final OccupancyGridVisualizer visualizer;
+
+   public CropVerifier(String namePrefix,
+                       ReferenceFrame soleFrame,
+                       double resolution,
+                       FootholdRotationParameters explorationParameters,
+                       YoVariableRegistry parentRegistry,
+                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-      this.occupancyGrid = occupancyGrid;
+
+      occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
+      occupancyGrid.setCellSize(resolution);
 
       perpendicularCoPError = new YoDouble(namePrefix + "PerpendicularCopError", registry);
       perpendicularCopErrorThreshold = explorationParameters.getPerpendicularCoPErrorThreshold();
@@ -41,7 +54,33 @@ public class CropVerifier
 
       desiredCopOnCorrectSide = new YoBoolean(namePrefix + "DesiredCopOnCorrectSide", registry);
 
+      if (yoGraphicsListRegistry != null)
+      {
+         visualizer = new OccupancyGridVisualizer(namePrefix + "DesiredCoP", occupancyGrid, 50, YoAppearance.Blue(), registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         visualizer = null;
+      }
+
       parentRegistry.addChild(registry);
+   }
+
+   public void reset()
+   {
+      occupancyGrid.reset();
+
+      if (visualizer != null)
+         visualizer.update();
+   }
+
+   public void update(FramePoint2DReadOnly desiredCoP)
+   {
+      if (!desiredCoP.containsNaN())
+         occupancyGrid.registerPoint(desiredCoP);
+
+      if (visualizer != null)
+         visualizer.update();
    }
 
    public boolean verifyFootholdCrop(FramePoint2DReadOnly desiredCoP, RobotSide sideToCrop, FrameLine2DReadOnly lineOfRotation)
