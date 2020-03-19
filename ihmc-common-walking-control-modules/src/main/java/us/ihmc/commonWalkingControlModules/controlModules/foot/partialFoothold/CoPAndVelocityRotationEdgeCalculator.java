@@ -102,8 +102,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
       String namePrefix = side.getLowerCaseName() + "CoPAndVelocity";
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      DoubleProvider filterBreakFrequency = copHistoryBreakFrequency;
-      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copHistoryBreakFrequency.getValue(), dt);
       pointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "PointOfRotation", "", registry, alpha, soleFrame);
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
 
