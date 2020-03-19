@@ -240,9 +240,7 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
             MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
          }
 
@@ -256,9 +254,7 @@ public class ICPQPInputCalculator
 
             if (indexHandler.useStepAdjustment())
             {
-               MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-               MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
                MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             }
          }
@@ -270,10 +266,8 @@ public class ICPQPInputCalculator
 
             if (indexHandler.useStepAdjustment())
             {
-               MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor );
-
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
                MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
                MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -291,12 +285,10 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
             if (indexHandler.hasCMPFeedbackTask())
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -313,9 +305,7 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);

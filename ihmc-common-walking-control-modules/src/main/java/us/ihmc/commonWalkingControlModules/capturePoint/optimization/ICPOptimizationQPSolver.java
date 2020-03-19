@@ -14,9 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -188,7 +186,6 @@ public class ICPOptimizationQPSolver
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
    private boolean hasPlanarRegionConstraint = false;
-   private double planarRegionDistanceFromEdge = 0.0;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationQPSolver}.
@@ -1242,9 +1239,9 @@ public class ICPOptimizationQPSolver
     * @param footstepIndex index of footstep to get.
     * @param footstepLocationToPack location of the footstep in the world frame.
     */
-   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2D footstepLocationToPack)
+   public void getFootstepSolutionLocation(int footstepIndex, FixedFramePoint2DBasics footstepLocationToPack)
    {
-      footstepLocationToPack.setToZero(worldFrame);
+      footstepLocationToPack.checkReferenceFrameMatch(worldFrame);
       footstepLocationToPack.setX(footstepLocationSolution.get(2 * footstepIndex, 0));
       footstepLocationToPack.setY(footstepLocationSolution.get(2 * footstepIndex + 1, 0));
    }
@@ -1349,5 +1346,15 @@ public class ICPOptimizationQPSolver
    ConstraintToConvexRegion getCMPLocationConstraint()
    {
       return cmpLocationConstraint;
+   }
+
+   public double getFootstepRecursionMultiplier()
+   {
+      return footstepRecursionMultiplier;
+   }
+
+   public double getFootstepAdjustmentSafetyFactor()
+   {
+      return footstepAdjustmentSafetyFactor;
    }
 }

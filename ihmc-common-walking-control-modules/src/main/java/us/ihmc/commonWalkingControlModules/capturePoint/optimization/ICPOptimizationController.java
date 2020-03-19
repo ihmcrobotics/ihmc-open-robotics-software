@@ -857,6 +857,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
+   /**
+    * This computes the footstep adjustment multiplier. This means that ICP error that is not being compensated for via feedback because of feedback limits
+    * is compensated using some other term. That other term is equal to the adjustment multiplier times the total footstep adjustment.
+    */
    private double computeFootstepAdjustmentMultiplier(double omega0)
    {
       double timeInTransferForShifting = Math
@@ -864,8 +868,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
       recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
 
+      // This is the maximum possible multiplier
       double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
 
+      // The recursion multiplier is guaranteed to be between the max and min values. This forces it to interpolate between those two.
       double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
       return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
