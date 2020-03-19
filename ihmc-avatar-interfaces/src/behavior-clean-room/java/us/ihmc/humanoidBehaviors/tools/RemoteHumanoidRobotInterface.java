@@ -7,9 +7,11 @@ import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -19,11 +21,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.postProcessing.AreaSplitFractionPostProcessingElement;
-import us.ihmc.footstepPlanning.postProcessing.PositionSplitFractionPostProcessingElement;
-import us.ihmc.footstepPlanning.postProcessing.SwingOverRegionsPostProcessingElement;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
@@ -37,7 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
@@ -45,8 +41,6 @@ public class RemoteHumanoidRobotInterface
    private final Ros2NodeInterface ros2Node;
    private final String robotName;
    private final DRCRobotJointMap jointMap;
-   private final FootstepPostProcessingParametersBasics footstepPostProcessingParameters;
-   private final WalkingControllerParameters walkingControllerParameters;
 
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
@@ -66,19 +60,15 @@ public class RemoteHumanoidRobotInterface
 
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
-   private final PositionSplitFractionPostProcessingElement positionSplitFractionPostProcessor;
-   private final AreaSplitFractionPostProcessingElement areaSplitFractionPostProcessor;
-   private final SwingOverRegionsPostProcessingElement swingOverRegionsPostProcessor;
+   private final FootstepPlanPostProcessingModule footstepPlanPostProcessingModule;
 
    public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       this.ros2Node = ros2Node;
       robotName = robotModel.getSimpleRobotName();
-      footstepPostProcessingParameters = robotModel.getFootstepPostProcessingParameters();
-      walkingControllerParameters = robotModel.getWalkingControllerParameters();
       jointMap = robotModel.getJointMap();
+
       ROS2ModuleIdentifier controllerId = ROS2Tools.HUMANOID_CONTROLLER;
-      
       footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, robotName, controllerId);
       footLoadBearingMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootLoadBearingMessage.class, robotName, controllerId);
       armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, robotName, controllerId);
@@ -97,20 +87,9 @@ public class RemoteHumanoidRobotInterface
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, robotName, controllerId, initialState, this::acceptStatusChange);
-
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, robotName, controllerId);
 
-      YoVariableRegistry registry = new YoVariableRegistry("swingOver");
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      positionSplitFractionPostProcessor = new PositionSplitFractionPostProcessingElement(footstepPostProcessingParameters,
-                                                                                          robotModel.getCapturePointPlannerParameters());
-      areaSplitFractionPostProcessor = new AreaSplitFractionPostProcessingElement(footstepPostProcessingParameters,
-                                                                                  robotModel.getCapturePointPlannerParameters(),
-                                                                                  robotModel.getContactPointParameters().getFootContactPoints());
-      swingOverRegionsPostProcessor = new SwingOverRegionsPostProcessingElement(footstepPostProcessingParameters,
-                                                                                walkingControllerParameters,
-                                                                                registry,
-                                                                                yoGraphicsListRegistry);
+      footstepPlanPostProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel);
 
       remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
    }
@@ -153,25 +132,18 @@ public class RemoteHumanoidRobotInterface
       FramePose3D rightFootPose = new FramePose3D();
       leftFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
       rightFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
-      positionSplitFractionPostProcessor.postProcessFootstepPlan(footstepPlan,
-                                                                 leftFootPose.getPosition(),
-                                                                 leftFootPose.getOrientation(),
-                                                                 rightFootPose.getPosition(),
-                                                                 rightFootPose.getOrientation());
       CapturabilityBasedStatus latestCapturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
-      areaSplitFractionPostProcessor.postProcessFootstepPlan(footstepPlan,
-                                                             leftFootPose.getPosition(),
-                                                             leftFootPose.getOrientation(),
-                                                             rightFootPose.getPosition(),
-                                                             rightFootPose.getOrientation(),
-                                                             latestCapturabilityBasedStatus.getLeftFootSupportPolygon2d(),
-                                                             latestCapturabilityBasedStatus.getRightFootSupportPolygon2d());
-      swingOverRegionsPostProcessor.postProcessFootstepPlan(footstepPlan,
-                                                            leftFootPose.getPosition(),
-                                                            leftFootPose.getOrientation(),
-                                                            rightFootPose.getPosition(),
-                                                            rightFootPose.getOrientation(),
-                                                            planarRegionsList);
+
+      FootstepPostProcessingPacket footstepPostProcessingPacket = new FootstepPostProcessingPacket();
+      footstepPostProcessingPacket.getFootstepDataList().set(footstepPlan);
+      footstepPostProcessingPacket.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
+      footstepPostProcessingPacket.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
+      footstepPostProcessingPacket.getRightFootPositionInWorld().set(rightFootPose.getPosition());
+      footstepPostProcessingPacket.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
+      footstepPostProcessingPacket.getLeftFootContactPoints2d().set(latestCapturabilityBasedStatus.getLeftFootSupportPolygon2d());
+      footstepPostProcessingPacket.getRightFootContactPoints2d().set(latestCapturabilityBasedStatus.getRightFootSupportPolygon2d());
+      footstepPostProcessingPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      footstepPlanPostProcessingModule.handleRequestPacket(footstepPostProcessingPacket);
 
       return requestWalk(footstepPlan);
    }
