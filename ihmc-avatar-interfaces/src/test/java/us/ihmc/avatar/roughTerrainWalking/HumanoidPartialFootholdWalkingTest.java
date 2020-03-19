@@ -211,6 +211,14 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
       step2.getLocation().set(blockDistanceFromOrigin + 0.3, -width / 2, topHeight);
 
+      FootstepDataMessage step3 = message.getFootstepDataList().add();
+      step3.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
+      step3.getLocation().set(blockDistanceFromOrigin + 0.55, width / 2, 0.0);
+
+      FootstepDataMessage step4 = message.getFootstepDataList().add();
+      step4.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);
+      step4.getLocation().set(blockDistanceFromOrigin + 0.55, -width / 2, 0.0);
+
       drcSimulationTestHelper.publishToController(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       assertTrue(success);

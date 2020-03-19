@@ -56,16 +56,11 @@ public class OnlineLeastSquaresRegression
       covarianceCalculator.update(x, y);
       pointsInRegression.increment();
 
-      if (pointsInRegression.getValue() < 2)
+      if (pointsInRegression.getValue() < 2 || covarianceCalculator.getXStandardDeviation() == 0.0)
          return;
 
       slope.set(covarianceCalculator.getCorrelation() * covarianceCalculator.getYStandardDeviation() / covarianceCalculator.getXStandardDeviation());
       intercept.set(covarianceCalculator.getYMean() - slope.getDoubleValue() * covarianceCalculator.getXMean());
-
-      if (slope.isNaN())
-         throw new RuntimeException("What?");
-      if (intercept.isNaN())
-         throw new RuntimeException("What?");
    }
 
    public int getPointsInRegression()
