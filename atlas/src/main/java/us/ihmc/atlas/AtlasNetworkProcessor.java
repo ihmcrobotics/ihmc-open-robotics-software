@@ -97,16 +97,17 @@ public class AtlasNetworkProcessor
    private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
    {
       networkProcessor.setupRosModule();
-      networkProcessor.setupBehaviorModule(false, false, 0);
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
-
+      
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
+      
+      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBehaviorModule(false, false, 0);
    }
 
    private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
