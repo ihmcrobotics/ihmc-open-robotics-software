@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.jfxvisualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -56,6 +57,14 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+
+         // Automatically send graph data over messager
+         plannerModule.addStatusCallback(status ->
+                                         {
+                                            if (status.getResult().terminalResult())
+                                               messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                                                      Pair.of(plannerModule.getEdgeDataMap(), plannerModule.getIterationData()));
+                                         });
       }
    }
 

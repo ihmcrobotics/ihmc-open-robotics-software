@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,16 +68,19 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
 
    private final IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
    private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher;
+   private final FootstepPlannerParametersBasics plannerParameters;
 
    public BipedContinuousPlanningToolboxController(StatusMessageOutputManager statusOutputManager,
                                                    IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher,
                                                    IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher,
+                                                   FootstepPlannerParametersBasics plannerParameters,
                                                    YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
       this.planningRequestPublisher = planningRequestPublisher;
       this.plannerStatePublisher = plannerStatePublisher;
+      this.plannerParameters = plannerParameters;
 
       broadcastPlanId.set(defaultStartPlanId);
       receivedPlanId.set(-1);
@@ -274,16 +278,19 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       RobotSide initialSupportSide = expectedInitialSteppingSide.get().getOppositeSide();
       Pose3DReadOnly stancePose = currentFeetPositions.get(initialSupportSide);
 
-      planningRequestPacket.setInitialStanceRobotSide(initialSupportSide.toByte());
+      planningRequestPacket.setRequestedInitialStanceSide(initialSupportSide.toByte());
       planningRequestPacket.setHorizonLength(continuousPlanningRequestPacket.getHorizonLength());
       planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
-      planningRequestPacket.getStanceFootPositionInWorld().set(stancePose.getPosition());
-      planningRequestPacket.getStanceFootOrientationInWorld().set(stancePose.getOrientation());
+      planningRequestPacket.getStartLeftFootPose().set(currentFeetPositions.get(RobotSide.LEFT));
+      planningRequestPacket.getStartRightFootPose().set(currentFeetPositions.get(RobotSide.LEFT));
       planningRequestPacket.setTimeout(continuousPlanningRequestPacket.getTimeout());
       planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getBestEffortTimeout());
-      planningRequestPacket.getGoalPositionInWorld().set(continuousPlanningRequestPacket.getGoalPositionInWorld());
-      planningRequestPacket.getGoalOrientationInWorld().set(continuousPlanningRequestPacket.getGoalOrientationInWorld());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());
+
+      planningRequestPacket.getGoalLeftFootPose().set(continuousPlanningRequestPacket.getGoalPositionInWorld(), continuousPlanningRequestPacket.getGoalOrientationInWorld());
+      planningRequestPacket.getGoalRightFootPose().set(continuousPlanningRequestPacket.getGoalPositionInWorld(), continuousPlanningRequestPacket.getGoalOrientationInWorld());
+      planningRequestPacket.getGoalLeftFootPose().appendTranslation(0.0, 0.5 * plannerParameters.getIdealFootstepWidth(), 0.0);
+      planningRequestPacket.getGoalRightFootPose().appendTranslation(0.0, - 0.5 * plannerParameters.getIdealFootstepWidth(), 0.0);
 
       broadcastPlanId.increment();
       planningRequestPacket.setPlannerRequestId(broadcastPlanId.getIntegerValue());

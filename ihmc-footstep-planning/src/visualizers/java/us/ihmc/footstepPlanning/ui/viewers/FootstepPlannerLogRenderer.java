@@ -43,9 +43,16 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
 
    public FootstepPlannerLogRenderer(RobotContactPointParameters<RobotSide> contactPointParameters, Messager messager)
    {
-      List<Point2D> contactPoints = contactPointParameters.getFootContactPoints().get(RobotSide.LEFT);
-      contactPoints.forEach(defaultFootPolygon::addVertex);
-      defaultFootPolygon.update();
+      if (contactPointParameters == null)
+      {
+         defaultFootPolygon.set(PlannerTools.createDefaultFootPolygon());
+      }
+      else
+      {
+         List<Point2D> contactPoints = contactPointParameters.getFootContactPoints().get(RobotSide.LEFT);
+         contactPoints.forEach(defaultFootPolygon::addVertex);
+         defaultFootPolygon.update();
+      }
 
       for (int i = 0; i < defaultFootPolygon.getNumberOfVertices(); i++)
       {

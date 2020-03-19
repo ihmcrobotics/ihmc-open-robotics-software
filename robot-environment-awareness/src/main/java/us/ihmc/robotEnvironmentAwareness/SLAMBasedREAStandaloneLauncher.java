@@ -4,19 +4,19 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
-import us.ihmc.robotEnvironmentAwareness.ui.DepthBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 
-public class DepthBasedREAStandaloneLauncher extends Application
+public class SLAMBasedREAStandaloneLauncher extends Application
 {
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
 
-   private DepthBasedEnvironmentAwarenessUI ui;
+   private SLAMBasedEnvironmentAwarenessUI ui;
    private SLAMModule module;
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = DepthBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
+      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
       module = SLAMModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
 
       ui.show();

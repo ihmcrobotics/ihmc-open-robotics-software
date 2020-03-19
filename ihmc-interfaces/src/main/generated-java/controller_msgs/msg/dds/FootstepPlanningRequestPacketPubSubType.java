@@ -42,15 +42,15 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -89,16 +89,16 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartLeftFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getStartRightFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalLeftFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalRightFootPose(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getStanceFootPositionInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getStanceFootOrientationInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalPositionInWorld(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getGoalOrientationInWorld(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -139,12 +139,12 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_9(data.getInitialStanceRobotSide());
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getStartLeftFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getStartRightFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalLeftFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalRightFootPose(), cdr);
+      cdr.write_type_9(data.getRequestedInitialStanceSide());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getStanceFootPositionInWorld(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getStanceFootOrientationInWorld(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPositionInWorld(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
       cdr.write_type_9(data.getRequestedFootstepPlannerType());
 
       cdr.write_type_6(data.getGoalDistanceProximity());
@@ -172,12 +172,12 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setInitialStanceRobotSide(cdr.read_type_9());
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getStartLeftFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getStartRightFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalLeftFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalRightFootPose(), cdr);	
+      data.setRequestedInitialStanceSide(cdr.read_type_9());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getStanceFootPositionInWorld(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getStanceFootOrientationInWorld(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPositionInWorld(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
       data.setRequestedFootstepPlannerType(cdr.read_type_9());
       	
       data.setGoalDistanceProximity(cdr.read_type_6());
@@ -203,15 +203,15 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    public final void serialize(controller_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_9("initial_stance_robot_side", data.getInitialStanceRobotSide());
-      ser.write_type_a("stance_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getStanceFootPositionInWorld());
+      ser.write_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
-      ser.write_type_a("stance_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getStanceFootOrientationInWorld());
+      ser.write_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.write_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
+      ser.write_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
 
-      ser.write_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
+      ser.write_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
 
+      ser.write_type_9("requested_initial_stance_side", data.getRequestedInitialStanceSide());
       ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
       ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
@@ -229,15 +229,15 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlanningRequestPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setInitialStanceRobotSide(ser.read_type_9("initial_stance_robot_side"));
-      ser.read_type_a("stance_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getStanceFootPositionInWorld());
+      ser.read_type_a("start_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartLeftFootPose());
 
-      ser.read_type_a("stance_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getStanceFootOrientationInWorld());
+      ser.read_type_a("start_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getStartRightFootPose());
 
-      ser.read_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
+      ser.read_type_a("goal_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalLeftFootPose());
 
-      ser.read_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
+      ser.read_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
 
+      data.setRequestedInitialStanceSide(ser.read_type_9("requested_initial_stance_side"));
       data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
       data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
