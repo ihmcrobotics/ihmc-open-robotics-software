@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -83,7 +85,7 @@ public class PartialFootholdCropperModule
       shouldShrinkFoothold.set(false);
 
       cropVerifier.update(desiredCoP);
-      footholdCropper.update(measuredCoP, desiredCoP);
+      footholdCropper.update(measuredCoP);
 
       if (!isRotating.getBooleanValue())
       {
@@ -184,6 +186,13 @@ public class PartialFootholdCropperModule
       copAndVelocityEdgeCalculator.reset();
       copHistoryEdgeCalculator.reset();
    }
+
+   public void initialize(FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      cropVerifier.initialize();
+      footholdCropper.reset(footPolygon);
+   }
+
 
    public void reset()
    {

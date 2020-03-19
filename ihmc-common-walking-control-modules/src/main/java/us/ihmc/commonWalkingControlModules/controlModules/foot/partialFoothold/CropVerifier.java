@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -14,6 +15,7 @@ import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CropVerifier
@@ -30,6 +32,15 @@ public class CropVerifier
    private final YoBoolean enoughDesiredCopOnCropSide;
 
    private final OccupancyGridVisualizer visualizer;
+   private final YoEnum<RobotSide> previousSideToCrop;
+
+   private final YoDouble maxFootPitch;
+   private final YoDouble minFootPitch;
+
+   private final YoDouble maxFootRoll;
+   private final YoDouble minFootRoll;
+
+   private final ReferenceFrame soleFrame;
 
    public CropVerifier(String namePrefix,
                        ReferenceFrame soleFrame,
@@ -38,6 +49,8 @@ public class CropVerifier
                        YoVariableRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.soleFrame = soleFrame;
+
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
       occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
@@ -51,8 +64,14 @@ public class CropVerifier
       numberOfCellsThreshold = explorationParameters.getNumberOfDesiredCopsOnCropSide();
 
       numberOfCellsOccupiedOnCropSide = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnCropSide", registry);
+      previousSideToCrop = new YoEnum<>(namePrefix + "PreviousSideToCrop", registry, RobotSide.class, true);
 
       desiredCopOnCorrectSide = new YoBoolean(namePrefix + "DesiredCopOnCorrectSide", registry);
+
+      maxFootPitch = new YoDouble(namePrefix + "MaxFootPitch", registry);
+      minFootPitch = new YoDouble(namePrefix + "MinFootPitch", registry);
+      maxFootRoll = new YoDouble(namePrefix + "MaxFootRoll", registry);
+      minFootRoll = new YoDouble(namePrefix + "MinFootRoll", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -63,21 +82,44 @@ public class CropVerifier
          visualizer = null;
       }
 
+      reset();
+
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       occupancyGrid.reset();
+      previousSideToCrop.set(null);
+
+      maxFootPitch.set(0.0);
+      minFootPitch.set(0.0);
+      maxFootRoll.set(0.0);
+      minFootRoll.set(0.0);
 
       if (visualizer != null)
          visualizer.update();
+   }
+
+   private final FrameQuaternion footOrientation = new FrameQuaternion();
+
+   public void initialize()
+   {
+      footOrientation.setToZero(soleFrame);
+      footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      maxFootPitch.set(footOrientation.getPitch());
+      minFootPitch.set(footOrientation.getPitch());
+      maxFootPitch.set(footOrientation.getRoll());
+      minFootPitch.set(footOrientation.getRoll());
    }
 
    public void update(FramePoint2DReadOnly desiredCoP)
    {
       if (!desiredCoP.containsNaN())
          occupancyGrid.registerPoint(desiredCoP);
+
+
 
       if (visualizer != null)
          visualizer.update();
@@ -95,6 +137,14 @@ public class CropVerifier
                                                                                                       distanceFromLineToComputeDesiredCoPOccupancy.getValue()));
       enoughDesiredCopOnCropSide.set(numberOfCellsOccupiedOnCropSide.getValue() > numberOfCellsThreshold.getValue());
 
-      return perpendicularCopErrorAboveThreshold.getBooleanValue() && desiredCopOnCorrectSide.getBooleanValue() && enoughDesiredCopOnCropSide.getBooleanValue();
+      if (perpendicularCopErrorAboveThreshold.getBooleanValue() && desiredCopOnCorrectSide.getBooleanValue() && enoughDesiredCopOnCropSide.getBooleanValue())
+      {
+         previousSideToCrop.set(sideToCrop);
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }
