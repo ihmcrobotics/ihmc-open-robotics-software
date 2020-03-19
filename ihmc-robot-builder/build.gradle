@@ -26,6 +26,6 @@ mainDependencies {
 
 testDependencies {
 
-   api("us.ihmc:ihmc-commons-testing:0.28.0")
+   api("us.ihmc:ihmc-commons-testing:0.28.1")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
