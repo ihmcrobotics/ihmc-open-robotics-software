@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to  convert weights and gains into the actual objects for the quadratic program.
@@ -444,21 +445,10 @@ public class ICPQPInputCalculator
 
    private final DenseMatrix64F aTb = new DenseMatrix64F(6, 6);
 
-   private void multAddInner(DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
-   {
-      quadraticMultAddTransA(jac, weight, jac, resultToPack);
-   }
 
    private void multAddInner(double scalar, DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
    {
       quadraticMultAddTransA(scalar, jac, weight, jac, resultToPack);
-   }
-
-   private void quadraticMultAddTransA(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)
-   {
-      aTb.reshape(a.getNumCols(), b.getNumCols());
-      CommonOps.multTransA(a, b, aTb);
-      CommonOps.multAdd(aTb, c, resultToPack);
    }
 
    private void quadraticMultAddTransA(double scalar, DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)

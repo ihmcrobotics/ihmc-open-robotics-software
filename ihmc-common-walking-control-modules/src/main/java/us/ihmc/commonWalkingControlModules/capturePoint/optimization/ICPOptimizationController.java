@@ -200,7 +200,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-   private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FrameVector2D currentICPVelocity = new FrameVector2D();
@@ -679,20 +678,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
       this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
-      this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
       this.currentICPVelocity.changeFrame(worldFrame);
 
-      this.yoPerfectCoP.set(this.perfectCoP);
-      this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      this.yoPerfectCoP.setMatchingFrame(perfectCoP);
+      this.yoPerfectCMP.add(yoPerfectCoP, this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
 
@@ -878,8 +875,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private boolean solveQP()
    {
-      perfectCoP.set(yoPerfectCoP);
-      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      boolean converged = solver.compute(icpError, yoPerfectCoP, perfectCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
       {

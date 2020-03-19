@@ -50,8 +50,6 @@ public class ICPOptimizationSolutionHandler
    private final YoFramePoint2D adjustedICPReferenceLocation;
    private final YoFramePoint2D footstepSolutionInControlPlane;
 
-   private final YoFrameVector2D icpErrorCompensatedFromCoPFeedback;
-   private final YoFrameVector2D icpErrorCompensatedFromCMPFeedback;
    private final YoFrameVector2D icpErrorCompensatedFromStepAdjustment;
 
    private final boolean debug;
@@ -83,8 +81,6 @@ public class ICPOptimizationSolutionHandler
       this.debug = debug;
       this.icpControlPlane = icpControlPlane;
 
-      icpErrorCompensatedFromCMPFeedback = new YoFrameVector2D(yoNamePrefix + "ICPErrorCompensatedFromCMPFeedback", worldFrame, registry);
-      icpErrorCompensatedFromCoPFeedback = new YoFrameVector2D(yoNamePrefix + "ICPErrorCompensatedFromCoPFeedback", worldFrame, registry);
       icpErrorCompensatedFromStepAdjustment = new YoFrameVector2D(yoNamePrefix + "ICPErrorCompensatedFromStepAdjustment", worldFrame, registry);
 
       if (debug)
@@ -113,7 +109,6 @@ public class ICPOptimizationSolutionHandler
       footstepAdjustment = new YoFrameVector2D(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
       clippedFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
       totalFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalFootstepAdjustment", worldFrame, registry);
-
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
       footstepSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);

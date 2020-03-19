@@ -31,7 +31,6 @@ public class ICPOptimizationQPSolver
 
    private static final boolean useWarmStart = true;
    private static final int maxNumberOfIterations = 100;
-   private static final double convergenceThreshold = 1.0e-20;
 
    private boolean resetActiveSet;
    private boolean previousTickFailed = false;
@@ -764,7 +763,7 @@ public class ICPOptimizationQPSolver
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
     * @return whether a new solution was found if this is false the last valid solution will be used.
     */
-   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP)
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP)
    {
       cmpOffsetToThrowAway.setToZero(worldFrame);
       return compute(currentICPError, desiredCoP, cmpOffsetToThrowAway);
@@ -781,7 +780,7 @@ public class ICPOptimizationQPSolver
     * @param desiredCMPOffset current desired distance from the CoP to the CMP.
     * @return whether a new solution was found if this is false the last valid solution will be used.
     */
-   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP, FrameVector2D desiredCMPOffset)
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP, FrameVector2DReadOnly desiredCMPOffset)
    {
       indexHandler.computeProblemSize();
 
@@ -789,15 +788,12 @@ public class ICPOptimizationQPSolver
       reshape();
 
       currentICPError.checkReferenceFrameMatch(worldFrame);
-      desiredCoP.changeFrame(worldFrame);
-      desiredCMPOffset.changeFrame(worldFrame);
+      desiredCoP.checkReferenceFrameMatch(worldFrame);
+      desiredCMPOffset.checkReferenceFrameMatch(worldFrame);
 
-      this.currentICPError.set(0, 0, currentICPError.getX());
-      this.currentICPError.set(1, 0, currentICPError.getY());
-      this.desiredCoP.set(0, 0, desiredCoP.getX());
-      this.desiredCoP.set(1, 0, desiredCoP.getY());
-      this.desiredCMPOffset.set(0, 0, desiredCMPOffset.getX());
-      this.desiredCMPOffset.set(1, 0, desiredCMPOffset.getY());
+      currentICPError.get(this.currentICPError);
+      desiredCoP.get(this.desiredCoP);
+      desiredCMPOffset.get(this.desiredCMPOffset);
       CommonOps.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
 
       addCoPFeedbackTask();
