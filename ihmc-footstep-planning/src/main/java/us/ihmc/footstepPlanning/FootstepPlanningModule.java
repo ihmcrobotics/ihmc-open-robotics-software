@@ -265,7 +265,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       endNodeCost = distanceAndYawHeuristics.compute(endNode);
 
       // Check valid goal
-      if (snapAndCheckGoalNodes(goalNodes, horizonLengthImposed))
+      if (!snapAndCheckGoalNodes(goalNodes, horizonLengthImposed))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          isPlanning.set(false);
@@ -418,14 +418,20 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private boolean snapAndCheckGoalNodes(SideDependentList<FootstepNode> goalNodes, boolean horizonLengthImposed)
    {
-      boolean snapSteps = horizonLengthImposed || request.getSnapGoalSteps();
-      if (!snapSteps)
-      {
-         return false;
-      }
+      FootstepNodeSnapData leftGoalStepSnapData, rightGoalStepSnapData;
+      boolean snapGoalSteps = horizonLengthImposed || request.getSnapGoalSteps();
 
-      FootstepNodeSnapData leftGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.LEFT));
-      FootstepNodeSnapData rightGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.RIGHT));
+      if (snapGoalSteps)
+      {
+         leftGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.LEFT));
+         rightGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.RIGHT));
+      }
+      else
+      {
+         addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+         addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+         return true;
+      }
 
       if (request.getAbortIfGoalStepSnappingFails())
       {
@@ -433,7 +439,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else
       {
-         return false;
+         return true;
       }
    }
 
@@ -618,8 +624,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       addSnapData(request.getStartFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
       addSnapData(request.getStartFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
-      addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
-      addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
    }
 
    private void addSnapData(Pose3D footstepPose, RobotSide side)
