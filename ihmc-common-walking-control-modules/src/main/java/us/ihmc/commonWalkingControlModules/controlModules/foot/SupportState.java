@@ -243,6 +243,9 @@ public class SupportState extends AbstractFootControlState
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
 
+      computeFootPolygon();
+      footRotationCalculationModule.initialize(footPolygon);
+
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       liftOff.set(false);

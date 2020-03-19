@@ -55,7 +55,6 @@ public class FootholdCropper
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final int numberOfFootCornerPoints;
 
-   private final CropVerifier verifier;
    private final OccupancyGridVisualizer measuredVisualizer;
 
    public FootholdCropper(String namePrefix,
@@ -84,8 +83,6 @@ public class FootholdCropper
 
       footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
       footCoPHullCropper = new FootCoPHullCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
-
-      verifier = new CropVerifier(namePrefix, soleFrame, resolution, rotationParameters, registry, yoGraphicsListRegistry);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
@@ -141,14 +138,11 @@ public class FootholdCropper
       footCoPOccupancyGrid.reset();
       if (measuredVisualizer != null)
          measuredVisualizer.update();
-      verifier.reset();
    }
 
-   public void update(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
+   public void update(FramePoint2DReadOnly measuredCoP)
    {
       measuredCoPOccupancy.update();
-
-      verifier.update(desiredCoP);
 
       if (!measuredCoP.containsNaN())
          measuredCoPOccupancy.registerPoint(measuredCoP);
