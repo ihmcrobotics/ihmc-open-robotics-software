@@ -37,6 +37,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private ReferenceFrame controlFrame;
    private final ReferenceFrame ankleFrame;
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final PIDSE3GainsReadOnly gains;
 
@@ -68,6 +69,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+      workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -103,6 +105,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
       }
    }
 
@@ -173,6 +179,25 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+         desiredPose.setPosition(desiredAnklePosition);
+         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+         desiredPosition.setIncludingFrame(desiredPose.getPosition());
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
+         desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
+         desiredLinearVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearVelocity());
+         desiredAngularVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularVelocity());
+         desiredLinearAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearAcceleration());
+         desiredAngularAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularAcceleration());
+
+         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
+         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
+
+         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
