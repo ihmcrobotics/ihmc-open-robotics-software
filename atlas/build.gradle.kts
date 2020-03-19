@@ -32,7 +32,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-yovariables:0.4.0")
-   api("us.ihmc:ihmc-commons:0.28.1")
+   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
    api("us.ihmc:simulation-construction-set:0.14.0")
    api("us.ihmc:ihmc-graphics-description:0.14.1")
@@ -67,7 +67,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
-   api("us.ihmc:ihmc-commons-testing:0.28.1")
+   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
