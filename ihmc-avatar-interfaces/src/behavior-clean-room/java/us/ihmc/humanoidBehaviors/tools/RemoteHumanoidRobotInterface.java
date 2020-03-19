@@ -21,7 +21,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
@@ -33,7 +32,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -139,7 +137,7 @@ public class RemoteHumanoidRobotInterface
                                                               boolean swingOverPlanarRegions,
                                                               PlanarRegionsList planarRegionsList)
    {
-      if (swingOverPlanarRegions && planarRegionsList != null && decidePlanDistance(footstepPlan, humanoidReferenceFrames) == PlanTravelDistance.FAR)
+      if (swingOverPlanarRegions && planarRegionsList != null)
       {
          footstepPlan = calculateSwingOverTrajectoryExpansions(footstepPlan, humanoidReferenceFrames, planarRegionsList);
       }
@@ -304,18 +302,6 @@ public class RemoteHumanoidRobotInterface
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
       stampedPosePublisher.publish(stampedPosePacket);
-   }
-
-   private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
-   {
-      FramePose3D midFeetZUpPose = new FramePose3D();
-      midFeetZUpPose.setFromReferenceFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
-
-      FootstepDataMessage footstep = footstepPlan.getFootstepDataList().get(footstepPlan.getFootstepDataList().size() - 1);
-
-      double distance = midFeetZUpPose.getPositionDistance(footstep.getLocation());
-
-      return distance < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
    private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepDataListMessage footsteps, HumanoidReferenceFrames humanoidReferenceFrames,
