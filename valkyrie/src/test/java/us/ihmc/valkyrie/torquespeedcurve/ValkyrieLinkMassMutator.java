@@ -19,7 +19,6 @@ public class ValkyrieLinkMassMutator implements SDFDescriptionMutator {
 	private final Map<String, Double> customLinkMassMap = new HashMap<>();
 
 	public ValkyrieLinkMassMutator(ValkyrieJointMap jointMap, String linkName, double mass) {
-		System.out.printf("Changing mass of %s link to %f (note: torso may be further adjusted)\n", linkName, mass);
 		customLinkMassMap.put(linkName, mass);
 	}
 
@@ -30,17 +29,26 @@ public class ValkyrieLinkMassMutator implements SDFDescriptionMutator {
 
 	@Override
 	public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder) {
-		if (customLinkMassMap.containsKey(linkHolder.getName())) {
+		String linkName = linkHolder.getName();
+		if (customLinkMassMap.containsKey(linkName)) {
 			double oldMass = linkHolder.getMass();
-			double newMass = customLinkMassMap.get(linkHolder.getName());
+			double newMass = customLinkMassMap.get(linkName);
 
+			
+			System.out.printf("Changing mass of %s from %f to %f\n", 
+					linkName, oldMass, newMass);
+			
 			// Update link mass
 			linkHolder.setMass(newMass);
 
-			// Scale inertia tensor
-			Matrix3D inertia = linkHolder.getInertia();
-			inertia.scale(newMass / oldMass);
-			linkHolder.setInertia(inertia);
+			// Hokuyo link can easily go unstable if inertia is modified. 
+			// Seems better for now to leave it as is.
+			if (!linkName.equals("hokuyo_link")) {
+				// Scale inertia tensor
+				Matrix3D inertia = linkHolder.getInertia();
+				inertia.scale(newMass / oldMass);
+				linkHolder.setInertia(inertia);
+			}
 		}
 	}
 
