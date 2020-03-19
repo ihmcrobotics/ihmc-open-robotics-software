@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -28,8 +26,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
    private final EdgeVisualizer edgeVisualizer;
-   private final DoubleProvider lineStdDevThreshold = () -> 0.01;
-   private final DoubleProvider transverseStdDevThreshold = () -> 0.002;
+   private final DoubleProvider inlineStdDevThreshold;
+   private final DoubleProvider transverseStdDevThreshold;
    private final YoBoolean statisticsStable;
    private final YoBoolean lineStable;
 
@@ -46,6 +44,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
            rotationParameters.getStableRotationDirectionThreshold(),
            rotationParameters.getStableRotationPositionThreshold(),
            rotationParameters.getStableEdgeWindowSize(),
+           rotationParameters.getInlineCoPHistoryStdDev(),
+           rotationParameters.getTransverseCoPHistoryStdDev(),
            dt,
            parentRegistry,
            color,
@@ -57,6 +57,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            DoubleProvider stableRotationDirectionThreshold,
                                            DoubleProvider stableRotationPositionThreshold,
                                            IntegerProvider stableEdgeWindowSize,
+                                           DoubleProvider inlineStdDevThreshold,
+                                           DoubleProvider transverseStdDevThreshold,
                                            double dt,
                                            YoVariableRegistry parentRegistry,
                                            Color color,
@@ -66,6 +68,9 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       lineStable = new YoBoolean(namePrefix + "IsStable", registry);
       statisticsStable = new YoBoolean(namePrefix + "StatisticsStable", registry);
+
+      this.inlineStdDevThreshold = inlineStdDevThreshold;
+      this.transverseStdDevThreshold = transverseStdDevThreshold;
 
       lineCalculator = new OnlineLine2DLinearRegression(namePrefix + "FootRotation", registry);
       lineOfRotationInSole = new YoFrameLine2D(namePrefix + "LineOfRotation", "", soleFrame, registry);
@@ -105,7 +110,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
       stabilityEvaluator.update();
 
       statisticsStable.set(lineCalculator.getTransverseStandardDeviation() < transverseStdDevThreshold.getValue()
-                       && lineCalculator.getInlineStandardDeviation() > lineStdDevThreshold.getValue());
+                       && lineCalculator.getInlineStandardDeviation() > inlineStdDevThreshold.getValue());
       lineStable.set(statisticsStable.getBooleanValue() && stabilityEvaluator.isEdgeVelocityStable());
 
       if (edgeVisualizer != null)
@@ -124,9 +129,6 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    @Override
    public boolean isRotationEdgeTrusted()
    {
-      if (lineStable.getBooleanValue())
-         return true;
-      else
-         return false;
+      return lineStable.getBooleanValue();
    }
 }

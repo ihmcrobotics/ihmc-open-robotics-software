@@ -22,6 +22,8 @@ public class FootholdRotationParameters
    private final DoubleProvider distanceFromLineToComputeDesiredCoPOccupancy;
    private final IntegerProvider numberOfDesiredCopsOnCropSide;
    private final DoubleProvider copAreaThreshold;
+   private final DoubleProvider inlineCoPHistoryStdDev;
+   private final DoubleProvider transverseCoPHistoryStdDev;
 
    private final DoubleProvider omegaThresholdForEstimation;
    private final DoubleProvider decayBreakFrequency;
@@ -51,6 +53,8 @@ public class FootholdRotationParameters
       numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
       distanceFromLineToComputeDesiredCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineToComputeDesiredCoPOccupancy", registry, 0.005);
       copAreaThreshold = new DoubleParameter(namePrefix + "CopHullAreaRatioThreshold", registry, 0.9);
+      inlineCoPHistoryStdDev = new DoubleParameter(namePrefix + "InlineCoPHistoryStdDev", registry, 0.015);
+      transverseCoPHistoryStdDev = new DoubleParameter(namePrefix + "TransverseCoPHistoryStdDev", registry, 0.002);
 
       namePrefix = "Kinematic_";
       angularVelocityAroundLoRThreshold = new DoubleParameter(namePrefix + "omegaMagnitudeThreshold", registry, 0.5);
@@ -174,5 +178,15 @@ public class FootholdRotationParameters
    public DoubleProvider getCopHullAreaRatioThreshold()
    {
       return copAreaThreshold;
+   }
+
+   public DoubleProvider getInlineCoPHistoryStdDev()
+   {
+      return inlineCoPHistoryStdDev;
+   }
+
+   public DoubleProvider getTransverseCoPHistoryStdDev()
+   {
+      return transverseCoPHistoryStdDev;
    }
 }
