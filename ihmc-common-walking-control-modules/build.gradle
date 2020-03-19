@@ -26,7 +26,7 @@ mainDependencies {
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:ihmc-yovariables:0.4.0")
-   api("us.ihmc:ihmc-commons:0.28.0")
+   api("us.ihmc:ihmc-commons:0.28.1")
    api("us.ihmc:ihmc-graphics-description:0.14.1")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
@@ -40,7 +40,7 @@ mainDependencies {
 
 testDependencies {
 
-   api("us.ihmc:ihmc-commons-testing:0.28.0")
+   api("us.ihmc:ihmc-commons-testing:0.28.1")
    api("us.ihmc:simulation-construction-set:0.14.0")
    api("us.ihmc:simulation-construction-set-test:0.14.0")
    api("us.ihmc:simulation-construction-set-tools-test:source")
