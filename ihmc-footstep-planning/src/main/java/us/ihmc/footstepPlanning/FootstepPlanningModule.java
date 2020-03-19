@@ -82,9 +82,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private double statusPublishPeriod = defaultStatusPublishPeriod;
 
    private FootstepPlanningResult result = null;
+   private FootstepNode startNode;
    private FootstepNode endNode = null;
    private double endNodeCost;
-   private final FramePose3D goalPose = new FramePose3D();
+   private final FramePose3D startMidFootPose = new FramePose3D();
+   private final FramePose3D goalMidFootPose = new FramePose3D();
 
    private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
 
@@ -168,7 +170,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       haltRequested.set(false);
       result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
       bodyPathPlanHolder.getPlan().clear();
-      goalPose.set(request.getGoalPose());
+      startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
+      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       requestCallback.accept(request);
 
       // Reset logged variables
@@ -190,8 +193,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (bodyPathPlanRequested.getAsBoolean())
       {
-         bodyPathPlanner.setInitialStanceFoot(request.getStanceFootPose(), request.getInitialStanceSide());
-         bodyPathPlanner.setGoal(goalPose);
+         bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
+         bodyPathPlanner.setGoal(goalMidFootPose);
 
          FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          if (!bodyPathPlannerResult.validForExecution())
@@ -224,31 +227,27 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
-            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalPose);
+            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
          reportBodyPathPlan();
       }
       else
       {
-         Pose3D startPose = new Pose3D(request.getStanceFootPose());
-         double stanceOffset = request.getInitialStanceSide().negateIfLeftSide(0.5 * getFootstepPlannerParameters().getIdealFootstepWidth());
-         startPose.appendTranslation(0.0, stanceOffset, 0.0);
-
          List<Pose3DReadOnly> waypoints = new ArrayList<>();
-         waypoints.add(startPose);
+         waypoints.add(startMidFootPose);
          waypoints.addAll(request.getBodyPathWaypoints());
-         waypoints.add(new Pose3D(request.getGoalPose()));
+         waypoints.add(goalMidFootPose);
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
       }
 
       // Setup footstep planner
-      FootstepNode startNode = createStartNode(request);
+      startNode = createStartNode(request);
       endNode = startNode;
-      addStartPoseToSnapper(request, startNode);
+      addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
       SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
-      distanceAndYawHeuristics.setGoalPose(goalPose);
+      distanceAndYawHeuristics.setGoalPose(goalMidFootPose);
       idealStepCalculator.initialize(goalNodes);
 
       // Calculate end node cost
@@ -293,8 +292,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
       }
 
-      reportStatus();
       markSolutionEdges();
+      reportStatus();
       isPlanning.set(false);
       return output;
    }
@@ -318,14 +317,23 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
 
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
+         FootstepNodeSnapData snapData;
+         if (footstepPlannerParameters.getMaximumXYWiggleDistance() > 0.0 || footstepPlannerParameters.getMaximumYawWiggle() > 0.0)
+         {
+            snapData = snapAndWiggler.snapFootstepNode(path.get(i));
+         }
+         else
+         {
+            snapData = snapper.snapFootstepNode(path.get(i));
+         }
+
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
          footstep.getSoleFramePose().set(footstepPose);
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
-            double flatGroundHeight = request.getStanceFootPose().getZ();
+            double flatGroundHeight = startMidFootPose.getZ();
             footstep.getSoleFramePose().setZ(flatGroundHeight);
          }
 
@@ -342,7 +350,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             output.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
          }
 
-         output.getLowLevelGoal().set(goalPose);
+         output.getLowLevelGoal().set(goalMidFootPose);
       }
 
       output.setPlanarRegionsList(request.getPlanarRegionsList());
@@ -543,7 +551,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          double cost = footstepPlanner.getGraph().getCostFromStart(childNode) + distanceAndYawHeuristics.compute(childNode);
-         if (cost < endNodeCost)
+         if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;
             endNodeCost = cost;
@@ -579,28 +587,35 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return validXYDistanceToGoal && validYawDistanceToGoal;
    }
 
-   private void addStartPoseToSnapper(FootstepPlannerRequest request, FootstepNode startNode)
+   private void addFootPosesToSnapper(FootstepPlannerRequest request)
    {
-      Pose3D footPose = request.getStanceFootPose();
-      RigidBodyTransform snapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, footPose);
-      snapper.addSnapData(startNode, new FootstepNodeSnapData(snapTransform));
+      addSnapData(request.getStartFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+      addSnapData(request.getStartFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+      addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+      addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+   }
+
+   private void addSnapData(Pose3D footstepPose, RobotSide side)
+   {
+      FootstepNode footstepNode = new FootstepNode(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
+      FootstepNodeSnapData snapData = new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(footstepNode, footstepPose));
+      snapper.addSnapData(footstepNode, snapData);
+      snapAndWiggler.addSnapData(footstepNode, snapData);
    }
 
    private static FootstepNode createStartNode(FootstepPlannerRequest request)
    {
-      Point3D stancePosition = request.getStanceFootPose().getPosition();
-      double stanceYaw = request.getStanceFootPose().getOrientation().getYaw();
-      RobotSide robotSide = request.getInitialStanceSide();
-      return new FootstepNode(stancePosition.getX(), stancePosition.getY(), stanceYaw, robotSide);
+      RobotSide robotSide = request.getRequestedInitialStanceSide();
+      Pose3D startFootPose = request.getStartFootPoses().get(robotSide);
+      return new FootstepNode(startFootPose.getX(), startFootPose.getY(), startFootPose.getYaw(), robotSide);
    }
 
    private SideDependentList<FootstepNode> createGoalNodes(FootstepPlannerRequest request)
    {
       return new SideDependentList<>(side ->
                                      {
-                                        Pose3D goalPose = new Pose3D(request.getGoalPose());
-                                        goalPose.appendTranslation(0.0, 0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()), 0.0);
-                                        return new FootstepNode(goalPose.getX(), goalPose.getY(), goalPose.getYaw(), side);
+                                        Pose3D goalFootPose = request.getGoalFootPoses().get(side);
+                                        return new FootstepNode(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
                                      });
    }
 }

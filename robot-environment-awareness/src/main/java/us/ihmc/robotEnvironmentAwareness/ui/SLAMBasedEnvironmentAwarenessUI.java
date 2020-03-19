@@ -29,7 +29,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExpor
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
-public class DepthBasedEnvironmentAwarenessUI
+public class SLAMBasedEnvironmentAwarenessUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
 
@@ -58,7 +58,7 @@ public class DepthBasedEnvironmentAwarenessUI
 
    private final StereoVisionPointCloudDataExporter stereoVisionPointCloudDataExporter;
 
-   private DepthBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
+   private SLAMBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
@@ -177,22 +177,22 @@ public class DepthBasedEnvironmentAwarenessUI
       }
    }
 
-   public static DepthBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API,
                                                                 NetworkPorts.REA_MODULE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new DepthBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
+      return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
 
-   public static DepthBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
    {
       Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API,
                                                              host,
                                                              NetworkPorts.REA_MODULE_UI_PORT,
                                                              REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new DepthBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
+      return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
 }

@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.communication;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,8 +11,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -19,6 +23,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -27,6 +32,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
+import java.util.Map;
 
 public class FootstepPlannerMessagerAPI
 {
@@ -71,42 +77,32 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
    public static final Topic<Boolean> EditModeEnabled = topic("EditModeEnabled");
-   public static final Topic<Boolean> StartPositionEditModeEnabled = topic("StartPositionEditModeEnabled");
    public static final Topic<Boolean> GoalPositionEditModeEnabled = topic("GoalPositionEditModeEnabled");
-
-   public static final Topic<Boolean> StartOrientationEditModeEnabled = topic("StartOrientationEditModeEnabled");
    public static final Topic<Boolean> GoalOrientationEditModeEnabled = topic("GoalOrientationEditModeEnabled");
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
-   public static final Topic<Point3D> StartPosition = topic("StartPosition");
-   public static final Topic<Point3D> GoalPosition = topic("GoalPosition");
+   public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
+   public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
+   public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
+   public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");
+   public static final Topic<Pose3DReadOnly> RightFootGoalPose = topic("RightFootGoalPose");
+   public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
+   public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
+   public static final Topic<Point3D> GoalMidFootPosition = topic("GoalMidFootPosition");
+   public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
 
-   public static final Topic<Quaternion> StartOrientation = topic("StartOrientation");
-   public static final Topic<Quaternion> GoalOrientation = topic("GoalOrientation");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
 
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
 
-   public static final Topic<Point3D> LeftFootStartPosition = topic("LeftFootStartPosition");
-   public static final Topic<Point3D> RightFootStartPosition = topic("RightFootStartPosition");
-   public static final Topic<Quaternion> LeftFootStartOrientation = topic("LeftFootStartOrientation");
-   public static final Topic<Quaternion> RightFootStartOrientation = topic("RightFootStartOrientation");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
 
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 
    public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
-
-   public static final Topic<Boolean> EnableNodeChecking = topic("EnableNodeChecking");
-   public static final Topic<Point3D> NodeCheckingPosition = topic("NodeCheckingPosition");
-   public static final Topic<Quaternion> NodeCheckingOrientation = topic("NodeCheckingOrientation");
-   public static final Topic<Boolean> EnableNodeCheckingPositionEditing = topic("EnableNodeCheckingPositionEditing");
-
-   public static final Topic<Boolean> ExportUnitTestDataFile = topic("ExportUnitTestDataFile");
-   public static final Topic<String> ExportUnitTestPath = topic("ExportUnitTestPath");
 
    public static final Topic<List<? extends Pose3DReadOnly>> BodyPathData = topic("BodyPathData");
 
@@ -148,6 +144,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
    public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
+   public static final Topic<Pair<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>>> GraphData = topic("GraphData");
 
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 

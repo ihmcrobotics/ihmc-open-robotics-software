@@ -7,6 +7,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -113,8 +114,9 @@ public class FootstepPlanningModuleLauncher
                                                   if (swingParameterCalculator != null)
                                                   {
                                                      swingParameterCalculator.setPlanarRegionsList(footstepPlanningModule.getRequest().getPlanarRegionsList());
-                                                     swingParameterCalculator.setSwingParameters(footstepPlanningModule.getRequest().getStanceFootPose(),
-                                                                                                 outputStatus.getFootstepDataList());
+                                                     RobotSide initialStanceSide = footstepPlanningModule.getRequest().getRequestedInitialStanceSide();
+                                                     Pose3D initialStancePose = footstepPlanningModule.getRequest().getStartFootPoses().get(initialStanceSide);
+                                                     swingParameterCalculator.setSwingParameters(initialStancePose, outputStatus.getFootstepDataList());
                                                   }
                                                   resultPublisher.publish(outputStatus);
                                                });

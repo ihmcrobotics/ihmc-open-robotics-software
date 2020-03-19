@@ -20,28 +20,13 @@
 
                 <Tab text="Footstep Parameters">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        <children>
-                            <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
-                        </children>
+                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
                     </content>
                 </Tab>
 
                 <Tab text="Visibility Graph Parameters">
                     <content>
                         <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Body Collisions">
-                    <content>
-                        <fx:include fx:id="bodyCollisionCheckingUI" source="BodyCollisionCheckingUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Footstep Costs">
-                    <content>
-                        <fx:include fx:id="footstepPlannerCostsUI" source="FootstepPlannerCostsUI.fxml" />
                     </content>
                 </Tab>
 
@@ -57,21 +42,9 @@
                     </content>
                 </Tab>
 
-                <Tab text="Node checking">
-                    <content>
-                        <fx:include fx:id="footstepNodeCheckingUI" source="FootstepNodeCheckingUI.fxml" />
-                    </content>
-                </Tab>
-
                 <Tab text="Visualization Control">
                     <content>
                         <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Unit Test Exporter">
-                    <content>
-                        <fx:include fx:id="dataExporterAnchorPane" source="FootstepPlannerDataExporterAnchorPane.fxml" />
                     </content>
                 </Tab>
 
