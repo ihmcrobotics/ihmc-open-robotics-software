@@ -78,7 +78,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_humanoid_behavior_node");
+   private final Ros2Node ros2Node;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
@@ -93,7 +93,36 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                       LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo)
          throws IOException
    {
-      this(robotName, footstepPlannerParameters, wholeBodyControllerParameters, robotModelFactory, modelProvider, startYoVariableServer, sensorInfo, false);
+      this(robotName,
+           footstepPlannerParameters,
+           wholeBodyControllerParameters,
+           robotModelFactory,
+           modelProvider,
+           startYoVariableServer,
+           sensorInfo,
+           false,
+           PubSubImplementation.FAST_RTPS);
+   }
+
+   public IHMCHumanoidBehaviorManager(String robotName,
+                                      FootstepPlannerParametersBasics footstepPlannerParameters,
+                                      WholeBodyControllerParameters<?> wholeBodyControllerParameters,
+                                      FullHumanoidRobotModelFactory robotModelFactory,
+                                      LogModelProvider modelProvider,
+                                      boolean startYoVariableServer,
+                                      HumanoidRobotSensorInformation sensorInfo,
+                                      PubSubImplementation pubSubImplementation) throws IOException
+   {
+
+      this(robotName,
+           footstepPlannerParameters,
+           wholeBodyControllerParameters,
+           robotModelFactory,
+           modelProvider,
+           startYoVariableServer,
+           sensorInfo,
+           false,
+           pubSubImplementation);
    }
 
    public static void setAutomaticDiagnosticTimeToWait(double timeToWait)
@@ -101,10 +130,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       runAutomaticDiagnosticTimeToWait = timeToWait;
    }
 
-   private IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
-                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
-                                       LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo,
-                                       boolean runAutomaticDiagnostic)
+   private IHMCHumanoidBehaviorManager(String robotName,
+                                       FootstepPlannerParametersBasics footstepPlannerParameters,
+                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters,
+                                       FullHumanoidRobotModelFactory robotModelFactory,
+                                       LogModelProvider modelProvider,
+                                       boolean startYoVariableServer,
+                                       HumanoidRobotSensorInformation sensorInfo,
+                                       boolean runAutomaticDiagnostic,
+                                       PubSubImplementation pubSubImplementation)
          throws IOException
    {
       LogTools.info("Initializing");
@@ -113,6 +147,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       {
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
+
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
 
       FullHumanoidRobotModel fullRobotModel = robotModelFactory.createFullRobotModel();
 
@@ -506,8 +542,10 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                                                         FootstepPlannerParametersBasics footstepPlannerParameters,
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
-                                                                                        LogModelProvider modelProvider, boolean startYoVariableServer,
-                                                                                        HumanoidRobotSensorInformation sensorInfo, double timeToWait)
+                                                                                        LogModelProvider modelProvider,
+                                                                                        boolean startYoVariableServer,
+                                                                                        HumanoidRobotSensorInformation sensorInfo,
+                                                                                        double timeToWait)
          throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
@@ -518,7 +556,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                                                                 modelProvider,
                                                                                                 startYoVariableServer,
                                                                                                 sensorInfo,
-                                                                                                true);
+                                                                                                true,
+                                                                                                PubSubImplementation.FAST_RTPS);
       return ihmcHumanoidBehaviorManager;
    }
 
