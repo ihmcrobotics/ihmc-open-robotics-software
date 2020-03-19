@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -58,16 +59,16 @@ public class FootholdCropper
    private final OccupancyGridVisualizer measuredVisualizer;
 
    public FootholdCropper(String namePrefix,
-                          ContactableFoot contactableFoot,
+                          ReferenceFrame soleFrame,
+                          List<? extends FramePoint2DReadOnly> defaultContactPoints,
                           FootholdRotationParameters rotationParameters,
                           double dt,
                           YoVariableRegistry parentRegistry,
                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
-      numberOfFootCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(defaultContactPoints));
+      numberOfFootCornerPoints = defaultContactPoints.size();
 
-      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
       shrunkenFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkenFootPolygon", "", soleFrame, 20, registry);
@@ -94,7 +95,7 @@ public class FootholdCropper
       doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
       applyPartialFootholds = new YoBoolean(namePrefix + "ApplyPartialFootholds", registry);
       doPartialFootholdDetection.set(true);
-      applyPartialFootholds.set(false);
+      applyPartialFootholds.set(true);
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
@@ -216,7 +217,7 @@ public class FootholdCropper
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
       // make sure the foot has the right number of contact points
-      controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
+      controllerFootPolygon.setIncludingFrame(getShrunkenFootPolygon());
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, numberOfFootCornerPoints);
       controllerFootPolygonInWorld.setIncludingFrame(controllerFootPolygon);
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
@@ -240,5 +241,10 @@ public class FootholdCropper
 
       shrinkCounter.increment();
       return true;
+   }
+
+   public FrameConvexPolygon2DReadOnly getShrunkenFootPolygon()
+   {
+      return shrunkenFootPolygon;
    }
 }

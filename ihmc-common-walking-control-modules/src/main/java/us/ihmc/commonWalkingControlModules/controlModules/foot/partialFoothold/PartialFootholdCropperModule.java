@@ -1,21 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
 import java.util.EnumMap;
+import java.util.List;
 
 public class PartialFootholdCropperModule
 {
@@ -41,7 +39,7 @@ public class PartialFootholdCropperModule
 
    public PartialFootholdCropperModule(RobotSide side,
                                        MovingReferenceFrame soleFrame,
-                                       ContactableFoot contactableFoot,
+                                       List<? extends FramePoint2DReadOnly> defaultContactPoints,
                                        FootholdRotationParameters rotationParameters,
                                        double dt,
                                        YoVariableRegistry parentRegistry,
@@ -73,7 +71,7 @@ public class PartialFootholdCropperModule
          edgeVisualizer = null;
 
       cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, graphicsRegistry);
-      footholdCropper = new FootholdCropper(side.getLowerCaseName(), contactableFoot, rotationParameters, dt, registry, graphicsRegistry);
+      footholdCropper = new FootholdCropper(side.getLowerCaseName(), soleFrame, defaultContactPoints, rotationParameters, dt, registry, graphicsRegistry);
 
       reset();
    }
@@ -95,7 +93,7 @@ public class PartialFootholdCropperModule
          return;
       }
 
-      FrameLine2DReadOnly lineOfRotation = getLineOfRotation(measuredCoP);
+      FrameLine2DReadOnly lineOfRotation = computeLineOfRotation(measuredCoP);
       isEdgeStable.set(lineOfRotation != null);
       if (!isEdgeStable.getBooleanValue())
          return;
@@ -122,20 +120,35 @@ public class PartialFootholdCropperModule
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
-      if (!shouldShrinkFoothold.getBooleanValue())
-         return false;
-
-      if (!footholdCropper.shouldApplyShrunkenFoothold())
+      if (!shouldApplyShrunkenFoothold())
          return false;
 
       return footholdCropper.applyShrunkenFoothold(contactStateToModify);
    }
 
-   public FrameLine2DReadOnly getLineOfRotation(FramePoint2DReadOnly measuredCoP)
+   boolean shouldApplyShrunkenFoothold()
+   {
+      if (!shouldShrinkFoothold.getBooleanValue())
+         return false;
+
+      return footholdCropper.shouldApplyShrunkenFoothold();
+   }
+
+   public FrameConvexPolygon2DReadOnly getShrunkenFootPolygon()
+   {
+      return footholdCropper.getShrunkenFootPolygon();
+   }
+
+   private FrameLine2DReadOnly computeLineOfRotation(FramePoint2DReadOnly measuredCoP)
    {
       copHistoryEdgeCalculator.compute(measuredCoP);
       copAndVelocityEdgeCalculator.compute(measuredCoP);
 
+      return getLineOfRotation();
+   }
+
+   public FrameLine2DReadOnly getLineOfRotation()
+   {
       if (copHistoryEdgeCalculator.isRotationEdgeTrusted())
          return copHistoryEdgeCalculator.getLineOfRotation();
       if (copAndVelocityEdgeCalculator.isRotationEdgeTrusted())
@@ -192,7 +205,6 @@ public class PartialFootholdCropperModule
       cropVerifier.initialize();
       footholdCropper.reset(footPolygon);
    }
-
 
    public void reset()
    {
