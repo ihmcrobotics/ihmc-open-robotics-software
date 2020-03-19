@@ -1,27 +1,15 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
-import java.io.IOException;
-import java.net.URL;
-
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.UIConnectionHandler;
 
 public class PointCloudAnchorPaneController extends REABasicUIController
 {
-   public static REAUIMessager uiStaticMessager;
    @FXML
    private ToggleButton enableLidarButton;
    @FXML
@@ -66,38 +54,9 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIDepthCloudShow, enableDepthButton.selectedProperty(), true);
-
+      
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
-
-      ihmcSLAMViewer = new SLAMMeshViewer(uiMessager);
-
-      uiStaticMessager = uiMessager;
-      FXMLLoader loader = new FXMLLoader();
-      URL url = getClass().getResource("../../ui/SLAMVisualizerMainPane" + ".fxml");
-      loader.setLocation(url);
-
-      try
-      {
-         BorderPane mainPane = loader.load();
-         View3DFactory view3dFactory = View3DFactory.createSubscene();
-         view3dFactory.addCameraController(true);
-         view3dFactory.addWorldCoordinateSystem(0.3);
-         view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
-         mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
-
-         stage = new Stage();
-         Scene mainScene = new Scene(mainPane, 1000, 800);
-         stage.setScene(mainScene);
-         stage.setOnCloseRequest(event -> ihmcSLAMViewer.stop());
-
-         uiConnectionHandler = new UIConnectionHandler(stage, uiMessager);
-         uiConnectionHandler.start();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
    }
 
    @FXML
@@ -111,7 +70,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    {
       uiMessager.submitMessageInternal(REAModuleAPI.UIStereoVisionClear, true);
    }
-
+   
    @FXML
    public void clearDepth()
    {
@@ -125,7 +84,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       saveUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
    }
-
+   
    @FXML
    public void clearNavigation()
    {
@@ -145,22 +104,5 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       int max = maximumSizeOfPointCloud;
       int amountToStepBy = minimumSizeOfPointCloud;
       return new IntegerSpinnerValueFactory(min, max, initialValue, amountToStepBy);
-   }
-
-   @FXML
-   private SLAMAnchorPaneController slamAnchorPaneController;
-   private SLAMMeshViewer ihmcSLAMViewer;
-   private UIConnectionHandler uiConnectionHandler;
-   private Stage stage;
-
-   @FXML
-   public void openSLAM() throws IOException
-   {
-      uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, true);
-      if (stage != null)
-      {
-         ihmcSLAMViewer.start();
-         stage.show();
-      }
    }
 }
