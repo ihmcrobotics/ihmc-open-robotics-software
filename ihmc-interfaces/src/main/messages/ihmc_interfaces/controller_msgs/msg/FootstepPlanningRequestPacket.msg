@@ -23,6 +23,10 @@ geometry_msgs/Pose goal_left_foot_pose
 geometry_msgs/Pose goal_right_foot_pose
 # Requested initial stance side. If not specified the planner will choose
 byte requested_initial_stance_side 255
+# If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+bool snap_goal_steps true
+# If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+bool abort_if_goal_step_snapping_fails
 
 # Footstep planner type, see above
 byte requested_footstep_planner_type 255
@@ -30,8 +34,10 @@ byte requested_footstep_planner_type 255
 float64 goal_distance_proximity -1.0
 # Acceptable yaw offset from the given goal for the planner to terminate
 float64 goal_yaw_proximity -1.0
-# Timeout in seconds
-float64 timeout
+# Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+float64 timeout 5.0
+# Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+int32 max_iterations -1
 # Best effort timeout in seconds
 float64 best_effort_timeout
 # Max body path length if using body path
