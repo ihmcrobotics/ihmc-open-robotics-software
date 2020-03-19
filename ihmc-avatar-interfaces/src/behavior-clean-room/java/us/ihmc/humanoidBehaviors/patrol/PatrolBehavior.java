@@ -345,9 +345,11 @@ public class PatrolBehavior implements BehaviorInterface
 
       HumanoidReferenceFrames humanoidReferenceFrames = robot.pollHumanoidRobotState();
 
-      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
+//      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
 
-      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
+      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, planarRegionsList);
+
+      helper.publishToUI(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
    private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
