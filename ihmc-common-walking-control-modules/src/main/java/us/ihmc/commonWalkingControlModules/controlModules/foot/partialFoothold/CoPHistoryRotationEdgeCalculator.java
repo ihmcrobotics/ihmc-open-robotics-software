@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
@@ -37,6 +38,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            FootholdRotationParameters rotationParameters,
                                            double dt,
                                            YoVariableRegistry parentRegistry,
+                                           Color color,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
       this(side,
@@ -46,6 +48,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
            rotationParameters.getStableEdgeWindowSize(),
            dt,
            parentRegistry,
+           color,
            graphicsListRegistry);
    }
 
@@ -56,6 +59,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            IntegerProvider stableEdgeWindowSize,
                                            double dt,
                                            YoVariableRegistry parentRegistry,
+                                           Color color,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
@@ -75,7 +79,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                                               registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.BLUE, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 

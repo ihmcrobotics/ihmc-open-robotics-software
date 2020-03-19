@@ -33,6 +33,7 @@ public class CoPAndVelocityRotationEdgeCalculatorTest extends RotationEdgeCalcul
                                                       () -> stableWindowSize,
                                                       dt,
                                                       registry,
+                                                      null,
                                                       null);
    }
 

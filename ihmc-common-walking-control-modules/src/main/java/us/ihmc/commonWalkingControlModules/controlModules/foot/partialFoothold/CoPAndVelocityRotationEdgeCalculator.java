@@ -36,6 +36,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                FootholdRotationParameters rotationParameters,
                                                double dt,
                                                YoVariableRegistry parentRegistry,
+                                               Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this(side,
@@ -47,6 +48,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
            rotationParameters.getStableEdgeWindowSize(),
            dt,
            parentRegistry,
+           color,
            graphicsListRegistry);
    }
 
@@ -59,6 +61,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
                                                YoVariableRegistry parentRegistry,
+                                               Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this(side,
@@ -78,6 +81,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
            stableEdgeWindowSize,
            dt,
            parentRegistry,
+           color,
            graphicsListRegistry);
    }
 
@@ -90,6 +94,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                IntegerProvider stableEdgeWindowSize,
                                                double dt,
                                                YoVariableRegistry parentRegistry,
+                                               Color color,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this.velocityEdgeCalculator = velocityEdgeCalculator;
@@ -113,7 +118,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
                                                               registry);
 
       if (graphicsListRegistry != null)
-         edgeVisualizer = new EdgeVisualizer(namePrefix, Color.RED, registry, graphicsListRegistry);
+         edgeVisualizer = new EdgeVisualizer(namePrefix, color, registry, graphicsListRegistry);
       else
          edgeVisualizer = null;
 
