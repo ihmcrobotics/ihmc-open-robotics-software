@@ -19,6 +19,7 @@ public class FootholdRotationParameters
    private final DoubleProvider stableRotationPositionThreshold;
    private final IntegerProvider stableEdgeWindowSize;
    private final DoubleProvider perpendicularCoPError;
+   private final DoubleProvider distanceFromLineToComputeDesiredCoPOccupancy;
    private final IntegerProvider numberOfDesiredCopsOnCropSide;
    private final DoubleProvider copAreaThreshold;
 
@@ -48,6 +49,7 @@ public class FootholdRotationParameters
       stableEdgeWindowSize = new IntegerParameter(namePrefix + "StableEdgeWindowSize", registry, 5);
       perpendicularCoPError = new DoubleParameter(namePrefix + "PerpendicularCoPErrorThreshold", registry, 0.005);
       numberOfDesiredCopsOnCropSide = new IntegerParameter(namePrefix + "NumberOfDesiredCopsOnCropSide", registry, 2);
+      distanceFromLineToComputeDesiredCoPOccupancy = new DoubleParameter(namePrefix + "DistanceFromLineToComputeDesiredCoPOccupancy", registry, 0.005);
       copAreaThreshold = new DoubleParameter(namePrefix + "CopHullAreaRatioThreshold", registry, 0.9);
 
       namePrefix = "Kinematic_";
@@ -152,6 +154,11 @@ public class FootholdRotationParameters
    public DoubleProvider getPerpendicularCoPErrorThreshold()
    {
       return perpendicularCoPError;
+   }
+
+   public DoubleProvider getDistanceFromLineToComputeDesiredCoPOccupancy()
+   {
+      return distanceFromLineToComputeDesiredCoPOccupancy;
    }
 
    public IntegerProvider getNumberOfDesiredCopsOnCropSide()
