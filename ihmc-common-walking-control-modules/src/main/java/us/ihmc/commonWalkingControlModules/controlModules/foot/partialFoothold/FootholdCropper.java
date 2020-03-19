@@ -216,12 +216,7 @@ public class FootholdCropper
       shiftedLineToPack.getPoint().add(shiftVector);
    }
 
-   public boolean shouldShrinkFoothold()
-   {
-      return shouldShrinkFoothold.getBooleanValue();
-   }
-
-   public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
+   public boolean shouldApplyShrunkenFoothold()
    {
       // if we are not doing partial foothold detection exit
       if (!doPartialFootholdDetection.getBooleanValue())
@@ -240,6 +235,14 @@ public class FootholdCropper
       {
          return false;
       }
+
+      return true;
+   }
+
+   public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
+   {
+      if (!shouldApplyShrunkenFoothold())
+         return false;
 
       // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkenFootPolygon);
