@@ -103,10 +103,6 @@ public class PartialFootholdCropperModule
       return isRotating.getBooleanValue();
    }
 
-   public boolean shouldShrinkFoothold()
-   {
-      return footholdCropper.shouldShrinkFoothold();
-   }
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
