@@ -200,7 +200,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-   private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FrameVector2D currentICPVelocity = new FrameVector2D();
@@ -679,20 +678,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
       this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
-      this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
       this.currentICPVelocity.changeFrame(worldFrame);
 
-      this.yoPerfectCoP.set(this.perfectCoP);
-      this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      this.yoPerfectCoP.setMatchingFrame(perfectCoP);
+      this.yoPerfectCMP.add(yoPerfectCoP, this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
 
@@ -857,6 +854,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
+   /**
+    * This computes the footstep adjustment multiplier. This means that ICP error that is not being compensated for via feedback because of feedback limits
+    * is compensated using some other term. That other term is equal to the adjustment multiplier times the total footstep adjustment.
+    */
    private double computeFootstepAdjustmentMultiplier(double omega0)
    {
       double timeInTransferForShifting = Math
@@ -864,16 +865,17 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
       recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
 
+      // This is the maximum possible multiplier
       double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
 
+      // The recursion multiplier is guaranteed to be between the max and min values. This forces it to interpolate between those two.
       double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
       return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()
    {
-      perfectCoP.set(yoPerfectCoP);
-      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      boolean converged = solver.compute(icpError, yoPerfectCoP, perfectCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
       {
