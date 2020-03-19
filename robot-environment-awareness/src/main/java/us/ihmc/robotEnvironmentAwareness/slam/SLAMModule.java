@@ -6,10 +6,12 @@ import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -67,9 +69,10 @@ public class SLAMModule
    private static final String PLANAR_REGIONS_LIST_TOPIC_SURFIX = "_slam";
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
+   private final AtomicLong latestRobotTimeStamp = new AtomicLong();
+   protected final AtomicReference<StampedPosePacket> sensorPosePacketToPublish = new AtomicReference<>(null);
 
    public SLAMModule(Messager messager, File configurationFile)
    {
@@ -100,14 +103,6 @@ public class SLAMModule
       MessageTopicNameGenerator publisherTopicNameGenerator;
       publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
-
-      // TODO: currently, available for Atlas only.
-      // TODO: put proper topic name of the atlas status message.
-
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           "topic name of the message for atlas", // ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           this::isStationaryStatus);
    }
 
    public void start() throws IOException
@@ -156,16 +151,17 @@ public class SLAMModule
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
 
-   private boolean isStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
+   protected boolean isStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
    {
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
+      latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
 
       if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.01)
       {
-         reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
+         reaMessager.submitMessage(REAModuleAPI.RobotStatus, true);
       }
 
-      return true;
+      return false;
    }
 
    public void updateSLAM()
@@ -230,6 +226,21 @@ public class SLAMModule
          latestStereoMessage.getSensorPosition().set(latestFrame.getSensorPose().getTranslation());
          latestStereoMessage.getSensorOrientation().set(latestFrame.getSensorPose().getRotation());
          reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+
+         StampedPosePacket posePacket = new StampedPosePacket();
+         posePacket.setTimestamp(latestRobotTimeStamp.get());
+         int maximumBufferOfQueue = 10;
+         if (pointCloudQueue.size() >= maximumBufferOfQueue)
+         {
+            posePacket.setConfidenceFactor(0.0);
+         }
+         else
+         {
+            //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
+            posePacket.setConfidenceFactor(1.0);
+         }
+         posePacket.getPose().set(latestFrame.getSensorPose());
+         sensorPosePacketToPublish.set(posePacket);
       }
    }
 

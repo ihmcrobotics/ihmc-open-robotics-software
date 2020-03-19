@@ -60,11 +60,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
    {
       if (walking)
       {
-         stationaryFlag.setStyle("-fx-background-color: green;");
+         stationaryFlag.setStyle("-fx-background-color: red;");
       }
       else
       {
-         stationaryFlag.setStyle("-fx-background-color: red;");
+         stationaryFlag.setStyle("-fx-background-color: green;");
       }
    }
 
