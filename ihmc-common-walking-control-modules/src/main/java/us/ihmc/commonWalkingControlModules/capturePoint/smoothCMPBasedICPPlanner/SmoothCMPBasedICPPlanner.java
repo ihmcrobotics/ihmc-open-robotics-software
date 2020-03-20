@@ -1132,12 +1132,12 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          timeInCurrentState.set(time - initialTime.getDoubleValue());
          timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
-         double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
+//         double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
 
-         referenceICPGenerator.compute(timeInCurrentState);
-         referenceCoMGenerator.compute(timeInCurrentState);
-         referenceCoPGenerator.update(timeInCurrentState);
-         referenceCMPGenerator.update(timeInCurrentState);
+         referenceICPGenerator.compute(timeInCurrentState.getDoubleValue());
+         referenceCoMGenerator.compute(timeInCurrentState.getDoubleValue());
+         referenceCoPGenerator.update(timeInCurrentState.getDoubleValue());
+         referenceCMPGenerator.update(timeInCurrentState.getDoubleValue());
 
          referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
          referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
