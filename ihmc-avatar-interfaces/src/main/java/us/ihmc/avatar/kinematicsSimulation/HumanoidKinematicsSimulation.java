@@ -300,6 +300,7 @@ public class HumanoidKinematicsSimulation
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
+                                                                         100000,
                                                                          0.01);
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
