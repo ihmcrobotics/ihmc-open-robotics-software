@@ -207,10 +207,15 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
                OneDoFJointBasics otherJoint = jointsAtLimit.get(j);
                ActiveLimit otherActiveLimit = activeLimits.get(j);
                double a = responseCalculator.getJointTwistChange(otherJoint);
+               /*
+                * The LCP solver only handles positive impulse/velocity, so we mirror the problem for joints on the
+                * upper limit which need negative impulse/velocity.
+                */
                a = activeLimit.transform(otherActiveLimit.transform(a));
                solverInput_A.set(j, i, a);
                solverInput_A.set(i, j, a); // Using symmetry property
             }
+
             responseCalculator.reset();
          }
          isInertiaUpToDate = true;
