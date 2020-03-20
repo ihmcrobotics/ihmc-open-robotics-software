@@ -73,10 +73,9 @@ public class FootstepPlanningModuleTest
                             "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
                             + ", # of statuses=" + numberOfStatusesReceived.getValue());
    }
-
+   
    @Test
-   @Disabled
-   public void testGoalProximity()
+   public void testGoalProximityWhenGoalIsUnreachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
       planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
@@ -94,6 +93,31 @@ public class FootstepPlanningModuleTest
       request.setPlanBodyPath(false);
       request.setGoalDistanceProximity(0.65);
       request.setGoalYawProximity(0.4);
+      request.setTimeout(2.0);
+
+      FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
+      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+   }
+
+   @Test
+   public void testGoalProximityWhenGoalIsReachable()
+   {
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(6.0, 6.0);
+
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      Pose3D initialMidFootPose = new Pose3D();
+      Pose3D goalMidFootPose = new Pose3D(2.0, 0.0, 0.0, 0.5 * Math.PI, 0.0, 0.0);
+      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
+      request.setPlanBodyPath(false);
+      request.setGoalDistanceProximity(0.3);
+      request.setGoalYawProximity(0.25 * Math.PI);
       request.setTimeout(2.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
