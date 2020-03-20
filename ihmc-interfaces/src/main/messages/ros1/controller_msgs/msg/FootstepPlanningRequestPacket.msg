@@ -78,4 +78,8 @@ int32 planner_request_id
 # Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
 geometry_msgs/Pose[] body_path_waypoints
 
+# Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+# For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+bool generate_log
+
 
