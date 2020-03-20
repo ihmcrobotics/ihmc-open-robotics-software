@@ -199,23 +199,12 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       }
       else
       {
-         double xyStiffness = 50000.0;
-         double zStiffness = 2000.0;
-         double xyZeta = 4.5;
-         double zZeta = 16.5;
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
-         double xyDamping = GainCalculator.computeDerivativeGain(xyStiffness * scale, xyZeta);
-         double zDamping = GainCalculator.computeDerivativeGain(zStiffness * scale, zZeta);
-         linearGroundContactModel.setZStiffness(zStiffness);
-         linearGroundContactModel.setZDamping(zDamping);
-         linearGroundContactModel.setXYStiffness(xyStiffness);
-         linearGroundContactModel.setXYDamping(xyDamping);
 
          linearGroundContactModel.setZStiffness(2000.0 * scale);
          linearGroundContactModel.setZDamping(1500.0 * scale);
          linearGroundContactModel.setXYStiffness(50000.0 * scale);
          linearGroundContactModel.setXYDamping(2000.0 * scale);
-
       }
    }
 
