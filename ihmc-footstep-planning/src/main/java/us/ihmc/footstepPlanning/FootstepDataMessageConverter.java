@@ -121,6 +121,11 @@ public class FootstepDataMessageConverter
       return footstepPlan;
    }
 
+   public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepDataListMessage footstepDataListMessage)
+   {
+      return reduceFootstepPlanForUIMessager(convertToFootstepPlan(footstepDataListMessage));
+   }
+
    public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepPlan footstepPlan)
    {
       ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();

@@ -3,7 +3,9 @@ package us.ihmc.avatar.kinematicsSimulation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -29,15 +31,16 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 public class IntraprocessYoVariableLogger
 {
+   private static final String INTRAPROCESS_LOG_POSTFIX = "_IntraprocessLogger";
    public static final String PROPERTY_FILE = "robotData.log";
    public static final String HANDSHAKE_FILENAME = "handshake.yaml";
    public static final String DATA_FILENAME = "robotData.bsz";
@@ -45,8 +48,8 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
+   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs");
    private final String timestamp;
-   private final Path ihmcFolder = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
@@ -66,12 +69,15 @@ public class IntraprocessYoVariableLogger
                                        YoVariableRegistry registry,
                                        RigidBodyBasics rootBody,
                                        YoGraphicsListRegistry yoGraphicsListRegistry,
-                                       double dt)
+                                       int maxTicksToRecord,
+                                       double dt,
+                                       Path incomingLogsFolder)
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
-      logFolder = ihmcFolder.resolve(timestamp + "_Log");
+      logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
+      deleteOldLogs(incomingLogsFolder, 10);
 
       RegistrySendBufferBuilder registrySendBufferBuilder = new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry);
 
@@ -152,7 +158,7 @@ public class IntraprocessYoVariableLogger
          numberOfJointStates += JointState.getNumberOfVariables(joint.getType());
       }
 
-      int stateVariables = 1 + 9876 + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
+      int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
       LogTools.info("Buffer size: {}", bufferSize);
       LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
@@ -239,6 +245,24 @@ public class IntraprocessYoVariableLogger
       catch (IOException e)
       {
          e.printStackTrace();
+      }
+   }
+
+   public void deleteOldLogs(Path incomingLogsFolder, int numberOflogsToKeep)
+   {
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      PathTools.walkFlat(incomingLogsFolder, (path, type) -> {
+         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(INTRAPROCESS_LOG_POSTFIX))
+            sortedSet.add(path);
+         return FileVisitResult.CONTINUE;
+      });
+
+      while (sortedSet.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedSet.remove(earliestLogDirectory);
       }
    }
 

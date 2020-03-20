@@ -29,7 +29,7 @@ mainDependencies {
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
    }
-   api("us.ihmc:ihmc-commons:0.28.0")
+   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
    api("us.ihmc:simulation-construction-set:0.14.0")
    api("us.ihmc:ihmc-graphics-description:0.14.1")
@@ -56,7 +56,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.28.0")
+   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }

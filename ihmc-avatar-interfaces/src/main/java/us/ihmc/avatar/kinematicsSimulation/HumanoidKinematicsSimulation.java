@@ -65,6 +65,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,9 +117,9 @@ public class HumanoidKinematicsSimulation
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
 
-   public static void create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
+   public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
-      new HumanoidKinematicsSimulation(robotModel, kinematicsSimulationParameters);
+      return new HumanoidKinematicsSimulation(robotModel, kinematicsSimulationParameters);
    }
 
    public HumanoidKinematicsSimulation(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
@@ -295,12 +296,23 @@ public class HumanoidKinematicsSimulation
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
+         Path incomingLogsDirectory;
+         if (kinematicsSimulationParameters.getIncomingLogsDirectory() == null)
+         {
+            incomingLogsDirectory = IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY;
+         }
+         else
+         {
+            incomingLogsDirectory = kinematicsSimulationParameters.getIncomingLogsDirectory();
+         }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
-                                                                         0.01);
+                                                                         100000,
+                                                                         0.01,
+                                                                         incomingLogsDirectory);
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
