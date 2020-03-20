@@ -145,7 +145,7 @@ public class RobotJointLimitImpulseBasedCalculatorTest
             MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
             List<ActiveLimit> activeLimits = calculator.getActiveLimits();
-            List<OneDoFJointBasics> jointsAtLimit = calculator.getJointsAtLimit();
+            List<OneDoFJointBasics> jointsAtLimit = calculator.getJointTargets();
 
             for (int j = 0; j < jointsAtLimit.size(); j++)
             {

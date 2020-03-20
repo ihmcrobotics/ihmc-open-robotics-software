@@ -3,9 +3,11 @@ package us.ihmc.robotics.physics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 
@@ -51,10 +53,18 @@ public class MultiContactImpulseCalculator
 
       for (ImpulseBasedConstraintCalculator calculator : calculators)
       {
-         CombinedRigidBodyTwistProviders externalRigidBodyTwistModifier = calculators.stream().filter(other -> other != calculator)
-                                                                                     .collect(CombinedRigidBodyTwistProviders.collectFromCalculator(rootFrame));
-         CombinedJointStateProviders externalJointTwistModifier = calculators.stream().filter(other -> other != calculator)
-                                                                             .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
+         List<ImpulseBasedConstraintCalculator> otherCalculators = calculators.stream().filter(other -> other != calculator).collect(Collectors.toList());
+
+         List<? extends RigidBodyBasics> rigidBodyTargets = otherCalculators.stream().map(ImpulseBasedConstraintCalculator::getRigidBodyTargets)
+                                                                            .flatMap(List::stream).collect(Collectors.toList());
+         List<? extends JointBasics> jointTargets = otherCalculators.stream().map(ImpulseBasedConstraintCalculator::getJointTargets).flatMap(List::stream)
+                                                                    .collect(Collectors.toList());
+         calculator.setExternalTargets(rigidBodyTargets, jointTargets);
+
+         CombinedRigidBodyTwistProviders externalRigidBodyTwistModifier = otherCalculators.stream()
+                                                                                          .collect(CombinedRigidBodyTwistProviders.collectFromCalculator(rootFrame));
+         CombinedJointStateProviders externalJointTwistModifier = otherCalculators.stream()
+                                                                                  .collect(CombinedJointStateProviders.collectFromCalculator(JointStateType.VELOCITY));
          calculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
       }
    }
@@ -68,6 +78,8 @@ public class MultiContactImpulseCalculator
       }
       else
       {
+         calculators.forEach(ImpulseBasedConstraintCalculator::initialize);
+
          double alpha = 1.0;
          double maxUpdateMagnitude = Double.POSITIVE_INFINITY;
 
@@ -92,11 +104,10 @@ public class MultiContactImpulseCalculator
                            + contactCalculator.isContactClosing() + ", impulse update: " + contactCalculator.getImpulseUpdate() + ", velocity update: "
                            + contactCalculator.getVelocityUpdate());
                   }
-                  else if (calculator instanceof OneDoFJointLimitImpulseBasedCalculator)
+                  else
                   {
-                     OneDoFJointLimitImpulseBasedCalculator jointCalculator = (OneDoFJointLimitImpulseBasedCalculator) calculator;
-                     System.out.println("Calc index: " + i + ", active: " + jointCalculator.isConstraintActive() + ", impulse update: "
-                           + jointCalculator.getImpulseUpdate() + ", velocity update: " + jointCalculator.getVelocityUpdate());
+                     System.out.println("Calc index: " + i + ", active: " + calculator.isConstraintActive() + ", impulse update: "
+                           + calculator.getImpulseUpdate() + ", velocity update: " + calculator.getVelocityUpdate());
                   }
                }
                maxUpdateMagnitude = Math.max(maxUpdateMagnitude, updateMagnitude);

@@ -1,16 +1,22 @@
 package us.ihmc.robotics.physics;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -19,9 +25,11 @@ import us.ihmc.mecano.algorithms.MultiBodyResponseCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialImpulse;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
 
@@ -37,10 +45,9 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private double springConstant = 5.0;
+   private double springConstant = 30.0;
 
    private boolean isInitialized = false;
-   private boolean isInertiaUpToDate = false;
    private boolean isImpulseZero = false;
    private boolean isContactClosing = false;
 
@@ -92,6 +99,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    private CollisionResult collisionResult;
    private RigidBodyTwistProvider externalRigidBodyTwistModifier;
+   private final ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifierA, rigidBodyTwistModifierB;
+   private final ImpulseBasedJointTwistProvider jointTwistModifierA, jointTwistModifierB;
 
    public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt,
                                          ForwardDynamicsCalculator forwardDynamicsCalculatorA, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
@@ -132,6 +141,20 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          responseCalculatorB = new MultiBodyResponseCalculator(forwardDynamicsCalculatorB);
       else
          responseCalculatorB = null;
+
+      rigidBodyTwistModifierA = new ImpulseBasedRigidBodyTwistProvider(rootFrame, rootA);
+      jointTwistModifierA = new ImpulseBasedJointTwistProvider(rootA);
+
+      if (forwardDynamicsCalculatorB != null)
+      {
+         rigidBodyTwistModifierB = new ImpulseBasedRigidBodyTwistProvider(rootFrame, rootB);
+         jointTwistModifierB = new ImpulseBasedJointTwistProvider(rootB);
+      }
+      else
+      {
+         rigidBodyTwistModifierB = null;
+         jointTwistModifierB = null;
+      }
    }
 
    public void setSpringConstant(double springConstant)
@@ -153,6 +176,23 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public void setExternalTwistModifier(RigidBodyTwistProvider externalRigidBodyTwistModifier)
    {
       this.externalRigidBodyTwistModifier = externalRigidBodyTwistModifier;
+   }
+
+   @Override
+   public void setExternalTargets(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
+   {
+      rigidBodyTwistModifierA.clear(3);
+      jointTwistModifierA.clear(3);
+      rigidBodyTwistModifierA.addAll(rigidBodyTargets);
+      jointTwistModifierA.addAll(jointTargets);
+
+      if (rootB != null)
+      {
+         rigidBodyTwistModifierB.clear(3);
+         jointTwistModifierB.clear(3);
+         rigidBodyTwistModifierB.addAll(rigidBodyTargets);
+         jointTwistModifierB.addAll(jointTargets);
+      }
    }
 
    @Override
@@ -185,8 +225,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          noImpulseVelocityB.changeFrame(contactFrame);
       }
 
-      isInertiaUpToDate = false;
       isInitialized = true;
+      updateInertia();
    }
 
    static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
@@ -255,6 +295,12 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          contactVelocityChange.sub(contactVelocity, previousContactVelocity);
          previousContactVelocity.set(contactVelocity);
       }
+      // TODO Move the spring stuff to before the test to update isContactClosing
+      collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
+      collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
+      collisionPositionTerm.scale(springConstant);
+      collisionPositionTerm.changeFrame(contactVelocity.getReferenceFrame());
+      contactVelocity.sub(collisionPositionTerm);
 
       impulseA.setToZero(bodyFrameA, contactFrame);
 
@@ -262,31 +308,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
-        // TODO Move the spring stuff to before the test to update isContactClosing
-         collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
-         collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
-         collisionPositionTerm.scale(springConstant);
-         collisionPositionTerm.changeFrame(contactVelocity.getReferenceFrame());
-         contactVelocity.sub(collisionPositionTerm);
-
-         if (!isInertiaUpToDate)
-         {
-            // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
-            responseCalculatorA.computeRigidBodyApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
-
-            if (forwardDynamicsCalculatorB != null)
-            {
-               responseCalculatorB.computeRigidBodyApparentLinearInertiaInverse(contactingBodyB, contactFrame, inverseApparentInertiaB);
-               CommonOps.add(inverseApparentInertiaA, inverseApparentInertiaB, M_inv);
-            }
-            else
-            {
-               M_inv.set(inverseApparentInertiaA);
-            }
-
-            isInertiaUpToDate = true;
-         }
-
          contactVelocity.get(c);
          LinearSolver<DenseMatrix64F> solver;
          if (CommonOps.det(M_inv) > 1.0e-6)
@@ -332,30 +353,91 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          isImpulseZero = impulseA.getLinearPart().length() < 1.0e-10;
       }
 
-
       if (isImpulseZero)
       {
-         responseCalculatorA.reset();
+         rigidBodyTwistModifierA.setImpulseToZero();
+         jointTwistModifierA.setImpulseToZero();
 
-         if (responseCalculatorB != null)
+         if (rootB != null)
          {
             impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
-            responseCalculatorB.reset();
+            rigidBodyTwistModifierB.setImpulseToZero();
+            jointTwistModifierB.setImpulseToZero();
          }
       }
       else
       {
-         responseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
+         rigidBodyTwistModifierA.setImpulse(impulseA.getLinearPart());
+         jointTwistModifierA.setImpulse(impulseA.getLinearPart());
 
-         if (responseCalculatorB != null)
+         if (rootB != null)
          {
             impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
             impulseB.negate();
-            responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
+            rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart());
+            jointTwistModifierB.setImpulse(impulseB.getLinearPart());
          }
       }
 
       previousImpulseA.set(impulseA.getLinearPart());
+   }
+
+   private void updateInertia()
+   {
+      // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
+      computeApparentInertiaInverse(contactingBodyA, responseCalculatorA, rigidBodyTwistModifierA, jointTwistModifierA, inverseApparentInertiaA);
+      //            responseCalculatorA.computeRigidBodyApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
+
+      if (forwardDynamicsCalculatorB != null)
+      {
+         computeApparentInertiaInverse(contactingBodyB, responseCalculatorB, rigidBodyTwistModifierB, jointTwistModifierB, inverseApparentInertiaB);
+         //               responseCalculatorB.computeRigidBodyApparentLinearInertiaInverse(contactingBodyB, contactFrame, inverseApparentInertiaB);
+         CommonOps.add(inverseApparentInertiaA, inverseApparentInertiaB, M_inv);
+      }
+      else
+      {
+         M_inv.set(inverseApparentInertiaA);
+      }
+   }
+
+   private final SpatialImpulse testImpulse = new SpatialImpulse();
+   private final Twist testTwist = new Twist();
+
+   private void computeApparentInertiaInverse(RigidBodyBasics body, MultiBodyResponseCalculator calculator,
+                                              ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifierToUpdate,
+                                              ImpulseBasedJointTwistProvider jointTwistModifierToUpdate, DenseMatrix64F inertiaMatrixToPack)
+   {
+      calculator.reset();
+      inertiaMatrixToPack.reshape(3, 3);
+      RigidBodyTwistProvider twistChangeProvider = calculator.getTwistChangeProvider();
+
+      testImpulse.setBodyFrame(body.getBodyFixedFrame());
+      testImpulse.setReferenceFrame(contactFrame);
+
+      for (int axis = 0; axis < 3; axis++)
+      {
+         testImpulse.set(null, Axis.values[axis], EuclidCoreTools.origin3D);
+         if (!calculator.applyRigidBodyImpulse(body, testImpulse))
+            throw new IllegalStateException("Something went wrong with the response calculator");
+
+         testTwist.setIncludingFrame(twistChangeProvider.getTwistOfBody(body));
+         testTwist.changeFrame(contactFrame);
+         testTwist.getLinearPart().get(0, axis, inertiaMatrixToPack);
+
+         for (RigidBodyBasics externalTarget : rigidBodyTwistModifierToUpdate.getRigidBodies())
+         {
+            DenseMatrix64F externalInertiaMatrix = rigidBodyTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
+            twistChangeProvider.getTwistOfBody(externalTarget).get(0, axis, externalInertiaMatrix);
+         }
+
+         for (JointBasics externalTarget : jointTwistModifierToUpdate.getJoints())
+         {
+            DenseMatrix64F externalInertiaMatrix = jointTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
+            externalInertiaMatrix.set(calculator.getJointTwistChange(externalTarget));
+         }
+
+         calculator.reset();
+      }
    }
 
    @Override
@@ -423,7 +505,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public JointStateProvider getJointTwistChangeProvider(int index)
    {
-      return index == 0 ? JointStateProvider.toJointTwistProvider(responseCalculatorA) : JointStateProvider.toJointTwistProvider(responseCalculatorB);
+      return index == 0 ? jointTwistModifierA : jointTwistModifierB;
    }
 
    @Override
@@ -444,20 +526,29 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    public RigidBodyTwistProvider getTwistChangeProviderA()
    {
-      return responseCalculatorA.getTwistChangeProvider();
+      return rigidBodyTwistModifierA;
    }
 
    public RigidBodyTwistProvider getTwistChangeProviderB()
    {
-      if (responseCalculatorB != null)
-         return responseCalculatorB.getTwistChangeProvider();
+      if (rootB != null)
+         return rigidBodyTwistModifierB;
       else
          return null;
    }
 
    public DenseMatrix64F getJointVelocityChangeA()
    {
-      return isImpulseZero ? null : responseCalculatorA.propagateImpulse();
+      if (!isConstraintActive())
+         return null;
+
+      DenseMatrix64F response = responseCalculatorA.propagateImpulse();
+
+      if (response != null)
+         return response;
+
+      responseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
+      return responseCalculatorA.propagateImpulse();
    }
 
    public RigidBodyBasics getContactingBodyB()
@@ -472,9 +563,16 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    public DenseMatrix64F getJointVelocityChangeB()
    {
-      if (responseCalculatorB == null)
+      if (rootB == null || !isConstraintActive())
          return null;
-      return isImpulseZero ? null : responseCalculatorB.propagateImpulse();
+
+      DenseMatrix64F response = responseCalculatorB.propagateImpulse();
+
+      if (response != null)
+         return response;
+
+      responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
+      return responseCalculatorB.propagateImpulse();
    }
 
    public SpatialImpulseReadOnly getContactImpulseA()
@@ -490,6 +588,21 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public double getCoefficientOfFriction()
    {
       return coefficientOfFriction;
+   }
+
+   @Override
+   public List<? extends JointBasics> getJointTargets()
+   {
+      return Collections.emptyList();
+   }
+
+   @Override
+   public List<? extends RigidBodyBasics> getRigidBodyTargets()
+   {
+      if (rootB == null)
+         return Collections.singletonList(contactingBodyA);
+      else
+         return Arrays.asList(contactingBodyA, contactingBodyB);
    }
 
    public void printForUnitTest()

@@ -1,8 +1,11 @@
 package us.ihmc.robotics.physics;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 
@@ -44,7 +47,7 @@ public interface ImpulseBasedConstraintCalculator
    {
 
    }
-   
+
    double getDT();
 
    int getNumberOfRobotsInvolved();
@@ -56,4 +59,10 @@ public interface ImpulseBasedConstraintCalculator
    RigidBodyBasics getRootBody(int index);
 
    DenseMatrix64F getJointVelocityChange(int index);
+
+   void setExternalTargets(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets);
+
+   List<? extends RigidBodyBasics> getRigidBodyTargets();
+
+   List<? extends JointBasics> getJointTargets();
 }
