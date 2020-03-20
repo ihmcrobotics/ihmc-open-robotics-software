@@ -76,8 +76,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupKinematicsToolboxModule(parameters.isVisualizeKinematicsToolboxModule());
       if (parameters.isUseKinematicsPlanningToolboxModule())
          humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
-      if (parameters.isUseKinematicsPlanningToolboxModule())
-         humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
@@ -285,12 +283,14 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public FootstepPlanningModule setupFootstepPlanningToolboxModule(AdaptiveSwingParameters adaptiveSwingParameters, boolean automaticallySaveLogs)
    {
+	   
       checkIfModuleCanBeCreated(FootstepPlanningModule.class);
 
       try
       {
          FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS, adaptiveSwingParameters, automaticallySaveLogs);
          modulesToClose.add(module);
+
          return module;
       }
       catch (Throwable e)
