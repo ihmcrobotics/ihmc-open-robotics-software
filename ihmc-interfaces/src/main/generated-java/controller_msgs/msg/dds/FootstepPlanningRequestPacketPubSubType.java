@@ -79,6 +79,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -146,6 +148,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPathWaypoints().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -187,6 +192,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getBodyPathWaypoints());else
           throw new RuntimeException("body_path_waypoints field exceeds the maximum length");
 
+      cdr.write_type_7(data.getGenerateLog());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
@@ -223,6 +230,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setPlannerRequestId(cdr.read_type_2());
       	
       cdr.read_type_e(data.getBodyPathWaypoints());	
+      data.setGenerateLog(cdr.read_type_7());
+      	
 
    }
 
@@ -253,6 +262,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_e("body_path_waypoints", data.getBodyPathWaypoints());
+      ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
    @Override
@@ -282,6 +292,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       ser.read_type_e("body_path_waypoints", data.getBodyPathWaypoints());
+      data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlanningRequestPacket src, controller_msgs.msg.dds.FootstepPlanningRequestPacket dest)
