@@ -107,7 +107,7 @@ public class SLAMModule
       MessageTopicNameGenerator publisherTopicNameGenerator;
       publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
-      
+
       robotStatus = reaMessager.createInput(REAModuleAPI.RobotStatus, false);
    }
 
@@ -159,7 +159,6 @@ public class SLAMModule
 
    protected void updateStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
    {
-      System.out.println("hello configuration");
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
       latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
 
@@ -237,7 +236,7 @@ public class SLAMModule
          latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
          reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
 
-         if(estimatedPelvisPublisher != null)
+         if (estimatedPelvisPublisher != null)
          {
             StampedPosePacket posePacket = new StampedPosePacket();
             posePacket.setTimestamp(latestRobotTimeStamp.get());
@@ -251,8 +250,8 @@ public class SLAMModule
                //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
                posePacket.setConfidenceFactor(1.0);
             }
-            RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPose);
-            sensorPoseToPelvisTransformer.transform(estimatedPelvisPose);
+            RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
+            estimatedPelvisPose.preMultiply(sensorPose);
             posePacket.getPose().set(estimatedPelvisPose);
             reaMessager.submitMessage(REAModuleAPI.PelvisFrameState, posePacket);
             estimatedPelvisPublisher.publish(posePacket);
