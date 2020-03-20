@@ -8,19 +8,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.Lists;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
@@ -248,9 +250,19 @@ public class PatrolBehavior implements BehaviorInterface
 
       PlanarRegionsListMessage latestPlanarRegionList = rea.getLatestPlanarRegionsListMessage();
 
-      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(midFeetZUpPose,
-                                                                          new FramePose3D(waypointManager.peekNextPose()),
-                                                                          latestPlanarRegionList);
+      FramePose3DReadOnly start = midFeetZUpPose;
+      FramePose3D goal = new FramePose3D(waypointManager.peekNextPose());
+      DefaultFootstepPlannerParameters defaultFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
+      {
+         defaultFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
+      }
+      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters);
+   }
+
+   private static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
+   {
+      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
    private void doPlanStateAction(double timeInState)
@@ -333,7 +345,23 @@ public class PatrolBehavior implements BehaviorInterface
 
       HumanoidReferenceFrames humanoidReferenceFrames = robot.pollHumanoidRobotState();
 
-      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, swingOverPlanarRegions, planarRegionsList);
+//      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
+
+      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, planarRegionsList);
+
+      helper.publishToUI(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
+   }
+
+   private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
+   {
+      FramePose3D midFeetZUpPose = new FramePose3D();
+      midFeetZUpPose.setFromReferenceFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
+
+      FootstepDataMessage footstep = footstepPlan.getFootstepDataList().get(footstepPlan.getFootstepDataList().size() - 1);
+
+      double distance = midFeetZUpPose.getPositionDistance(footstep.getLocation());
+
+      return distance < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
    private void doWalkStateAction(double timeInState)
@@ -360,7 +388,7 @@ public class PatrolBehavior implements BehaviorInterface
             // next waypoint is far, gather more data to increase robustness
             FramePose3DReadOnly midFeetZUpPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
-            PlanTravelDistance planType = RemoteFootstepPlannerInterface.decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
+            PlanTravelDistance planType = decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
 
          // perceive everytime when updownenabled
             if (upDownExplorationEnabled.get() || (planType == PlanTravelDistance.FAR))

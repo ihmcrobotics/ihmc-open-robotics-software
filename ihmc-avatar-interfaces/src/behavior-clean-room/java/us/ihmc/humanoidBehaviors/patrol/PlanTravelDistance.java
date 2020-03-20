@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
+package us.ihmc.humanoidBehaviors.patrol;
 
 public enum PlanTravelDistance
 {

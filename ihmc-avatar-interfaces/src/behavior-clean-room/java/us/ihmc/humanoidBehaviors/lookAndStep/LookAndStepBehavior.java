@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import com.google.common.collect.Lists;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -270,16 +271,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       }
 
       LogTools.info("Requesting walk");
-      boolean swingOverPlanarRegions = true;
       double swingTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.swingTime);
       double transferTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.transferTime);
-      walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
-                                                                                                                swingTime,
-                                                                                                                transferTime,
-                                                                                                                ExecutionMode.OVERRIDE),
-                                                    robot.pollHumanoidRobotState(),
-                                                    swingOverPlanarRegions,
-                                                    environmentMap.getLatestCombinedRegionsList());
+      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
+                                                                                                                    swingTime,
+                                                                                                                    transferTime,
+                                                                                                                    ExecutionMode.OVERRIDE);
+      walkingStatusNotification = robot.requestWalk(footstepDataListMessage, robot.pollHumanoidRobotState(), environmentMap.getLatestCombinedRegionsList());
+
+      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
    private boolean transitionFromStep(double timeInState)

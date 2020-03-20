@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to  convert weights and gains into the actual objects for the quadratic program.
@@ -240,9 +241,7 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
             MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
          }
 
@@ -256,9 +255,7 @@ public class ICPQPInputCalculator
 
             if (indexHandler.useStepAdjustment())
             {
-               MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-               MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
                MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             }
          }
@@ -270,10 +267,8 @@ public class ICPQPInputCalculator
 
             if (indexHandler.useStepAdjustment())
             {
-               MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor );
-
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCoPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
                MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
                MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -291,12 +286,10 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
             if (indexHandler.hasCMPFeedbackTask())
                MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getCMPFeedbackIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
-            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -313,9 +306,7 @@ public class ICPQPInputCalculator
 
          if (indexHandler.useStepAdjustment())
          {
-            MatrixTools.setDiagonal(identity, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
-
-            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
+            MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, footstepRecursionMultiplier / footstepAdjustmentSafetyFactor);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -454,21 +445,10 @@ public class ICPQPInputCalculator
 
    private final DenseMatrix64F aTb = new DenseMatrix64F(6, 6);
 
-   private void multAddInner(DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
-   {
-      quadraticMultAddTransA(jac, weight, jac, resultToPack);
-   }
 
    private void multAddInner(double scalar, DenseMatrix64F jac, DenseMatrix64F weight, DenseMatrix64F resultToPack)
    {
       quadraticMultAddTransA(scalar, jac, weight, jac, resultToPack);
-   }
-
-   private void quadraticMultAddTransA(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)
-   {
-      aTb.reshape(a.getNumCols(), b.getNumCols());
-      CommonOps.multTransA(a, b, aTb);
-      CommonOps.multAdd(aTb, c, resultToPack);
    }
 
    private void quadraticMultAddTransA(double scalar, DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F resultToPack)

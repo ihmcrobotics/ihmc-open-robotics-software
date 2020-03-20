@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="200" prefHeight="1000.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController">
+   <children>
+	      <VBox alignment="TOP_CENTER" layoutX="-5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+	         <children>
+	            <VBox prefWidth="150.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+	               <children>
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Visualize" textAlignment="CENTER">
+	                     <font>
+	                        <Font name="System Bold" size="14.0" />
+	                     </font>
+	                  </Label>
+	                  <ToggleButton fx:id="enableSLAMButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable" />
+	                  <TextField fx:id="queuedBufferSize" alignment="CENTER" editable="false" text="0" />
+	                  <TextField fx:id="slamStatus" alignment="CENTER" editable="false" />
+	                  <ToggleButton fx:id="latestFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Latest Frame" textAlignment="CENTER" />
+	                  <ToggleButton fx:id="octreeMapEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Octree Map" textAlignment="CENTER" />
+	                  <ToggleButton fx:id="sensorFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Sensor Frame" textAlignment="CENTER" />
+	                  <ToggleButton fx:id="planarRegionsEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Planar Regions" textAlignment="CENTER" />
+	                  <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
+	               </children>
+	            </VBox>
+	            <VBox prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+	               <children>
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Parameters" textAlignment="CENTER">
+	                     <font>
+	                        <Font name="System Bold" size="14.0" />
+	                     </font>
+	                  </Label>
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="source points" textAlignment="CENTER" />
+	                  <Slider fx:id="sourcePointsSlider" blockIncrement="50.0" majorTickUnit="50.0" max="1000.0" min="100.0" minorTickCount="10" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="300.0" />
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="icp searching size" textAlignment="CENTER" />
+	                  <Slider fx:id="searchingSizeSlider" blockIncrement="1.0" majorTickUnit="2.0" max="10.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0" />
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum overlapped ratio (%)" textAlignment="CENTER" />
+	                  <Slider fx:id="minimumOverlappedRatioSlider" majorTickUnit="0.1" max="1.0" min="0.1" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.4" />
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="window margin (m)" textAlignment="CENTER" />
+	                  <Slider fx:id="windowMarginSlider" blockIncrement="0.01" majorTickUnit="0.1" max="0.2" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.1" />
+	                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum inliers ratio (%)" textAlignment="CENTER" />
+	                  <Slider fx:id="minimumInliersRatioSlider" majorTickUnit="0.1" max="1.0" min="0.5" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.95" />
+	               </children>
+	            </VBox>
+	         </children>
+	         <padding>
+	            <Insets left="5.0" right="5.0" top="10.0" />
+	         </padding>
+	      </VBox>
+	</children>
+</AnchorPane>
