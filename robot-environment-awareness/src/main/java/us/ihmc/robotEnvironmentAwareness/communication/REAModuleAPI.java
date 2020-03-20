@@ -159,6 +159,7 @@ public class REAModuleAPI
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVision).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = ModuleCategory.child(DepthCloud).topic(Data);
    public static final Topic<StampedPosePacket> TrackingCameraMessageState = ModuleCategory.child(Tracking).topic(Data);
+   public static final Topic<StampedPosePacket> PelvisFrameState = ModuleCategory.child(Custom).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
    public static final Topic<NormalOcTreeMessage> LidarBufferState = OcTreeCategory.child(Lidar).child(Buffer).topic(Data);
    public static final Topic<NormalOcTreeMessage> StereoVisionBufferState = OcTreeCategory.child(StereoVision).child(Buffer).topic(Data);

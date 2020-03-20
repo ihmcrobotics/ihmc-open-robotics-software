@@ -30,9 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
 public class SLAMMeshViewer
 {
-   private static final int SLOW_PACE_UPDATE_PERIOD = 2000;
-   private static final int MEDIUM_PACE_UPDATE_PERIOD = 100;
-   private static final int HIGH_PACE_UPDATE_PERIOD = 10;
+   private static final int UPDATE_PERIOD = 100;
 
    private final Group root = new Group();
 
@@ -141,10 +139,10 @@ public class SLAMMeshViewer
       if (!meshBuilderScheduledFutures.isEmpty())
          return;
       renderMeshAnimation.start();
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       sensorFrameViewer.start();
    }
 
