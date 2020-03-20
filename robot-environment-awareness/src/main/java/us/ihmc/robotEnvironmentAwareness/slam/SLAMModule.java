@@ -254,6 +254,7 @@ public class SLAMModule
             RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPose);
             sensorPoseToPelvisTransformer.transform(estimatedPelvisPose);
             posePacket.getPose().set(estimatedPelvisPose);
+            reaMessager.submitMessage(REAModuleAPI.PelvisFrameState, posePacket);
             estimatedPelvisPublisher.publish(posePacket);
          }
       }
@@ -319,6 +320,7 @@ public class SLAMModule
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       newPointCloud.set(message);
+      reaMessager.submitMessage(REAModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
    public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
