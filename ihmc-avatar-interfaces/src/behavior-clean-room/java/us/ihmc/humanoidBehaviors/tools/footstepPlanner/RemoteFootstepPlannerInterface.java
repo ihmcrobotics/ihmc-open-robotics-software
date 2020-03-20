@@ -9,10 +9,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -23,7 +22,6 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 
@@ -141,25 +139,23 @@ public class RemoteFootstepPlannerInterface
     */
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal)
    {
-      return requestPlan(start, goal, (PlanarRegionsListMessage) null);
+      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters());
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal, PlanarRegionsList planarRegionsList)
    {
-      return requestPlan(start, goal, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      return requestPlan(start,
+                         goal,
+                         PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList),
+                         new DefaultFootstepPlannerParameters());
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
                                                                      FramePose3DReadOnly goal,
-                                                                     PlanarRegionsListMessage planarRegionsListMessage)
+                                                                     PlanarRegionsListMessage planarRegionsListMessage,
+                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
-
-      DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
-      if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
-      {
-         settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
-      }
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, settableFootstepPlannerParameters);
@@ -201,10 +197,5 @@ public class RemoteFootstepPlannerInterface
    {
       LogTools.debug("Sending SLEEP to footstep planner");
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
-   public static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
-   {
-      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 }

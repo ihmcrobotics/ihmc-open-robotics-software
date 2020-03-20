@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,17 +20,19 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -80,6 +85,24 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
+   public void deleteOldLogs(int numberOflogsToKeep)
+   {
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
+         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(FOOTSTEP_PLANNER_LOG_POSTFIX))
+            sortedSet.add(path);
+         return FileVisitResult.CONTINUE;
+      });
+
+      while (sortedSet.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedSet.remove(earliestLogDirectory);
+      }
+   }
+
    /**
     * Generates log in the given directory. For example calling with the input "/home/user/.ihmc/logs/20200320_testLog/" will create (if empty)
     * and populate that directy with log files.
@@ -96,7 +119,7 @@ public class FootstepPlannerLogger
          logDirectory += File.separator;
       }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
+      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
       latestLogDirectory = sessionDirectory;
 
       try

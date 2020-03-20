@@ -52,7 +52,7 @@ public class AtlasKinematicSimWithCamera
       scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
 
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-      remoteSyncedHumanoidFrames.pollHumanoidRobotState().getNeckFrame(NeckJointName.DISTAL_NECK_PITCH);
+      remoteSyncedHumanoidFrames.pollHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
 
       /// create scs
       SensorOnlySimulation sensorOnlySimulation = new SensorOnlySimulation();
@@ -79,6 +79,8 @@ public class AtlasKinematicSimWithCamera
                                   new VideoDataServerImageCallback(new SCSVideoDataROS2Bridge(scsCameraPublisher::publish)),
                                   () -> robotConfigurationData.getLatest().getSyncTimestamp(),
                                   framesPerSecond);
+
+      scs.simulate();
    }
 
    private void robotViewer()

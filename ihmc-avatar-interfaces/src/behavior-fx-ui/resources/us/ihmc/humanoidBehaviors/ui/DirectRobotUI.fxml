@@ -46,7 +46,7 @@
                         </ComboBox>
                      </right>
                   </BorderPane>
-                  <CheckBox fx:id="showRegions" mnemonicParsing="false" onAction="#showRegions" selected="true" text="Show regions" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <CheckBox fx:id="showRegions" mnemonicParsing="false" onAction="#showRegions" text="Show regions" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       			</children>
                <columnConstraints>
                   <ColumnConstraints />

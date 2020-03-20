@@ -46,17 +46,16 @@ public class ROS2Callback<T>
                        ROS2TopicQualifier ioTopicQualifier,
                        Consumer<T> messageCallback)
    {
+      this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier), messageCallback);
+   }
+
+   public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
+   {
       this.messageCallback = messageCallback;
       ExceptionTools.handle(() ->
       {
-         subscription = ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
-                                                    this::nullOmissionCallback,
-                                                    ROS2Tools.generateDefaultTopicName(messageType,
-                                                                                       robotName,
-                                                                                       moduleTopicQualifier,
-                                                                                       ioTopicQualifier));
-      },
-      DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         subscription = ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType), this::nullOmissionCallback, topicName);
+      }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    private void nullOmissionCallback(Subscriber<T> subscriber)

@@ -883,6 +883,15 @@ public class PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList flatGround()
+   {
+      return flatGround(20.0);
+   }
+
+   public static PlanarRegionsList flatGround(double size)
+   {
+      return PlanarRegionsList.flatGround(size);
+   }
 
    public static void main(String[] args)
    {

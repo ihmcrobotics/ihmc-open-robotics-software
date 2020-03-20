@@ -18,17 +18,23 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAModuleMode.*;
+
 /**
  * Acts as REA, reporting currently visible area as planar regions.
  */
 public class SimulatedREAModule
 {
+   enum SimulatedREAModuleMode { REPUBLISH_FULL_MAP, REDUCE_TO_VIEWABLE_AREA }
+   private final SimulatedREAModuleMode mode;
+
    private volatile PlanarRegionsList map;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
    private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
-   private final HashMap<Integer, PlanarRegion> additionalPlanarRegions = new HashMap<>();
+   private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
@@ -45,8 +51,11 @@ public class SimulatedREAModule
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA.getNodeName());
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
 
-      if (robotModel != null)
+      mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
+
+      if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
          remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
          neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
@@ -59,7 +68,7 @@ public class SimulatedREAModule
                          PlanarRegionsListMessage.class,
                          null,
                          ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
-                         this::acceptAdditionalRegionList);
+                         this::acceptSupportRegionsList);
 
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
@@ -83,7 +92,7 @@ public class SimulatedREAModule
    {
       remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
-      if (remoteSyncedHumanoidRobotState != null)
+      if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
          if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
          {
@@ -94,21 +103,22 @@ public class SimulatedREAModule
             // blank result
          }
       }
-      else
+      else // republish full map
       {
          combinedRegionsList.addAll(map.getPlanarRegionsAsList());
       }
 
       synchronized (this)
       {
-         combinedRegionsList.addAll(additionalPlanarRegions.values());
+         combinedRegionsList.addAll(supportRegions.values());
          PlanarRegionsList combinedRegions = new PlanarRegionsList(combinedRegionsList);
          PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedRegions);
          planarRegionPublisher.publish(message);
+         realsenseSLAMPublisher.publish(message);
       }
    }
 
-   private void acceptAdditionalRegionList(PlanarRegionsListMessage message)
+   private void acceptSupportRegionsList(PlanarRegionsListMessage message)
    {
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
 
@@ -122,12 +132,12 @@ public class SimulatedREAModule
             }
             else if (region.isEmpty())
             {
-               additionalPlanarRegions.remove(region.getRegionId());
+               supportRegions.remove(region.getRegionId());
             }
             else
             {
                CustomPlanarRegionHandler.performConvexDecompositionIfNeeded(region);
-               additionalPlanarRegions.put(region.getRegionId(), region);
+               supportRegions.put(region.getRegionId(), region);
             }
          }
       }

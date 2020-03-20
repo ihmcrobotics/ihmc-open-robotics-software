@@ -48,7 +48,7 @@ public class AtlasBehaviorDoNothingTest
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll
