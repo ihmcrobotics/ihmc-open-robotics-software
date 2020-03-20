@@ -48,6 +48,7 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
+   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs");
    private final String timestamp;
    private Path logFolder;
    private ByteBuffer compressedBuffer;
@@ -62,24 +63,6 @@ public class IntraprocessYoVariableLogger
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    private ConcurrentRingBuffer<VariableChangedMessage> variableChanged = new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(),
                                                                                                      CHANGED_BUFFER_CAPACITY);
-
-   public IntraprocessYoVariableLogger(String logName,
-                                       LogModelProvider logModelProvider,
-                                       YoVariableRegistry registry,
-                                       RigidBodyBasics rootBody,
-                                       YoGraphicsListRegistry yoGraphicsListRegistry,
-                                       int maxTicksToRecord,
-                                       double dt)
-   {
-      this(logName,
-           logModelProvider,
-           registry,
-           rootBody,
-           yoGraphicsListRegistry,
-           maxTicksToRecord,
-           dt,
-           Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs"));
-   }
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
