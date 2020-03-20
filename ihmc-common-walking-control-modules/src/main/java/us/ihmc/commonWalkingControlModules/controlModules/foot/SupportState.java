@@ -126,7 +126,6 @@ public class SupportState extends AbstractFootControlState
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
-   private final FootRotationDetector footRotationDetector;
    private final PartialFootholdCropperModule footRotationCalculationModule;
 
    private final YoBoolean liftOff;
@@ -211,7 +210,6 @@ public class SupportState extends AbstractFootControlState
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
-      footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
       footRotationCalculationModule = new PartialFootholdCropperModule(robotSide,
                                                                        soleFrame,
                                                                        footControlHelper.getContactableFoot().getContactPoints2d(),
@@ -261,7 +259,6 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.hide();
       explorationHelper.stopExploring();
-      footRotationDetector.reset();
       footRotationCalculationModule.reset();
 
       liftOff.set(false);
@@ -356,7 +353,7 @@ public class SupportState extends AbstractFootControlState
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();
 
-      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      if (footRotationCalculationModule.isRotating() && avoidFootRotations.getValue())
       {
          if (dampFootRotations.getValue())
          {
