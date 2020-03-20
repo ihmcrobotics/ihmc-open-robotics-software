@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -28,6 +29,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -112,6 +114,11 @@ public class AtlasLookAndStepBehaviorTest
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(INTRAPROCESS);
       kinematicsSimulationParameters.setLogToFile(true);
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         kinematicsSimulationParameters.setLogToFile(false);
+         kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos"));
+      }
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
       AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
    }
