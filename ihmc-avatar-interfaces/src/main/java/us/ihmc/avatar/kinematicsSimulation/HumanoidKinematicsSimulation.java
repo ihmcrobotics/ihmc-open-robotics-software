@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -38,8 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -77,8 +75,9 @@ import java.util.stream.Collectors;
 
 public class HumanoidKinematicsSimulation
 {
+   private static final double PLAYBACK_SPEED_MULTIPLIER = 10.0;
    private static final double DT = UnitConversions.hertzToSeconds(70);
-   private static final double PLAYBACK_SPEED = 10.0;
+   private static final double UPDATE_RATE = DT / PLAYBACK_SPEED_MULTIPLIER;
    private static final double GRAVITY_Z = 9.81;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
@@ -92,6 +91,7 @@ public class HumanoidKinematicsSimulation
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
    private ScheduledFuture<?> yoVariableServerScheduled;
+   private final Stopwatch monotonicTimer = new Stopwatch();
    private final YoDouble yoTime;
 
    private final FullHumanoidRobotModel fullRobotModel;
@@ -326,7 +326,8 @@ public class HumanoidKinematicsSimulation
 
       initialize();
 
-      scheduler.schedule(this::controllerTick, Conversions.secondsToNanoseconds(DT / PLAYBACK_SPEED), TimeUnit.NANOSECONDS);
+      monotonicTimer.start();
+      scheduler.schedule(this::controllerTick, Conversions.secondsToNanoseconds(UPDATE_RATE), TimeUnit.NANOSECONDS);
    }
 
    public void initialize()
@@ -349,7 +350,9 @@ public class HumanoidKinematicsSimulation
    {
       doControl();
 
-      robotConfigurationDataPublisher.publish(extractRobotConfigurationData(fullRobotModel));
+      RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(fullRobotModel);
+      robotConfigurationData.setMonotonicTime(Conversions.secondsToNanoseconds(monotonicTimer.totalElapsed()));
+      robotConfigurationDataPublisher.publish(robotConfigurationData);
    }
 
    public void doControl()
