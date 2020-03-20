@@ -223,6 +223,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       for (int iter = 0; iter < iters; iter++)
       {
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
 
          Pose3D startLeftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -241,8 +242,11 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalRightFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+         messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
+         messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
+         messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
 
@@ -370,6 +374,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
+         int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
          Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -386,6 +391,9 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, rightFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
+         messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations,maxIterations);
+         messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
+         messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
          messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
