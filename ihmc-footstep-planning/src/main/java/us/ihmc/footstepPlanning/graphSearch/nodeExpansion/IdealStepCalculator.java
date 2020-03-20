@@ -19,9 +19,10 @@ import java.util.function.BiPredicate;
 
 public class IdealStepCalculator
 {
+   // TODO extract these to parameters once they're stable
    private static final double distanceToleranceToMatchHeading = 0.25;
    private static final double yawToleranceToTurnTowardsGoal = 0.35;
-   private static final double idealStepLengthWhenUpOrDown = 0.25;
+   private static final double idealStepLengthWhenUpOrDownMultiplier = 0.7;
    private static final double upOrDownStepThreshold = 0.2;
 
    private final HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
@@ -129,7 +130,9 @@ public class IdealStepCalculator
          double alphaLookAhead = MathTools.clamp(alphaMidFoot +  parameters.getIdealFootstepLength() / pathLength, 0.0, 1.0);
          bodyPathPlanHolder.getPointAlongPath(alphaLookAhead, projectionPose);
          double nextStepHeight = projectionPose.getZ();
-         double idealStepLength = Math.abs(nextStepHeight - previousStepHeight) > upOrDownStepThreshold ? idealStepLengthWhenUpOrDown : parameters.getIdealFootstepLength();
+
+         double idealStepLengthMultiplier = Math.abs(nextStepHeight - previousStepHeight) > upOrDownStepThreshold ? idealStepLengthWhenUpOrDownMultiplier : 1.0;
+         double idealStepLength = idealStepLengthMultiplier * parameters.getIdealFootstepLength();
          
          // do ideal step with turn
          idealStep.set(midFootPoint, stanceNode.getYaw());
@@ -141,7 +144,7 @@ public class IdealStepCalculator
          double distanceFromPath = bodyPathPlanHolder.getSegmentLine(segmentIndex).distance(idealStep.getPosition());
          double maximumCorrectiveWidth = 0.05;
          double correctiveWidth = Math.min(maximumCorrectiveWidth, distanceFromPath) * (onLeftSideOfLine ? -1.0 : 1.0);
-         double stepWidth = stanceSide.negateIfLeftSide(parameters.getIdealFootstepWidth());
+         double stepWidth = stanceSide.negateIfLeftSide(0.5 * parameters.getIdealFootstepWidth());
          idealStep.appendTranslation(0.0, stepWidth + correctiveWidth);
 
          return new FootstepNode(idealStep.getX(), idealStep.getY(), idealStep.getYaw(), stanceNode.getRobotSide().getOppositeSide());
