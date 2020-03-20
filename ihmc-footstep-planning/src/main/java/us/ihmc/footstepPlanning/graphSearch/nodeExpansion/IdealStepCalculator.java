@@ -10,6 +10,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -28,6 +29,7 @@ public class IdealStepCalculator
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private SideDependentList<FootstepNode> goalNodes;
    private final BiPredicate<FootstepNode, FootstepNode> nodeChecker;
+   private PlanarRegionsList planarRegionsList;
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D idealStep = new Pose2D();
@@ -52,15 +54,25 @@ public class IdealStepCalculator
       goalMidFootPose.interpolate(leftGoalPose, rightGoalPose, 0.5);
    }
 
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   {
+      this.planarRegionsList = planarRegionsList;
+   }
+
    public FootstepNode computeIdealStep(FootstepNode stanceNode)
    {
       return idealStepMap.computeIfAbsent(stanceNode, this::computeIdealStepInternal);
    }
 
+   private boolean flatGroundMode()
+   {
+      return planarRegionsList == null || planarRegionsList.isEmpty();
+   }
+
    private FootstepNode computeIdealStepInternal(FootstepNode stanceNode)
    {
       FootstepNode goalNode = goalNodes.get(stanceNode.getRobotSide().getOppositeSide());
-      if (nodeChecker.test(goalNode, stanceNode))
+      if (!flatGroundMode() && nodeChecker.test(goalNode, stanceNode))
       {
          return goalNode;
       }
