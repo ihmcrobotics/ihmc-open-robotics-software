@@ -72,6 +72,11 @@ public class FootstepNodeChecker
    private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)
    {
       candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
+      
+      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      {
+         return null;
+      }
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())

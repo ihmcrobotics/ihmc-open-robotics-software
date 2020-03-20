@@ -67,7 +67,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AutoPostProcess = topic("AutoPostProcess");
 
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
-   public static final Topic<Double> PlannerBestEffortTimeout = topic("PlannerBestEffortTimeout");
+   public static final Topic<Integer> MaxIterations = topic("MaxIterations");
    public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
    public static final Topic<FootstepPlannerType> PlannerType = topic("PlannerType");
    public static final Topic<FootstepPlanningResult> PlanningResult = topic("PlanningResult");
@@ -82,6 +82,8 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
    public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
+   public static final Topic<Boolean> SnapGoalSteps = topic("SnapGoalSteps");
+   public static final Topic<Boolean> AbortIfGoalStepSnapFails = topic("AbortIfGoalStepSnapFails");
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
    public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
    public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");

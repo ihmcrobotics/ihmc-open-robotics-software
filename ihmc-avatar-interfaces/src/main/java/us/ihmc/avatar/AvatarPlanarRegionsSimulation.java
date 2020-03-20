@@ -30,7 +30,7 @@ public class AvatarPlanarRegionsSimulation
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
-      networkProcessorParameters.setUseFootstepPlanningToolboxModule(true);
+      networkProcessorParameters.setUseFootstepPlanningToolboxModule(false);
       networkProcessorParameters.setUseWalkingPreviewModule(true);
       networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(true);
 
