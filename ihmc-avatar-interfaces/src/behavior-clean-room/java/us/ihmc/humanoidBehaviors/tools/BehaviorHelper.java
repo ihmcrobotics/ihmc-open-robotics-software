@@ -22,8 +22,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.StepThroughAlgorithm;
-
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
  * shopping location for everything one might want to do when creating a robot behavior. It should
@@ -61,6 +59,7 @@ public class BehaviorHelper
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
+   private RemoteEnvironmentMapInterface environmentMap;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -93,6 +92,13 @@ public class BehaviorHelper
       if (rea == null)
          rea = new RemoteREAInterface(managedROS2Node);
       return rea; // REA toolbox
+   }
+
+   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
+   {
+      if (environmentMap == null)
+         environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
+      return environmentMap;
    }
 
    // UI Communication Methods:

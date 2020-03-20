@@ -1,8 +1,4 @@
-package us.ihmc.quadrupedUI.video;
-
-import java.awt.image.BufferedImage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package us.ihmc.humanoidBehaviors.ui.video;
 
 import controller_msgs.msg.dds.VideoPacket;
 import javafx.scene.image.ImageView;
@@ -18,6 +14,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.Ros2Node;
+
+import java.awt.image.BufferedImage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class JavaFXROS2VideoView extends ImageView
 {

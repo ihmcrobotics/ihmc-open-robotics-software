@@ -1,24 +1,31 @@
-package us.ihmc.quadrupedUI.video;
+package us.ihmc.humanoidBehaviors.ui.video;
 
-import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.log.LogTools;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 
-public class JavaFXROS2VideoViewer extends Application
+public class JavaFXROS2VideoViewer
 {
    private static final int width = 1024;
    private static final int height = 544;
+   private Ros2Node ros2Node;
 
-   @Override
-   public void start(Stage primaryStage) throws Exception
+   public JavaFXROS2VideoViewer(Ros2Node ros2Node)
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
+      this.ros2Node = ros2Node;
+      JavaFXApplicationCreator.createAJavaFXApplication();
+      Platform.runLater(this::buildAndStartUI);
+   }
+
+   private void buildAndStartUI()
+   {
+      Stage primaryStage = new Stage();
 
       JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(width, height, false, false);
 
@@ -39,14 +46,8 @@ public class JavaFXROS2VideoViewer extends Application
       ros2VideoView.start(ros2Node);
    }
 
-   @Override
-   public void stop() throws Exception
-   {
-      LogTools.info("JavaFX stop() called");
-   }
-
    public static void main(String[] args)
    {
-      launch(args);
+      new JavaFXROS2VideoViewer(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
    }
 }
