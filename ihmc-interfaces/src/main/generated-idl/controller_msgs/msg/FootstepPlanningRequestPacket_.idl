@@ -63,6 +63,15 @@ module controller_msgs
         @defaultValue(value=255)
         octet requested_initial_stance_side;
         /**
+         * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+         */
+        @defaultValue(value=True)
+        boolean snap_goal_steps;
+        /**
+         * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+         */
+        boolean abort_if_goal_step_snapping_fails;
+        /**
          * Footstep planner type, see above
          */
         @defaultValue(value=255)
@@ -78,9 +87,15 @@ module controller_msgs
         @defaultValue(value=-1.0)
         double goal_yaw_proximity;
         /**
-         * Timeout in seconds
+         * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
          */
+        @defaultValue(value=5.0)
         double timeout;
+        /**
+         * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+         */
+        @defaultValue(value=-1)
+        long max_iterations;
         /**
          * Best effort timeout in seconds
          */
