@@ -96,6 +96,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean generate_log_;
 
    public FootstepPlanningRequestPacket()
    {
@@ -148,6 +153,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       planner_request_id_ = other.planner_request_id_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
+      generate_log_ = other.generate_log_;
+
    }
 
    /**
@@ -399,6 +406,23 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return body_path_waypoints_;
    }
 
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public void setGenerateLog(boolean generate_log)
+   {
+      generate_log_ = generate_log;
+   }
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean getGenerateLog()
+   {
+      return generate_log_;
+   }
+
 
    public static Supplier<FootstepPlanningRequestPacketPubSubType> getPubSubType()
    {
@@ -455,6 +479,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
+
 
       return true;
    }
@@ -500,6 +526,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
+      if(this.generate_log_ != otherMyClass.generate_log_) return false;
+
 
       return true;
    }
@@ -547,7 +575,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
       builder.append("body_path_waypoints=");
-      builder.append(this.body_path_waypoints_);
+      builder.append(this.body_path_waypoints_);      builder.append(", ");
+      builder.append("generate_log=");
+      builder.append(this.generate_log_);
       builder.append("}");
       return builder.toString();
    }

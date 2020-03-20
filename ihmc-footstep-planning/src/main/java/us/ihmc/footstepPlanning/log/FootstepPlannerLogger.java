@@ -77,8 +77,7 @@ public class FootstepPlannerLogger
 
    public boolean logSession()
    {
-      String sessionDirectory = defaultLogsDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
-      return logSession(sessionDirectory);
+      return logSession(defaultLogsDirectory);
    }
 
    /**
@@ -97,30 +96,31 @@ public class FootstepPlannerLogger
          logDirectory += File.separator;
       }
 
-      latestLogDirectory = logDirectory;
+      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
+      latestLogDirectory = sessionDirectory;
 
       try
       {
          // log request packet
-         String requestPacketFile = logDirectory + requestPacketFileName;
+         String requestPacketFile = sessionDirectory + requestPacketFileName;
          planner.getRequest().setPacket(requestPacket);
          byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
          // log footstep planner parameters packet
-         String footstepParametersPacketFile = logDirectory + footstepParametersFileName;
+         String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log footstep planner parameters packet
-         String bodyPathParametersPacketFile = logDirectory + bodyPathParametersFileName;
+         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
          byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log status packet
-         String statusPacketFile = logDirectory + statusPacketFileName;
+         String statusPacketFile = sessionDirectory + statusPacketFileName;
          planner.getOutput().setPacket(outputStatus);
          byte[] serializedStatus = statusPacketSerializer.serializeToBytes(outputStatus);
          writeToFile(statusPacketFile, serializedStatus);
@@ -135,7 +135,7 @@ public class FootstepPlannerLogger
       }
 
       // log planner iteration data
-      String plannerIterationDataFileName = logDirectory + "PlannerIterationData.log";
+      String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
       try
       {
          File plannerDataFile = new File(plannerIterationDataFileName);
