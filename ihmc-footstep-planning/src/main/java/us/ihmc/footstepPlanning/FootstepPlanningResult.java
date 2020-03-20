@@ -15,6 +15,7 @@ public enum FootstepPlanningResult
    SNAPPING_FAILED,
    PLANNER_FAILED,
    INVALID_GOAL,
+   MAXIMUM_ITERATIONS_REACHED,
    EXCEPTION;
 
    public static final FootstepPlanningResult[] values = values();

@@ -54,11 +54,17 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -103,13 +109,22 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -145,6 +160,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalRightFootPose(), cdr);
       cdr.write_type_9(data.getRequestedInitialStanceSide());
 
+      cdr.write_type_7(data.getSnapGoalSteps());
+
+      cdr.write_type_7(data.getAbortIfGoalStepSnappingFails());
+
       cdr.write_type_9(data.getRequestedFootstepPlannerType());
 
       cdr.write_type_6(data.getGoalDistanceProximity());
@@ -152,6 +171,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_6(data.getGoalYawProximity());
 
       cdr.write_type_6(data.getTimeout());
+
+      cdr.write_type_2(data.getMaxIterations());
 
       cdr.write_type_6(data.getBestEffortTimeout());
 
@@ -178,6 +199,10 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalRightFootPose(), cdr);	
       data.setRequestedInitialStanceSide(cdr.read_type_9());
       	
+      data.setSnapGoalSteps(cdr.read_type_7());
+      	
+      data.setAbortIfGoalStepSnappingFails(cdr.read_type_7());
+      	
       data.setRequestedFootstepPlannerType(cdr.read_type_9());
       	
       data.setGoalDistanceProximity(cdr.read_type_6());
@@ -185,6 +210,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setGoalYawProximity(cdr.read_type_6());
       	
       data.setTimeout(cdr.read_type_6());
+      	
+      data.setMaxIterations(cdr.read_type_2());
       	
       data.setBestEffortTimeout(cdr.read_type_6());
       	
@@ -212,10 +239,13 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
 
       ser.write_type_9("requested_initial_stance_side", data.getRequestedInitialStanceSide());
+      ser.write_type_7("snap_goal_steps", data.getSnapGoalSteps());
+      ser.write_type_7("abort_if_goal_step_snapping_fails", data.getAbortIfGoalStepSnappingFails());
       ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
       ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
       ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_2("max_iterations", data.getMaxIterations());
       ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
       ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
@@ -238,10 +268,13 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("goal_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalRightFootPose());
 
       data.setRequestedInitialStanceSide(ser.read_type_9("requested_initial_stance_side"));
+      data.setSnapGoalSteps(ser.read_type_7("snap_goal_steps"));
+      data.setAbortIfGoalStepSnappingFails(ser.read_type_7("abort_if_goal_step_snapping_fails"));
       data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
       data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
       data.setTimeout(ser.read_type_6("timeout"));
+      data.setMaxIterations(ser.read_type_2("max_iterations"));
       data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
