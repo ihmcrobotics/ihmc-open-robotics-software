@@ -1,5 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,6 +10,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FiducialDoorRobot;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -19,20 +22,26 @@ import java.util.List;
 
 public class FiducialDoorEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final List<ContactableDoorRobot> doorRobots = new ArrayList<ContactableDoorRobot>();
+   private final List<FiducialDoorRobot> robots = new ArrayList<>();
    private final CombinedTerrainObject3D combinedTerrainObject;
 
-   private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
+   private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<>();
 
-   public static final Point3D DEFAULT_DOOR_LOCATION = new Point3D(3.0, 0.0, 0.0);
+   private final double distanceToDoor = 3.0;
+   private final double wallWidth = 1.0;
+   private final double doorWidth = ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX();
+   private final double doorThickness = ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getY();
+   private final double doorHeight = ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getZ();
 
    public FiducialDoorEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
-      
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", DEFAULT_DOOR_LOCATION);
-      doorRobots.add(door);
+
+      Point3D doorPosition = new Point3D(distanceToDoor, doorWidth / 2.0, 0.0);
+      AxisAngle doorOrientation = new AxisAngle(Axis.Z, -Math.PI / 2.0);
+      FiducialDoorRobot door = new FiducialDoorRobot("doorRobot", doorPosition, doorOrientation);
+      robots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
    }
 
@@ -51,13 +60,25 @@ public class FiducialDoorEnvironment implements CommonAvatarEnvironmentInterface
       RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3D(location, 200, 200, 0.75), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
-      combinedTerrainObject.addBox(2.0, -0.05, 3.0, 0.05, 2.0, YoAppearance.Beige());
-      combinedTerrainObject.addBox(3.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   -0.05,
-                                   4.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   0.05,
-                                   2.0,
-                                   YoAppearance.Beige());
+      double xStart;
+      double yStart;
+      double xEnd;
+      double yEnd;
+      double height;
+
+      xStart = distanceToDoor;
+      yStart = wallWidth +(doorWidth / 2.0);
+      xEnd = distanceToDoor + doorThickness;
+      yEnd = doorWidth / 2.0;
+      height = doorHeight;
+      combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, height, YoAppearance.Beige());
+
+      xStart = distanceToDoor;
+      yStart = -doorWidth / 2.0;
+      xEnd = distanceToDoor + doorThickness;
+      yEnd = -(doorWidth / 2.0) - wallWidth;
+      height = doorHeight;
+      combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, height, YoAppearance.Beige());
 
       return combinedTerrainObject;
    }
@@ -71,7 +92,7 @@ public class FiducialDoorEnvironment implements CommonAvatarEnvironmentInterface
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
-      return doorRobots;
+      return robots;
    }
 
    @Override
@@ -81,8 +102,8 @@ public class FiducialDoorEnvironment implements CommonAvatarEnvironmentInterface
       contactController.setContactParameters(100000.0, 100.0, 0.5, 0.3);
 
       contactController.addContactPoints(contactPoints);
-      contactController.addContactables(doorRobots);
-      doorRobots.get(0).setController(contactController);    
+      contactController.addContactables(robots);
+      robots.get(0).setController(contactController);
    }
 
    @Override

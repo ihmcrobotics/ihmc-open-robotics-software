@@ -37,7 +37,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
-import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -46,6 +45,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Potential improvements:
@@ -63,11 +63,6 @@ public class SCSDoorAndCameraSimulator
    private final FloatingJoint floatingHeadJoint;
 
    public SCSDoorAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
-   {
-      this(ros2Node, environment.getTerrainObject3D(), robotModel, startMinimized);
-   }
-
-   public SCSDoorAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel, boolean startMinimized)
    {
       robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
 
@@ -98,7 +93,15 @@ public class SCSDoorAndCameraSimulator
       robot.addRootJoint(floatingHeadJoint);
       robot.setGravity(0.0);
 
-      scs = new SimulationConstructionSet(robot);
+      Robot[] robots = new Robot[1 + environment.getEnvironmentRobots().size()];
+      robots[0] = robot;
+      List<? extends Robot> environmentRobots = environment.getEnvironmentRobots();
+      for (int i = 0; i < environmentRobots.size(); i++)
+      {
+         robots[i + 1] = environmentRobots.get(i);
+      }
+
+      scs = new SimulationConstructionSet(robots);
       scs.setDT(0.001, 100); // TODO: Check this, might greatly alter performance
 
       FunctionalRobotController controller = new FunctionalRobotController();
@@ -128,7 +131,7 @@ public class SCSDoorAndCameraSimulator
                                   framesPerSecond);
 
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
+      scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
       scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
 
