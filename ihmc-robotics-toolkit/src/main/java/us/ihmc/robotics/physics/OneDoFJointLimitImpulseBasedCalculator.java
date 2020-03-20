@@ -156,7 +156,7 @@ public class OneDoFJointLimitImpulseBasedCalculator implements ImpulseBasedConst
          impulseUpdate = impulse - previousImpulse;
       }
 
-      isImpulseZero = EuclidCoreTools.epsilonEquals(0.0, impulse, 1.0 - 12);
+      isImpulseZero = EuclidCoreTools.epsilonEquals(0.0, impulse, 1.0e-12);
 
       if (isImpulseZero)
       {
