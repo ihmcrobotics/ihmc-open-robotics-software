@@ -32,7 +32,7 @@ public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-   private static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "FootstepPlannerLog";
+   private static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -119,7 +119,7 @@ public class FootstepPlannerLogger
          logDirectory += File.separator;
       }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
+      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
       latestLogDirectory = sessionDirectory;
 
       try
