@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviors.jmeSensorSimulation;
 
 import com.jme3.asset.AssetConfig;
+import com.jme3.asset.TextureKey;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
@@ -14,17 +15,21 @@ import com.jme3.renderer.opengl.GLRenderer;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.plugins.ogre.MaterialLoader;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.lwjgl.LwjglContext;
+import com.jme3.texture.Texture;
 import com.jme3.texture.plugins.AWTLoader;
+import com.jme3.util.SkyFactory;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
 import jme3tools.optimize.GeometryBatchFactory;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
 import us.ihmc.log.LogTools;
@@ -119,6 +124,7 @@ public class JMEInSwingWindowEnvironment
 //      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
 
       setUpGrid();
+      setupSky();
 
       JFrame frame = new JFrame("JME");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -142,6 +148,27 @@ public class JMEInSwingWindowEnvironment
    private void initialize()
    {
 
+   }
+
+   private void setupSky()
+   {
+      String west = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp";
+      String east = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp";
+      String north = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp";
+      String south = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp";
+      String up = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp";
+      String down = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp";
+      Texture westTex = jme.getAssetManager().loadTexture(new TextureKey(west, true));
+      Texture eastTex = jme.getAssetManager().loadTexture(new TextureKey(east, true));
+      Texture northTex = jme.getAssetManager().loadTexture(new TextureKey(north, true));
+      Texture southTex = jme.getAssetManager().loadTexture(new TextureKey(south, true));
+      Texture upTex = jme.getAssetManager().loadTexture(new TextureKey(up, true));
+      Texture downTex = jme.getAssetManager().loadTexture(new TextureKey(down, true));
+      jme.enqueue(() -> {
+         Spatial sky = SkyFactory.createSky(jme.getAssetManager(), westTex, eastTex, northTex, southTex, upTex, downTex);
+         sky.setLocalScale(1000);
+         jme.getRootNode().attachChild(sky);
+      });
    }
 
    private void setupLighting()
