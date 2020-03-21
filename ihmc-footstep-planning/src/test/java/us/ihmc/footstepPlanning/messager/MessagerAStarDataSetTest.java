@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.messager;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
@@ -17,17 +16,17 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    @Override
    @Test
    @Disabled
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void testDatasetsInDevelopment()
    {
-      super.testDatasetsWithoutOcclusionInDevelopment();
+      super.testDatasetsInDevelopment();
    }
 
    public static void main(String[] args) throws Exception

@@ -146,7 +146,7 @@ public abstract class FootstepPlannerDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -161,7 +161,7 @@ public abstract class FootstepPlannerDataSetTest
 
    @Test
    @Disabled
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void testDatasetsInDevelopment()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
