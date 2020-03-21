@@ -281,6 +281,11 @@ public class FootstepPlannerLogger
       fileWriter.write("\n");
    }
 
+   public String getLatestLogDirectory()
+   {
+      return latestLogDirectory;
+   }
+
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;

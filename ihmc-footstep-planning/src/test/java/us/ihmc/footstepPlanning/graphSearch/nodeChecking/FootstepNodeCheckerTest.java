@@ -263,6 +263,12 @@ public class FootstepNodeCheckerTest
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
 
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
+
       FootstepNode node0 = new FootstepNode(0.2, 0.2, 0.0, RobotSide.LEFT);
       RigidBodyTransform snapTransform0 = new RigidBodyTransform();
 
@@ -295,6 +301,12 @@ public class FootstepNodeCheckerTest
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
+
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
 
       double minFoothold = parameters.getMinimumFootholdPercent();
 
@@ -364,6 +376,13 @@ public class FootstepNodeCheckerTest
 
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
       checker.setParentNodeSupplier(graph::getParentNode);
+
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
+
       Assert.assertFalse(checker.isNodeValid(node3, node2));
    }
 

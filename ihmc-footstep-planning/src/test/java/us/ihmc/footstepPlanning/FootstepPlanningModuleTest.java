@@ -118,7 +118,8 @@ public class FootstepPlanningModuleTest
       request.setPlanBodyPath(false);
       request.setGoalDistanceProximity(0.3);
       request.setGoalYawProximity(0.25 * Math.PI);
-      request.setTimeout(2.0);
+      request.setTimeout(Double.MAX_VALUE);
+      request.setMaximumIterations(200);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getResult().validForExecution());
