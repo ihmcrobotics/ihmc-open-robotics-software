@@ -11,6 +11,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
+import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.opengl.GLRenderer;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
@@ -29,6 +31,7 @@ import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
 import jme3tools.optimize.GeometryBatchFactory;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
@@ -104,8 +107,8 @@ public class JMEInSwingWindowEnvironment
    {
       LogTools.info("Hello JME");
 
-//      Thread.currentThread().setUncaughtExceptionHandler(null);
-//      Thread.setDefaultUncaughtExceptionHandler(null);
+      Thread.currentThread().setUncaughtExceptionHandler(null);
+      Thread.setDefaultUncaughtExceptionHandler(null);
 
       jme.getAssetManager().registerLoader(AWTLoader.class, "tif");
       jme.getAssetManager().registerLoader(ColladaLoader.class, "dae");
@@ -118,10 +121,23 @@ public class JMEInSwingWindowEnvironment
 
       setupLighting();
 
-//      jme.getFlyByCamera().setEnabled(false);
-//      jme.getViewPort().setEnabled(false);
-//      jme.getRenderManager().removeMainView(jme.getViewPort());
-//      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
+
+      jme.getFlyByCamera().setEnabled(false);
+      jme.getViewPort().setEnabled(false);
+      jme.getRenderManager().removeMainView(jme.getViewPort());
+      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
+
+      CustomJMECamera customCamera = new CustomJMECamera(1100, 800);
+//      JMECamera customCamera = new JMECamera(1100, 800);
+
+//      Camera customCamera = new Camera(1100, 800);
+//      customCamera.setFrustumPerspective(45f, (float)customCamera.getWidth() / customCamera.getHeight(), 1f, 1000f);
+//      customCamera.setLocation(new Vector3f(0f, 0f, 10f));
+//      customCamera.lookAt(new Vector3f(0f, 0f, 0f), Vector3f.UNIT_Y);
+
+      ViewPort customViewport = jme.getRenderManager().createMainView("JMEViewport", customCamera);
+      customViewport.attachScene(jme.getRootNode());
+      customViewport.setClearFlags(true, true, true);
 
       setUpGrid();
       setupSky();
@@ -134,7 +150,7 @@ public class JMEInSwingWindowEnvironment
 
       JPanel centerPanel = new JPanel(new BorderLayout());
       centerPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      centerPanel.setPreferredSize(new Dimension(1600, 600));
+      centerPanel.setPreferredSize(new Dimension(1100, 800));
       centerPanel.add(((JmeCanvasContext) jme.getContext()).getCanvas(), BorderLayout.CENTER);
       contentPane.add(centerPanel, BorderLayout.CENTER);
 
@@ -164,11 +180,9 @@ public class JMEInSwingWindowEnvironment
       Texture southTex = jme.getAssetManager().loadTexture(new TextureKey(south, true));
       Texture upTex = jme.getAssetManager().loadTexture(new TextureKey(up, true));
       Texture downTex = jme.getAssetManager().loadTexture(new TextureKey(down, true));
-      jme.enqueue(() -> {
-         Spatial sky = SkyFactory.createSky(jme.getAssetManager(), westTex, eastTex, northTex, southTex, upTex, downTex);
-         sky.setLocalScale(1000);
-         jme.getRootNode().attachChild(sky);
-      });
+      Spatial sky = SkyFactory.createSky(jme.getAssetManager(), westTex, eastTex, northTex, southTex, upTex, downTex);
+      sky.setLocalScale(1000);
+      jme.getRootNode().attachChild(sky);
    }
 
    private void setupLighting()
