@@ -17,6 +17,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,8 +49,8 @@ public class FootholdCropper
    private final FootCoPHullCalculator footCoPHullCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   private final YoBoolean doPartialFootholdDetection;
-   private final YoBoolean applyPartialFootholds;
+   private final BooleanProvider doPartialFootholdDetection;
+   private final BooleanProvider applyPartialFootholds;
    private final IntegerProvider shrinkMaxLimit;
    private final YoInteger shrinkCounter;
 
@@ -92,10 +93,8 @@ public class FootholdCropper
       minAreaToConsider = rotationParameters.getMinimumAreaForCropping();
       distanceFromRotationToCrop = rotationParameters.getDistanceFromRotationToCrop();
 
-      doPartialFootholdDetection = new YoBoolean(namePrefix + "DoPartialFootholdDetection", registry);
-      applyPartialFootholds = new YoBoolean(namePrefix + "ApplyPartialFootholds", registry);
-      doPartialFootholdDetection.set(true);
-      applyPartialFootholds.set(true);
+      doPartialFootholdDetection = rotationParameters.getDoPartialFootholdDetection();
+      applyPartialFootholds = rotationParameters.getApplyPartialFootholds();
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
       shrinkMaxLimit = rotationParameters.getShrinkMaxLimit();
 
@@ -204,7 +203,7 @@ public class FootholdCropper
    public boolean shouldApplyShrunkenFoothold()
    {
       // if we are not doing partial foothold detection exit
-      if (!doPartialFootholdDetection.getBooleanValue())
+      if (!doPartialFootholdDetection.getValue())
       {
          shrunkenFootPolygon.set(defaultFootPolygon);
          return false;
@@ -223,7 +222,7 @@ public class FootholdCropper
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       shrunkenFootPolygonInWorld.set(controllerFootPolygonInWorld);
 
-      if (applyPartialFootholds.getBooleanValue())
+      if (applyPartialFootholds.getValue())
       {
          List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
          int i = 0;
