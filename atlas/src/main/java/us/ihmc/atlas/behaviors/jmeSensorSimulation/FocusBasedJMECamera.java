@@ -15,30 +15,34 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FocusBasedJMECamera extends Camera
 {
+   private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
+   private final FramePose3D cameraPose = new FramePose3D();
+
+   private AxisAngle latitudeAxisAngle = new AxisAngle();
+   private AxisAngle longitudeAxisAngle = new AxisAngle();
+   private AxisAngle rollAxisAngle = new AxisAngle();
+
    private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
 
    private double zoomSpeed = 1.0;
    private double latitudeSpeed = 5.0;
    private double longitudeSpeed = 5.0;
+   private double translateSpeed = 5.0;
 
-   private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
+   private final Vector3D translationOffset = new Vector3D();
+//   private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
+   private final PoseReferenceFrame zUpLongitudeFrame = new PoseReferenceFrame("ZUpLongitudeFrame", zUpFrame);
+   private final FramePose3D focusPointPose = new FramePose3D();
    private double latitude = 0.0;
    private double longitude = 0.0;
    private double roll;
    private double zoom = 10.0;
 
-   private AxisAngle latitudeRotate = new AxisAngle();
-   private AxisAngle longitudeRotate = new AxisAngle();
-   private AxisAngle rollRotate = new AxisAngle();
-
-   private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
-   private final FramePose3D cameraPose = new FramePose3D();
 
    private final Vector3f translationJME = new Vector3f();
    private final com.jme3.math.Quaternion orientationJME = new com.jme3.math.Quaternion();
@@ -101,17 +105,23 @@ public class FocusBasedJMECamera extends Camera
       longitude = EuclidCoreTools.trimAngleMinusPiToPi(longitude);
       roll = 0.0;
 
-      latitudeRotate.set(Axis.X, -latitude);
-      longitudeRotate.set(Axis.Y, -longitude);
-      rollRotate.set(Axis.Z, roll);
+      latitudeAxisAngle.set(Axis.X, -latitude);
+      longitudeAxisAngle.set(Axis.Y, -longitude);
+      rollAxisAngle.set(Axis.Z, roll);
+
+
+      focusPointPose.changeFrame(ReferenceFrame.getWorldFrame());
+      focusPointPose.setOrientation(longitudeAxisAngle);
+      focusPointPose.changeFrame(zUpFrame);
+//      focusPointPose.appendTranslation(translationOffset);
 
       cameraPose.setToZero(zUpFrame);
-      cameraPose.appendTranslation(focusPoint);
+      cameraPose.appendTranslation(focusPointPose.getPosition());
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
       cameraPose.appendRotation(cameraOrientationOffset);
-      cameraPose.appendRotation(longitudeRotate);
-      cameraPose.appendRotation(latitudeRotate);
-      cameraPose.appendRotation(rollRotate);
+      cameraPose.appendRotation(longitudeAxisAngle);
+      cameraPose.appendRotation(latitudeAxisAngle);
+      cameraPose.appendRotation(rollAxisAngle);
       cameraPose.appendTranslation(0.0, 0.0, -zoom);
 
       translationJME.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
@@ -128,27 +138,45 @@ public class FocusBasedJMECamera extends Camera
    {
       if (isWPressed)
       {
-         focusPoint.addX(tpf);
+         focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
+//         focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
+//         translationOffset.addX(translateSpeed * tpf);
+//         translationOffset.addZ(translateSpeed * tpf);
       }
-      else if (isAPressed)
+      if (isAPressed)
       {
-         focusPoint.addY(tpf);
+         focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
+//         focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
+//         translationOffset.addY(translateSpeed * tpf);
+//         translationOffset.addX(translateSpeed * tpf);
       }
-      else if (isSPressed)
+      if (isSPressed)
       {
-         focusPoint.subX(tpf);
+         focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
+//         focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
+//         translationOffset.subX(translateSpeed * tpf);
+//         translationOffset.subZ(translateSpeed * tpf);
       }
-      else if (isDPressed)
+      if (isDPressed)
       {
-         focusPoint.subY(tpf);
+         focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
+//         focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
+//         translationOffset.subY(translateSpeed * tpf);
+//         translationOffset.subX(translateSpeed * tpf);
       }
-      else if (isQPressed)
+      if (isQPressed)
       {
-         focusPoint.addZ(tpf);
+         focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
+//         focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
+//         translationOffset.addZ(translateSpeed * tpf);
+//         translationOffset.addY(translateSpeed * tpf);
       }
-      else if (isZPressed)
+      if (isZPressed)
       {
-         focusPoint.subZ(tpf);
+         focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
+//         focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
+//         translationOffset.subZ(translateSpeed * tpf);
+//         translationOffset.subY(translateSpeed * tpf);
       }
 
       updateCameraPose();
