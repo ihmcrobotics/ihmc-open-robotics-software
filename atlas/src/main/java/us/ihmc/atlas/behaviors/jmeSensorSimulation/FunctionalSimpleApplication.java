@@ -6,6 +6,12 @@ public class FunctionalSimpleApplication extends SimpleApplication
 {
    private Runnable simpleInitApp;
    private Runnable initialize;
+   private JMEFloatConsumer simpleUpdate;
+
+   public interface JMEFloatConsumer
+   {
+      void accept(float timePerFrame);
+   }
 
    /**
     * Nothing in super.
@@ -24,6 +30,13 @@ public class FunctionalSimpleApplication extends SimpleApplication
       if (initialize != null) initialize.run();
    }
 
+   @Override
+   public void simpleUpdate(float tpf)
+   {
+      // nothing in super
+      if (simpleUpdate != null) simpleUpdate.accept(tpf);
+   }
+
    public void setSimpleInitApp(Runnable simpleInitApp)
    {
       this.simpleInitApp = simpleInitApp;
@@ -32,5 +45,10 @@ public class FunctionalSimpleApplication extends SimpleApplication
    public void setInitialize(Runnable initialize)
    {
       this.initialize = initialize;
+   }
+
+   public void setSimpleUpdate(JMEFloatConsumer simpleUpdate)
+   {
+      this.simpleUpdate = simpleUpdate;
    }
 }
