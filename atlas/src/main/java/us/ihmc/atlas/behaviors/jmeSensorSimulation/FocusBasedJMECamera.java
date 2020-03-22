@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 public class FocusBasedJMECamera extends Camera
 {
    private final Point3D focusPoint;
-   private double latitude = Math.PI / 2.0;
+   private double latitude = 0.0;
    private double longitude = 0.0;
 //   private YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
@@ -56,9 +56,9 @@ public class FocusBasedJMECamera extends Camera
       zUpToYUp.set(0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0);
       zUpFrame.setOrientationAndUpdate(zUpToYUp);
 
-      focusPoint = new Point3D(0.0, 0.0, -5.0);
+      focusPoint = new Point3D(0.0, 0.0, 5.0);
 //      translation = new Point3D(-2.0, 0.7, 1.0);
-      offsetFromFocusPoint = new Vector3D(-10.0, 0.0, 0.0);
+      offsetFromFocusPoint = new Vector3D(0.0, 0.0, -10.0);
 //      orientation = new Quaternion(0.0, -Math.PI / 2.0, 0.0);
 
 //      focusPoint = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -99,6 +99,7 @@ public class FocusBasedJMECamera extends Camera
       down.setAndNegate(up);
       Vector3D cameraZAxis = new Vector3D(forward);
       Vector3D cameraYAxis = new Vector3D(up);
+//      Vector3D cameraYAxis = new Vector3D(down);
       Vector3D cameraXAxis = new Vector3D();
       cameraXAxis.cross(cameraYAxis, cameraZAxis);
       RotationMatrix cameraOrientationOffset = new RotationMatrix();
@@ -110,7 +111,7 @@ public class FocusBasedJMECamera extends Camera
 //      left.cross(up, forward);
 //      rotationOffset.setColumns(forward, left, up);
 
-      latitude = MathTools.clamp(latitude, Math.PI);
+      latitude = MathTools.clamp(latitude, Math.PI / 2.0);
       longitude = EuclidCoreTools.trimAngleMinusPiToPi(longitude);
       double roll = 0.0;
 
@@ -122,13 +123,13 @@ public class FocusBasedJMECamera extends Camera
 //      AxisAngle latitudeRotate = new AxisAngle(Axis.Y, -latitude);
 //      AxisAngle longitudeRotate = new AxisAngle(Axis.X, -longitude);
 //      AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
-      AxisAngle latitudeRotate = new AxisAngle(Axis.Y, -latitude);
+      AxisAngle latitudeRotate = new AxisAngle(Axis.X, -latitude);
 //      AxisAngle longitudeRotate = new AxisAngle(Axis.Z, -longitude);
-      AxisAngle longitudeRotate = new AxisAngle(Axis.Z, 0.0);
-      AxisAngle rollRotate = new AxisAngle(Axis.X, roll);
+      AxisAngle longitudeRotate = new AxisAngle(Axis.Y, -longitude);
+      AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
 
       RotationMatrix latLonOffset = new RotationMatrix();
-//      rotationMatrix.append(rotationOffset);
+      latLonOffset.append(cameraOrientationOffset);
       latLonOffset.append(latitudeRotate);
       latLonOffset.append(longitudeRotate);
       latLonOffset.append(rollRotate);
@@ -139,13 +140,17 @@ public class FocusBasedJMECamera extends Camera
       cameraPose.setToZero(zUpFrame);
 //      cameraPose.setPosition(focusPoint);
       cameraPose.appendTranslation(focusPoint);
-      cameraPose.appendRotation(cameraOrientationOffset);
+      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 //      cameraPose.appendRotation(latLonOffset);
+      cameraPose.appendRotation(cameraOrientationOffset);
+      cameraPose.appendRotation(latitudeRotate);
+      cameraPose.appendRotation(longitudeRotate);
+      cameraPose.appendRotation(rollRotate);
+//      cameraPose.appendRotation(cameraOrientationOffset);
 //      cameraPose.appendRotation(new YawPitchRoll(-longitude, -latitude, 0.0));
 //      cameraPose.setOrientation(orientation);
       cameraPose.appendTranslation(offsetFromFocusPoint);
 
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
 //      System.out.println(focusPoint.toString());
 
@@ -197,8 +202,6 @@ public class FocusBasedJMECamera extends Camera
       {
          latitude += tpf;
       }
-
-      updateCameraPose();
    }
 
    private void onMouseYDown(float value, float tpf)
@@ -207,18 +210,14 @@ public class FocusBasedJMECamera extends Camera
       {
          latitude -= tpf;
       }
-
-      updateCameraPose();
    }
 
    private void onMouseXLeft(float value, float tpf)
    {
       if (leftMousePressed)
       {
-         longitude += tpf;
+         longitude -= tpf;
       }
-
-      updateCameraPose();
    }
 
    private void onMouseXRight(float value, float tpf)
@@ -227,8 +226,6 @@ public class FocusBasedJMECamera extends Camera
       {
          longitude += tpf;
       }
-
-      updateCameraPose();
    }
 
    private void onMouseScrollUp(float value, float tpf)
