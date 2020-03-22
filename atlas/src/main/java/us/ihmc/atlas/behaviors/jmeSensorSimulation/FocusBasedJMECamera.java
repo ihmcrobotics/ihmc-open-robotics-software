@@ -21,11 +21,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FocusBasedJMECamera extends Camera
 {
-   private final Point3D focusPoint;
+   private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
    private double latitude = 0.0;
    private double longitude = 0.0;
 
-   private final Vector3D offsetFromFocusPoint;
+   private final Vector3D offsetFromFocusPoint = new Vector3D(0.0, 0.0, -10.0);
 
    private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D cameraPose = new FramePose3D();
@@ -49,15 +49,9 @@ public class FocusBasedJMECamera extends Camera
       zUpToYUp.set(0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0);
       zUpFrame.setOrientationAndUpdate(zUpToYUp);
 
-      focusPoint = new Point3D(0.0, 0.0, 5.0);
-      offsetFromFocusPoint = new Vector3D(0.0, 0.0, -10.0);
-
       setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
 
       updateCameraPose();
-
-//      setLocation(translation);
-//      lookAt(focusPoint, Vector3f.UNIT_Y);
 
       JMEInputMapperHelper inputMapper = new JMEInputMapperHelper(inputManager);
       inputMapper.addAnalogMapping("onMouseYUp", new MouseAxisTrigger(MouseInput.AXIS_Y, false), this::onMouseYUp);
@@ -87,7 +81,6 @@ public class FocusBasedJMECamera extends Camera
       down.setAndNegate(up);
       Vector3D cameraZAxis = new Vector3D(forward);
       Vector3D cameraYAxis = new Vector3D(up);
-//      Vector3D cameraYAxis = new Vector3D(down);
       Vector3D cameraXAxis = new Vector3D();
       cameraXAxis.cross(cameraYAxis, cameraZAxis);
       RotationMatrix cameraOrientationOffset = new RotationMatrix();
@@ -110,15 +103,11 @@ public class FocusBasedJMECamera extends Camera
       cameraPose.appendRotation(rollRotate);
       cameraPose.appendTranslation(offsetFromFocusPoint);
 
-//      System.out.println(focusPoint.toString());
-
       translationJME.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
       orientationJME.set(cameraPose.getOrientation().getX32(),
                          cameraPose.getOrientation().getY32(),
                          cameraPose.getOrientation().getZ32(),
                          cameraPose.getOrientation().getS32());
-
-//      System.out.println(translationJME.toString() + "   " + orientationJME.toString());
 
       setLocation(translationJME);
       setRotation(orientationJME);
