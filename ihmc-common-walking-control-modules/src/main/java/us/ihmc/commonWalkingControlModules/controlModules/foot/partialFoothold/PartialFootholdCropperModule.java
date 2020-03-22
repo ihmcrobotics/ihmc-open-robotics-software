@@ -17,23 +17,15 @@ import java.util.List;
 
 public class PartialFootholdCropperModule
 {
-   private enum RotationDetectorType
-   {
-      GEOMETRIC, KINEMATIC, VELOCITY, ANY, KINEMATIC_AND_VELOCITY;
-
-      static final RotationDetectorType[] values = {/*GEOMETRIC,*/ KINEMATIC, VELOCITY};
-   }
-
-   private final YoEnum<RotationDetectorType> rotationDetectorType;
    private final RotationEdgeCalculator copHistoryEdgeCalculator;
    private final CoPAndVelocityRotationEdgeCalculator copAndVelocityEdgeCalculator;
-   private final EnumMap<RotationDetectorType, FootRotationDetector> rotationDetectors = new EnumMap<>(RotationDetectorType.class);
    private final FootholdCropper footholdCropper;
    private final CropVerifier cropVerifier;
 
-   private final YoBoolean isRotating;
    private final YoBoolean isEdgeStable;
    private final YoBoolean shouldShrinkFoothold;
+
+   private final FootRotationDetector rotationDetector;
 
    private final EdgeVisualizer edgeVisualizer;
 
@@ -48,22 +40,14 @@ public class PartialFootholdCropperModule
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
-      isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
       isEdgeStable = new YoBoolean(side.getLowerCaseName() + "IsEdgeStable", registry);
       shouldShrinkFoothold = new YoBoolean(side.getLowerCaseName() + "ShouldShrinkFoothold", registry);
 
+      rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
 
       copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.BLUE, graphicsRegistry);
       copAndVelocityEdgeCalculator = new CoPAndVelocityRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.GRAY, graphicsRegistry);
 
-      FootRotationDetector velocityRotationDetector = new VelocityFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
-      FootRotationDetector kinematicRotationDetector = new KinematicFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
-      rotationDetectors.put(RotationDetectorType.KINEMATIC, kinematicRotationDetector);
-      rotationDetectors.put(RotationDetectorType.VELOCITY, velocityRotationDetector);
-
-      rotationDetectorType = YoEnum.create(side.getCamelCaseName() + "RotationDetectorType", RotationDetectorType.class, registry);
-
-      rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
 
 //      if (graphicsRegistry != null)
 //         edgeVisualizer = new EdgeVisualizer(side.getLowerCaseName(), Color.RED, registry, graphicsRegistry);
@@ -78,14 +62,14 @@ public class PartialFootholdCropperModule
 
    public void compute(FramePoint2DReadOnly measuredCoP, FramePoint2DReadOnly desiredCoP)
    {
-      boolean wasRotating = isRotating.getBooleanValue();
-      isRotating.set(computeIsRotating());
+      boolean wasRotating = rotationDetector.isRotating();
+      boolean isRotating = rotationDetector.compute();
       shouldShrinkFoothold.set(false);
 
       cropVerifier.update(desiredCoP);
       footholdCropper.update(measuredCoP);
 
-      if (!isRotating.getBooleanValue())
+      if (!isRotating)
       {
          if (wasRotating)
             resetEdgeCalculators();
@@ -115,7 +99,7 @@ public class PartialFootholdCropperModule
 
    public boolean isRotating()
    {
-      return isRotating.getBooleanValue();
+      return rotationDetector.compute();
    }
 
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
@@ -157,37 +141,6 @@ public class PartialFootholdCropperModule
          return null;
    }
 
-   private boolean computeIsRotating()
-   {
-      if (rotationDetectorType.getEnumValue() == RotationDetectorType.ANY)
-      {
-         boolean rotationDetected = false;
-         for (RotationDetectorType type : RotationDetectorType.values)
-         {
-            if (rotationDetectors.get(type).compute())
-               rotationDetected = true;
-         }
-
-         return rotationDetected;
-      }
-      else if (rotationDetectorType.getEnumValue() == RotationDetectorType.KINEMATIC_AND_VELOCITY)
-      {
-         boolean rotationDetected = rotationDetectors.get(RotationDetectorType.KINEMATIC).compute();
-         rotationDetected |= rotationDetectors.get(RotationDetectorType.VELOCITY).compute();
-         return rotationDetected;
-      }
-      else
-      {
-         return rotationDetectors.get(rotationDetectorType.getEnumValue()).compute();
-      }
-   }
-
-   private void resetRotationDetectors()
-   {
-      for (RotationDetectorType type : RotationDetectorType.values)
-         rotationDetectors.get(type).reset();
-   }
-
    private void resetEdgeCalculators()
    {
       if (edgeVisualizer != null)
@@ -208,9 +161,8 @@ public class PartialFootholdCropperModule
 
    public void reset()
    {
-      isRotating.set(false);
       isEdgeStable.set(false);
-      resetRotationDetectors();
+      rotationDetector.reset();
       resetEdgeCalculators();
       cropVerifier.reset();
       footholdCropper.reset();
