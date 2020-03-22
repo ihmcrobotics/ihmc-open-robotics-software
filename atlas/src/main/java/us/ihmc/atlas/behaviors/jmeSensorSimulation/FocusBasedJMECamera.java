@@ -130,8 +130,8 @@ public class FocusBasedJMECamera extends Camera
 
       RotationMatrix latLonOffset = new RotationMatrix();
       latLonOffset.append(cameraOrientationOffset);
-      latLonOffset.append(latitudeRotate);
       latLonOffset.append(longitudeRotate);
+      latLonOffset.append(latitudeRotate);
       latLonOffset.append(rollRotate);
 
 //      RigidBodyTransform transform = new RigidBodyTransform();
@@ -143,8 +143,8 @@ public class FocusBasedJMECamera extends Camera
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 //      cameraPose.appendRotation(latLonOffset);
       cameraPose.appendRotation(cameraOrientationOffset);
-      cameraPose.appendRotation(latitudeRotate);
       cameraPose.appendRotation(longitudeRotate);
+      cameraPose.appendRotation(latitudeRotate);
       cameraPose.appendRotation(rollRotate);
 //      cameraPose.appendRotation(cameraOrientationOffset);
 //      cameraPose.appendRotation(new YawPitchRoll(-longitude, -latitude, 0.0));
