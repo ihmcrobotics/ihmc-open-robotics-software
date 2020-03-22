@@ -21,11 +21,17 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FocusBasedJMECamera extends Camera
 {
+   private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
+
    private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
    private double latitude = 0.0;
    private double longitude = 0.0;
+   private double roll;
+   private double zoom = 10.0;
 
-   private final Vector3D offsetFromFocusPoint = new Vector3D(0.0, 0.0, -10.0);
+   private AxisAngle latitudeRotate = new AxisAngle();
+   private AxisAngle longitudeRotate = new AxisAngle();
+   private AxisAngle rollRotate = new AxisAngle();
 
    private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D cameraPose = new FramePose3D();
@@ -48,6 +54,18 @@ public class FocusBasedJMECamera extends Camera
       RotationMatrix zUpToYUp = new RotationMatrix();
       zUpToYUp.set(0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0);
       zUpFrame.setOrientationAndUpdate(zUpToYUp);
+
+      Vector3D up = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D forward = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D left = new Vector3D();
+      left.cross(up, forward);
+      Vector3D down = new Vector3D();
+      down.setAndNegate(up);
+      Vector3D cameraZAxis = new Vector3D(forward);
+      Vector3D cameraYAxis = new Vector3D(up);
+      Vector3D cameraXAxis = new Vector3D();
+      cameraXAxis.cross(cameraYAxis, cameraZAxis);
+      cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
 
       setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
 
@@ -73,26 +91,15 @@ public class FocusBasedJMECamera extends Camera
 
    private void updateCameraPose()
    {
-      Vector3D up = new Vector3D(0.0, 0.0, 1.0);
-      Vector3D forward = new Vector3D(1.0, 0.0, 0.0);
-      Vector3D left = new Vector3D();
-      left.cross(up, forward);
-      Vector3D down = new Vector3D();
-      down.setAndNegate(up);
-      Vector3D cameraZAxis = new Vector3D(forward);
-      Vector3D cameraYAxis = new Vector3D(up);
-      Vector3D cameraXAxis = new Vector3D();
-      cameraXAxis.cross(cameraYAxis, cameraZAxis);
-      RotationMatrix cameraOrientationOffset = new RotationMatrix();
-      cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
+      zoom = MathTools.clamp(zoom, 0.1, 100.0);
 
       latitude = MathTools.clamp(latitude, Math.PI / 2.0);
       longitude = EuclidCoreTools.trimAngleMinusPiToPi(longitude);
-      double roll = 0.0;
+      roll = 0.0;
 
-      AxisAngle latitudeRotate = new AxisAngle(Axis.X, -latitude);
-      AxisAngle longitudeRotate = new AxisAngle(Axis.Y, -longitude);
-      AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
+      latitudeRotate.set(Axis.X, -latitude);
+      longitudeRotate.set(Axis.Y, -longitude);
+      rollRotate.set(Axis.Z, roll);
 
       cameraPose.setToZero(zUpFrame);
       cameraPose.appendTranslation(focusPoint);
@@ -101,7 +108,7 @@ public class FocusBasedJMECamera extends Camera
       cameraPose.appendRotation(longitudeRotate);
       cameraPose.appendRotation(latitudeRotate);
       cameraPose.appendRotation(rollRotate);
-      cameraPose.appendTranslation(offsetFromFocusPoint);
+      cameraPose.appendTranslation(0.0, 0.0, -zoom);
 
       translationJME.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
       orientationJME.set(cameraPose.getOrientation().getX32(),
@@ -177,12 +184,12 @@ public class FocusBasedJMECamera extends Camera
 
    private void onMouseScrollUp(float value, float tpf)
    {
-
+      zoom -= value;
    }
 
    private void onMouseScrollDown(float value, float tpf)
    {
-
+      zoom += value;
    }
 
    private void onMouseButtonLeft(boolean isPressed, float tpf)
