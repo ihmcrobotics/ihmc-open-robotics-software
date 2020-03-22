@@ -23,6 +23,10 @@ public class FocusBasedJMECamera extends Camera
 {
    private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
 
+   private double zoomSpeed = 1.0;
+   private double latitudeSpeed = 5.0;
+   private double longitudeSpeed = 5.0;
+
    private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
    private double latitude = 0.0;
    private double longitude = 0.0;
@@ -154,7 +158,7 @@ public class FocusBasedJMECamera extends Camera
    {
       if (leftMousePressed)
       {
-         latitude += tpf;
+         latitude += latitudeSpeed * value;
       }
    }
 
@@ -162,7 +166,7 @@ public class FocusBasedJMECamera extends Camera
    {
       if (leftMousePressed)
       {
-         latitude -= tpf;
+         latitude -= latitudeSpeed * value;
       }
    }
 
@@ -170,7 +174,7 @@ public class FocusBasedJMECamera extends Camera
    {
       if (leftMousePressed)
       {
-         longitude -= tpf;
+         longitude -= longitudeSpeed * value;
       }
    }
 
@@ -178,18 +182,18 @@ public class FocusBasedJMECamera extends Camera
    {
       if (leftMousePressed)
       {
-         longitude += tpf;
+         longitude += longitudeSpeed * value;
       }
    }
 
    private void onMouseScrollUp(float value, float tpf)
    {
-      zoom -= value;
+      zoom -= zoomSpeed * value;
    }
 
    private void onMouseScrollDown(float value, float tpf)
    {
-      zoom += value;
+      zoom += zoomSpeed * value;
    }
 
    private void onMouseButtonLeft(boolean isPressed, float tpf)
