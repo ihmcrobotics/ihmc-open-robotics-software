@@ -91,7 +91,7 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
@@ -110,6 +110,8 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
          edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override

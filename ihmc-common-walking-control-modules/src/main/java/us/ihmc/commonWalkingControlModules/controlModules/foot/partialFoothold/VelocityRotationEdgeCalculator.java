@@ -117,7 +117,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
 
@@ -150,6 +150,8 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
          edgeVisualizer.visualize(true);
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override
