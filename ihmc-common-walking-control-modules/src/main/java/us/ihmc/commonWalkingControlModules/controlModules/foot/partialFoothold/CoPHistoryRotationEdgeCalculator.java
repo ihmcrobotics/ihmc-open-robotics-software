@@ -102,7 +102,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       lineCalculator.update(measuredCoP);
       lineOfRotationInSole.set(lineCalculator.getMeanLine());
@@ -118,6 +118,8 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
          edgeVisualizer.visualize(true);
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override

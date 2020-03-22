@@ -127,7 +127,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       if (!measuredCoP.containsNaN())
          pointOfRotation.update(measuredCoP);
@@ -145,6 +145,8 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
          edgeVisualizer.visualize(true);
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override
