@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -36,6 +38,9 @@ public class FootholdRotationParameters
    private final DoubleProvider minimumAreaForCropping;
    private final IntegerProvider shrinkMaxLimit;
    private final DoubleProvider distanceFromRotationToCrop;
+
+   private final BooleanParameter doPartialFootholdDetection;
+   private final BooleanParameter applyPartialFootholds;
 
    public FootholdRotationParameters(YoVariableRegistry registry)
    {
@@ -73,6 +78,9 @@ public class FootholdRotationParameters
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
       shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 1);
       distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.0);
+
+      doPartialFootholdDetection = new BooleanParameter("doPartialFootholdDetection", registry, true);
+      applyPartialFootholds = new BooleanParameter("applyPartialFootholds", registry, false);
    }
 
    public DoubleProvider getGeometricDetectionAngleThreshold()
@@ -188,5 +196,15 @@ public class FootholdRotationParameters
    public DoubleProvider getTransverseCoPHistoryStdDev()
    {
       return transverseCoPHistoryStdDev;
+   }
+
+   public BooleanProvider getApplyPartialFootholds()
+   {
+      return applyPartialFootholds;
+   }
+
+   public BooleanProvider getDoPartialFootholdDetection()
+   {
+      return doPartialFootholdDetection;
    }
 }
