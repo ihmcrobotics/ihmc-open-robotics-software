@@ -15,11 +15,8 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class FocusBasedJMECamera extends Camera
@@ -27,15 +24,11 @@ public class FocusBasedJMECamera extends Camera
    private final Point3D focusPoint;
    private double latitude = 0.0;
    private double longitude = 0.0;
-//   private YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
-//   private final Quaternion orientation;
    private final Vector3D offsetFromFocusPoint;
 
    private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D cameraPose = new FramePose3D();
-//   private final RigidBodyTransform transform = new RigidBodyTransform();
-//   private final Point3D translation;
 
    private final Vector3f translationJME = new Vector3f();
    private final com.jme3.math.Quaternion orientationJME = new com.jme3.math.Quaternion();
@@ -57,12 +50,7 @@ public class FocusBasedJMECamera extends Camera
       zUpFrame.setOrientationAndUpdate(zUpToYUp);
 
       focusPoint = new Point3D(0.0, 0.0, 5.0);
-//      translation = new Point3D(-2.0, 0.7, 1.0);
       offsetFromFocusPoint = new Vector3D(0.0, 0.0, -10.0);
-//      orientation = new Quaternion(0.0, -Math.PI / 2.0, 0.0);
-
-//      focusPoint = new Vector3f(0.0f, 0.0f, 0.0f);
-//      translation = new Vector3f(-2.0f, 0.7f, 1.0f);
 
       setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
 
@@ -105,52 +93,22 @@ public class FocusBasedJMECamera extends Camera
       RotationMatrix cameraOrientationOffset = new RotationMatrix();
       cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
 
-//      up = new Vector3D(0.0, -1.0, 0.0);
-//      forward = new Vector3D(1.0, 0.0, 0.0);
-//      left = new Vector3D();
-//      left.cross(up, forward);
-//      rotationOffset.setColumns(forward, left, up);
-
       latitude = MathTools.clamp(latitude, Math.PI / 2.0);
       longitude = EuclidCoreTools.trimAngleMinusPiToPi(longitude);
       double roll = 0.0;
 
-//      yawPitchRoll.set(-latitude, -longitude, roll);
-
-//      AxisAngle latitudeRotate = new AxisAngle(Axis.X, -latitude);
-//      AxisAngle longitudeRotate = new AxisAngle(Axis.Y, -longitude);
-//      AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
-//      AxisAngle latitudeRotate = new AxisAngle(Axis.Y, -latitude);
-//      AxisAngle longitudeRotate = new AxisAngle(Axis.X, -longitude);
-//      AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
       AxisAngle latitudeRotate = new AxisAngle(Axis.X, -latitude);
-//      AxisAngle longitudeRotate = new AxisAngle(Axis.Z, -longitude);
       AxisAngle longitudeRotate = new AxisAngle(Axis.Y, -longitude);
       AxisAngle rollRotate = new AxisAngle(Axis.Z, roll);
 
-      RotationMatrix latLonOffset = new RotationMatrix();
-      latLonOffset.append(cameraOrientationOffset);
-      latLonOffset.append(longitudeRotate);
-      latLonOffset.append(latitudeRotate);
-      latLonOffset.append(rollRotate);
-
-//      RigidBodyTransform transform = new RigidBodyTransform();
-//      transform.
-
       cameraPose.setToZero(zUpFrame);
-//      cameraPose.setPosition(focusPoint);
       cameraPose.appendTranslation(focusPoint);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-//      cameraPose.appendRotation(latLonOffset);
       cameraPose.appendRotation(cameraOrientationOffset);
       cameraPose.appendRotation(longitudeRotate);
       cameraPose.appendRotation(latitudeRotate);
       cameraPose.appendRotation(rollRotate);
-//      cameraPose.appendRotation(cameraOrientationOffset);
-//      cameraPose.appendRotation(new YawPitchRoll(-longitude, -latitude, 0.0));
-//      cameraPose.setOrientation(orientation);
       cameraPose.appendTranslation(offsetFromFocusPoint);
-
 
 //      System.out.println(focusPoint.toString());
 
