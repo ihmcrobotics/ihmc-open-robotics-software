@@ -15,6 +15,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -23,9 +24,9 @@ public class FocusBasedJMECamera extends Camera
    private final PoseReferenceFrame zUpFrame = new PoseReferenceFrame("ZUpFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D cameraPose = new FramePose3D();
 
-   private AxisAngle latitudeAxisAngle = new AxisAngle();
-   private AxisAngle longitudeAxisAngle = new AxisAngle();
-   private AxisAngle rollAxisAngle = new AxisAngle();
+   private final AxisAngle latitudeAxisAngle = new AxisAngle();
+   private final AxisAngle longitudeAxisAngle = new AxisAngle();
+   private final AxisAngle rollAxisAngle = new AxisAngle();
 
    private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
 
@@ -40,6 +41,10 @@ public class FocusBasedJMECamera extends Camera
    private double roll;
    private double zoom = 10.0;
 
+   private final Vector3D up;
+   private final Vector3D forward;
+   private final Vector3D left;
+   private final Vector3D down;
 
    private final Vector3f translationJME = new Vector3f();
    private final com.jme3.math.Quaternion orientationJME = new com.jme3.math.Quaternion();
@@ -56,15 +61,17 @@ public class FocusBasedJMECamera extends Camera
    {
       super(width, height);
 
+      setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
+
       RotationMatrix zUpToYUp = new RotationMatrix();
       zUpToYUp.set(0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0);
       zUpFrame.setOrientationAndUpdate(zUpToYUp);
 
-      Vector3D up = new Vector3D(0.0, 0.0, 1.0);
-      Vector3D forward = new Vector3D(1.0, 0.0, 0.0);
-      Vector3D left = new Vector3D();
+      up = new Vector3D(0.0, 0.0, 1.0);
+      forward = new Vector3D(1.0, 0.0, 0.0);
+      left = new Vector3D();
       left.cross(up, forward);
-      Vector3D down = new Vector3D();
+      down = new Vector3D();
       down.setAndNegate(up);
       Vector3D cameraZAxis = new Vector3D(forward);
       Vector3D cameraYAxis = new Vector3D(up);
@@ -72,7 +79,8 @@ public class FocusBasedJMECamera extends Camera
       cameraXAxis.cross(cameraYAxis, cameraZAxis);
       cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
 
-      setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
+      focusPointPose.changeFrame(zUpFrame);
+      changeCameraPosition(-2.0, 0.7, 1.0);
 
       updateCameraPose();
 
@@ -92,6 +100,30 @@ public class FocusBasedJMECamera extends Camera
       inputMapper.addActionMapping("onKeyQ", new KeyTrigger(KeyInput.KEY_Q), this::onKeyQ);
       inputMapper.addActionMapping("onKeyZ", new KeyTrigger(KeyInput.KEY_Z), this::onKeyZ);
       inputMapper.build();
+   }
+
+   public void changeCameraPosition(double x, double y, double z)
+   {
+      Point3D desiredCameraPosition = new Point3D(x, y, z);
+
+      zoom = desiredCameraPosition.distance(focusPointPose.getPosition());
+
+      Vector3D fromFocusToCamera = new Vector3D();
+      fromFocusToCamera.sub(desiredCameraPosition, focusPointPose.getPosition());
+      fromFocusToCamera.normalize();
+      Vector3D fromCameraToFocus = new Vector3D();
+      fromCameraToFocus.setAndNegate(fromFocusToCamera);
+      // We remove the component along up to be able to compute the longitude
+      fromCameraToFocus.scaleAdd(-fromCameraToFocus.dot(down), down, fromCameraToFocus);
+
+      latitude = Math.PI / 2.0 - fromFocusToCamera.angle(down);
+      longitude = fromCameraToFocus.angle(forward);
+
+      Vector3D cross = new Vector3D();
+      cross.cross(fromCameraToFocus, forward);
+
+      if (cross.dot(down) > 0.0)
+         longitude = -longitude;
    }
 
    private void updateCameraPose()

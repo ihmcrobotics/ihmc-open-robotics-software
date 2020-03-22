@@ -15,10 +15,12 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.opengl.GLRenderer;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.plugins.ogre.MaterialLoader;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.jme3.system.JmeSystem;
@@ -26,10 +28,18 @@ import com.jme3.system.lwjgl.LwjglContext;
 import com.jme3.texture.Texture;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
+import javafx.scene.paint.Color;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
 import jme3tools.optimize.GeometryBatchFactory;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEMeshDataInterpreter;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
 import us.ihmc.log.LogTools;
@@ -79,6 +89,7 @@ public class JMEInSwingWindowEnvironment
       appSettings.setAudioRenderer(null);
       appSettings.setResolution(1100, 800);
       appSettings.setVSync(true);
+      appSettings.setSamples(4);
 
       jme.setSimpleInitApp(this::simpleInitApp);
       jme.setInitialize(this::initialize);
@@ -86,7 +97,7 @@ public class JMEInSwingWindowEnvironment
       jme.setPauseOnLostFocus(false);
       jme.setShowSettings(false);
       jme.setSettings(appSettings);
-      jme.setDisplayFps(true);
+      jme.setDisplayFps(false);
       jme.setDisplayStatView(false);
 
       jme.createCanvas();
@@ -128,19 +139,15 @@ public class JMEInSwingWindowEnvironment
 
       customCamera = new FocusBasedJMECamera(1100, 800, jme.getInputManager());
 
-//      JMECamera customCamera = new JMECamera(1100, 800);
-
-//      Camera customCamera = new Camera(1100, 800);
-//      customCamera.setFrustumPerspective(45f, (float)customCamera.getWidth() / customCamera.getHeight(), 1f, 1000f);
-//      customCamera.setLocation(new Vector3f(0f, 0f, 10f));
-//      customCamera.lookAt(new Vector3f(0f, 0f, 0f), Vector3f.UNIT_Y);
-
       ViewPort customViewport = jme.getRenderManager().createMainView("JMEViewport", customCamera);
       customViewport.attachScene(jme.getRootNode());
       customViewport.setClearFlags(true, true, true);
 
-      setUpGrid();
       setupSky();
+
+      createCoordinateFrame();
+
+      setUpGrid();
 
       JFrame frame = new JFrame("JME");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -157,9 +164,60 @@ public class JMEInSwingWindowEnvironment
       frame.pack();
       frame.setLocationByPlatform(true);
       frame.setVisible(true);
-
-//      jme.getContext()
    }
+
+   private void createCoordinateFrame()
+   {
+      double length = 1.0;
+      double radius = 0.02 * length;
+      double coneHeight = 0.10 * length;
+      double coneRadius = 0.05 * length;
+      Node coordinateSystemNode = new Node();
+      int axisSamples = 10;
+      int radialSamples = 1;
+      boolean closed = true;
+
+      JMEMultiColorMeshBuilder meshBuilder = new JMEMultiColorMeshBuilder();
+      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
+      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(length, 0.0, 0.0), new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), Color.RED);
+      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
+      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, length, 0.0), new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0), Color.GREEN);
+      meshBuilder.addCylinder(length, radius, new Point3D(), new AxisAngle(), Color.BLUE);
+      meshBuilder.addCone(coneHeight, coneRadius, new Point3D(0.0, 0.0, length), new AxisAngle(), Color.BLUE);
+      Mesh mesh = meshBuilder.generateMesh();
+
+      Geometry geometry = new Geometry("g1", mesh);
+      geometry.setMaterial(meshBuilder.generateMaterial(jme.getAssetManager()));
+
+
+////      Cylinder cylinder = new Cylinder(axisSamples, radialSamples, (float) radius, (float) length, closed);
+//      Material blueMaterial = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+////      blueMaterial.setColor("Color", ColorRGBA.Blue);
+////      Texture texture = new Texture();
+//      Texture texture = jme.getAssetManager().loadTexture("palette.png");
+////      Texture texture = jme.getAssetManager().loadTexture("running-man-32x32.png");
+//      blueMaterial.setTexture("ColorMap", texture);
+//      geometry.setMaterial(blueMaterial);
+
+      zUpNode.attachChild(geometry);
+//      cylinderGeometry.
+
+   }
+
+//   private MeshDataHolder setColor(MeshDataHolder input, Color color)
+//   {
+//      if (input == null)
+//         return null;
+//      Point3D32[] vertices = input.getVertices();
+//      int[] triangleIndices = input.getTriangleIndices();
+//      Vector3D32[] vertexNormals = input.getVertexNormals();
+//      TexCoord2f[] inputTexturePoints = input.getTexturePoints();
+//      TexCoord2f[] outputTexturePoints = new TexCoord2f[inputTexturePoints.length];
+//      float[] textureLocation = colorPalette.getTextureLocation(color);
+//      for (int i = 0; i < inputTexturePoints.length; i++)
+//         outputTexturePoints[i] = new TexCoord2f(textureLocation);
+//      return new MeshDataHolder(vertices, outputTexturePoints, triangleIndices, vertexNormals);
+//   }
 
    private void initialize()
    {
