@@ -34,9 +34,6 @@ public class FocusBasedJMECamera extends Camera
    private double longitudeSpeed = 5.0;
    private double translateSpeed = 5.0;
 
-   private final Vector3D translationOffset = new Vector3D();
-//   private final Point3D focusPoint = new Point3D(0.0, 0.0, 5.0);
-   private final PoseReferenceFrame zUpLongitudeFrame = new PoseReferenceFrame("ZUpLongitudeFrame", zUpFrame);
    private final FramePose3D focusPointPose = new FramePose3D();
    private double latitude = 0.0;
    private double longitude = 0.0;
@@ -109,11 +106,9 @@ public class FocusBasedJMECamera extends Camera
       longitudeAxisAngle.set(Axis.Y, -longitude);
       rollAxisAngle.set(Axis.Z, roll);
 
-
       focusPointPose.changeFrame(ReferenceFrame.getWorldFrame());
       focusPointPose.setOrientation(longitudeAxisAngle);
       focusPointPose.changeFrame(zUpFrame);
-//      focusPointPose.appendTranslation(translationOffset);
 
       cameraPose.setToZero(zUpFrame);
       cameraPose.appendTranslation(focusPointPose.getPosition());
@@ -139,44 +134,26 @@ public class FocusBasedJMECamera extends Camera
       if (isWPressed)
       {
          focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
-//         focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
-//         translationOffset.addX(translateSpeed * tpf);
-//         translationOffset.addZ(translateSpeed * tpf);
       }
       if (isAPressed)
       {
          focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
-//         focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
-//         translationOffset.addY(translateSpeed * tpf);
-//         translationOffset.addX(translateSpeed * tpf);
       }
       if (isSPressed)
       {
          focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
-//         focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
-//         translationOffset.subX(translateSpeed * tpf);
-//         translationOffset.subZ(translateSpeed * tpf);
       }
       if (isDPressed)
       {
          focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
-//         focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
-//         translationOffset.subY(translateSpeed * tpf);
-//         translationOffset.subX(translateSpeed * tpf);
       }
       if (isQPressed)
       {
          focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
-//         focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
-//         translationOffset.addZ(translateSpeed * tpf);
-//         translationOffset.addY(translateSpeed * tpf);
       }
       if (isZPressed)
       {
          focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
-//         focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
-//         translationOffset.subZ(translateSpeed * tpf);
-//         translationOffset.subY(translateSpeed * tpf);
       }
 
       updateCameraPose();
