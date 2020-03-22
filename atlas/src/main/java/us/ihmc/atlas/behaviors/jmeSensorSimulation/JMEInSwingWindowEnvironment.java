@@ -11,7 +11,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.opengl.GLRenderer;
 import com.jme3.renderer.queue.RenderQueue;
@@ -31,8 +30,6 @@ import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
 import jme3tools.optimize.GeometryBatchFactory;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
 import us.ihmc.log.LogTools;
@@ -63,6 +60,7 @@ public class JMEInSwingWindowEnvironment
    private DirectionalLight primaryLight;
    private AmbientLight ambientLight;
    private ArrayList<DirectionalLight> lights = new ArrayList<>();
+   private FocusBasedJMECamera customCamera;
 
    public JMEInSwingWindowEnvironment()
    {
@@ -84,6 +82,7 @@ public class JMEInSwingWindowEnvironment
 
       jme.setSimpleInitApp(this::simpleInitApp);
       jme.setInitialize(this::initialize);
+      jme.setSimpleUpdate(this::simpleUpdate);
       jme.setPauseOnLostFocus(false);
       jme.setShowSettings(false);
       jme.setSettings(appSettings);
@@ -127,7 +126,8 @@ public class JMEInSwingWindowEnvironment
       jme.getRenderManager().removeMainView(jme.getViewPort());
       jme.getRenderManager().removeMainView(jme.getGuiViewPort());
 
-      CustomJMECamera customCamera = new CustomJMECamera(1100, 800);
+      customCamera = new FocusBasedJMECamera(1100, 800, jme.getInputManager());
+
 //      JMECamera customCamera = new JMECamera(1100, 800);
 
 //      Camera customCamera = new Camera(1100, 800);
@@ -164,6 +164,11 @@ public class JMEInSwingWindowEnvironment
    private void initialize()
    {
 
+   }
+
+   private void simpleUpdate(float tpf)
+   {
+      customCamera.simpleUpdate(tpf);
    }
 
    private void setupSky()
