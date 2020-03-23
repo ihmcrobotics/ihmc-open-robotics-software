@@ -46,9 +46,7 @@ public class JMEInputMapperHelper implements ActionListener, AnalogListener
 
    public void build()
    {
-      String[] mappingNames = inputNames.toArray(new String[0]);
-      System.out.println(mappingNames);
-      inputManager.addListener(this, mappingNames);
+      inputManager.addListener(this, inputNames.toArray(new String[0]));
    }
 
    @Override
