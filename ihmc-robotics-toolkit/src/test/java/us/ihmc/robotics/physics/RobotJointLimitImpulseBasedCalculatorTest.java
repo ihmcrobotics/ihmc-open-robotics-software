@@ -70,6 +70,8 @@ public class RobotJointLimitImpulseBasedCalculatorTest
 
          RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
          calculator.setSpringConstant(0.0);
+         calculator.initialize(dt);
+         calculator.updateInertia(null, null);
          calculator.computeImpulse(dt);
 
          String message = "Iteration " + i;
@@ -132,6 +134,8 @@ public class RobotJointLimitImpulseBasedCalculatorTest
 
          RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
          calculator.setSpringConstant(0.0);
+         calculator.initialize(dt);
+         calculator.updateInertia(null, null);
          calculator.computeImpulse(dt);
 
          String message = "Iteration " + i;

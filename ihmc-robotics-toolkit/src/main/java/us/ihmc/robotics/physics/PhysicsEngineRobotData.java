@@ -15,8 +15,9 @@ public class PhysicsEngineRobotData implements CollidableHolder
    private final MultiBodySystemBasics multiBodySystem;
    private final List<Collidable> collidables;
 
-   // Specific to the type of engine used:
+   // TODO Following fields are specific to the type of engine used, they need interfacing.
    private final SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin;
+   private final RobotJointLimitImpulseBasedCalculator jointLimitConstraintCalculator;
 
    public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter robotInitialStateWriter,
                                  MultiBodySystemStateWriter controllerOutputWriter, RobotCollisionModel robotCollisionModel)
@@ -32,6 +33,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       collidables = robotCollisionModel.getRobotCollidables(multiBodySystem);
 
       forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem, controllerOutputWriter);
+      jointLimitConstraintCalculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsPlugin.getForwardDynamicsCalculator());
    }
 
    public void initialize()
@@ -64,6 +66,11 @@ public class PhysicsEngineRobotData implements CollidableHolder
    public SingleRobotForwardDynamicsPlugin getForwardDynamicsPlugin()
    {
       return forwardDynamicsPlugin;
+   }
+
+   public RobotJointLimitImpulseBasedCalculator getJointLimitConstraintCalculator()
+   {
+      return jointLimitConstraintCalculator;
    }
 
    public RigidBodyBasics getRootBody()

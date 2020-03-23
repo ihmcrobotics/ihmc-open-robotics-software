@@ -183,23 +183,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    }
 
    @Override
-   public void setExternalTargets(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
-   {
-      rigidBodyTwistModifierA.clear(3);
-      jointTwistModifierA.clear(3);
-      rigidBodyTwistModifierA.addAll(rigidBodyTargets);
-      jointTwistModifierA.addAll(jointTargets);
-
-      if (rootB != null)
-      {
-         rigidBodyTwistModifierB.clear(3);
-         jointTwistModifierB.clear(3);
-         rigidBodyTwistModifierB.addAll(rigidBodyTargets);
-         jointTwistModifierB.addAll(jointTargets);
-      }
-   }
-
-   @Override
    public void initialize(double dt)
    {
       EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionResult.getCollisionAxisForA(), contactFrameOrientation);
@@ -220,8 +203,41 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          noImpulseVelocityB.changeFrame(contactFrame);
       }
 
-      updateInertia();
       isFirstUpdate = true;
+   }
+
+   @Override
+   public void updateInertia(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
+   {
+      rigidBodyTwistModifierA.clear(3);
+      jointTwistModifierA.clear(3);
+      if (rigidBodyTargets != null)
+         rigidBodyTwistModifierA.addAll(rigidBodyTargets);
+      if (jointTargets != null)
+         jointTwistModifierA.addAll(jointTargets);
+
+      if (rootB != null)
+      {
+         rigidBodyTwistModifierB.clear(3);
+         jointTwistModifierB.clear(3);
+         if (rigidBodyTargets != null)
+            rigidBodyTwistModifierB.addAll(rigidBodyTargets);
+         if (jointTargets != null)
+            jointTwistModifierB.addAll(jointTargets);
+      }
+
+      // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
+      computeApparentInertiaInverse(contactingBodyA, responseCalculatorA, rigidBodyTwistModifierA, jointTwistModifierA, inverseApparentInertiaA);
+
+      if (forwardDynamicsCalculatorB != null)
+      {
+         computeApparentInertiaInverse(contactingBodyB, responseCalculatorB, rigidBodyTwistModifierB, jointTwistModifierB, inverseApparentInertiaB);
+         CommonOps.add(inverseApparentInertiaA, inverseApparentInertiaB, M_inv);
+      }
+      else
+      {
+         M_inv.set(inverseApparentInertiaA);
+      }
    }
 
    static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
@@ -375,24 +391,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       isFirstUpdate = false;
    }
 
-   private void updateInertia()
-   {
-      // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
-      computeApparentInertiaInverse(contactingBodyA, responseCalculatorA, rigidBodyTwistModifierA, jointTwistModifierA, inverseApparentInertiaA);
-      //            responseCalculatorA.computeRigidBodyApparentLinearInertiaInverse(contactingBodyA, contactFrame, inverseApparentInertiaA);
-
-      if (forwardDynamicsCalculatorB != null)
-      {
-         computeApparentInertiaInverse(contactingBodyB, responseCalculatorB, rigidBodyTwistModifierB, jointTwistModifierB, inverseApparentInertiaB);
-         //               responseCalculatorB.computeRigidBodyApparentLinearInertiaInverse(contactingBodyB, contactFrame, inverseApparentInertiaB);
-         CommonOps.add(inverseApparentInertiaA, inverseApparentInertiaB, M_inv);
-      }
-      else
-      {
-         M_inv.set(inverseApparentInertiaA);
-      }
-   }
-
    private final SpatialImpulse testImpulse = new SpatialImpulse();
    private final Twist testTwist = new Twist();
 
@@ -426,7 +424,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          for (JointBasics externalTarget : jointTwistModifierToUpdate.getJoints())
          {
             DenseMatrix64F externalInertiaMatrix = jointTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
-            externalInertiaMatrix.set(calculator.getJointTwistChange(externalTarget));
+            CommonOps.insert(calculator.getJointTwistChange(externalTarget), externalInertiaMatrix, 0, axis);
          }
 
          calculator.reset();

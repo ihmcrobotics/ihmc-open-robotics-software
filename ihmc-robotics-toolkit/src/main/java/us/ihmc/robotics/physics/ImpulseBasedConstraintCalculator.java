@@ -13,9 +13,10 @@ public interface ImpulseBasedConstraintCalculator
 {
    void initialize(double dt);
 
+   void updateInertia(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets);
+
    default void computeImpulse(double dt)
    {
-      initialize(dt);
       updateImpulse(dt, 1.0);
    }
 
@@ -55,8 +56,6 @@ public interface ImpulseBasedConstraintCalculator
    RigidBodyBasics getRootBody(int index);
 
    DenseMatrix64F getJointVelocityChange(int index);
-
-   void setExternalTargets(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets);
 
    List<? extends RigidBodyBasics> getRigidBodyTargets();
 

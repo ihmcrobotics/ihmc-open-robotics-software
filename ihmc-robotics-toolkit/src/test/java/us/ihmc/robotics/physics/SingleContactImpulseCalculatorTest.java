@@ -61,6 +61,8 @@ public class SingleContactImpulseCalculatorTest
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult, worldFrame, forwardDynamicsCalculatorA, null);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
+         impulseCalculator.initialize(dt);
+         impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
          updateVelocities(impulseCalculator, dt);
 
@@ -96,6 +98,9 @@ public class SingleContactImpulseCalculatorTest
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
+         impulseCalculator.initialize(dt);
+         impulseCalculator.updateInertia(null, null);
+
          try
          {
             impulseCalculator.computeImpulse(dt);
