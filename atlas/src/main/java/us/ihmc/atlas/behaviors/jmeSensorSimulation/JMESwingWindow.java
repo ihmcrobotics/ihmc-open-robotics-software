@@ -3,12 +3,15 @@ package us.ihmc.atlas.behaviors.jmeSensorSimulation;
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingSphere;
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Sphere;
 import javafx.scene.paint.Color;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 import javax.swing.*;
@@ -18,14 +21,12 @@ import java.awt.*;
 public class JMESwingWindow
 {
    private final JMECanvasApplication jmeCanvasApplication;
-   private final AssetManager assetManager;
-   private final Node rootNode;
+   private AssetManager assetManager;
+   private Node rootNode;
 
    public JMESwingWindow()
    {
       jmeCanvasApplication = new JMECanvasApplication();
-      assetManager = jmeCanvasApplication.getJME().getAssetManager();
-      rootNode = jmeCanvasApplication.getZUpNode();
 
       jmeCanvasApplication.enqueue(this::setupJME);
 
@@ -48,9 +49,50 @@ public class JMESwingWindow
 
    private void setupJME()
    {
+      assetManager = jmeCanvasApplication.getJME().getAssetManager();
+      rootNode = jmeCanvasApplication.getZUpNode();
+
       jmeCanvasApplication.setupConstantColorSky(Color.GRAY);
       jmeCanvasApplication.setupPointLighting();
-      jmeCanvasApplication.createCoordinateFrame();
+      jmeCanvasApplication.createCoordinateFrame(0.3);
+
+      addDoor();
+
+      rootNode.attachChild(addNormalSphere(0.3, 1.0, -1.0, 1.0, Color.RED));
+//      rootNode.attachChild(addMeshBuilderSphere(0.3, 1.0, -1.0, 1.0, Color.RED));
+   }
+
+   private void addDoor()
+   {
+      Node doorNode = new Node();
+
+      Spatial doorModel = assetManager.loadModel("models/door.obj");
+
+      AxisAngle axisAngle = new AxisAngle(Axis.Y, Math.PI);
+
+      us.ihmc.euclid.tuple4D.Quaternion q = new us.ihmc.euclid.tuple4D.Quaternion(axisAngle);
+
+      Quaternion quaternion = new Quaternion();
+      quaternion.set(q.getX32(), q.getY32(), q.getZ32(), q.getS32());
+      doorModel.setLocalRotation(quaternion);
+
+      doorModel.setLocalTranslation(0.921900f, 0f, 2.043600f);
+
+      doorNode.attachChild(doorModel);
+
+      axisAngle = new AxisAngle(Axis.Z, Math.PI / 2.0);
+      q = new us.ihmc.euclid.tuple4D.Quaternion(axisAngle);
+      quaternion.set(q.getX32(), q.getY32(), q.getZ32(), q.getS32());
+      doorNode.setLocalRotation(quaternion);
+
+      rootNode.attachChild(doorNode);
+
+//      Geometry teaGeom = (Geometry) assetManager.loadModel("Models/Teapot/Teapot.obj");
+//      teaGeom.setLocalTranslation(1.0f, 1.0f, 1.0f);
+//      rootNode.attachChild(teaGeom);
+
+//      Spatial object3DSGraphics = JME3DLoaderUtils.load3DModel("models/door.obj", assetManager, Graphics3DNodeType.VISUALIZATION);
+//      rootNode.attachChild(object3DSGraphics);
    }
 
    private Geometry addMeshBuilderSphere(double radius, double x, double y, double z, javafx.scene.paint.Color color)
@@ -68,7 +110,7 @@ public class JMESwingWindow
       Sphere sphere = new Sphere(10, 10, (float) radius);
       Geometry geometry = new Geometry("meep2", sphere);
       Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-      material.setColor("Diffuse", new ColorRGBA((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue(), 1.0f));
+      material.setColor("Diffuse", JMEColorConversions.toJMEColor(color));
       geometry.setMaterial(material);
       geometry.setLocalTranslation((float) x, (float) y, (float) z);
       return geometry;

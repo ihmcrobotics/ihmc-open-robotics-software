@@ -1,5 +1,7 @@
 package us.ihmc.atlas.behaviors.jmeSensorSimulation;
 
+import com.jme3.asset.AssetManager;
+import com.jme3.bounding.BoundingSphere;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -8,6 +10,8 @@ import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.scene.Geometry;
+import javafx.scene.paint.Color;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -41,6 +45,8 @@ public class FocusBasedJMECamera extends Camera
    private double roll;
    private double zoom = 10.0;
 
+   private final Geometry focusPointSphere;
+
    private final Vector3D up;
    private final Vector3D forward;
    private final Vector3D left;
@@ -57,7 +63,7 @@ public class FocusBasedJMECamera extends Camera
    private boolean isQPressed = false;
    private boolean isZPressed = false;
 
-   public FocusBasedJMECamera(int width, int height, InputManager inputManager)
+   public FocusBasedJMECamera(int width, int height, InputManager inputManager, AssetManager assetManager)
    {
       super(width, height);
 
@@ -78,6 +84,11 @@ public class FocusBasedJMECamera extends Camera
       Vector3D cameraXAxis = new Vector3D();
       cameraXAxis.cross(cameraYAxis, cameraZAxis);
       cameraOrientationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
+
+      JMEMultiColorMeshBuilder colorMeshBuilder = new JMEMultiColorMeshBuilder();
+      colorMeshBuilder.addSphere((float) 1.0, new Point3D(0.0, 0.0, 0.0), Color.DARKRED);
+      focusPointSphere = new Geometry("FocusPointViz", colorMeshBuilder.generateMesh());
+      focusPointSphere.setMaterial(colorMeshBuilder.generateMaterial(assetManager));
 
       focusPointPose.changeFrame(zUpFrame);
       changeCameraPosition(-2.0, 0.7, 1.0);
@@ -100,6 +111,12 @@ public class FocusBasedJMECamera extends Camera
       inputMapper.addActionMapping("onKeyQ", new KeyTrigger(KeyInput.KEY_Q), this::onKeyQ);
       inputMapper.addActionMapping("onKeyZ", new KeyTrigger(KeyInput.KEY_Z), this::onKeyZ);
       inputMapper.build();
+
+   }
+
+   public Geometry getFocusPointSphere()
+   {
+      return focusPointSphere;
    }
 
    public void changeCameraPosition(double x, double y, double z)
@@ -141,6 +158,9 @@ public class FocusBasedJMECamera extends Camera
       focusPointPose.changeFrame(ReferenceFrame.getWorldFrame());
       focusPointPose.setOrientation(longitudeAxisAngle);
       focusPointPose.changeFrame(zUpFrame);
+
+      focusPointSphere.setLocalTranslation((float) focusPointPose.getX(), (float) focusPointPose.getY(), (float) focusPointPose.getZ());
+      focusPointSphere.setLocalScale((float) (0.0035 * zoom));
 
       cameraPose.setToZero(zUpFrame);
       cameraPose.appendTranslation(focusPointPose.getPosition());

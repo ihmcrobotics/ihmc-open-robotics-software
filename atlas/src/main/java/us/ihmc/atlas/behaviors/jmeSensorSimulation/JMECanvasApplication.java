@@ -78,7 +78,7 @@ public class JMECanvasApplication
       jme.setShowSettings(false);
       jme.setSettings(appSettings);
       jme.setDisplayFps(false);
-      jme.setDisplayStatView(true);
+      jme.setDisplayStatView(false);
 
       jme.createCanvas();
    }
@@ -100,8 +100,10 @@ public class JMECanvasApplication
       jme.getFlyByCamera().setEnabled(false);
       jme.getViewPort().setEnabled(false);
       jme.getRenderManager().removeMainView(jme.getViewPort());
+      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
 
-      customCamera = new FocusBasedJMECamera(1100, 800, jme.getInputManager());
+      customCamera = new FocusBasedJMECamera(1100, 800, jme.getInputManager(), jme.getAssetManager());
+      zUpNode.attachChild(customCamera.getFocusPointSphere());
 
       customViewport = jme.getRenderManager().createMainView("JMEViewport", customCamera);
       customViewport.attachScene(jme.getRootNode());
@@ -144,9 +146,8 @@ public class JMECanvasApplication
       jme.enqueue(runnable);
    }
 
-   public void createCoordinateFrame()
+   public void createCoordinateFrame(double length)
    {
-      double length = 1.0;
       double radius = 0.02 * length;
       double coneHeight = 0.10 * length;
       double coneRadius = 0.05 * length;
