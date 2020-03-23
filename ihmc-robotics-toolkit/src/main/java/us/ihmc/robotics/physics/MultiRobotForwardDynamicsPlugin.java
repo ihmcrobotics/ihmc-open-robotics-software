@@ -52,13 +52,13 @@ public class MultiRobotForwardDynamicsPlugin
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
          MultiContactImpulseCalculator calculator = new MultiContactImpulseCalculator(rootFrame);
-         calculator.configure(dt, robots, collisionGroup);
+         calculator.configure(robots, collisionGroup);
          impulseCalculators.add(calculator);
       }
 
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
-         impulseCalculator.computeImpulses(false);
+         impulseCalculator.computeImpulses(dt, false);
          robots.forEach((rootBody, robot) -> impulseCalculator.applyJointVelocityChange(rootBody, robot.getForwardDynamicsPlugin()::addJointVelocities));
       }
 

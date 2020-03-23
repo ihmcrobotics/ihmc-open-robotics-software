@@ -41,7 +41,7 @@ public class MultiContactImpulseCalculator
       this.rootFrame = rootFrame;
    }
 
-   public void configure(double dt, Map<RigidBodyBasics, PhysicsEngineRobotData> robots, MultiRobotCollisionGroup collisionGroup)
+   public void configure(Map<RigidBodyBasics, PhysicsEngineRobotData> robots, MultiRobotCollisionGroup collisionGroup)
    {
       contactCalculators.clear();
       jointLimitCalculators.clear();
@@ -51,7 +51,7 @@ public class MultiContactImpulseCalculator
       for (RigidBodyBasics rootBody : collisionGroup.getRootBodies())
       {
          PhysicsEngineRobotData robot = robots.get(rootBody);
-         jointLimitCalculators.add(new RobotJointLimitImpulseBasedCalculator(dt, robot));
+         jointLimitCalculators.add(new RobotJointLimitImpulseBasedCalculator(robot));
       }
 
       for (CollisionResult collisionResult : collisionGroup.getGroupCollisions())
@@ -61,7 +61,7 @@ public class MultiContactImpulseCalculator
          PhysicsEngineRobotData robotA = robots.get(rootA);
          PhysicsEngineRobotData robotB = rootB != null ? robots.get(rootB) : null;
 
-         contactCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, dt, robotA, robotB));
+         contactCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, robotA, robotB));
       }
 
       calculators.addAll(contactCalculators);
@@ -98,16 +98,16 @@ public class MultiContactImpulseCalculator
       }
    }
 
-   public double computeImpulses(boolean verbose)
+   public double computeImpulses(double dt, boolean verbose)
    {
       if (calculators.size() == 1)
       {
-         calculators.get(0).computeImpulse();
+         calculators.get(0).computeImpulse(dt);
          return 0.0;
       }
       else
       {
-         calculators.forEach(ImpulseBasedConstraintCalculator::initialize);
+         calculators.forEach(calculator -> calculator.initialize(dt));
 
          double alpha = 1.0;
          double maxUpdateMagnitude = Double.POSITIVE_INFINITY;
@@ -122,7 +122,7 @@ public class MultiContactImpulseCalculator
             for (int i = 0; i < calculators.size(); i++)
             {
                ImpulseBasedConstraintCalculator calculator = calculators.get(i);
-               calculator.updateImpulse(alpha);
+               calculator.updateImpulse(dt, alpha);
                double updateMagnitude = calculator.getVelocityUpdate();
                if (verbose)
                {

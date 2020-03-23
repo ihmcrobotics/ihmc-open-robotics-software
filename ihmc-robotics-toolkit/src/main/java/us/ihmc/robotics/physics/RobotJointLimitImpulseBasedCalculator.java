@@ -42,7 +42,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
 
-   private boolean isInitialized = false;
+   private boolean isFirstUpdate;
    private boolean isImpulseZero = false;
 
    private JointStateProvider externalJointTwistModifier;
@@ -64,21 +64,19 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    private final DenseMatrix64F impulseUpdate = new DenseMatrix64F(matrixInitialSize, 1);
 
    private final RigidBodyBasics rootBody;
-   private final double dt;
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
    private final MultiBodyResponseCalculator responseCalculator;
    private List<? extends RigidBodyBasics> externalRigidBodyTargets;
    private List<? extends JointBasics> externalJointTargets;
 
-   public RobotJointLimitImpulseBasedCalculator(double dt, PhysicsEngineRobotData robot)
+   public RobotJointLimitImpulseBasedCalculator(PhysicsEngineRobotData robot)
    {
-      this(robot.getRootBody(), dt, robot.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
+      this(robot.getRootBody(), robot.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
    }
 
-   public RobotJointLimitImpulseBasedCalculator(RigidBodyBasics rootBody, double dt, ForwardDynamicsCalculator forwardDynamicsCalculator)
+   public RobotJointLimitImpulseBasedCalculator(RigidBodyBasics rootBody, ForwardDynamicsCalculator forwardDynamicsCalculator)
    {
       this.rootBody = rootBody;
-      this.dt = dt;
       this.forwardDynamicsCalculator = forwardDynamicsCalculator;
 
       responseCalculator = new MultiBodyResponseCalculator(forwardDynamicsCalculator);
@@ -94,17 +92,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    }
 
    @Override
-   public void reset()
+   public void initialize(double dt)
    {
-      isInitialized = false;
-   }
-
-   @Override
-   public void initialize()
-   {
-      if (isInitialized)
-         return;
-
       jointsAtLimit.clear();
       activeLimits.clear();
 
@@ -113,7 +102,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          if (joint instanceof OneDoFJointBasics)
          {
             OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
-            ActiveLimit activeLimit = computeActiveLimit(oneDoFJoint);
+            ActiveLimit activeLimit = computeActiveLimit(oneDoFJoint, dt);
 
             if (activeLimit != null)
             {
@@ -159,11 +148,11 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       rigidBodyTwistModifier.addAll(externalRigidBodyTargets);
       jointTwistModifier.addAll(externalJointTargets);
 
-      isInitialized = true;
       updateInertia();
+      isFirstUpdate = true;
    }
 
-   private ActiveLimit computeActiveLimit(OneDoFJointReadOnly joint)
+   private ActiveLimit computeActiveLimit(OneDoFJointReadOnly joint, double dt)
    {
       double q = joint.getQ();
       double qd = joint.getQd();
@@ -178,11 +167,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    }
 
    @Override
-   public void updateImpulse(double alpha)
+   public void updateImpulse(double dt, double alpha)
    {
-      boolean isFirstUpdate = !isInitialized;
-      initialize();
-
       if (jointsAtLimit.isEmpty())
       {
          isImpulseZero = true;
@@ -251,6 +237,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
 
       impulsePrevious.set(impulse);
+      isFirstUpdate = false;
    }
 
    private void updateInertia()
@@ -337,12 +324,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    public boolean isConstraintActive()
    {
       return !isImpulseZero;
-   }
-
-   @Override
-   public double getDT()
-   {
-      return dt;
    }
 
    public ForwardDynamicsCalculator getForwardDynamicsCalculator()

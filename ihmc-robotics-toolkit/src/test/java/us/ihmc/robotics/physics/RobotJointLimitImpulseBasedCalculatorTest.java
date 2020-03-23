@@ -68,9 +68,9 @@ public class RobotJointLimitImpulseBasedCalculatorTest
 
          joint.setJointLimits(jointLimitLower, jointLimitUpper);
 
-         RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, dt, forwardDynamicsCalculator);
+         RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
          calculator.setSpringConstant(0.0);
-         calculator.computeImpulse();
+         calculator.computeImpulse(dt);
 
          String message = "Iteration " + i;
          assertEquals(isJointApproachingLimit, calculator.isConstraintActive(), message);
@@ -130,9 +130,9 @@ public class RobotJointLimitImpulseBasedCalculatorTest
             joint.setJointLimits(jointLimitLower, jointLimitUpper);
          }
 
-         RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, dt, forwardDynamicsCalculator);
+         RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
          calculator.setSpringConstant(0.0);
-         calculator.computeImpulse();
+         calculator.computeImpulse(dt);
 
          String message = "Iteration " + i;
 
