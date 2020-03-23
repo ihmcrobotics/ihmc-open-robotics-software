@@ -32,7 +32,7 @@ public class MultiContactImpulseCalculator
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
 
-   private int maxNumberOfIterations = 500;
+   private int maxNumberOfIterations = 100;
    private int iterationCounter = 0;
 
    public MultiContactImpulseCalculator(ReferenceFrame rootFrame)
