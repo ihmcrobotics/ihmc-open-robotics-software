@@ -157,8 +157,7 @@ public class FocusBasedJMECamera extends Camera
                          cameraPose.getOrientation().getZ32(),
                          cameraPose.getOrientation().getS32());
 
-      setLocation(translationJME);
-      setRotation(orientationJME);
+      setFrame(translationJME, orientationJME);
    }
 
    public void simpleUpdate(float tpf)
