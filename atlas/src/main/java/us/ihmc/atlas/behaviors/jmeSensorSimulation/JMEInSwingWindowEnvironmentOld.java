@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 
 import static java.util.logging.Logger.*;
 
-public class JMEInSwingWindowEnvironment
+public class JMEInSwingWindowEnvironmentOld
 {
    private static final boolean DISABLE_LOGGING = false;
    private final java.util.logging.Logger[] jmeLoggers = new java.util.logging.Logger[] {getLogger(FXBumpMaterialGenerator.class.getName()),
@@ -66,7 +66,7 @@ public class JMEInSwingWindowEnvironment
    private Node floor;
    private FocusBasedJMECamera customCamera;
 
-   public JMEInSwingWindowEnvironment()
+   public JMEInSwingWindowEnvironmentOld()
    {
       if (DISABLE_LOGGING)
       {
@@ -508,6 +508,6 @@ public class JMEInSwingWindowEnvironment
 
    public static void main(String[] args)
    {
-      new JMEInSwingWindowEnvironment();
+      new JMEInSwingWindowEnvironmentOld();
    }
 }
