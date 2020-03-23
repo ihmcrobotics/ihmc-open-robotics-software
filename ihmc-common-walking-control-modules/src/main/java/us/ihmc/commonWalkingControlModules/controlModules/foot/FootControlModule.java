@@ -375,15 +375,15 @@ public class FootControlModule
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                  double zCurrent, ReferenceFrame pelvisZUpFrame)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
-      }
-      if (workspaceLimiterControlModule != null)
-      {
-         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
-      }
+//      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+//      {
+//         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+//                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
+//      }
+//      if (workspaceLimiterControlModule != null)
+//      {
+//         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
+//      }
    }
 
    public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
@@ -399,11 +399,11 @@ public class FootControlModule
 
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
-                                                                                                              getCurrentConstraintType());
-      }
+//      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+//      {
+//         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
+//                                                                                                              getCurrentConstraintType());
+//      }
       if (workspaceLimiterControlModule != null)
       {
          workspaceLimiterControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());

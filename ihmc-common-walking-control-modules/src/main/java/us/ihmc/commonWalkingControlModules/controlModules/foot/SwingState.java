@@ -484,18 +484,18 @@ public class SwingState extends AbstractFootControlState
                                                                         desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
-
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
-
-         desiredPose.setPosition(desiredAnklePosition);
-         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-         desiredPosition.setIncludingFrame(desiredPose.getPosition());
-      }
+//      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+//      {
+//         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
+//         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+//         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
+//
+//         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+//
+//         desiredPose.setPosition(desiredAnklePosition);
+//         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+//         desiredPosition.setIncludingFrame(desiredPose.getPosition());
+//      }
       if (workspaceLimiterControlModule != null)
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
