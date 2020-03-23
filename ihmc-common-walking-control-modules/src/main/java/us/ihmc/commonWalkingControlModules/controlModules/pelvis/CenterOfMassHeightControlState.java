@@ -296,12 +296,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       if (feetManager != null)
       {
+         // FIXME check on the ordering here
          comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
          feetManager.correctCoMHeightForSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
-         feetManager.correctCoMHeightForUnreachableFootstep(desiredICPVelocity, zCurrent, comHeightDataAfterUnreachableFootstep);
-         
+         feetManager.correctCoMHeightForUnreachableFootstep(comHeightDataAfterUnreachableFootstep);
+
          finalComHeightData.set(comHeightDataAfterUnreachableFootstep);
       }
       else
@@ -364,7 +365,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          statusActualPosition.setIncludingFrame(comPosition);
       statusActualPosition.setX(Double.NaN);
       statusActualPosition.setY(Double.NaN);
-      
+
       return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
    }
 }
