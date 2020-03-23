@@ -270,10 +270,10 @@ public class JMEInSwingWindowEnvironment
    private void setupLighting2()
    {
       float ambientValue = 0.7f;
-//      float pointValue = 0.2f;
-      float pointValue = 0.8f;
-//      float pointDistance = 1000.0f;
-      float pointDistance = 1.5f;
+      float pointValue = 0.2f;
+//      float pointValue = 0.8f;
+      float pointDistance = 1000.0f;
+//      float pointDistance = 1.5f;
 
       ColorRGBA ambientColor = new ColorRGBA(ambientValue, ambientValue, ambientValue, 1.0f);
       zUpNode.addLight(new AmbientLight(ambientColor));
@@ -285,10 +285,10 @@ public class JMEInSwingWindowEnvironment
 
        // order seems to be odd: y, z, x (but only when sky added)
 //      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, -pointDistance), indoorColor));
-      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, pointDistance), indoorColor, 100.0f));
-      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor, 100.0f));
-//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor, 100.0f));
-//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, -pointDistance), indoorColor, 100.0f));
+      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, pointDistance), indoorColor));
+      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor));
+      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor));
+      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, -pointDistance), indoorColor));
 //      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, -pointDistance, pointDistance), indoorColor, 100.0f));
 //      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, pointDistance), indoorColor, 100.0f));
 //      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, -pointDistance), indoorColor, 100.0f));
