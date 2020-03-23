@@ -12,7 +12,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class PhysicsEngine
 {
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry parentRegistry;
 
    private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
@@ -28,7 +27,6 @@ public class PhysicsEngine
 
    public PhysicsEngine(YoVariableRegistry parentRegistry)
    {
-      this.parentRegistry = parentRegistry;
       collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
       multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame);
       parentRegistry.addChild(physicsEngineRegistry);
@@ -43,7 +41,7 @@ public class PhysicsEngine
       integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReaders.add(physicsOutputReader);
-      parentRegistry.addChild(robot.getRobotRegistry());
+      physicsEngineRegistry.addChild(robot.getRobotRegistry());
       robotList.add(robot);
    }
 
@@ -69,6 +67,7 @@ public class PhysicsEngine
 
       for (PhysicsEngineRobotData robot : robotList)
       {
+         robot.resetCalculators();
          robot.updateCollidableBoundingBoxes();
       }
 

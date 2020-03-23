@@ -1,9 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -47,6 +44,7 @@ public class MultiRobotForwardDynamicsPlugin
          forwardDynamicsPlugin.readJointVelocities();
       }
 
+      Set<RigidBodyBasics> uncoveredRobotsRootBody = new HashSet<>(robots.keySet());
       List<MultiContactImpulseCalculator> impulseCalculators = new ArrayList<>();
 
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
@@ -54,6 +52,17 @@ public class MultiRobotForwardDynamicsPlugin
          MultiContactImpulseCalculator calculator = new MultiContactImpulseCalculator(rootFrame);
          calculator.configure(robots, collisionGroup);
          impulseCalculators.add(calculator);
+         uncoveredRobotsRootBody.removeAll(collisionGroup.getRootBodies());
+      }
+
+      for (RigidBodyBasics rootBody : uncoveredRobotsRootBody)
+      {
+         PhysicsEngineRobotData robot = robots.get(rootBody);
+         RobotJointLimitImpulseBasedCalculator jointLimitConstraintCalculator = robot.getJointLimitConstraintCalculator();
+         jointLimitConstraintCalculator.initialize(dt);
+         jointLimitConstraintCalculator.updateInertia(null, null);
+         jointLimitConstraintCalculator.computeImpulse(dt);
+         robot.getForwardDynamicsPlugin().addJointVelocities(jointLimitConstraintCalculator.getJointVelocityChange(0));
       }
 
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
