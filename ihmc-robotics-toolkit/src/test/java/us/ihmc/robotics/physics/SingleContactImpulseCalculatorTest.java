@@ -1,8 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,20 +58,16 @@ public class SingleContactImpulseCalculatorTest
 
          FrameVector3D contactLinearVelocityPreImpulse = predictContactVelocity(dt, collisionResult, forwardDynamicsCalculatorA, null);
 
-         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult,
-                                                                                               worldFrame,
-                                                                                               dt,
-                                                                                               forwardDynamicsCalculatorA,
-                                                                                               null);
+         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult, worldFrame, forwardDynamicsCalculatorA, null);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.computeImpulse();
-         updateVelocities(impulseCalculator);
+         impulseCalculator.computeImpulse(dt);
+         updateVelocities(impulseCalculator, dt);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
          assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isConstraintActive(), "Iteration " + i);
 
-         assertContactResponseProperties("Iteration " + i, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
+         assertContactResponseProperties("Iteration " + i, dt, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
       }
    }
 
@@ -98,33 +92,31 @@ public class SingleContactImpulseCalculatorTest
 
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult,
                                                                                                worldFrame,
-                                                                                               dt,
                                                                                                forwardDynamicsCalculatorA,
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
          try
          {
-            impulseCalculator.computeImpulse();
+            impulseCalculator.computeImpulse(dt);
          }
          catch (IllegalStateException e)
          {
             throw new AssertionFailedError("Failed at iteration " + i, e);
          }
 
-         updateVelocities(impulseCalculator);
+         updateVelocities(impulseCalculator, dt);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
          assertEquals(normalVelocityMagnitudePreImpulse < 0.0, impulseCalculator.isConstraintActive(), "Iteration " + i);
-         assertContactResponseProperties("Iteration " + i, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
+         assertContactResponseProperties("Iteration " + i, dt, contactLinearVelocityPreImpulse, impulseCalculator, EPSILON, POST_IMPULSE_VELOCITY_EPSILON);
       }
    }
 
-   static void assertContactResponseProperties(String messagePrefix, FrameVector3D contactLinearVelocityPreImpulse,
+   static void assertContactResponseProperties(String messagePrefix, double dt, FrameVector3D contactLinearVelocityPreImpulse,
                                                SingleContactImpulseCalculator impulseCalculator, double epsilon, double postImpulseVelocityEpsilon)
          throws Throwable
    {
-      double dt = impulseCalculator.getDT();
       CollisionResult collisionResult = impulseCalculator.getCollisionResult();
       FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       RigidBodyBasics bodyA = collisionResult.getCollidableA().getRigidBody();
@@ -268,17 +260,17 @@ public class SingleContactImpulseCalculatorTest
       return contactLinearVelocityPreImpulse;
    }
 
-   static void updateVelocities(SingleContactImpulseCalculator impulseCalculator)
+   static void updateVelocities(SingleContactImpulseCalculator impulseCalculator, double dt)
    {
       if (!impulseCalculator.isConstraintActive())
          return;
 
-      updateJointVelocities(impulseCalculator.getDT(),
+      updateJointVelocities(dt,
                             impulseCalculator.getContactingBodyA(),
                             impulseCalculator.getForwardDynamicsCalculatorA(),
                             impulseCalculator.getJointVelocityChangeA());
       if (impulseCalculator.getContactingBodyB() != null)
-         updateJointVelocities(impulseCalculator.getDT(),
+         updateJointVelocities(dt,
                                impulseCalculator.getContactingBodyB(),
                                impulseCalculator.getForwardDynamicsCalculatorB(),
                                impulseCalculator.getJointVelocityChangeB());

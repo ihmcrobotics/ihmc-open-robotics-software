@@ -11,17 +11,15 @@ import us.ihmc.mecano.tools.JointStateType;
 
 public interface ImpulseBasedConstraintCalculator
 {
-   void reset();
+   void initialize(double dt);
 
-   void initialize();
-
-   default void computeImpulse()
+   default void computeImpulse(double dt)
    {
-      reset();
-      updateImpulse(1.0);
+      initialize(dt);
+      updateImpulse(dt, 1.0);
    }
 
-   void updateImpulse(double alpha);
+   void updateImpulse(double dt, double alpha);
 
    double getImpulseUpdate();
 
@@ -47,8 +45,6 @@ public interface ImpulseBasedConstraintCalculator
    {
 
    }
-
-   double getDT();
 
    int getNumberOfRobotsInvolved();
 

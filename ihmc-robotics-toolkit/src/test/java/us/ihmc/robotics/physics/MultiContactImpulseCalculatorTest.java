@@ -66,13 +66,13 @@ public class MultiContactImpulseCalculatorTest
                                                                                                         robotForwardDynamicsCalculatorMap);
 
          MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
-         multiContactImpulseCalculator.configure(dt, physicsEngineRobotDataMap, collisionGroup);
+         multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          multiContactImpulseCalculator.setSpringConstant(0.0);
          try
          {
-            multiContactImpulseCalculator.computeImpulses(i == 204);
+            multiContactImpulseCalculator.computeImpulses(dt, i == 204);
             System.out.println("Completed in " + multiContactImpulseCalculator.getNumberOfIterations() + " iterations.");
          }
          catch (IllegalStateException e)
@@ -80,7 +80,7 @@ public class MultiContactImpulseCalculatorTest
             throw new AssertionFailedError("Failed at iteration " + i, e);
          }
 
-         updateVelocities(multiContactImpulseCalculator, robotForwardDynamicsCalculatorMap);
+         updateVelocities(dt, multiContactImpulseCalculator, robotForwardDynamicsCalculatorMap);
 
          List<SingleContactImpulseCalculator> impulseCalculators = multiContactImpulseCalculator.getImpulseCalculators();
 
@@ -90,6 +90,7 @@ public class MultiContactImpulseCalculatorTest
             FrameVector3D contactLinearVelocityPreImpulse = contactLinearVelocitiesPreImpulse.get(impulseCalculator.getCollisionResult());
             String messagePrefix = "Iteration " + i + ", calc. index " + j;
             SingleContactImpulseCalculatorTest.assertContactResponseProperties(messagePrefix,
+                                                                               dt,
                                                                                contactLinearVelocityPreImpulse,
                                                                                impulseCalculator,
                                                                                EPSILON,
@@ -126,13 +127,13 @@ public class MultiContactImpulseCalculatorTest
       return map;
    }
 
-   static void updateVelocities(MultiContactImpulseCalculator multiContactImpulseCalculator, Map<RigidBodyBasics, ForwardDynamicsCalculator> calculatorMap)
+   static void updateVelocities(double dt, MultiContactImpulseCalculator multiContactImpulseCalculator,
+                                Map<RigidBodyBasics, ForwardDynamicsCalculator> calculatorMap)
    {
       Map<RigidBodyBasics, DenseMatrix64F> jointVelocityMatrixMap = new HashMap<>();
 
       for (SingleContactImpulseCalculator impulseCalculator : multiContactImpulseCalculator.getImpulseCalculators())
       {
-         double dt = impulseCalculator.getDT();
          RigidBodyBasics bodyA = impulseCalculator.getContactingBodyA();
          RigidBodyBasics rootA = MultiBodySystemTools.getRootBody(bodyA);
 

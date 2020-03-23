@@ -47,7 +47,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double gamma = 1.0e-6;
    private double springConstant = 30.0;
 
-   private boolean isInitialized = false;
+   private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
    private boolean isContactClosing = false;
 
@@ -95,25 +95,22 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final RigidBodyBasics contactingBodyA, contactingBodyB;
    private final MovingReferenceFrame bodyFrameA, bodyFrameB;
 
-   private double dt;
-
    private CollisionResult collisionResult;
    private RigidBodyTwistProvider externalRigidBodyTwistModifier;
    private final ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifierA, rigidBodyTwistModifierB;
    private final ImpulseBasedJointTwistProvider jointTwistModifierA, jointTwistModifierB;
 
-   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt, PhysicsEngineRobotData robotA,
+   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, PhysicsEngineRobotData robotA,
                                          PhysicsEngineRobotData robotB)
    {
-      this(collisionResult, rootFrame, dt, robotA.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
+      this(collisionResult, rootFrame, robotA.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
            robotB == null ? null : robotB.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
    }
 
-   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt,
-                                         ForwardDynamicsCalculator forwardDynamicsCalculatorA, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
+   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, ForwardDynamicsCalculator forwardDynamicsCalculatorA,
+                                         ForwardDynamicsCalculator forwardDynamicsCalculatorB)
    {
       this.collisionResult = collisionResult;
-      this.dt = dt;
       this.forwardDynamicsCalculatorA = forwardDynamicsCalculatorA;
       this.forwardDynamicsCalculatorB = forwardDynamicsCalculatorB;
 
@@ -203,17 +200,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    }
 
    @Override
-   public void reset()
+   public void initialize(double dt)
    {
-      isInitialized = false;
-   }
-
-   @Override
-   public void initialize()
-   {
-      if (isInitialized)
-         return;
-
       EuclidGeometryTools.orientation3DFromZUpToVector3D(collisionResult.getCollisionAxisForA(), contactFrameOrientation);
       contactFramePosition.set(collisionResult.getPointOnARootFrame());
       contactFrame.update();
@@ -232,8 +220,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          noImpulseVelocityB.changeFrame(contactFrame);
       }
 
-      isInitialized = true;
       updateInertia();
+      isFirstUpdate = true;
    }
 
    static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
@@ -256,11 +244,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final FrameVector3D collisionPositionTerm = new FrameVector3D();
 
    @Override
-   public void updateImpulse(double alpha)
+   public void updateImpulse(double dt, double alpha)
    {
-      boolean isFirstUpdate = !isInitialized;
-      initialize();
-
       if (externalRigidBodyTwistModifier != null)
       {
          velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, contactPointA));
@@ -387,6 +372,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
 
       previousImpulseA.set(impulseA.getLinearPart());
+      isFirstUpdate = false;
    }
 
    private void updateInertia()
@@ -468,12 +454,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public boolean isContactClosing()
    {
       return isContactClosing;
-   }
-
-   @Override
-   public double getDT()
-   {
-      return dt;
    }
 
    public CollisionResult getCollisionResult()
