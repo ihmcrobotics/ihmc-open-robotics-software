@@ -28,7 +28,7 @@ public class MultiContactImpulseCalculator
    private final List<ImpulseBasedConstraintCalculator> allCalculators = new ArrayList<>();
    private final Map<RigidBodyBasics, List<Supplier<DenseMatrix64F>>> robotToCalculatorsOutputMap = new HashMap<>();
 
-   private double alpha_min = 0.3;
+   private double alpha_min = 0.7;
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
 
