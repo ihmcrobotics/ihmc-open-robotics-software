@@ -92,34 +92,23 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final DenseMatrix64F M_inv_solverCopy = new DenseMatrix64F(3, 3);
 
    private final RigidBodyBasics rootA, rootB;
-   private final RigidBodyBasics contactingBodyA, contactingBodyB;
-   private final MovingReferenceFrame bodyFrameA, bodyFrameB;
 
-   private CollisionResult collisionResult;
    private RigidBodyTwistProvider externalRigidBodyTwistModifier;
    private final ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifierA, rigidBodyTwistModifierB;
    private final ImpulseBasedJointTwistProvider jointTwistModifierA, jointTwistModifierB;
 
-   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, PhysicsEngineRobotData robotA,
-                                         PhysicsEngineRobotData robotB)
-   {
-      this(collisionResult, rootFrame, robotA.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
-           robotB == null ? null : robotB.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
-   }
+   private CollisionResult collisionResult;
+   private RigidBodyBasics contactingBodyA, contactingBodyB;
+   private MovingReferenceFrame bodyFrameA, bodyFrameB;
 
-   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, ForwardDynamicsCalculator forwardDynamicsCalculatorA,
-                                         ForwardDynamicsCalculator forwardDynamicsCalculatorB)
+   public SingleContactImpulseCalculator(ReferenceFrame rootFrame, RigidBodyBasics rootBodyA, ForwardDynamicsCalculator forwardDynamicsCalculatorA,
+                                         RigidBodyBasics rootBodyB, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
    {
-      this.collisionResult = collisionResult;
       this.forwardDynamicsCalculatorA = forwardDynamicsCalculatorA;
       this.forwardDynamicsCalculatorB = forwardDynamicsCalculatorB;
 
-      rootA = collisionResult.getCollidableA().getRootBody();
-      rootB = collisionResult.getCollidableB().getRootBody();
-      contactingBodyA = collisionResult.getCollidableA().getRigidBody();
-      contactingBodyB = collisionResult.getCollidableB().getRigidBody();
-      bodyFrameA = contactingBodyA.getBodyFixedFrame();
-      bodyFrameB = contactingBodyB == null ? null : contactingBodyB.getBodyFixedFrame();
+      rootA = rootBodyA;
+      rootB = rootBodyB;
 
       contactFrame = new ReferenceFrame("contactFrame", rootFrame, true, false)
       {
@@ -180,6 +169,21 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public void setExternalTwistModifier(RigidBodyTwistProvider externalRigidBodyTwistModifier)
    {
       this.externalRigidBodyTwistModifier = externalRigidBodyTwistModifier;
+   }
+
+   public void setCollision(CollisionResult collisionResult)
+   {
+      Collidable collidableA = collisionResult.getCollidableA();
+      Collidable collidableB = collisionResult.getCollidableB();
+
+      if (collidableA.getRootBody() != rootA || collidableB.getRootBody() != rootB)
+         throw new IllegalArgumentException("Robot mismatch!");
+
+      this.collisionResult = collisionResult;
+      contactingBodyA = collidableA.getRigidBody();
+      contactingBodyB = collidableB.getRigidBody();
+      bodyFrameA = contactingBodyA.getBodyFixedFrame();
+      bodyFrameB = contactingBodyB == null ? null : contactingBodyB.getBodyFixedFrame();
    }
 
    @Override

@@ -67,11 +67,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
    private final MultiBodyResponseCalculator responseCalculator;
 
-   public RobotJointLimitImpulseBasedCalculator(PhysicsEngineRobotData robot)
-   {
-      this(robot.getRootBody(), robot.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
-   }
-
    public RobotJointLimitImpulseBasedCalculator(RigidBodyBasics rootBody, ForwardDynamicsCalculator forwardDynamicsCalculator)
    {
       this.rootBody = rootBody;

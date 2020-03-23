@@ -51,6 +51,7 @@ public class SingleContactImpulseCalculatorTest
          Vector3DReadOnly gravity = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, EuclidCoreRandomTools.nextDouble(random, 0.0, 15.0));
 
          RigidBodyBasics singleBodyA = nextSingleFloatingRigidBody(random, "shoup");
+         RigidBodyBasics rootBodyA = MultiBodySystemTools.getRootBody(singleBodyA);
 
          CollisionResult collisionResult = nextCollisionResult(random, singleBodyA);
 
@@ -58,7 +59,8 @@ public class SingleContactImpulseCalculatorTest
 
          FrameVector3D contactLinearVelocityPreImpulse = predictContactVelocity(dt, collisionResult, forwardDynamicsCalculatorA, null);
 
-         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult, worldFrame, forwardDynamicsCalculatorA, null);
+         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame, rootBodyA, forwardDynamicsCalculatorA, null, null);
+         impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
          impulseCalculator.initialize(dt);
@@ -86,16 +88,20 @@ public class SingleContactImpulseCalculatorTest
          RigidBodyBasics singleBodyA = nextSingleFloatingRigidBody(random, "shoup");
          RigidBodyBasics singleBodyB = nextSingleFloatingRigidBody(random, "kolop");
          CollisionResult collisionResult = nextCollisionResult(random, singleBodyA, singleBodyB);
+         RigidBodyBasics rootBodyA = collisionResult.getCollidableA().getRootBody();
+         RigidBodyBasics rootBodyB = collisionResult.getCollidableB().getRootBody();
 
          ForwardDynamicsCalculator forwardDynamicsCalculatorA = setupForwardDynamicsCalculator(gravity, singleBodyA);
          ForwardDynamicsCalculator forwardDynamicsCalculatorB = setupForwardDynamicsCalculator(gravity, singleBodyB);
 
          FrameVector3D contactLinearVelocityPreImpulse = predictContactVelocity(dt, collisionResult, forwardDynamicsCalculatorA, forwardDynamicsCalculatorB);
 
-         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(collisionResult,
-                                                                                               worldFrame,
+         SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame,
+                                                                                               rootBodyA,
                                                                                                forwardDynamicsCalculatorA,
+                                                                                               rootBodyB,
                                                                                                forwardDynamicsCalculatorB);
+         impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
          impulseCalculator.initialize(dt);

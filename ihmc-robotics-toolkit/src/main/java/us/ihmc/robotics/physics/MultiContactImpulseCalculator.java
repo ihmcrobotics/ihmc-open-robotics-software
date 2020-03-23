@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -57,10 +58,17 @@ public class MultiContactImpulseCalculator
       {
          RigidBodyBasics rootA = collisionResult.getCollidableA().getRootBody();
          RigidBodyBasics rootB = collisionResult.getCollidableB().getRootBody();
-         PhysicsEngineRobotData robotA = robots.get(rootA);
-         PhysicsEngineRobotData robotB = rootB != null ? robots.get(rootB) : null;
+         ForwardDynamicsCalculator forwardDynamicsCalculatorA = robots.get(rootA).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
+         ForwardDynamicsCalculator forwardDynamicsCalculatorB = rootB != null ? robots.get(rootB).getForwardDynamicsPlugin().getForwardDynamicsCalculator()
+               : null;
 
-         contactCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, robotA, robotB));
+         SingleContactImpulseCalculator calculator = new SingleContactImpulseCalculator(rootFrame,
+                                                                                        rootA,
+                                                                                        forwardDynamicsCalculatorA,
+                                                                                        rootB,
+                                                                                        forwardDynamicsCalculatorB);
+         calculator.setCollision(collisionResult);
+         contactCalculators.add(calculator);
       }
 
       allCalculators.addAll(contactCalculators);
