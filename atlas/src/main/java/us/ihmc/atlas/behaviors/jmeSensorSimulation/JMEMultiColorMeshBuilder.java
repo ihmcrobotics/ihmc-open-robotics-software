@@ -2,6 +2,7 @@ package us.ihmc.atlas.behaviors.jmeSensorSimulation;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Mesh;
 import com.jme3.texture.Texture;
 import javafx.scene.paint.Color;
@@ -35,6 +36,16 @@ public class JMEMultiColorMeshBuilder
    public void addCone(double height, double radius, Tuple3DReadOnly offset, AxisAngle orientation, Color color)
    {
       addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, orientation, color);
+   }
+
+   public void addSphere(float radius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset, new AxisAngle(), color);
+   }
+
+   public void addBox(double lx, double ly, double lz, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, new AxisAngle(), color);
    }
 
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3DReadOnly offset, AxisAngle orientation, Color color)
@@ -79,9 +90,10 @@ public class JMEMultiColorMeshBuilder
 
    public Material generateMaterial(AssetManager assetManager)
    {
-      Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
       Texture texture = assetManager.loadTexture("palette.png");
-      material.setTexture("ColorMap", texture);
+      material.setTexture("DiffuseMap", texture);
+      material.setColor("Diffuse", ColorRGBA.White);
       return material;
    }
 }
