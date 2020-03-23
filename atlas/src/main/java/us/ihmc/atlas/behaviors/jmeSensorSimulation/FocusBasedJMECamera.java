@@ -30,7 +30,7 @@ public class FocusBasedJMECamera extends Camera
 
    private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
 
-   private double zoomSpeed = 1.0;
+   private double zoomSpeedFactor = 0.1;
    private double latitudeSpeed = 5.0;
    private double longitudeSpeed = 5.0;
    private double translateSpeed = 5.0;
@@ -61,7 +61,7 @@ public class FocusBasedJMECamera extends Camera
    {
       super(width, height);
 
-      setFrustumPerspective(45.0f, (float) width / height, 1.0f, 1000.0f);
+      setFrustumPerspective(45.0f, (float) width / height, 0.05f, 2000.0f);
 
       RotationMatrix zUpToYUp = new RotationMatrix();
       zUpToYUp.set(0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0);
@@ -225,12 +225,14 @@ public class FocusBasedJMECamera extends Camera
 
    private void onMouseScrollUp(float value, float tpf)
    {
-      zoom -= zoomSpeed * value;
+      zoom = zoom - zoom * zoomSpeedFactor;
+//      zoom -= zoomSpeedFactor * value;
    }
 
    private void onMouseScrollDown(float value, float tpf)
    {
-      zoom += zoomSpeed * value;
+      zoom = zoom + zoom * zoomSpeedFactor;
+//      zoom += zoomSpeedFactor * value;
    }
 
    private void onMouseButtonLeft(boolean isPressed, float tpf)
