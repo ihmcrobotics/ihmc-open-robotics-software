@@ -66,8 +66,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    private final RigidBodyBasics rootBody;
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
    private final MultiBodyResponseCalculator responseCalculator;
-   private List<? extends RigidBodyBasics> externalRigidBodyTargets;
-   private List<? extends JointBasics> externalJointTargets;
 
    public RobotJointLimitImpulseBasedCalculator(PhysicsEngineRobotData robot)
    {
@@ -82,13 +80,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       responseCalculator = new MultiBodyResponseCalculator(forwardDynamicsCalculator);
       rigidBodyTwistModifier = new ImpulseBasedRigidBodyTwistProvider(responseCalculator.getTwistChangeProvider().getInertialFrame(), rootBody);
       jointTwistModifier = new ImpulseBasedJointTwistProvider(rootBody);
-   }
-
-   @Override
-   public void setExternalTargets(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
-   {
-      this.externalRigidBodyTargets = rigidBodyTargets;
-      this.externalJointTargets = jointTargets;
    }
 
    @Override
@@ -143,13 +134,56 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          jointVelocityNoImpulse.set(i, qd);
       }
 
+      isFirstUpdate = true;
+   }
+
+   @Override
+   public void updateInertia(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
+   {
       rigidBodyTwistModifier.clear(jointsAtLimit.size());
       jointTwistModifier.clear(jointsAtLimit.size());
-      rigidBodyTwistModifier.addAll(externalRigidBodyTargets);
-      jointTwistModifier.addAll(externalJointTargets);
+      if (rigidBodyTargets != null)
+         rigidBodyTwistModifier.addAll(rigidBodyTargets);
+      if (jointTargets != null)
+         jointTwistModifier.addAll(jointTargets);
 
-      updateInertia();
-      isFirstUpdate = true;
+      responseCalculator.reset();
+      RigidBodyTwistProvider twistChangeProvider = responseCalculator.getTwistChangeProvider();
+
+      for (int i = 0; i < jointsAtLimit.size(); i++)
+      {
+         OneDoFJointBasics joint = jointsAtLimit.get(i);
+         ActiveLimit activeLimit = activeLimits.get(i);
+         responseCalculator.applyJointImpulse(joint, 1.0);
+
+         for (int j = i; j < jointsAtLimit.size(); j++)
+         {
+            OneDoFJointBasics otherJoint = jointsAtLimit.get(j);
+            ActiveLimit otherActiveLimit = activeLimits.get(j);
+            double a = responseCalculator.getJointTwistChange(otherJoint);
+            /*
+             * The LCP solver only handles positive impulse/velocity, so we mirror the problem for joints on the
+             * upper limit which need negative impulse/velocity.
+             */
+            a = activeLimit.transform(otherActiveLimit.transform(a));
+            solverInput_A.set(j, i, a);
+            solverInput_A.set(i, j, a); // Using symmetry property
+         }
+
+         for (RigidBodyBasics externalTarget : rigidBodyTwistModifier.getRigidBodies())
+         {
+            DenseMatrix64F externalInertiaMatrix = rigidBodyTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
+            twistChangeProvider.getTwistOfBody(externalTarget).get(0, i, externalInertiaMatrix);
+         }
+
+         for (JointBasics externalTarget : jointTwistModifier.getJoints())
+         {
+            DenseMatrix64F externalInertiaMatrix = jointTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
+            externalInertiaMatrix.set(responseCalculator.getJointTwistChange(externalTarget));
+         }
+
+         responseCalculator.reset();
+      }
    }
 
    private ActiveLimit computeActiveLimit(OneDoFJointReadOnly joint, double dt)
@@ -238,47 +272,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
 
       impulsePrevious.set(impulse);
       isFirstUpdate = false;
-   }
-
-   private void updateInertia()
-   {
-      responseCalculator.reset();
-      RigidBodyTwistProvider twistChangeProvider = responseCalculator.getTwistChangeProvider();
-
-      for (int i = 0; i < jointsAtLimit.size(); i++)
-      {
-         OneDoFJointBasics joint = jointsAtLimit.get(i);
-         ActiveLimit activeLimit = activeLimits.get(i);
-         responseCalculator.applyJointImpulse(joint, 1.0);
-
-         for (int j = i; j < jointsAtLimit.size(); j++)
-         {
-            OneDoFJointBasics otherJoint = jointsAtLimit.get(j);
-            ActiveLimit otherActiveLimit = activeLimits.get(j);
-            double a = responseCalculator.getJointTwistChange(otherJoint);
-            /*
-             * The LCP solver only handles positive impulse/velocity, so we mirror the problem for joints on the
-             * upper limit which need negative impulse/velocity.
-             */
-            a = activeLimit.transform(otherActiveLimit.transform(a));
-            solverInput_A.set(j, i, a);
-            solverInput_A.set(i, j, a); // Using symmetry property
-         }
-
-         for (RigidBodyBasics externalTarget : rigidBodyTwistModifier.getRigidBodies())
-         {
-            DenseMatrix64F externalInertiaMatrix = rigidBodyTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
-            twistChangeProvider.getTwistOfBody(externalTarget).get(0, i, externalInertiaMatrix);
-         }
-
-         for (JointBasics externalTarget : jointTwistModifier.getJoints())
-         {
-            DenseMatrix64F externalInertiaMatrix = jointTwistModifier.getApparentInertiaMatrixInverse(externalTarget);
-            externalInertiaMatrix.set(responseCalculator.getJointTwistChange(externalTarget));
-         }
-
-         responseCalculator.reset();
-      }
    }
 
    public void setSpringConstant(double springConstant)
