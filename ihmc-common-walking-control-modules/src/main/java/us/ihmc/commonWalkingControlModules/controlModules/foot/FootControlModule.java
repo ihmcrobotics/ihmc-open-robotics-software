@@ -380,10 +380,10 @@ public class FootControlModule
 //         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
 //                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
 //      }
-//      if (workspaceLimiterControlModule != null)
-//      {
-//         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
-//      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
+      }
    }
 
    public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
