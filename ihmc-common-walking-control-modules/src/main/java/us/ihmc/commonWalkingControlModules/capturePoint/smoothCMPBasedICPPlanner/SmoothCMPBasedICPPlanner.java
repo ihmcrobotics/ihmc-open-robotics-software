@@ -890,7 +890,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
-      shouldClampDuration.set(false);
+      shouldClampDuration.set(true);
 
       updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
       skipNextUpdate.set(true);
