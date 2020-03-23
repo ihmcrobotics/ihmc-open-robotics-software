@@ -20,6 +20,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    BARRIERS_FURTHER_IN,
    SMALL_PLATFORM,
    MEDIUM_PLATFORM,
+   LARGE_PLATFORM,
    ON_MEDIUM_PLATFORM,
    ON_LARGE_PLATFORM,
    EASY_STEPPING_STONES,
@@ -52,6 +53,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, new OffsetAndYawRobotInitialSetup(1.0, 1.0, 0, Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES, new OffsetAndYawRobotInitialSetup(-7.22, -0.8, 0.3, Math.PI - 0.01));
       addMapping(DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatformToesTouching(3));
+      addMapping(DRCObstacleCourseStartingLocation.LARGE_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatformToesTouching(5));
       addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_QUALS, new SquaredUpDRCDemo01Robot(0.0, 1.5, Math.toRadians(-41.1147), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.NARROW_DOORWAY, new SquaredUpDRCDemo01Robot(0.0, 2.7094, Math.toRadians(-89.2852), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotOnPlatformsInitialSetup.createInitialSetupOnNthPlatform(3));
@@ -90,7 +92,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       OffsetAndYawRobotInitialSetup startingLocation = initialSetupMap.get(this.toString());
       return startingLocation;
    }
-   
+
    public static String optionsToString()
    {
       String ret = "[ ";
@@ -101,5 +103,5 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       ret = ret + "]";
       return ret;
    }
-   
+
 }
