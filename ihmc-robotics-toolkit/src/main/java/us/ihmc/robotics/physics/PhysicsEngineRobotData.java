@@ -15,17 +15,23 @@ public class PhysicsEngineRobotData implements CollidableHolder
    private final MultiBodySystemBasics multiBodySystem;
    private final List<Collidable> collidables;
 
+   // Specific to the type of engine used:
+   private final SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin;
+
    public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter robotInitialStateWriter,
-                                 RobotCollisionModel robotCollisionModel)
+                                 MultiBodySystemStateWriter controllerOutputWriter, RobotCollisionModel robotCollisionModel)
    {
       this.rootBody = rootBody;
       this.robotInitialStateWriter = robotInitialStateWriter;
 
       robotRegistry = new YoVariableRegistry(robotName);
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
-      robotInitialStateWriter.setMultiBodySystem(multiBodySystem);
+      if (robotInitialStateWriter != null)
+         robotInitialStateWriter.setMultiBodySystem(multiBodySystem);
 
       collidables = robotCollisionModel.getRobotCollidables(multiBodySystem);
+
+      forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem, controllerOutputWriter);
    }
 
    public void initialize()
@@ -53,6 +59,11 @@ public class PhysicsEngineRobotData implements CollidableHolder
    public MultiBodySystemBasics getMultiBodySystem()
    {
       return multiBodySystem;
+   }
+
+   public SingleRobotForwardDynamicsPlugin getForwardDynamicsPlugin()
+   {
+      return forwardDynamicsPlugin;
    }
 
    public RigidBodyBasics getRootBody()

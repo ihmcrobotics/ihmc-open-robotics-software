@@ -1,12 +1,16 @@
 package us.ihmc.robotics.physics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -18,9 +22,12 @@ import us.ihmc.mecano.tools.JointStateType;
  */
 public class MultiContactImpulseCalculator
 {
+   private final ReferenceFrame rootFrame;
+
    private final List<SingleContactImpulseCalculator> contactCalculators = new ArrayList<>();
    private final List<RobotJointLimitImpulseBasedCalculator> jointLimitCalculators = new ArrayList<>();
    private final List<ImpulseBasedConstraintCalculator> calculators = new ArrayList<>();
+   private final Map<RigidBodyBasics, List<Supplier<DenseMatrix64F>>> robotToCalculatorsOutputMap = new HashMap<>();
 
    private double alpha_min = 0.3;
    private double gamma = 0.99;
@@ -29,21 +36,30 @@ public class MultiContactImpulseCalculator
    private int maxNumberOfIterations = 500;
    private int iterationCounter = 0;
 
-   public MultiContactImpulseCalculator(ReferenceFrame rootFrame, double dt, Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap,
-                                        MultiRobotCollisionGroup collisionGroup)
+   public MultiContactImpulseCalculator(ReferenceFrame rootFrame)
    {
+      this.rootFrame = rootFrame;
+   }
+
+   public void configure(double dt, Map<RigidBodyBasics, PhysicsEngineRobotData> robots, MultiRobotCollisionGroup collisionGroup)
+   {
+      contactCalculators.clear();
+      jointLimitCalculators.clear();
+      calculators.clear();
+      robotToCalculatorsOutputMap.clear();
+
       for (RigidBodyBasics rootBody : collisionGroup.getRootBodies())
       {
-         ForwardDynamicsCalculator robot = robotForwardDynamicsCalculatorMap.get(rootBody);
-         jointLimitCalculators.add(new RobotJointLimitImpulseBasedCalculator(rootBody, dt, robot));
+         PhysicsEngineRobotData robot = robots.get(rootBody);
+         jointLimitCalculators.add(new RobotJointLimitImpulseBasedCalculator(dt, robot));
       }
 
       for (CollisionResult collisionResult : collisionGroup.getGroupCollisions())
       {
          RigidBodyBasics rootA = collisionResult.getCollidableA().getRootBody();
          RigidBodyBasics rootB = collisionResult.getCollidableB().getRootBody();
-         ForwardDynamicsCalculator robotA = robotForwardDynamicsCalculatorMap.get(rootA);
-         ForwardDynamicsCalculator robotB = rootB != null ? robotForwardDynamicsCalculatorMap.get(rootB) : null;
+         PhysicsEngineRobotData robotA = robots.get(rootA);
+         PhysicsEngineRobotData robotB = rootB != null ? robots.get(rootB) : null;
 
          contactCalculators.add(new SingleContactImpulseCalculator(collisionResult, rootFrame, dt, robotA, robotB));
       }
@@ -53,6 +69,19 @@ public class MultiContactImpulseCalculator
 
       for (ImpulseBasedConstraintCalculator calculator : calculators)
       {
+         for (int i = 0; i < calculator.getNumberOfRobotsInvolved(); i++)
+         {
+            final int robotIndex = i;
+            RigidBodyBasics roobtBody = calculator.getRootBody(i);
+            List<Supplier<DenseMatrix64F>> robotCalculatorsOutput = robotToCalculatorsOutputMap.get(roobtBody);
+            if (robotCalculatorsOutput == null)
+            {
+               robotCalculatorsOutput = new ArrayList<>();
+               robotToCalculatorsOutputMap.put(roobtBody, robotCalculatorsOutput);
+            }
+            robotCalculatorsOutput.add(() -> calculator.getJointVelocityChange(robotIndex));
+         }
+
          List<ImpulseBasedConstraintCalculator> otherCalculators = calculators.stream().filter(other -> other != calculator).collect(Collectors.toList());
 
          List<? extends RigidBodyBasics> rigidBodyTargets = otherCalculators.stream().map(ImpulseBasedConstraintCalculator::getRigidBodyTargets)
@@ -149,20 +178,19 @@ public class MultiContactImpulseCalculator
       contactCalculators.forEach(calculator -> calculator.setSpringConstant(springConstant));
    }
 
-   public void applyJointVelocityChange(Map<RigidBodyBasics, SingleRobotForwardDynamicsPlugin> singleRobotPluginMap)
+   public void applyJointVelocityChange(RigidBodyBasics rootBody, Consumer<DenseMatrix64F> jointVelocityChangeConsumer)
    {
-      for (ImpulseBasedConstraintCalculator calculator : calculators)
-      {
-         if (!calculator.isConstraintActive())
-            continue;
+      List<Supplier<DenseMatrix64F>> robotCalculatorsOutput = robotToCalculatorsOutputMap.get(rootBody);
 
-         for (int i = 0; i < calculator.getNumberOfRobotsInvolved(); i++)
-         {
-            RigidBodyBasics rootBody = calculator.getRootBody(i);
-            SingleRobotForwardDynamicsPlugin robotPlugin = singleRobotPluginMap.get(rootBody);
-            robotPlugin.addJointVelocities(calculator.getJointVelocityChange(i));
-         }
-      }
+      if (robotCalculatorsOutput == null)
+         return;
+
+      robotCalculatorsOutput.forEach(output ->
+      {
+         DenseMatrix64F jointVelocityChange = output.get();
+         if (jointVelocityChange != null)
+            jointVelocityChangeConsumer.accept(jointVelocityChange);
+      });
    }
 
    public int getNumberOfIterations()

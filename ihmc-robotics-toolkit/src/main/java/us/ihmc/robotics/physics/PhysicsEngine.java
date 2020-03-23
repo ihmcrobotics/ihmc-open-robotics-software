@@ -38,8 +38,8 @@ public class PhysicsEngine
                         MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
                         MultiBodySystemStateReader physicsOutputReader)
    {
-      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotInitialStateWriter, robotCollisionModel);
-      multiRobotPhysicsEnginePlugin.addMultiBodySystem(robot.getMultiBodySystem(), controllerOutputWriter);
+      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotInitialStateWriter, controllerOutputWriter, robotCollisionModel);
+      multiRobotPhysicsEnginePlugin.addRobot(robot);
       integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReaders.add(physicsOutputReader);
