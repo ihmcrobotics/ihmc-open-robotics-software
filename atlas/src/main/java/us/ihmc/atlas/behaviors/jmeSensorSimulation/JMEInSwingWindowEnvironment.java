@@ -2,8 +2,10 @@ package us.ihmc.atlas.behaviors.jmeSensorSimulation;
 
 import com.jme3.asset.AssetConfig;
 import com.jme3.asset.TextureKey;
+import com.jme3.bounding.BoundingSphere;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.light.PointLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.material.TechniqueDef;
@@ -20,7 +22,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.plugins.ogre.MaterialLoader;
 import com.jme3.scene.shape.Box;
-import com.jme3.scene.shape.Cylinder;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.jme3.system.JmeSystem;
@@ -35,11 +37,6 @@ import jme3dae.materials.FXBumpMaterialGenerator;
 import jme3tools.optimize.GeometryBatchFactory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.TexCoord2f;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEMeshDataInterpreter;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
 import us.ihmc.log.LogTools;
@@ -67,9 +64,6 @@ public class JMEInSwingWindowEnvironment
 
    private Node zUpNode;
    private Node floor;
-   private DirectionalLight primaryLight;
-   private AmbientLight ambientLight;
-   private ArrayList<DirectionalLight> lights = new ArrayList<>();
    private FocusBasedJMECamera customCamera;
 
    public JMEInSwingWindowEnvironment()
@@ -98,7 +92,7 @@ public class JMEInSwingWindowEnvironment
       jme.setShowSettings(false);
       jme.setSettings(appSettings);
       jme.setDisplayFps(false);
-      jme.setDisplayStatView(false);
+      jme.setDisplayStatView(true);
 
       jme.createCanvas();
 
@@ -129,25 +123,48 @@ public class JMEInSwingWindowEnvironment
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
       jme.getRootNode().attachChild(zUpNode);
 
-      setupLighting();
 
 
       jme.getFlyByCamera().setEnabled(false);
       jme.getViewPort().setEnabled(false);
       jme.getRenderManager().removeMainView(jme.getViewPort());
-      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
+//      jme.getRenderManager().removeMainView(jme.getGuiViewPort());
+
+//      jme.getRenderManager().
+//      jme.getRenderer().
 
       customCamera = new FocusBasedJMECamera(1100, 800, jme.getInputManager());
 
       ViewPort customViewport = jme.getRenderManager().createMainView("JMEViewport", customCamera);
       customViewport.attachScene(jme.getRootNode());
       customViewport.setClearFlags(true, true, true);
+      customViewport.setBackgroundColor(new ColorRGBA(0.5019608f, 0.5019608f, 0.5019608f, 1.0f));
 
       setupSky();
+      setupLighting2();
+      setupLighting();
 
       createCoordinateFrame();
 
-      setUpGrid();
+      zUpNode.attachChild(addSphere2(0.1, 1.0, 1.0, 1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, -1.0, 1.0, 1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, -1.0, -1.0, 1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, 1.0, -1.0, 1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, 1.0, 1.0, -1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, -1.0, 1.0, -1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, -1.0, -1.0, -1.0, Color.RED));
+      zUpNode.attachChild(addSphere2(0.1, 1.0, -1.0, -1.0, Color.RED));
+      zUpNode.attachChild(addSkySphere(50.0, 0.0, 0.0, 0.0, Color.WHITE));
+      zUpNode.attachChild(addSphere(0.3, -1.0, -1.0, -1.0, Color.BLUE));
+
+
+      RenderState renderState = new RenderState();
+      renderState.setDepthWrite(false);
+      renderState.setDepthFunc(RenderState.TestFunction.Equal);
+      jme.getRenderer().applyRenderState(renderState);
+
+//      jme.getRenderer().getStatistics().
+//      setUpGrid();
 
       JFrame frame = new JFrame("JME");
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -199,6 +216,7 @@ public class JMEInSwingWindowEnvironment
 //      blueMaterial.setTexture("ColorMap", texture);
 //      geometry.setMaterial(blueMaterial);
 
+//      zUpNode.attachChild(geometry);
       zUpNode.attachChild(geometry);
 //      cylinderGeometry.
 
@@ -245,7 +263,96 @@ public class JMEInSwingWindowEnvironment
       Texture downTex = jme.getAssetManager().loadTexture(new TextureKey(down, true));
       Spatial sky = SkyFactory.createSky(jme.getAssetManager(), westTex, eastTex, northTex, southTex, upTex, downTex);
       sky.setLocalScale(1000);
-      jme.getRootNode().attachChild(sky);
+//      zUpNode.attachChild(sky);
+//      jme.getRootNode().attachChild(SkyFactory.createSky(jme.getAssetManager(), "Textures/Sky/Bright/BrightSky.dds", SkyFactory.EnvMapType.CubeMap));
+   }
+
+   private void setupLighting2()
+   {
+      float ambientValue = 0.7f;
+//      float pointValue = 0.2f;
+      float pointValue = 0.8f;
+//      float pointDistance = 1000.0f;
+      float pointDistance = 1.5f;
+
+      ColorRGBA ambientColor = new ColorRGBA(ambientValue, ambientValue, ambientValue, 1.0f);
+      zUpNode.addLight(new AmbientLight(ambientColor));
+      ColorRGBA indoorColor = new ColorRGBA(pointValue, pointValue, pointValue, 1.0f);
+//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, pointDistance), indoorColor));
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor));
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, pointDistance), indoorColor));
+//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, -pointDistance, pointDistance), indoorColor));
+
+       // order seems to be odd: y, z, x (but only when sky added)
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, -pointDistance), indoorColor));
+      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, pointDistance), indoorColor, 100.0f));
+      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, -pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, -pointDistance, pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, -pointDistance, -pointDistance), indoorColor, 100.0f));
+//      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, -pointDistance, -pointDistance), indoorColor, 100.0f));
+
+//      jme.getRootNode().addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor));
+//      jme.getRootNode().addLight(new PointLight(new Vector3f(pointDistance, pointDistance, pointDistance), indoorColor));
+//      jme.getRootNode().addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor));
+//      jme.getRootNode().addLight(new PointLight(new Vector3f(pointDistance, pointDistance, -pointDistance), indoorColor));
+
+//      // order seems to be odd: y, z, x
+//      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor));
+////      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, pointDistance), indoorColor));
+////      zUpNode.addLight(new PointLight(new Vector3f(-pointDistance, pointDistance, -pointDistance), indoorColor));
+////      zUpNode.addLight(new PointLight(new Vector3f(pointDistance, pointDistance, -pointDistance), indoorColor));
+   }
+
+   private Geometry addSphere(double radius, double x, double y, double z, Color color)
+   {
+      JMEMultiColorMeshBuilder colorMeshBuilder = new JMEMultiColorMeshBuilder();
+      colorMeshBuilder.addSphere((float) radius, new Point3D(x, y, z), color);
+      Geometry geometry = new Geometry("meep", colorMeshBuilder.generateMesh());
+      geometry.setMaterial(colorMeshBuilder.generateMaterial(jme.getAssetManager()));
+//      geometry.setQueueBucket(RenderQueue.Bucket.Sky);
+//      geometry.setCullHint(Spatial.CullHint.Never);
+      geometry.setModelBound(new BoundingSphere(Float.POSITIVE_INFINITY, Vector3f.ZERO));
+      return geometry;
+   }
+
+   private Geometry addSphere2(double radius, double x, double y, double z, Color color)
+   {
+      Sphere sphere = new Sphere(10, 10, (float) radius);
+
+      Geometry geometry = new Geometry("meep2", sphere);
+//      Material material = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      Material material = new Material(jme.getAssetManager(), "Common/MatDefs/Light/Lighting.j3md");
+      material.setColor("Diffuse", new ColorRGBA((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue(), 1.0f));
+      geometry.setMaterial(material);
+      geometry.setLocalTranslation((float) x, (float) y, (float) z);
+      //      geometry.setQueueBucket(RenderQueue.Bucket.Sky);
+      //      geometry.setCullHint(Spatial.CullHint.Never);
+//      geometry.setModelBound(new BoundingSphere(Float.POSITIVE_INFINITY, Vector3f.ZERO));
+      return geometry;
+   }
+
+   private Geometry addSkySphere(double radius, double x, double y, double z, Color color)
+   {
+      Sphere sphere = new Sphere(10, 10, (float) radius, false, false);
+
+      Geometry geometry = new Geometry("meep2", sphere);
+//      geometry.setQueueBucket(RenderQueue.Bucket.Sky);
+//      geometry.setCullHint(Spatial.CullHint.Never);
+//      geometry.setModelBound(new BoundingSphere(Float.POSITIVE_INFINITY, Vector3f.ZERO));
+//      Material material = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+      Material material = new Material(jme.getAssetManager(), "Common/MatDefs/Misc/Sky.j3md");
+//      material.setVector3("NormalScale", Vector3f.UNIT_XYZ);
+//      material.setColor("Diffuse", new ColorRGBA((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue(), 1.0f));
+//      material.setBoolean("SphereMap", true);
+      geometry.setMaterial(material);
+      geometry.setLocalTranslation((float) x, (float) y, (float) z);
+      //      geometry.setQueueBucket(RenderQueue.Bucket.Sky);
+      //      geometry.setCullHint(Spatial.CullHint.Never);
+//      geometry.setModelBound(new BoundingSphere(Float.POSITIVE_INFINITY, Vector3f.ZERO));
+      return geometry;
    }
 
    private void setupLighting()
@@ -265,32 +372,33 @@ public class JMEInSwingWindowEnvironment
       Vector3f fromTheBackOtherSide = fromTheBack.add(fromTheOtherSide).normalizeLocal();
       Vector3f fromTheBackBottom = fromTheBack.add(fromTheBottom).normalizeLocal();
 
-      primaryLight = new DirectionalLight();
+      DirectionalLight primaryLight = new DirectionalLight();
       primaryLight.setColor(ColorRGBA.White.mult(0.5f));
       primaryLight.setDirection(fromTheTopFront);
-      jme.getRootNode().addLight(primaryLight);
+//      jme.getRootNode().addLight(primaryLight);
+      ArrayList<DirectionalLight> lights = new ArrayList<>();
       lights.add(primaryLight);
 
       // TODO: Ambient light could be brighter, but OBJ model files seem to just get white in ambient light, rather than their material.
-      ambientLight = new AmbientLight();
+      AmbientLight ambientLight = new AmbientLight();
       ambientLight.setColor(ColorRGBA.White.mult(0.2f));
-      jme.getRootNode().addLight(ambientLight);
+//      jme.getRootNode().addLight(ambientLight);
 
-      addDirectionalLight(ColorRGBA.White.mult(0.35f), fromTheFrontSide);
-      addDirectionalLight(ColorRGBA.White.mult(0.3f), fromTheBackOtherSide);
-      addDirectionalLight(ColorRGBA.White.mult(0.28f), fromTheBackBottom);
-      addDirectionalLight(ColorRGBA.White.mult(0.32f), fromTheOtherSide);
-      addDirectionalLight(ColorRGBA.White.mult(0.35f), fromTheSide);
+//      addDirectionalLight(ColorRGBA.White.mult(0.35f), fromTheFrontSide, lights, primaryLight);
+//      addDirectionalLight(ColorRGBA.White.mult(0.3f), fromTheBackOtherSide, lights, primaryLight);
+//      addDirectionalLight(ColorRGBA.White.mult(0.28f), fromTheBackBottom, lights, primaryLight);
+//      addDirectionalLight(ColorRGBA.White.mult(0.32f), fromTheOtherSide, lights, primaryLight);
+//      addDirectionalLight(ColorRGBA.White.mult(0.35f), fromTheSide, lights, primaryLight);
 
-      jme.getRenderManager().setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
+//      jme.getRenderManager().setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
+      jme.getRenderManager().setPreferredLightMode(TechniqueDef.LightMode.MultiPass);
 
       jme.getRootNode().setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
       zUpNode.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
    }
 
-   private void addDirectionalLight(ColorRGBA color, Vector3f direction)
+   private void addDirectionalLight(ColorRGBA color, Vector3f direction, ArrayList<DirectionalLight> lights, DirectionalLight primaryLight)
    {
-
       if (lights.isEmpty())
       {
          primaryLight.setColor(color);
