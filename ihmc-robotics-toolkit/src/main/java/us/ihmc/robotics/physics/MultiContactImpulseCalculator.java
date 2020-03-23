@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -64,13 +63,11 @@ public class MultiContactImpulseCalculator
 
          if (rootB == null)
          {
-            calculator = robots.get(rootA).getOrCreateEnvironmentContactCalculator(i);
+            calculator = robots.get(rootA).getOrCreateEnvironmentContactConstraintCalculator();
          }
          else
          {
-            ForwardDynamicsCalculator forwardDynamicsCalculatorA = robots.get(rootA).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
-            ForwardDynamicsCalculator forwardDynamicsCalculatorB = robots.get(rootB).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
-            calculator = new SingleContactImpulseCalculator(rootFrame, rootA, forwardDynamicsCalculatorA, rootB, forwardDynamicsCalculatorB);
+            calculator = robots.get(rootA).getOrCreateInterRobotContactConstraintCalculator(robots.get(rootB));
          }
 
          calculator.setCollision(collisionResult);
@@ -99,68 +96,6 @@ public class MultiContactImpulseCalculator
          CombinedJointStateProviders externalJointTwistModifier = assembleExternalJointTwistModifierForCalculator(calculator);
          calculator.setExternalTwistModifiers(externalRigidBodyTwistModifier, externalJointTwistModifier);
       }
-   }
-
-   private CombinedRigidBodyTwistProviders assembleExternalRigidBodyTwistModifierForCalculator(ImpulseBasedConstraintCalculator calculator)
-   {
-      CombinedRigidBodyTwistProviders rigidBodyTwistProviders = new CombinedRigidBodyTwistProviders(rootFrame);
-
-      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
-      {
-         if (otherCalculator != calculator)
-         {
-            for (int i = 0; i < otherCalculator.getNumberOfRobotsInvolved(); i++)
-            {
-               rigidBodyTwistProviders.add(otherCalculator.getRigidBodyTwistChangeProvider(i));
-            }
-         }
-      }
-
-      return rigidBodyTwistProviders;
-   }
-
-   private CombinedJointStateProviders assembleExternalJointTwistModifierForCalculator(ImpulseBasedConstraintCalculator calculator)
-   {
-      CombinedJointStateProviders jointTwistProviders = new CombinedJointStateProviders(JointStateType.VELOCITY);
-
-      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
-      {
-         if (otherCalculator != calculator)
-         {
-            for (int i = 0; i < otherCalculator.getNumberOfRobotsInvolved(); i++)
-            {
-               jointTwistProviders.add(otherCalculator.getJointTwistChangeProvider(i));
-            }
-         }
-      }
-
-      return jointTwistProviders;
-   }
-
-   private List<RigidBodyBasics> collectRigidBodyTargetsForCalculator(ImpulseBasedConstraintCalculator calculator)
-   {
-      List<RigidBodyBasics> rigidBodyTargets = new ArrayList<>();
-
-      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
-      {
-         if (otherCalculator != calculator)
-            rigidBodyTargets.addAll(otherCalculator.getRigidBodyTargets());
-      }
-
-      return rigidBodyTargets;
-   }
-
-   private List<JointBasics> collectJointTargetsForCalculator(ImpulseBasedConstraintCalculator calculator)
-   {
-      List<JointBasics> jointTargets = new ArrayList<>();
-
-      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
-      {
-         if (otherCalculator != calculator)
-            jointTargets.addAll(otherCalculator.getJointTargets());
-      }
-
-      return jointTargets;
    }
 
    public double computeImpulses(double dt, boolean verbose)
@@ -234,6 +169,11 @@ public class MultiContactImpulseCalculator
             }
          }
 
+         for (int i = 0; i < allCalculators.size(); i++)
+         {
+            allCalculators.get(i).finalizeImpulse();
+         }
+
          return maxUpdateMagnitude;
       }
    }
@@ -260,12 +200,7 @@ public class MultiContactImpulseCalculator
       if (robotCalculatorsOutput == null)
          return;
 
-      robotCalculatorsOutput.forEach(output ->
-      {
-         DenseMatrix64F jointVelocityChange = output.get();
-         if (jointVelocityChange != null)
-            jointVelocityChangeConsumer.accept(jointVelocityChange);
-      });
+      robotCalculatorsOutput.forEach(output -> jointVelocityChangeConsumer.accept(output.get()));
    }
 
    public int getNumberOfIterations()
@@ -276,5 +211,67 @@ public class MultiContactImpulseCalculator
    public List<SingleContactImpulseCalculator> getImpulseCalculators()
    {
       return contactCalculators;
+   }
+
+   private CombinedRigidBodyTwistProviders assembleExternalRigidBodyTwistModifierForCalculator(ImpulseBasedConstraintCalculator calculator)
+   {
+      CombinedRigidBodyTwistProviders rigidBodyTwistProviders = new CombinedRigidBodyTwistProviders(rootFrame);
+
+      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
+      {
+         if (otherCalculator != calculator)
+         {
+            for (int i = 0; i < otherCalculator.getNumberOfRobotsInvolved(); i++)
+            {
+               rigidBodyTwistProviders.add(otherCalculator.getRigidBodyTwistChangeProvider(i));
+            }
+         }
+      }
+
+      return rigidBodyTwistProviders;
+   }
+
+   private CombinedJointStateProviders assembleExternalJointTwistModifierForCalculator(ImpulseBasedConstraintCalculator calculator)
+   {
+      CombinedJointStateProviders jointTwistProviders = new CombinedJointStateProviders(JointStateType.VELOCITY);
+
+      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
+      {
+         if (otherCalculator != calculator)
+         {
+            for (int i = 0; i < otherCalculator.getNumberOfRobotsInvolved(); i++)
+            {
+               jointTwistProviders.add(otherCalculator.getJointTwistChangeProvider(i));
+            }
+         }
+      }
+
+      return jointTwistProviders;
+   }
+
+   private List<RigidBodyBasics> collectRigidBodyTargetsForCalculator(ImpulseBasedConstraintCalculator calculator)
+   {
+      List<RigidBodyBasics> rigidBodyTargets = new ArrayList<>();
+
+      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
+      {
+         if (otherCalculator != calculator)
+            rigidBodyTargets.addAll(otherCalculator.getRigidBodyTargets());
+      }
+
+      return rigidBodyTargets;
+   }
+
+   private List<JointBasics> collectJointTargetsForCalculator(ImpulseBasedConstraintCalculator calculator)
+   {
+      List<JointBasics> jointTargets = new ArrayList<>();
+
+      for (ImpulseBasedConstraintCalculator otherCalculator : allCalculators)
+      {
+         if (otherCalculator != calculator)
+            jointTargets.addAll(otherCalculator.getJointTargets());
+      }
+
+      return jointTargets;
    }
 }

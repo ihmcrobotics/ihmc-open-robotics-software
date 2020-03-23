@@ -88,6 +88,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          if (joint instanceof OneDoFJointBasics)
          {
             OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
+            // TODO This is not enough as other joints maybe driven to their limit due to the different impacts. 
             ActiveLimit activeLimit = computeActiveLimit(oneDoFJoint, dt);
 
             if (activeLimit != null)
@@ -314,11 +315,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       return !isImpulseZero;
    }
 
-   public ForwardDynamicsCalculator getForwardDynamicsCalculator()
-   {
-      return forwardDynamicsCalculator;
-   }
-
    @Override
    public void setExternalTwistModifier(JointStateProvider externalJointTwistModifier)
    {
@@ -364,5 +360,15 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          responseCalculator.applyJointImpulse(jointsAtLimit.get(i), impulse.get(i));
       }
       return responseCalculator.propagateImpulse();
+   }
+
+   public DenseMatrix64F getJointVelocityDueToOtherImpulse()
+   {
+      return jointVelocityDueToOtherImpulse;
+   }
+
+   public MultiBodyResponseCalculator getResponseCalculator()
+   {
+      return responseCalculator;
    }
 }

@@ -44,7 +44,8 @@ public class SingleRobotForwardDynamicsPlugin
 
    public void addJointVelocities(DenseMatrix64F jointVelocityToAdd)
    {
-      CommonOps.addEquals(jointVelocityMatrix, jointVelocityToAdd);
+      if (jointVelocityToAdd != null)
+         CommonOps.addEquals(jointVelocityMatrix, jointVelocityToAdd);
    }
 
    public void writeJointVelocities()
