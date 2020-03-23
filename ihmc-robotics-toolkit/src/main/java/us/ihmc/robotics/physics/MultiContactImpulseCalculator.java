@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -28,12 +29,14 @@ public class MultiContactImpulseCalculator
    private final List<ImpulseBasedConstraintCalculator> allCalculators = new ArrayList<>();
    private final Map<RigidBodyBasics, List<Supplier<DenseMatrix64F>>> robotToCalculatorsOutputMap = new HashMap<>();
 
-   private double alpha_min = 0.7;
+   private double alphaMin = 0.7;
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
 
    private int maxNumberOfIterations = 100;
    private int iterationCounter = 0;
+
+   private static boolean hasCalculatorFailedOnce = false;
 
    public MultiContactImpulseCalculator(ReferenceFrame rootFrame)
    {
@@ -160,11 +163,15 @@ public class MultiContactImpulseCalculator
             if (iterationCounter == 1 && numberOfClosingContacts <= 1)
                break;
 
-            alpha = alpha_min + gamma * (alpha - alpha_min);
+            alpha = alphaMin + gamma * (alpha - alphaMin);
 
             if (iterationCounter > maxNumberOfIterations)
             {
-               System.err.println("Unable to converge during Successive Over-Relaxation method");
+               if (!hasCalculatorFailedOnce)
+               {
+                  LogTools.error("Unable to converge during Successive Over-Relaxation method. Only reporting the first failure.");
+                  hasCalculatorFailedOnce = true;
+               }
                break;
             }
          }
@@ -178,9 +185,24 @@ public class MultiContactImpulseCalculator
       }
    }
 
+   public void setAlphaMin(double alphaMin)
+   {
+      this.alphaMin = alphaMin;
+   }
+
+   public void setGamma(double gamma)
+   {
+      this.gamma = gamma;
+   }
+
    public void setTolerance(double tolerance)
    {
       this.tolerance = tolerance;
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations = maxNumberOfIterations;
    }
 
    public void setSingleContactTolerance(double gamma)
@@ -201,6 +223,26 @@ public class MultiContactImpulseCalculator
          return;
 
       robotCalculatorsOutput.forEach(output -> jointVelocityChangeConsumer.accept(output.get()));
+   }
+
+   public double getAlphaMin()
+   {
+      return alphaMin;
+   }
+
+   public double getGamma()
+   {
+      return gamma;
+   }
+
+   public double getTolerance()
+   {
+      return tolerance;
+   }
+
+   public int getMaxNumberOfIterations()
+   {
+      return maxNumberOfIterations;
    }
 
    public int getNumberOfIterations()

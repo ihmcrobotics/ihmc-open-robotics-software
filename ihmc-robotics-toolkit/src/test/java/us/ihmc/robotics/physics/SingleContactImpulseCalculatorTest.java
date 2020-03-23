@@ -143,23 +143,23 @@ public class SingleContactImpulseCalculatorTest
          double normalVelocityPostImpulse = contactLinearVelocityPostImpulse.dot(collisionAxisForA);
          assertEquals(0.0, normalVelocityPostImpulse, Math.max(1.0, Math.abs(normalVelocityMagnitudePreImpulse)) * postImpulseVelocityEpsilon, messagePrefix);
 
-         assertEquals(bodyA.getBodyFixedFrame(), impulseCalculator.getContactImpulseA().getBodyFrame());
-         FrameVector3D impulseOnA = new FrameVector3D(impulseCalculator.getContactImpulseA().getLinearPart());
-         EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getContactImpulseA().getAngularPart());
-         EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getContactImpulseB().getAngularPart());
+         assertEquals(bodyA.getBodyFixedFrame(), impulseCalculator.getImpulseA().getBodyFrame());
+         FrameVector3D impulseOnA = new FrameVector3D(impulseCalculator.getImpulseA().getLinearPart());
+         EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getImpulseA().getAngularPart());
+         EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getImpulseB().getAngularPart());
 
          if (bodyB != null)
          {
-            assertEquals(bodyB.getBodyFixedFrame(), impulseCalculator.getContactImpulseB().getBodyFrame());
+            assertEquals(bodyB.getBodyFixedFrame(), impulseCalculator.getImpulseB().getBodyFrame());
 
-            FrameVector3D impulseOnB = new FrameVector3D(impulseCalculator.getContactImpulseB().getLinearPart());
+            FrameVector3D impulseOnB = new FrameVector3D(impulseCalculator.getImpulseB().getLinearPart());
             impulseOnB.changeFrame(impulseOnA.getReferenceFrame());
             impulseOnB.negate();
             EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, impulseOnA, impulseOnB, epsilon);
          }
          else
          {
-            EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getContactImpulseB().getLinearPart());
+            EuclidCoreTestTools.assertTuple3DIsSetToZero(messagePrefix, impulseCalculator.getImpulseB().getLinearPart());
          }
 
          FrameVector3D impulseNormal = extractNormalPart(impulseOnA, collisionAxisForA);
