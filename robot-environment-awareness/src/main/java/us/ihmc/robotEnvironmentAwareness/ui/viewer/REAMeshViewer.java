@@ -141,7 +141,6 @@ public class REAMeshViewer
    {
       sleep();
 
-      // TODO: check this to terminate properly.
       if (executorService != null)
       {
          executorService.shutdownNow();

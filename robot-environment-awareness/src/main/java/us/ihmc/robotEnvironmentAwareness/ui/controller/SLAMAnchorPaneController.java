@@ -108,5 +108,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
    {
       uiMessager.broadcastMessage(REAModuleAPI.SLAMClear, true);
       uiMessager.broadcastMessage(REAModuleAPI.SLAMVizClear, true);
+      uiMessager.broadcastMessage(REAModuleAPI.UISensorPoseHistoryClear, true);
    }
 }
