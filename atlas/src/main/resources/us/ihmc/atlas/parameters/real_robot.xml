@@ -59,11 +59,11 @@
                     <registry name="HighLevelControlManagerFactory">
                         <registry name="FeetManager">
                             <registry name="leftFootControlModule">
-<parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.15"/>
+<parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.25"/>
 <parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
                             </registry>
                             <registry name="rightFootControlModule">
-<parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.15"/>
+<parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.25"/>
 <parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
                             </registry>
                             <registry name="ToeOffManager">
@@ -78,9 +78,18 @@
 <parameter name="dampFootRotations" type="BooleanParameter" value="true"/>
 <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
                             </registry>
+                            <parameter name="Verification_PerpendicularCoPErrorThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.005"/>
+                            <parameter name="Verification_DistanceFromLineToComputeDesiredCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.002"/>
+                            <parameter name="Velocity_omegaMagnitudeThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                            <parameter name="Velocity_rotationAngleDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+                            <parameter name="Velocity_rotationAngleThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+                            <parameter name="Cropping_ThresholdForCoPRegionOccupancy" type="IntegerParameter" min="-10" max="10" value="4"/>
+                            <parameter name="Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy" type="DoubleParameter" min="0.0" max="1.0" value="0.003"/>
+                            <parameter name="Verification_InlineCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="0.002"/>
+                            <parameter name="Verification_TransverseCoPHistoryStdDev" type="DoubleParameter" min="0.0" max="1.0" value="5.0E-4"/>
                         </registry>
                         <registry name="BalanceManager">
-                            <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
+                            <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         </registry>
                     </registry>
                     <registry name="MomentumOptimizationSettings">
@@ -90,6 +99,9 @@
                 </registry>
                 <registry name="WalkingControllerState">
                     <registry name="LinearMomentumRateControlModule">
+                        <registry name="ICPOptimizationController">
+                            <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.12"/>
+                        </registry>
                         <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
                         <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
                     </registry>

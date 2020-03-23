@@ -101,6 +101,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
    private final YoFramePoint2D predictedEndOfStateICP = new YoFramePoint2D(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
+   private final YoDouble currentICPVelocityMagnitude = new YoDouble(yoNamePrefix + "ICPVelocityMagnitude", registry);
 
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
@@ -1034,7 +1035,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isICPStuck.getBooleanValue())
          return true;
 
-      if ((currentICPVelocity.length() < thresholdForStuck.getValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getValue()))
+      currentICPVelocityMagnitude.set(currentICPVelocity.length());
+      if ((currentICPVelocityMagnitude.getDoubleValue() < thresholdForStuck.getValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getValue()))
          return true;
 
       return false;
