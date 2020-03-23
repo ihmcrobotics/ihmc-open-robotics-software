@@ -54,19 +54,25 @@ public class MultiContactImpulseCalculator
          jointLimitCalculators.add(robot.getJointLimitConstraintCalculator());
       }
 
-      for (CollisionResult collisionResult : collisionGroup.getGroupCollisions())
+      for (int i = 0; i < collisionGroup.getNumberOfCollisions(); i++)
       {
+         CollisionResult collisionResult = collisionGroup.getGroupCollisions().get(i);
+
          RigidBodyBasics rootA = collisionResult.getCollidableA().getRootBody();
          RigidBodyBasics rootB = collisionResult.getCollidableB().getRootBody();
-         ForwardDynamicsCalculator forwardDynamicsCalculatorA = robots.get(rootA).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
-         ForwardDynamicsCalculator forwardDynamicsCalculatorB = rootB != null ? robots.get(rootB).getForwardDynamicsPlugin().getForwardDynamicsCalculator()
-               : null;
+         SingleContactImpulseCalculator calculator;
 
-         SingleContactImpulseCalculator calculator = new SingleContactImpulseCalculator(rootFrame,
-                                                                                        rootA,
-                                                                                        forwardDynamicsCalculatorA,
-                                                                                        rootB,
-                                                                                        forwardDynamicsCalculatorB);
+         if (rootB == null)
+         {
+            calculator = robots.get(rootA).getOrCreateEnvironmentContactCalculator(i);
+         }
+         else
+         {
+            ForwardDynamicsCalculator forwardDynamicsCalculatorA = robots.get(rootA).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
+            ForwardDynamicsCalculator forwardDynamicsCalculatorB = robots.get(rootB).getForwardDynamicsPlugin().getForwardDynamicsCalculator();
+            calculator = new SingleContactImpulseCalculator(rootFrame, rootA, forwardDynamicsCalculatorA, rootB, forwardDynamicsCalculatorB);
+         }
+
          calculator.setCollision(collisionResult);
          contactCalculators.add(calculator);
       }
