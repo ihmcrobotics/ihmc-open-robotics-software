@@ -55,9 +55,11 @@ public class MainTabController
 
    // control
    @FXML
-   private ComboBox<FootstepPlannerType> plannerType;
-   @FXML
    private CheckBox acceptNewRegions;
+   @FXML
+   private CheckBox turnWalkTurnPlanner;
+   @FXML
+   private CheckBox planBodyPath;
    @FXML
    private CheckBox assumeFlatGround;
    @FXML
@@ -276,10 +278,6 @@ public class MainTabController
 
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
-      ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
-      plannerType.setItems(plannerTypeOptions);
-      plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
-
       timeout.setValueFactory(createTimeoutValueFactory());
       maxIterations.setValueFactory(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 1));
       horizonLength.setValueFactory(createHorizonValueFactory());
@@ -298,7 +296,6 @@ public class MainTabController
       setupControls();
 
       // control
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerType, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
@@ -352,6 +349,9 @@ public class MainTabController
 
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
+
+      messager.bindBidirectional(TurnWalkTurnPlanner, turnWalkTurnPlanner.selectedProperty(), true);
+      messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
 
       messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());
 
