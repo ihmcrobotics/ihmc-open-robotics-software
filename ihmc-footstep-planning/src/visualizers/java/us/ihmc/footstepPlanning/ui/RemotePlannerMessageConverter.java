@@ -129,7 +129,8 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, packet.getGoalRightFootPose());
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, plannerType == FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      messager.submitMessage(FootstepPlannerMessagerAPI.TurnWalkTurnPlanner, plannerType == FootstepPlannerType.PLAN_THEN_SNAP);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);

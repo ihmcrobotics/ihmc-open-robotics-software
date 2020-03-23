@@ -194,7 +194,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, footstepPlannerLog.getRequestPacket().getGoalDistanceProximity());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalYawProximity, footstepPlannerLog.getRequestPacket().getGoalYawProximity());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType()));
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, footstepPlannerLog.getRequestPacket().getTimeout());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
@@ -223,6 +223,10 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
+
+      FootstepPlannerType footstepPlannerType = FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType());
+      messager.submitMessage(FootstepPlannerMessagerAPI.TurnWalkTurnPlanner, footstepPlannerType == FootstepPlannerType.PLAN_THEN_SNAP);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerType == FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
 
       // set graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());

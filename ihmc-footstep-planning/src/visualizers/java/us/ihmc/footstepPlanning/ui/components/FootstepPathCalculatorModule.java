@@ -12,7 +12,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParameters;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerStatus;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeout;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RequestPlannerStatistics;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
@@ -25,14 +24,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jfree.util.TableOrder;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -67,7 +64,8 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Pose3DReadOnly> rightFootStartPose;
    private final AtomicReference<Pose3DReadOnly> leftFootGoalPose;
    private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
-   private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
+   private final AtomicReference<Boolean> turnWalkTurnPlanner;
+   private final AtomicReference<Boolean> planBodyPath;
 
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> plannerMaxIterationsReference;
@@ -95,7 +93,8 @@ public class FootstepPathCalculatorModule
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
-      footstepPlannerTypeReference = messager.createInput(PlannerType, FootstepPlannerType.A_STAR);
+      turnWalkTurnPlanner = messager.createInput(TurnWalkTurnPlanner, false);
+      planBodyPath = messager.createInput(PlanBodyPath, true);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
 
@@ -169,7 +168,7 @@ public class FootstepPathCalculatorModule
          request.setRequestedInitialStanceSide(initialStanceSideReference.get());
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
-         request.setPlanBodyPath(footstepPlannerTypeReference.get().plansPath());
+         request.setPlanBodyPath(planBodyPath.get());
          request.setSnapGoalSteps(snapGoalSteps.get());
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 
@@ -217,7 +216,7 @@ public class FootstepPathCalculatorModule
 
    private void sendPlannerStatistics()
    {
-      if (footstepPlannerTypeReference.get().plansPath())
+      if (planBodyPath.get())
       {
          sendVisibilityGraphStatisticsMessages(planningModule.getBodyPathPlanner().getPlannerStatistics());
       }
