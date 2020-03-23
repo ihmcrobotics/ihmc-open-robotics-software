@@ -224,9 +224,8 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
-      FootstepPlannerType footstepPlannerType = FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType());
-      messager.submitMessage(FootstepPlannerMessagerAPI.TurnWalkTurnPlanner, footstepPlannerType == FootstepPlannerType.PLAN_THEN_SNAP);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerType == FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, footstepPlannerLog.getRequestPacket().getPerformAStarSearch());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
 
       // set graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());

@@ -92,7 +92,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint1.getX(), walkToPoint1.getY(), 0),
                                                        JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.A_STAR);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };
@@ -116,7 +116,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
             FramePose3D poseToWalkTo = new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(walkToPoint2.getX(), walkToPoint2.getY(), 0),
                                                        JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(q));
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.A_STAR);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(poseToWalkTo);
          }
       };

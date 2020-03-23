@@ -47,9 +47,9 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private boolean setupComplete = false;
    private boolean goalLocationChanged = false;
    
-   private  FootstepPlannerType footStepPlannerToUse =  FootstepPlannerType.A_STAR;
+   private boolean planBodyPath = false;
+   private boolean performAStarSearch = false;
    private boolean assumeFlatGround = false;
-
 
    public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
                                         WalkingControllerParameters walkingControllerParameters,FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
@@ -94,11 +94,16 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       goalLocationChanged=true;
    }
    
-   public void setFootStepPlanner( FootstepPlannerType footStepPlannerToUse)
+   public void setPlanBodyPath(boolean planBodyPath)
    {
-      this.footStepPlannerToUse = footStepPlannerToUse;
+      this.planBodyPath = planBodyPath;
    }
-   
+
+   public void setPerformAStarSearch(boolean performAStarSearch)
+   {
+      this.performAStarSearch = performAStarSearch;
+   }
+
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
@@ -152,7 +157,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             if (currentGoalPose.get() == null)
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose,footStepPlannerToUse, assumeFlatGround);
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
          

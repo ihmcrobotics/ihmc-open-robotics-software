@@ -48,7 +48,8 @@ public class TurnInPlaceBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             walkToLocationPlannedBehavior.setAssumeFlatGround(true);
-            walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.PLAN_THEN_SNAP);
+            walkToLocationPlannedBehavior.setPlanBodyPath(false);
+            walkToLocationPlannedBehavior.setPerformAStarSearch(false);
             walkToLocationPlannedBehavior.setTarget(targetOrientationInWorldFrame);
          }
       };

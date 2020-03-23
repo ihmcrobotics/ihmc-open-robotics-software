@@ -181,7 +181,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(cinderBlockField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, cinderBlockField, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(false, cinderBlockField, goalPose);
    }
 
    @Disabled
@@ -194,7 +194,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(cinderBlockField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, cinderBlockField, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(true, cinderBlockField, goalPose);
    }
 
    @Tag("video")
@@ -207,7 +207,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       setupSimulation(steppingStoneField, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, steppingStoneField, goalPose);
+      boolean planBodyPath = false;
+
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, steppingStoneField, goalPose);
    }
 
    @Disabled
@@ -219,7 +221,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       goalPose.setX(1.0);
       setupSimulation(flatGround, startingLocation);
       drcSimulationTestHelper.createSimulation("FootstepPlannerEndToEndTest");
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, null, goalPose);
+      boolean planBodyPath = false;
+
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, null, goalPose);
    }
 
    @Disabled
@@ -240,15 +244,16 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       parametersPacket.setCheckForBodyBoxCollisions(true);
       parametersPacket.setReturnBestEffortPlan(false);
       footstepPlannerParametersPublisher.publish(parametersPacket);
+      boolean planBodyPath = false;
 
-      runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType.A_STAR, bollardPlanarRegions, goalPose);
+      runEndToEndTestAndKeepSCSUpIfRequested(planBodyPath, bollardPlanarRegions, goalPose);
    }
 
-   private void runEndToEndTestAndKeepSCSUpIfRequested(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
+   private void runEndToEndTestAndKeepSCSUpIfRequested(boolean planBodyPath, PlanarRegionsList planarRegionsList, FramePose3D goalPose)
    {
       try
       {
-         runEndToEndTest(plannerType, planarRegionsList, goalPose);
+         runEndToEndTest(planBodyPath, planarRegionsList, goalPose);
          if (simulationTestingParameters.getKeepSCSUp())
          {
             ThreadTools.sleepForever();
@@ -280,7 +285,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.createSubscriberFromController(WalkingStatusMessage.class, this::listenForWalkingComplete);
    }
 
-   private void runEndToEndTest(FootstepPlannerType plannerType, PlanarRegionsList planarRegionsList, FramePose3D goalPose) throws Exception
+   private void runEndToEndTest(boolean planBodyPath, PlanarRegionsList planarRegionsList, FramePose3D goalPose) throws Exception
    {
       blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
       ToolboxStateMessage wakeUpMessage = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
@@ -308,7 +313,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
                                                                                                                     rightSolePose,
                                                                                                                     goalPose,
                                                                                                                     stanceWidth,
-                                                                                                                    plannerType);
+                                                                                                                    planBodyPath);
       if(planarRegionsList != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);

@@ -93,7 +93,7 @@ public class FootstepPathCalculatorModule
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
-      turnWalkTurnPlanner = messager.createInput(TurnWalkTurnPlanner, false);
+      turnWalkTurnPlanner = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);

@@ -9,9 +9,21 @@ import us.ihmc.pathPlanning.DataSetName;
 public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
-   public FootstepPlannerType getPlannerType()
+   protected boolean getPlanBodyPath()
    {
-      return FootstepPlannerType.A_STAR;
+      return false;
+   }
+
+   @Override
+   protected boolean getPerformAStarSearch()
+   {
+      return true;
+   }
+
+   @Override
+   protected String getTestNamePrefix()
+   {
+      return "a_star";
    }
 
    @Override
