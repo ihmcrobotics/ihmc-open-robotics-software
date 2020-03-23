@@ -1,5 +1,6 @@
 package us.ihmc.robotics.physics;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -18,6 +19,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
    // TODO Following fields are specific to the type of engine used, they need interfacing.
    private final SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin;
    private final RobotJointLimitImpulseBasedCalculator jointLimitConstraintCalculator;
+   private final List<SingleContactImpulseCalculator> environmentContactConstraintCalculators = new ArrayList<>();
 
    public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter robotInitialStateWriter,
                                  MultiBodySystemStateWriter controllerOutputWriter, RobotCollisionModel robotCollisionModel)
@@ -58,6 +60,11 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return collidables;
    }
 
+   public RigidBodyBasics getRootBody()
+   {
+      return rootBody;
+   }
+
    public MultiBodySystemBasics getMultiBodySystem()
    {
       return multiBodySystem;
@@ -73,9 +80,16 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return jointLimitConstraintCalculator;
    }
 
-   public RigidBodyBasics getRootBody()
+   public SingleContactImpulseCalculator getOrCreateEnvironmentContactCalculator(int index)
    {
-      return rootBody;
+      while (environmentContactConstraintCalculators.size() <= index)
+         environmentContactConstraintCalculators.add(new SingleContactImpulseCalculator(multiBodySystem.getInertialFrame(),
+                                                                                        rootBody,
+                                                                                        forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                                                        null,
+                                                                                        null));
+
+      return environmentContactConstraintCalculators.get(index);
    }
 
    public YoVariableRegistry getRobotRegistry()
