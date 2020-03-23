@@ -76,7 +76,7 @@ public class GraphSearchStatistics implements PlannerStatistics<GraphSearchStati
       Pose3D stanceFootPose = request.getStartFootPoses().get(request.getRequestedInitialStanceSide());
       FootstepNode startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), request.getRequestedInitialStanceSide());
       SimplePlanarRegionFootstepNodeSnapper snapper = planningModule.getSnapper();
-      DirectedGraph<FootstepNode> graph = planningModule.getFootstepPlanner().getGraph();
+      DirectedGraph<FootstepNode> graph = planningModule.getLowLevelStepPlanner().getGraph();
 
       RigidBodyTransform startNodePose = snapper.snapFootstepNode(startNode).getOrComputeSnappedNodeTransform(startNode);
       fullGraphList.addNode(-1, startNode, startNodePose, null);
