@@ -377,12 +377,12 @@ public class FootControlModule
    {
 //      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
 //      {
-//         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+//         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comXYVelocity, comHeightDataToCorrect, zCurrent,
 //                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
 //      }
       if (workspaceLimiterControlModule != null)
       {
-         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
+         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, getCurrentConstraintType());
       }
    }
 

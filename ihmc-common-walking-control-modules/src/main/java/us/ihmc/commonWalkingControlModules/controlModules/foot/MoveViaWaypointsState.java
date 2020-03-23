@@ -197,6 +197,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
+         workspaceLimiterControlModule.update();
          workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
          desiredPose.setPosition(desiredAnklePosition);

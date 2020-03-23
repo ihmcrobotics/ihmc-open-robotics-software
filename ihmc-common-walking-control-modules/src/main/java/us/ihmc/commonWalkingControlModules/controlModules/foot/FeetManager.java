@@ -213,15 +213,11 @@ public class FeetManager
 
    public void correctCoMHeightForSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footControlModules.get(robotSide).updateLegSingularityModule();
-      }
-
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModules.get(robotSide).updateLegSingularityModule();
          footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
    }
@@ -231,6 +227,7 @@ public class FeetManager
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
+         footControlModules.get(robotSide).updateLegSingularityModule();
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
