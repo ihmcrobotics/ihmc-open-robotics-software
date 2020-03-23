@@ -484,30 +484,26 @@ public class SwingState extends AbstractFootControlState
                                                                         desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
-//      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-//      {
-//         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-//         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-//         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
-//
-//         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
-//
-//         desiredPose.setPosition(desiredAnklePosition);
-//         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-//         desiredPosition.setIncludingFrame(desiredPose.getPosition());
-//      }
-      if (workspaceLimiterControlModule != null)
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null || workspaceLimiterControlModule != null)
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
-         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+         {
+            legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
+         if (workspaceLimiterControlModule != null)
+         {
+            workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
+
 
       if (yoSetDesiredVelocityToZero.getBooleanValue())
       {

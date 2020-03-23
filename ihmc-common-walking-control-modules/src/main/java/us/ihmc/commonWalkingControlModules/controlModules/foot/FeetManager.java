@@ -217,18 +217,19 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModules.get(robotSide).updateLegSingularityModule();
+         footControlModule.updateLegSingularityModule();
          footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
    }
 
-   public void correctCoMHeightForUnreachableFootstep(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesData comHeightData)
    {
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).updateLegSingularityModule();
-         footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.updateLegSingularityModule();
+         footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
 

@@ -165,26 +165,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
-//      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-//      {
-//         desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
-//         desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
-//         desiredLinearVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearVelocity());
-//         desiredAngularVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularVelocity());
-//         desiredLinearAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearAcceleration());
-//         desiredAngularAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularAcceleration());
-//
-//         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-//         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-//         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
-//
-//         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
-//
-//         desiredPose.setPosition(desiredAnklePosition);
-//         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-//         desiredPosition.setIncludingFrame(desiredPose.getPosition());
-//      }
-      if (workspaceLimiterControlModule != null)
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null || workspaceLimiterControlModule != null)
       {
          desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
          desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
@@ -197,8 +178,15 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
-         workspaceLimiterControlModule.update();
-         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+         {
+            legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
+         if (workspaceLimiterControlModule != null)
+         {
+            workspaceLimiterControlModule.update();
+            workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
 
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
