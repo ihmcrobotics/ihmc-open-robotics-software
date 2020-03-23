@@ -1,11 +1,6 @@
 package us.ihmc.robotics.physics;
 
-
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.computeContactVelocity;
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextCollidable;
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextSingleFloatingRigidBody;
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextStaticCollidable;
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.setupForwardDynamicsCalculator;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.*;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -59,16 +54,19 @@ public class MultiContactImpulseCalculatorTest
          collisionGroup.getGroupCollisions().add(bodyAToEnvironment);
          collisionGroup.getGroupCollisions().add(bodyAToBodyB);
 
-         Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap = toForwardDynamicsCalculatorMap(gravity, bodyA, bodyB);
+         Map<RigidBodyBasics, PhysicsEngineRobotData> physicsEngineRobotDataMap = toPhysicsEngineRobotDataMap(gravity, bodyA, bodyB);
+         Map<RigidBodyBasics, ForwardDynamicsCalculator> robotForwardDynamicsCalculatorMap = physicsEngineRobotDataMap.entrySet().stream()
+                                                                                                                      .collect(Collectors.toMap(Entry::getKey,
+                                                                                                                                                e -> e.getValue()
+                                                                                                                                                      .getForwardDynamicsPlugin()
+                                                                                                                                                      .getForwardDynamicsCalculator()));
 
          Map<CollisionResult, FrameVector3D> contactLinearVelocitiesPreImpulse = predictContactVelocity(dt,
                                                                                                         collisionGroup.getGroupCollisions(),
                                                                                                         robotForwardDynamicsCalculatorMap);
 
-         MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame,
-                                                                                                         dt,
-                                                                                                         robotForwardDynamicsCalculatorMap,
-                                                                                                         collisionGroup);
+         MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
+         multiContactImpulseCalculator.configure(dt, physicsEngineRobotDataMap, collisionGroup);
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          multiContactImpulseCalculator.setSpringConstant(0.0);
@@ -98,6 +96,21 @@ public class MultiContactImpulseCalculatorTest
                                                                                POST_IMPULSE_VELOCITY_EPSILON);
          }
       }
+   }
+
+   public Map<RigidBodyBasics, PhysicsEngineRobotData> toPhysicsEngineRobotDataMap(Vector3DReadOnly gravity, RigidBodyBasics... rigidBodies)
+   {
+      HashMap<RigidBodyBasics, PhysicsEngineRobotData> map = new HashMap<>();
+
+      for (RigidBodyBasics rigidBody : rigidBodies)
+      {
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
+         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null);
+         physicsEngineRobotData.getForwardDynamicsPlugin().getForwardDynamicsCalculator().setGravitionalAcceleration(gravity);
+         map.put(rootBody, physicsEngineRobotData);
+      }
+
+      return map;
    }
 
    public Map<RigidBodyBasics, ForwardDynamicsCalculator> toForwardDynamicsCalculatorMap(Vector3DReadOnly gravity, RigidBodyBasics... rigidBodies)

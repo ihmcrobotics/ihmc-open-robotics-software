@@ -102,6 +102,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final ImpulseBasedRigidBodyTwistProvider rigidBodyTwistModifierA, rigidBodyTwistModifierB;
    private final ImpulseBasedJointTwistProvider jointTwistModifierA, jointTwistModifierB;
 
+   public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt, PhysicsEngineRobotData robotA,
+                                         PhysicsEngineRobotData robotB)
+   {
+      this(collisionResult, rootFrame, dt, robotA.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
+           robotB == null ? null : robotB.getForwardDynamicsPlugin().getForwardDynamicsCalculator());
+   }
+
    public SingleContactImpulseCalculator(CollisionResult collisionResult, ReferenceFrame rootFrame, double dt,
                                          ForwardDynamicsCalculator forwardDynamicsCalculatorA, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
    {
