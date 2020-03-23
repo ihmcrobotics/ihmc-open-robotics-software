@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -14,6 +15,7 @@ public class PhysicsEngine
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
    private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
 
@@ -25,10 +27,11 @@ public class PhysicsEngine
 
    private boolean initialize = true;
 
-   public PhysicsEngine(YoVariableRegistry parentRegistry)
+   public PhysicsEngine(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
-      multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame);
+      multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
       parentRegistry.addChild(physicsEngineRegistry);
    }
 
@@ -36,7 +39,12 @@ public class PhysicsEngine
                         MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
                         MultiBodySystemStateReader physicsOutputReader)
    {
-      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotInitialStateWriter, controllerOutputWriter, robotCollisionModel);
+      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName,
+                                                                rootBody,
+                                                                robotInitialStateWriter,
+                                                                controllerOutputWriter,
+                                                                robotCollisionModel,
+                                                                yoGraphicsListRegistry);
       multiRobotPhysicsEnginePlugin.addRobot(robot);
       integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());

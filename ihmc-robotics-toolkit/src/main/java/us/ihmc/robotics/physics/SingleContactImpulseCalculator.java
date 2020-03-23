@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -57,27 +58,27 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final MultiBodyResponseCalculator responseCalculatorA;
    private final MultiBodyResponseCalculator responseCalculatorB;
 
-   private final FramePoint3D contactPointA = new FramePoint3D();
-   private final FramePoint3D contactPointB = new FramePoint3D();
+   private final FramePoint3D pointA = new FramePoint3D();
+   private final FramePoint3D pointB = new FramePoint3D();
 
-   private final FrameVector3D noImpulseVelocityA = new FrameVector3D();
-   private final FrameVector3D noImpulseVelocityB = new FrameVector3D();
+   private final FrameVector3D velocityNoImpulseA = new FrameVector3D();
+   private final FrameVector3D velocityNoImpulseB = new FrameVector3D();
 
    private final FrameVector3D velocityDueToOtherImpulseA = new FrameVector3D();
    private final FrameVector3D velocityDueToOtherImpulseB = new FrameVector3D();
 
-   private final FrameVector3D contactPointVelocityA = new FrameVector3D();
-   private final FrameVector3D contactPointVelocityB = new FrameVector3D();
-   private final FrameVector3D contactVelocity = new FrameVector3D();
-   private final FrameVector3D previousContactVelocity = new FrameVector3D();
-   private final FrameVector3D contactVelocityChange = new FrameVector3D();
+   private final FrameVector3D velocityA = new FrameVector3D();
+   private final FrameVector3D velocityB = new FrameVector3D();
+   private final FrameVector3D velocityRelative = new FrameVector3D();
+   private final FrameVector3D velocityRelativePrevious = new FrameVector3D();
+   private final FrameVector3D velocityRelativeChange = new FrameVector3D();
 
    private final DenseMatrix64F inverseApparentInertiaA = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F inverseApparentInertiaB = new DenseMatrix64F(3, 3);
 
    private final SpatialImpulse impulseA = new SpatialImpulse();
    private final SpatialImpulse impulseB = new SpatialImpulse();
-   private final FrameVector3D previousImpulseA = new FrameVector3D();
+   private final FrameVector3D impulsePreviousA = new FrameVector3D();
    private final FrameVector3D impulseChangeA = new FrameVector3D();
 
    private final Point3D contactFramePosition = new Point3D();
@@ -119,13 +120,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          }
       };
 
-      contactPointVelocityA.setReferenceFrame(contactFrame);
-      contactPointVelocityB.setReferenceFrame(contactFrame);
-      contactVelocity.setReferenceFrame(contactFrame);
-      previousContactVelocity.setReferenceFrame(contactFrame);
-      contactVelocityChange.setReferenceFrame(contactFrame);
+      velocityA.setReferenceFrame(contactFrame);
+      velocityB.setReferenceFrame(contactFrame);
+      velocityRelative.setReferenceFrame(contactFrame);
+      velocityRelativePrevious.setReferenceFrame(contactFrame);
+      velocityRelativeChange.setReferenceFrame(contactFrame);
 
-      previousImpulseA.setReferenceFrame(contactFrame);
+      impulsePreviousA.setReferenceFrame(contactFrame);
       impulseChangeA.setReferenceFrame(contactFrame);
 
       responseCalculatorA = new MultiBodyResponseCalculator(forwardDynamicsCalculatorA);
@@ -193,18 +194,18 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       contactFramePosition.set(collisionResult.getPointOnARootFrame());
       contactFrame.update();
 
-      contactPointA.setIncludingFrame(collisionResult.getCollisionData().getPointOnA());
-      contactPointA.changeFrame(bodyFrameA);
+      pointA.setIncludingFrame(collisionResult.getCollisionData().getPointOnA());
+      pointA.changeFrame(bodyFrameA);
 
-      computeContactPointVelocity(dt, rootA, contactingBodyA, forwardDynamicsCalculatorA.getAccelerationProvider(), contactPointA, noImpulseVelocityA);
-      noImpulseVelocityA.changeFrame(contactFrame);
+      computeContactPointVelocity(dt, rootA, contactingBodyA, forwardDynamicsCalculatorA.getAccelerationProvider(), pointA, velocityNoImpulseA);
+      velocityNoImpulseA.changeFrame(contactFrame);
 
       if (rootB != null)
       {
-         contactPointB.setIncludingFrame(collisionResult.getCollisionData().getPointOnB());
-         contactPointB.changeFrame(bodyFrameB);
-         computeContactPointVelocity(dt, rootB, contactingBodyB, forwardDynamicsCalculatorB.getAccelerationProvider(), contactPointB, noImpulseVelocityB);
-         noImpulseVelocityB.changeFrame(contactFrame);
+         pointB.setIncludingFrame(collisionResult.getCollisionData().getPointOnB());
+         pointB.changeFrame(bodyFrameB);
+         computeContactPointVelocity(dt, rootB, contactingBodyB, forwardDynamicsCalculatorB.getAccelerationProvider(), pointB, velocityNoImpulseB);
+         velocityNoImpulseB.changeFrame(contactFrame);
       }
 
       isFirstUpdate = true;
@@ -268,59 +269,59 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    {
       if (externalRigidBodyTwistModifier != null)
       {
-         velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, contactPointA));
+         velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, pointA));
          velocityDueToOtherImpulseA.changeFrame(contactFrame);
-         contactPointVelocityA.add(noImpulseVelocityA, velocityDueToOtherImpulseA);
+         velocityA.add(velocityNoImpulseA, velocityDueToOtherImpulseA);
       }
       else
       {
-         contactPointVelocityA.set(noImpulseVelocityA);
+         velocityA.set(velocityNoImpulseA);
       }
 
       if (rootB != null)
       {
          if (externalRigidBodyTwistModifier != null)
          {
-            velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, contactPointB));
+            velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, pointB));
             velocityDueToOtherImpulseB.changeFrame(contactFrame);
-            contactPointVelocityB.add(noImpulseVelocityB, velocityDueToOtherImpulseB);
+            velocityB.add(velocityNoImpulseB, velocityDueToOtherImpulseB);
          }
          else
          {
-            contactPointVelocityB.set(noImpulseVelocityB);
+            velocityB.set(velocityNoImpulseB);
          }
 
-         contactVelocity.sub(contactPointVelocityA, contactPointVelocityB);
+         velocityRelative.sub(velocityA, velocityB);
       }
       else
       {
-         contactVelocity.set(contactPointVelocityA);
+         velocityRelative.set(velocityA);
       }
 
       if (isFirstUpdate)
       {
-         previousContactVelocity.set(contactVelocity);
-         contactVelocityChange.set(contactVelocity);
+         velocityRelativePrevious.set(velocityRelative);
+         velocityRelativeChange.set(velocityRelative);
       }
       else
       {
-         contactVelocityChange.sub(contactVelocity, previousContactVelocity);
-         previousContactVelocity.set(contactVelocity);
+         velocityRelativeChange.sub(velocityRelative, velocityRelativePrevious);
+         velocityRelativePrevious.set(velocityRelative);
       }
-      // TODO Move the spring stuff to before the test to update isContactClosing
+
       collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
       collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
       collisionPositionTerm.scale(springConstant);
-      collisionPositionTerm.changeFrame(contactVelocity.getReferenceFrame());
-      contactVelocity.sub(collisionPositionTerm);
+      collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
+      velocityRelative.sub(collisionPositionTerm);
 
       impulseA.setToZero(bodyFrameA, contactFrame);
 
-      isContactClosing = contactVelocity.getZ() < 0.0;
+      isContactClosing = velocityRelative.getZ() < 0.0;
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
-         contactVelocity.get(c);
+         velocityRelative.get(c);
          LinearSolver<DenseMatrix64F> solver;
          if (CommonOps.det(M_inv) > 1.0e-6)
             solver = linearSolver;
@@ -360,8 +361,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
       else
       {
-         impulseA.getLinearPart().interpolate(previousImpulseA, impulseA.getLinearPart(), alpha);
-         impulseChangeA.sub(impulseA.getLinearPart(), previousImpulseA);
+         impulseA.getLinearPart().interpolate(impulsePreviousA, impulseA.getLinearPart(), alpha);
+         impulseChangeA.sub(impulseA.getLinearPart(), impulsePreviousA);
          isImpulseZero = impulseA.getLinearPart().length() < 1.0e-10;
       }
 
@@ -391,7 +392,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          }
       }
 
-      previousImpulseA.set(impulseA.getLinearPart());
+      impulsePreviousA.set(impulseA.getLinearPart());
       isFirstUpdate = false;
    }
 
@@ -444,7 +445,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public double getVelocityUpdate()
    {
-      return contactVelocityChange.length();
+      return velocityRelativeChange.length();
    }
 
    @Override
@@ -473,6 +474,16 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return forwardDynamicsCalculatorA;
    }
 
+   public RigidBodyBasics getContactingBodyB()
+   {
+      return contactingBodyB;
+   }
+
+   public ForwardDynamicsCalculator getForwardDynamicsCalculatorB()
+   {
+      return forwardDynamicsCalculatorB;
+   }
+
    @Override
    public int getNumberOfRobotsInvolved()
    {
@@ -482,13 +493,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public RigidBodyBasics getRootBody(int index)
    {
-      return index == 0 ? getRootBodyA() : getRootBodyB();
+      return index == 0 ? rootA : rootB;
    }
 
    @Override
    public RigidBodyTwistProvider getRigidBodyTwistChangeProvider(int index)
    {
-      return index == 0 ? getTwistChangeProviderA() : getTwistChangeProviderB();
+      return index == 0 ? rigidBodyTwistModifierA : rigidBodyTwistModifierB;
    }
 
    @Override
@@ -501,29 +512,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public DenseMatrix64F getJointVelocityChange(int index)
    {
       return index == 0 ? getJointVelocityChangeA() : getJointVelocityChangeB();
-   }
-
-   public RigidBodyBasics getRootBodyA()
-   {
-      return rootA;
-   }
-
-   public RigidBodyBasics getRootBodyB()
-   {
-      return rootB;
-   }
-
-   public RigidBodyTwistProvider getTwistChangeProviderA()
-   {
-      return rigidBodyTwistModifierA;
-   }
-
-   public RigidBodyTwistProvider getTwistChangeProviderB()
-   {
-      if (rootB != null)
-         return rigidBodyTwistModifierB;
-      else
-         return null;
    }
 
    public DenseMatrix64F getJointVelocityChangeA()
@@ -540,16 +528,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return responseCalculatorA.propagateImpulse();
    }
 
-   public RigidBodyBasics getContactingBodyB()
-   {
-      return contactingBodyB;
-   }
-
-   public ForwardDynamicsCalculator getForwardDynamicsCalculatorB()
-   {
-      return forwardDynamicsCalculatorB;
-   }
-
    public DenseMatrix64F getJointVelocityChangeB()
    {
       if (rootB == null || !isConstraintActive())
@@ -564,14 +542,54 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return responseCalculatorB.propagateImpulse();
    }
 
-   public SpatialImpulseReadOnly getContactImpulseA()
+   public SpatialImpulseReadOnly getImpulseA()
    {
       return impulseA;
    }
 
-   public SpatialImpulseReadOnly getContactImpulseB()
+   public SpatialImpulseReadOnly getImpulseB()
    {
       return impulseB;
+   }
+
+   public FramePoint3DReadOnly getPointA()
+   {
+      return pointA;
+   }
+
+   public FramePoint3DReadOnly getPointB()
+   {
+      return pointB;
+   }
+
+   public FrameVector3DReadOnly getVelocityNoImpulseA()
+   {
+      return velocityNoImpulseA;
+   }
+
+   public FrameVector3DReadOnly getVelocityNoImpulseB()
+   {
+      return velocityNoImpulseB;
+   }
+
+   public FrameVector3DReadOnly getVelocityDueToOtherImpulseA()
+   {
+      return velocityDueToOtherImpulseA;
+   }
+
+   public FrameVector3DReadOnly getVelocityDueToOtherImpulseB()
+   {
+      return velocityDueToOtherImpulseB;
+   }
+
+   public MultiBodyResponseCalculator getResponseCalculatorA()
+   {
+      return responseCalculatorA;
+   }
+
+   public MultiBodyResponseCalculator getResponseCalculatorB()
+   {
+      return responseCalculatorB;
    }
 
    public double getCoefficientOfFriction()

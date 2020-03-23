@@ -1,21 +1,37 @@
 package us.ihmc.robotics.physics;
 
 import java.util.*;
+import java.util.function.Supplier;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class MultiRobotForwardDynamicsPlugin
 {
-   private final ReferenceFrame rootFrame;
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robots = new HashMap<>();
+   private final RecyclingArrayList<YoMultiContactImpulseCalculator> multiContactImpulseCalculators;
 
    private List<MultiRobotCollisionGroup> collisionGroups;
 
-   public MultiRobotForwardDynamicsPlugin(ReferenceFrame rootFrame)
+   public MultiRobotForwardDynamicsPlugin(ReferenceFrame rootFrame, YoVariableRegistry registry)
    {
-      this.rootFrame = rootFrame;
+      YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
+      registry.addChild(multiContactCalculatorRegistry);
+
+      multiContactImpulseCalculators = new RecyclingArrayList<>(1, new Supplier<YoMultiContactImpulseCalculator>()
+      {
+         int identifier = 0;
+
+         @Override
+         public YoMultiContactImpulseCalculator get()
+         {
+            return new YoMultiContactImpulseCalculator(identifier++, rootFrame, multiContactCalculatorRegistry);
+         }
+      });
+      multiContactImpulseCalculators.clear();
    }
 
    public void addRobot(PhysicsEngineRobotData robot)
@@ -47,9 +63,11 @@ public class MultiRobotForwardDynamicsPlugin
       Set<RigidBodyBasics> uncoveredRobotsRootBody = new HashSet<>(robots.keySet());
       List<MultiContactImpulseCalculator> impulseCalculators = new ArrayList<>();
 
+      multiContactImpulseCalculators.clear();
+
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
-         MultiContactImpulseCalculator calculator = new MultiContactImpulseCalculator(rootFrame);
+         MultiContactImpulseCalculator calculator = multiContactImpulseCalculators.add();
          calculator.configure(robots, collisionGroup);
          impulseCalculators.add(calculator);
          uncoveredRobotsRootBody.removeAll(collisionGroup.getRootBodies());

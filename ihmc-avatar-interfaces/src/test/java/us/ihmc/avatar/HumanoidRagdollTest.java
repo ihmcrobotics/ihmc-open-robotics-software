@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.robotics.physics.*;
@@ -91,7 +92,8 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
    {
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
 
-      PhysicsEngine physicsEngine = new PhysicsEngine(drcSimulationTestHelper.getYoVariableRegistry());
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      PhysicsEngine physicsEngine = new PhysicsEngine(drcSimulationTestHelper.getYoVariableRegistry(), yoGraphicsListRegistry);
 
       String robotName = getSimpleRobotName();
       RigidBodyBasics rootBody = getRobotModel().createFullRobotModel().getElevator();
@@ -99,6 +101,8 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       MultiBodySystemStateWriter robotInitialStateWriter = createRobotInitialStateWriter(getRobotModel().getJointMap());
       MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
       physicsEngine.addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
       return physicsEngine;
    }
 
