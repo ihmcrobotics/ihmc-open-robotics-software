@@ -446,13 +446,14 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       Quaternion orientation = new Quaternion();
       currentGoalPose.get().get(location, orientation);
       publishUIPositionCheckerPacket(location, orientation);
+      boolean planBodyPath = false;
 
       FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
                                                                                                               startLeftFootPose,
                                                                                                               startRightFootPose,
                                                                                                               currentGoalPose.get(),
                                                                                                               idealStanceWidth,
-                                                                                                              FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                              planBodyPath);
 
       if (planarRegions.get() != null)
          request.getPlanarRegionsListMessage().set(planarRegions.get());

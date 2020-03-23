@@ -67,7 +67,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Integer> MaxIterations = topic("MaxIterations");
    public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
-   public static final Topic<Boolean> TurnWalkTurnPlanner = topic("TurnWalkTurnPlanner");
+   public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
    public static final Topic<FootstepPlanningResult> PlanningResult = topic("PlanningResult");
    public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
    public static final Topic<Integer> PlannerRequestId = topic("PlannerRequestId");

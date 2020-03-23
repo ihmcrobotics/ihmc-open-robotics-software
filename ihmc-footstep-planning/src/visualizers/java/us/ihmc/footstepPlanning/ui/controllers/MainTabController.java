@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -57,7 +55,7 @@ public class MainTabController
    @FXML
    private CheckBox acceptNewRegions;
    @FXML
-   private CheckBox turnWalkTurnPlanner;
+   private CheckBox performAStarSearch;
    @FXML
    private CheckBox planBodyPath;
    @FXML
@@ -350,7 +348,7 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
-      messager.bindBidirectional(TurnWalkTurnPlanner, turnWalkTurnPlanner.selectedProperty(), true);
+      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
 
       messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());

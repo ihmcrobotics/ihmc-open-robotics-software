@@ -11,9 +11,21 @@ import us.ihmc.pathPlanning.DataSetName;
 public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
-   public FootstepPlannerType getPlannerType()
+   protected boolean getPlanBodyPath()
    {
-      return FootstepPlannerType.PLAN_THEN_SNAP;
+      return false;
+   }
+
+   @Override
+   protected boolean getPerformAStarSearch()
+   {
+      return false;
+   }
+
+   @Override
+   protected String getTestNamePrefix()
+   {
+      return "plan_then_snap";
    }
 
    @Override

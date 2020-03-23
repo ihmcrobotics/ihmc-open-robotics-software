@@ -412,12 +412,13 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       planId.increment();
+      boolean planBodyPath = false;
       FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
                                                                                                               startLeftFootPose,
                                                                                                               startRightFootPose,
                                                                                                               goalPose.get(),
                                                                                                               idealStanceWidth,
-                                                                                                              FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                              planBodyPath);
       request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
