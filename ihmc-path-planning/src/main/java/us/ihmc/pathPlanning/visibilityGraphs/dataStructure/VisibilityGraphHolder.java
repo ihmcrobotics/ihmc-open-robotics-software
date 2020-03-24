@@ -38,6 +38,11 @@ public class VisibilityGraphHolder
       goalMapId = mapId;
    }
 
+   public void setInterRegionsMapId(int interRegionsMapId)
+   {
+      this.interRegionsMapId = interRegionsMapId;
+   }
+
    public void setStartVisibilityMapInWorld(int mapId, VisibilityMap startMap)
    {
       startMapId = mapId;
@@ -111,6 +116,11 @@ public class VisibilityGraphHolder
    public VisibilityMapWithNavigableRegion getNavigableRegion(int regionNumber)
    {
       return visibilityMapsWithNavigableRegions.get(regionNumber);
+   }
+
+   public List<VisibilityMapWithNavigableRegion> getVisibilityMapsWithNavigableRegions()
+   {
+      return visibilityMapsWithNavigableRegions;
    }
 
    public void clear()

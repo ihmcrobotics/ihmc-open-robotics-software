@@ -14,7 +14,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 
 public class ValkyriePlanarRegionsSimulation
 {
-   private static final DataSetName DATA_SET_TO_USE = DataSetName._20200226_120200_FlatGround_StartMidRegion;
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190220_172417_EOD_Cinders;
 
    public static void main(String[] args)
    {
