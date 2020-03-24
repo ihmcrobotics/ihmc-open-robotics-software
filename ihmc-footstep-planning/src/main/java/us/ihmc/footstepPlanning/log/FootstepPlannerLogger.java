@@ -21,7 +21,6 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -104,7 +103,7 @@ public class FootstepPlannerLogger
    }
 
    /**
-    * Generates log in the given directory. For example calling with the input "/home/user/.ihmc/logs/20200320_testLog/" will create (if empty)
+    * Generates log in the given directory. For example calling with the input "/home/user/.ihmc/logs/" will create (if empty)
     * and populate that directy with log files.
     *
     * <p> Contents of the log file include: json of footstep parameters packet, json of visibility parameters packet, json of request packet,
@@ -162,7 +161,7 @@ public class FootstepPlannerLogger
       try
       {
          File plannerDataFile = new File(plannerIterationDataFileName);
-         ensureFileExists(plannerDataFile.toPath());
+         FileTools.ensureFileExists(plannerDataFile.toPath());
          fileWriter = new FileWriter(plannerIterationDataFileName);
 
          fileWriter.write(
@@ -223,7 +222,7 @@ public class FootstepPlannerLogger
 
    private void writeToFile(String file, byte[] fileContents) throws Exception
    {
-      ensureFileExists(new File(file).toPath());
+      FileTools.ensureFileExists(new File(file).toPath());
       outputStream = new FileOutputStream(file);
       printStream = new PrintStream(outputStream);
 
@@ -289,45 +288,5 @@ public class FootstepPlannerLogger
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;
-   }
-
-   // TODO replace with updated method in commons once it's released
-
-   private static void ensureFileExists(Path path) throws IOException
-   {
-      if (path.getParent() != null && !Files.exists(path.getParent()))
-      {
-         ensureDirectoryExists(path.getParent());
-      }
-
-      if (Files.exists(path) && Files.isDirectory(path))
-      {
-         Files.delete(path);
-         Files.createFile(path);
-      }
-
-      if (!Files.exists(path))
-      {
-         Files.createFile(path);
-      }
-   }
-
-   public static void ensureDirectoryExists(Path path) throws IOException
-   {
-      if (path.getParent() != null && !Files.exists(path.getParent()))
-      {
-         ensureDirectoryExists(path.getParent());
-      }
-
-      if (Files.exists(path) && !Files.isDirectory(path))
-      {
-         Files.delete(path);
-         Files.createDirectory(path);
-      }
-
-      if (!Files.exists(path))
-      {
-         Files.createDirectory(path);
-      }
    }
 }
