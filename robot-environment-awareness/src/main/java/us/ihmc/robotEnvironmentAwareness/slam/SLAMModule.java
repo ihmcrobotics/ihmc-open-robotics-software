@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
@@ -44,7 +43,7 @@ import us.ihmc.ros2.Ros2Node;
 
 public class SLAMModule
 {
-   private final Messager reaMessager;
+   protected final Messager reaMessager;
 
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
@@ -74,7 +73,7 @@ public class SLAMModule
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
    private final AtomicReference<Boolean> robotStatus;
-   private final AtomicLong latestRobotTimeStamp = new AtomicLong();
+   protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
@@ -155,21 +154,6 @@ public class SLAMModule
    private boolean isSLAMThreadInterrupted()
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
-   }
-
-   protected void updateStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
-   {
-      RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
-      latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
-
-      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.001)
-      {
-         reaMessager.submitMessage(REAModuleAPI.RobotStatus, true);
-      }
-      else
-      {
-         reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
-      }
    }
 
    public void updateSLAM()
