@@ -83,7 +83,7 @@ public class PartialFootholdCropperModuleTest
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.getVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
-      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("leftApplyPartialFootholds"));
+      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("applyPartialFootholds"));
       applyPartialFootholds.set(true);
 
 
