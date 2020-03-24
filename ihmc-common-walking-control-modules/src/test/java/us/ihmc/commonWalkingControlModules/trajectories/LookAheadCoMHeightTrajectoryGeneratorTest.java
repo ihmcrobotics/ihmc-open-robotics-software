@@ -87,6 +87,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
       SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
+      testingParameters.setKeepSCSUp(true);
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");
@@ -257,8 +258,6 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             FramePoint3D comPosition = new FramePoint3D();
             pelvisFrame.setZ(comPosition.getZ());
             pelvisFrame.update();
-
-            coMHeightPartialDerivativesDataToPack.getCoMHeight(comPosition);
 
             scs.tickAndUpdate();
          }
