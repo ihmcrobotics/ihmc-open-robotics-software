@@ -38,7 +38,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private double springConstant = 5.0;
+   private double springConstant = 0.1;
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
 
