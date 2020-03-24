@@ -34,7 +34,6 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -64,7 +63,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Pose3DReadOnly> rightFootStartPose;
    private final AtomicReference<Pose3DReadOnly> leftFootGoalPose;
    private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
-   private final AtomicReference<Boolean> turnWalkTurnPlanner;
+   private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<Boolean> planBodyPath;
 
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -93,7 +92,7 @@ public class FootstepPathCalculatorModule
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
-      turnWalkTurnPlanner = messager.createInput(PerformAStarSearch, false);
+      performAStarSearch = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
@@ -169,6 +168,7 @@ public class FootstepPathCalculatorModule
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(planBodyPath.get());
+         request.setPerformAStarSearch(performAStarSearch.get());
          request.setSnapGoalSteps(snapGoalSteps.get());
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 
@@ -220,10 +220,6 @@ public class FootstepPathCalculatorModule
       {
          sendVisibilityGraphStatisticsMessages(planningModule.getBodyPathPlanner().getPlannerStatistics());
       }
-
-      GraphSearchStatistics graphSearchStatistics = new GraphSearchStatistics();
-      graphSearchStatistics.set(planningModule);
-      sendGraphSearchPlannerStatisticsMessage(graphSearchStatistics);
    }
 
    private void sendPlannerStatisticsMessages(PlannerStatistics plannerStatistics)
@@ -235,9 +231,6 @@ public class FootstepPathCalculatorModule
          break;
       case VISIBILITY_GRAPH:
          sendVisibilityGraphStatisticsMessages((VisibilityGraphStatistics) plannerStatistics);
-         break;
-      case GRAPH_SEARCH:
-         sendGraphSearchPlannerStatisticsMessage((GraphSearchStatistics) plannerStatistics);
          break;
       }
    }
@@ -301,12 +294,6 @@ public class FootstepPathCalculatorModule
       messager.submitMessage(GoalVisibilityMap, goalMap);
       messager.submitMessage(VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
-   }
-
-   private void sendGraphSearchPlannerStatisticsMessage(GraphSearchStatistics graphSearchStatistics)
-   {
-      messager.submitMessage(FootstepPlannerMessagerAPI.ExpandedNodesMap, graphSearchStatistics.getExpandedNodes());
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraphPart, graphSearchStatistics.getFullGraph());
    }
 
    public static FootstepPathCalculatorModule createMessagerModule(SharedMemoryMessager messager)

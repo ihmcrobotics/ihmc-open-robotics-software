@@ -213,7 +213,6 @@ public class FootstepPlannerLogVisualizerController
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowExpandedNodes, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRejectedNodes, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);

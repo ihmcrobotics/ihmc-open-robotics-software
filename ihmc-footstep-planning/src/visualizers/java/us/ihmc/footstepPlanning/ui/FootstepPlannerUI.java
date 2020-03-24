@@ -66,8 +66,6 @@ public class FootstepPlannerUI
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final OccupancyMapRenderer occupancyMapRenderer;
-   private final ExpandedNodesRenderer expandedNodesRenderer;
-   private final FullGraphRenderer fullGraphRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
@@ -170,8 +168,6 @@ public class FootstepPlannerUI
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
-      this.expandedNodesRenderer = new ExpandedNodesRenderer(messager);
-      this.fullGraphRenderer = new FullGraphRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(contactPointParameters, messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
@@ -182,8 +178,6 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
-      view3dFactory.addNodeToView(expandedNodesRenderer.getRoot());
-      view3dFactory.addNodeToView(fullGraphRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
@@ -226,8 +220,6 @@ public class FootstepPlannerUI
          mainTabController.setContactPointParameters(contactPointParameters);
          pathViewer.setDefaultContactPoints(contactPointParameters);
          goalOrientationViewer.setDefaultContactPoints(contactPointParameters);
-         expandedNodesRenderer.setDefaultContactPoints(contactPointParameters);
-         fullGraphRenderer.setDefaultContactPoints(contactPointParameters);
          footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
       }
 
@@ -241,8 +233,6 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
       occupancyMapRenderer.start();
-      expandedNodesRenderer.start();
-      fullGraphRenderer.start();
       footstepPlannerLogRenderer.start();
       new FootPoseFromMidFootUpdater(messager).start();
 
@@ -326,8 +316,6 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       occupancyMapRenderer.stop();
-      expandedNodesRenderer.stop();
-      fullGraphRenderer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();

@@ -127,15 +127,9 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
    public static final Topic<PlannerNodeDataList> NodeData = topic("NodeData");
-   public static final Topic<PlannerNodeDataList> FootstepGraphPart = topic("FootstepGraphPart");
    public static final Topic<Boolean> ShowNodeData = topic("ShowNodeData");
    public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
-   public static final Topic<PlannerLatticeMap> ExpandedNodesMap = topic("ExpandedNodesMap");
    public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
-   public static final Topic<Boolean> ShowExpandedNodes = topic("ShowExpandedNodes");
-   public static final Topic<Boolean> ShowFullGraph = topic("ShowFullGraph");
-   public static final Topic<Double> ExpansionFractionToShow = topic("ExpansionFractionToShow");
-   public static final Topic<RejectionReasonToVisualize> RejectionReasonToShow = topic("RejectionReasonToShow");
    public static final Topic<Boolean> ShowRejectedNodes = topic("ShowRejectedNodes");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
 
