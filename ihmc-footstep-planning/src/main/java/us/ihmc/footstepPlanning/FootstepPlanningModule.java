@@ -95,8 +95,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters, visibilityGraphParameters, pathPostProcessor, registry);
 
-      TurnWalkTurnPlanner turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
-      this.planThenSnapPlanner = new PlanThenSnapPlanner(turnWalkTurnPlanner, footPolygons);
+      this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
    }
 
@@ -137,15 +136,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       requestCallback.accept(request);
 
       // Update planar regions
-      PlanarRegionsList planarRegionsList = null;
-      if (!request.getAssumeFlatGround() && request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty())
-      {
-         planarRegionsList = request.getPlanarRegionsList();
-      }
-
+      boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
+      PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
-      if (request.getPlanBodyPath())
+      if (request.getPlanBodyPath() && !flatGroundMode)
       {
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
@@ -198,7 +193,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
          planThenSnapPlanner.setPlanarRegions(planarRegionsList);
-         planThenSnapPlanner.setTimeout(request.getTimeout());
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);

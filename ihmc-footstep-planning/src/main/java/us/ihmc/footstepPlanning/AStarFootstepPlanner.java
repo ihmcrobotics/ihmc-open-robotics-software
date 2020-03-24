@@ -110,11 +110,13 @@ public class AStarFootstepPlanner
       outputToPack.setPlanId(request.getRequestId());
 
       // Update planar regions
-      PlanarRegionsList planarRegionsList = null;
-      if (!request.getAssumeFlatGround() && request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty())
-      {
-         planarRegionsList = request.getPlanarRegionsList();
-      }
+      boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
+      PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
+
+      snapper.setPlanarRegions(planarRegionsList);
+      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      checker.setPlanarRegions(planarRegionsList);
+      idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
       boolean horizonLengthImposed =
             request.getPlanBodyPath() && MathTools.intervalContains(bodyPathPlanHolder.computePathLength(0.0), 0.0, request.getHorizonLength());
@@ -129,11 +131,6 @@ public class AStarFootstepPlanner
       {
          goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
       }
-
-      snapper.setPlanarRegions(planarRegionsList);
-      snapAndWiggler.setPlanarRegions(planarRegionsList);
-      checker.setPlanarRegions(planarRegionsList);
-      idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
