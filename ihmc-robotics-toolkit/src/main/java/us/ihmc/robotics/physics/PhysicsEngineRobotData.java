@@ -37,6 +37,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
       if (robotInitialStateWriter != null)
          robotInitialStateWriter.setMultiBodySystem(multiBodySystem);
+      if (controllerOutputWriter != null)
+         controllerOutputWriter.setMultiBodySystem(multiBodySystem);
 
       collidables = robotCollisionModel.getRobotCollidables(multiBodySystem);
 
