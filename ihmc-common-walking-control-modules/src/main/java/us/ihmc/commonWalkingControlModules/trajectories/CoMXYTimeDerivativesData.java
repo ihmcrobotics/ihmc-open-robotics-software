@@ -2,19 +2,22 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public class CoMXYTimeDerivativesData
 {
    private FramePoint2D comXYPosition = new FramePoint2D(ReferenceFrame.getWorldFrame());
-   private FrameVector2D comXYVelocity = new FrameVector2D(ReferenceFrame.getWorldFrame());
-   private FrameVector2D comXYAcceleration = new FrameVector2D(ReferenceFrame.getWorldFrame());
+   private FrameVector3D comVelocity = new FrameVector3D();
+   private FrameVector3D comAcceleration = new FrameVector3D();
 
    public void set(CoMXYTimeDerivativesData comXYData)
    {
       this.comXYPosition.set(comXYData.comXYPosition);
-      this.comXYVelocity.set(comXYData.comXYVelocity);
-      this.comXYAcceleration.set(comXYData.comXYAcceleration);
+      this.comVelocity.set(comXYData.comVelocity);
+      this.comAcceleration.set(comXYData.comAcceleration);
    }
 
    public void getCoMXYPosition(FramePoint2D comXYPositionToPack)
@@ -22,28 +25,29 @@ public class CoMXYTimeDerivativesData
       comXYPositionToPack.set(this.comXYPosition);
    }
 
-   public void getCoMXYVelocity(FrameVector2D comXYVelocityToPack)
+
+   public FrameVector3DReadOnly getCoMVelocity()
    {
-      comXYVelocityToPack.set(this.comXYVelocity);
+      return comVelocity;
    }
 
-   public void getCoMXYAcceleration(FrameVector2D comXYAccelerationToPack)
+   public FrameVector3DReadOnly getCoMAcceleration()
    {
-      comXYAccelerationToPack.set(this.comXYAcceleration);
+      return comAcceleration;
    }
 
-   public void setCoMXYPosition(FramePoint2D comXYPosition)
+   public void setCoMXYPosition(FramePoint3DReadOnly comXYPosition)
    {
       this.comXYPosition.set(comXYPosition);
    }
 
-   public void setCoMXYVelocity(FrameVector2D comXYVelocity)
+   public void setCoMVelocity(FrameVector3DReadOnly comVelocity)
    {
-      this.comXYVelocity.set(comXYVelocity);
+      this.comVelocity.set(comVelocity);
    }
 
-   public void setCoMXYAcceleration(FrameVector2D comXYAcceleration)
+   public void setCoMAcceleration(FrameVector3DReadOnly comAcceleration)
    {
-      this.comXYAcceleration.set(comXYAcceleration);
+      this.comAcceleration.set(comAcceleration);
    }
 }

@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -596,7 +597,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
             tempFramePointForViz1.changeFrame(worldFrame);
             queryPoint.set(tempFramePointForViz1);
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
-            coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
+            tempFramePointForViz2.setToZero(coMHeightPartialDerivativesData.getFrameOfCoMHeight());
+            tempFramePointForViz2.setZ(coMHeightPartialDerivativesData.getComHeight());
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());
             tempFramePointForViz2.setY(tempFramePointForViz1.getY());
 
@@ -762,15 +764,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       getCenterOfMass2d(solutionPoint, centerOfMassFrame);
       solve(coMHeightPartialDerivativesDataToPack, solutionPoint, isInDoubleSupport);
 
-      coMHeightPartialDerivativesDataToPack.getCoMHeight(tempFramePoint);
-      desiredCoMPosition.set(solutionPoint.getX(), solutionPoint.getY(), tempFramePoint.getZ());
+      desiredCoMPosition.set(solutionPoint.getX(), solutionPoint.getY(), coMHeightPartialDerivativesDataToPack.getComHeight());
    }
 
    private final FramePoint3D height = new FramePoint3D();
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
-   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2D queryPoint, boolean isInDoubleSupport)
+   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2DBasics queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
