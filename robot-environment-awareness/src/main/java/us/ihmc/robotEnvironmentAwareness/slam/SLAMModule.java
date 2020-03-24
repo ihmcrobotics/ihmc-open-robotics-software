@@ -237,7 +237,7 @@ public class SLAMModule
             RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
             estimatedPelvisPose.preMultiply(sensorPose);
             posePacket.getPose().set(estimatedPelvisPose);
-            reaMessager.submitMessage(REAModuleAPI.PelvisFrameState, posePacket);
+            reaMessager.submitMessage(REAModuleAPI.CustomizedFrameState, posePacket);
             estimatedPelvisPublisher.publish(posePacket);
          }
       }
