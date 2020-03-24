@@ -78,7 +78,7 @@ public class SLAMBasedEnvironmentAwarenessUI
                                                                               REAModuleAPI.UISensorPoseHistoryFrames,
                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor());
       pelvisFrameViewer = new SensorFrameViewer<StampedPosePacket>(uiMessager,
-                                                                               REAModuleAPI.PelvisFrameState,
+                                                                               REAModuleAPI.CustomizedFrameState,
                                                                                REAModuleAPI.UISensorPoseHistoryFrames,
                                                                                SensorFrameViewer.createStampedPosePacketSensorFrameExtractor());
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
