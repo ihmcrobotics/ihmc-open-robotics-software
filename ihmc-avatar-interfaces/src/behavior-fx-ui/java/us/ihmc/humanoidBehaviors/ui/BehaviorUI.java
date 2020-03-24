@@ -93,6 +93,7 @@ public class BehaviorUI
          Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
          behaviorSelector.getItems().add("None");
+         behaviorSelector.setValue("None");
 
          for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
@@ -115,7 +116,7 @@ public class BehaviorUI
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
-         Scene mainScene = new Scene(mainPane, 1554, 1000);
+         Scene mainScene = new Scene(mainPane, 1750, 1000);
 
          primaryStage.setScene(mainScene);
          primaryStage.show();

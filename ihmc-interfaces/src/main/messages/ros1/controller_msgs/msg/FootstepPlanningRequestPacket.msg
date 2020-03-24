@@ -32,6 +32,13 @@ geometry_msgs/Pose goal_right_foot_pose
 # Field default value 255
 int8 requested_initial_stance_side
 
+# If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+# Field default value True
+bool snap_goal_steps
+
+# If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+bool abort_if_goal_step_snapping_fails
+
 # Footstep planner type, see above
 # Field default value 255
 int8 requested_footstep_planner_type
@@ -44,8 +51,13 @@ float64 goal_distance_proximity
 # Field default value -1.0
 float64 goal_yaw_proximity
 
-# Timeout in seconds
+# Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+# Field default value 5.0
 float64 timeout
+
+# Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+# Field default value -1
+int32 max_iterations
 
 # Best effort timeout in seconds
 float64 best_effort_timeout
@@ -65,5 +77,9 @@ int32 planner_request_id
 
 # Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
 geometry_msgs/Pose[] body_path_waypoints
+
+# Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+# For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+bool generate_log
 
 

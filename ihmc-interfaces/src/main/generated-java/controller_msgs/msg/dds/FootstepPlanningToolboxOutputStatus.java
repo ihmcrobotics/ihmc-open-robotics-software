@@ -19,7 +19,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 5;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 6;
    public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 7;
-   public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 8;
+   public static final byte FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = (byte) 8;
+   public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 9;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.

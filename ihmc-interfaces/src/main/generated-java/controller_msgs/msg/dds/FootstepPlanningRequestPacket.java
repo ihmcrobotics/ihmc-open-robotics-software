@@ -45,6 +45,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public byte requested_initial_stance_side_ = (byte) 255;
    /**
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public boolean snap_goal_steps_ = true;
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public boolean abort_if_goal_step_snapping_fails_;
+   /**
             * Footstep planner type, see above
             */
    public byte requested_footstep_planner_type_ = (byte) 255;
@@ -57,9 +65,13 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double goal_yaw_proximity_ = -1.0;
    /**
-            * Timeout in seconds
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
-   public double timeout_;
+   public double timeout_ = 5.0;
+   /**
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+            */
+   public int max_iterations_ = -1;
    /**
             * Best effort timeout in seconds
             */
@@ -84,6 +96,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean generate_log_;
 
    public FootstepPlanningRequestPacket()
    {
@@ -112,6 +129,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
       requested_initial_stance_side_ = other.requested_initial_stance_side_;
 
+      snap_goal_steps_ = other.snap_goal_steps_;
+
+      abort_if_goal_step_snapping_fails_ = other.abort_if_goal_step_snapping_fails_;
+
       requested_footstep_planner_type_ = other.requested_footstep_planner_type_;
 
       goal_distance_proximity_ = other.goal_distance_proximity_;
@@ -119,6 +140,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
 
       timeout_ = other.timeout_;
+
+      max_iterations_ = other.max_iterations_;
 
       best_effort_timeout_ = other.best_effort_timeout_;
 
@@ -130,6 +153,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       planner_request_id_ = other.planner_request_id_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
+      generate_log_ = other.generate_log_;
+
    }
 
    /**
@@ -199,6 +224,36 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public void setSnapGoalSteps(boolean snap_goal_steps)
+   {
+      snap_goal_steps_ = snap_goal_steps;
+   }
+   /**
+            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+            */
+   public boolean getSnapGoalSteps()
+   {
+      return snap_goal_steps_;
+   }
+
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public void setAbortIfGoalStepSnappingFails(boolean abort_if_goal_step_snapping_fails)
+   {
+      abort_if_goal_step_snapping_fails_ = abort_if_goal_step_snapping_fails;
+   }
+   /**
+            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+            */
+   public boolean getAbortIfGoalStepSnappingFails()
+   {
+      return abort_if_goal_step_snapping_fails_;
+   }
+
+   /**
             * Footstep planner type, see above
             */
    public void setRequestedFootstepPlannerType(byte requested_footstep_planner_type)
@@ -244,18 +299,33 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Timeout in seconds
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
    public void setTimeout(double timeout)
    {
       timeout_ = timeout;
    }
    /**
-            * Timeout in seconds
+            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
    public double getTimeout()
    {
       return timeout_;
+   }
+
+   /**
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+            */
+   public void setMaxIterations(int max_iterations)
+   {
+      max_iterations_ = max_iterations;
+   }
+   /**
+            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+            */
+   public int getMaxIterations()
+   {
+      return max_iterations_;
    }
 
    /**
@@ -336,6 +406,23 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return body_path_waypoints_;
    }
 
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public void setGenerateLog(boolean generate_log)
+   {
+      generate_log_ = generate_log;
+   }
+   /**
+            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+            */
+   public boolean getGenerateLog()
+   {
+      return generate_log_;
+   }
+
 
    public static Supplier<FootstepPlanningRequestPacketPubSubType> getPubSubType()
    {
@@ -362,6 +449,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_initial_stance_side_, other.requested_initial_stance_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snap_goal_steps_, other.snap_goal_steps_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_goal_step_snapping_fails_, other.abort_if_goal_step_snapping_fails_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_footstep_planner_type_, other.requested_footstep_planner_type_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
@@ -369,6 +460,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_iterations_, other.max_iterations_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.best_effort_timeout_, other.best_effort_timeout_, epsilon)) return false;
 
@@ -385,6 +478,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          for (int i = 0; i < this.body_path_waypoints_.size(); i++)
          {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
       }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
       return true;
@@ -407,6 +502,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
       if(this.requested_initial_stance_side_ != otherMyClass.requested_initial_stance_side_) return false;
 
+      if(this.snap_goal_steps_ != otherMyClass.snap_goal_steps_) return false;
+
+      if(this.abort_if_goal_step_snapping_fails_ != otherMyClass.abort_if_goal_step_snapping_fails_) return false;
+
       if(this.requested_footstep_planner_type_ != otherMyClass.requested_footstep_planner_type_) return false;
 
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
@@ -414,6 +513,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
+
+      if(this.max_iterations_ != otherMyClass.max_iterations_) return false;
 
       if(this.best_effort_timeout_ != otherMyClass.best_effort_timeout_) return false;
 
@@ -425,6 +526,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
+      if(this.generate_log_ != otherMyClass.generate_log_) return false;
+
 
       return true;
    }
@@ -447,6 +550,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.goal_right_foot_pose_);      builder.append(", ");
       builder.append("requested_initial_stance_side=");
       builder.append(this.requested_initial_stance_side_);      builder.append(", ");
+      builder.append("snap_goal_steps=");
+      builder.append(this.snap_goal_steps_);      builder.append(", ");
+      builder.append("abort_if_goal_step_snapping_fails=");
+      builder.append(this.abort_if_goal_step_snapping_fails_);      builder.append(", ");
       builder.append("requested_footstep_planner_type=");
       builder.append(this.requested_footstep_planner_type_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
@@ -455,6 +562,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.goal_yaw_proximity_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
+      builder.append("max_iterations=");
+      builder.append(this.max_iterations_);      builder.append(", ");
       builder.append("best_effort_timeout=");
       builder.append(this.best_effort_timeout_);      builder.append(", ");
       builder.append("horizon_length=");
@@ -466,7 +575,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
       builder.append("body_path_waypoints=");
-      builder.append(this.body_path_waypoints_);
+      builder.append(this.body_path_waypoints_);      builder.append(", ");
+      builder.append("generate_log=");
+      builder.append(this.generate_log_);
       builder.append("}");
       return builder.toString();
    }

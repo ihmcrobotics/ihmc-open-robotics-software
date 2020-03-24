@@ -12,6 +12,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -44,6 +45,27 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
                                          YoVariableRegistry parentRegistry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
+      this(side,
+           soleFrame,
+           rotationParameters.getVelocityEdgeFilterBreakFrequency(),
+           rotationParameters.getStableRotationDirectionThreshold(),
+           rotationParameters.getStableRotationPositionThreshold(),
+           rotationParameters.getStableEdgeWindowSize(),
+           dt,
+           parentRegistry,
+           graphicsListRegistry);
+
+   }
+   public VelocityRotationEdgeCalculator(RobotSide side,
+                                         MovingReferenceFrame soleFrame,
+                                         DoubleProvider velocityEdgeFilterBreakFrequency,
+                                         DoubleProvider stableRotationDirectionThreshold,
+                                         DoubleProvider stableRotationPositionThreshold,
+                                         IntegerProvider stableEdgeWindowSize,
+                                         double dt,
+                                         YoVariableRegistry parentRegistry,
+                                         YoGraphicsListRegistry graphicsListRegistry)
+   {
       this.soleFrame = soleFrame;
 
       String namePrefix = side.getLowerCaseName() + "Velocity";
@@ -53,8 +75,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
       parentRegistry.addChild(registry);
 
-      DoubleProvider filterBreakFrequency = rotationParameters.getVelocityEdgeFilterBreakFrequency();
-      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+      DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityEdgeFilterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(namePrefix + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);
 
@@ -69,8 +90,9 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
                                                               lineOfRotationInSole,
-                                                              rotationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              rotationParameters.getStableCoRLinearVelocityThreshold(),
+                                                              stableRotationDirectionThreshold,
+                                                              stableRotationPositionThreshold,
+                                                              stableEdgeWindowSize,
                                                               dt,
                                                               registry);
 
@@ -95,7 +117,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
 
@@ -125,9 +147,11 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
       if (edgeVisualizer != null)
       {
-         edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
+         edgeVisualizer.visualize(true);
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override

@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jfree.util.TableOrder;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -69,8 +70,11 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<FootstepPlannerType> footstepPlannerTypeReference;
 
    private final AtomicReference<Double> plannerTimeoutReference;
-   private final AtomicReference<Double> plannerBestEffortTimeoutReference;
+   private final AtomicReference<Integer> plannerMaxIterationsReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
+
+   private final AtomicReference<Boolean> snapGoalSteps;
+   private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
 
    private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
@@ -93,8 +97,11 @@ public class FootstepPathCalculatorModule
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
       footstepPlannerTypeReference = messager.createInput(PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
-      plannerBestEffortTimeoutReference = messager.createInput(PlannerBestEffortTimeout, 0.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
+
+      plannerMaxIterationsReference = messager.createInput(MaxIterations, -1);
+      snapGoalSteps = messager.createInput(SnapGoalSteps, false);
+      abortIfGoalStepSnapFails = messager.createInput(AbortIfGoalStepSnapFails, false);
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
       messager.registerTopicListener(RequestPlannerStatistics, request -> sendPlannerStatistics());
@@ -111,8 +118,10 @@ public class FootstepPathCalculatorModule
       leftFootGoalPose.set(null);
       rightFootGoalPose.set(null);
       plannerTimeoutReference.set(null);
-      plannerBestEffortTimeoutReference.set(null);
+      plannerMaxIterationsReference.set(null);
       plannerHorizonLengthReference.set(null);
+      snapGoalSteps.set(null);
+      abortIfGoalStepSnapFails.set(null);
    }
 
    public void start()
@@ -155,11 +164,14 @@ public class FootstepPathCalculatorModule
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          request.setPlanarRegionsList(planarRegionsList);
          request.setTimeout(plannerTimeoutReference.get());
+         request.setMaximumIterations(plannerMaxIterationsReference.get());
          request.setHorizonLength(plannerHorizonLengthReference.get());
          request.setRequestedInitialStanceSide(initialStanceSideReference.get());
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(footstepPlannerTypeReference.get().plansPath());
+         request.setSnapGoalSteps(snapGoalSteps.get());
+         request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 
          planningModule.getFootstepPlannerParameters().set(parameters.get());
          planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());

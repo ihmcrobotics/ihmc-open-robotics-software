@@ -18,17 +18,17 @@ public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    @Override
    @Test
    @Disabled
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void testDatasetsInDevelopment()
    {
-      super.testDatasetsWithoutOcclusionInDevelopment();
+      super.testDatasetsInDevelopment();
    }
 
    public static void main(String[] args) throws Exception
