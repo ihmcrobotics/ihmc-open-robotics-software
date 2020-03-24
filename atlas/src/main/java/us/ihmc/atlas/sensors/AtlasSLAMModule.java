@@ -12,6 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.messager.Messager;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -19,6 +20,21 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 
 public class AtlasSLAMModule extends SLAMModule
 {
+   private void updateStationaryStatus(Subscriber<RobotConfigurationData> subscriber)
+   {
+      RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
+      latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
+
+      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.001)
+      {
+         reaMessager.submitMessage(REAModuleAPI.RobotStatus, true);
+      }
+      else
+      {
+         reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
+      }
+   }
+
    public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
    {
       super(messager, configurationFile);
