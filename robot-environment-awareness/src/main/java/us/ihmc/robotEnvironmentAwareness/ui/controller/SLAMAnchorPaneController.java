@@ -56,9 +56,9 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    }
 
-   private void updateRobotStatusViz(boolean walking)
+   private void updateSensorStatusViz(boolean moving)
    {
-      if (walking)
+      if (moving)
       {
          stationaryFlag.setStyle("-fx-background-color: red;");
       }
@@ -91,7 +91,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
       initializeSetup();
 
-      uiMessager.registerTopicListener(REAModuleAPI.RobotStatus, (moving) -> updateRobotStatusViz(moving));
+      uiMessager.registerTopicListener(REAModuleAPI.RobotStatus, (moving) -> updateSensorStatusViz(moving));
    }
 
    private void initializeSetup()
