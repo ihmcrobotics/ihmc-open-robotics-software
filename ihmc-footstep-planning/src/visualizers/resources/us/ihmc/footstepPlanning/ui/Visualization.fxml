@@ -57,14 +57,6 @@
                 <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                 <CheckBox fx:id="showIntermediateSolution" mnemonicParsing="false" selected="true" text="Show intermediate plans" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                 <CheckBox fx:id="showPostProcessingInfo" mnemonicParsing="false" selected="true" text="Show post processing info" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-                <CheckBox fx:id="showGraphSteps" mnemonicParsing="false" selected="true" text="Show planning steps" GridPane.columnIndex="3" GridPane.rowIndex="7" />
-
-                <Text text="Step In Planning To Show" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="BOTTOM" />
-                <Slider fx:id="expansionSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="30.0" prefWidth="582.0" GridPane.columnSpan="3" GridPane.rowIndex="8" />
-                <CheckBox fx:id="showRejectedNodes" mnemonicParsing="false" selected="true" text="Show rejected nodes" GridPane.columnIndex="3" GridPane.rowIndex="8" />
-                <ComboBox fx:id="rejectionReasonToShow" prefHeight="26.0" prefWidth="198.0" GridPane.columnIndex="3" GridPane.halignment="LEFT" GridPane.rowIndex="9" />
-                <Label alignment="TOP_LEFT" prefHeight="16.0" prefWidth="135.0" text="Reason to Show" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="9" />
-
             </children>
         </GridPane>
     </children>

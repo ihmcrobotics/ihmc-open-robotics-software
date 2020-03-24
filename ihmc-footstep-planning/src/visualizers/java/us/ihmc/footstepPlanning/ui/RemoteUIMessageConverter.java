@@ -22,7 +22,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerLatticeMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -191,9 +190,6 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerOccupancyMapMessage.class,
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerLatticeMapMessage.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.ExpandedNodesMap, new PlannerLatticeMap(s.takeNextData())));
       // we want to list to the footstep plan post processing result from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class,
                                            getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2TopicQualifier.OUTPUT),
@@ -268,10 +264,7 @@ public class RemoteUIMessageConverter
 
    private void processNodeDataList(FootstepNodeDataListMessage message)
    {
-      if (message.getIsFootstepGraph())
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepGraphPart, new PlannerNodeDataList(message));
-      else
-         messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, new PlannerNodeDataList(message));
+      messager.submitMessage(FootstepPlannerMessagerAPI.NodeData, new PlannerNodeDataList(message));
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
