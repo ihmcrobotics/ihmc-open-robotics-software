@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import controller_msgs.msg.dds.BodyPathPlanMessage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -30,6 +32,11 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -182,7 +189,7 @@ public class FootstepPlannerLogVisualizerController
       footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
-      // publish body parameters
+      // publish body path planner parameters
       DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
       visibilityGraphParameters.set(footstepPlannerLog.getBodyPathParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, visibilityGraphParameters);
@@ -202,13 +209,22 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, footstepPlannerLog.getRequestPacket().getPerformAStarSearch());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
 
       // publish status
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, FootstepPlanningResult.fromByte(footstepPlannerLog.getStatusPacket().getFootstepPlanningResult()));
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
+
+      // publish visibility graph data
+      VisibilityGraphHolder visibilityGraphHolder = footstepPlannerLog.getVisibilityGraphHolder();
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, new VisibilityMapWrapper(visibilityGraphHolder.getStartMapId(), visibilityGraphHolder.getStartVisibilityMap()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, new VisibilityMapWrapper(visibilityGraphHolder.getGoalMapId(), visibilityGraphHolder.getGoalVisibilityMap()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, new VisibilityMapWrapper(visibilityGraphHolder.getInterRegionsMapId(), visibilityGraphHolder.getInterRegionsVisibilityMap()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, visibilityGraphHolder.getVisibilityMapsWithNavigableRegions());
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
 
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
@@ -222,11 +238,38 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, footstepPlannerLog.getRequestPacket().getPerformAStarSearch());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
-
       // set graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());
+   }
+
+   private class VisibilityMapWrapper implements VisibilityMapHolder
+   {
+      private final int id;
+      private final VisibilityMap visibilityMap;
+
+      VisibilityMapWrapper(int id, VisibilityMap visibilityMap)
+      {
+         this.id = id;
+         this.visibilityMap = visibilityMap;
+      }
+
+      @Override
+      public int getMapId()
+      {
+         return id;
+      }
+
+      @Override
+      public VisibilityMap getVisibilityMapInLocal()
+      {
+         throw new NotImplementedException("Local visibility map not implemented by log loader");
+      }
+
+      @Override
+      public VisibilityMap getVisibilityMapInWorld()
+      {
+         return visibilityMap;
+      }
    }
 
    private void updateGraphData(PlanarRegionsList planarRegionsList,

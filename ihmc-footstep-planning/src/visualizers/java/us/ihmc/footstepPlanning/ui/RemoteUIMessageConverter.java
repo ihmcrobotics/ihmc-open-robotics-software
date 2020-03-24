@@ -323,6 +323,9 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
       messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, navigableRegionList);
       messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
+
+      if (verbose)
+         LogTools.info("Received a body path planning result from the toolbox.");
    }
 
    private void processFootstepPlannerStatus(FootstepPlannerStatusMessage packet)
