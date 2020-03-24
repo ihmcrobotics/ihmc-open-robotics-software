@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private double springConstant = 30.0;
+   private double springConstant = 0.1;
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;

@@ -29,6 +29,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -580,6 +581,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
       return new ValkyrieKinematicsCollisionModel(getJointMap());
+   }
+
+   @Override
+   public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
+      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+      return collisionModel;
    }
 
    @Override

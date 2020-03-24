@@ -26,6 +26,7 @@ import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierSchedu
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -37,6 +38,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -50,6 +53,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.*;
+import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
@@ -79,6 +83,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   private final OptionalFactoryField<Boolean> useExperimentalSimulationPhysicsEngine = new OptionalFactoryField<>("useExperimentalSimulationPhysicsEngine");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -133,7 +138,9 @@ public class AvatarSimulationFactory
    {
       if (createYoVariableServer.get())
       {
-         yoVariableServer = new YoVariableServer(getClass(), robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(),
+         yoVariableServer = new YoVariableServer(getClass(),
+                                                 robotModel.get().getLogModelProvider(),
+                                                 robotModel.get().getLogSettings(),
                                                  robotModel.get().getEstimatorDT());
       }
    }
@@ -153,8 +160,39 @@ public class AvatarSimulationFactory
          commonAvatarEnvironment.get().createAndSetContactControllerToARobot();
       }
 
-      simulationConstructionSet = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]), guiInitialSetup.get().getGraphics3DAdapter(),
-                                                                simulationConstructionSetParameters);
+      if (useExperimentalSimulationPhysicsEngine.hasValue() && useExperimentalSimulationPhysicsEngine.get())
+      {
+         ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
+                                                                                    simulationConstructionSetParameters.getDataBufferSize());
+         experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
+
+         CollidableHelper helper = new CollidableHelper();
+         String environmentCollisionMask = "ground";
+         String robotCollisionMask = robotModel.get().getSimpleRobotName();
+         MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
+                                                                                                               robotModel.get()
+                                                                                                                         .createHumanoidFloatingRootJointRobot(false),
+                                                                                                               robotModel.get().getJointMap());
+         experimentalSimulation.addEnvironmentCollidables(ExperimentalSimulation.toCollidables(helper.getCollisionMask(environmentCollisionMask),
+                                                                                               helper.createCollisionGroup(robotCollisionMask),
+                                                                                               commonAvatarEnvironment.get()));
+         experimentalSimulation.addRobot(robotModel.get().getSimpleRobotName(),
+                                         robotModel.get().createFullRobotModel().getElevator(),
+                                         robotModel.get().getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask),
+                                         robotInitialStateWriter);
+
+         simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
+                                                                   guiInitialSetup.get().getGraphics3DAdapter(),
+                                                                   simulationConstructionSetParameters);
+         simulationConstructionSet.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
+         simulationConstructionSet.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
+      }
+      else
+      {
+         simulationConstructionSet = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]),
+                                                                   guiInitialSetup.get().getGraphics3DAdapter(),
+                                                                   simulationConstructionSetParameters);
+      }
 
       if (simulationConstructionSetParameters.getCreateGUI())
       {
@@ -213,7 +251,9 @@ public class AvatarSimulationFactory
       else
       {
          pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), publisherTopicNameGenerator);
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(), StampedPosePacket.class, subscriberTopicNameGenerator,
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(),
+                                              StampedPosePacket.class,
+                                              subscriberTopicNameGenerator,
                                               s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 
@@ -233,9 +273,15 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      controllerThread = new AvatarControllerThread(robotName, robotModel.get(), robotModel.get().getSensorInformation(),
-                                                    highLevelHumanoidControllerFactory.get(), contextDataFactory, simulationOutputProcessor,
-                                                    realtimeRos2Node.get(), gravity.get(), robotModel.get().getEstimatorDT());
+      controllerThread = new AvatarControllerThread(robotName,
+                                                    robotModel.get(),
+                                                    robotModel.get().getSensorInformation(),
+                                                    highLevelHumanoidControllerFactory.get(),
+                                                    contextDataFactory,
+                                                    simulationOutputProcessor,
+                                                    realtimeRos2Node.get(),
+                                                    gravity.get(),
+                                                    robotModel.get().getEstimatorDT());
    }
 
    private void createMasterContext()
@@ -259,20 +305,23 @@ public class AvatarSimulationFactory
       // Previously done in estimator thread write
       if (simulationOutputWriter != null)
       {
-         estimatorTask.addRunnableOnSchedulerThread(() -> {
+         estimatorTask.addRunnableOnSchedulerThread(() ->
+         {
             if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
                simulationOutputWriter.writeAfter();
          });
       }
       // Previously done in estimator thread read
       SensorReader sensorReader = estimatorThread.getSensorReader();
-      estimatorTask.addRunnableOnSchedulerThread(() -> {
+      estimatorTask.addRunnableOnSchedulerThread(() ->
+      {
          long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
          masterContext.setTimestamp(newTimestamp);
       });
       if (simulationOutputWriter != null)
       {
-         estimatorTask.addRunnableOnSchedulerThread(() -> {
+         estimatorTask.addRunnableOnSchedulerThread(() ->
+         {
             if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
                simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
          });
@@ -306,7 +355,8 @@ public class AvatarSimulationFactory
       // If running with server setup the server registries and their updates.
       if (yoVariableServer != null)
       {
-         yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
+         yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(),
+                                          estimatorThread.getFullRobotModel().getElevator(),
                                           estimatorThread.getYoGraphicsListRegistry());
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoVariableRegistry()));
@@ -317,8 +367,10 @@ public class AvatarSimulationFactory
       }
 
       // Add registry and graphics to SCS.
-      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoVariableRegistry(), estimatorThread.getYoGraphicsListRegistry());
-      SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
+      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoVariableRegistry(),
+                                                                                         estimatorThread.getYoGraphicsListRegistry());
+      SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(),
+                                                                                          controllerThread.getYoGraphicsListRegistry());
       estimatorTask.addRunnableOnSchedulerThread(() -> estimatorRobotVisualizer.update());
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
       addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
@@ -345,9 +397,9 @@ public class AvatarSimulationFactory
          LogTools.info("Initializing estimator to actual");
 
          /**
-          * The following is to get the initial CoM position from the robot. It is cheating for now,
-          * and we need to move to where the robot itself determines coordinates, and the sensors
-          * are all in the robot-determined world coordinates..
+          * The following is to get the initial CoM position from the robot. It is cheating for now, and we
+          * need to move to where the robot itself determines coordinates, and the sensors are all in the
+          * robot-determined world coordinates..
           */
          robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
          try
@@ -420,9 +472,12 @@ public class AvatarSimulationFactory
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
 
-            JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
-                                                                                                                 controllerDesiredOutput, isUpperBodyJoint,
-                                                                                                                 isBackJoint, false,
+            JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint,
+                                                                                                                 controllerJoint,
+                                                                                                                 controllerDesiredOutput,
+                                                                                                                 isUpperBodyJoint,
+                                                                                                                 isBackJoint,
+                                                                                                                 false,
                                                                                                                  controllerFullRobotModel.getTotalMass(),
                                                                                                                  robotModel.get().getSimulateDT());
             humanoidFloatingRootJointRobot.setController(positionControlSimulator);
@@ -612,4 +667,8 @@ public class AvatarSimulationFactory
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
 
+   public void setUseExperimentalSimulationPhysicsEngine(boolean useExperimentalSimulationPhysicsEngine)
+   {
+      this.useExperimentalSimulationPhysicsEngine.set(useExperimentalSimulationPhysicsEngine);
+   }
 }

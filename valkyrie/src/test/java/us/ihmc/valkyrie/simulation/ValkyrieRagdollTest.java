@@ -29,6 +29,13 @@ public class ValkyrieRagdollTest extends HumanoidRagdollTest
 
    @Test
    @Override
+   public void testStanding(TestInfo testInfo) throws Exception
+   {
+      super.testStanding(testInfo);
+   }
+
+   @Test
+   @Override
    public void testZeroTorque(TestInfo testInfo) throws Exception
    {
       super.testZeroTorque(testInfo);
