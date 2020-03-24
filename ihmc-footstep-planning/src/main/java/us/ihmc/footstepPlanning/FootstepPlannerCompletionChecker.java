@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
@@ -25,7 +25,7 @@ public class FootstepPlannerCompletionChecker
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
-   private final CostToGoHeuristics heuristics;
+   private final FootstepPlannerHeuristicCalculator heuristics;
 
    private final SquaredUpStepComparator squaredUpStepComparator;
    private final GoalProximityComparator goalProximityComparator;
@@ -43,7 +43,7 @@ public class FootstepPlannerCompletionChecker
 
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
                                            AStarPathPlanner<FootstepNode> footstepPlanner,
-                                           CostToGoHeuristics heuristics)
+                                           FootstepPlannerHeuristicCalculator heuristics)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.footstepPlanner = footstepPlanner;

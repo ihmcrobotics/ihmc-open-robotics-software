@@ -2,34 +2,20 @@ package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.BodyPathPlanMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
-import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
@@ -52,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
