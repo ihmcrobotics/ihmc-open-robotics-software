@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.pathPlanners;
+package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 import java.util.List;
