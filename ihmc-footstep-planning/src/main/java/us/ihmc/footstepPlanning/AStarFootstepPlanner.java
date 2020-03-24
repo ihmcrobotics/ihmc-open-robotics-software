@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionF
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -77,7 +76,7 @@ public class AStarFootstepPlanner
       this.snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
       this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
