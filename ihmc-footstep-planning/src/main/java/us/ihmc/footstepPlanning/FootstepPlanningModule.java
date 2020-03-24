@@ -1,10 +1,13 @@
 package us.ihmc.footstepPlanning;
 
+import cern.colt.function.DoubleComparator;
 import controller_msgs.msg.dds.BodyPathPlanMessage;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,6 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
@@ -47,12 +51,11 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
@@ -70,6 +73,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final CostToGoHeuristics distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
    private final FootstepCostCalculator stepCostCalculator;
+   private final FootstepPlannerCompletionChecker completionChecker;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
@@ -78,17 +82,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepPlannerOutput output = new FootstepPlannerOutput();
-   private final Stopwatch stopwatch = new Stopwatch();
    private double statusPublishPeriod = defaultStatusPublishPeriod;
+
+   private final Stopwatch stopwatch = new Stopwatch();
+   private int iterations = 0;
 
    private FootstepPlanningResult result = null;
    private FootstepNode startNode;
-   private FootstepNode endNode = null;
-   private double endNodeCost;
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
-
-   private final BooleanSupplier bodyPathPlanRequested = request::getPlanBodyPath;
 
    private Consumer<FootstepPlannerRequest> requestCallback = request -> {};
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
@@ -133,6 +135,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                               edgeData.setCostFromStart(footstepPlanner.getGraph().getCostFromStart(edge.getEndNode()));
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                            });
+      this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics);
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -164,6 +167,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       // Start timer
       stopwatch.start();
+      iterations = 0;
 
       this.request.set(request);
       isPlanning.set(true);
@@ -173,6 +177,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       requestCallback.accept(request);
+      SideDependentList<FootstepNode> goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
 
       // Reset logged variables
       edgeData.clear();
@@ -190,8 +195,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
+      idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
-      if (bodyPathPlanRequested.getAsBoolean())
+      boolean horizonLengthImposed = false;
+
+      if (request.getPlanBodyPath())
       {
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
@@ -228,7 +236,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          {
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
+
+            // recompute goal nodes
+            SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
+            goalNodes = createGoalNodes(goalSteps::get);
+            horizonLengthImposed = true;
          }
+
          reportBodyPathPlan();
       }
       else
@@ -243,18 +257,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       // Setup footstep planner
       startNode = createStartNode(request);
-      endNode = startNode;
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
-      SideDependentList<FootstepNode> goalNodes = createGoalNodes(request);
       distanceAndYawHeuristics.setGoalPose(goalMidFootPose);
       idealStepCalculator.initialize(goalNodes);
-
-      // Calculate end node cost
-      endNodeCost = distanceAndYawHeuristics.compute(endNode);
+      completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
 
       // Check valid goal
-      if (!bodyPathPlanRequested.getAsBoolean() && !footstepPlannerParameters.getReturnBestEffortPlan() && !validGoal(goalNodes))
+      if (!snapAndCheckGoalNodes(goalNodes, horizonLengthImposed))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          isPlanning.set(false);
@@ -270,18 +280,29 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
             break;
          }
+         if (request.getMaximumIterations() > 0 && iterations > request.getMaximumIterations())
+         {
+            result = FootstepPlanningResult.MAXIMUM_ITERATIONS_REACHED;
+            break;
+         }
 
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
+         iterations++;
          
          if (iterationData.getParentNode() == null)
          {
             result = FootstepPlanningResult.NO_PATH_EXISTS;
             break;
          }
-         if (checkIfGoalIsReached(goalNodes, iterationData))
+         if (completionChecker.checkIfGoalIsReached(iterationData))
          {
+            // the final graph expansion is handled manually
+            AStarIterationData<FootstepNode> finalIterationData = footstepPlanner.getIterationData();
+            recordIterationData(finalIterationData);
+            iterationCallback.accept(finalIterationData);
+
             result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
             break;
          }
@@ -305,7 +326,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       // Pack solution path
       output.getFootstepPlan().clear();
-      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
+      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {
          SimpleFootstep footstep = new SimpleFootstep();
@@ -376,7 +397,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private void markSolutionEdges()
    {
-      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(endNode);
+      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {
          edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
@@ -399,15 +420,31 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.iterationData.add(loggedData);
    }
 
-   private boolean validGoal(SideDependentList<FootstepNode> goalNodes)
+   private boolean snapAndCheckGoalNodes(SideDependentList<FootstepNode> goalNodes, boolean horizonLengthImposed)
    {
-      for (RobotSide side : RobotSide.values)
+      FootstepNodeSnapData leftGoalStepSnapData, rightGoalStepSnapData;
+      boolean snapGoalSteps = horizonLengthImposed || request.getSnapGoalSteps();
+
+      if (snapGoalSteps)
       {
-         if (!checker.isNodeValid(goalNodes.get(side), null))
-            return false;
+         leftGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.LEFT));
+         rightGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.RIGHT));
+      }
+      else
+      {
+         addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+         addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+         return true;
       }
 
-      return true;
+      if (request.getAbortIfGoalStepSnappingFails())
+      {
+         return !leftGoalStepSnapData.getSnapTransform().containsNaN() && !rightGoalStepSnapData.getSnapTransform().containsNaN();
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public void addRequestCallback(Consumer<FootstepPlannerRequest> callback)
@@ -495,7 +532,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepNode getEndNode()
    {
-      return endNode;
+      return completionChecker.getEndNode();
    }
 
    public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
@@ -523,76 +560,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
    }
 
-   private boolean checkIfGoalIsReached(SideDependentList<FootstepNode> goalNodes, AStarIterationData<FootstepNode> iterationData)
-   {
-      double distanceProximity = request.getGoalDistanceProximity();
-      double yawProximity = request.getGoalYawProximity();
-
-      for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
-      {
-         FootstepNode childNode = iterationData.getValidChildNodes().get(i);
-         FootstepNode goalNode = goalNodes.get(childNode.getRobotSide());
-         boolean validProximityToGoal = isValidProximityToGoal(distanceProximity, yawProximity, childNode, goalNode);
-
-         if (validProximityToGoal)
-         {
-            boolean proximityMode = distanceProximity > 0.0 || yawProximity > 0.0;
-            if (proximityMode && isValidProximityToGoal(distanceProximity, yawProximity, footstepPlanner.getGraph().getParentNode(childNode), goalNode))
-            {
-               endNode = childNode;
-               return true;
-            }
-            else if (!proximityMode)
-            {
-               endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
-               footstepPlanner.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
-               return true;
-            }
-         }
-
-         double cost = footstepPlanner.getGraph().getCostFromStart(childNode) + distanceAndYawHeuristics.compute(childNode);
-         if (cost < endNodeCost || endNode.equals(startNode))
-         {
-            endNode = childNode;
-            endNodeCost = cost;
-         }
-      }
-
-      return false;
-   }
-
-   private boolean isValidProximityToGoal(double distanceProximity, double yawProximity, FootstepNode childNode, FootstepNode goalNode)
-   {
-      boolean validXYDistanceToGoal, validYawDistanceToGoal;
-
-      // check distance
-      if(distanceProximity > 0.0)
-      {
-         validXYDistanceToGoal = goalNode.euclideanDistanceSquared(childNode) < MathTools.square(distanceProximity);
-      }
-      else
-      {
-         validXYDistanceToGoal = childNode.equalPosition(goalNode);
-      }
-      // check yaw
-      if(yawProximity > 0.0)
-      {
-         validYawDistanceToGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalNode.getYaw(), childNode.getYaw())) < yawProximity;
-      }
-      else
-      {
-         validYawDistanceToGoal = childNode.getYawIndex() == goalNode.getYawIndex();
-      }
-
-      return validXYDistanceToGoal && validYawDistanceToGoal;
-   }
-
    private void addFootPosesToSnapper(FootstepPlannerRequest request)
    {
       addSnapData(request.getStartFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
       addSnapData(request.getStartFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
-      addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
-      addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
    }
 
    private void addSnapData(Pose3D footstepPose, RobotSide side)
@@ -610,11 +581,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return new FootstepNode(startFootPose.getX(), startFootPose.getY(), startFootPose.getYaw(), robotSide);
    }
 
-   private SideDependentList<FootstepNode> createGoalNodes(FootstepPlannerRequest request)
+   private SideDependentList<FootstepNode> createGoalNodes(Function<RobotSide, Pose3D> poses)
    {
       return new SideDependentList<>(side ->
                                      {
-                                        Pose3D goalFootPose = request.getGoalFootPoses().get(side);
+                                        Pose3DReadOnly goalFootPose = poses.apply(side);
                                         return new FootstepNode(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
                                      });
    }

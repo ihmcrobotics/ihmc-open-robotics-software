@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,17 +20,19 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -77,8 +82,25 @@ public class FootstepPlannerLogger
 
    public boolean logSession()
    {
-      String sessionDirectory = defaultLogsDirectory + dateFormat.format(new Date()) + "_" + "FootstepPlannerLog" + File.separator;
-      return logSession(sessionDirectory);
+      return logSession(defaultLogsDirectory);
+   }
+
+   public void deleteOldLogs(int numberOflogsToKeep)
+   {
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
+         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(FOOTSTEP_PLANNER_LOG_POSTFIX))
+            sortedSet.add(path);
+         return FileVisitResult.CONTINUE;
+      });
+
+      while (sortedSet.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedSet.remove(earliestLogDirectory);
+      }
    }
 
    /**
@@ -97,30 +119,31 @@ public class FootstepPlannerLogger
          logDirectory += File.separator;
       }
 
-      latestLogDirectory = logDirectory;
+      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
+      latestLogDirectory = sessionDirectory;
 
       try
       {
          // log request packet
-         String requestPacketFile = logDirectory + requestPacketFileName;
+         String requestPacketFile = sessionDirectory + requestPacketFileName;
          planner.getRequest().setPacket(requestPacket);
          byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
          // log footstep planner parameters packet
-         String footstepParametersPacketFile = logDirectory + footstepParametersFileName;
+         String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log footstep planner parameters packet
-         String bodyPathParametersPacketFile = logDirectory + bodyPathParametersFileName;
+         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
          byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log status packet
-         String statusPacketFile = logDirectory + statusPacketFileName;
+         String statusPacketFile = sessionDirectory + statusPacketFileName;
          planner.getOutput().setPacket(outputStatus);
          byte[] serializedStatus = statusPacketSerializer.serializeToBytes(outputStatus);
          writeToFile(statusPacketFile, serializedStatus);
@@ -135,7 +158,7 @@ public class FootstepPlannerLogger
       }
 
       // log planner iteration data
-      String plannerIterationDataFileName = logDirectory + "PlannerIterationData.log";
+      String plannerIterationDataFileName = sessionDirectory + "PlannerIterationData.log";
       try
       {
          File plannerDataFile = new File(plannerIterationDataFileName);
@@ -256,6 +279,11 @@ public class FootstepPlannerLogger
       }
 
       fileWriter.write("\n");
+   }
+
+   public String getLatestLogDirectory()
+   {
+      return latestLogDirectory;
    }
 
    public static String getDefaultLogsDirectory()

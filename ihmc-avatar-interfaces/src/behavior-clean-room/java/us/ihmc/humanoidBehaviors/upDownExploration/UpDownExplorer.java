@@ -84,7 +84,7 @@ public class UpDownExplorer
       {
          boolean isCloseToCenter = isCloseToCenter(midFeetZUpPose);
          boolean requireHeightChange = isCloseToCenter;
-         PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionList();
+         PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionsList();
          
          upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(humanoidReferenceFrames.getMidFeetZUpFrame(),
                                                                            latestPlanarRegionList,

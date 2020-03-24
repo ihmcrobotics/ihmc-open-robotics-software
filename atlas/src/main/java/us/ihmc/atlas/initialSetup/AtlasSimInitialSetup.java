@@ -179,11 +179,11 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    public Pose3DReadOnly getInitialPelvisPose()
    {
       Pose3D resultPose = new Pose3D();
-      resultPose.appendTranslation(0.0, 0.0, groundZ);
+      resultPose.appendTranslation(0.0, 0.0, groundZ + PELVIS_POSE.getZ());
       resultPose.appendTranslation(offset);
       resultPose.appendYawRotation(initialYaw);
 
-      return PELVIS_POSE;
+      return resultPose;
    }
 
    @Override

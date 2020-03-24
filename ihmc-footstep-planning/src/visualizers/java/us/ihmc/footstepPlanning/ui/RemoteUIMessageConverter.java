@@ -71,10 +71,12 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicReference<Pose3DReadOnly> goalLeftFootPose;
    private final AtomicReference<Pose3DReadOnly> goalRightFootPose;
+   private final AtomicReference<Boolean> snapGoalSteps;
+   private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<FootstepPlannerType> plannerTypeReference;
    private final AtomicReference<Double> plannerTimeoutReference;
-   private final AtomicReference<Double> plannerBestEffortTimeoutReference;
+   private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
@@ -132,10 +134,12 @@ public class RemoteUIMessageConverter
       rightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootPose);
       goalLeftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
       goalRightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
+      snapGoalSteps = messager.createInput(FootstepPlannerMessagerAPI.SnapGoalSteps);
+      abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.A_STAR);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
-      plannerBestEffortTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, 2.0);
+      maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
@@ -285,14 +289,15 @@ public class RemoteUIMessageConverter
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
-      double bestEffortTimeout = packet.getBestEffortTimeout();
       double horizonLength = packet.getHorizonLength();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, packet.getMaxIterations());
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide);
+      messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, packet.getSnapGoalSteps());
+      messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, packet.getAbortIfGoalStepSnappingFails());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);
 
@@ -529,8 +534,6 @@ public class RemoteUIMessageConverter
          packet.setRequestedInitialStanceSide(plannerInitialSupportSideReference.get().toByte());
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
-      if (plannerBestEffortTimeoutReference.get() != null)
-         packet.setBestEffortTimeout(plannerBestEffortTimeoutReference.get());
       if (plannerTypeReference.get() != null)
          packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
       if (plannerRequestIdReference.get() != null)
@@ -542,6 +545,9 @@ public class RemoteUIMessageConverter
       packet.setAssumeFlatGround(assumeFlatGround.get());
       packet.setGoalDistanceProximity(goalDistanceProximity.get());
       packet.setGoalYawProximity(goalYawProximity.get());
+      packet.setSnapGoalSteps(snapGoalSteps.get());
+      packet.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
+      packet.setMaxIterations(maxIterations.get());
 
       footstepPlanningRequestPublisher.publish(packet);
    }

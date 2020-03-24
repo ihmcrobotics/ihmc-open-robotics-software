@@ -35,8 +35,11 @@ module controller_msgs
       const octet FOOTSTEP_PLANNING_RESULT_INVALID_GOAL =
       7;
 
-      const octet FOOTSTEP_PLANNING_RESULT_EXCEPTION =
+      const octet FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED =
       8;
+
+      const octet FOOTSTEP_PLANNING_RESULT_EXCEPTION =
+      9;
 
       const long NO_PLAN_ID =
       -1;

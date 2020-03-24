@@ -50,7 +50,7 @@ public class AtlasPatrolBehaviorTest
       LogTools.info("Creating behavior messager");
       messager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));
 
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+      AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
       WaypointManager waypointManager = WaypointManager.createForUI(messager,
                                                                     PatrolBehaviorAPI.WaypointsToUI,
@@ -63,7 +63,7 @@ public class AtlasPatrolBehaviorTest
 
       messager.submitMessage(PatrolBehaviorAPI.GoToWaypoint, 0);
 
-      AtlasTestScripts.takeSteps(conductor, variables, 5, 5.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, 5, 5.0);
    }
 
    @AfterEach
@@ -84,7 +84,7 @@ public class AtlasPatrolBehaviorTest
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

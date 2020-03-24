@@ -58,7 +58,7 @@ public class FootstepPlanGraphic extends Group
    public void generateMeshesAsynchronously(ArrayList<Pair<RobotSide, Pose3D>> plan)
    {
       executorService.submit(() -> {
-         LogTools.debug("Received footstep plan containing {} steps", plan.size());
+         LogTools.trace("Received footstep plan containing {} steps", plan.size());
          generateMeshes(plan);
       });
    }

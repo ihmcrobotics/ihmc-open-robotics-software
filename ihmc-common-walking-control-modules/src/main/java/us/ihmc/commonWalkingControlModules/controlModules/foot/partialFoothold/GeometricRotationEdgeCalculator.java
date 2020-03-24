@@ -1,12 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
@@ -42,8 +39,12 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
 
    private final EdgeVelocityStabilityEvaluator stabilityEvaluator;
 
-   public GeometricRotationEdgeCalculator(RobotSide side, MovingReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, double dt,
-                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public GeometricRotationEdgeCalculator(RobotSide side,
+                                          MovingReferenceFrame soleFrame,
+                                          FootholdRotationParameters rotationParameters,
+                                          double dt,
+                                          YoVariableRegistry parentRegistry,
+                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
@@ -64,8 +65,13 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
       else
          edgeVisualizer = null;
 
-      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix, lineOfRotationInSole, rotationParameters.getStableLoRAngularVelocityThreshold(),
-                                                              rotationParameters.getStableCoRLinearVelocityThreshold(), dt, registry);
+      stabilityEvaluator = new EdgeVelocityStabilityEvaluator(namePrefix,
+                                                              lineOfRotationInSole,
+                                                              rotationParameters.getStableRotationDirectionThreshold(),
+                                                              rotationParameters.getStableRotationPositionThreshold(),
+                                                              rotationParameters.getStableEdgeWindowSize(),
+                                                              dt,
+                                                              registry);
 
       reset();
 
@@ -85,7 +91,7 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
    }
 
    @Override
-   public void compute(FramePoint2DReadOnly measuredCoP)
+   public boolean compute(FramePoint2DReadOnly measuredCoP)
    {
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
@@ -104,6 +110,8 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
          edgeVisualizer.visualize(stabilityEvaluator.isEdgeVelocityStable());
          edgeVisualizer.updateGraphics(lineOfRotationInSole);
       }
+
+      return isRotationEdgeTrusted();
    }
 
    @Override
