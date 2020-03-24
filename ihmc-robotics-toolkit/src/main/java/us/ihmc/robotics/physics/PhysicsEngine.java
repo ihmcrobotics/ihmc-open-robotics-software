@@ -15,7 +15,7 @@ public class PhysicsEngine
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
+   private final YoGraphicsListRegistry physicsEngineGraphicsRegistry = new YoGraphicsListRegistry();
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
    private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
 
@@ -27,12 +27,10 @@ public class PhysicsEngine
 
    private boolean initialize = true;
 
-   public PhysicsEngine(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public PhysicsEngine()
    {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
       multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
-      parentRegistry.addChild(physicsEngineRegistry);
    }
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
@@ -44,7 +42,7 @@ public class PhysicsEngine
                                                                 robotInitialStateWriter,
                                                                 controllerOutputWriter,
                                                                 robotCollisionModel,
-                                                                yoGraphicsListRegistry);
+                                                                physicsEngineGraphicsRegistry);
       multiRobotPhysicsEnginePlugin.addRobot(robot);
       integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
       physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());
@@ -99,5 +97,15 @@ public class PhysicsEngine
    public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
    {
       environmentCollidables.addAll(collidables);
+   }
+
+   public YoVariableRegistry getPhysicsEngineRegistry()
+   {
+      return physicsEngineRegistry;
+   }
+
+   public YoGraphicsListRegistry getPhysicsEngineGraphicsRegistry()
+   {
+      return physicsEngineGraphicsRegistry;
    }
 }

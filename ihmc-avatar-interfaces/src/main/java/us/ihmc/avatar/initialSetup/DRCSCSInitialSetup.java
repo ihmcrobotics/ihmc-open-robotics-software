@@ -36,6 +36,8 @@ public class DRCSCSInitialSetup
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
 
+   private boolean useExperimentalPhysicsEngine = false;
+
    public DRCSCSInitialSetup(GroundProfile3D groundProfile, double simulateDT)
    {
       this.groundProfile3D = groundProfile;
@@ -55,9 +57,19 @@ public class DRCSCSInitialSetup
       this.runMultiThreaded = runMultiThreaded;
    }
 
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
+
    public boolean getRunMultiThreaded()
    {
       return runMultiThreaded;
+   }
+
+   public boolean getUseExperimentalPhysicsEngine()
+   {
+      return useExperimentalPhysicsEngine;
    }
 
    public void initializeRobot(Robot robot, DRCRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry)

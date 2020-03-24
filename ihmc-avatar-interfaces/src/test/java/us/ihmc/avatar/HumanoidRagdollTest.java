@@ -43,6 +43,20 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
 
    public abstract RobotCollisionModel getRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks);
 
+   public void testStanding(TestInfo testInfo) throws Exception
+   {
+      simulationTestingParameters.setUsePefectSensors(true);
+
+      DRCRobotModel robotModel = getRobotModel();
+      FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
+      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      ThreadTools.sleepForever();
+   }
+
    public void testZeroTorque(TestInfo testInfo) throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -92,8 +106,9 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
    {
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      PhysicsEngine physicsEngine = new PhysicsEngine(drcSimulationTestHelper.getYoVariableRegistry(), yoGraphicsListRegistry);
+      PhysicsEngine physicsEngine = new PhysicsEngine();
+      YoGraphicsListRegistry yoGraphicsListRegistry = physicsEngine.getPhysicsEngineGraphicsRegistry();
+      drcSimulationTestHelper.getYoVariableRegistry().addChild(physicsEngine.getPhysicsEngineRegistry());
 
       String robotName = getSimpleRobotName();
       RigidBodyBasics rootBody = getRobotModel().createFullRobotModel().getElevator();
