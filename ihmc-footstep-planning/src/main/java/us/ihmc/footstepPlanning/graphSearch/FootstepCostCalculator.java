@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.stepCost;
+package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;

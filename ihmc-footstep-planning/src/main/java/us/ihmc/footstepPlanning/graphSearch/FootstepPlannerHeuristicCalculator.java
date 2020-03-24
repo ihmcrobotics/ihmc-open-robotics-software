@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.heuristics;
+package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

@@ -111,7 +111,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          debugIdealStepGraphic.update();
       }
    }
-   
+
    private void addFootstep(Tuple3DReadOnly translation, Orientation3DReadOnly orientation, List<Point2D> footPoints, ConvexPolygon2D footPolygon, Color color)
    {
       RigidBodyTransform transform = new RigidBodyTransform(orientation, translation);

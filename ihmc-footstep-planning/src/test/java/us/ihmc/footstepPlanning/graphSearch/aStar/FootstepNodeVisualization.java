@@ -4,7 +4,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerListener;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
