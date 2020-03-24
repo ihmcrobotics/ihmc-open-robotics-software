@@ -9,18 +9,10 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphRandomTools;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphTestTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 import java.util.ArrayList;
@@ -208,14 +200,14 @@ public class VisibilityGraphMessagesConverterTest
          for (int i = 0; i < numberOfNavigableRegions; i++)
             navigableRegions.add(VisibilityGraphRandomTools.getRandomNavigableRegion(random));
 
-         VisibilityGraphStatistics statisticsToConvert = new VisibilityGraphStatistics();
+         VisibilityGraphHolder statisticsToConvert = new VisibilityGraphHolder();
          statisticsToConvert.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
          statisticsToConvert.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
          statisticsToConvert.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
          statisticsToConvert.setVisibilityMapsWithNavigableRegions(navigableRegions);
 
          BodyPathPlanStatisticsMessage message = VisibilityGraphMessagesConverter.convertToBodyPathPlanStatisticsMessage(planId, statisticsToConvert);
-         VisibilityGraphStatistics convertedStatistics = VisibilityGraphMessagesConverter.convertToVisibilityGraphStatistics(message);
+         VisibilityGraphHolder convertedStatistics = VisibilityGraphMessagesConverter.convertToVisibilityGraphStatistics(message);
          VisibilityGraphTestTools.assertVisibilityGraphStatisticsEqual(statisticsToConvert, convertedStatistics, epsilon);
       }
    }

@@ -5,10 +5,8 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
@@ -19,12 +17,12 @@ import java.util.List;
 
 public class VisibilityGraphMessagesConverter
 {
-   public static BodyPathPlanStatisticsMessage convertToBodyPathPlanStatisticsMessage(VisibilityGraphStatistics statistics)
+   public static BodyPathPlanStatisticsMessage convertToBodyPathPlanStatisticsMessage(VisibilityGraphHolder statistics)
    {
       return convertToBodyPathPlanStatisticsMessage(BodyPathPlanStatisticsMessage.NO_PLAN_ID, statistics);
    }
 
-   public static BodyPathPlanStatisticsMessage convertToBodyPathPlanStatisticsMessage(int planId, VisibilityGraphStatistics statistics)
+   public static BodyPathPlanStatisticsMessage convertToBodyPathPlanStatisticsMessage(int planId, VisibilityGraphHolder statistics)
    {
       BodyPathPlanStatisticsMessage message = new BodyPathPlanStatisticsMessage();
 
@@ -263,9 +261,9 @@ public class VisibilityGraphMessagesConverter
       return cluster;
    }
 
-   public static VisibilityGraphStatistics convertToVisibilityGraphStatistics(BodyPathPlanStatisticsMessage message)
+   public static VisibilityGraphHolder convertToVisibilityGraphStatistics(BodyPathPlanStatisticsMessage message)
    {
-      VisibilityGraphStatistics statistics = new VisibilityGraphStatistics();
+      VisibilityGraphHolder statistics = new VisibilityGraphHolder();
 
       VisibilityMapHolder startMap = convertToSingleSourceVisibilityMap(message.getStartVisibilityMap());
       VisibilityMapHolder goalMap = convertToSingleSourceVisibilityMap(message.getGoalVisibilityMap());
