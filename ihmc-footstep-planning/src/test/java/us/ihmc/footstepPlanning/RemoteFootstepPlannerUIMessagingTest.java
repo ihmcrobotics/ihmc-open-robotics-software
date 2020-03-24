@@ -392,7 +392,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D rightFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
-         FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);

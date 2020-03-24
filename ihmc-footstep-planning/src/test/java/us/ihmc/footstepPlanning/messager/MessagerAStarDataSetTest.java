@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.messager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.DataSetName;
 
 public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
