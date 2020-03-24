@@ -15,9 +15,10 @@ import com.google.gson.annotations.Expose;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
+import us.ihmc.humanoidBehaviors.behaviors.examples.GetLidarScanExampleBehavior;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
-class ValkyrieTorqueSpeedTestConfig {
+class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	enum TestType {
 		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED;
 	}
@@ -42,6 +43,41 @@ class ValkyrieTorqueSpeedTestConfig {
 	public double globalSizeScale;      // Amount to scale size across the robot
 	public double torsoPitchDegrees;    // Amount to pitch the torso, in degrees (0.0 = vertical, positve = forward pitch)
 	public ValkyrieWalkingParameterValues walkingValues; // Tweaks to default walking settings
+	
+	@Override
+	public HashMap<String, Double> getTorqueLimits() {
+		return torqueLimits;
+	}
+	
+	@Override
+	public HashMap<String, Double> getLinkMassKg() {
+		return linkMassKg;
+	}
+	
+	@Override
+	public HashMap<String, Double> getVelocityLimits() {
+		return velocityLimits;
+	}
+	
+	@Override
+	public HashMap<String, ArrayList<Double>> getPositionLimits() {
+		return positionLimits;
+	}
+	
+	@Override
+	public double getGlobalMassScale() {
+		return globalMassScale;
+	}
+	
+	@Override
+	public double getGlobalSizeScale() {
+		return globalSizeScale;
+	}
+	
+	@Override
+	public boolean getAnkleLimitsDisabled() {
+		return disableAnkleLimits;
+	}
 	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
