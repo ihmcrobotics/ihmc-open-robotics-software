@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanRequestPacket;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -111,22 +111,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          debugIdealStepGraphic.update();
       }
    }
-
-   public void initialize(ValkyrieFootstepPlanningRequestPacket planningRequestPacket)
-   {
-      meshBuilder.clear();
-      addFootstep(planningRequestPacket.getStartLeftFootPose().getPosition(),
-                  planningRequestPacket.getStartLeftFootPose().getOrientation(),
-                  defaultFootPoints,
-                  defaultFootPolygon,
-                  Color.DARKGREEN);
-      addFootstep(planningRequestPacket.getStartRightFootPose().getPosition(),
-                  planningRequestPacket.getStartRightFootPose().getOrientation(),
-                  defaultFootPoints,
-                  defaultFootPolygon,
-                  Color.DARKGREEN);
-   }
-
+   
    private void addFootstep(Tuple3DReadOnly translation, Orientation3DReadOnly orientation, List<Point2D> footPoints, ConvexPolygon2D footPolygon, Color color)
    {
       RigidBodyTransform transform = new RigidBodyTransform(orientation, translation);
