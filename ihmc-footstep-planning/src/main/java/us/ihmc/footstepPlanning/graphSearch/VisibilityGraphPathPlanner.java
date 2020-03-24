@@ -3,38 +3,26 @@ package us.ihmc.footstepPlanning.graphSearch;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -54,7 +42,7 @@ public class VisibilityGraphPathPlanner
 
    private PlanarRegionsList planarRegionsList;
 
-   private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
+   private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
 
    public VisibilityGraphPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                      VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
@@ -122,10 +110,10 @@ public class VisibilityGraphPathPlanner
       return yoResult.getEnumValue();
    }
 
-   public VisibilityGraphStatistics getPlannerStatistics()
+   public VisibilityGraphHolder getVisibilityGraphHolder()
    {
-      packVisibilityGraphStatistics(visibilityGraphStatistics);
-      return visibilityGraphStatistics;
+      packGraph(visibilityGraphHolder);
+      return visibilityGraphHolder;
    }
 
    public void setStanceFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
@@ -159,20 +147,22 @@ public class VisibilityGraphPathPlanner
       return waypoints;
    }
 
-   private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)
+   public void packGraph(VisibilityGraphHolder visibilityGraphHolder)
    {
+      visibilityGraphHolder.clear();
+
       VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
       VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();
       VisibilityMapHolder interRegionsMap = navigableRegionsManager.getInterRegionConnections();
       List<VisibilityMapWithNavigableRegion> visibilityMapWithNavigableRegions = navigableRegionsManager.getNavigableRegionsList();
 
       if (startMap != null)
-         statistics.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
+         visibilityGraphHolder.setStartVisibilityMapInWorld(startMap.getMapId(), startMap.getVisibilityMapInWorld());
       if (goalMap != null)
-         statistics.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
+         visibilityGraphHolder.setGoalVisibilityMapInWorld(goalMap.getMapId(), goalMap.getVisibilityMapInWorld());
       if (interRegionsMap != null)
-         statistics.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
+         visibilityGraphHolder.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
       if (visibilityMapWithNavigableRegions != null)
-         statistics.addNavigableRegions(visibilityMapWithNavigableRegions);
+         visibilityGraphHolder.addNavigableRegions(visibilityMapWithNavigableRegions);
    }
 }

@@ -1,12 +1,14 @@
-package us.ihmc.pathPlanning.statistics;
+package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
+
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraph;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-
-public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGraphStatistics>
+/**
+ * Class for holding onto all nodes and edges created by {@link VisibilityGraph}.
+ */
+public class VisibilityGraphHolder
 {
    private int startMapId = -1;
    private int goalMapId = -1;
@@ -18,14 +20,7 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
 
    private final List<VisibilityMapWithNavigableRegion> visibilityMapsWithNavigableRegions = new ArrayList<>();
 
-   @Override
-   public StatisticsType getStatisticsType()
-   {
-      return StatisticsType.VISIBILITY_GRAPH;
-   }
-
-   @Override
-   public void set(VisibilityGraphStatistics other)
+   public void set(VisibilityGraphHolder other)
    {
       setStartVisibilityMapInWorld(other.startMapId, other.startMap);
       setGoalVisibilityMapInWorld(other.goalMapId, other.goalMap);
@@ -116,5 +111,17 @@ public class VisibilityGraphStatistics implements PlannerStatistics<VisibilityGr
    public VisibilityMapWithNavigableRegion getNavigableRegion(int regionNumber)
    {
       return visibilityMapsWithNavigableRegions.get(regionNumber);
+   }
+
+   public void clear()
+   {
+      startMapId = -1;
+      goalMapId = -1;
+      interRegionsMapId = -1;
+
+      startMap.clear();
+      goalMap.clear();
+      interRegionsMap.clear();
+      visibilityMapsWithNavigableRegions.clear();
    }
 }

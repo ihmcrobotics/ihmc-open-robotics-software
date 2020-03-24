@@ -31,7 +31,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
@@ -39,7 +38,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
@@ -102,7 +101,7 @@ public class FootstepPathCalculatorModule
       abortIfGoalStepSnapFails = messager.createInput(AbortIfGoalStepSnapFails, false);
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
-      messager.registerTopicListener(RequestPlannerStatistics, request -> sendPlannerStatistics());
+      messager.registerTopicListener(RequestPlannerStatistics, request -> sendVisibilityGraph());
 
       new FootPoseFromMidFootUpdater(messager).start();
    }
@@ -214,53 +213,32 @@ public class FootstepPathCalculatorModule
       return planningModule;
    }
 
-   private void sendPlannerStatistics()
+   private void sendVisibilityGraph()
    {
-      if (planBodyPath.get())
+      VisibilityGraphHolder visibilityGraphHolder = planningModule.getBodyPathPlanner().getVisibilityGraphHolder();
+      if (visibilityGraphHolder.getStartVisibilityMap().isEmpty())
       {
-         sendVisibilityGraphStatisticsMessages(planningModule.getBodyPathPlanner().getPlannerStatistics());
+         return;
       }
-   }
 
-   private void sendPlannerStatisticsMessages(PlannerStatistics plannerStatistics)
-   {
-      switch (plannerStatistics.getStatisticsType())
-      {
-      case LIST:
-         sendListOfStatisticsMessages((ListOfStatistics) plannerStatistics);
-         break;
-      case VISIBILITY_GRAPH:
-         sendVisibilityGraphStatisticsMessages((VisibilityGraphStatistics) plannerStatistics);
-         break;
-      }
-   }
-
-   private void sendListOfStatisticsMessages(ListOfStatistics listOfStatistics)
-   {
-      while (listOfStatistics.getNumberOfStatistics() > 0)
-         sendPlannerStatisticsMessages(listOfStatistics.pollStatistics());
-   }
-
-   private void sendVisibilityGraphStatisticsMessages(VisibilityGraphStatistics statistics)
-   {
       VisibilityMapHolder startMap = new VisibilityMapHolder()
       {
          @Override
          public int getMapId()
          {
-            return statistics.getStartMapId();
+            return visibilityGraphHolder.getStartMapId();
          }
 
          @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
-            return statistics.getStartVisibilityMap();
+            return visibilityGraphHolder.getStartVisibilityMap();
          }
 
          @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
-            return statistics.getStartVisibilityMap();
+            return visibilityGraphHolder.getStartVisibilityMap();
          }
       };
       VisibilityMapHolder goalMap = new VisibilityMapHolder()
@@ -268,27 +246,27 @@ public class FootstepPathCalculatorModule
          @Override
          public int getMapId()
          {
-            return statistics.getGoalMapId();
+            return visibilityGraphHolder.getGoalMapId();
          }
 
          @Override
          public VisibilityMap getVisibilityMapInLocal()
          {
-            return statistics.getGoalVisibilityMap();
+            return visibilityGraphHolder.getGoalVisibilityMap();
          }
 
          @Override
          public VisibilityMap getVisibilityMapInWorld()
          {
-            return statistics.getGoalVisibilityMap();
+            return visibilityGraphHolder.getGoalVisibilityMap();
          }
       };
       InterRegionVisibilityMap interRegionVisibilityMap = new InterRegionVisibilityMap();
-      interRegionVisibilityMap.addConnections(statistics.getInterRegionsVisibilityMap().getConnections());
+      interRegionVisibilityMap.addConnections(visibilityGraphHolder.getInterRegionsVisibilityMap().getConnections());
 
       List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
-      for (int i = 0; i < statistics.getNumberOfNavigableRegions(); i++)
-         navigableRegionList.add(statistics.getNavigableRegion(i));
+      for (int i = 0; i < visibilityGraphHolder.getNumberOfNavigableRegions(); i++)
+         navigableRegionList.add(visibilityGraphHolder.getNavigableRegion(i));
 
       messager.submitMessage(StartVisibilityMap, startMap);
       messager.submitMessage(GoalVisibilityMap, goalMap);
