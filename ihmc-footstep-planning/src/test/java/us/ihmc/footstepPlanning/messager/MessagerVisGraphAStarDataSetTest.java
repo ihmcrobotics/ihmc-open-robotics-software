@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
