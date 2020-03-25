@@ -16,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapSolution;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -164,5 +165,10 @@ public class VisibilityGraphPathPlanner
          visibilityGraphHolder.setInterRegionsVisibilityMapInWorld(interRegionsMap.getMapId(), interRegionsMap.getVisibilityMapInWorld());
       if (visibilityMapWithNavigableRegions != null)
          visibilityGraphHolder.addNavigableRegions(visibilityMapWithNavigableRegions);
+   }
+
+   public VisibilityMapSolution getSolution()
+   {
+      return navigableRegionsManager.getVisibilityMapSolution();
    }
 }

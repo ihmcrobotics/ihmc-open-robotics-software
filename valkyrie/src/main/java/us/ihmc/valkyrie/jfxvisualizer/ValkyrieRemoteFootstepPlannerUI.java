@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -59,12 +60,21 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
 
          // Automatically send graph data over messager
-         plannerModule.addStatusCallback(status ->
-                                         {
-                                            if (status.getResult().terminalResult())
-                                               messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
-                                                                      Pair.of(plannerModule.getEdgeDataMap(), plannerModule.getIterationData()));
-                                         });
+         plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));
+      }
+   }
+
+
+   private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
+   {
+      if (status.getResult().terminalResult())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
    }
 
