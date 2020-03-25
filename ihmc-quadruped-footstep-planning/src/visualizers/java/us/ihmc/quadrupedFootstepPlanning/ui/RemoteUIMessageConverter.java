@@ -80,7 +80,6 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<PawStepPlannerParametersPacket> plannerParametersPublisher;
    private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
    private IHMCRealtimeROS2Publisher<PawStepPlanningRequestPacket> pawPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<PlanningStatisticsRequestMessage> plannerStatisticsRequestPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> footstepDataListPublisher;
 //   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
 //   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
@@ -183,8 +182,6 @@ public class RemoteUIMessageConverter
                                                         PawStepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       pawPlanningRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, PawStepPlanningRequestPacket.class, PawStepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
-      plannerStatisticsRequestPublisher = ROS2Tools
-            .createPublisher(ros2Node, PlanningStatisticsRequestMessage.class, PawStepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
 
 //      MessageTopicNameGenerator controllerPreviewInputTopicNameGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
@@ -192,7 +189,6 @@ public class RemoteUIMessageConverter
 //      walkingPreviewRequestPublisher = ROS2Tools.createPublisher(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicNameGenerator);
 
       messager.registerTopicListener(PawStepPlannerMessagerAPI.ComputePathTopic, request -> requestNewPlan());
-      messager.registerTopicListener(PawStepPlannerMessagerAPI.RequestPlannerStatistics, request -> requestPlannerStatistics());
       messager.registerTopicListener(PawStepPlannerMessagerAPI.AbortPlanningTopic, request -> requestAbortPlanning());
       messager.registerTopicListener(PawStepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListPublisher::publish);
       /*
@@ -342,11 +338,6 @@ public class RemoteUIMessageConverter
          return false;
       }
       return true;
-   }
-
-   private void requestPlannerStatistics()
-   {
-      plannerStatisticsRequestPublisher.publish(new PlanningStatisticsRequestMessage());
    }
 
    private void requestAbortPlanning()

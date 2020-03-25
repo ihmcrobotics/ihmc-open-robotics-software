@@ -52,7 +52,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
    public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
-   public static final Topic<Boolean> RequestPlannerStatistics = topic("RequestPlannerStatistics");
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
 
    public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");

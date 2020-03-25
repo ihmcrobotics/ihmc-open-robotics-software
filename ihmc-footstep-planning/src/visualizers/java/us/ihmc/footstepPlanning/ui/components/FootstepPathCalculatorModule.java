@@ -1,52 +1,25 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.BodyPathData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InitialSupportSide;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.InterRegionVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerHorizonLength;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerParameters;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerStatus;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTimeout;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RequestPlannerStatistics;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartVisibilityMap;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityGraphsParameters;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
-
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.pathPlanning.statistics.ListOfStatistics;
-import us.ihmc.pathPlanning.statistics.PlannerStatistics;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.InterRegionVisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -101,8 +74,6 @@ public class FootstepPathCalculatorModule
       abortIfGoalStepSnapFails = messager.createInput(AbortIfGoalStepSnapFails, false);
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
-      messager.registerTopicListener(RequestPlannerStatistics, request -> sendVisibilityGraph());
-
       new FootPoseFromMidFootUpdater(messager).start();
    }
 
@@ -211,67 +182,6 @@ public class FootstepPathCalculatorModule
    public FootstepPlanningModule getPlanningModule()
    {
       return planningModule;
-   }
-
-   private void sendVisibilityGraph()
-   {
-      VisibilityGraphHolder visibilityGraphHolder = planningModule.getBodyPathPlanner().getVisibilityGraphHolder();
-      if (visibilityGraphHolder.getStartVisibilityMap().isEmpty())
-      {
-         return;
-      }
-
-      VisibilityMapHolder startMap = new VisibilityMapHolder()
-      {
-         @Override
-         public int getMapId()
-         {
-            return visibilityGraphHolder.getStartMapId();
-         }
-
-         @Override
-         public VisibilityMap getVisibilityMapInLocal()
-         {
-            return visibilityGraphHolder.getStartVisibilityMap();
-         }
-
-         @Override
-         public VisibilityMap getVisibilityMapInWorld()
-         {
-            return visibilityGraphHolder.getStartVisibilityMap();
-         }
-      };
-      VisibilityMapHolder goalMap = new VisibilityMapHolder()
-      {
-         @Override
-         public int getMapId()
-         {
-            return visibilityGraphHolder.getGoalMapId();
-         }
-
-         @Override
-         public VisibilityMap getVisibilityMapInLocal()
-         {
-            return visibilityGraphHolder.getGoalVisibilityMap();
-         }
-
-         @Override
-         public VisibilityMap getVisibilityMapInWorld()
-         {
-            return visibilityGraphHolder.getGoalVisibilityMap();
-         }
-      };
-      InterRegionVisibilityMap interRegionVisibilityMap = new InterRegionVisibilityMap();
-      interRegionVisibilityMap.addConnections(visibilityGraphHolder.getInterRegionsVisibilityMap().getConnections());
-
-      List<VisibilityMapWithNavigableRegion> navigableRegionList = new ArrayList<>();
-      for (int i = 0; i < visibilityGraphHolder.getNumberOfNavigableRegions(); i++)
-         navigableRegionList.add(visibilityGraphHolder.getNavigableRegion(i));
-
-      messager.submitMessage(StartVisibilityMap, startMap);
-      messager.submitMessage(GoalVisibilityMap, goalMap);
-      messager.submitMessage(VisibilityMapWithNavigableRegionData, navigableRegionList);
-      messager.submitMessage(InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
    public static FootstepPathCalculatorModule createMessagerModule(SharedMemoryMessager messager)

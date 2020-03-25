@@ -44,7 +44,7 @@
 
                 <Tab text="Visualization Control">
                     <content>
-                        <fx:include fx:id="visibilityGraphsUI" source="Visualization.fxml" />
+                        <fx:include fx:id="visibilityGraphsUI" source="VisualizationDashboard.fxml" />
                     </content>
                 </Tab>
 
