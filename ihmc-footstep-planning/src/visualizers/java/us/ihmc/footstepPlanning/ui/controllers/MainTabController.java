@@ -351,8 +351,6 @@ public class MainTabController
       messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
 
-      messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());
-
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
