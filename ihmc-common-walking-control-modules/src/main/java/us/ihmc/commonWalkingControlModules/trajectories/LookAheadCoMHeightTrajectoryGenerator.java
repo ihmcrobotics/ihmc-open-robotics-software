@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -605,6 +606,16 @@ public class LookAheadCoMHeightTrajectoryGenerator
             bagOfBalls.setBallLoop(tempFramePointForViz2);
          }
       }
+   }
+
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   public void getAnklePositionFromFootstep(FramePose3DReadOnly footstepPose, FramePoint3D positionToPack, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(footstepPose.getOrientation());
+      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.multiply(transformFromAnkleToSole);
+      positionToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getTranslationVector());
    }
 
    private Point2D tempPoint2dForStringStretching = new Point2D();
