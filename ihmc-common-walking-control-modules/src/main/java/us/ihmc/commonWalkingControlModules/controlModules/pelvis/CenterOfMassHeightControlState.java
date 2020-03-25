@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -27,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
@@ -71,17 +73,17 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
-   private final ReferenceFrame pelvisFrame;
+   private final MovingReferenceFrame pelvisFrame;
    private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
 
    private final double gravity;
-   private final RigidBodyBasics pelvis;
 
    private final FramePoint3D statusDesiredPosition = new FramePoint3D();
    private final FramePoint3D statusActualPosition = new FramePoint3D();
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
-   public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                         WalkingControllerParameters walkingControllerParameters,
                                          YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -90,7 +92,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       gravity = controllerToolbox.getGravityZ();
-      pelvis = controllerToolbox.getFullRobotModel().getPelvis();
 
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
@@ -104,8 +105,98 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       parentRegistry.addChild(registry);
    }
 
+   public CenterOfMassHeightControlState(double minimumHeightAboveGround,
+                                         double nominalHeightAboveGround,
+                                         double maximumHeightAboveGround,
+                                         double defaultOffsetHeightAboveGround,
+                                         RigidBodyBasics elevator,
+                                         SideDependentList<RigidBodyBasics> feet,
+                                         ReferenceFrame centerOfMassFrame,
+                                         MovingReferenceFrame pelvisFrame,
+                                         SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+                                         SideDependentList<? extends ReferenceFrame> soleFrames,
+                                         double gravityZ,
+                                         DoubleProvider timeProvider,
+                                         double controlDT,
+                                         YoVariableRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(minimumHeightAboveGround,
+           nominalHeightAboveGround,
+           maximumHeightAboveGround,
+           defaultOffsetHeightAboveGround,
+           elevator,
+           createTransformsFromAnkleToSole(feet, soleFrames),
+           centerOfMassFrame,
+           pelvisFrame,
+           ankleZUpFrames,
+           gravityZ,
+           timeProvider,
+           controlDT,
+           parentRegistry,
+           yoGraphicsListRegistry);
+   }
+
+   public CenterOfMassHeightControlState(double minimumHeightAboveGround,
+                                         double nominalHeightAboveGround,
+                                         double maximumHeightAboveGround,
+                                         double defaultOffsetHeightAboveGround,
+                                         RigidBodyBasics elevator,
+                                         SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
+                                         ReferenceFrame centerOfMassFrame,
+                                         MovingReferenceFrame pelvisFrame,
+                                         SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+                                         double gravityZ,
+                                         DoubleProvider timeProvider,
+                                         double controlDT,
+                                         YoVariableRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.centerOfMassFrame = centerOfMassFrame;
+      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
+      this.pelvisFrame = pelvisFrame;
+
+      gravity = gravityZ;
+
+      centerOfMassTrajectoryGenerator = createTrajectoryGenerator(minimumHeightAboveGround,
+                                                                  nominalHeightAboveGround,
+                                                                  maximumHeightAboveGround,
+                                                                  defaultOffsetHeightAboveGround,
+                                                                  pelvisFrame,
+                                                                  ankleZUpFrames,
+                                                                  transformsFromAnkleToSole,
+                                                                  timeProvider,
+                                                                  yoGraphicsListRegistry);
+
+      // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
+      controlPelvisHeightInsteadOfCoMHeight.set(true);
+
+      comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
+      centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
+
+      parentRegistry.addChild(registry);
+   }
+
+   private static SideDependentList<RigidBodyTransform> createTransformsFromAnkleToSole(SideDependentList<RigidBodyBasics> feet,
+                                                                                        SideDependentList<? extends ReferenceFrame> soleFrames)
+   {
+      SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = feet.get(robotSide);
+         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = soleFrames.get(robotSide);
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
+      }
+
+      return transformsFromAnkleToSole;
+   }
+
    public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
+                                                                          WalkingControllerParameters walkingControllerParameters,
+                                                                          CommonHumanoidReferenceFrames referenceFrames)
    {
       SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -123,18 +214,64 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
       double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
 
+      return createTrajectoryGenerator(minimumHeightAboveGround,
+                                       nominalHeightAboveGround,
+                                       maximumHeightAboveGround,
+                                       defaultOffsetHeightAboveGround,
+                                       referenceFrames.getPelvisFrame(),
+                                       referenceFrames.getAnkleZUpReferenceFrames(),
+                                       transformsFromAnkleToSole,
+                                       controllerToolbox.getYoTime(),
+                                       controllerToolbox.getYoGraphicsListRegistry());
+   }
+
+   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(double minimumHeightAboveGround,
+                                                                          double nominalHeightAboveGround,
+                                                                          double maximumHeightAboveGround,
+                                                                          double defaultOffsetHeightAboveGround,
+                                                                          ReferenceFrame pelvisFrame,
+                                                                          SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+                                                                          SideDependentList<RigidBodyTransform> transformsFromAnkleToSole,
+                                                                          DoubleProvider yoTime,
+                                                                          YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       double doubleSupportPercentageIn = 0.3;
       boolean activateDriftCompensation = false;
-      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
-      SideDependentList<? extends ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-            nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, centerOfMassFrame, pelvisFrame,
-            ankleZUpFrames, transformsFromAnkleToSole, yoTime, yoGraphicsListRegistry, registry);
+                                                                                                                        nominalHeightAboveGround,
+                                                                                                                        maximumHeightAboveGround,
+                                                                                                                        defaultOffsetHeightAboveGround,
+                                                                                                                        doubleSupportPercentageIn,
+                                                                                                                        centerOfMassFrame,
+                                                                                                                        pelvisFrame,
+                                                                                                                        ankleZUpFrames,
+                                                                                                                        transformsFromAnkleToSole,
+                                                                                                                        yoTime,
+                                                                                                                        yoGraphicsListRegistry,
+                                                                                                                        registry);
       centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
       return centerOfMassTrajectoryGenerator;
+   }
+
+   public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
+   {
+      centerOfMassTrajectoryGenerator.setMinimumHeightAboveGround(minimumHeightAboveGround);
+   }
+
+   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
+   {
+      centerOfMassTrajectoryGenerator.setNominalHeightAboveGround(nominalHeightAboveGround);
+   }
+
+   public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
+   {
+      centerOfMassTrajectoryGenerator.setMaximumHeightAboveGround(maximumHeightAboveGround);
+   }
+
+   public void setCoMHeightDriftCompensation(boolean activate)
+   {
+      centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activate);
    }
 
    @Override
@@ -223,8 +360,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
-         FeetManager feetManager)
+   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity,
+                                                     boolean isInDoubleSupport,
+                                                     double omega0,
+                                                     boolean isRecoveringFromPush,
+                                                     FeetManager feetManager)
    {
       solve(comHeightPartialDerivatives, isInDoubleSupport);
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
@@ -243,7 +383,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         pelvis.getBodyFixedFrame().getTwistOfFrame(currentPelvisTwist);
+         pelvisFrame.getTwistOfFrame(currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
