@@ -18,8 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pubsub.DomainFactory;
@@ -148,9 +146,6 @@ public class RemoteUIMessageConverter
       // we want to listen to the resulting body path plan from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanMessage.class, PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, BodyPathPlanStatisticsMessage.class,
-                                           PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
-                                           s -> processBodyPathPlanStatistics(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerStatusMessage.class,
                                            PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlannerStatus(s.takeNextData()));
@@ -256,20 +251,6 @@ public class RemoteUIMessageConverter
 
       if (verbose)
          PrintTools.info("Received a body path planning result from the toolbox.");
-   }
-
-   private void processBodyPathPlanStatistics(BodyPathPlanStatisticsMessage packet)
-   {
-      VisibilityMapHolder startVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getStartVisibilityMap());
-      VisibilityMapHolder goalVisibilityMap = VisibilityGraphMessagesConverter.convertToSingleSourceVisibilityMap(packet.getGoalVisibilityMap());
-      VisibilityMapHolder interRegionVisibilityMap = VisibilityGraphMessagesConverter.convertToInterRegionsVisibilityMap(packet.getInterRegionsMap());
-
-      List<VisibilityMapWithNavigableRegion> navigableRegionList = VisibilityGraphMessagesConverter.convertToNavigableRegionsList(packet.getNavigableRegions());
-
-      messager.submitMessage(PawStepPlannerMessagerAPI.StartVisibilityMap, startVisibilityMap);
-      messager.submitMessage(PawStepPlannerMessagerAPI.GoalVisibilityMap, goalVisibilityMap);
-      messager.submitMessage(PawStepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, navigableRegionList);
-      messager.submitMessage(PawStepPlannerMessagerAPI.InterRegionVisibilityMap, interRegionVisibilityMap);
    }
 
    private void processFootstepPlannerStatus(FootstepPlannerStatusMessage packet)
