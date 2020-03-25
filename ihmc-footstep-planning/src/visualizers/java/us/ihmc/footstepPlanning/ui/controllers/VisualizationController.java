@@ -44,15 +44,6 @@ public class VisualizationController
    @FXML
    private CheckBox showPostProcessingInfo;
 
-   @FXML
-   public void requestStatistics()
-   {
-      if (verbose)
-         PrintTools.info(this, "Clicked request statistics...");
-
-      messager.submitMessage(RequestPlannerStatistics, true);
-   }
-
    private JavaFXMessager messager;
 
    public void attachMessager(JavaFXMessager messager)
