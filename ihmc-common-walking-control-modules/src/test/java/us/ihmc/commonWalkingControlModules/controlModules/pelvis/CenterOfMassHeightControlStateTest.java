@@ -17,11 +17,16 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -63,252 +68,15 @@ public class CenterOfMassHeightControlStateTest
    }
 
    @Test
-   public void testLookAheadCoMHeightTrajectoryGenerator()
-   {
-      //TODO: Make more assertions. Right now we just assert continuity, so this is more a human visualizer and manual tester than an automatic unit test...
-
-      PoseReferenceFrame pelvisFrame = new PoseReferenceFrame("pelvisFrame", worldFrame);
-
-      Random random = new Random(1776L);
-
-      double minimumHeightAboveGround = 0.595 + 0.03;
-      double nominalHeightAboveGround = 0.675 + 0.03;
-      double maximumHeightAboveGround = 0.735 + 0.03;
-
-      double doubleSupportPercentageIn = 0.3;
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
-
-      YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
-
-      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
-      testingParameters.setKeepSCSUp(true);
-      testingParameters.setDataBufferSize(2048);
-
-      Robot robot = new Robot("Dummy");
-      YoDouble yoTime = robot.getYoTime();
-      SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
-
-      setupStuff(yoGraphicsListRegistry, registry);
-      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-                                                                                                                              nominalHeightAboveGround,
-                                                                                                                              maximumHeightAboveGround,
-                                                                                                                              0.0,
-                                                                                                                              doubleSupportPercentageIn,
-                                                                                                                              pelvisFrame,
-                                                                                                                              pelvisFrame,
-                                                                                                                              ankleZUpFrames,
-                                                                                                                              anklePositionsInSoleFrame,
-                                                                                                                              yoTime,
-                                                                                                                              yoGraphicsListRegistry,
-                                                                                                                              registry);
-
-      double dt = 0.01;
-
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
-      scs.setDT(dt, 2);
-      scs.addYoVariableRegistry(registry);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setPlaybackRealTimeRate(0.025);
-
-      CameraConfiguration cameraConfigurationOne = new CameraConfiguration("one");
-      cameraConfigurationOne.setCameraTracking(false, false, false, false);
-      cameraConfigurationOne.setCameraDolly(false, false, false, false);
-      cameraConfigurationOne.setCameraFix(new Point3D(11.25, 11.8, 0.6));
-      cameraConfigurationOne.setCameraPosition(new Point3D(10.1, 10.3, 0.3));
-      scs.setupCamera(cameraConfigurationOne);
-
-      CameraConfiguration cameraConfigurationTwo = new CameraConfiguration("two");
-      cameraConfigurationTwo.setCameraTracking(false, false, false, false);
-      cameraConfigurationTwo.setCameraDolly(false, false, false, false);
-      cameraConfigurationTwo.setCameraFix(new Point3D(11.5, 14.25, 1.1));
-      cameraConfigurationTwo.setCameraPosition(new Point3D(16.5, 10.9, 0.3));
-      scs.setupCamera(cameraConfigurationTwo);
-
-      ViewportConfiguration viewportConfiguration = new ViewportConfiguration("twoViews");
-      viewportConfiguration.addCameraView("one", 0, 0, 1, 1);
-      viewportConfiguration.addCameraView("two", 1, 0, 1, 1);
-
-      scs.setupViewport(viewportConfiguration);
-
-      scs.selectViewport("twoViews");
-      scs.maximizeMainWindow();
-
-      scs.startOnAThread();
-
-      ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-
-      FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet);
-
-      //    double stepWidth = 0.3;
-      //    double stepLength = 0.75;
-      //    int numberOfSteps = 30;
-      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFootsteps(stepWidth, stepLength, numberOfSteps);
-
-      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFlatGroundWalkingTrackFootstepProvider(registry, updatables);
-
-      List<Footstep> footsteps = generateFootstepsForATestCase(footstepTestTools);
-
-      boolean changeZRandomly = false;
-      double maxZChange = 0.6;
-
-      double time = 0.0;
-
-      int stepNumber = 0;
-      int maxNumberOfSteps = 80;
-
-      Footstep transferFromFootstep = footsteps.remove(0);
-      Footstep previousFootstep = transferFromFootstep;
-
-      Footstep transferToFootstep;
-
-      while ((footsteps.size() > 2) && (stepNumber < maxNumberOfSteps))
-      {
-         stepNumber++;
-
-         transferFromFootstep = previousFootstep;
-         transferToFootstep = footsteps.remove(0);
-
-         if (changeZRandomly)
-            transferToFootstep.setZ(transferToFootstep.getZ() + RandomNumbers.nextDouble(random, 0.0, maxZChange));
-         previousFootstep = transferToFootstep;
-
-         Footstep upcomingFootstep = footsteps.get(0);
-
-         FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
-         FramePoint3D transferFromFootFramePoint = new FramePoint3D();
-         transferFromFootstep.getPosition(transferFromFootFramePoint);
-         FrameQuaternion transferFromFootOrientation = new FrameQuaternion();
-         transferFromFootstep.getOrientation(transferFromFootOrientation);
-         transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
-
-         FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
-         FramePoint3D transferToFootFramePoint = new FramePoint3D();
-         transferToFootstep.getPosition(transferToFootFramePoint);
-         FrameQuaternion transferToFootOrientation = new FrameQuaternion();
-         transferToFootstep.getOrientation(transferToFootOrientation);
-         transferToFootSpoof.setPose(transferToFootFramePoint, transferToFootOrientation);
-
-         TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-         transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-         transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
-         transferToAndNextFootstepsData.setNextFootstep(upcomingFootstep);
-
-         transferToAndNextFootstepsData.setTransferToSide(transferToFootstep.getRobotSide());
-
-         RobotSide supportLeg = transferFromFootstep.getRobotSide();
-         supportLegFrameSide.set(supportLeg);
-
-         List<PlaneContactState> listOfContactStates = new ArrayList<PlaneContactState>();
-         for (YoPlaneContactState contactState : contactStates)
-         {
-            listOfContactStates.add(contactState);
-         }
-
-         // Initialize at the beginning of single support.
-         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
-         CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
-
-         scs.tickAndUpdate();
-
-         double stepTime = 2.0;
-
-         int numberOfTicks = (int) (stepTime / dt);
-         for (int i = 0; i < numberOfTicks; i++)
-         {
-            if (i == 0.35 * numberOfTicks)
-            {
-               // Initialize again at the beginning of double support.
-               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
-               supportLeg = null;
-            }
-            else if (i == 0.65 * numberOfTicks)
-            {
-               supportLeg = transferToFootstep.getRobotSide();
-            }
-
-            time = time + dt;
-            robot.setTime(time);
-
-            for (Updatable updatable : updatables)
-            {
-               updatable.update(time);
-            }
-
-            FramePoint2D transferFromFootPosition = new FramePoint2D(transferFromFootstep.getFootstepPose().getPosition());
-            FramePoint2D transferToFootPosition = new FramePoint2D(transferToFootstep.getFootstepPose().getPosition());
-
-            FramePoint2D queryPosition = new FramePoint2D();
-
-            double alpha = ((double) i) / ((double) (numberOfTicks - 1));
-
-            queryPosition.interpolate(transferFromFootPosition, transferToFootPosition, alpha);
-
-            pelvisFrame.setX(queryPosition.getX());
-            pelvisFrame.setY(queryPosition.getY());
-            pelvisFrame.update();
-
-            boolean switchSupportSides = random.nextBoolean();
-            if (switchSupportSides)
-            {
-               supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
-               lookAheadCoMHeightTrajectoryGenerator.setSupportLeg(supportLegFrameSide.getEnumValue());
-            }
-
-            boolean isInDoubleSupport = supportLeg == null;
-            lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
-
-            FramePoint3D comPosition = new FramePoint3D();
-            pelvisFrame.setZ(comPosition.getZ());
-            pelvisFrame.update();
-
-            scs.tickAndUpdate();
-         }
-      }
-
-      scs.gotoInPointNow();
-      scs.tick(2);
-      scs.setInPoint();
-      scs.cropBuffer();
-
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionZ")).getData();
-
-      double maxChangePerTick = dt * 0.75;
-      boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
-      boolean isDesiredCoMPositionYContinuous = ArrayTools.isContinuous(desiredCoMPositionYData, maxChangePerTick);
-      boolean isDesiredCoMPositionZContinuous = ArrayTools.isContinuous(desiredCoMPositionZData, maxChangePerTick);
-
-      if (!isDesiredCoMPositionXContinuous || !isDesiredCoMPositionYContinuous || !isDesiredCoMPositionZContinuous)
-      {
-         double xMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionXData);
-         double yMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionYData);
-         double zMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredCoMPositionZData);
-
-         System.err.println("desiredCoMPositionXData xMaxChange = " + xMaxChange);
-         System.err.println("desiredCoMPositionYData yMaxChange = " + yMaxChange);
-         System.err.println("desiredCoMPositionZData yMaxChange = " + zMaxChange);
-
-         System.err.println("maxChangePerTick = " + maxChangePerTick);
-
-         if (makeAssertions)
-            fail("Desired CoM position is not continuous!");
-      }
-
-      if (testingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-   }
-
-   @Test
    public void testWalkingUpRamp()
    {
       //TODO: Make more assertions. Right now we just assert continuity, so this is more a human visualizer and manual tester than an automatic unit test...
 
-      PoseReferenceFrame pelvisFrame = new PoseReferenceFrame("pelvisFrame", worldFrame);
+      RigidBody elevator = new RigidBody("elevator", worldFrame);
+
+      SixDoFJoint floatingJoint = new SixDoFJoint("sixDofJoint", elevator);
+      RigidBody pelvis = new RigidBody("pelvis", floatingJoint, 0.1, 0.1, 0.1, 5.0, new Vector3D());
+      MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
 
       Random random = new Random(1776L);
 
@@ -327,11 +95,29 @@ public class CenterOfMassHeightControlStateTest
       testingParameters.setKeepSCSUp(true);
       testingParameters.setDataBufferSize(2048);
 
+      double dt = 0.01;
+
       Robot robot = new Robot("Dummy");
       YoDouble yoTime = robot.getYoTime();
       SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);
+
+      CenterOfMassHeightControlState heightControlState = new CenterOfMassHeightControlState(minimumHeightAboveGround,
+                                                                                             nominalHeightAboveGround,
+                                                                                             maximumHeightAboveGround,
+                                                                                             0.0,
+                                                                                             elevator,
+                                                                                             anklePositionsInSoleFrame,
+                                                                                             pelvisFrame,
+                                                                                             pelvisFrame,
+                                                                                             ankleZUpFrames,
+                                                                                             9.81,
+                                                                                             yoTime,
+                                                                                             dt,
+                                                                                             registry,
+                                                                                             yoGraphicsListRegistry);
+
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
                                                                                                                               nominalHeightAboveGround,
                                                                                                                               maximumHeightAboveGround,
@@ -345,12 +131,10 @@ public class CenterOfMassHeightControlStateTest
                                                                                                                               yoGraphicsListRegistry,
                                                                                                                               registry);
 
-      lookAheadCoMHeightTrajectoryGenerator.setMinimumHeightAboveGround(0.705);
-      lookAheadCoMHeightTrajectoryGenerator.setNominalHeightAboveGround(0.7849999999999999);
-      lookAheadCoMHeightTrajectoryGenerator.setMaximumHeightAboveGround(0.9249999999999999);
-      lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(false);
-
-      double dt = 0.01;
+      heightControlState.setMinimumHeightAboveGround(0.705);
+      heightControlState.setNominalHeightAboveGround(0.7849999999999999);
+      heightControlState.setMaximumHeightAboveGround(0.9249999999999999);
+      heightControlState.setCoMHeightDriftCompensation(false);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
       scs.setDT(dt, 1);
@@ -368,16 +152,7 @@ public class CenterOfMassHeightControlStateTest
 
       scs.startOnAThread();
 
-      ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-
       FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet);
-
-      //    double stepWidth = 0.3;
-      //    double stepLength = 0.75;
-      //    int numberOfSteps = 30;
-      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFootsteps(stepWidth, stepLength, numberOfSteps);
-
-      //    FootstepProvider footstepProvider = footstepProviderTestHelper.createFlatGroundWalkingTrackFootstepProvider(registry, updatables);
 
       List<Footstep> footsteps = generateFootstepsForRamp(footstepTestTools);
 
@@ -421,14 +196,8 @@ public class CenterOfMassHeightControlStateTest
          RobotSide supportLeg = transferFromFootstep.getRobotSide();
          supportLegFrameSide.set(supportLeg);
 
-         List<PlaneContactState> listOfContactStates = new ArrayList<PlaneContactState>();
-         for (YoPlaneContactState contactState : contactStates)
-         {
-            listOfContactStates.add(contactState);
-         }
-
          // Initialize at the beginning of single support.
-         lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
+         heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
 
          scs.tickAndUpdate();
@@ -441,7 +210,7 @@ public class CenterOfMassHeightControlStateTest
             if (i == 0.35 * numberOfTicks)
             {
                // Initialize again at the beginning of double support.
-               lookAheadCoMHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, 0.0);
+               heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
                supportLeg = null;
             }
             else if (i == 0.65 * numberOfTicks)
@@ -452,11 +221,6 @@ public class CenterOfMassHeightControlStateTest
             time = time + dt;
             robot.setTime(time);
 
-            for (Updatable updatable : updatables)
-            {
-               updatable.update(time);
-            }
-
             FramePoint3DReadOnly transferFromFootPosition = transferFromFootstep.getFootstepPose().getPosition();
             FramePoint3DReadOnly transferToFootPosition = transferToFootstep.getFootstepPose().getPosition();
 
@@ -466,23 +230,24 @@ public class CenterOfMassHeightControlStateTest
 
             queryPosition.interpolate(transferFromFootPosition, transferToFootPosition, alpha);
 
-            pelvisFrame.setX(queryPosition.getX());
-            pelvisFrame.setY(queryPosition.getY());
-            pelvisFrame.update();
+            floatingJoint.getJointPose().getPosition().setX(queryPosition.getX());
+            floatingJoint.getJointPose().getPosition().setY(queryPosition.getY());
+            floatingJoint.updateFramesRecursively();
 
             boolean switchSupportSides = random.nextBoolean();
             if (switchSupportSides)
             {
                supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
-               lookAheadCoMHeightTrajectoryGenerator.setSupportLeg(supportLegFrameSide.getEnumValue());
+               heightControlState.setSupportLeg(supportLegFrameSide.getEnumValue());
             }
 
             boolean isInDoubleSupport = supportLeg == null;
+            // TODO replace with {@link CenterOfMassHeightControlState.solve}
             lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
 
             FramePoint3D comPosition = new FramePoint3D();
-            pelvisFrame.setZ(comPosition.getZ());
-            pelvisFrame.update();
+            floatingJoint.getJointPose().getPosition().setZ(comPosition.getZ());
+            floatingJoint.updateFramesRecursively();
 
             scs.tickAndUpdate();
          }
@@ -646,29 +411,24 @@ public class CenterOfMassHeightControlStateTest
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(-0.007, -0.164, 0.001), new Quaternion(-0.000,  0.004, -0.000,  1.000 )));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(-0.007, 0.164, 0.001), new Quaternion( 0.000,  0.004,  0.000,  1.000 )));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(0.593, -0.086, 0.009), new Quaternion( 0.000,  0.000,  0.000,  1.000 )));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D( 1.190,  0.169,  0.069 ),
-                                                              new Quaternion(-0.009, -0.052,  0.011,  0.999 )));
       footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D( 1.772, -0.072,  0.127 ),
-                                                              new Quaternion( 0.009, -0.051, -0.004,  0.999 )));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D( 2.378,  0.177,  0.188 ),
-                                                              new Quaternion(-0.010, -0.052,  0.006,  0.999 )));
+                                                              new Point3D(-0.007, -0.164, 0.001),
+                                                              new Quaternion(-0.000, 0.004, -0.000, 1.000)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(-0.007, 0.164, 0.001), new Quaternion(0.000, 0.004, 0.000, 1.000)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(0.593, -0.086, 0.009), new Quaternion(0.000, 0.000, 0.000, 1.000)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(1.190, 0.169, 0.069), new Quaternion(-0.009, -0.052, 0.011, 0.999)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
+                                                              new Point3D(1.772, -0.072, 0.127),
+                                                              new Quaternion(0.009, -0.051, -0.004, 0.999)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(2.378, 0.177, 0.188), new Quaternion(-0.010, -0.052, 0.006, 0.999)));
 
       footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D( 2.990, -0.068,  0.240 ),
-                                                              new Quaternion( 0.010, -0.050, -0.006,  0.999 )));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D( 3.596,  0.174,  0.300 ),
-                                                              new Quaternion(-0.015, -0.052, -0.003,  0.999 )));
+                                                              new Point3D(2.990, -0.068, 0.240),
+                                                              new Quaternion(0.010, -0.050, -0.006, 0.999)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(3.596, 0.174, 0.300), new Quaternion(-0.015, -0.052, -0.003, 0.999)));
       footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D( 4.181, -0.078,  0.354 ),
-                                                              new Quaternion( 0.013, -0.050, -0.015,  0.999 )));
-
+                                                              new Point3D(4.181, -0.078, 0.354),
+                                                              new Quaternion(0.013, -0.050, -0.015, 0.999)));
 
       return footsteps;
    }

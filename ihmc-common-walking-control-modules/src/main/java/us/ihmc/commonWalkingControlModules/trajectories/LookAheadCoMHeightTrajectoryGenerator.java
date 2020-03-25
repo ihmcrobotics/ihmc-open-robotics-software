@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -104,7 +105,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final BagOfBalls bagOfBalls;
 
-   private final YoDouble yoTime;
+   private final DoubleProvider yoTime;
 
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
@@ -125,7 +126,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
                                                 double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame pelvisFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
-                                                SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final YoDouble yoTime,
+                                                SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, DoubleProvider yoTime,
                                                 YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
@@ -134,7 +135,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
       this.transformsFromAnkleToSole = transformsFromAnkleToSole;
-      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+      offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
       offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
       offsetHeightAboveGroundPrevValue.set(defaultOffsetHeightAboveGround);
@@ -143,7 +144,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
             double previous = offsetHeightTrajectoryGenerator.getValue();
             offsetHeightTrajectoryGenerator.clear();
             offsetHeightTrajectoryGenerator.appendWaypoint(0.0, previous, 0.0);
@@ -797,7 +798,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       if (!isTrajectoryOffsetStopped.getBooleanValue())
       {
-         double deltaTime = yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue();
+         double deltaTime = yoTime.getValue() - offsetHeightAboveGroundChangedTime.getDoubleValue();
 
          if (!offsetHeightTrajectoryGenerator.isEmpty())
          {
@@ -860,7 +861,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          double heightOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightAboveGround.set(heightOffset);
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+         offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
 
          offsetHeightTrajectoryGenerator.clear();
          offsetHeightTrajectoryGenerator.appendWaypoint(0.0, heightOffset, 0.0);
@@ -892,7 +893,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       {
          isReadyToHandleQueuedCommands.set(true);
          clearCommandQueue(euclideanTrajectory.getCommandId());
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+         offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
          initializeOffsetTrajectoryGenerator(command, 0.0);
          return true;
       }
@@ -913,7 +914,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       {
          isReadyToHandleQueuedCommands.set(true);
          clearCommandQueue(euclideanTrajectory.getCommandId());
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+         offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
 
          if (euclideanTrajectory.getNumberOfTrajectoryPoints() != 1)
          {
@@ -1065,7 +1066,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (!processGoHome.getValue())
          return;
 
-      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+      offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightTrajectoryGenerator.clear();
       offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
       offsetHeightTrajectoryGenerator.appendWaypoint(trajectoryTime, 0.0, 0.0);
