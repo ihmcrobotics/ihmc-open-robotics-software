@@ -18,7 +18,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -61,7 +60,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
-   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
+   private boolean planBodyPath = false;
 
    private boolean assumeFlatGround = false;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -85,12 +84,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          RobotSide initialStanceSide,
                          Pose3DReadOnly leftFootPose,
                          Pose3DReadOnly rightFootPose,
-                         FootstepPlannerType footStepPlannerToUse,
+                         boolean planBodyPath,
                          boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
-      this.footStepPlannerToUse = footStepPlannerToUse;
+      this.planBodyPath = planBodyPath;
       this.initialStanceSide = initialStanceSide;
       this.startLeftFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), leftFootPose);
       this.startRightFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), rightFootPose);
@@ -151,9 +150,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                                                                                                                     startRightFootPose,
                                                                                                                     goalPose,
                                                                                                                     footstepPlannerParameters.getIdealFootstepWidth(),
-                                                                                                                    footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                                    planBodyPath);
             request.setTimeout(timeout);
-            request.setBestEffortTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
             {

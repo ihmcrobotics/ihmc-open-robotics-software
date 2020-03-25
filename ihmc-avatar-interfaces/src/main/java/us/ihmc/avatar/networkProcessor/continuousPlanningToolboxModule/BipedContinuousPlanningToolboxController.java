@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -276,15 +275,14 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       }
 
       RobotSide initialSupportSide = expectedInitialSteppingSide.get().getOppositeSide();
-      Pose3DReadOnly stancePose = currentFeetPositions.get(initialSupportSide);
 
       planningRequestPacket.setRequestedInitialStanceSide(initialSupportSide.toByte());
       planningRequestPacket.setHorizonLength(continuousPlanningRequestPacket.getHorizonLength());
-      planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
+      planningRequestPacket.setPlanBodyPath(true);
+      planningRequestPacket.setPerformAStarSearch(true);
       planningRequestPacket.getStartLeftFootPose().set(currentFeetPositions.get(RobotSide.LEFT));
-      planningRequestPacket.getStartRightFootPose().set(currentFeetPositions.get(RobotSide.LEFT));
+      planningRequestPacket.getStartRightFootPose().set(currentFeetPositions.get(RobotSide.RIGHT));
       planningRequestPacket.setTimeout(continuousPlanningRequestPacket.getTimeout());
-      planningRequestPacket.setBestEffortTimeout(continuousPlanningRequestPacket.getBestEffortTimeout());
       planningRequestPacket.getPlanarRegionsListMessage().set(latestPlanarRegions.get());
 
       planningRequestPacket.getGoalLeftFootPose().set(continuousPlanningRequestPacket.getGoalPositionInWorld(), continuousPlanningRequestPacket.getGoalOrientationInWorld());

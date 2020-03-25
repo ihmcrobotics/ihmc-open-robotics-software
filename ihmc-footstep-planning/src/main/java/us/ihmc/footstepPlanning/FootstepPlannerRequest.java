@@ -51,6 +51,11 @@ public class FootstepPlannerRequest
    private boolean planBodyPath;
 
    /**
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+    */
+   private boolean performAStarSearch;
+
+   /**
     * (beta) This specifies an acceptable xy distance that is acceptable to terminate planning. Set to non-positive value to disable.
     */
    private double goalDistanceProximity;
@@ -104,6 +109,7 @@ public class FootstepPlannerRequest
       snapGoalSteps = true;
       abortIfGoalStepSnappingFails = false;
       planBodyPath = false;
+      performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
       timeout = 5.0;
@@ -189,6 +195,11 @@ public class FootstepPlannerRequest
       this.planBodyPath = planBodyPath;
    }
 
+   public void setPerformAStarSearch(boolean performAStarSearch)
+   {
+      this.performAStarSearch = performAStarSearch;
+   }
+
    public void setGoalDistanceProximity(double goalDistanceProximity)
    {
       this.goalDistanceProximity = goalDistanceProximity;
@@ -259,6 +270,11 @@ public class FootstepPlannerRequest
       return planBodyPath;
    }
 
+   public boolean getPerformAStarSearch()
+   {
+      return performAStarSearch;
+   }
+
    public double getGoalDistanceProximity()
    {
       return goalDistanceProximity;
@@ -313,8 +329,8 @@ public class FootstepPlannerRequest
       setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
       setSnapGoalSteps(requestPacket.getSnapGoalSteps());
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
-
-      setPlanBodyPath(FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath());
+      setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
@@ -343,8 +359,8 @@ public class FootstepPlannerRequest
       requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
       requestPacket.setSnapGoalSteps(getSnapGoalSteps());
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
-
-      requestPacket.setRequestedFootstepPlannerType((getPlanBodyPath() ? FootstepPlannerType.VIS_GRAPH_WITH_A_STAR : FootstepPlannerType.A_STAR).toByte());
+      requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
       requestPacket.setTimeout(getTimeout());
@@ -380,6 +396,7 @@ public class FootstepPlannerRequest
       this.abortIfGoalStepSnappingFails = other.abortIfGoalStepSnappingFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
       this.timeout = other.timeout;

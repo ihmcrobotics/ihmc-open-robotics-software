@@ -18,10 +18,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -74,7 +71,8 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> snapGoalSteps;
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
-   private final AtomicReference<FootstepPlannerType> plannerTypeReference;
+   private final AtomicReference<Boolean> planBodyPath;
+   private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
@@ -137,7 +135,8 @@ public class RemoteUIMessageConverter
       snapGoalSteps = messager.createInput(FootstepPlannerMessagerAPI.SnapGoalSteps);
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      plannerTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.A_STAR);
+      planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
+      performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
@@ -284,14 +283,14 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, packet.getGoalRightFootPose());
-      FootstepPlannerType plannerType = FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType());
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
 
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, plannerType);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, packet.getMaxIterations());
@@ -534,8 +533,10 @@ public class RemoteUIMessageConverter
          packet.setRequestedInitialStanceSide(plannerInitialSupportSideReference.get().toByte());
       if (plannerTimeoutReference.get() != null)
          packet.setTimeout(plannerTimeoutReference.get());
-      if (plannerTypeReference.get() != null)
-         packet.setRequestedFootstepPlannerType(plannerTypeReference.get().toByte());
+
+      packet.setPlanBodyPath(planBodyPath.get());
+      packet.setPerformAStarSearch(performAStarSearch.get());
+
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)

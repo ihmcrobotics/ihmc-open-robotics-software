@@ -5,13 +5,6 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,13 +16,13 @@ public class FootstepPlannerMessageTools
                                                                                    Pose3DReadOnly startRightFootPose,
                                                                                    Pose3DReadOnly goalMidFootPose,
                                                                                    double idealStanceWidth,
-                                                                                   FootstepPlannerType requestedPlannerType)
+                                                                                   boolean planBodyPath)
    {
       Pose3D goalLeftFootPose = new Pose3D(goalMidFootPose);
       Pose3D goalRightFootPose = new Pose3D(goalMidFootPose);
       goalLeftFootPose.appendTranslation(0.0, 0.5 * idealStanceWidth, 0.0);
       goalRightFootPose.appendTranslation(0.0, -0.5 * idealStanceWidth, 0.0);
-      return createFootstepPlanningRequestPacket(initialStanceSide, startLeftFootPose, startRightFootPose, goalLeftFootPose, goalRightFootPose, requestedPlannerType);
+      return createFootstepPlanningRequestPacket(initialStanceSide, startLeftFootPose, startRightFootPose, goalLeftFootPose, goalRightFootPose, planBodyPath);
    }
 
    public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(RobotSide initialStanceSide,
@@ -37,7 +30,7 @@ public class FootstepPlannerMessageTools
                                                                                    Pose3DReadOnly startRightFootPose,
                                                                                    Pose3DReadOnly goalLeftFootPose,
                                                                                    Pose3DReadOnly goalRightFootPose,
-                                                                                   FootstepPlannerType requestedPlannerType)
+                                                                                   boolean planBodyPath)
    {
       FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
       message.setRequestedInitialStanceSide(initialStanceSide.toByte());
@@ -45,7 +38,8 @@ public class FootstepPlannerMessageTools
       message.getStartRightFootPose().set(startRightFootPose);
       message.getGoalLeftFootPose().set(goalLeftFootPose);
       message.getGoalRightFootPose().set(goalRightFootPose);
-      message.setRequestedFootstepPlannerType(requestedPlannerType.toByte());
+      message.setPlanBodyPath(planBodyPath);
+
       return message;
    }
 
