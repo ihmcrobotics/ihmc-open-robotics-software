@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -38,7 +39,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class GoalOrientationViewer extends AnimationTimer
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final Group root = new Group();
 
    private static final double cylinderLength = 5.0 * RADIUS;
@@ -80,6 +80,8 @@ public class GoalOrientationViewer extends AnimationTimer
       goalMidFootOrientation = messager.createInput(GoalMidFootOrientation, new Quaternion());
       leftFootGoalPose = messager.createInput(LeftFootGoalPose);
       rightFootGoalPose = messager.createInput(RightFootGoalPose);
+
+      messager.registerTopicListener(ShowGoalSteps, root::setVisible);
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)

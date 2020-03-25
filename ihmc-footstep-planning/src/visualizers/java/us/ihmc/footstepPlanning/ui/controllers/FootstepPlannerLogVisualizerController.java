@@ -71,8 +71,6 @@ public class FootstepPlannerLogVisualizerController
    private TableView debugChildStepTable;
 
    @FXML
-   private CheckBox showLogGraphics;
-   @FXML
    private Button reset;
    @FXML
    private Button stepInto;
@@ -87,7 +85,6 @@ public class FootstepPlannerLogVisualizerController
    public void bindControls()
    {
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, b -> loadLog());
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLogGraphics, showLogGraphics.selectedProperty(), true);
 
       AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
@@ -227,7 +224,6 @@ public class FootstepPlannerLogVisualizerController
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowRejectedNodes, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
