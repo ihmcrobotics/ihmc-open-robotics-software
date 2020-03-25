@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -55,9 +53,11 @@ public class MainTabController
 
    // control
    @FXML
-   private ComboBox<FootstepPlannerType> plannerType;
-   @FXML
    private CheckBox acceptNewRegions;
+   @FXML
+   private CheckBox performAStarSearch;
+   @FXML
+   private CheckBox planBodyPath;
    @FXML
    private CheckBox assumeFlatGround;
    @FXML
@@ -276,10 +276,6 @@ public class MainTabController
 
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
-      ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
-      plannerType.setItems(plannerTypeOptions);
-      plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
-
       timeout.setValueFactory(createTimeoutValueFactory());
       maxIterations.setValueFactory(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 1));
       horizonLength.setValueFactory(createHorizonValueFactory());
@@ -298,7 +294,6 @@ public class MainTabController
       setupControls();
 
       // control
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerType, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
@@ -352,6 +347,9 @@ public class MainTabController
 
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
+
+      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
+      messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
 
       messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());
 

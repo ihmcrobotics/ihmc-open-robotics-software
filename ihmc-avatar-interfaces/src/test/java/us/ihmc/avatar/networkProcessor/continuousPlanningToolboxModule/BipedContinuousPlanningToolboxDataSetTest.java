@@ -63,7 +63,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -411,7 +410,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
    protected String getTimeoutFlag()
    {
-      return FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toString().toLowerCase() + "_timeout";
+      return "vis_graph_with_a_star_timeout";
    }
 
    private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, boolean simulateOcclusions)
@@ -532,10 +531,11 @@ public class BipedContinuousPlanningToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
       ThreadTools.sleep(100);
+      String timeoutPrefix = "vis_graph_with_a_star";
 
       BipedContinuousPlanningRequestPacket requestPacket = new BipedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(dataset.getPlannerInput().getTimeoutFlag(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toString().toLowerCase()));
+      requestPacket.setTimeout(dataset.getPlannerInput().getTimeoutFlag(timeoutPrefix));
       requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());

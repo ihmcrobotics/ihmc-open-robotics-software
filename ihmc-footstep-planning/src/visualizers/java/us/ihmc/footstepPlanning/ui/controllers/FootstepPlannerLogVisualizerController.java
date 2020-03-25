@@ -15,7 +15,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -194,7 +193,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, footstepPlannerLog.getRequestPacket().getGoalDistanceProximity());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalYawProximity, footstepPlannerLog.getRequestPacket().getGoalYawProximity());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, FootstepPlannerType.fromByte(footstepPlannerLog.getRequestPacket().getRequestedFootstepPlannerType()));
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, footstepPlannerLog.getRequestPacket().getTimeout());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
@@ -223,6 +222,9 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, footstepPlannerLog.getRequestPacket().getPerformAStarSearch());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
 
       // set graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData());

@@ -410,7 +410,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
       request.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      request.setRequestedFootstepPlannerType(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toByte());
+      request.setPlanBodyPath(false);
 
       double timeout = 12.0;
       request.setTimeout(timeout);
