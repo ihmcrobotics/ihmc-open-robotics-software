@@ -9,8 +9,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 public class VisualizationController
 {
-   private static final boolean verbose = false;
-
    @FXML
    private CheckBox showBodyPathToggleButton;
    @FXML
@@ -80,5 +78,11 @@ public class VisualizationController
       messager.bindBidirectional(ShowLogGraphics, showLogGraphics.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
       messager.bindBidirectional(RenderShiftedWaypoints, renderAdjustedWaypoints.selectedProperty(), true);
+   }
+
+   @FXML
+   public void reset()
+   {
+      messager.submitMessage(GlobalReset, true);
    }
 }
