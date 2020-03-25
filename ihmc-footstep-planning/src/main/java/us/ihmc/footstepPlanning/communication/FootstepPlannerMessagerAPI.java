@@ -44,6 +44,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
    public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
    public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
+   public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
 
    // REA data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
@@ -104,7 +105,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AbortIfGoalStepSnapFails = topic("AbortIfGoalStepSnapFails");
    public static final Topic<Pose3DReadOnly> LeftFootGoalPose = topic("LeftFootGoalPose");
    public static final Topic<Pose3DReadOnly> RightFootGoalPose = topic("RightFootGoalPose");
-   public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
    public static final Topic<Point3D> GoalMidFootPosition = topic("GoalMidFootPosition");
    public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
