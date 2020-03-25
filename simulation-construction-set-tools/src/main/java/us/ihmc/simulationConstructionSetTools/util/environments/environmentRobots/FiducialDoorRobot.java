@@ -1,5 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
+import com.jme3.scene.Spatial;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -20,6 +21,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JME3DLoaderUtils;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -38,27 +41,19 @@ import java.util.List;
 
 public class FiducialDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
-   public static final Vector2D DEFAULT_HANDLE_OFFSET = new Vector2D(0.83, 0.98);
-   public static final Vector3D DEFAULT_DOOR_DIMENSIONS = new Vector3D(0.9144, 0.045, 2.04);
-   public static final double DEFAULT_MASS = 2.28; // 5lbs
-   public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
-   public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
-   public static final double DEFAULT_HANDLE_RADIUS = 0.02;
-   public static final double DEFAULT_HANDLE_LENGTH = 0.12;
+   private static final AppearanceDefinition doorColor = YoAppearance.Gray();
 
-   private static final AppearanceDefinition defaultColor = YoAppearance.Gray();
-
-   private double widthX;
-   private double depthY;
-   private double heightZ;
+   private double widthX = 0.9144;
+   private double depthY = 0.045;
+   private double heightZ = 2.04;
 
    private final RigidBodyTransform originalDoorPose;
    private final PoseReferenceFrame doorFrame;
    private final FrameBox3d doorBox;
 
-   private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<PoseReferenceFrame>();
+   private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<>();
 
-   private double mass;
+   private double mass = 2.28; // 5lbs
    private Matrix3D inertiaMatrix;
 
    private Link doorLink;
@@ -68,62 +63,32 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    private PinJoint handlePinJoint;
    private Link handleLink;
    private Graphics3DObject doorHandleGraphics = new Graphics3DObject();
-   private final Vector2D handleOffset;
-   private final double handleDoorSeparation;
-   private final double handleHingeRadius;
-   private final double handleRadius, handleLength;
+   private final Vector2D handleOffset = new Vector2D(0.83, 0.98);
+   private final double handleDoorSeparation = 0.06;
+   private final double handleHingeRadius = 0.01;
+   private final double handleRadius = 0.02;
+   private final double handleLength = 0.12;
 
    private final InternalMultiJointArticulatedContactable internalMultiJointArticulatedContactable;
+   private Point3D positionInWorld;
+   private AxisAngle orientationInWorld;
 
-   public FiducialDoorRobot(String name, Point3D positionInWorld, AxisAngle orientation)
-   {
-      this(name,
-           DEFAULT_DOOR_DIMENSIONS,
-           DEFAULT_MASS,
-           positionInWorld,
-           orientation,
-           DEFAULT_HANDLE_OFFSET,
-           DEFAULT_HANDLE_RADIUS,
-           DEFAULT_HANDLE_LENGTH,
-           DEFAULT_HANDLE_DOOR_SEPARATION,
-           DEFAULT_HANDLE_HINGE_RADIUS);
-   }
-
-   public FiducialDoorRobot(String name,
-                            Vector3D boxDimensions,
-                            double mass,
-                            Point3D positionInWorld,
-                            AxisAngle orientation,
-                            Vector2D handleOffset,
-                            double handleRadius,
-                            double handleLength,
-                            double handleDoorSeparation,
-                            double handleHingeRadius)
+   public FiducialDoorRobot(String name, Point3D positionInWorld, AxisAngle orientationInWorld)
    {
       super(name);
 
-      this.mass = mass;
+      this.positionInWorld = positionInWorld;
+      this.orientationInWorld = orientationInWorld;
 
-      this.widthX = boxDimensions.getX();
-      this.depthY = boxDimensions.getY();
-      this.heightZ = boxDimensions.getZ();
-
-      this.handleOffset = handleOffset;
-      this.handleHingeRadius = handleHingeRadius;
-
-      this.handleDoorSeparation = handleDoorSeparation;
-
-      this.handleRadius = handleRadius;
-      this.handleLength = handleLength;
-
-      createDoor(new Vector3D(positionInWorld));
+      createDoor();
       createDoorGraphics();
       createHandle();
       createHandleGraphics();
 
       // set up reference frames
-      originalDoorPose = new RigidBodyTransform(new AxisAngle(orientation), new Vector3D(positionInWorld));
-      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle(orientation)));
+      originalDoorPose = new RigidBodyTransform(new AxisAngle(orientationInWorld), new Vector3D(positionInWorld));
+      doorFrame = new PoseReferenceFrame("doorFrame",
+                                         new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle(orientationInWorld)));
       doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
 
       for (RobotSide robotSide : RobotSide.values())
@@ -139,10 +104,10 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
       internalMultiJointArticulatedContactable = new InternalMultiJointArticulatedContactable(getName(), this);
    }
 
-   private void createDoor(Vector3D positionInWorld)
+   private void createDoor()
    {
       // creating the pinJoint, i.e. door hinge
-      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis.Z);
+      doorHingePinJoint = new PinJoint("doorHingePinJoint", new Vector3D(positionInWorld), this, Axis.Z);
 
       // door link
       doorLink = new Link("doorLink");
@@ -173,12 +138,14 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    private void createDoorGraphics()
    {
       // graphics - door
-      List<Point2D> doorPoints = new ArrayList<Point2D>();
-      doorPoints.add(new Point2D());
+      List<Point2D> doorPoints = new ArrayList<>();
+      doorPoints.add(new Point2D(0.0, 0.0));
       doorPoints.add(new Point2D(widthX, 0.0));
       doorPoints.add(new Point2D(widthX, depthY));
       doorPoints.add(new Point2D(0.0, depthY));
-      doorLinkGraphics.addExtrudedPolygon(doorPoints, heightZ, defaultColor);
+//      doorLinkGraphics.addExtrudedPolygon(doorPoints, heightZ, defaultColor);
+      doorLinkGraphics.translate(widthX / 2.0, depthY / 2.0, 0.0);
+      doorLinkGraphics.addCube(widthX, depthY, heightZ, doorColor);
       doorLink.setLinkGraphics(doorLinkGraphics);
    }
 
@@ -186,7 +153,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    {
       // graphics - handle hinge
       RotationMatrix rotX90 = new RotationMatrix();
-      rotX90.setToRollMatrix(Math.PI / 2.0);
+      rotX90.setToRollOrientation(Math.PI / 2.0);
       doorHandleGraphics.rotate(rotX90);
       doorHandleGraphics.translate(new Vector3D(0.0, 0.0, -0.5 * depthY)); // center graphics
 
@@ -299,7 +266,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    public void updateAllGroundContactPointVelocities()
    {
       RotationMatrix hingeRotation = new RotationMatrix();
-      hingeRotation.setToYawMatrix(getHingeYaw());
+      hingeRotation.setToYawOrientation(getHingeYaw());
       RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
       newDoorPose.setRotation(hingeRotation);
       doorFrame.setPoseAndUpdate(newDoorPose);
@@ -454,9 +421,9 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
                                             double forceVectorScale,
                                             boolean visualizeContacts)
    {
-      ArrayList<Integer> numContactPoints = new ArrayList<Integer>();
-      numContactPoints.add(new Integer(numDoorContactPoints));
-      numContactPoints.add(new Integer(numHandleContactPoints));
+      ArrayList<Integer> numContactPoints = new ArrayList<>();
+      numContactPoints.add(numDoorContactPoints);
+      numContactPoints.add(numHandleContactPoints);
       internalMultiJointArticulatedContactable.createAvailableContactPoints(groupId, numContactPoints, forceVectorScale, visualizeContacts);
 
       internalMultiJointArticulatedContactable.setNumDoorContactPoints(numDoorContactPoints);
@@ -501,9 +468,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
 
          int jointIndex = robot.lastInsideHandles ? 1 : 0;
 
-         GroundContactPoint point = getLockedContactPoint(jointIndex, contactPointIndex);
-
-         return point;
+         return getLockedContactPoint(jointIndex, contactPointIndex);
       }
 
       @Override
