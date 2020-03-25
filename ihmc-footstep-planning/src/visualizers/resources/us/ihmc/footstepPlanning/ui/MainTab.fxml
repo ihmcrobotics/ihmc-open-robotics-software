@@ -246,7 +246,7 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -256,7 +256,7 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -266,7 +266,7 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />
                                 </image>
                             </ImageView>
                         </graphic>

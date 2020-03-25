@@ -578,18 +578,6 @@ public class FootstepNodeCheckerTest
       }
 
       @Override
-      public void plannerFinished(List<FootstepNode> plan)
-      {
-
-      }
-
-      @Override
-      public void reportLowestCostNodeList(List<FootstepNode> plan)
-      {
-
-      }
-
-      @Override
       public void tickAndUpdate()
       {
          rejectionReason = null;
