@@ -74,7 +74,6 @@ public class RandomICPSLAM extends SLAMBasics
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
 
       polygonizerParameters.setConcaveHullThreshold(0.15);
 
