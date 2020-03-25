@@ -93,15 +93,21 @@ public class SCSDoorAndCameraSimulator
       robot.addRootJoint(floatingHeadJoint);
       robot.setGravity(0.0);
 
-      Robot[] robots = new Robot[1 + environment.getEnvironmentRobots().size()];
-      robots[0] = robot;
-      List<? extends Robot> environmentRobots = environment.getEnvironmentRobots();
-      for (int i = 0; i < environmentRobots.size(); i++)
+      if (environment.getEnvironmentRobots() != null)
       {
-         robots[i + 1] = environmentRobots.get(i);
+         Robot[] robots = new Robot[1 + environment.getEnvironmentRobots().size()];
+         robots[0] = robot;
+         List<? extends Robot> environmentRobots = environment.getEnvironmentRobots();
+         for (int i = 0; i < environmentRobots.size(); i++)
+         {
+            robots[i + 1] = environmentRobots.get(i);
+         }
+         scs = new SimulationConstructionSet(robots);
       }
-
-      scs = new SimulationConstructionSet(robots);
+      else
+      {
+        scs = new SimulationConstructionSet(robot);
+      }
       scs.setDT(0.001, 100); // TODO: Check this, might greatly alter performance
 
       FunctionalRobotController controller = new FunctionalRobotController();
