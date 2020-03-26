@@ -1,11 +1,12 @@
 package us.ihmc.avatar;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -13,7 +14,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
+public abstract class HumanoidExperimentalSimulationEndToEndTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
@@ -35,9 +36,7 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       drcSimulationTestHelper.getSCSInitialSetup().setRecordFrequency(1);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-
-      ThreadTools.sleepForever();
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
    public void testZeroTorque(TestInfo testInfo) throws Exception
@@ -53,8 +52,6 @@ public abstract class HumanoidRagdollTest implements MultiRobotTestInterface
       drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum()
                              .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
-
-      ThreadTools.sleepForever();
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0));
    }
 }
