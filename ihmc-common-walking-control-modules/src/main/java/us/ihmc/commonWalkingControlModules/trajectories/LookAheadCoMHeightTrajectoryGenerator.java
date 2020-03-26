@@ -612,7 +612,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private Point2D tempPoint2dForStringStretching = new Point2D();
 
    private final StringStretcher2d stringStretcher2d = new StringStretcher2d();
-   private final List<Point2D> stretchedStringWaypoints = new ArrayList<>();
+   private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>();
 
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
