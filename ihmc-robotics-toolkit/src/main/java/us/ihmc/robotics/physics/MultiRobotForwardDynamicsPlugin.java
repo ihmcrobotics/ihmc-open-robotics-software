@@ -13,6 +13,7 @@ public class MultiRobotForwardDynamicsPlugin
 {
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robots = new HashMap<>();
    private final RecyclingArrayList<YoMultiContactImpulseCalculator> multiContactImpulseCalculators;
+   private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
 
@@ -42,6 +43,11 @@ public class MultiRobotForwardDynamicsPlugin
    public void removeRobot(PhysicsEngineRobotData robot)
    {
       robots.remove(robot.getRootBody());
+   }
+
+   public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
+   {
+      externalWrenchReaders.add(externalWrenchReader);
    }
 
    public void submitCollisions(SimpleCollisionDetection collisionDetectionPlugin)
@@ -87,6 +93,7 @@ public class MultiRobotForwardDynamicsPlugin
       {
          impulseCalculator.computeImpulses(dt, false);
          robots.forEach((rootBody, robot) -> impulseCalculator.applyJointVelocityChange(rootBody, robot.getForwardDynamicsPlugin()::addJointVelocities));
+         impulseCalculator.readExternalWrenches(dt, externalWrenchReaders);
       }
 
       for (PhysicsEngineRobotData robotPlugin : robots.values())
