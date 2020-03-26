@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.torquespeedcurve;
+package us.ihmc.valkyrie.testsupport;
 
 import java.util.ArrayList;
 import java.util.HashMap;

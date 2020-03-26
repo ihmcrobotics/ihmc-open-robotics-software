@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCPushRecoveryTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);
@@ -46,17 +46,19 @@ public abstract class DRCPushRecoveryTest
 
    private static String defaultScript = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static double simulationTime = 6.0;
+   protected static double simulationTime = 6.0;
 
-   private PushRobotController pushRobotController;
+   protected PushRobotController pushRobotController;
 
-   private double swingTime, transferTime;
+   protected double swingTime;
 
-   private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
+   protected double transferTime;
 
-   private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+   protected SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
+
+   protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()

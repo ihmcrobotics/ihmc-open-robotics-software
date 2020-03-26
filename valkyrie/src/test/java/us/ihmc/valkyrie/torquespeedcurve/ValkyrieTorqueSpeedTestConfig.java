@@ -17,12 +17,17 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataListMessagePubSubType;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetLidarScanExampleBehavior;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotConfig;
 
 class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, PUSHRECOVERY;
 	}
 
+	public String testCase;             // for push recovery, specifies which case to run
+	public double [] forceVector; // for push recovery, specifies direction of force
+	public double forceMagnitude;       // for push recovery, specifies magnitude of the force
+	public double forceDuration;        // for push recovery, specifies the duration of the force
 	public double stepStartingDistance; // for step/stair scenarios, distance to the first step (inches)
 	public double stepHeight;           // for step/stairs scenarios, height of each step (inches)
 	public int numberOfSteps;           // for step/stair scenarios, number of steps in the staircase
@@ -84,7 +89,9 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	
 	// Default constructor
 	public ValkyrieTorqueSpeedTestConfig() {
-		
+		forceVector = new double [3];
+		forceMagnitude = 0.0;
+		forceDuration = 1.0;
 		stepStartingDistance = 1.0 * 100.0 / 2.54; // 1m in inches
 		stepHeight = 6.0;
 		numberOfSteps = 3;

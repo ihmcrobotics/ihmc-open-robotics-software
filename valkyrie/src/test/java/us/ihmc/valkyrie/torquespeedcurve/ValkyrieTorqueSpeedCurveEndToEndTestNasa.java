@@ -63,7 +63,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-
+import us.ihmc.valkyrie.testsupport.ValkyrieTestExporter;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -179,12 +179,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
 			String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
 
-			if (!success) {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
-			}
-			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{
@@ -263,12 +258,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			if (!success) {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
-			}
 			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{
@@ -368,12 +359,8 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			if (!success) {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
-			}
 			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{
@@ -442,12 +429,9 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 				info += String.format("\nWalking time: %f s for %f m = %f mph\n", 
 						walkingDuration, courseLength, metersPerSecToMilesPerHour*courseLength/walkingDuration);
 				System.out.println(info);
-			} else {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
 			}
 			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{
@@ -507,12 +491,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			String dataNameSuffix = "Walk" + (slopeAngle < 0.0 ? "Up" : "Down") + "Slope" + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + "Deg";
 			String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of " + Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
 			
-			if (!success) {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
-			}
-			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{
@@ -582,13 +561,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa
 			String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
 			String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
 			
-			if (!success) {
-				dataNameSuffix += "_FAILED";
-				info += "_FAILED";
-			}
-			
-			
-			return ValkyrieTestExporter.exportTorqueSpeedCurves(scs, dataOutputFolder, dataNameSuffix, info);
+			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
 		}
 		finally
 		{

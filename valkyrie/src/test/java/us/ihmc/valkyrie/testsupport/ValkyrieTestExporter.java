@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.torquespeedcurve;
+package us.ihmc.valkyrie.testsupport;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -28,12 +28,17 @@ public class ValkyrieTestExporter {
 		}
 	}	
 	
-	// Pattern-matched from TorqueSpeedDataExporter
-	public static File exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
+	// Export sim data, graphs and video, if available
+	public static File exportSimData(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info, boolean simSucceeded)
 	{
 		Robot robot = scs.getRobots()[0];
 		TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
 		DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+		
+		if (!simSucceeded) {
+			info += "_FAILED";
+			dataNameSuffix += "_FAILED";
+		}
 
 		// Stop the sim and disable the GUI:
 		scs.stop();

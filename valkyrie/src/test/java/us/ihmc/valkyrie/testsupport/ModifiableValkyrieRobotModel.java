@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.torquespeedcurve;
+package us.ihmc.valkyrie.testsupport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +11,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointPositionLimitMutator;
+import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
+import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointVelocityLimitMutator;
+import us.ihmc.valkyrie.torquespeedcurve.ValkyrieLinkMassMutator;
 
 /* ValkyrieRobotModel with SDF modifications */
 public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {

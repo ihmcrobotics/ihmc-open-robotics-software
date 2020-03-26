@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -45,6 +47,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
@@ -59,6 +62,8 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.pushRecovery.ModifiableValkyriePushRecoveryTest;
+import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotModel;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig;
@@ -103,6 +108,43 @@ public class TorqueSpeedTestRunner {
 
 		return argumentParser;
 	}
+	
+	public static File runPushRecoveryTest(ValkyrieRobotModel robot, ValkyrieTorqueSpeedTestConfig config, File outputPrefixDirectory)
+	{
+		ModifiableValkyriePushRecoveryTest tester = new ModifiableValkyriePushRecoveryTest(robot);
+		String testCase = config.testCase;
+		Vector3D forceDirection = new Vector3D(config.forceVector);
+		boolean testFailed = false;
+		File outputDir = null;
+		
+		java.lang.reflect.Method method = null;
+		try {
+		  method = tester.getClass().getMethod(testCase, Vector3D.class, double.class, double.class, File.class);
+		} catch (SecurityException e) { 
+			System.out.println("Security exception attempt to execute test case " + testCase);
+			System.exit(1);
+		}
+		  catch (NoSuchMethodException e) {
+			System.out.printf("Unable to find method '%s' as a push recovery case", testCase);
+			System.exit(1);
+		}
+		
+		try {
+			outputDir = (File) method.invoke(tester, forceDirection, config.forceMagnitude, config.forceDuration, outputPrefixDirectory);
+
+		} catch (IllegalArgumentException e) {
+			System.out.println("Illegal argument to push recovery case: " + e.toString());
+			System.exit(1);
+		} catch (IllegalAccessException e) {
+			System.out.println("Illegal access exception calling push recovery case: " + e.toString());
+			System.exit(1);			
+		} catch (InvocationTargetException e) {
+			System.out.println("Invocation target exception while calling push recovery case: " + e.toString());
+			System.exit(1);
+		}
+
+		return outputDir;
+	}
 
 	public static void main(String[] args) {
 
@@ -139,13 +181,13 @@ public class TorqueSpeedTestRunner {
 		// recordedFootsteps will be null.
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
 
-		ValkyrieRobotModel robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);
+		ValkyrieRobotModel robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
 
 		// Set walking parameters
 		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
 				robot.getJointMap(),
 				robot.getRobotPhysicalProperties(), 
-				RobotTarget.REAL_ROBOT,
+				robot.getTarget(),
 				config.walkingValues);
 
 
@@ -189,6 +231,10 @@ public class TorqueSpeedTestRunner {
 			case SPEED:
 				outputResultsDirectory = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory);		
 				break;
+			case PUSHRECOVERY:
+				outputResultsDirectory = runPushRecoveryTest(robot, config, outputPrefixDirectory);
+				break;
+				
 			}
 
 		} catch (SimulationExceededMaximumTimeException e) {
