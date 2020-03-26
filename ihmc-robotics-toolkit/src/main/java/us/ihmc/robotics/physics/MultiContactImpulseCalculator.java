@@ -225,6 +225,11 @@ public class MultiContactImpulseCalculator
       robotCalculatorsOutput.forEach(output -> jointVelocityChangeConsumer.accept(output.get()));
    }
 
+   public void readExternalWrenches(double dt, List<ExternalWrenchReader> externalWrenchReaders)
+   {
+      contactCalculators.forEach(calculator -> calculator.readExternalWrench(dt, externalWrenchReaders));
+   }
+
    public double getAlphaMin()
    {
       return alphaMin;

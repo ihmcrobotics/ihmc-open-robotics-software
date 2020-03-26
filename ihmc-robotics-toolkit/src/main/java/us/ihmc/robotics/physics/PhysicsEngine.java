@@ -51,6 +51,11 @@ public class PhysicsEngine
       robotList.add(robot);
    }
 
+   public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
+   {
+      multiRobotPhysicsEnginePlugin.addExternalWrenchReader(externalWrenchReader);
+   }
+
    public boolean initialize()
    {
       if (!initialize)

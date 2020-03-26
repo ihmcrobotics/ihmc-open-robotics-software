@@ -444,6 +444,29 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
    }
 
+   public void readExternalWrench(double dt, List<ExternalWrenchReader> externalWrenchReaders)
+   {
+      externalWrenchReaders.forEach(reader -> readExternalWrench(dt, reader));
+   }
+
+   public void readExternalWrench(double dt, ExternalWrenchReader externalWrenchReader)
+   {
+      Wrench externalWrenchA = new Wrench();
+      externalWrenchA.setIncludingFrame(impulseA.getBodyFrame(), impulseA);
+      externalWrenchA.scale(1.0 / dt);
+      externalWrenchA.changeFrame(bodyFrameA);
+      externalWrenchReader.readExternalWrench(contactingBodyA, externalWrenchA);
+
+      if (rootB != null)
+      {
+         Wrench externalWrenchB = new Wrench();
+         externalWrenchB.setIncludingFrame(impulseB.getBodyFrame(), impulseB);
+         externalWrenchB.scale(1.0 / dt);
+         externalWrenchB.changeFrame(bodyFrameB);
+         externalWrenchReader.readExternalWrench(contactingBodyB, externalWrenchB);
+      }
+   }
+
    @Override
    public double getImpulseUpdate()
    {
