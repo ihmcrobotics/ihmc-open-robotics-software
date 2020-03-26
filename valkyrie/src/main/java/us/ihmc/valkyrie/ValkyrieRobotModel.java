@@ -79,6 +79,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
 
    private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
@@ -214,6 +215,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.sdfDescriptionMutator = sdfDescriptionMutator;
    }
 
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
+   {
+      if (this.valkyrieInitialSetup != null)
+         throw new IllegalArgumentException("Cannot set valkyrieInitialSetup once it has been created.");
+      this.valkyrieInitialSetup = valkyrieInitialSetup;
+   }
+
    public SDFDescriptionMutator getSDFDescriptionMutator()
    {
       if (sdfDescriptionMutator == null)
@@ -328,7 +336,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
-      return new ValkyrieInitialSetup(groundHeight, initialYaw);
+      if (valkyrieInitialSetup == null)
+         valkyrieInitialSetup = new ValkyrieInitialSetup(groundHeight, initialYaw);
+      valkyrieInitialSetup.setInitialGroundHeight(groundHeight);
+      valkyrieInitialSetup.setInitialYaw(initialYaw);
+      return valkyrieInitialSetup;
    }
 
    @Override

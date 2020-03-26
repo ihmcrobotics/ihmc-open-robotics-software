@@ -275,13 +275,26 @@ public class ExperimentalSimulation extends Simulation
                {
                   OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) robot.getJoint(idJoint.getName());
                   ((OneDoFJointBasics) idJoint).setQ(scsJoint.getQ());
+                  ((OneDoFJointBasics) idJoint).setQd(scsJoint.getQD());
                }
                else if (idJoint instanceof SixDoFJointBasics)
                {
                   FloatingJoint scsJoint = (FloatingJoint) robot.getJoint(idJoint.getName());
-                  Pose3DBasics jointPose = ((SixDoFJointBasics) idJoint).getJointPose();
+                  SixDoFJointBasics idSixDoFJoint = (SixDoFJointBasics) idJoint;
+
+                  Pose3DBasics jointPose = idSixDoFJoint.getJointPose();
                   jointPose.getOrientation().set(scsJoint.getQuaternion());
                   scsJoint.getPosition(jointPose.getPosition());
+
+                  FrameVector3D linearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+                  scsJoint.getVelocity(linearVelocity);
+                  linearVelocity.changeFrame(idSixDoFJoint.getFrameAfterJoint());
+                  idSixDoFJoint.getJointTwist().getLinearPart().set(linearVelocity);
+                  idSixDoFJoint.getJointTwist().getAngularPart().set(scsJoint.getAngularVelocityInBody());
+               }
+               else
+               {
+                  throw new UnsupportedOperationException("Unsupported joint type: " + idJoint);
                }
             }
          }
