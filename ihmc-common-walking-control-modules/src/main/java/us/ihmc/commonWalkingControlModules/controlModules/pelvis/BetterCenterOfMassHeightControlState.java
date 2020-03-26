@@ -169,7 +169,6 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
                                                                                                                         defaultOffsetHeightAboveGround,
                                                                                                                         doubleSupportPercentageIn,
                                                                                                                         centerOfMassFrame,
-                                                                                                                        pelvisFrame,
                                                                                                                         soleFrames,
                                                                                                                         yoTime,
                                                                                                                         yoGraphicsListRegistry,
@@ -213,22 +212,22 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if (centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command))
-      {
-         SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
-         se3Trajectory.setSequenceId(command.getSequenceId());
-         statusHelper.registerNewTrajectory(se3Trajectory);
-      }
+//      if (centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command))
+//      {
+//         SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+//         se3Trajectory.setSequenceId(command.getSequenceId());
+//         statusHelper.registerNewTrajectory(se3Trajectory);
+//      }
    }
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      if (centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command))
-      {
-         EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
-         euclideanTrajectory.setSequenceId(command.getSequenceId());
-         statusHelper.registerNewTrajectory(euclideanTrajectory);
-      }
+//      if (centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command))
+//      {
+//         EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+//         euclideanTrajectory.setSequenceId(command.getSequenceId());
+//         statusHelper.registerNewTrajectory(euclideanTrajectory);
+//      }
    }
 
    @Override
