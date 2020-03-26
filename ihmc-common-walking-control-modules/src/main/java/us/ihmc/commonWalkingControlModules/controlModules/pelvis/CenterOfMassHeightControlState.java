@@ -50,7 +50,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    private final YoBoolean controlPelvisHeightInsteadOfCoMHeight = new YoBoolean("controlPelvisHeightInsteadOfCoMHeight", registry);
 
-   private final CoMHeightTimeDerivativesCalculator comHeightTimeDerivativesCalculator = new CoMHeightTimeDerivativesCalculator();
    private final CoMHeightTimeDerivativesSmoother comHeightTimeDerivativesSmoother;
    private final YoDouble desiredCoMHeightFromTrajectory = new YoDouble("desiredCoMHeightFromTrajectory", registry);
    private final YoDouble desiredCoMHeightVelocityFromTrajectory = new YoDouble("desiredCoMHeightVelocityFromTrajectory", registry);
@@ -352,12 +351,16 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final CoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new CoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
    private final CoMHeightTimeDerivativesData finalComHeightData = new CoMHeightTimeDerivativesData("finalComHeightData", registry);
 
-   private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final Twist currentPelvisTwist = new Twist();
 
    private boolean desiredCMPcontainedNaN = false;
+
+   public double getDesiredCoMHeight()
+   {
+      return desiredCoMHeightAfterSmoothing.getDoubleValue();
+   }
 
    @Override
    public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity,
@@ -405,12 +408,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comAcceleration.sub(comVelocity);
       comAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
-      // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-      comXYTimeDerivatives.setCoMXYPosition(comPosition);
-      comXYTimeDerivatives.setCoMVelocity(comVelocity);
-      comXYTimeDerivatives.setCoMAcceleration(comAcceleration);
 
-      comHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comXYTimeDerivatives, comHeightPartialDerivatives);
+      CoMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comVelocity, comAcceleration, comHeightPartialDerivatives);
 
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());

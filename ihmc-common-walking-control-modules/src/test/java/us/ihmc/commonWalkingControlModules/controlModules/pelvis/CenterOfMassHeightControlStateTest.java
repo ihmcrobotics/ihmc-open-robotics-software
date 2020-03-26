@@ -51,6 +51,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -107,8 +108,6 @@ public class CenterOfMassHeightControlStateTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
 
-      YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
-
       SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
       testingParameters.setKeepSCSUp(true);
       testingParameters.setDataBufferSize(2048);
@@ -154,12 +153,10 @@ public class CenterOfMassHeightControlStateTest
       ICPPlannerParameters parameters = new SmoothCMPPlannerParameters(1.0);
       SmoothCMPBasedICPPlanner smoothCMPBasedICPPlanner = new SmoothCMPBasedICPPlanner(10.0, feetPolygons, soleFrames, contactableFeet, null, yoTime,
                                                                                        registry, yoGraphicsListRegistry, 9.81, parameters);
-      smoothCMPBasedICPPlanner.setOmega0(omega0);
-      smoothCMPBasedICPPlanner.setFinalTransferDuration(1.0);
-      smoothCMPBasedICPPlanner.holdCurrentICP(new FramePoint3D(worldFrame, 0, 0, 0.785));
-//      smoothCMPBasedICPPlanner.initializeForStanding(0.0);
+
 
       YoFramePoint3D desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
+      YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
       YoGraphicPosition desiredICPGraphic = new YoGraphicPosition("desiredICPGraphic", desiredICPPosition, 0.05, YoAppearance.Black(), GraphicType.SOLID_BALL);
 
@@ -183,6 +180,11 @@ public class CenterOfMassHeightControlStateTest
 
       scs.maximizeMainWindow();
 
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(true);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+      simulationOverheadPlotterFactory.createOverheadPlotter();
+
       scs.startOnAThread();
 
       FootstepTestHelper footstepTestTools = new FootstepTestHelper(contactableFeet);
@@ -193,16 +195,28 @@ public class CenterOfMassHeightControlStateTest
       double dsRatio = 0.6;
       double stepTime = 2.0;
 
-
-      Footstep transferFromFootstep = footsteps.remove(0);
-      Footstep previousFootstep = transferFromFootstep;
-
-      Footstep transferToFootstep;
-
-      while (footsteps.size() > 2)
+      smoothCMPBasedICPPlanner.setOmega0(omega0);
+      smoothCMPBasedICPPlanner.setFinalTransferDuration(1.0);
+      smoothCMPBasedICPPlanner.setDefaultPhaseTimes(0.8, 1.2);
+      smoothCMPBasedICPPlanner.holdCurrentICP(new FramePoint3D());
+      smoothCMPBasedICPPlanner.initializeForStanding(yoTime.getDoubleValue());
+      for (double standingTIme = 0.0; standingTIme < 1.0; standingTIme += dt)
       {
+         smoothCMPBasedICPPlanner.compute(standingTIme);
 
-         transferFromFootstep = previousFootstep;
+         smoothCMPBasedICPPlanner.getDesiredCapturePointPosition(desiredICPPosition);
+         smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
+         dummyDesiredICPVelocity.set(desiredICPVelocity);
+
+         FramePoint3D comPosition = new FramePoint3D();
+         floatingJoint.getJointPose().getPosition().setZ(comPosition.getZ());
+         floatingJoint.updateFramesRecursively();
+      }
+
+      Footstep previousFootstep = footsteps.remove(0);
+
+      while (footsteps.size() > 1)
+      {
          smoothCMPBasedICPPlanner.clearPlan();
          for (int i = 0; i < Math.min(3, footsteps.size()); i++)
          {
@@ -211,96 +225,83 @@ public class CenterOfMassHeightControlStateTest
             FootstepShiftFractions fractions = new FootstepShiftFractions();
             smoothCMPBasedICPPlanner.addFootstepToPlan(footsteps.get(i), timing, fractions);
          }
-         transferToFootstep = footsteps.remove(0);
+         Footstep thisFootstep = footsteps.remove(0);
 
-         previousFootstep = transferToFootstep;
+         // This is likely wrong.
+         FootSpoof trailingFootLocation = contactableFeet.get(previousFootstep.getRobotSide());
+         trailingFootLocation.setPose(previousFootstep.getFootstepPose());
 
-         FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
-         FramePoint3D transferFromFootFramePoint = new FramePoint3D();
-         transferFromFootstep.getPosition(transferFromFootFramePoint);
-         FrameQuaternion transferFromFootOrientation = new FrameQuaternion();
-         transferFromFootstep.getOrientation(transferFromFootOrientation);
-         transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
-
-         FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
-         FramePoint3D transferToFootFramePoint = new FramePoint3D();
-         transferToFootstep.getPosition(transferToFootFramePoint);
-         FrameQuaternion transferToFootOrientation = new FrameQuaternion();
-         transferToFootstep.getOrientation(transferToFootOrientation);
-         transferToFootSpoof.setPose(transferToFootFramePoint, transferToFootOrientation);
+//         FootSpoof leadingFootLocation = contactableFeet.get(thisFootstep.getRobotSide());
+//         leadingFootLocation.setPose(thisFootstep.getFootstepPose());
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-         transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-         transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+         transferToAndNextFootstepsData.setTransferFromFootstep(previousFootstep);
+         transferToAndNextFootstepsData.setTransferToFootstep(thisFootstep);
          transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
          transferToAndNextFootstepsData.setNextFootstep(null);
 
-         transferToAndNextFootstepsData.setTransferToSide(transferToFootstep.getRobotSide());
+         transferToAndNextFootstepsData.setTransferToSide(thisFootstep.getRobotSide());
 
-         RobotSide supportLeg = transferFromFootstep.getRobotSide();
-         supportLegFrameSide.set(supportLeg);
 
          // Initialize at the beginning of single support.
          heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
-
-         scs.tickAndUpdate();
-
+         smoothCMPBasedICPPlanner.setTransferToSide(thisFootstep.getRobotSide().getOppositeSide());
          smoothCMPBasedICPPlanner.initializeForTransfer(time);
 
-         int numberOfTicks = (int) (stepTime / dt);
-         for (int i = 0; i < numberOfTicks; i++)
+         double transferDuration = dsRatio * stepTime;
+         double swingDuration = (1.0 - dsRatio) * stepTime;
+
+         for (double timeInState = 0.0; timeInState < transferDuration; timeInState += dt, time += dt)
          {
-
-            if (i == 0.35 * numberOfTicks)
-            {
-               // Initialize again at the beginning of double support.
-               heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
-               supportLeg = null;
-            }
-            else if (i == 0.65 * numberOfTicks)
-            {
-               smoothCMPBasedICPPlanner.initializeForSingleSupport(time);
-               supportLeg = transferToFootstep.getRobotSide();
-            }
-
-            time += dt;
             robot.setTime(time);
 
-            FramePoint3DReadOnly transferFromFootPosition = transferFromFootstep.getFootstepPose().getPosition();
-            FramePoint3DReadOnly transferToFootPosition = transferToFootstep.getFootstepPose().getPosition();
-
-            FramePoint3D queryPosition = new FramePoint3D();
-
-            double alpha = ((double) i) / ((double) (numberOfTicks - 1));
-
-            queryPosition.interpolate(transferFromFootPosition, transferToFootPosition, alpha);
-
-            floatingJoint.getJointPose().getPosition().setX(queryPosition.getX());
-            floatingJoint.getJointPose().getPosition().setY(queryPosition.getY());
-            floatingJoint.updateFramesRecursively();
-
-            boolean switchSupportSides = random.nextBoolean();
-            if (switchSupportSides)
-            {
-               supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
-               heightControlState.setSupportLeg(supportLegFrameSide.getEnumValue());
-            }
-
-            boolean isInDoubleSupport = supportLeg == null;
-
             smoothCMPBasedICPPlanner.compute(time);
-            // FIXME should be CoM
             smoothCMPBasedICPPlanner.getDesiredCapturePointPosition(desiredICPPosition);
             smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
-            dummyDesiredICPVelocity.set(desiredICPVelocity);
-            heightControlState.computeDesiredCoMHeightAcceleration(dummyDesiredICPVelocity, isInDoubleSupport, omega0, false, null);
+            smoothCMPBasedICPPlanner.getDesiredCenterOfMassPosition(desiredCoMPosition);
 
-            FramePoint3D comPosition = new FramePoint3D();
-            floatingJoint.getJointPose().getPosition().setZ(comPosition.getZ());
+            floatingJoint.getJointPose().getPosition().setX(desiredCoMPosition.getX());
+            floatingJoint.getJointPose().getPosition().setY(desiredCoMPosition.getY());
+            floatingJoint.updateFramesRecursively();
+
+            // FIXME should be CoM
+            dummyDesiredICPVelocity.set(desiredICPVelocity);
+            heightControlState.computeDesiredCoMHeightAcceleration(dummyDesiredICPVelocity, true, omega0, false, null);
+
+            floatingJoint.getJointPose().getPosition().setZ(heightControlState.getDesiredCoMHeight());
             floatingJoint.updateFramesRecursively();
 
             scs.tickAndUpdate();
          }
+
+         heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
+         smoothCMPBasedICPPlanner.setSupportLeg(thisFootstep.getRobotSide().getOppositeSide());
+         smoothCMPBasedICPPlanner.initializeForSingleSupport(time);
+
+         for (double timeInState = 0.0; timeInState < swingDuration; timeInState += dt, time += dt)
+         {
+            robot.setTime(time);
+
+            smoothCMPBasedICPPlanner.compute(time);
+            smoothCMPBasedICPPlanner.getDesiredCapturePointPosition(desiredICPPosition);
+            smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
+            smoothCMPBasedICPPlanner.getDesiredCenterOfMassPosition(desiredCoMPosition);
+
+            floatingJoint.getJointPose().getPosition().setX(desiredCoMPosition.getX());
+            floatingJoint.getJointPose().getPosition().setY(desiredCoMPosition.getY());
+            floatingJoint.updateFramesRecursively();
+
+            // FIXME should be CoM
+            dummyDesiredICPVelocity.set(desiredICPVelocity);
+            heightControlState.computeDesiredCoMHeightAcceleration(dummyDesiredICPVelocity, false, omega0, false, null);
+
+            floatingJoint.getJointPose().getPosition().setZ(heightControlState.getDesiredCoMHeight());
+            floatingJoint.updateFramesRecursively();
+
+            scs.tickAndUpdate();
+         }
+
+         previousFootstep = thisFootstep;
       }
 
       scs.gotoInPointNow();
