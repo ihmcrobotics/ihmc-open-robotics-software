@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.listeners;
+package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
