@@ -24,7 +24,6 @@ public class PawStepPlannerCommunicationProperties
       statusMessages.add(FootstepPlanningToolboxOutputStatus.class);
       statusMessages.add(FootstepPlannerStatusMessage.class);
       statusMessages.add(BodyPathPlanMessage.class);
-      statusMessages.add(BodyPathPlanStatisticsMessage.class);
       statusMessages.add(FootstepNodeDataListMessage.class);
       statusMessages.add(FootstepPlannerOccupancyMapMessage.class);
 

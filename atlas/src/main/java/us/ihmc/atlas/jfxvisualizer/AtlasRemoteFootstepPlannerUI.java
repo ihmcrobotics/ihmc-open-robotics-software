@@ -9,19 +9,17 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.footstepPlanAndProcessModule.FootstepPlanAndProcessModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -76,12 +74,20 @@ public class AtlasRemoteFootstepPlannerUI extends Application
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
 
          // Automatically send graph data over messager
-         planningModule.addStatusCallback(status ->
-                                          {
-                                             if (status.getResult().terminalResult())
-                                                messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
-                                                                       Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
-                                          });
+         planningModule.addStatusCallback(status -> handleMessagerCallbacks(planningModule, status));
+      }
+   }
+
+   private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
+   {
+      if (status.getResult().terminalResult())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
    }
 
