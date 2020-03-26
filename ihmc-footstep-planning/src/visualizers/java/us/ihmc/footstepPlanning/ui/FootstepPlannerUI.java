@@ -235,6 +235,7 @@ public class FootstepPlannerUI
       occupancyMapRenderer.start();
       footstepPlannerLogRenderer.start();
       new FootPoseFromMidFootUpdater(messager).start();
+      new FootstepCompletionListener(messager).start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());

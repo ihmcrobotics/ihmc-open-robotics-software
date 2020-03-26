@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -135,31 +135,17 @@ public class FootstepPlanningModuleLauncher
                                                });
 
       // planner listener
-      long updateFrequency = 500;
-      IHMCROS2Publisher<FootstepNodeDataListMessage> plannerNodeDataPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                          FootstepNodeDataListMessage.class,
-                                                                                                          publisherTopicNameGenerator);
       IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                               FootstepPlannerOccupancyMapMessage.class,
                                                                                                               publisherTopicNameGenerator);
-
-      RosBasedPlannerListener plannerListener = new RosBasedPlannerListener(plannerNodeDataPublisher,
-                                                                            occupancyMapPublisher,
-                                                                            footstepPlanningModule.getSnapper(),
-                                                                            updateFrequency);
-      footstepPlanningModule.getChecker().setListener(plannerListener);
-
-      footstepPlanningModule.addRequestCallback(request -> plannerListener.reset());
-      footstepPlanningModule.addIterationCallback(iterationData ->
-                                                  {
-                                                     if (iterationData.getParentNode() == null)
-                                                        return;
-                                                     for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
-                                                        plannerListener.addNode(iterationData.getValidChildNodes().get(i), iterationData.getParentNode());
-                                                     for (int i = 0; i < iterationData.getInvalidChildNodes().size(); i++)
-                                                        plannerListener.addNode(iterationData.getInvalidChildNodes().get(i), iterationData.getParentNode());
-                                                     plannerListener.tickAndUpdate();
-                                                  });
+      FootstepPlannerOccupancyMapAssembler occupancyMapAssembler = new FootstepPlannerOccupancyMapAssembler();
+      footstepPlanningModule.addRequestCallback(request -> occupancyMapAssembler.reset());
+      footstepPlanningModule.addIterationCallback(occupancyMapAssembler);
+      footstepPlanningModule.addStatusCallback(status ->
+                                               {
+                                                  occupancyMapPublisher.publish(occupancyMapAssembler.getOccupancyMap().getAsMessage());
+                                                  occupancyMapAssembler.getOccupancyMap().clear();
+                                               });
 
       // status publisher
       IHMCROS2Publisher<FootstepPlannerStatusMessage> statusPublisher = ROS2Tools.createPublisher(ros2Node,
