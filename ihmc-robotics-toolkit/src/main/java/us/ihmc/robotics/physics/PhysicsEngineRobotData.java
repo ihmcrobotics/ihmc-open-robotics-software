@@ -71,6 +71,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
                                                                                                contactConstraintCalculatorRegistry);
             if (yoGraphicsListRegistry != null)
                calculator.setupGraphics(yoGraphicsListRegistry);
+            calculator.clear();
             return calculator;
          }
       });
