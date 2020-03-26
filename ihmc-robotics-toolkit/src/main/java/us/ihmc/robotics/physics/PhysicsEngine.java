@@ -83,9 +83,6 @@ public class PhysicsEngine
       multiRobotPhysicsEnginePlugin.doScience(dt, gravity);
       integrationMethod.integrate(dt);
 
-      for (PhysicsEngineRobotData robot : robotList)
-         robot.updateFrames();
-
       for (int i = 0; i < robotList.size(); i++)
       {
          PhysicsEngineRobotData robot = robotList.get(i);
