@@ -7,12 +7,15 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.physics.*;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.*;
@@ -27,8 +30,11 @@ public class ExperimentalSimulation extends Simulation
    private static final long serialVersionUID = -3940628684026932009L;
 
    private final PhysicsEngine physicsEngine = new PhysicsEngine();
+   private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
 
    private Vector3DReadOnly gravity;
+
+   private final List<RigidBodyBasics> rootBodies = new ArrayList<>();
 
    public ExperimentalSimulation(Robot[] robotArray, int dataBufferSize)
    {
@@ -43,6 +49,7 @@ public class ExperimentalSimulation extends Simulation
    public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidable)
    {
       physicsEngine.addEnvironmentCollidables(environmentCollidable);
+      physicsEngine.addExternalWrenchReader(externalWrenchReader);
    }
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
@@ -51,7 +58,9 @@ public class ExperimentalSimulation extends Simulation
 
       MultiBodySystemStateWriter controllerOutputWriter = createControllerOutputWriter(scsRobot);
       MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+      rootBodies.add(rootBody);
       physicsEngine.addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      externalWrenchReader.addRobot(rootBody, scsRobot);
    }
 
    @Override
@@ -65,10 +74,18 @@ public class ExperimentalSimulation extends Simulation
             robot.doControllers();
          }
 
+         externalWrenchReader.initialize();
          physicsEngine.simulate(getDT(), gravity);
+         externalWrenchReader.updateSCSGroundContactPoints();
 
-         for (Robot robot : getRobots())
+         Robot[] robots = getRobots();
+
+         for (int i = 0; i < robots.length; i++)
+         {
+            Robot robot = robots[i];
+            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
             robot.getYoTime().add(getDT());
+         }
       }
    }
 
@@ -275,5 +292,28 @@ public class ExperimentalSimulation extends Simulation
             allIDJoints = multiBodySystem.getAllJoints();
          }
       };
+   }
+
+   private static void updateGroundContactPointsVelocity(RigidBodyReadOnly rootBody, Robot scsRobot)
+   {
+      ArrayList<GroundContactPoint> scsGroundContactPoints = scsRobot.getAllGroundContactPoints();
+      JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
+      FramePoint3D position = new FramePoint3D();
+      FrameVector3D linearVelocity = new FrameVector3D();
+      FrameVector3D angularVelocity = new FrameVector3D();
+
+      for (GroundContactPoint scsGroundContactPoint : scsGroundContactPoints)
+      {
+         Joint scsJoint = scsGroundContactPoint.getParentJoint();
+         scsGroundContactPoint.getOffset(position);
+         JointReadOnly joint = Stream.of(allJoint).filter(candidate -> candidate.getName().equals(scsJoint.getName())).findFirst().get();
+         position.setReferenceFrame(joint.getFrameAfterJoint());
+         TwistReadOnly twistOfFrame = joint.getFrameAfterJoint().getTwistOfFrame();
+         twistOfFrame.getLinearVelocityAt(position, linearVelocity);
+         linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+         angularVelocity.setMatchingFrame(twistOfFrame.getAngularPart());
+         scsGroundContactPoint.setVelocity(linearVelocity);
+         scsGroundContactPoint.setAngularVelocity(angularVelocity);
+      }
    }
 }
