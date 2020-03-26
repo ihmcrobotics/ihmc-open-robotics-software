@@ -197,14 +197,15 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       pointA.setIncludingFrame(collisionResult.getCollisionData().getPointOnA());
       pointA.changeFrame(bodyFrameA);
 
-      computeContactPointVelocity(dt, rootA, contactingBodyA, forwardDynamicsCalculatorA.getAccelerationProvider(), pointA, velocityNoImpulseA);
+      computeContactPointVelocity(dt, rootA, contactingBodyA, forwardDynamicsCalculatorA.getAccelerationProvider(false), pointA, velocityNoImpulseA);
       velocityNoImpulseA.changeFrame(contactFrame);
+
+      pointB.setIncludingFrame(collisionResult.getCollisionData().getPointOnB());
 
       if (rootB != null)
       {
-         pointB.setIncludingFrame(collisionResult.getCollisionData().getPointOnB());
          pointB.changeFrame(bodyFrameB);
-         computeContactPointVelocity(dt, rootB, contactingBodyB, forwardDynamicsCalculatorB.getAccelerationProvider(), pointB, velocityNoImpulseB);
+         computeContactPointVelocity(dt, rootB, contactingBodyB, forwardDynamicsCalculatorB.getAccelerationProvider(false), pointB, velocityNoImpulseB);
          velocityNoImpulseB.changeFrame(contactFrame);
       }
 
@@ -234,7 +235,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       // First we evaluate M^-1 that is the inverse of the apparent inertia considering both bodies interacting in this contact.
       computeApparentInertiaInverse(contactingBodyA, responseCalculatorA, rigidBodyTwistModifierA, jointTwistModifierA, inverseApparentInertiaA);
 
-      if (forwardDynamicsCalculatorB != null)
+      if (rootB != null)
       {
          computeApparentInertiaInverse(contactingBodyB, responseCalculatorB, rigidBodyTwistModifierB, jointTwistModifierB, inverseApparentInertiaB);
          CommonOps.add(inverseApparentInertiaA, inverseApparentInertiaB, M_inv);
@@ -245,13 +246,14 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
    }
 
-   static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
-                                           RigidBodyAccelerationProvider accelerationProvider, FramePoint3DReadOnly contactPoint,
-                                           FrameVector3DBasics linearVelocityToPack)
+   public static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
+                                                  RigidBodyAccelerationProvider noVelocityRigidBodyAccelerationProvider, FramePoint3DReadOnly contactPoint,
+                                                  FrameVector3DBasics linearVelocityToPack)
    {
       MovingReferenceFrame bodyFixedFrame = contactingBody.getBodyFixedFrame();
 
-      SpatialAccelerationReadOnly contactingBodyAcceleration = accelerationProvider.getRelativeAcceleration(rootBody, contactingBody);
+      // Using acceleration relative to the root to avoid integrating the gravitational acceleration.
+      SpatialAccelerationReadOnly contactingBodyAcceleration = noVelocityRigidBodyAccelerationProvider.getRelativeAcceleration(rootBody, contactingBody);
       contactingBodyAcceleration.getLinearAccelerationAt(null, contactPoint, linearVelocityToPack);
       linearVelocityToPack.scale(dt);
       double vx = linearVelocityToPack.getX();
@@ -415,12 +417,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       inertiaMatrixToPack.reshape(3, 3);
       RigidBodyTwistProvider twistChangeProvider = calculator.getTwistChangeProvider();
 
-      testImpulse.setBodyFrame(body.getBodyFixedFrame());
-      testImpulse.setReferenceFrame(contactFrame);
-
       for (int axis = 0; axis < 3; axis++)
       {
-         testImpulse.set(null, Axis.values[axis], EuclidCoreTools.origin3D);
+         testImpulse.setIncludingFrame(body.getBodyFixedFrame(), contactFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
+
          if (!calculator.applyRigidBodyImpulse(body, testImpulse))
             throw new IllegalStateException("Something went wrong with the response calculator");
 
@@ -556,6 +556,11 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    public FramePoint3DReadOnly getPointB()
    {
       return pointB;
+   }
+
+   public FrameVector3DReadOnly getVelocityRelative()
+   {
+      return velocityRelative;
    }
 
    public FrameVector3DReadOnly getVelocityNoImpulseA()
