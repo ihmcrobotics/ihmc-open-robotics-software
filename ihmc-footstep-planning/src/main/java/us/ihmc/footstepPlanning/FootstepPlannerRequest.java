@@ -66,6 +66,12 @@ public class FootstepPlannerRequest
    private double goalYawProximity;
 
    /**
+    * Specifies the desired robot heading.
+    * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+    */
+   private FootstepPlanHeading desiredHeading;
+
+   /**
     * Planner timeout in seconds. If {@link #maximumIterations} is set also, the planner terminates whenever either is reached
     */
    private double timeout;
@@ -112,6 +118,7 @@ public class FootstepPlannerRequest
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
+      desiredHeading = FootstepPlanHeading.FORWARD;
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
@@ -210,6 +217,11 @@ public class FootstepPlannerRequest
       this.goalYawProximity = goalYawProximity;
    }
 
+   public void setDesiredHeading(FootstepPlanHeading desiredHeading)
+   {
+      this.desiredHeading = desiredHeading;
+   }
+
    public void setTimeout(double timeout)
    {
       this.timeout = timeout;
@@ -285,6 +297,11 @@ public class FootstepPlannerRequest
       return goalYawProximity;
    }
 
+   public FootstepPlanHeading getDesiredHeading()
+   {
+      return desiredHeading;
+   }
+
    public double getTimeout()
    {
       return timeout;
@@ -339,6 +356,10 @@ public class FootstepPlannerRequest
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
 
+      FootstepPlanHeading desiredHeading = FootstepPlanHeading.fromByte(requestPacket.getRequestedPathHeading());
+      if (desiredHeading != null)
+         setDesiredHeading(desiredHeading);
+
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
       {
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
@@ -363,6 +384,7 @@ public class FootstepPlannerRequest
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
+      requestPacket.setRequestedPathHeading(getDesiredHeading().toByte());
       requestPacket.setTimeout(getTimeout());
       requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
@@ -399,6 +421,7 @@ public class FootstepPlannerRequest
       this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
+      this.desiredHeading = other.desiredHeading;
       this.timeout = other.timeout;
       this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;
