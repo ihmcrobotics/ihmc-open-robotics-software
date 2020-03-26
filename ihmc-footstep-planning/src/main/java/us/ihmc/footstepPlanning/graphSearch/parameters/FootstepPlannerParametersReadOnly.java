@@ -45,6 +45,22 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Returns the ideal step width when "shuffling" sideways.
+    */
+   default double getIdealSideStepWidth()
+   {
+      return get(idealSideStepWidth);
+   }
+
+   /**
+    * Returns the ideal length when walking backwards. This value is negative.
+    */
+   default double getIdealBackStepLength()
+   {
+      return get(idealBackStepLength);
+   }
+
+   /**
     * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
     * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
     * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds

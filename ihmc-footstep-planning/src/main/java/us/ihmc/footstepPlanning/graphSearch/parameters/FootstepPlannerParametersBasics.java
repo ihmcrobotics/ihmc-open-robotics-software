@@ -165,6 +165,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.idealFootstepLength, idealFootstepLength);
    }
 
+   default void setIdealSideStepWidth(double idealSideStepWidth)
+   {
+      set(FootstepPlannerParameterKeys.idealSideStepWidth, idealSideStepWidth);
+   }
+
+   default void setIdealBackStepLength(double idealBackStepLength)
+   {
+      set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
+   }
+
    default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
    {
       set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
@@ -351,6 +361,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != noValue)
          setIdealFootstepLength(parametersPacket.getIdealFootstepLength());
+      if (parametersPacket.getIdealSideStepWidth() != noValue)
+         setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
+      if (parametersPacket.getIdealBackStepLength() != noValue)
+         setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
       if (parametersPacket.getWiggleInsideDelta() != noValue)
          setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
       if (parametersPacket.getMaximumStepReach() != noValue)

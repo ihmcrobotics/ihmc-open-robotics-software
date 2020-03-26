@@ -14,8 +14,10 @@ public class FootstepPlannerParameterKeys
    public static final BooleanStoredPropertyKey checkForPathCollisions                     = keys.addBooleanKey("Check for path collisions", true);
    public static final DoubleStoredPropertyKey idealFootstepWidth                         = keys.addDoubleKey ("Ideal footstep width", 0.22);
    public static final DoubleStoredPropertyKey idealFootstepLength                        = keys.addDoubleKey ("Ideal footstep length", 0.3);
+   public static final DoubleStoredPropertyKey idealSideStepWidth                         = keys.addDoubleKey ("Ideal side step width", 0.35);
+   public static final DoubleStoredPropertyKey idealBackStepLength                         = keys.addDoubleKey ("Ideal back step length", -0.2);
    public static final DoubleStoredPropertyKey maxStepReach                               = keys.addDoubleKey ("Max step reach", 0.45);
-   public static final DoubleStoredPropertyKey  minStepLength                              = keys.addDoubleKey ("Min step length", -0.1);
+   public static final DoubleStoredPropertyKey  minStepLength                              = keys.addDoubleKey ("Min step length", -0.25);
    public static final DoubleStoredPropertyKey  minStepYaw                                 = keys.addDoubleKey ("Min step yaw", -0.3);
    public static final DoubleStoredPropertyKey maxStepYaw                                 = keys.addDoubleKey ("Max step yaw", 0.6);
    public static final DoubleStoredPropertyKey  minStepWidth                               = keys.addDoubleKey ("Min step width", 0.15);
@@ -76,5 +78,5 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  longStepWeight                             = keys.addDoubleKey ("Long step weight", 0.2);
    public static final DoubleStoredPropertyKey bodyPathViolationWeight                         = keys.addDoubleKey("Body path violation weight", 30.0);
    public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
-   public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.2);
+   public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.35);
 }
