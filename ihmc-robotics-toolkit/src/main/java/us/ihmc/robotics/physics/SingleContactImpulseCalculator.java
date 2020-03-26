@@ -31,6 +31,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialImpulse;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
 
@@ -46,7 +47,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private double springConstant = 0.1;
+   private double springConstant = 0.0;
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
