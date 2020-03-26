@@ -66,6 +66,7 @@ public class SingleContactImpulseCalculatorTest
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
+         impulseCalculator.finalizeImpulse();
          updateVelocities(impulseCalculator, dt);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
@@ -115,7 +116,7 @@ public class SingleContactImpulseCalculatorTest
          {
             throw new AssertionFailedError("Failed at iteration " + i, e);
          }
-
+         impulseCalculator.finalizeImpulse();
          updateVelocities(impulseCalculator, dt);
 
          double normalVelocityMagnitudePreImpulse = contactLinearVelocityPreImpulse.dot(collisionResult.getCollisionAxisForA());
