@@ -396,6 +396,14 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       isFirstUpdate = false;
    }
 
+   @Override
+   public void finalizeImpulse()
+   {
+      responseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
+      if (rootB != null)
+         responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
+   }
+
    private final SpatialImpulse testImpulse = new SpatialImpulse();
    private final Twist testTwist = new Twist();
 
@@ -519,12 +527,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       if (!isConstraintActive())
          return null;
 
-      DenseMatrix64F response = responseCalculatorA.propagateImpulse();
-
-      if (response != null)
-         return response;
-
-      responseCalculatorA.applyRigidBodyImpulse(contactingBodyA, impulseA);
       return responseCalculatorA.propagateImpulse();
    }
 
@@ -533,12 +535,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       if (rootB == null || !isConstraintActive())
          return null;
 
-      DenseMatrix64F response = responseCalculatorB.propagateImpulse();
-
-      if (response != null)
-         return response;
-
-      responseCalculatorB.applyRigidBodyImpulse(contactingBodyB, impulseB);
       return responseCalculatorB.propagateImpulse();
    }
 
