@@ -83,7 +83,6 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
-   private final OptionalFactoryField<Boolean> useExperimentalSimulationPhysicsEngine = new OptionalFactoryField<>("useExperimentalSimulationPhysicsEngine");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -160,7 +159,7 @@ public class AvatarSimulationFactory
          commonAvatarEnvironment.get().createAndSetContactControllerToARobot();
       }
 
-      if (useExperimentalSimulationPhysicsEngine.hasValue() && useExperimentalSimulationPhysicsEngine.get())
+      if (scsInitialSetup.get().getUseExperimentalPhysicsEngine())
       {
          ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
                                                                                     simulationConstructionSetParameters.getDataBufferSize());
@@ -665,10 +664,5 @@ public class AvatarSimulationFactory
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
-   }
-
-   public void setUseExperimentalSimulationPhysicsEngine(boolean useExperimentalSimulationPhysicsEngine)
-   {
-      this.useExperimentalSimulationPhysicsEngine.set(useExperimentalSimulationPhysicsEngine);
    }
 }
