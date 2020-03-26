@@ -15,6 +15,18 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
+      const octet FOOTSTEP_PLAN_HEADING_FORWARD =
+      0;
+
+      const octet FOOTSTEP_PLAN_HEADING_BACKWARD =
+      1;
+
+      const octet FOOTSTEP_PLAN_HEADING_LEFT =
+      2;
+
+      const octet FOOTSTEP_PLAN_HEADING_RIGHT =
+      3;
+
       const long NO_PLAN_ID =
       -1;
 
@@ -73,15 +85,20 @@ module controller_msgs
          */
         sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
         /**
-         * Acceptable xy distance from the given goal for the planner to terminate
+         * (In beta) acceptable xy distance from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_distance_proximity;
         /**
-         * Acceptable yaw offset from the given goal for the planner to terminate
+         * (In beta) acceptable yaw offset from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_yaw_proximity;
+        /**
+         * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+         */
+        @defaultValue(value=255)
+        octet requested_path_heading;
         /**
          * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
          */
