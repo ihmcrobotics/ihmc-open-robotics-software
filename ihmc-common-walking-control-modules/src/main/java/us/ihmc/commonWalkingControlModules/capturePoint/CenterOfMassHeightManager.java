@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -46,7 +43,8 @@ public class CenterOfMassHeightManager
    private final YoEnum<PelvisHeightControlMode> requestedState;
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
-   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+//   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
+   private final BetterCenterOfMassHeightControlState betterCenterOfMassHeightControlState;
 
    /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
    private final PelvisHeightControlState pelvisHeightControlState;
@@ -72,14 +70,16 @@ public class CenterOfMassHeightManager
          YoDouble yoTime = controllerToolbox.getYoTime();
          String namePrefix = getClass().getSimpleName();
          requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
-         centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+//         centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+         betterCenterOfMassHeightControlState = new BetterCenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
          stateMachine = setupStateMachine(namePrefix, yoTime);
       }
       else
       {
          requestedState = null;
-         centerOfMassHeightControlState = null;
+//         centerOfMassHeightControlState = null;
+         betterCenterOfMassHeightControlState = null;
          stateMachine = null;
       }
    }
@@ -89,7 +89,7 @@ public class CenterOfMassHeightManager
       StateMachineFactory<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> factory = new StateMachineFactory<>(PelvisHeightControlMode.class);
       factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
 
-      factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
+      factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, betterCenterOfMassHeightControlState);
       factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
 
       for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
@@ -105,7 +105,8 @@ public class CenterOfMassHeightManager
       if (useStateMachine)
       {
          stateMachine.resetToInitialState();
-         centerOfMassHeightControlState.initialize();
+//         centerOfMassHeightControlState.initialize();
+         betterCenterOfMassHeightControlState.initialize();
       }
 
       pelvisHeightControlState.initialize();
@@ -155,7 +156,8 @@ public class CenterOfMassHeightManager
       if (stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
-         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+//         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
+         betterCenterOfMassHeightControlState.initializeDesiredHeightToCurrent();
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
    }
@@ -202,7 +204,8 @@ public class CenterOfMassHeightManager
             return;
          }
 
-         centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+//         centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+         betterCenterOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
       else
@@ -233,7 +236,8 @@ public class CenterOfMassHeightManager
             return;
          }
 
-         centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+//         centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+         betterCenterOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
       else
@@ -275,7 +279,8 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-         centerOfMassHeightControlState.setSupportLeg(supportLeg);
+//         centerOfMassHeightControlState.setSupportLeg(supportLeg);
+         betterCenterOfMassHeightControlState.setSupportLeg(supportLeg);
       }
    }
 
@@ -283,7 +288,8 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+//         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+         betterCenterOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
       }
    }
 
@@ -305,7 +311,7 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-         return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
+         return betterCenterOfMassHeightControlState.hasBeenInitializedWithNextStep();
       }
       else
       {
@@ -361,7 +367,8 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-         centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+//         centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+         betterCenterOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
       }
       pelvisHeightControlState.setGains(userModeComHeightGains);
    }
