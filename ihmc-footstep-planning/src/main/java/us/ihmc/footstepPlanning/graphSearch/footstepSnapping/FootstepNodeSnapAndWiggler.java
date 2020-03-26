@@ -8,8 +8,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -23,7 +21,6 @@ import java.util.function.DoubleSupplier;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    private final BooleanSupplier wiggleIntoConvexHullOfPlanarRegions;
@@ -59,11 +56,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       this.maximumXYWiggleDistance = maximumXYWiggleDistance;
       this.maximumYawWiggle = maximumYawWiggle;
       this.maximumZPenetrationOnValleyRegions = maximumZPenetrationOnValleyRegions;
-   }
-
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      listeners.add(listener);
    }
 
    @Override
@@ -220,7 +212,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   if (zPenetration > maximumZPenetrationOnValleyRegions.getAsDouble())
                   {
-                     rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;
                   }
                }
@@ -229,11 +220,5 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       return false;
-   }
-
-   private void rejectNode(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
-   {
-      for (BipedalFootstepPlannerListener listener : listeners)
-         listener.rejectNode(nodeToExpand, null, reason);
    }
 }
