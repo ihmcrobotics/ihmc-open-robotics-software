@@ -21,10 +21,7 @@ import java.util.function.BiPredicate;
 public class IdealStepCalculator
 {
    // TODO extract these to parameters once they're stable
-   private static final double distanceToleranceToMatchHeading = 0.3;
-   private static final double yawToleranceToTurnTowardsGoal = 0.35;
    private static final double idealStepLengthWhenUpOrDownMultiplier = 0.7;
-   private static final double upOrDownStepThreshold = 0.2;
    private static final double maxAdjustmentTowardsPath = 0.05;
 
    private final HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
@@ -99,7 +96,7 @@ public class IdealStepCalculator
       {
          desiredYaw = goalMidFootPose.getYaw();
       }
-      else if (distanceFromPathSquared < MathTools.square(distanceToleranceToMatchHeading))
+      else if (distanceFromPathSquared < MathTools.square(parameters.getDistanceFromPathTolerance()))
       {
          desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading.getYawOffset());
       }
@@ -123,7 +120,7 @@ public class IdealStepCalculator
          // turn in place at goal
          return turnInPlaceStep(stanceNode, goalMidFootPose.getPosition(), stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
       }
-      else if (Math.abs(deltaYaw) > yawToleranceToTurnTowardsGoal)
+      else if (Math.abs(deltaYaw) > parameters.getDeltaYawFromReferenceTolerance())
       {
          // turn in place towards goal
          return turnInPlaceStep(stanceNode, midFootPoint, stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
@@ -137,7 +134,7 @@ public class IdealStepCalculator
          double alphaLookAhead = MathTools.clamp(alphaMidFoot +  parameters.getIdealFootstepLength() / pathLength, 0.0, 1.0);
          bodyPathPlanHolder.getPointAlongPath(alphaLookAhead, projectionPose);
          double nextStepHeight = projectionPose.getZ();
-         double idealStepLengthMultiplier = Math.abs(nextStepHeight - previousStepHeight) > upOrDownStepThreshold ? idealStepLengthWhenUpOrDownMultiplier : 1.0;
+         double idealStepLengthMultiplier = Math.abs(nextStepHeight - previousStepHeight) > parameters.getMaximumStepZWhenSteppingUp() ? idealStepLengthWhenUpOrDownMultiplier : 1.0;
 
          if (desiredHeading == FootstepPlanHeading.FORWARD)
          {
@@ -155,7 +152,7 @@ public class IdealStepCalculator
          else if (desiredHeading == FootstepPlanHeading.BACKWARD)
          {
             // do ideal step with turn
-            double idealStepLength = idealStepLengthMultiplier * parameters.getMinimumStepLength();
+            double idealStepLength = idealStepLengthMultiplier * parameters.getIdealBackStepLength();
             idealStep.set(midFootPoint, stanceNode.getYaw());
             idealStep.appendTranslation(idealStepLength, 0.0);
 
@@ -168,7 +165,7 @@ public class IdealStepCalculator
          else if (desiredHeading == FootstepPlanHeading.LEFT)
          {
             // do ideal step with turn
-            double idealStepWidth = stepSide == RobotSide.LEFT ? idealStepLengthMultiplier * parameters.getMaximumStepWidth() : - parameters.getMinimumStepWidth();
+            double idealStepWidth = stepSide == RobotSide.LEFT ? idealStepLengthMultiplier * parameters.getIdealSideStepWidth() : - parameters.getMinimumStepWidth();
             idealStep.set(stanceNode.getX(), stanceNode.getY(), stanceNode.getYaw());
             idealStep.appendTranslation(0.0, idealStepWidth);
 
@@ -180,7 +177,7 @@ public class IdealStepCalculator
          else if (desiredHeading == FootstepPlanHeading.RIGHT)
          {
             // do ideal step with turn
-            double idealStepWidth = stepSide == RobotSide.RIGHT ? - idealStepLengthMultiplier * parameters.getMaximumStepWidth() : parameters.getMinimumStepWidth();
+            double idealStepWidth = stepSide == RobotSide.RIGHT ? - idealStepLengthMultiplier * parameters.getIdealSideStepWidth() : parameters.getMinimumStepWidth();
             idealStep.set(stanceNode.getX(), stanceNode.getY(), stanceNode.getYaw());
             idealStep.appendTranslation(0.0, idealStepWidth);
 
