@@ -75,6 +75,7 @@ public class FootstepPathCalculatorModule
 
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
       new FootPoseFromMidFootUpdater(messager).start();
+      new FootstepCompletionListener(messager).start();
    }
 
    public void clear()
