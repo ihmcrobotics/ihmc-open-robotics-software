@@ -24,7 +24,10 @@ public class MultiRobotFirstOrderIntegrator
    public void integrate(double dt)
    {
       integrator.setIntegrationDT(dt);
+
       for (MultiBodySystemBasics system : multiBobySystems)
+      {
          integrator.doubleIntegrateFromAccelerationSubtree(system.getRootBody());
+      }
    }
 }
