@@ -10,6 +10,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -103,9 +106,14 @@ public class FootSpoof implements ContactablePlaneBody
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setPose(FramePoint3D position, FrameQuaternion orientation)
+   public void setPose(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       shinFrame.setPoseAndUpdate(position, orientation);
+   }
+
+   public void setPose(FramePose3DReadOnly pose)
+   {
+      shinFrame.setPoseAndUpdate(pose);
    }
 
    public void translate(double x, double y, double z)

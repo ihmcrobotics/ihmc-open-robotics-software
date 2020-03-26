@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class CoMHeightPartialDerivativesData
+public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivativesDataReadOnly
 {
    private ReferenceFrame frameOfCoMHeight;
    private double comHeight, partialDzDx, partialDzDy, partialD2zDx2, partialD2zDy2, partialD2zDxDy;
