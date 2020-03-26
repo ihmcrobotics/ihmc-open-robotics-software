@@ -28,6 +28,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -53,6 +56,8 @@ import us.ihmc.tools.ArrayTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +159,13 @@ public class CenterOfMassHeightControlStateTest
       smoothCMPBasedICPPlanner.holdCurrentICP(new FramePoint3D(worldFrame, 0, 0, 0.785));
 //      smoothCMPBasedICPPlanner.initializeForStanding(0.0);
 
+      YoFramePoint3D desiredICPPosition = new YoFramePoint3D("desiredICPPosition", worldFrame, registry);
+      YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
+      YoGraphicPosition desiredICPGraphic = new YoGraphicPosition("desiredICPGraphic", desiredICPPosition, 0.05, YoAppearance.Black(), GraphicType.SOLID_BALL);
+
+      yoGraphicsListRegistry.registerYoGraphic("Test", desiredICPGraphic);
+
+      yoGraphicsListRegistry.registerArtifact("Test", desiredICPGraphic.createArtifact());
 
       FrameVector2D dummyDesiredICPVelocity = new FrameVector2D();
 
@@ -278,7 +290,9 @@ public class CenterOfMassHeightControlStateTest
 
             smoothCMPBasedICPPlanner.compute(time);
             // FIXME should be CoM
-            smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(dummyDesiredICPVelocity);
+            smoothCMPBasedICPPlanner.getDesiredCapturePointPosition(desiredICPPosition);
+            smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
+            dummyDesiredICPVelocity.set(desiredICPVelocity);
             heightControlState.computeDesiredCoMHeightAcceleration(dummyDesiredICPVelocity, isInDoubleSupport, omega0, false, null);
 
             FramePoint3D comPosition = new FramePoint3D();
