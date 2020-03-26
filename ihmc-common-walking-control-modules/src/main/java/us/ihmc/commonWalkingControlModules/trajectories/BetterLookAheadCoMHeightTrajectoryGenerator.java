@@ -5,15 +5,14 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -21,7 +20,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.StringStretcher2d;
+import us.ihmc.robotics.geometry.StringStretcher3D;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
+import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
@@ -45,18 +49,15 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 public class BetterLookAheadCoMHeightTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
 
    private static final boolean DEBUG = false;
 
    private boolean visualize = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
+   private final YoPolynomial spline = new YoPolynomial("height", 4 , registry);
 
    private final YoBoolean isTrajectoryOffsetStopped = new YoBoolean("isPelvisOffsetHeightTrajectoryStopped", registry);
-
-   private final YoBoolean hasBeenInitializedWithNextStep = new YoBoolean("hasBeenInitializedWithNextStep", registry);
 
    private final YoDouble offsetHeightAboveGround = new YoDouble("offsetHeightAboveGround", registry);
 
@@ -82,16 +83,15 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
 
-   private final LineSegment2D projectionSegment = new LineSegment2D();
+   private final LineSegment2D projectionSegmentInWorld = new LineSegment2D();
 
    private final YoFramePoint3D contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint3D contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
 
-   private final YoGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
-   private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
-   private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
+   private final YoGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz;
+   private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz;
+   private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz;
 
-   private final YoBoolean correctForCoMHeightDrift = new YoBoolean("correctForCoMHeightDrift", registry);
    private final YoBoolean initializeToCurrent = new YoBoolean("initializeCoMHeightToCurrent", registry);
 
    private final BagOfBalls bagOfBalls;
@@ -101,9 +101,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
-   private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
-
-   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoLong lastCommandId;
 
@@ -116,16 +114,15 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public BetterLookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
                                                       double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame,
-                                                      ReferenceFrame pelvisFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
-                                                      SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, DoubleProvider yoTime,
+                                                      ReferenceFrame pelvisFrame,
+                                                      SideDependentList<MovingReferenceFrame> soleFrames, DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;
-      this.ankleZUpFrames = ankleZUpFrames;
-      frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
+      this.soleFrames = soleFrames;
+      frameOfLastFoostep = soleFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
-      this.transformsFromAnkleToSole = transformsFromAnkleToSole;
       offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
       offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
@@ -152,8 +149,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       previousZFinalLeft.set(nominalHeightAboveGround);
       previousZFinalRight.set(nominalHeightAboveGround);
 
-      hasBeenInitializedWithNextStep.set(false);
-
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
 
       String namePrefix = "pelvisHeight";
@@ -172,32 +167,31 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       {
          double pointSize = 0.03;
 
-         YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
-         YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Orange());
+         String prefix = "better_";
 
-         pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
-         pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
-         pointD0Viz = new YoGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
-         pointDFViz = new YoGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
-         pointSNextViz = new YoGraphicPosition("pointSNext", "", registry, pointSize, YoAppearance.Pink());
+         YoGraphicPosition position0 = new YoGraphicPosition(prefix + "contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
+         YoGraphicPosition position1 = new YoGraphicPosition(prefix + "contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Orange());
 
-         pointS0MinViz = new YoGraphicPosition("pointS0Min", "", registry, 0.8 * pointSize, YoAppearance.CadetBlue());
-         pointSFMinViz = new YoGraphicPosition("pointSFMin", "", registry, 0.8 * pointSize, YoAppearance.Chartreuse());
-         pointD0MinViz = new YoGraphicPosition("pointD0Min", "", registry, 0.8 * pointSize, YoAppearance.BlueViolet());
-         pointDFMinViz = new YoGraphicPosition("pointDFMin", "", registry, 0.8 * pointSize, YoAppearance.Azure());
-         pointSNextMinViz = new YoGraphicPosition("pointSNextMin", "", registry, 0.8 * pointSize, YoAppearance.Pink());
+         pointS0Viz = new YoGraphicPosition(prefix + "pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
+         pointSFViz = new YoGraphicPosition(prefix + "pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
+         pointD0Viz = new YoGraphicPosition(prefix + "pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
+         pointDFViz = new YoGraphicPosition(prefix + "pointDF", "", registry, pointSize, YoAppearance.Azure());
 
-         pointS0MaxViz = new YoGraphicPosition("pointS0Max", "", registry, 0.9 * pointSize, YoAppearance.CadetBlue());
-         pointSFMaxViz = new YoGraphicPosition("pointSFMax", "", registry, 0.9 * pointSize, YoAppearance.Chartreuse());
-         pointD0MaxViz = new YoGraphicPosition("pointD0Max", "", registry, 0.9 * pointSize, YoAppearance.BlueViolet());
-         pointDFMaxViz = new YoGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
-         pointSNextMaxViz = new YoGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
+         pointS0MinViz = new YoGraphicPosition(prefix + "pointS0Min", "", registry, 0.8 * pointSize, YoAppearance.CadetBlue());
+         pointSFMinViz = new YoGraphicPosition(prefix + "pointSFMin", "", registry, 0.8 * pointSize, YoAppearance.Chartreuse());
+         pointD0MinViz = new YoGraphicPosition(prefix + "pointD0Min", "", registry, 0.8 * pointSize, YoAppearance.BlueViolet());
+         pointDFMinViz = new YoGraphicPosition(prefix + "pointDFMin", "", registry, 0.8 * pointSize, YoAppearance.Azure());
 
-         bagOfBalls = new BagOfBalls(15, registry, yoGraphicsListRegistry);
+         pointS0MaxViz = new YoGraphicPosition(prefix + "pointS0Max", "", registry, 0.9 * pointSize, YoAppearance.CadetBlue());
+         pointSFMaxViz = new YoGraphicPosition(prefix + "pointSFMax", "", registry, 0.9 * pointSize, YoAppearance.Chartreuse());
+         pointD0MaxViz = new YoGraphicPosition(prefix + "pointD0Max", "", registry, 0.9 * pointSize, YoAppearance.BlueViolet());
+         pointDFMaxViz = new YoGraphicPosition(prefix + "pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
 
-         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
+         bagOfBalls = new BagOfBalls(15, 0.01, "height", registry, yoGraphicsListRegistry);
 
-         String graphicListName = "CoMHeightTrajectoryGenerator";
+         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition(prefix + "desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
+
+         String graphicListName = "BetterCoMHeightTrajectoryGenerator";
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, position0);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, position1);
 
@@ -205,22 +199,18 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFViz);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextViz);
 
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MinViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMinViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMinViz);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMinViz);
 
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MaxViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMaxViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMaxViz);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMaxViz);
-
+//
          yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMPositionViz);
-
       }
       else
       {
@@ -228,19 +218,16 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          pointSFViz = null;
          pointD0Viz = null;
          pointDFViz = null;
-         pointSNextViz = null;
 
          pointS0MinViz = null;
          pointSFMinViz = null;
          pointD0MinViz = null;
          pointDFMinViz = null;
-         pointSNextMinViz = null;
 
          pointS0MaxViz = null;
          pointSFMaxViz = null;
          pointD0MaxViz = null;
          pointDFMaxViz = null;
-         pointSNextMaxViz = null;
 
          bagOfBalls = null;
       }
@@ -248,7 +235,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public void reset()
    {
-      hasBeenInitializedWithNextStep.set(false);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
       isReadyToHandleQueuedCommands.set(false);
       numberOfQueuedCommands.set(0);
@@ -275,32 +261,28 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
 
-   public void setCoMHeightDriftCompensation(boolean activate)
-   {
-      correctForCoMHeightDrift.set(activate);
-   }
-
    public void setSupportLeg(RobotSide supportLeg)
    {
-      ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
+      ReferenceFrame newFrame = soleFrames.get(supportLeg);
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, startWaypoint.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, startWaypoint.getZ());
       tempFramePoint.changeFrame(newFrame);
-      startWaypoint.setY(tempFramePoint.getZ());
+      startWaypoint.setZ(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, firstMidpointPosition.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, firstMidpoint.getZ());
       tempFramePoint.changeFrame(newFrame);
-      firstMidpointPosition.setY(tempFramePoint.getZ());
+      firstMidpoint.setZ(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, secondMidpointPosition.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, secondMidpoint.getZ());
       tempFramePoint.changeFrame(newFrame);
-      secondMidpointPosition.setY(tempFramePoint.getZ());
+      secondMidpoint.setZ(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, endWaypoint.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, endWaypoint.getZ());
       tempFramePoint.changeFrame(newFrame);
-      endWaypoint.setY(tempFramePoint.getZ());
+      endWaypoint.setZ(tempFramePoint.getZ());
 
-      spline.initialize(startWaypoint, firstMidpointPosition, secondMidpointPosition, endWaypoint);
+      spline.setCubicUsingIntermediatePoints(startWaypoint.getX(), firstMidpoint.getX(), secondMidpoint.getX(), endWaypoint.getX(),
+                                             startWaypoint.getZ(), firstMidpoint.getZ(), secondMidpoint.getZ(), endWaypoint.getZ());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -313,47 +295,37 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       frameOfLastFoostep = newFrame;
    }
 
-   private final Point2D tempPoint2dA = new Point2D();
-   private final Point2D tempPoint2dB = new Point2D();
+   private final FramePoint3D startWaypointMinimum = new FramePoint3D();
+   private final FramePoint3D firstMidpointMinimum = new FramePoint3D();
+   private final FramePoint3D secondMidpointMinimum = new FramePoint3D();
+   private final FramePoint3D endWaypointMinimum = new FramePoint3D();
 
-   private final Point2D startWaypointMinimum = new Point2D();
-   private final Point2D firstMidpointMinimum = new Point2D();
-   private final Point2D secondMidpointMinimum = new Point2D();
-   private final Point2D endWaypointMinimum = new Point2D();
-   private final Point2D sNextMin = new Point2D();
+   private final FramePoint3D startWaypointNominal = new FramePoint3D();
+   private final FramePoint3D firstMidpointNominal = new FramePoint3D();
+   private final FramePoint3D secondMidpointNominal = new FramePoint3D();
+   private final FramePoint3D endWaypointNominal = new FramePoint3D();
 
-   private final Point2D startWaypointNominal = new Point2D();
-   private final Point2D firstMidpointNominal = new Point2D();
-   private final Point2D secondMidpointNominal = new Point2D();
-   private final Point2D endWaypointNominal = new Point2D();
-   private final Point2D sNextNom = new Point2D();
+   private final FramePoint3D startWaypointMaximum = new FramePoint3D();
+   private final FramePoint3D firstMidpointMaximum = new FramePoint3D();
+   private final FramePoint3D secondMidpointMaximum = new FramePoint3D();
+   private final FramePoint3D endWaypointMaximum = new FramePoint3D();
 
-   private final Point2D startWaypointMaximum = new Point2D();
-   private final Point2D firstMidpointMaximum = new Point2D();
-   private final Point2D secondMidpointMaximum = new Point2D();
-   private final Point2D endWaypointMaximum = new Point2D();
-   private final Point2D sNextMax = new Point2D();
-
-   private final Point2D startWaypoint = new Point2D();
-   private final Point2D firstMidpointPosition = new Point2D();
-   private final Point2D secondMidpointPosition = new Point2D();
-   private final Point2D endWaypoint = new Point2D();
-   private final Point2D sNext = new Point2D();
+   private final FramePoint3D startWaypoint = new FramePoint3D();
+   private final FramePoint3D firstMidpoint = new FramePoint3D();
+   private final FramePoint3D secondMidpoint = new FramePoint3D();
+   private final FramePoint3D endWaypoint = new FramePoint3D();
 
    private final FramePoint3D framePointS0 = new FramePoint3D();
    private final FramePoint3D framePointD0 = new FramePoint3D();
    private final FramePoint3D framePointDF = new FramePoint3D();
    private final FramePoint3D framePointSF = new FramePoint3D();
-   private final FramePoint3D framePointSNext = new FramePoint3D();
 
    private final FramePoint3D tempFramePointForViz1 = new FramePoint3D();
    private final FramePoint3D tempFramePointForViz2 = new FramePoint3D();
 
-   private final FramePoint3D transferFromAnklePosition = new FramePoint3D();
-   private final FramePoint3D transferToAnklePosition = new FramePoint3D();
-   private final FramePoint3D transferFromDesiredContactFramePosition = new FramePoint3D();
+   private final FramePoint3D transferFromSolePosition = new FramePoint3D();
+   private final FramePoint3D transferToSolePosition = new FramePoint3D();
 
-   private final FrameVector3D fromContactFrameDrift = new FrameVector3D();
    private final CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
    private final Point2D queryPoint = new Point2D();
 
@@ -366,126 +338,92 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
-      Footstep transferFromDesiredFootstep = transferToAndNextFootstepsData.getTransferFromDesiredFootstep();
 
-      Footstep nextFootstep = null;
+      transferFromFootstep.getPosition(transferFromSolePosition);
+      transferToFootstep.getPosition(transferToSolePosition);
 
-      if (CONSIDER_NEXT_FOOTSTEP)
-      {
-         nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-         if (nextFootstep != null)
-            hasBeenInitializedWithNextStep.set(true);
-         else
-            hasBeenInitializedWithNextStep.set(false);
-      }
-      else
-      {
-         hasBeenInitializedWithNextStep.set(false);
-      }
+      transferFromSolePosition.changeFrame(worldFrame);
+      transferToSolePosition.changeFrame(worldFrame);
 
-      transferFromFootstep.getAnklePosition(transferFromAnklePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
-      transferToFootstep.getAnklePosition(transferToAnklePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
+      contactFrameZeroPosition.setMatchingFrame(transferFromSolePosition);
+      contactFrameOnePosition.setMatchingFrame(transferToSolePosition);
 
-      boolean frameDrifted = false;
-      if (correctForCoMHeightDrift.getBooleanValue() && transferToFootstep.getTrustHeight() && (transferFromDesiredFootstep != null))
-      {
-         if (transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide())
-         {
-            if (DEBUG)
-            {
-               System.err.println("transferFromDesiredFootstep.getRobotSide() != transferFromFootstep.getRobotSide() in LookAheadCoMHeightTrajectoryGenerator.initialize()");
-            }
-         }
-         else
-         {
-            transferFromDesiredFootstep.getAnklePosition(transferFromDesiredContactFramePosition,
-                                                         transformsFromAnkleToSole.get(transferFromDesiredFootstep.getRobotSide()));
-            transferFromDesiredContactFramePosition.changeFrame(transferFromAnklePosition.getReferenceFrame());
+      projectionSegmentInWorld.set(transferFromSolePosition, transferToSolePosition);
 
-            fromContactFrameDrift.setToZero(transferFromAnklePosition.getReferenceFrame());
-            fromContactFrameDrift.sub(transferFromAnklePosition, transferFromDesiredContactFramePosition);
-            fromContactFrameDrift.changeFrame(transferToAnklePosition.getReferenceFrame());
-            transferToAnklePosition.setZ(transferToAnklePosition.getZ() + fromContactFrameDrift.getZ());
-            frameDrifted = true;
-         }
-      }
+      transferFromSolePosition.changeFrame(frameOfLastFoostep);
+      transferToSolePosition.changeFrame(frameOfLastFoostep);
 
-      transferFromAnklePosition.changeFrame(worldFrame);
-      transferToAnklePosition.changeFrame(worldFrame);
+      zeroFrames();
 
-      FramePoint3D nextContactFramePosition = null;
+      double length = projectionSegmentInWorld.length();
 
-      if (CONSIDER_NEXT_FOOTSTEP)
-      {
-         if (nextFootstep != null)
-         {
-            nextContactFramePosition = new FramePoint3D();
-            nextFootstep.getAnklePosition(nextContactFramePosition, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
+      double xS0 = 0.0;
+      double xD0 = doubleSupportPercentageIn.getDoubleValue() * length;
+      double xDF = (1.0 - doubleSupportPercentageIn.getDoubleValue()) * length;
+      double xSF = length;
 
-            if (frameDrifted)
-            {
-               fromContactFrameDrift.changeFrame(nextContactFramePosition.getReferenceFrame());
-               nextContactFramePosition.setZ(nextContactFramePosition.getZ() + fromContactFrameDrift.getZ());
-            }
+      startWaypoint.setX(xS0);
+      firstMidpoint.setX(xD0);
+      secondMidpoint.setX(xDF);
+      endWaypoint.setX(xSF);
 
-            nextContactFramePosition.changeFrame(worldFrame);
-         }
-      }
+      startWaypointMinimum.setX(xS0);
+      firstMidpointMinimum.setX(xD0);
+      secondMidpointMinimum.setX(xDF);
+      endWaypointMinimum.setX(xSF);
 
-      contactFrameZeroPosition.set(transferFromAnklePosition);
-      contactFrameOnePosition.set(transferToAnklePosition);
+      startWaypointNominal.setX(xS0);
+      firstMidpointNominal.setX(xD0);
+      secondMidpointNominal.setX(xDF);
+      endWaypointNominal.setX(xSF);
 
-      tempPoint2dA.set(transferFromAnklePosition);
-      tempPoint2dB.set(transferToAnklePosition);
+      startWaypointMaximum.setX(xS0);
+      firstMidpointMaximum.setX(xD0);
+      secondMidpointMaximum.setX(xDF);
+      endWaypointMaximum.setX(xSF);
 
-      projectionSegment.set(tempPoint2dA, tempPoint2dB);
-      setPointXValues(nextContactFramePosition);
+      // we always start at 0.0
+      startWaypointMinimum.setZ(minimumHeightAboveGround.getDoubleValue());
+      startWaypointNominal.setZ(nominalHeightAboveGround.getDoubleValue());
+      startWaypointMaximum.setZ(maximumHeightAboveGround.getDoubleValue());
 
-      transferFromAnklePosition.changeFrame(frameOfLastFoostep);
-      transferToAnklePosition.changeFrame(frameOfLastFoostep);
+      endWaypointMinimum.setZ(minimumHeightAboveGround.getDoubleValue());
+      endWaypointNominal.setZ(nominalHeightAboveGround.getDoubleValue());
+      endWaypointMaximum.setZ(maximumHeightAboveGround.getDoubleValue());
 
-      double footHeight0 = transferFromAnklePosition.getZ();
-      double footHeight1 = transferToAnklePosition.getZ();
+      firstMidpointMinimum.setZ(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpoint.getX(), 0.0));
+      firstMidpointNominal.setZ(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpoint.getX(), 0.0));
+      firstMidpointMaximum.setZ(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpoint.getX(), 0.0));
 
-      double nextFootHeight = Double.NaN;
+      secondMidpointMinimum.setZ(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpoint.getX(), 0.0));
+      secondMidpointNominal.setZ(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpoint.getX(), 0.0));
+      secondMidpointMaximum.setZ(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpoint.getX(), extraToeOffHeight));
 
-      if (CONSIDER_NEXT_FOOTSTEP)
-      {
-         if (nextContactFramePosition != null)
-         {
-            nextContactFramePosition.changeFrame(frameOfLastFoostep);
-            nextFootHeight = nextContactFramePosition.getZ();
-         }
-      }
+      startWaypointMinimum.setY(0.5 * transferToSolePosition.getY());
+      startWaypointNominal.setY(0.5 * transferToSolePosition.getY());
+      startWaypointMaximum.setY(0.5 * transferToSolePosition.getY());
 
-      startWaypointMinimum.setY(footHeight0 + minimumHeightAboveGround.getDoubleValue());
-      startWaypointNominal.setY(footHeight0 + nominalHeightAboveGround.getDoubleValue());
-      startWaypointMaximum.setY(footHeight0 + maximumHeightAboveGround.getDoubleValue());
+      endWaypointMinimum.setY(0.5 * transferToSolePosition.getY());
+      endWaypointNominal.setY(0.5 * transferToSolePosition.getY());
+      endWaypointMaximum.setY(0.5 * transferToSolePosition.getY());
 
-      endWaypointMinimum.setY(footHeight1 + minimumHeightAboveGround.getDoubleValue());
-      endWaypointNominal.setY(footHeight1 + nominalHeightAboveGround.getDoubleValue());
-      endWaypointMaximum.setY(footHeight1 + maximumHeightAboveGround.getDoubleValue());
+      firstMidpointMinimum.setY(0.5 * transferToSolePosition.getY());
+      firstMidpointNominal.setY(0.5 * transferToSolePosition.getY());
+      firstMidpointMaximum.setY(0.5 * transferToSolePosition.getY());
 
-      firstMidpointMinimum.setY(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
-      firstMidpointNominal.setY(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
-      firstMidpointMaximum.setY(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
-
-      secondMidpointMinimum.setY(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0, footHeight1));
-      secondMidpointNominal.setY(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0, footHeight1));
-      secondMidpointMaximum.setY(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0 + extraToeOffHeight, footHeight1));
-
-      sNextMin.setY(nextFootHeight + minimumHeightAboveGround.getDoubleValue());
-      sNextNom.setY(nextFootHeight + nominalHeightAboveGround.getDoubleValue());
-      sNextMax.setY(nextFootHeight + maximumHeightAboveGround.getDoubleValue());
+      secondMidpointMinimum.setY(0.5 * transferToSolePosition.getY());
+      secondMidpointNominal.setY(0.5 * transferToSolePosition.getY());
+      secondMidpointMaximum.setY(0.5 * transferToSolePosition.getY());
 
       computeHeightsToUseByStretchingString(transferFromFootstep.getRobotSide());
       previousZFinals.get(transferToFootstep.getRobotSide()).set(endWaypoint.getY());
 
-      spline.initialize(startWaypoint, firstMidpointPosition, secondMidpointPosition, endWaypoint);
+      spline.setCubicUsingIntermediatePoints(startWaypoint.getX(), firstMidpoint.getX(), secondMidpoint.getX(), endWaypoint.getX(),
+                                             startWaypoint.getZ(), firstMidpoint.getZ(), secondMidpoint.getZ(), endWaypoint.getZ());
 
       if (visualize)
       {
-         framePointS0.setIncludingFrame(transferFromAnklePosition);
+         framePointS0.setIncludingFrame(transferFromSolePosition);
          framePointS0.setZ(startWaypoint.getY() + offsetHeightAboveGround.getDoubleValue());
          framePointS0.changeFrame(worldFrame);
          pointS0Viz.setPosition(framePointS0);
@@ -500,9 +438,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          framePointS0.changeFrame(worldFrame);
          pointS0MaxViz.setPosition(framePointS0);
 
-         framePointD0.setToZero(transferFromAnklePosition.getReferenceFrame());
-         framePointD0.interpolate(transferFromAnklePosition, transferToAnklePosition, firstMidpointPosition.getX() / endWaypoint.getX());
-         framePointD0.setZ(firstMidpointPosition.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointD0.setToZero(transferFromSolePosition.getReferenceFrame());
+         framePointD0.interpolate(transferFromSolePosition, transferToSolePosition, firstMidpoint.getX() / endWaypoint.getX());
+         framePointD0.setZ(firstMidpoint.getY() + offsetHeightAboveGround.getDoubleValue());
          framePointD0.changeFrame(worldFrame);
          pointD0Viz.setPosition(framePointD0);
 
@@ -516,9 +454,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          framePointD0.changeFrame(worldFrame);
          pointD0MaxViz.setPosition(framePointD0);
 
-         framePointDF.setToZero(transferFromAnklePosition.getReferenceFrame());
-         framePointDF.interpolate(transferFromAnklePosition, transferToAnklePosition, secondMidpointPosition.getX() / endWaypoint.getX());
-         framePointDF.setZ(secondMidpointPosition.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointDF.setToZero(transferFromSolePosition.getReferenceFrame());
+         framePointDF.interpolate(transferFromSolePosition, transferToSolePosition, secondMidpoint.getX() / endWaypoint.getX());
+         framePointDF.setZ(secondMidpoint.getY() + offsetHeightAboveGround.getDoubleValue());
          framePointDF.changeFrame(worldFrame);
          pointDFViz.setPosition(framePointDF);
 
@@ -532,7 +470,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          framePointDF.changeFrame(worldFrame);
          pointDFMaxViz.setPosition(framePointDF);
 
-         framePointSF.setIncludingFrame(transferToAnklePosition);
+         framePointSF.setIncludingFrame(transferToSolePosition);
          framePointSF.setZ(endWaypoint.getY() + offsetHeightAboveGround.getDoubleValue());
          framePointSF.changeFrame(worldFrame);
          pointSFViz.setPosition(framePointSF);
@@ -547,46 +485,13 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          framePointSF.changeFrame(worldFrame);
          pointSFMaxViz.setPosition(framePointSF);
 
-         if (CONSIDER_NEXT_FOOTSTEP)
-         {
-            if (nextContactFramePosition != null)
-            {
-               framePointSNext.setIncludingFrame(nextContactFramePosition);
-               framePointSNext.setZ(sNext.getY() + offsetHeightAboveGround.getDoubleValue());
-               framePointSNext.changeFrame(worldFrame);
-               pointSNextViz.setPosition(framePointSNext);
-
-               framePointSNext.changeFrame(frameOfLastFoostep);
-               framePointSNext.setZ(sNextMin.getY() + offsetHeightAboveGround.getDoubleValue());
-               framePointSNext.changeFrame(worldFrame);
-               pointSNextMinViz.setPosition(framePointSNext);
-
-               framePointSNext.changeFrame(frameOfLastFoostep);
-               framePointSNext.setZ(sNextMax.getY() + offsetHeightAboveGround.getDoubleValue());
-               framePointSNext.changeFrame(worldFrame);
-               pointSNextMaxViz.setPosition(framePointSNext);
-            }
-            else
-            {
-               pointSNextViz.setPositionToNaN();
-               pointSNextMinViz.setPositionToNaN();
-               pointSNextMaxViz.setPositionToNaN();
-            }
-         }
-         else
-         {
-            pointSNextViz.setPositionToNaN();
-            pointSNextMinViz.setPositionToNaN();
-            pointSNextMaxViz.setPositionToNaN();
-         }
-
          bagOfBalls.reset();
          int numberOfPoints = bagOfBalls.getNumberOfBalls();
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            tempFramePointForViz1.setToZero(transferFromAnklePosition.getReferenceFrame());
-            tempFramePointForViz1.interpolate(transferFromAnklePosition, transferToAnklePosition, ((double) i) / ((double) numberOfPoints));
+            tempFramePointForViz1.setToZero(transferFromSolePosition.getReferenceFrame());
+            tempFramePointForViz1.interpolate(transferFromSolePosition, transferToSolePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
             queryPoint.set(tempFramePointForViz1);
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
@@ -600,149 +505,96 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       }
    }
 
+   private void zeroFrames()
+   {
+      startWaypoint.setToZero(frameOfLastFoostep);
+      firstMidpoint.setToZero(frameOfLastFoostep);
+      secondMidpoint.setToZero(frameOfLastFoostep);
+      endWaypoint.setToZero(frameOfLastFoostep);
 
-   private Point2D tempPoint2dForStringStretching = new Point2D();
+      startWaypointMinimum.setToZero(frameOfLastFoostep);
+      firstMidpointMinimum.setToZero(frameOfLastFoostep);
+      secondMidpointMinimum.setToZero(frameOfLastFoostep);
+      endWaypointMinimum.setToZero(frameOfLastFoostep);
 
-   private final StringStretcher2d stringStretcher2d = new StringStretcher2d();
-   private final List<Point2D> stretchedStringWaypoints = new ArrayList<>();
+      startWaypointNominal.setToZero(frameOfLastFoostep);
+      firstMidpointNominal.setToZero(frameOfLastFoostep);
+      secondMidpointNominal.setToZero(frameOfLastFoostep);
+      endWaypointNominal.setToZero(frameOfLastFoostep);
+
+      startWaypointMaximum.setToZero(frameOfLastFoostep);
+      firstMidpointMaximum.setToZero(frameOfLastFoostep);
+      secondMidpointMaximum.setToZero(frameOfLastFoostep);
+      endWaypointMaximum.setToZero(frameOfLastFoostep);
+   }
+
+   private void setPointViz()
+   {
+
+   }
+
+
+   private Point3D tempPoint2dForStringStretching = new Point3D();
+
+   private final StringStretcher3D stringStretcher = new StringStretcher3D();
+   private final List<Point3DBasics> stretchedStringWaypoints = new ArrayList<>();
 
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
-      stringStretcher2d.reset();
+      stringStretcher.reset();
       // startWaypoint is at previous
-      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), startWaypointMinimum.getY(), startWaypointMaximum.getY());
-      startWaypoint.setY(z0);
+      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), startWaypointMinimum.getZ(), startWaypointMaximum.getZ());
+      startWaypoint.setZ(z0);
 
-      stringStretcher2d.setStartPoint(startWaypoint);
+      stringStretcher.setStartPoint(startWaypoint);
 
-      if (!Double.isNaN(sNext.getX()))
-      {
-         if (sNext.getX() < endWaypoint.getX() + 0.01)
-         {
-            sNext.setX(endWaypoint.getX() + 0.01);
-         }
-
-         double zNext;
-         if (sNextMin.getY() > endWaypointNominal.getY())
-         {
-            zNext = sNextMin.getY();
-         }
-         else if (sNextMax.getY() < endWaypointNominal.getY())
-         {
-            zNext = sNextMax.getY();
-         }
-         else
-         {
-            zNext = endWaypointNominal.getY();
-         }
-
-         sNext.setY(zNext);
-
-         stringStretcher2d.setEndPoint(sNext);
-
-         stringStretcher2d.addMinMaxPoints(firstMidpointMinimum, firstMidpointMaximum);
-         stringStretcher2d.addMinMaxPoints(secondMidpointMinimum, secondMidpointMaximum);
-         stringStretcher2d.addMinMaxPoints(endWaypointMinimum, endWaypointMaximum);
-      }
-      else
-      {
-         double sFNomHeight = endWaypointNominal.getY();
+         double sFNomHeight = endWaypointNominal.getZ();
 
          // If the final single support nominal position is higher than the final double support max position, decrease it
          // but don't decrease it below the final single support minimum height.
-         if (sFNomHeight > secondMidpointMaximum.getY())
+         if (sFNomHeight > secondMidpointMaximum.getZ())
          {
-            sFNomHeight = Math.max(secondMidpointMaximum.getY(), endWaypointMinimum.getY());
+            sFNomHeight = Math.max(secondMidpointMaximum.getZ(), endWaypointMinimum.getZ());
             tempPoint2dForStringStretching.set(endWaypointNominal);
-            tempPoint2dForStringStretching.setY(sFNomHeight);
-            stringStretcher2d.setEndPoint(tempPoint2dForStringStretching);
+            tempPoint2dForStringStretching.setZ(sFNomHeight);
+            stringStretcher.setEndPoint(tempPoint2dForStringStretching);
          }
          else
          {
-            stringStretcher2d.setEndPoint(endWaypointNominal);
+            stringStretcher.setEndPoint(endWaypointNominal);
          }
 
-         stringStretcher2d.addMinMaxPoints(firstMidpointMinimum, firstMidpointMaximum);
-         stringStretcher2d.addMinMaxPoints(secondMidpointMinimum, secondMidpointMaximum);
-      }
+         stringStretcher.addMinMaxPoints(firstMidpointMinimum, firstMidpointMaximum);
+         stringStretcher.addMinMaxPoints(secondMidpointMinimum, secondMidpointMaximum);
 
-      stringStretcher2d.stretchString(stretchedStringWaypoints);
+      stringStretcher.stretchString(stretchedStringWaypoints);
 
-      firstMidpointPosition.set(stretchedStringWaypoints.get(1));
-      secondMidpointPosition.set(stretchedStringWaypoints.get(2));
+      firstMidpoint.set(stretchedStringWaypoints.get(1));
+      secondMidpoint.set(stretchedStringWaypoints.get(2));
       endWaypoint.set(stretchedStringWaypoints.get(3));
    }
 
-   private final Point2D nextPoint2d = new Point2D();
-   private final Point2D projectedPoint = new Point2D();
-   private final Line2D line2d = new Line2D();
-
-   private void setPointXValues(FramePoint3D nextContactFramePosition)
+   private double findMinimumDoubleSupportHeight(double startXRelativeToAnkle, double endXRelativeToAnkle, double queryRelativeToAnkle, double extraToeOffHeight)
    {
-      double length = projectionSegment.length();
-
-      double xS0 = 0.0;
-      double xD0 = doubleSupportPercentageIn.getDoubleValue() * length;
-      double xDF = (1.0 - doubleSupportPercentageIn.getDoubleValue()) * length;
-      double xSF = length;
-
-      double xSNext = Double.NaN;
-      if (nextContactFramePosition != null)
-      {
-         //need to double check this
-         line2d.set(projectionSegment.getFirstEndpoint(), projectionSegment.getSecondEndpoint());
-         nextPoint2d.set(nextContactFramePosition.getX(), nextContactFramePosition.getY());
-         line2d.orthogonalProjection(nextPoint2d, projectedPoint);
-         xSNext = projectionSegment.percentageAlongLineSegment(projectedPoint) * projectionSegment.length();
-      }
-
-      startWaypoint.setX(xS0);
-      firstMidpointPosition.setX(xD0);
-      secondMidpointPosition.setX(xDF);
-      endWaypoint.setX(xSF);
-      sNext.setX(xSNext);
-
-      startWaypointMinimum.setX(xS0);
-      firstMidpointMinimum.setX(xD0);
-      secondMidpointMinimum.setX(xDF);
-      endWaypointMinimum.setX(xSF);
-      sNextMin.setX(xSNext);
-
-      startWaypointNominal.setX(xS0);
-      firstMidpointNominal.setX(xD0);
-      secondMidpointNominal.setX(xDF);
-      endWaypointNominal.setX(xSF);
-      sNextNom.setX(xSNext);
-
-      startWaypointMaximum.setX(xS0);
-      firstMidpointMaximum.setX(xD0);
-      secondMidpointMaximum.setX(xDF);
-      endWaypointMaximum.setX(xSF);
-      sNextMax.setX(xSNext);
+      return findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), startXRelativeToAnkle, endXRelativeToAnkle, queryRelativeToAnkle, extraToeOffHeight);
    }
 
-   private double findMinimumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findNominalDoubleSupportHeight(double startXRelativeToAnkle, double endXRelativeToAnkle, double queryRelativeToAnkle, double extraToeOffHeight)
    {
-      return findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
+      return findDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), startXRelativeToAnkle, endXRelativeToAnkle, queryRelativeToAnkle, extraToeOffHeight);
    }
 
-   private double findNominalDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findMaximumDoubleSupportHeight(double startXRelativeToAnkle, double endXRelativeToAnkle, double queryRelativeToAnkle, double extraToeOffHeight)
    {
-      return findDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
+      return findDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), startXRelativeToAnkle, endXRelativeToAnkle, queryRelativeToAnkle, extraToeOffHeight);
    }
 
-   private double findMaximumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
+   private double findDoubleSupportHeight(double desiredDistanceFromFoot, double startXRelativeToAnkle, double endXRelativeToAnkle, double queryRelativeToAnkle, double extraToeOffHeight)
    {
-      return findDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
-   }
+      double z_d0_A = extraToeOffHeight + Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryRelativeToAnkle - startXRelativeToAnkle));
+      double z_d0_B = Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square((endXRelativeToAnkle - queryRelativeToAnkle)));
 
-   private double findDoubleSupportHeight(double distanceFromFoot, double s0, double sF, double s_d0, double foot0Height, double foot1Height)
-   {
-      double z_d0_A = foot0Height + Math.sqrt(MathTools.square(distanceFromFoot) - MathTools.square(s_d0 - s0));
-      double z_d0_B = foot1Height + Math.sqrt(MathTools.square(distanceFromFoot) - MathTools.square((sF - s_d0)));
-      double z_d0 = Math.min(z_d0_A, z_d0_B);
-
-      return z_d0;
+      return Math.min(z_d0_A, z_d0_B);
    }
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -762,12 +614,13 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2DBasics queryPoint, boolean isInDoubleSupport)
    {
-      projectionSegment.orthogonalProjection(queryPoint);
-      double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
+      // TODO this is not how we want to do this, we want to be using the actual center of mass point
+      projectionSegmentInWorld.orthogonalProjection(queryPoint);
+      double splineQuery = projectionSegmentInWorld.percentageAlongLineSegment(queryPoint) * projectionSegmentInWorld.length();
 
       // Happens when the robot gets stuck in double support but the ICP is still being dragged in the front support foot.
       if (isInDoubleSupport)
-         splineQuery = Math.min(splineQuery, secondMidpointPosition.getX());
+         splineQuery = Math.min(splineQuery, secondMidpoint.getX());
 
       spline.compute(splineQuery);
 
@@ -797,11 +650,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       offsetHeightAboveGroundPrevValue.set(offsetHeightTrajectoryGenerator.getValue());
 
-      double z = spline.getY() + offsetHeightAboveGroundTrajectoryOutput.getValue();
-      double dzds = spline.getYDot();
-      double ddzdds = spline.getYDDot();
+      double z = spline.getPosition() + offsetHeightAboveGroundTrajectoryOutput.getValue();
+      double dzds = spline.getVelocity();
+      double ddzdds = spline.getAcceleration();
 
-      getPartialDerivativesWithRespectToS(projectionSegment, partialDerivativesWithRespectToS);
+      getPartialDerivativesWithRespectToS(projectionSegmentInWorld, partialDerivativesWithRespectToS);
       double dsdx = partialDerivativesWithRespectToS[0];
       double dsdy = partialDerivativesWithRespectToS[1];
       double ddsddx = 0;
@@ -835,7 +688,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          desiredPosition.setToZero(pelvisFrame);
          desiredPosition.changeFrame(frameOfLastFoostep);
 
-         double heightOffset = desiredPosition.getZ() - spline.getY();
+         double heightOffset = desiredPosition.getZ() - spline.getPosition();
 
          offsetHeightAboveGround.set(heightOffset);
          offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
@@ -1001,7 +854,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, zInWorld);
       desiredPosition.changeFrame(frameOfLastFoostep);
 
-      double zOffset = desiredPosition.getZ() - spline.getY();
+      double zOffset = desiredPosition.getZ() - spline.getPosition();
       return zOffset;
    }
 
@@ -1079,11 +932,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       coM.changeFrame(worldFrame);
 
       point2dToPack.set(coM);
-   }
-
-   public boolean hasBeenInitializedWithNextStep()
-   {
-      return hasBeenInitializedWithNextStep.getBooleanValue();
    }
 
    private void printOutFootstepGenerationCode(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
