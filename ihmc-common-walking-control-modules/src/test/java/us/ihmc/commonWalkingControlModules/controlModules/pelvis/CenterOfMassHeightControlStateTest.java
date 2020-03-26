@@ -2,17 +2,26 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedCoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,12 +31,16 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.dataStructures.Vertex2DSupplierList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -103,6 +116,8 @@ public class CenterOfMassHeightControlStateTest
 
       setupStuff(yoGraphicsListRegistry, registry);
 
+      PDGains gains = new PDGains();
+
       CenterOfMassHeightControlState heightControlState = new CenterOfMassHeightControlState(minimumHeightAboveGround,
                                                                                              nominalHeightAboveGround,
                                                                                              maximumHeightAboveGround,
@@ -118,23 +133,29 @@ public class CenterOfMassHeightControlStateTest
                                                                                              registry,
                                                                                              yoGraphicsListRegistry);
 
-      LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-                                                                                                                              nominalHeightAboveGround,
-                                                                                                                              maximumHeightAboveGround,
-                                                                                                                              0.0,
-                                                                                                                              doubleSupportPercentageIn,
-                                                                                                                              pelvisFrame,
-                                                                                                                              pelvisFrame,
-                                                                                                                              ankleZUpFrames,
-                                                                                                                              anklePositionsInSoleFrame,
-                                                                                                                              yoTime,
-                                                                                                                              yoGraphicsListRegistry,
-                                                                                                                              registry);
-
       heightControlState.setMinimumHeightAboveGround(0.705);
       heightControlState.setNominalHeightAboveGround(0.7849999999999999);
       heightControlState.setMaximumHeightAboveGround(0.9249999999999999);
       heightControlState.setCoMHeightDriftCompensation(false);
+      heightControlState.setGains(gains, () -> 10.0);
+
+      double omega0 = 3.0;
+
+      SideDependentList<FrameConvexPolygon2DReadOnly> feetPolygons = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         feetPolygons.put(robotSide, new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2d())));
+      }
+      ICPPlannerParameters parameters = new SmoothCMPPlannerParameters(1.0);
+      SmoothCMPBasedICPPlanner smoothCMPBasedICPPlanner = new SmoothCMPBasedICPPlanner(10.0, feetPolygons, soleFrames, contactableFeet, null, yoTime,
+                                                                                       registry, yoGraphicsListRegistry, 9.81, parameters);
+      smoothCMPBasedICPPlanner.setOmega0(omega0);
+      smoothCMPBasedICPPlanner.setFinalTransferDuration(1.0);
+      smoothCMPBasedICPPlanner.holdCurrentICP(new FramePoint3D(worldFrame, 0, 0, 0.785));
+//      smoothCMPBasedICPPlanner.initializeForStanding(0.0);
+
+
+      FrameVector2D dummyDesiredICPVelocity = new FrameVector2D();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
       scs.setDT(dt, 1);
@@ -157,6 +178,9 @@ public class CenterOfMassHeightControlStateTest
       List<Footstep> footsteps = generateFootstepsForRamp(footstepTestTools);
 
       double time = 0.0;
+      double dsRatio = 0.6;
+      double stepTime = 2.0;
+
 
       Footstep transferFromFootstep = footsteps.remove(0);
       Footstep previousFootstep = transferFromFootstep;
@@ -167,6 +191,14 @@ public class CenterOfMassHeightControlStateTest
       {
 
          transferFromFootstep = previousFootstep;
+         smoothCMPBasedICPPlanner.clearPlan();
+         for (int i = 0; i < Math.min(3, footsteps.size()); i++)
+         {
+            FootstepTiming timing = new FootstepTiming();
+            timing.setTimings((1.0 - dsRatio) * stepTime, dsRatio * stepTime);
+            FootstepShiftFractions fractions = new FootstepShiftFractions();
+            smoothCMPBasedICPPlanner.addFootstepToPlan(footsteps.get(i), timing, fractions);
+         }
          transferToFootstep = footsteps.remove(0);
 
          previousFootstep = transferToFootstep;
@@ -198,15 +230,15 @@ public class CenterOfMassHeightControlStateTest
 
          // Initialize at the beginning of single support.
          heightControlState.initialize(transferToAndNextFootstepsData, 0.0);
-         CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack = new CoMHeightPartialDerivativesData();
 
          scs.tickAndUpdate();
 
-         double stepTime = 2.0;
+         smoothCMPBasedICPPlanner.initializeForTransfer(time);
 
          int numberOfTicks = (int) (stepTime / dt);
          for (int i = 0; i < numberOfTicks; i++)
          {
+
             if (i == 0.35 * numberOfTicks)
             {
                // Initialize again at the beginning of double support.
@@ -215,10 +247,11 @@ public class CenterOfMassHeightControlStateTest
             }
             else if (i == 0.65 * numberOfTicks)
             {
+               smoothCMPBasedICPPlanner.initializeForSingleSupport(time);
                supportLeg = transferToFootstep.getRobotSide();
             }
 
-            time = time + dt;
+            time += dt;
             robot.setTime(time);
 
             FramePoint3DReadOnly transferFromFootPosition = transferFromFootstep.getFootstepPose().getPosition();
@@ -242,8 +275,11 @@ public class CenterOfMassHeightControlStateTest
             }
 
             boolean isInDoubleSupport = supportLeg == null;
-            // TODO replace with {@link CenterOfMassHeightControlState.solve}
-            lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
+
+            smoothCMPBasedICPPlanner.compute(time);
+            // FIXME should be CoM
+            smoothCMPBasedICPPlanner.getDesiredCapturePointVelocity(dummyDesiredICPVelocity);
+            heightControlState.computeDesiredCoMHeightAcceleration(dummyDesiredICPVelocity, isInDoubleSupport, omega0, false, null);
 
             FramePoint3D comPosition = new FramePoint3D();
             floatingJoint.getJointPose().getPosition().setZ(comPosition.getZ());
@@ -342,69 +378,6 @@ public class CenterOfMassHeightControlStateTest
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
-   }
-
-   public List<Footstep> generateFootstepsForATestCase(FootstepTestHelper footstepProviderTestHelper)
-   {
-      ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
-
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D(13.498008237591158, 12.933984676794712, 0.08304866902498514),
-                                                              new Quaternion(0.712207206856358,
-                                                                             -0.002952488685311897,
-                                                                             0.003108390899721778,
-                                                                             0.7019562060545106)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D(13.170202005363656, 12.938562106620529, 0.08304880466443637),
-                                                              new Quaternion(0.7118317189761082,
-                                                                             -0.0030669544205584594,
-                                                                             0.002995905842662467,
-                                                                             0.7023369719716335)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D(13.331337238526865, 13.209631212022698, 0.07946232652345472),
-                                                              new Quaternion(0.7118303580231159,
-                                                                             -0.0031545801122483245,
-                                                                             0.018597667622730154,
-                                                                             0.7020980820227274)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D(13.080837909205398, 13.505772370798573, 0.07489977483062672),
-                                                              new Quaternion(0.7118264756261261,
-                                                                             -0.003742268262861186,
-                                                                             0.003495827367880344,
-                                                                             0.7023367021713666)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-                                                              new Quaternion(0.7116005831473223,
-                                                                             0.01831580652938022,
-                                                                             0.024589083079517595,
-                                                                             0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-                                                              new Quaternion(0.7118265348281387,
-                                                                             -0.00374226855753469,
-                                                                             0.003495827052433593,
-                                                                             0.7023366421694281)));
-
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-                                                              new Quaternion(0.7116005831473223,
-                                                                             0.01831580652938022,
-                                                                             0.024589083079517595,
-                                                                             0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT,
-                                                              new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-                                                              new Quaternion(0.7118265348281387,
-                                                                             -0.00374226855753469,
-                                                                             0.003495827052433593,
-                                                                             0.7023366421694281)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT,
-                                                              new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-                                                              new Quaternion(0.7116005831473223,
-                                                                             0.01831580652938022,
-                                                                             0.024589083079517595,
-                                                                             0.7019148939072867)));
-
-      return footsteps;
    }
 
    public List<Footstep> generateFootstepsForRamp(FootstepTestHelper footstepProviderTestHelper)
