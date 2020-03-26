@@ -1008,23 +1008,23 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                          referenceCoMGenerator.getCoMVelocityDesiredFinalList(), referenceCoMGenerator.getCoMAccelerationDesiredInitialList(),
                                          referenceCoMGenerator.getCoMAccelerationDesiredFinalList(), referenceCoPGenerator.getNumberOfFootstepsRegistered());
 
-//      angularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getValue(), isStanding.getValue());
-//      angularMomentumTrajectoryGenerator.initializeForDoubleSupport(ZERO_TIME, isStanding.getBooleanValue());
+      angularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromDoubleSupport(isInitialTransfer.getValue(), isStanding.getValue());
+      angularMomentumTrajectoryGenerator.initializeForDoubleSupport(ZERO_TIME, isStanding.getBooleanValue());
 
       // If standing still or in final transfer do not use angular momentum.
-//      if (isStanding.getValue())
-//      {
+      if (isStanding.getValue())
+      {
          referenceCMPGenerator
                .initializeForTransfer(ZERO_TIME, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories(), null,
                                       null);
-//      }
-//      else
-//      {
-//         referenceCMPGenerator
-//               .initializeForTransfer(ZERO_TIME, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories(),
-//                                      angularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories(),
-//                                      angularMomentumTrajectoryGenerator.getSwingAngularMomentumTrajectories());
-//      }
+      }
+      else
+      {
+         referenceCMPGenerator
+               .initializeForTransfer(ZERO_TIME, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories(),
+                                      angularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories(),
+                                      angularMomentumTrajectoryGenerator.getSwingAngularMomentumTrajectories());
+      }
       referenceICPGenerator
             .initializeForTransfer(ZERO_TIME, referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
 
@@ -1065,17 +1065,17 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                            referenceICPGenerator.getICPPositonFromCoPDesiredFinalList());
       }
 
-//      angularMomentumTrajectoryGenerator
-//            .addCopAndComSetpointsToPlan(referenceCoPGenerator.getWaypoints(), referenceCoMGenerator.getCoMPositionDesiredInitialList(),
-//                                         referenceCoMGenerator.getCoMPositionDesiredFinalList(), referenceCoMGenerator.getCoMVelocityDesiredInitialList(),
-//                                         referenceCoMGenerator.getCoMVelocityDesiredFinalList(), referenceCoMGenerator.getCoMAccelerationDesiredInitialList(),
-//                                         referenceCoMGenerator.getCoMAccelerationDesiredFinalList(), referenceCoPGenerator.getNumberOfFootstepsRegistered());
-//      angularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
-//      angularMomentumTrajectoryGenerator.initializeForSingleSupport(ZERO_TIME);
+      angularMomentumTrajectoryGenerator
+            .addCopAndComSetpointsToPlan(referenceCoPGenerator.getWaypoints(), referenceCoMGenerator.getCoMPositionDesiredInitialList(),
+                                         referenceCoMGenerator.getCoMPositionDesiredFinalList(), referenceCoMGenerator.getCoMVelocityDesiredInitialList(),
+                                         referenceCoMGenerator.getCoMVelocityDesiredFinalList(), referenceCoMGenerator.getCoMAccelerationDesiredInitialList(),
+                                         referenceCoMGenerator.getCoMAccelerationDesiredFinalList(), referenceCoPGenerator.getNumberOfFootstepsRegistered());
+      angularMomentumTrajectoryGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
+      angularMomentumTrajectoryGenerator.initializeForSingleSupport(ZERO_TIME);
 
-      referenceCMPGenerator.initializeForSwing(ZERO_TIME, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories(), null, null);
-//                                               angularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories(),
-//                                               angularMomentumTrajectoryGenerator.getSwingAngularMomentumTrajectories());
+      referenceCMPGenerator.initializeForSwing(ZERO_TIME, referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories(),
+                                               angularMomentumTrajectoryGenerator.getTransferAngularMomentumTrajectories(),
+                                               angularMomentumTrajectoryGenerator.getSwingAngularMomentumTrajectories());
       referenceICPGenerator.initializeForSwing(ZERO_TIME, referenceCMPGenerator.getTransferCMPTrajectories(), referenceCMPGenerator.getSwingCMPTrajectories());
 
       referenceCoMGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
@@ -1128,16 +1128,16 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          referenceCoMGenerator.getLinearData(desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration);
 
          // If standing still or in final transfer do not use angular momentum.
-//         if (isStanding.getValue())
-//         {
+         if (isStanding.getValue())
+         {
             desiredCentroidalAngularMomentum.setToZero();
             desiredCentroidalTorque.setToZero();
-//         }
-//         else
-//         {
-//            angularMomentumTrajectoryGenerator.update(this.timeInCurrentState.getDoubleValue());
-//            angularMomentumTrajectoryGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
-//         }
+         }
+         else
+         {
+            angularMomentumTrajectoryGenerator.update(this.timeInCurrentState.getDoubleValue());
+            angularMomentumTrajectoryGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
+         }
 
          decayDesiredVelocityIfNeeded();
 
