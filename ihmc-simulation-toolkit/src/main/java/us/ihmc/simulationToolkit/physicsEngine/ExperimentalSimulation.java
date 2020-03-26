@@ -61,7 +61,7 @@ public class ExperimentalSimulation extends Simulation
       {
          for (Robot robot : getRobots())
          {
-            robot.updateVelocities();
+            robot.update();
             robot.doControllers();
          }
 
