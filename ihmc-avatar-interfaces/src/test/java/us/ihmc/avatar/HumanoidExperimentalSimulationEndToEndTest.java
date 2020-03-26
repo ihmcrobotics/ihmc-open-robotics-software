@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class HumanoidExperimentalSimulationEndToEndTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @BeforeAll
    public static void disableStackTrace()

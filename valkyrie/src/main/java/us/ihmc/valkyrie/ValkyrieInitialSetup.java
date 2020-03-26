@@ -27,10 +27,12 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    private final Quaternion rotation = new Quaternion();
    private boolean robotInitialized = false;
 
+   public ValkyrieInitialSetup()
+   {
+   }
+
    public ValkyrieInitialSetup(double groundZ, double initialYaw)
    {
-      this.groundZ = groundZ;
-      this.initialYaw = initialYaw;
    }
 
    @Override
