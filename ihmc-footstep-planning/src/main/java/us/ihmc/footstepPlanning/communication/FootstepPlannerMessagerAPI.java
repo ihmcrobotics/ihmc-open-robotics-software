@@ -45,6 +45,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pose3DReadOnly> RightFootPose = topic("RightStartPose");
    public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
    public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
+   public static final Topic<FootstepStatusMessage> FootstepStatusMessage = topic("FootstepStatusMessage");
 
    // REA data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
