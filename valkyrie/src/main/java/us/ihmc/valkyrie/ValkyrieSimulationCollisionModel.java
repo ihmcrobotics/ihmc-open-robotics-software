@@ -6,7 +6,9 @@ import java.util.List;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
+import us.ihmc.euclid.shape.primitives.PointShape3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -166,6 +168,15 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
             Box3D footShape = new Box3D(0.275, 0.16, 0.095);
             footShape.getPosition().set(0.044, 0.0, -0.042);
             collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape, ankleRoll.getFrameAfterJoint()));
+
+            for (RobotSide footSide : RobotSide.values)
+            {
+               PointShape3D footFrontCorner = new PointShape3D(new Point3D(0.17, footSide.negateIfRightSide(0.07), -0.09));
+               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footFrontCorner, ankleRoll.getFrameAfterJoint()));
+
+               PointShape3D footBackCorner = new PointShape3D(new Point3D(-0.08, footSide.negateIfRightSide(0.07), -0.09));
+               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footBackCorner, ankleRoll.getFrameAfterJoint()));
+            }
          }
       }
 
