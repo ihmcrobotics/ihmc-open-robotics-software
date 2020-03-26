@@ -1,5 +1,6 @@
 package us.ihmc.robotics.physics;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       if (controllerOutputWriter != null)
          controllerOutputWriter.setMultiBodySystem(multiBodySystem);
 
-      collidables = robotCollisionModel.getRobotCollidables(multiBodySystem);
+      collidables = robotCollisionModel != null ? robotCollisionModel.getRobotCollidables(multiBodySystem) : Collections.emptyList();
 
       forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem, controllerOutputWriter);
 
@@ -60,7 +61,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
          @Override
          public YoSingleContactImpulseCalculator get()
          {
-            YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator(identifier++,
+            YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
+                                                                                               identifier++,
                                                                                                multiBodySystem.getInertialFrame(),
                                                                                                rootBody,
                                                                                                forwardDynamicsPlugin.getForwardDynamicsCalculator(),
@@ -72,7 +74,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
             return calculator;
          }
       });
-      environmentContactConstraintCalculatorPool.clear();
+      resetCalculators();
    }
 
    public void initialize()
@@ -145,7 +147,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
             @Override
             public YoSingleContactImpulseCalculator get()
             {
-               return new YoSingleContactImpulseCalculator(identifier++,
+               return new YoSingleContactImpulseCalculator("Dual",
+                                                           identifier++,
                                                            multiBodySystem.getInertialFrame(),
                                                            rootBody,
                                                            forwardDynamicsPlugin.getForwardDynamicsCalculator(),
