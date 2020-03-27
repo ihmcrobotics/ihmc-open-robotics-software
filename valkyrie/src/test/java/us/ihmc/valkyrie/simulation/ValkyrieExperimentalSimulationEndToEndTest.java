@@ -14,6 +14,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -23,6 +24,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
@@ -30,7 +32,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS);
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
    }
 
    @Test
@@ -62,7 +64,13 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum()
                              .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraTracking(true, true, true, true);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraDolly(true, true, true, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+
+      RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
+      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()));
+      assertOneDoFJointsAreWithingLimits(elevator, 5.0e-3);
    }
 
    private static class FlyingValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
