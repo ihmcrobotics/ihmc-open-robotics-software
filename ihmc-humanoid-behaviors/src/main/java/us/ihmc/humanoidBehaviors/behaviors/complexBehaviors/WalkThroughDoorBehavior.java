@@ -387,7 +387,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
       factory.addState(WalkThroughDoorBehaviorState.DONE, doneState);
 
-      factory.addStateChangedListener((from, to) -> LogTools.info("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name()));
+      factory.addStateChangedListener((from, to) -> {
+         publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
+      });
+
 
       return WalkThroughDoorBehaviorState.SETUP_ROBOT;
    }
