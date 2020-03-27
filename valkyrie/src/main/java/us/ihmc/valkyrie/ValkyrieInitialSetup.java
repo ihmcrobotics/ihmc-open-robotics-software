@@ -25,7 +25,6 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    private final Vector3D positionInWorld = new Vector3D();
    private final Vector3D offset = new Vector3D();
    private final Quaternion rotation = new Quaternion();
-   private boolean robotInitialized = false;
 
    public ValkyrieInitialSetup()
    {
@@ -33,17 +32,15 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
    public ValkyrieInitialSetup(double groundZ, double initialYaw)
    {
+      setInitialGroundHeight(groundZ);
+      setInitialYaw(initialYaw);
    }
 
    @Override
    public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
-      if (!robotInitialized)
-      {
-         setActuatorPositions(robot, jointMap);
-         positionRobotInWorld(robot);
-         robotInitialized = true;
-      }
+      setActuatorPositions(robot, jointMap);
+      positionRobotInWorld(robot);
    }
 
    private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)

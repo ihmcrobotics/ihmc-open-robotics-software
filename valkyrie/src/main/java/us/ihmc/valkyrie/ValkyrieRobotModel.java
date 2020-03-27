@@ -337,7 +337,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       if (valkyrieInitialSetup == null)
-         valkyrieInitialSetup = new ValkyrieInitialSetup(groundHeight, initialYaw);
+         valkyrieInitialSetup = new ValkyrieInitialSetup();
       valkyrieInitialSetup.setInitialGroundHeight(groundHeight);
       valkyrieInitialSetup.setInitialYaw(initialYaw);
       return valkyrieInitialSetup;
