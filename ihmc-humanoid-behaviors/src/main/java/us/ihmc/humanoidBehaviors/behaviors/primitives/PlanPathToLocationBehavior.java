@@ -26,6 +26,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
@@ -36,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
    //wakeup, request plan
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
    private boolean planningSuccess = false;
 
    private FootstepPlanningResult planningResult;
@@ -179,7 +180,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-
+            publishTextToSpeech("PlanPathToLocationBehavior: Waiting until plan response for " + timeout);
             sleepBehavior.setSleepTime(timeout);
          }
 
@@ -191,9 +192,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
         	 {
         		 footstepPlanningToolboxOutputStatus= footPlanStatusQueue.getLatestPacket();
         		 planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+        		 publishTextToSpeech("Plan received: " + planningResult);
         	 }
         	 
-        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
+//        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
         	 
             return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
 

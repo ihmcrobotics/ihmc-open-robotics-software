@@ -29,7 +29,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
 
-   api("us.ihmc:log-tools:0.3.1")
+   api("us.ihmc:log-tools:0.4.1")
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:euclid-frame:0.12.2")
    api("us.ihmc:euclid-shape:0.12.2")
