@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class PhysicsEngine
+public class ExperimentalPhysicsEngine
 {
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
@@ -27,7 +27,7 @@ public class PhysicsEngine
 
    private boolean initialize = true;
 
-   public PhysicsEngine()
+   public ExperimentalPhysicsEngine()
    {
       collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
       multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
