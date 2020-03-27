@@ -1,13 +1,23 @@
 package us.ihmc.avatar;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.function.ToDoubleFunction;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -48,6 +58,43 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
       drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum()
                              .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+
+      RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
+      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()));
+      assertOneDoFJointsAreWithingLimits(elevator, 1.0e-3);
+   }
+
+   public static void assertRigidBodiesAreAboveFlatGround(RigidBodyBasics rootBody, ToDoubleFunction<Point3DReadOnly> groundHeightFunction)
+   {
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+      {
+         if (rigidBody.isRootBody())
+            continue;
+
+         FramePoint3D bodyCoM = new FramePoint3D(rigidBody.getBodyFixedFrame());
+         bodyCoM.changeFrame(ReferenceFrame.getWorldFrame());
+         double groundHeight = groundHeightFunction.applyAsDouble(bodyCoM);
+         assertTrue(bodyCoM.getZ() > groundHeight,
+                    "Rigid-body is below the ground: " + rigidBody.getName() + ", CoM: " + bodyCoM + ", groundHeight: " + groundHeight);
+      }
+   }
+
+   public static void assertOneDoFJointsAreWithingLimits(RigidBodyBasics rootBody, double epsilon)
+   {
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof OneDoFJointBasics)
+         {
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
+
+            double q = oneDoFJoint.getQ();
+            double max = oneDoFJoint.getJointLimitUpper();
+            double min = oneDoFJoint.getJointLimitLower();
+
+            if (!MathTools.intervalContains(q, min - epsilon, max + epsilon))
+               fail("Joint outside limits: " + oneDoFJoint.getName() + ", q = " + q + ", limits = [" + min + ", " + max + "].");
+         }
+      }
    }
 }
