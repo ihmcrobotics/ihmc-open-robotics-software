@@ -2,6 +2,7 @@ package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -32,11 +33,12 @@ import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionD
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.tools.statistics.GraphSearchStatistics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
@@ -47,6 +49,7 @@ import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.OcclusionHandlingPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -63,10 +66,7 @@ import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 import java.time.Duration;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
@@ -347,24 +347,28 @@ public class AtlasCorridorNavigationTest
          {
             LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getResult());
 
-            GraphSearchStatistics graphSearchStatistics = new GraphSearchStatistics();
-            graphSearchStatistics.set(planner);
-            HashMap<BipedalFootstepPlannerNodeRejectionReason, Integer> reasons = new HashMap<>();
-            for (PlannerNodeData nodeDatum : graphSearchStatistics.getFullGraph().getNodeData())
+            EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionReasonCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
+            Arrays.stream(BipedalFootstepPlannerNodeRejectionReason.values).forEach(reason -> rejectionReasonCount.put(reason, new MutableInt()));
+
+            List<FootstepPlannerIterationData> iterationDataList = planner.getIterationData();
+            HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = planner.getEdgeDataMap();
+            iterationDataList.stream().forEach(iterationData ->
+                                               {
+                                                  List<FootstepNode> childNodes = iterationData.getChildNodes();
+                                                  for (int i = 0; i < childNodes.size(); i++)
+                                                  {
+                                                     GraphEdge<FootstepNode> edge = new GraphEdge<>(iterationData.getStanceNode(), childNodes.get(i));
+                                                     if (!edgeDataMap.containsKey(edge))
+                                                        continue;
+                                                     BipedalFootstepPlannerNodeRejectionReason rejectionReason = edgeDataMap.get(edge).getRejectionReason();
+                                                     if (rejectionReason != null)
+                                                        rejectionReasonCount.get(rejectionReason).incrementAndGet();
+                                                  }
+                                               });
+
+            for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
             {
-               BipedalFootstepPlannerNodeRejectionReason rejectionReason = nodeDatum.getRejectionReason();
-               if (!reasons.containsKey(rejectionReason))
-               {
-                  reasons.put(rejectionReason, 1);
-               }
-               else
-               {
-                  reasons.put(rejectionReason, reasons.get(rejectionReason) + 1);
-               }
-            }
-            for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : reasons.keySet())
-            {
-               System.out.println("Reason: " + rejectionReason + "  " + reasons.get(rejectionReason));
+               System.out.println("Reason: " + rejectionReason + "  " + rejectionReasonCount.get(rejectionReason));
             }
 
             ThreadTools.sleep(1000);

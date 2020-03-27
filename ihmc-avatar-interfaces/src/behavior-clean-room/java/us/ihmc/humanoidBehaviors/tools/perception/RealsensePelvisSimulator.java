@@ -33,6 +33,10 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       transform.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
       transform.appendPitchRotation(depthPitchingAngle);
       transform.appendTranslation(depthThickness, 0.0, 0.0);
+
+      // Real robot Realsense D435 sensor has an additional frame change to convert to camera frame
+      // which is Z forward instead of X forward. We omit that here because the SimulatedDepthCamera
+      // algorithm operates if X forward frame (same as robot)
    }
 
    public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, Ros2NodeInterface ros2Node)

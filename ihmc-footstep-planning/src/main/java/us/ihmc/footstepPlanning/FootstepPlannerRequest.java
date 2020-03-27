@@ -15,19 +15,84 @@ import java.util.ArrayList;
 
 public class FootstepPlannerRequest
 {
+   /**
+    * Unique ID associated with the plan
+    */
    private int requestId;
 
+   /**
+    * Requested initial stance side. If this is null the planner will choose an initial stance side
+    */
    private RobotSide requestedInitialStanceSide;
-   private final SideDependentList<Pose3D> startFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
-   private final SideDependentList<Pose3D> goalFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
 
+   /**
+    * The starting left and right footstep poses
+    */
+   private final SideDependentList<Pose3D> startFootPoses = new SideDependentList<>(side -> new Pose3D());
+
+   /**
+    * The goal left and right footstep poses.
+    */
+   private final SideDependentList<Pose3D> goalFootPoses = new SideDependentList<>(side -> new Pose3D());
+
+   /**
+    * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+    */
+   private boolean snapGoalSteps;
+
+   /**
+    * If {@link #snapGoalSteps} is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+    */
+   private boolean abortIfGoalStepSnappingFails;
+
+   /**
+    * If true, the planner will plan a body path. If false, it will try to follow a straight line to the goal.
+    */
    private boolean planBodyPath;
+
+   /**
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+    */
+   private boolean performAStarSearch;
+
+   /**
+    * (beta) This specifies an acceptable xy distance that is acceptable to terminate planning. Set to non-positive value to disable.
+    */
    private double goalDistanceProximity;
+
+   /**
+    * (beta) This specifies an acceptable orientation distance that is acceptable to terminate planning. Set to non-positive value to disable.
+    */
    private double goalYawProximity;
+
+   /**
+    * Planner timeout in seconds. If {@link #maximumIterations} is set also, the planner terminates whenever either is reached
+    */
    private double timeout;
+
+   /**
+    * Maximum iterations. Set to a non-positive number to disable. If {@link #timeout} is also set, the planner terminates whener either is reached.
+    */
+   private int maximumIterations;
+
+   /**
+    * Maximum lookahead distance along the body path. Is only used when {@link #planBodyPath} is true
+    */
    private double horizonLength;
+
+   /**
+    * Planar regions. May be null or empty to enable flat ground mode.
+    */
    private PlanarRegionsList planarRegionsList;
+
+   /**
+    * If true, will ignore planar regions and plan on flat ground
+    */
    private boolean assumeFlatGround;
+
+   /**
+    * Externally provided body path waypoints. If this is non-empty and {@link #planBodyPath} is false, the planner will follow this path.
+    */
    private final ArrayList<Pose3DReadOnly> bodyPathWaypoints = new ArrayList<>();
 
    public FootstepPlannerRequest()
@@ -41,10 +106,14 @@ public class FootstepPlannerRequest
       requestedInitialStanceSide = RobotSide.LEFT;
       startFootPoses.forEach(Pose3D::setToNaN);
       goalFootPoses.forEach(Pose3D::setToNaN);
+      snapGoalSteps = true;
+      abortIfGoalStepSnappingFails = false;
       planBodyPath = false;
+      performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
       timeout = 5.0;
+      maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
       assumeFlatGround = false;
@@ -111,9 +180,24 @@ public class FootstepPlannerRequest
       this.goalFootPoses.get(side).set(goalPosition, goalOrientation);
    }
 
+   public void setSnapGoalSteps(boolean snapGoalSteps)
+   {
+      this.snapGoalSteps = snapGoalSteps;
+   }
+
+   public void setAbortIfGoalStepSnappingFails(boolean abortIfGoalStepSnappingFails)
+   {
+      this.abortIfGoalStepSnappingFails = abortIfGoalStepSnappingFails;
+   }
+
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
+   }
+
+   public void setPerformAStarSearch(boolean performAStarSearch)
+   {
+      this.performAStarSearch = performAStarSearch;
    }
 
    public void setGoalDistanceProximity(double goalDistanceProximity)
@@ -129,6 +213,11 @@ public class FootstepPlannerRequest
    public void setTimeout(double timeout)
    {
       this.timeout = timeout;
+   }
+
+   public void setMaximumIterations(int maximumIterations)
+   {
+      this.maximumIterations = maximumIterations;
    }
 
    public void setHorizonLength(double horizonLength)
@@ -166,9 +255,24 @@ public class FootstepPlannerRequest
       return goalFootPoses;
    }
 
+   public boolean getSnapGoalSteps()
+   {
+      return snapGoalSteps;
+   }
+
+   public boolean getAbortIfGoalStepSnappingFails()
+   {
+      return abortIfGoalStepSnappingFails;
+   }
+
    public boolean getPlanBodyPath()
    {
       return planBodyPath;
+   }
+
+   public boolean getPerformAStarSearch()
+   {
+      return performAStarSearch;
    }
 
    public double getGoalDistanceProximity()
@@ -184,6 +288,11 @@ public class FootstepPlannerRequest
    public double getTimeout()
    {
       return timeout;
+   }
+
+   public int getMaximumIterations()
+   {
+      return maximumIterations;
    }
 
    public double getHorizonLength()
@@ -218,11 +327,14 @@ public class FootstepPlannerRequest
       setStartFootPose(RobotSide.RIGHT, requestPacket.getStartRightFootPose());
       setGoalFootPose(RobotSide.LEFT, requestPacket.getGoalLeftFootPose());
       setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
-
-      setPlanBodyPath(FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath());
+      setSnapGoalSteps(requestPacket.getSnapGoalSteps());
+      setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
+      setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
+      setMaximumIterations(requestPacket.getMaxIterations());
       if(requestPacket.getHorizonLength() > 0.0)
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
@@ -245,11 +357,14 @@ public class FootstepPlannerRequest
       requestPacket.getStartRightFootPose().set(getStartFootPoses().get(RobotSide.RIGHT));
       requestPacket.getGoalLeftFootPose().set(getGoalFootPoses().get(RobotSide.LEFT));
       requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
-
-      requestPacket.setRequestedFootstepPlannerType((getPlanBodyPath() ? FootstepPlannerType.VIS_GRAPH_WITH_A_STAR : FootstepPlannerType.A_STAR).toByte());
+      requestPacket.setSnapGoalSteps(getSnapGoalSteps());
+      requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
+      requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
       requestPacket.setTimeout(getTimeout());
+      requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
 
@@ -277,11 +392,15 @@ public class FootstepPlannerRequest
       this.startFootPoses.get(RobotSide.RIGHT).set(other.startFootPoses.get(RobotSide.RIGHT));
       this.goalFootPoses.get(RobotSide.LEFT).set(other.goalFootPoses.get(RobotSide.LEFT));
       this.goalFootPoses.get(RobotSide.RIGHT).set(other.goalFootPoses.get(RobotSide.RIGHT));
+      this.snapGoalSteps = other.snapGoalSteps;
+      this.abortIfGoalStepSnappingFails = other.abortIfGoalStepSnappingFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
       this.timeout = other.timeout;
+      this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
 

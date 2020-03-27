@@ -28,8 +28,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior.FollowFiducialState;
@@ -446,13 +444,14 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       Quaternion orientation = new Quaternion();
       currentGoalPose.get().get(location, orientation);
       publishUIPositionCheckerPacket(location, orientation);
+      boolean planBodyPath = false;
 
       FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
                                                                                                               startLeftFootPose,
                                                                                                               startRightFootPose,
                                                                                                               currentGoalPose.get(),
                                                                                                               idealStanceWidth,
-                                                                                                              FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                              planBodyPath);
 
       if (planarRegions.get() != null)
          request.getPlanarRegionsListMessage().set(planarRegions.get());

@@ -5,10 +5,10 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -54,9 +53,11 @@ public class MainTabController
 
    // control
    @FXML
-   private ComboBox<FootstepPlannerType> plannerType;
-   @FXML
    private CheckBox acceptNewRegions;
+   @FXML
+   private CheckBox performAStarSearch;
+   @FXML
+   private CheckBox planBodyPath;
    @FXML
    private CheckBox assumeFlatGround;
    @FXML
@@ -66,7 +67,7 @@ public class MainTabController
    @FXML
    private Spinner<Double> timeout;
    @FXML
-   private Spinner<Double> bestEffortTimeout;
+   private Spinner<Integer> maxIterations;
    @FXML
    private Spinner<Double> horizonLength;
 
@@ -98,6 +99,10 @@ public class MainTabController
    private Button placeGoal;
    @FXML
    private CheckBox bindStartToRobot;
+   @FXML
+   private CheckBox snapGoalSteps;
+   @FXML
+   private CheckBox abortIfGoalStepSnapFails;
 
    @FXML
    private Button computePath;
@@ -271,12 +276,8 @@ public class MainTabController
 
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
-      ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
-      plannerType.setItems(plannerTypeOptions);
-      plannerType.setValue(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
-
       timeout.setValueFactory(createTimeoutValueFactory());
-      bestEffortTimeout.setValueFactory(new DoubleSpinnerValueFactory(0.0, 100.0, 3.0, 1.0));
+      maxIterations.setValueFactory(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 1));
       horizonLength.setValueFactory(createHorizonValueFactory());
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
@@ -284,7 +285,8 @@ public class MainTabController
 
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
-      messager.bindBidirectional(BindStartToRobot, bindStartToRobot.selectedProperty(), false);
+      messager.bindBidirectional(SnapGoalSteps, snapGoalSteps.selectedProperty(), true);
+      messager.bindBidirectional(AbortIfGoalStepSnapFails, abortIfGoalStepSnapFails.selectedProperty(), true);
    }
 
    public void bindControls()
@@ -292,7 +294,6 @@ public class MainTabController
       setupControls();
 
       // control
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerType, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
@@ -314,9 +315,7 @@ public class MainTabController
                                       });
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerBestEffortTimeout, bestEffortTimeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
@@ -349,7 +348,8 @@ public class MainTabController
       goalRotationProperty.bindBidirectionalYaw(goalYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
-      messager.registerTopicListener(GlobalReset, reset -> clearGoalTextFields());
+      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
+      messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);
       previewSlider.valueProperty().addListener((ChangeListener<Number>) (observable, oldValue, newValue) -> walkingPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
