@@ -168,7 +168,7 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
                                                                                                                         maximumHeightAboveGround,
                                                                                                                         defaultOffsetHeightAboveGround,
                                                                                                                         doubleSupportPercentageIn,
-                                                                                                                        centerOfMassFrame,
+                                                                                                                        pelvisFrame,
                                                                                                                         soleFrames,
                                                                                                                         yoTime,
                                                                                                                         yoGraphicsListRegistry,

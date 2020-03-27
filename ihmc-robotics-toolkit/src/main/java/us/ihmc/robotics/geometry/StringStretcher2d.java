@@ -212,14 +212,14 @@ public class StringStretcher2d
    {
       double x = minPointX;
       if (Math.abs(x - maxPointX) > 1e-7)
-         throw new RuntimeException();
+         throw new RuntimeException("Min X " + x + " and Max X " + maxPointX + " aren't far enough apart.");
       if (minPointY > maxPointY)
-         throw new RuntimeException();
+         throw new RuntimeException("Min Y " + minPointY + " is greater than Max Y " + maxPointY + ".");
 
       if (x < startPoint.getX())
-         throw new RuntimeException();
+         throw new RuntimeException("Min X " + x + "  is less than the start point " + startPoint.getX() + ".");
       if (x > endPoint.getX())
-         throw new RuntimeException();
+         throw new RuntimeException("Min X " + x + "  is greater than the end point " + endPoint.getX() + ".");
 
       int i = 0;
       while ((minMaxPoints.size() > i) && (x > minMaxPoints.get(i).getMinPoint().getX()))

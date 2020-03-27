@@ -200,6 +200,7 @@ public abstract class TransferState extends WalkingState
 
       // TODO double check this
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
+      comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, 0.0);
    }
 
