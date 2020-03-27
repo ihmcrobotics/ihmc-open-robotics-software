@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.function.ToDoubleFunction;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -25,11 +27,25 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public abstract class HumanoidExperimentalSimulationEndToEndTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   protected DRCSimulationTestHelper drcSimulationTestHelper = null;
 
    @BeforeAll
    public static void disableStackTrace()
    {
       YoVariable.SAVE_STACK_TRACE = false;
+   }
+
+   @AfterEach
+   public void tearDown()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+         ThreadTools.sleepForever();
+
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
    }
 
    public void testStanding(TestInfo testInfo) throws Exception
@@ -38,7 +54,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       drcSimulationTestHelper.getSCSInitialSetup().setRecordFrequency(1);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
@@ -51,7 +67,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
       // Switch to zero-torque controller.
