@@ -5,13 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -181,8 +175,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       footPolygon.clear(soleFrame);
       for (int i = 0; i < contactPoints.get(trailingLeg).size(); i++)
       {
-         contactPoints.get(trailingLeg).get(i).getPosition2d(toeOffContactPoint2d);
-         footPolygon.addVertex(toeOffContactPoint2d);
+         footPolygon.addVertex(contactPoints.get(trailingLeg).get(i));
       }
       footPolygon.update();
    }

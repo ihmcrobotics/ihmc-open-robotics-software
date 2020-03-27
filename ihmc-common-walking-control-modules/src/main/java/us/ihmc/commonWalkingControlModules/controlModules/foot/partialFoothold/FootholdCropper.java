@@ -229,7 +229,7 @@ public class FootholdCropper
          for (; i < controllerFootPolygon.getNumberOfVertices(); i++)
          {
             YoContactPoint contactPoint = contactPoints.get(i);
-            contactPoint.setPosition(controllerFootPolygon.getVertex(i));
+            contactPoint.set(controllerFootPolygon.getVertex(i));
             contactPoint.setInContact(true);
          }
          for (; i < contactPoints.size(); i++)
