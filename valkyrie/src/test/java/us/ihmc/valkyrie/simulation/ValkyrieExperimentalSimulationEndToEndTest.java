@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -64,8 +63,6 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
                              .set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
-
-      ThreadTools.sleepForever();
    }
 
    private static class FlyingValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>

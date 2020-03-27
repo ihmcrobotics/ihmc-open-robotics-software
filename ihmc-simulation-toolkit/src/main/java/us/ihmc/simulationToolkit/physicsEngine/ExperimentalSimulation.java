@@ -61,7 +61,7 @@ public class ExperimentalSimulation extends Simulation
    public void addEnvironmentCollidables(CollidableHelper helper, String robotCollisionMask, String environmentCollisionMask,
                                          CommonAvatarEnvironmentInterface environment)
    {
-      toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment);
+      addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
    }
 
    public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidable)
