@@ -62,9 +62,6 @@ mainDependencies {
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
    api("us.ihmc:ihmc-avatar-interfaces-behavior-clean-room:source")
    api("us.ihmc:ihmc-avatar-interfaces-behavior-fx-ui:source")
-
-   api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.10")
-   api("com.badlogicgames.gdx:gdx-platform:1.9.10:natives-desktop")
 }
 
 testDependencies {
