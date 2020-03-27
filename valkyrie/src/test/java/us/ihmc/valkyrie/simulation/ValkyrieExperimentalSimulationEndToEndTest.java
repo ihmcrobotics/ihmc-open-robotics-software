@@ -57,7 +57,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
       robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup());
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
-      DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
       // Switch to zero-torque controller.
