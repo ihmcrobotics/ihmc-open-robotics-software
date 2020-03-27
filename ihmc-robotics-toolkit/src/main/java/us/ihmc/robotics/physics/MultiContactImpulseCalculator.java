@@ -260,6 +260,11 @@ public class MultiContactImpulseCalculator
       return contactCalculators;
    }
 
+   public boolean hasConverged()
+   {
+      return iterationCounter <= maxNumberOfIterations;
+   }
+
    private CombinedRigidBodyTwistProviders assembleExternalRigidBodyTwistModifierForCalculator(ImpulseBasedConstraintCalculator calculator)
    {
       CombinedRigidBodyTwistProviders rigidBodyTwistProviders = new CombinedRigidBodyTwistProviders(rootFrame);
