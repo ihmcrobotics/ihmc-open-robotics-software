@@ -5,12 +5,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -21,15 +23,10 @@ import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.IMUMount;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class AtlasSDFViewer
@@ -37,11 +34,13 @@ public class AtlasSDFViewer
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_IMU_FRAMES = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_SIM_COLLISIONS = true;
 
    public static void main(String[] args)
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      AtlasRobotVersion atlasRobotVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
+      DRCRobotModel robotModel = new AtlasRobotModel(atlasRobotVersion, RobotTarget.SCS, false);
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       if (SHOW_ELLIPSOIDS)
@@ -66,28 +65,35 @@ public class AtlasSDFViewer
          addKinematicsCollisionGraphics(fullRobotModel, sdfRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
       }
 
+      if (SHOW_SIM_COLLISIONS)
+      {
+         FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+         fullRobotModel.updateFrames();
+         FramePoint3D chestCoM = new FramePoint3D(fullRobotModel.getChest().getBodyFixedFrame());
+         chestCoM.changeFrame(ReferenceFrame.getWorldFrame());
+         System.out.println(chestCoM);
+         AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(robotModel.getJointMap(), atlasRobotVersion);
+         collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
+         addKinematicsCollisionGraphics(fullRobotModel, sdfRobot, collisionModel);
+      }
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
-
-
 
       SelectedListener selectedListener = new SelectedListener()
       {
          @Override
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location,
+                              Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation)
          {
-            System.out.println("Clicked location " +  location);
+            System.out.println("Clicked location " + location);
          }
       };
 
       scs.attachSelectedListener(selectedListener);
 
-
-
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }
-
 
    private static void showIMUFrames(HumanoidFloatingRootJointRobot sdfRobot)
    {
@@ -109,7 +115,6 @@ public class AtlasSDFViewer
          linkGraphics.identity();
       }
    }
-
 
    private static void addIntertialEllipsoidsToVisualizer(FloatingRootJointRobot sdfRobot)
    {
@@ -202,6 +207,19 @@ public class AtlasSDFViewer
          graphics.addCapsule(capsule.getRadius(),
                              capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
                              appearance);
+      }
+      else if (shape instanceof Box3DReadOnly)
+      {
+         Box3DReadOnly box = (Box3DReadOnly) shape;
+         graphics.translate(box.getPosition());
+         graphics.rotate(new RotationMatrix(box.getOrientation()));
+         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), true, appearance);
+      }
+      else if (shape instanceof PointShape3DReadOnly)
+      {
+         PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
+         graphics.translate(pointShape);
+         graphics.addSphere(0.01, appearance);
       }
       else
       {

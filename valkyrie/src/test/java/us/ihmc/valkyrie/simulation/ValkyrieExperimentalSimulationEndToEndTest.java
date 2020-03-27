@@ -19,14 +19,11 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.physics.CollidableHelper;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.ValkyrieSimulationCollisionModel;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
@@ -35,14 +32,6 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
    public DRCRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS);
-   }
-
-   @Override
-   public RobotCollisionModel getRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
-   {
-      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getRobotModel().getJointMap());
-      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
-      return collisionModel;
    }
 
    @Test
