@@ -536,8 +536,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double dzds = spline.getVelocity();
       double ddzdds = spline.getAcceleration();
 
-      double dsdx = (projectionSegmentInWorld.getSecondEndpointX() - projectionSegmentInWorld.getFirstEndpointX()) / projectionSegmentInWorld.length();
-      double dsdy = (projectionSegmentInWorld.getSecondEndpointZ() - projectionSegmentInWorld.getFirstEndpointZ()) / projectionSegmentInWorld.length();
+      double length = startWaypoint.distance(endWaypoint);
+      double dsdx = (endWaypoint.getX() - startWaypoint.getX()) / length;
+      double dsdy = (endWaypoint.getZ() - startWaypoint.getZ()) / length;
 
       double ddsddx = 0;
       double ddsddy = 0;
