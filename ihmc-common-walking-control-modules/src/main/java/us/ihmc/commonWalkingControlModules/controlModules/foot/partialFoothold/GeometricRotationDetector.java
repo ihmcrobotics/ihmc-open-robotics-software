@@ -59,8 +59,7 @@ public class GeometricRotationDetector implements FootRotationDetector
       double cosAlpha = Math.abs(groundPlaneNormal.dot(footNormal));
       double alpha = Math.acos(cosAlpha);
       angleFootGround.set(alpha);
-      if (!isRotating.getBooleanValue())
-         isRotating.set(alpha > angleThreshold.getValue());
+      isRotating.set(angleFootGround.getDoubleValue() > angleThreshold.getValue());
 
       return isRotating.getBooleanValue();
    }

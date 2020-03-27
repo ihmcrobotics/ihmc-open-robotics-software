@@ -79,7 +79,7 @@ public class OnlineStandardDeviationCalculator
          variance.set(sumOfSquare.getDoubleValue() / numberOfSamples.getIntegerValue());
       }
 
-      if (MathTools.epsilonEquals(variance.getDoubleValue(), 0.0, 1e-10))
+      if (numberOfSamples.getValue() < 2)
          standardDeviation.set(0.0);
       else
          standardDeviation.set(Math.sqrt(variance.getDoubleValue()));

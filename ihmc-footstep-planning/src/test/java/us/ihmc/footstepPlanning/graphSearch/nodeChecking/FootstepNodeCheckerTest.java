@@ -18,7 +18,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
@@ -263,6 +262,12 @@ public class FootstepNodeCheckerTest
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
 
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
+
       FootstepNode node0 = new FootstepNode(0.2, 0.2, 0.0, RobotSide.LEFT);
       RigidBodyTransform snapTransform0 = new RigidBodyTransform();
 
@@ -295,6 +300,12 @@ public class FootstepNodeCheckerTest
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeSnapper snapper = new TestSnapper();
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
+
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
 
       double minFoothold = parameters.getMinimumFootholdPercent();
 
@@ -364,6 +375,13 @@ public class FootstepNodeCheckerTest
 
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
       checker.setParentNodeSupplier(graph::getParentNode);
+
+      // add planar regions, otherwise will always be valid
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+      PlanarRegionsList dummyRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      checker.setPlanarRegions(dummyRegions);
+
       Assert.assertFalse(checker.isNodeValid(node3, node2));
    }
 
@@ -421,29 +439,24 @@ public class FootstepNodeCheckerTest
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);
 
-      TestListener rejectionListener = new TestListener();
-
       double footLength = 0.2;
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeChecker(parameters, footPolygons, snapper, edgeData);
-      nodeChecker.setListener(rejectionListener);
-
       nodeChecker.setPlanarRegions(planarRegionsList);
 
       FootstepNode previousNode = new FootstepNode(0.0, 0.1, 0.0, RobotSide.LEFT);
       FootstepNode node = new FootstepNode(0.0, -0.1, 0.0, RobotSide.RIGHT);
 
       assertTrue(nodeChecker.isNodeValid(node, previousNode));
-      assertEquals(null, rejectionListener.getRejectionReason());
+      assertEquals(null, edgeData.getRejectionReason());
 
       double rotationAngle;
 
       // test a bunch of independent roll/pitch valid angles
       for (rotationAngle = -parameters.getMinimumSurfaceInclineRadians() + barelyTooSteepEpsilon; rotationAngle < parameters.getMinimumSurfaceInclineRadians() - barelyTooSteepEpsilon; rotationAngle += 0.001)
       {
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
@@ -451,21 +464,19 @@ public class FootstepNodeCheckerTest
          snapper.setPlanarRegions(planarRegionsList);
 
          assertTrue(nodeChecker.isNodeValid(node, previousNode));
-         assertEquals(null, rejectionListener.getRejectionReason());
+         assertEquals(null, edgeData.getRejectionReason());
 
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
          assertTrue(nodeChecker.isNodeValid(node, previousNode));
-         assertEquals(null, rejectionListener.getRejectionReason());
+         assertEquals(null, edgeData.getRejectionReason());
       }
 
       for (rotationAngle = parameters.getMinimumSurfaceInclineRadians() + 0.001; rotationAngle < Math.toRadians(75); rotationAngle += 0.001)
       {
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
@@ -473,21 +484,19 @@ public class FootstepNodeCheckerTest
          nodeChecker.setPlanarRegions(planarRegionsList);
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(node, previousNode));
-         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, rejectionListener.getRejectionReason());
+         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, edgeData.getRejectionReason());
 
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(node, previousNode));
-         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, rejectionListener.getRejectionReason());
+         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, edgeData.getRejectionReason());
       }
 
       for (rotationAngle = -Math.toRadians(75); rotationAngle < -parameters.getMinimumSurfaceInclineRadians(); rotationAngle += 0.001)
       {
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
@@ -495,16 +504,15 @@ public class FootstepNodeCheckerTest
          snapper.setPlanarRegions(planarRegionsList);
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(node, previousNode));
-         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, rejectionListener.getRejectionReason());
+         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, edgeData.getRejectionReason());
 
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.appendPitchRotation(rotationAngle);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
          assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(node, previousNode));
-         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, rejectionListener.getRejectionReason());
+         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, edgeData.getRejectionReason());
       }
 
       // test random orientations
@@ -513,7 +521,6 @@ public class FootstepNodeCheckerTest
       {
          QuaternionReadOnly orientation3DReadOnly = EuclidCoreRandomTools.nextQuaternion(random);
 
-         rejectionListener.tickAndUpdate();
          transformToWorld.setIdentity();
          transformToWorld.setRotation(orientation3DReadOnly);
          planarRegion.set(transformToWorld, polygons);
@@ -530,55 +537,15 @@ public class FootstepNodeCheckerTest
          {
             String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinimumSurfaceInclineRadians();
             assertFalse(message, nodeChecker.isNodeValid(node, previousNode));
-            boolean correctRejection = BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP == rejectionListener.getRejectionReason() ||
-                                       BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP == rejectionListener.getRejectionReason();
+            boolean correctRejection = BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP == edgeData.getRejectionReason() ||
+                                       BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP == edgeData.getRejectionReason();
             assertTrue(message, correctRejection);
          }
          else
          {
             assertTrue(nodeChecker.isNodeValid(node, previousNode));
-            assertEquals(null, rejectionListener.getRejectionReason());
+            assertEquals(null, edgeData.getRejectionReason());
          }
-      }
-   }
-
-   public class TestListener implements BipedalFootstepPlannerListener
-   {
-      private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
-
-      @Override
-      public void addNode(FootstepNode node, FootstepNode previousNode)
-      {
-
-      }
-
-      @Override
-      public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, BipedalFootstepPlannerNodeRejectionReason reason)
-      {
-         rejectionReason = reason;
-      }
-
-      @Override
-      public void plannerFinished(List<FootstepNode> plan)
-      {
-
-      }
-
-      @Override
-      public void reportLowestCostNodeList(List<FootstepNode> plan)
-      {
-
-      }
-
-      @Override
-      public void tickAndUpdate()
-      {
-         rejectionReason = null;
-      }
-
-      public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
-      {
-         return rejectionReason;
       }
    }
 

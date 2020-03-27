@@ -3,40 +3,38 @@ package us.ihmc.footstepPlanning.simplePlanners;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
+public class PlanThenSnapPlanner
 {
-   private final FootstepPlanner internalPlanner;
+   private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private PlanarRegionsList planarRegionsList;
    private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
 
-   public PlanThenSnapPlanner(FootstepPlanner internalPlanner, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanThenSnapPlanner(FootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this.internalPlanner = internalPlanner;
+      this.turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
       this.footPolygons = footPolygons;
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setWiggleInWrongDirectionThreshold(Double.NaN);
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
    }
 
-   @Override
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
    {
-      internalPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
+      turnWalkTurnPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
    }
 
-   @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
-      internalPlanner.setGoal(goal);
+      turnWalkTurnPlanner.setGoal(goal);
    }
 
-   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -44,11 +42,10 @@ public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
 
    private FootstepPlan footstepPlan = new FootstepPlan();
 
-   @Override
    public FootstepPlanningResult plan()
    {
-      FootstepPlanningResult result = internalPlanner.plan();
-      footstepPlan = internalPlanner.getPlan();
+      FootstepPlanningResult result = turnWalkTurnPlanner.plan();
+      footstepPlan = turnWalkTurnPlanner.getPlan();
 
       if (planarRegionsList == null)
          return result;
@@ -78,27 +75,8 @@ public class PlanThenSnapPlanner implements BodyPathAndFootstepPlanner
       return result;
    }
 
-   @Override
    public FootstepPlan getPlan()
    {
       return footstepPlan;
    }
-
-   @Override
-   public void setTimeout(double timeout)
-   {
-
-   }
-
-   @Override
-   public double getPlanningDuration()
-   {
-      return -1;
-   }
-
-   @Override
-   public void setPlanningHorizonLength(double planningHorizonLength)
-   {
-   }
-
 }

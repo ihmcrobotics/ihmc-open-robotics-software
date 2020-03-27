@@ -3,19 +3,33 @@ package us.ihmc.footstepPlanning.log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
+import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.swing.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class FootstepPlannerLogLoader
 {
@@ -85,9 +99,33 @@ public class FootstepPlannerLogLoader
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
+         // load body path data file
+         File bodyPathPlannerFile = new File(logDirectory, FootstepPlannerLogger.bodyPathPlanFileName);
+         BufferedReader dataFileReader = new BufferedReader(new FileReader(bodyPathPlannerFile));
+         log.getVisibilityGraphHolder().setStartMapId(getIntCSV(true, dataFileReader.readLine())[0]);
+         log.getVisibilityGraphHolder().setGoalMapId(getIntCSV(true, dataFileReader.readLine())[0]);
+         log.getVisibilityGraphHolder().setInterRegionsMapId(getIntCSV(true, dataFileReader.readLine())[0]);
+         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getStartVisibilityMap());
+         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getGoalVisibilityMap());
+         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getInterRegionsVisibilityMap());
+
+         int numberOfNavigableRegions = getIntCSV(true, dataFileReader.readLine())[0];
+         List<PlanarRegion> planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage()).getPlanarRegionsAsList();
+         for (int i = 0; i < numberOfNavigableRegions; i++)
+         {
+            VisibilityMapWithNavigableRegion navigableRegion = loadNavigableRegion(dataFileReader, planarRegionsList);
+            if (navigableRegion == null)
+            {
+               LogTools.error("Couldn't find corresponding planar region in visibility graph log");
+               break;
+            }
+            log.getVisibilityGraphHolder().addNavigableRegion(navigableRegion);
+         }
+
          // load data file
+         dataFileReader.close();
          File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
-         BufferedReader dataFileReader = new BufferedReader(new FileReader(dataFile));
+         dataFileReader = new BufferedReader(new FileReader(dataFile));
 
          // data variables
          dataFileReader.readLine();
@@ -97,7 +135,7 @@ public class FootstepPlannerLogLoader
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealStep(readNode(dataFileReader.readLine()));
-            int edges = getIntCSV(dataFileReader.readLine())[0];
+            int edges = getIntCSV(true, dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
             log.getIterationData().add(iterationData);
@@ -113,7 +151,7 @@ public class FootstepPlannerLogLoader
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
 
-               double[] doubleCSV = getDoubleCSV(dataFileReader.readLine());
+               double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
                edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
                edgeData.setFootAreaPercentage(doubleCSV[1]);
                edgeData.setStepWidth(doubleCSV[2]);
@@ -145,12 +183,92 @@ public class FootstepPlannerLogLoader
       return log;
    }
 
-   private static int[] getIntCSV(String dataFileLine)
+   private void loadVisibilityMap(BufferedReader dataFileReader, VisibilityMap visibilityMap) throws IOException
+   {
+      dataFileReader.readLine();
+
+      int numberOfConnections = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfConnections; i++)
+      {
+         double[] connectionPointData = getDoubleCSV(false, dataFileReader.readLine());
+         Connection connection = new Connection(new ConnectionPoint3D(connectionPointData[0], connectionPointData[1], connectionPointData[2], 0),
+                                                new ConnectionPoint3D(connectionPointData[3], connectionPointData[4], connectionPointData[5], 0));
+         visibilityMap.addConnection(connection);
+      }
+
+      int numberOfVertices = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         double[] vertexData = getDoubleCSV(false, dataFileReader.readLine());
+         visibilityMap.getVertices().add(new ConnectionPoint3D(vertexData[0], vertexData[1], vertexData[2], 0));
+      }
+   }
+
+   private VisibilityMapWithNavigableRegion loadNavigableRegion(BufferedReader dataFileReader, List<PlanarRegion> planarRegionsList) throws IOException
+   {
+      dataFileReader.readLine();
+
+      int mapId = getIntCSV(true, dataFileReader.readLine())[0];
+      ClusterType clusterType = ClusterType.fromByte((byte) getIntCSV(true, dataFileReader.readLine())[0]);
+      ExtrusionSide extrusionSide = ExtrusionSide.fromByte((byte) getIntCSV(true, dataFileReader.readLine())[0]);
+      Optional<PlanarRegion> region = planarRegionsList.stream().filter(r -> r.getRegionId() == mapId).findFirst();
+
+      if (!region.isPresent())
+      {
+         return null;
+      }
+
+      Cluster homeRegionCluster = new Cluster(extrusionSide, clusterType);
+
+      int numberOfNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfNaviableExtrusions; i++)
+      {
+         homeRegionCluster.getNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
+      }
+      int numberOfNonNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfNonNaviableExtrusions; i++)
+      {
+         homeRegionCluster.getNonNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
+      }
+      int numberOfPreferredNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfPreferredNaviableExtrusions; i++)
+      {
+         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+         ExtrusionHull extrusionHull = new ExtrusionHull();
+         for (int j = 0; j < numberOfExtrusions; j++)
+         {
+            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
+         }
+         homeRegionCluster.getPreferredNavigableExtrusionsInLocal().add(extrusionHull);
+      }
+      int numberOfPreferredNonNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfPreferredNonNaviableExtrusions; i++)
+      {
+         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
+         ExtrusionHull extrusionHull = new ExtrusionHull();
+         for (int j = 0; j < numberOfExtrusions; j++)
+         {
+            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
+         }
+         homeRegionCluster.getPreferredNonNavigableExtrusionsInLocal().add(extrusionHull);
+      }
+
+      VisibilityMap visibilityMapInLocal = new VisibilityMap();
+      loadVisibilityMap(dataFileReader, visibilityMapInLocal);
+
+      VisibilityMapWithNavigableRegion visibilityMapWithNavigableRegion = new VisibilityMapWithNavigableRegion(new NavigableRegion(region.get(),
+                                                                                                                                   homeRegionCluster,
+                                                                                                                                   new ArrayList<>()));
+      visibilityMapWithNavigableRegion.setVisibilityMapInLocal(visibilityMapInLocal);
+      return visibilityMapWithNavigableRegion;
+   }
+
+   private static int[] getIntCSV(boolean removeKey, String dataFileLine)
    {
       if(dataFileLine.contains("null"))
          return new int[0];
 
-      String[] csvString = getStringCSV(dataFileLine);
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
       int[] data = new int[csvString.length];
       for (int i = 0; i < csvString.length; i++)
       {
@@ -159,12 +277,12 @@ public class FootstepPlannerLogLoader
       return data;
    }
 
-   private static double[] getDoubleCSV(String dataFileLine)
+   private static double[] getDoubleCSV(boolean removeKey, String dataFileLine)
    {
       if(dataFileLine.contains("null"))
          return new double[0];
 
-      String[] csvString = getStringCSV(dataFileLine);
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
       double[] data = new double[csvString.length];
       for (int i = 0; i < csvString.length; i++)
       {
@@ -173,31 +291,50 @@ public class FootstepPlannerLogLoader
       return data;
    }
 
-   private static String[] getStringCSV(String dataFileLine)
+   private static String[] getStringCSV(boolean removeKey, String dataFileLine)
    {
-      if(!dataFileLine.contains(":"))
+      if(removeKey && !dataFileLine.contains(":"))
       {
          throw new RuntimeException("Error parsing data file, ':' not found at line: \n" + dataFileLine);
       }
 
-      return dataFileLine.split(":")[1].split(",");
+      if (removeKey)
+      {
+         return dataFileLine.split(":")[1].split(",");
+      }
+      else
+      {
+         return dataFileLine.split(",");
+      }
    }
 
    private static FootstepNode readNode(String dataFileString)
    {
-      int[] csv = getIntCSV(dataFileString);
+      int[] csv = getIntCSV(true, dataFileString);
       return new FootstepNode(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
    }
 
    private static RigidBodyTransform readTransform(String dataFileLine)
    {
-      double[] csv = getDoubleCSV(dataFileLine);
+      double[] csv = getDoubleCSV(true, dataFileLine);
       return new RigidBodyTransform(new Quaternion(csv[0], csv[1], csv[2], csv[3]), new Vector3D(csv[4], csv[5], csv[6]));
+   }
+
+   private static Point2D readPoint2D(boolean removeKey, String dataFileLine)
+   {
+      double[] csv = getDoubleCSV(removeKey, dataFileLine);
+      return new Point2D(csv[0], csv[1]);
+   }
+
+   private static Point3D readPoint3D(boolean removeKey, String dataFileLine)
+   {
+      double[] csv = getDoubleCSV(removeKey, dataFileLine);
+      return new Point3D(csv[0], csv[1], csv[2]);
    }
 
    private static ConvexPolygon2D readPolygon(String dataFileLine)
    {
-      double[] csv = getDoubleCSV(dataFileLine);
+      double[] csv = getDoubleCSV(true, dataFileLine);
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for (int i = 0; i < csv.length / 2; i++)
       {

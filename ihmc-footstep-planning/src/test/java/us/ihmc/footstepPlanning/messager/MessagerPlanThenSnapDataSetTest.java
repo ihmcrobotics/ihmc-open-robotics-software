@@ -4,31 +4,42 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.DataSetName;
 
 @Tag("footstep-planning-slow")
 public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
-   public FootstepPlannerType getPlannerType()
+   protected boolean getPlanBodyPath()
    {
-      return FootstepPlannerType.PLAN_THEN_SNAP;
+      return false;
+   }
+
+   @Override
+   protected boolean getPerformAStarSearch()
+   {
+      return false;
+   }
+
+   @Override
+   protected String getTestNamePrefix()
+   {
+      return "plan_then_snap";
    }
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    @Override
    @Test
    @Disabled
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void testDatasetsInDevelopment()
    {
-      super.testDatasetsWithoutOcclusionInDevelopment();
+      super.testDatasetsInDevelopment();
    }
 
    public static void main(String[] args) throws Exception
