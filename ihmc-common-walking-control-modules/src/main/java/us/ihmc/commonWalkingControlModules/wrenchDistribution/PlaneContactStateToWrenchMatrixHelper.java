@@ -32,14 +32,15 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 public class PlaneContactStateToWrenchMatrixHelper
 {
    /**
-    * This is used when determining whether two contact points are at the same location. If that is the case
-    * one of them will rotate it's friction cone approximation to get better coverage of the cone through the
-    * basis vectors.
+    * This is used when determining whether two contact points are at the same location. If that is the
+    * case one of them will rotate it's friction cone approximation to get better coverage of the cone
+    * through the basis vectors.
     */
    private static final double distanceThresholdBetweenTwoContactPoint = 0.005;
 
    /**
-    * If the size of the foothold is below this threshold CoP objectives for this plane will be ignored.
+    * If the size of the foothold is below this threshold CoP objectives for this plane will be
+    * ignored.
     */
    private static final double minFootholdSizeForCoPObjectives = 1.0e-3;
 
@@ -245,7 +246,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             for (int j = contactPointIndex + 1; j < contactPoints.size(); j++)
             {
                YoContactPoint candidateForMatch = contactPoints.get(j);
-               candidateForMatch.getPosition2d(contactPoint2d);
+               contactPoint2d.setIncludingFrame(candidateForMatch);
                if (candidateForMatch.isInContact() && contactPoint.epsilonEquals(contactPoint2d, distanceThresholdBetweenTwoContactPoint))
                {
                   matches++;
@@ -271,7 +272,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
             if (inContact)
             {
-               contactPoint.getPosition(basisVectorOrigin);
+               basisVectorOrigin.setIncludingFrame(contactPoint);
                computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
                double rhoWeight = rhoWeights[contactPointIndex].getDoubleValue();

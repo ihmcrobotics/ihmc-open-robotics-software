@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import java.awt.Color;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointBasics;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -109,11 +109,11 @@ public class ICPControlPolygons
 
             for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
             {
-               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
+               ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
                if (!contactPoint.isInContact())
                   continue;
 
-               icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint.getPosition(), tempProjectedContactPosition);
+               icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint, tempProjectedContactPosition);
                footPolygonInWorldFrame.addVertexMatchingFrame(tempProjectedContactPosition);
                footPolygonInMidFeetZUp.addVertexMatchingFrame(tempProjectedContactPosition);
             }
