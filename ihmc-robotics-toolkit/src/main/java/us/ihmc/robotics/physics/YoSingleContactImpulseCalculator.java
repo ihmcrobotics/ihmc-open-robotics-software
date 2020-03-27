@@ -171,7 +171,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
          impulseB.setMatchingFrame(getImpulseB().getLinearPart());
          velocityDueToOtherImpulseB.setMatchingFrame(getVelocityDueToOtherImpulseB());
          velocityChangeB.setMatchingFrame(getResponseCalculatorB().getTwistChangeProvider().getLinearVelocityOfBodyFixedPoint(getContactingBodyB(),
-                                                                                                                              getPointA()));
+                                                                                                                              getPointB()));
          if (getJointVelocityChange(1) != null)
             jointVelocityChangeBList.forEach(holder -> holder.updateVelocity(getResponseCalculatorB()));
          else
