@@ -509,6 +509,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                                                                                      referenceFrames,
                                                                                                                      registry);
       dispatcher.addBehavior(HumanoidBehaviorType.REPEATEDLY_WALK_FOOTSTEP_LIST, repeatedlyWalkFootstepListBehavior);
+
+      LogTools.info("Finished registering behaviors.");
    }
 
    private void createAndRegisterAutomaticDiagnostic(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
