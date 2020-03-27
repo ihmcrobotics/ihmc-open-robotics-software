@@ -40,7 +40,7 @@ import java.util.function.Function;
 
 public class AStarFootstepPlanner
 {
-   private static final double defaultStatusPublishPeriod = 1.0;
+   private static final double defaultStatusPublishPeriod = Double.MAX_VALUE;
 
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
