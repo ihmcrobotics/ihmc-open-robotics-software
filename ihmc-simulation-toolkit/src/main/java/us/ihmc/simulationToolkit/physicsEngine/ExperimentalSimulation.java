@@ -25,11 +25,20 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+/**
+ * SCS wrapper around {@link ExperimentalPhysicsEngine}.
+ * <p>
+ * This physics engine is <b>experimental</b>, meaning that it is not bug-free, not extensively
+ * tested, nor fully compatible with our simulation framework.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class ExperimentalSimulation extends Simulation
 {
    private static final long serialVersionUID = -3940628684026932009L;
 
-   private final PhysicsEngine physicsEngine = new PhysicsEngine();
+   private final ExperimentalPhysicsEngine physicsEngine = new ExperimentalPhysicsEngine();
    private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
 
    private Vector3DReadOnly gravity;

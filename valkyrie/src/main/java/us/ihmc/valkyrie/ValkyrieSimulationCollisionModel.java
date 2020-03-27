@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
@@ -19,8 +20,19 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+/**
+ * Collision model for Valkyrie used for simulating shape-to-shape collisions. It is used only with
+ * {@link ExperimentalSimulation} and not with the default SCS physics engine.
+ * <p>
+ * {@link ExperimentalSimulation} can be used instead of the default SCS physics engine using
+ * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
 {
    private CollidableHelper helper;

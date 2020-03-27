@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
@@ -19,8 +20,19 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
+/**
+ * Collision model for Atlas used for simulating shape-to-shape collisions. It is used only with
+ * {@link ExperimentalSimulation} and not with the default SCS physics engine.
+ * <p>
+ * {@link ExperimentalSimulation} can be used instead of the default SCS physics engine using
+ * {@link DRCSCSInitialSetup#setUseExperimentalPhysicsEngine(boolean)}.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class AtlasSimulationCollisionModel implements RobotCollisionModel
 {
    private final DRCRobotJointMap jointMap;
@@ -54,30 +66,30 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
       { // Torso
          RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
          Box3D chestCoreShape = new Box3D(0.4, 0.35, 0.5);
-         chestCoreShape.getPosition().set(-0.06-0.05, 0.0, -0.065-0.03);
+         chestCoreShape.getPosition().set(-0.06 - 0.05, 0.0, -0.065 - 0.03);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestCoreShape, torso.getBodyFixedFrame()));
 
          Box3D chestFrontLowShape = new Box3D(0.12, 0.2, 0.3);
-         chestFrontLowShape.getPosition().set(0.23-0.05, 0.0, -0.16-0.03);
+         chestFrontLowShape.getPosition().set(0.23 - 0.05, 0.0, -0.16 - 0.03);
          chestFrontLowShape.getOrientation().setQuaternion(0.0, 0.1, 0.0, 1.0);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestFrontLowShape, torso.getBodyFixedFrame()));
 
          Capsule3D chestFrontHighShape = new Capsule3D(0.3, 0.15);
-         chestFrontHighShape.getPosition().set(0.18-0.05, 0.0, 0.1-0.03);
+         chestFrontHighShape.getPosition().set(0.18 - 0.05, 0.0, 0.1 - 0.03);
          chestFrontHighShape.getAxis().set(Axis.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestFrontHighShape, torso.getBodyFixedFrame()));
 
          Box3D chestTopBackShape = new Box3D(0.5, 0.35, 0.18);
-         chestTopBackShape.getPosition().set(-0.01-0.05, 0.0, 0.28-0.03);
+         chestTopBackShape.getPosition().set(-0.01 - 0.05, 0.0, 0.28 - 0.03);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestTopBackShape, torso.getBodyFixedFrame()));
 
          Capsule3D chestHeadGuardShape = new Capsule3D(0.3, 0.08);
-         chestHeadGuardShape.getPosition().set(0.3-0.05, 0.0, 0.305-0.03);
+         chestHeadGuardShape.getPosition().set(0.3 - 0.05, 0.0, 0.305 - 0.03);
          chestHeadGuardShape.getAxis().set(Axis.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestHeadGuardShape, torso.getBodyFixedFrame()));
 
          Box3D chestTopShape = new Box3D(0.3, 0.35, 0.15);
-         chestTopShape.getPosition().set(0.12-0.05, 0.0, 0.44-0.03);
+         chestTopShape.getPosition().set(0.12 - 0.05, 0.0, 0.44 - 0.03);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestTopShape, torso.getBodyFixedFrame()));
       }
 
