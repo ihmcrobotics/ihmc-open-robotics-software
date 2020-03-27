@@ -8,8 +8,6 @@ import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.robotics.physics.CollidableHelper;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -23,8 +21,6 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
    {
       YoVariable.SAVE_STACK_TRACE = false;
    }
-
-   public abstract RobotCollisionModel getRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks);
 
    public void testStanding(TestInfo testInfo) throws Exception
    {

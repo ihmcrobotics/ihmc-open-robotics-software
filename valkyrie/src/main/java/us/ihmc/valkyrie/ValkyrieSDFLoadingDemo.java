@@ -9,10 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -97,7 +94,7 @@ public class ValkyrieSDFLoadingDemo
          appearance.setTransparency(0.6);
          l.addEllipsoidFromMassProperties(appearance);
          l.addCoordinateSystemToCOM(0.5);
-//         l.addBoxFromMassProperties(appearance);
+         //         l.addBoxFromMassProperties(appearance);
       }
    }
 
@@ -174,6 +171,12 @@ public class ValkyrieSDFLoadingDemo
          graphics.translate(box.getPosition());
          graphics.rotate(new RotationMatrix(box.getOrientation()));
          graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), true, appearance);
+      }
+      else if (shape instanceof PointShape3DReadOnly)
+      {
+         PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
+         graphics.translate(pointShape);
+         graphics.addSphere(0.01, appearance);
       }
       else
       {
