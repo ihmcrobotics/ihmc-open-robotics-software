@@ -40,6 +40,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -169,16 +170,12 @@ public class AvatarSimulationFactory
          String environmentCollisionMask = "ground";
          String robotCollisionMask = robotModel.get().getSimpleRobotName();
          MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
-                                                                                                               robotModel.get()
-                                                                                                                         .createHumanoidFloatingRootJointRobot(false),
+                                                                                                               robotModel.get(),
                                                                                                                robotModel.get().getJointMap());
-         experimentalSimulation.addEnvironmentCollidables(ExperimentalSimulation.toCollidables(helper.getCollisionMask(environmentCollisionMask),
-                                                                                               helper.createCollisionGroup(robotCollisionMask),
-                                                                                               commonAvatarEnvironment.get()));
-         experimentalSimulation.addRobot(robotModel.get().getSimpleRobotName(),
-                                         robotModel.get().createFullRobotModel().getElevator(),
-                                         robotModel.get().getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask),
-                                         robotInitialStateWriter);
+         experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
+         RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
+                                                                       .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
+         experimentalSimulation.addRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
 
          simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
                                                                    guiInitialSetup.get().getGraphics3DAdapter(),

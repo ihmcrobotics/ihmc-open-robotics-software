@@ -16,13 +16,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.*;
+import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -55,10 +58,23 @@ public class ExperimentalSimulation extends Simulation
       this.gravity = gravity;
    }
 
+   public void addEnvironmentCollidables(CollidableHelper helper, String robotCollisionMask, String environmentCollisionMask,
+                                         CommonAvatarEnvironmentInterface environment)
+   {
+      toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment);
+   }
+
    public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidable)
    {
       physicsEngine.addEnvironmentCollidables(environmentCollidable);
       physicsEngine.addExternalWrenchReader(externalWrenchReader);
+   }
+
+   public void addRobot(FullHumanoidRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
+   {
+      String robotName = robotFactory.getRobotDescription().getName();
+      RigidBodyBasics rootBody = robotFactory.createFullRobotModel().getElevator();
+      addRobot(robotName, rootBody, robotCollisionModel, robotInitialStateWriter);
    }
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
@@ -264,6 +280,12 @@ public class ExperimentalSimulation extends Simulation
       }
 
       return collidables;
+   }
+
+   public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, DRCRobotJointMap> initialSetup,
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, DRCRobotJointMap jointMap)
+   {
+      return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
    }
 
    public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, DRCRobotJointMap> initialSetup, T robot,
