@@ -10,6 +10,28 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+/**
+ * Physics engine that simulates the dynamic behavior of multiple robots and their contact
+ * interactions.
+ * <p>
+ * Its uses Featherstone forward dynamics algorithm to account for controller outputs, i.e. joint
+ * efforts. The interactions are simulated using an impulse-based framework.
+ * </p>
+ * <p>
+ * References that this physics engine is based on:
+ * <ul>
+ * <li>Multi-body forward dynamics algorithm: Featherstone, Roy. <i>Rigid Body Dynamics
+ * Algorithms</i> Springer, 2008.
+ * <li>Multi-body impulse response algorithm: Mirtich, Brian Vincent. <i>Impulse-based dynamic
+ * simulation of rigid body systems</i>. University of California, Berkeley, 1996.
+ * <li>Impulse-based contact resolution algorithm: Hwangbo, Jemin, Joonho Lee, and Marco Hutter.
+ * <i>Per-contact iteration method for solving contact dynamics.</i> IEEE Robotics and Automation
+ * Letters 3.2 (2018): 895-902.
+ * </ul>
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class ExperimentalPhysicsEngine
 {
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
