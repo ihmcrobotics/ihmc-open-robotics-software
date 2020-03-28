@@ -15,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,15 +56,13 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoFramePoint3D startWaypointMinInWorld, firstMidpointMinInWorld, secondMidpointMinInWorld, endWaypointMinInWorld;
    private final YoFramePoint3D startWaypointMaxInWorld, firstMidpointMaxInWorld, secondMidpointMaxInWorld, endWaypointMaxInWorld;
 
-   private final YoBoolean initializeToCurrent = new YoBoolean("initializeCoMHeightToCurrent", registry);
-
    private final BagOfBalls bagOfBalls;
 
    private final DoubleProvider yoTime;
 
    private ReferenceFrame frameOfLastFootstep;
    private final ReferenceFrame centerOfMassFrame;
-   private final SideDependentList<MovingReferenceFrame> soleFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
    private final FramePoint3D startWaypointMinimum = new FramePoint3D();
    private final FramePoint3D firstMidpointMinimum = new FramePoint3D();
@@ -103,7 +100,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       double defaultOffsetHeightAboveGround,
                                                       double doubleSupportPercentageIn,
                                                       ReferenceFrame centerOfMassFrame,
-                                                      SideDependentList<MovingReferenceFrame> soleFrames,
+                                                      SideDependentList<? extends ReferenceFrame> soleFrames,
                                                       DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                                       YoVariableRegistry parentRegistry)
@@ -204,6 +201,10 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public void reset()
    {
+      tempFramePoint.setToZero(centerOfMassFrame);
+      tempFramePoint.changeFrame(worldFrame);
+
+      desiredCoMPosition.set(tempFramePoint);
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
@@ -233,9 +234,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startCoMPosition.setIncludingFrame(desiredCoMPosition);
       startCoMPosition.changeFrame(frameOfLastFootstep);
 
-      endCoMPosition.set(transferToFootstepPosition);
+      endCoMPosition.setIncludingFrame(transferToFootstepPosition);
       endCoMPosition.changeFrame(frameOfLastFootstep);
-      endCoMPosition.setZ(nominalHeightAboveGround.getDoubleValue());
+      double endAnkleZ = endCoMPosition.getZ();
+
+      endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
 
       double midstanceWidth = 0.5 * endCoMPosition.getY();
 
@@ -261,46 +264,44 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          endX = startCoMPosition.getX();
          endZ = startCoMPosition.getZ();
       }
-      double firstMidpointX = InterpolationTools.linearInterpolate(startX, endX, 1.0 - doubleSupportPercentageIn.getDoubleValue());
-      double secondMidpointX = InterpolationTools.linearInterpolate(startX, endX, doubleSupportPercentageIn.getDoubleValue());
+      double firstMidpointX = InterpolationTools.linearInterpolate(startX, endX, doubleSupportPercentageIn.getDoubleValue());
+      double secondMidpointX = InterpolationTools.linearInterpolate(endX, startX, doubleSupportPercentageIn.getDoubleValue());
 
       startWaypoint.set(startX, midstanceWidth, startZ);
       endWaypoint.set(endX, midstanceWidth, endZ);
+      firstMidpoint.setY(midstanceWidth);
+      secondMidpoint.setY(midstanceWidth);
 
       startWaypointMinimum.set(startX, midstanceWidth, minimumHeightAboveGround.getDoubleValue());
       startWaypointNominal.set(startX, midstanceWidth, nominalHeightAboveGround.getDoubleValue());
       startWaypointMaximum.set(startX, midstanceWidth, maximumHeightAboveGround.getDoubleValue());
 
-      endWaypointMinimum.set(endX, midstanceWidth, minimumHeightAboveGround.getDoubleValue());
-      endWaypointNominal.set(endX, midstanceWidth, nominalHeightAboveGround.getDoubleValue());
-      endWaypointMaximum.set(endX, midstanceWidth, maximumHeightAboveGround.getDoubleValue());
+      endWaypointMinimum.set(endX, midstanceWidth, minimumHeightAboveGround.getDoubleValue() + endAnkleZ);
+      endWaypointNominal.set(endX, midstanceWidth, nominalHeightAboveGround.getDoubleValue() + endAnkleZ);
+      endWaypointMaximum.set(endX, midstanceWidth, maximumHeightAboveGround.getDoubleValue() + endAnkleZ);
 
       firstMidpointMinimum.set(firstMidpointX,
                                midstanceWidth,
-                               findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), startX, endX, firstMidpointX, 0.0));
+                               findFirstWaypointDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), startX, firstMidpointX, 0.0));
       firstMidpointNominal.set(firstMidpointX,
                                midstanceWidth,
-                               findDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), startX, endX, firstMidpointX, 0.0));
+                               findFirstWaypointDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), startX, firstMidpointX, 0.0));
       firstMidpointMaximum.set(firstMidpointX,
                                midstanceWidth,
-                               findDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), startX, endX, firstMidpointX, 0.0));
+                               findFirstWaypointDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), startX, firstMidpointX, extraToeOffHeight));
 
       secondMidpointMinimum.set(secondMidpointX,
                                 midstanceWidth,
-                                findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), startX, endX, secondMidpointX, 0.0));
+                                findSecondWaypointDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), endX, endAnkleZ, secondMidpointX));
       secondMidpointNominal.set(secondMidpointX,
                                 midstanceWidth,
-                                findDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), startX, endX, secondMidpointX, 0.0));
+                                findSecondWaypointDoubleSupportHeight(nominalHeightAboveGround.getDoubleValue(), endX, endAnkleZ, secondMidpointX));
       secondMidpointMaximum.set(secondMidpointX,
                                 midstanceWidth,
-                                findDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), startX, endX, secondMidpointX, extraToeOffHeight));
+                                findSecondWaypointDoubleSupportHeight(maximumHeightAboveGround.getDoubleValue(), endX, endAnkleZ, secondMidpointX));
 
-      contactFrameZeroPosition.setMatchingFrame(startWaypoint);
-      contactFrameOnePosition.setMatchingFrame(endWaypoint);
 
-      // FIXME the projection segment is real wrong.
-      projectionSegmentInWorld.getFirstEndpoint().set(contactFrameZeroPosition);
-      projectionSegmentInWorld.getSecondEndpoint().set(contactFrameOnePosition);
+
 
       computeHeightsToUseByStretchingString();
 
@@ -312,6 +313,14 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                              firstMidpoint.getZ(),
                                              secondMidpoint.getZ(),
                                              endWaypoint.getZ());
+
+      contactFrameZeroPosition.setMatchingFrame(startWaypoint);
+      contactFrameOnePosition.setMatchingFrame(endWaypoint);
+
+      // FIXME the projection segment is real wrong.
+      projectionSegmentInWorld.getFirstEndpoint().set(contactFrameZeroPosition);
+      projectionSegmentInWorld.getSecondEndpoint().set(contactFrameOnePosition);
+
 
       startWaypointInWorld.setMatchingFrame(startWaypoint);
       startWaypointMinInWorld.setMatchingFrame(startWaypointMinimum);
@@ -411,13 +420,18 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endWaypoint.setZ(stretchedStringWaypoints.get(3).getY());
    }
 
-   private static double findDoubleSupportHeight(double desiredDistanceFromFoot, double startAnkleX, double endAnkleX, double queryX, double extraToeOffHeight)
+   private static double findFirstWaypointDoubleSupportHeight(double desiredDistanceFromFoot, double startAnkleX, double queryX, double extraToeOffHeight)
    {
-      double heightAboveStartAnkle = extraToeOffHeight + Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - startAnkleX));
-      double heightAboveEndAnkle = Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - endAnkleX));
-
-      return Math.min(heightAboveStartAnkle, heightAboveEndAnkle);
+      return extraToeOffHeight + Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - startAnkleX));
    }
+
+   private static double findSecondWaypointDoubleSupportHeight(double desiredDistanceFromFoot, double endAnkleX, double endAnkleZ, double queryX)
+   {
+      return Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - endAnkleX)) + endAnkleZ;
+   }
+
+
+
 
    public void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
    {
@@ -487,7 +501,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public void initializeDesiredHeightToCurrent()
    {
-      initializeToCurrent.set(true);
    }
 
    public void getCurrentDesiredHeight(FramePoint3D positionToPack)
