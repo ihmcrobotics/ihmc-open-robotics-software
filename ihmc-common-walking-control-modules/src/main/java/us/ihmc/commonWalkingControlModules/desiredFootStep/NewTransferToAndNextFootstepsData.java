@@ -64,7 +64,10 @@ public class NewTransferToAndNextFootstepsData
    public void setNextFootstepPosition(FramePoint3DReadOnly nextFootstepPosition)
    {
       if (nextFootstepPosition == null)
+      {
+         this.nextFootstepPosition.setToNaN();
          return;
+      }
 
       this.nextFootstepPosition.set(nextFootstepPosition);
    }

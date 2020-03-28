@@ -93,7 +93,7 @@ public abstract class TransferState extends WalkingState
       feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-      comHeightManager.setSupportLeg(transferToSide);
+//      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
 
       balanceManager.computeNormalizedEllipticICPError(transferToSide);
 
@@ -201,7 +201,7 @@ public abstract class TransferState extends WalkingState
 
       // TODO double check this
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
-      comHeightManager.setSupportLeg(transferToSide);
+      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
       comHeightManager.initialize(transferToAndNextFootstepsData, 0.0);
    }
 
