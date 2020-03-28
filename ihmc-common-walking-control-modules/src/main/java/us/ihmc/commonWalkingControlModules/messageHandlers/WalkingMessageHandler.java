@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -874,46 +875,41 @@ public class WalkingMessageHandler
          footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
-   private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+   private final NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
 
-   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
+
+   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
-      Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
-      Footstep transferToFootstep = getFootstepAtCurrentLocation(transferToSide);
+      transferToAndNextFootstepsData.setTransferFromPosition(soleFrames.get(transferToSide.getOppositeSide()));
+      transferToAndNextFootstepsData.setTransferToPosition(soleFrames.get(transferToSide));
 
-      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
-      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
 
       if (getCurrentNumberOfFootsteps() > 0)
       {
-         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
+         transferToAndNextFootstepsData.setNextFootstepPosition(upcomingFootsteps.get(0).getFootstepPose().getPosition());
       }
       else
       {
-         transferToAndNextFootstepsData.setNextFootstep(null);
+         transferToAndNextFootstepsData.setNextFootstepPosition(null);
       }
 
       return transferToAndNextFootstepsData;
    }
 
-   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
+   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
-      Footstep transferFromFootstep = getFootstepAtCurrentLocation(swingSide.getOppositeSide());
-
-      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+      transferToAndNextFootstepsData.setTransferFromPosition(soleFrames.get(swingSide.getOppositeSide()));
+      transferToAndNextFootstepsData.setTransferToPosition(transferToFootstep.getFootstepPose().getPosition());
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
-      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
 
       if (getCurrentNumberOfFootsteps() > 0)
       {
-         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
+         transferToAndNextFootstepsData.setNextFootstepPosition(upcomingFootsteps.get(0).getFootstepPose().getPosition());
       }
       else
       {
-         transferToAndNextFootstepsData.setNextFootstep(null);
+         transferToAndNextFootstepsData.setNextFootstepPosition(null);
       }
 
       return transferToAndNextFootstepsData;
