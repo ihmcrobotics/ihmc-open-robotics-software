@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.robotics.geometry.RevisedStringStretcher2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -324,8 +325,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double endX = comPositions.get(2).getX();
       double endZ = comPositions.get(2).getZ();
 
-      double firstMidpointX = InterpolationTools.linearInterpolate(0.0, middleX, doubleSupportPercentageIn.getDoubleValue());
-      double secondMidpointX = InterpolationTools.linearInterpolate(middleX, 0.0, doubleSupportPercentageIn.getDoubleValue());
+      double firstMidpointX = InterpolationTools.linearInterpolate(startX, middleX, doubleSupportPercentageIn.getDoubleValue());
+      double secondMidpointX = InterpolationTools.linearInterpolate(middleX, startX, doubleSupportPercentageIn.getDoubleValue());
       double thirdMidpointX = InterpolationTools.linearInterpolate(middleX, endX, doubleSupportPercentageIn.getDoubleValue());
       double fourthMidpointX = InterpolationTools.linearInterpolate(endX, middleX, doubleSupportPercentageIn.getDoubleValue());
 
@@ -369,23 +370,23 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                 midstanceWidth,
                                 findWaypointHeight(maximumHeightAboveGround.getDoubleValue(), middleX, secondMidpointX, middleAnkleZ));
 
-      thirdMidpointMinimum.set(secondMidpointX,
+      thirdMidpointMinimum.set(thirdMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(minimumHeightAboveGround.getDoubleValue(), middleX, thirdMidpointX, middleAnkleZ));
-      thirdMidpointNominal.set(secondMidpointX,
+      thirdMidpointNominal.set(thirdMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(nominalHeightAboveGround.getDoubleValue(), middleX, thirdMidpointX, middleAnkleZ));
-      thirdMidpointMaximum.set(secondMidpointX,
+      thirdMidpointMaximum.set(thirdMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(maximumHeightAboveGround.getDoubleValue(), middleX, thirdMidpointX, middleAnkleZ));
 
-      fourthMidpointMinimum.set(secondMidpointX,
+      fourthMidpointMinimum.set(fourthMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(minimumHeightAboveGround.getDoubleValue(), endX, fourthMidpointX, endAnkleZ));
-      fourthMidpointNominal.set(secondMidpointX,
+      fourthMidpointNominal.set(fourthMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(nominalHeightAboveGround.getDoubleValue(), endX, fourthMidpointX, endAnkleZ));
-      fourthMidpointMaximum.set(secondMidpointX,
+      fourthMidpointMaximum.set(fourthMidpointX,
                                 midstanceWidth,
                                 findWaypointHeight(maximumHeightAboveGround.getDoubleValue(), endX, fourthMidpointX, endAnkleZ));
 
@@ -463,6 +464,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startWaypoint.setToZero(referenceFrame);
       firstMidpoint.setToZero(referenceFrame);
       secondMidpoint.setToZero(referenceFrame);
+      middleWaypoint.setToZero(referenceFrame);
       thirdMidpoint.setToZero(referenceFrame);
       fourthMidpoint.setToZero(referenceFrame);
       endWaypoint.setToZero(referenceFrame);
@@ -470,6 +472,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startWaypointMinimum.setToZero(referenceFrame);
       firstMidpointMinimum.setToZero(referenceFrame);
       secondMidpointMinimum.setToZero(referenceFrame);
+      middleWaypointMinimum.setToZero(referenceFrame);
       thirdMidpointMinimum.setToZero(referenceFrame);
       fourthMidpointMinimum.setToZero(referenceFrame);
       endWaypointMinimum.setToZero(referenceFrame);
@@ -477,6 +480,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startWaypointNominal.setToZero(referenceFrame);
       firstMidpointNominal.setToZero(referenceFrame);
       secondMidpointNominal.setToZero(referenceFrame);
+      middleWaypointNominal.setToZero(referenceFrame);
       thirdMidpointNominal.setToZero(referenceFrame);
       fourthMidpointNominal.setToZero(referenceFrame);
       endWaypointNominal.setToZero(referenceFrame);
@@ -484,12 +488,13 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startWaypointMaximum.setToZero(referenceFrame);
       firstMidpointMaximum.setToZero(referenceFrame);
       secondMidpointMaximum.setToZero(referenceFrame);
+      middleWaypointMaximum.setToZero(referenceFrame);
       thirdMidpointMaximum.setToZero(referenceFrame);
       fourthMidpointMaximum.setToZero(referenceFrame);
       endWaypointMaximum.setToZero(referenceFrame);
    }
 
-   private final StringStretcher2d stringStretcher = new StringStretcher2d();
+   private final RevisedStringStretcher2d stringStretcher = new RevisedStringStretcher2d();
    private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>();
 
    private void computeHeightsToUseByStretchingString(boolean hasSecondStep)
@@ -515,14 +520,14 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          stringStretcher.setEndPoint(finalPoint.getX(), finalPoint.getZ());
       }
 
-      stringStretcher.addMinMaxPoints(0.0, minimumHeightAboveGround.getDoubleValue(), 0.0, maximumHeightAboveGround.getDoubleValue());
-      stringStretcher.addMinMaxPoints(firstMidpointMinimum.getX(), firstMidpointMinimum.getZ(), firstMidpointMaximum.getX(), firstMidpointMaximum.getZ());
-      stringStretcher.addMinMaxPoints(secondMidpointMinimum.getX(), secondMidpointMinimum.getZ(), secondMidpointMaximum.getX(), secondMidpointMaximum.getZ());
+//      stringStretcher.addMinMaxPoints(0.0, minimumHeightAboveGround.getDoubleValue(), 0.0, maximumHeightAboveGround.getDoubleValue());
+      stringStretcher.addMinMaxPoints(firstMidpointMinimum.getX(), firstMidpointMinimum.getZ(), firstMidpointMaximum.getZ());
+      stringStretcher.addMinMaxPoints(secondMidpointMinimum.getX(), secondMidpointMinimum.getZ(), secondMidpointMaximum.getZ());
       if (hasSecondStep)
       {
-         stringStretcher.addMinMaxPoints(middleWaypointMinimum.getX(), middleWaypointMinimum.getZ(), middleWaypointMaximum.getX(), middleWaypointMaximum.getZ());
-         stringStretcher.addMinMaxPoints(thirdMidpointMinimum.getX(), thirdMidpointMinimum.getZ(), thirdMidpointMaximum.getX(), thirdMidpointMaximum.getZ());
-         stringStretcher.addMinMaxPoints(fourthMidpointMinimum.getX(), fourthMidpointMinimum.getZ(), fourthMidpointMaximum.getX(), fourthMidpointMaximum.getZ());
+         stringStretcher.addMinMaxPoints(middleWaypointMinimum.getX(), middleWaypointMinimum.getZ(), middleWaypointMaximum.getZ());
+         stringStretcher.addMinMaxPoints(thirdMidpointMinimum.getX(), thirdMidpointMinimum.getZ(), thirdMidpointMaximum.getZ());
+         stringStretcher.addMinMaxPoints(fourthMidpointMinimum.getX(), fourthMidpointMinimum.getZ(), fourthMidpointMaximum.getZ());
       }
 
       stringStretcher.stretchString(stretchedStringWaypoints);
@@ -562,7 +567,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double percentAlongSegment = projectionSegmentInWorld.percentageAlongLineSegment(queryPoint);
       percentageThroughSegment.set(percentAlongSegment);
 
-      double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
+      double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), middleWaypoint.getX(), percentAlongSegment);
 
       // Happens when the robot gets stuck in double support but the ICP is still being dragged in the front support foot.
       //      if (isInDoubleSupport)
@@ -575,9 +580,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double dzds = spline.getVelocity();
       double ddzdds = spline.getAcceleration();
 
-      double length = startWaypoint.distance(endWaypoint);
-      double dsdx = (endWaypoint.getX() - startWaypoint.getX()) / length;
-      double dsdy = (endWaypoint.getZ() - startWaypoint.getZ()) / length;
+      double length = startWaypoint.distance(middleWaypoint);
+      double dsdx = (middleWaypoint.getX() - startWaypoint.getX()) / length;
+      double dsdy = (middleWaypoint.getZ() - startWaypoint.getZ()) / length;
 
       double ddsddx = 0;
       double ddsddy = 0;
