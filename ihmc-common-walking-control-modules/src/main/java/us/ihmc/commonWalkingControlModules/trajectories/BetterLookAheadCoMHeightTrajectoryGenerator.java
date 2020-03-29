@@ -17,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.robotics.geometry.RevisedStringStretcher2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
+import us.ihmc.robotics.math.trajectories.BezierCurve;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,6 +37,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoPolynomial spline = new YoPolynomial("height", 4, registry);
+   private final BezierCurve curve = new BezierCurve();
 
    private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
    private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
@@ -401,6 +403,17 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                              firstMidpoint.getZ(),
                                              secondMidpoint.getZ(),
                                              middleWaypoint.getZ());
+      curve.reset();
+      curve.addPoint(startWaypoint.getX(), startWaypoint.getZ());
+      curve.addPoint(firstMidpoint.getX(), firstMidpoint.getZ());
+      curve.addPoint(secondMidpoint.getX(), secondMidpoint.getZ());
+      curve.addPoint(middleWaypoint.getX(), middleWaypoint.getZ());
+      if (hasSecondStep)
+      {
+         curve.addPoint(thirdMidpoint.getX(), thirdMidpoint.getZ());
+         curve.addPoint(fourthMidpoint.getX(), fourthMidpoint.getZ());
+         curve.addPoint(endWaypoint.getX(), endWaypoint.getZ());
+      }
 
       contactFrameZeroPosition.setMatchingFrame(startWaypoint);
       contactFrameOnePosition.setMatchingFrame(middleWaypoint);
@@ -575,8 +588,10 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       this.splineQuery.set(splineQuery);
       spline.compute(splineQuery);
+      curve.compute(splineQuery);
 
-      double z = spline.getPosition();
+//      double z = spline.getPosition();
+      double z = curve.getPosition();
       double dzds = spline.getVelocity();
       double ddzdds = spline.getAcceleration();
 
