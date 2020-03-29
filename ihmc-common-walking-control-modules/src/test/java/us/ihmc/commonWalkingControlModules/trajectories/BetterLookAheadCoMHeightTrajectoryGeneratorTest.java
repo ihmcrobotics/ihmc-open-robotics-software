@@ -36,6 +36,22 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    }
 
    @Test
+   public void testFlatMultiStep()
+   {
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
+      FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
+      FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, -0.164, 0.0);
+      FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.2, 0.0);
+
+      transferToAndNextFootstepsData.setTransferToPosition(transferTo);
+      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
+
+      runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
+   }
+
+
+   @Test
    public void testBigSteppingDown()
    {
       double stepDownHeight = -0.4;
