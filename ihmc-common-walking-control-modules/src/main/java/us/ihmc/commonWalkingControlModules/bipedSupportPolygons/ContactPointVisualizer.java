@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -59,7 +58,6 @@ public class ContactPointVisualizer implements Updatable
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint3D tempFramePoint = new FramePoint3D(worldFrame);
    private final FrameVector3D tempFrameVector = new FrameVector3D(worldFrame);
 
    @Override
@@ -73,7 +71,7 @@ public class ContactPointVisualizer implements Updatable
          tempFrameVector.changeFrame(worldFrame);
          tempFrameVector.scale(normalVectorScale);
 
-         List<? extends ContactPointInterface> contactPoints = contactState.getContactPoints();
+         List<? extends ContactPointBasics> contactPoints = contactState.getContactPoints();
          for (int k = 0; k < contactPoints.size(); k++)
          {
             updateContactPointYoGraphics(i++, contactPoints.get(k));
@@ -81,13 +79,11 @@ public class ContactPointVisualizer implements Updatable
       }
    }
 
-   private void updateContactPointYoGraphics(int i, ContactPointInterface contactPoint)
+   private void updateContactPointYoGraphics(int i, ContactPointBasics contactPoint)
    {
       if (contactPoint.isInContact())
       {
-         contactPoint.getPosition(tempFramePoint);
-         tempFramePoint.changeFrame(worldFrame);
-         contactPointsWorld.get(i).set(tempFramePoint);
+         contactPointsWorld.get(i).setMatchingFrame(contactPoint);
          normalVectors.get(i).set(tempFrameVector);
 
          yoGraphicPositions.get(i).showGraphicObject();
