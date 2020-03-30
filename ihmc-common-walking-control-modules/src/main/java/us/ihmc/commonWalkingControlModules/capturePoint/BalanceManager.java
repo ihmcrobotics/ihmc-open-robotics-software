@@ -82,6 +82,7 @@ public class BalanceManager
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+   private final YoFrameVector2D yoDesiredCoMVelocity = new YoFrameVector2D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
 
    /** CoP position according to the ICP planner */
@@ -374,6 +375,7 @@ public class BalanceManager
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCenterOfPressurePosition(perfectCoP2d);
+      icpPlanner.getDesiredCenterOfMassVelocity(yoDesiredCoMVelocity);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
@@ -515,6 +517,11 @@ public class BalanceManager
    public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
    {
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
+   }
+
+   public void getDesiredCoMVelocity(FrameVector2D desiredCoMVelocityToPack)
+   {
+      desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)

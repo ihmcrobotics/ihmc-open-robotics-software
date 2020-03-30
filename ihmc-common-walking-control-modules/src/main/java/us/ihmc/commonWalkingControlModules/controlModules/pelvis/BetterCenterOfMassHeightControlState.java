@@ -148,7 +148,7 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
                                        maximumHeightAboveGround,
                                        defaultOffsetHeightAboveGround,
                                        referenceFrames.getPelvisFrame(),
-                                       referenceFrames.getSoleFrames(),
+                                       referenceFrames.getSoleZUpFrames(),
                                        controllerToolbox.getYoTime(),
                                        controllerToolbox.getYoGraphicsListRegistry());
    }

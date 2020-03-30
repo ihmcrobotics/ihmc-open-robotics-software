@@ -553,6 +553,12 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    }
 
    @Override
+   public void getDesiredCenterOfMassVelocity(FixedFrameVector2DBasics desiredCenterOfMassVelocityToPack)
+   {
+      desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
+   }
+
+   @Override
    public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.setIncludingFrame(desiredICPVelocity);
