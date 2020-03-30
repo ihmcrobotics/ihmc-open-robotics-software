@@ -13,6 +13,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   public static final byte FOOTSTEP_PLAN_HEADING_FORWARD = (byte) 0;
+   public static final byte FOOTSTEP_PLAN_HEADING_BACKWARD = (byte) 1;
+   public static final byte FOOTSTEP_PLAN_HEADING_LEFT = (byte) 2;
+   public static final byte FOOTSTEP_PLAN_HEADING_RIGHT = (byte) 3;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -59,13 +63,17 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public double goal_distance_proximity_ = -1.0;
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public double goal_yaw_proximity_ = -1.0;
+   /**
+            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            */
+   public byte requested_path_heading_ = (byte) 255;
    /**
             * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
@@ -135,6 +143,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goal_distance_proximity_ = other.goal_distance_proximity_;
 
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
+
+      requested_path_heading_ = other.requested_path_heading_;
 
       timeout_ = other.timeout_;
 
@@ -287,14 +297,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public void setGoalDistanceProximity(double goal_distance_proximity)
    {
       goal_distance_proximity_ = goal_distance_proximity;
    }
    /**
-            * Acceptable xy distance from the given goal for the planner to terminate
+            * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public double getGoalDistanceProximity()
    {
@@ -302,18 +312,33 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public void setGoalYawProximity(double goal_yaw_proximity)
    {
       goal_yaw_proximity_ = goal_yaw_proximity;
    }
    /**
-            * Acceptable yaw offset from the given goal for the planner to terminate
+            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public double getGoalYawProximity()
    {
       return goal_yaw_proximity_;
+   }
+
+   /**
+            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            */
+   public void setRequestedPathHeading(byte requested_path_heading)
+   {
+      requested_path_heading_ = requested_path_heading;
+   }
+   /**
+            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            */
+   public byte getRequestedPathHeading()
+   {
+      return requested_path_heading_;
    }
 
    /**
@@ -462,6 +487,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_path_heading_, other.requested_path_heading_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_iterations_, other.max_iterations_, epsilon)) return false;
@@ -508,6 +535,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
 
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
+
+      if(this.requested_path_heading_ != otherMyClass.requested_path_heading_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
@@ -558,6 +587,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.goal_distance_proximity_);      builder.append(", ");
       builder.append("goal_yaw_proximity=");
       builder.append(this.goal_yaw_proximity_);      builder.append(", ");
+      builder.append("requested_path_heading=");
+      builder.append(this.requested_path_heading_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("max_iterations=");

@@ -45,6 +45,14 @@ float64 ideal_footstep_width
 # Field default value -11.1
 float64 ideal_footstep_length
 
+# Returns the ideal step side step width when "shuffling" sideways.
+# Field default value -11.1
+float64 ideal_side_step_width
+
+# Returns the ideal length when walking backwards. This value is negative.
+# Field default value -11.1
+float64 ideal_back_step_length
+
 # If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
 # regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
 # edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds

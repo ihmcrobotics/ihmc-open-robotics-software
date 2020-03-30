@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -46,7 +47,7 @@ public class IdealStepCalculatorTest
                                                                                                      goalStepPose.getYaw(),
                                                                                                      side);
                                                                           });
-      idealStepCalculator.initialize(goalPoses);
+      idealStepCalculator.initialize(goalPoses, FootstepPlanHeading.FORWARD);
 
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
       double idealStepWidth = footstepPlannerParameters.getIdealFootstepWidth();

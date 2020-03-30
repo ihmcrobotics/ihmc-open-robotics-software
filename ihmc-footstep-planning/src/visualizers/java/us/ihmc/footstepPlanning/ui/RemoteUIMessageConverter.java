@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
@@ -71,6 +72,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
+   private final AtomicReference<FootstepPlanHeading> pathHeadingReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
@@ -134,6 +136,7 @@ public class RemoteUIMessageConverter
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
+      pathHeadingReference = messager.createInput(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, FootstepPlanHeading.FORWARD);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
@@ -508,6 +511,8 @@ public class RemoteUIMessageConverter
       packet.setAssumeFlatGround(assumeFlatGround.get());
       packet.setGoalDistanceProximity(goalDistanceProximity.get());
       packet.setGoalYawProximity(goalYawProximity.get());
+      if (pathHeadingReference.get() != null)
+         packet.setRequestedPathHeading(pathHeadingReference.get().toByte());
       packet.setSnapGoalSteps(snapGoalSteps.get());
       packet.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
       packet.setMaxIterations(maxIterations.get());

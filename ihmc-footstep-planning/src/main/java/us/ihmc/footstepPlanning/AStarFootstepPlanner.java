@@ -135,8 +135,8 @@ public class AStarFootstepPlanner
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
-      distanceAndYawHeuristics.setGoalPose(goalMidFootPose);
-      idealStepCalculator.initialize(goalNodes);
+      distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
+      idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
 
       // Check valid goal

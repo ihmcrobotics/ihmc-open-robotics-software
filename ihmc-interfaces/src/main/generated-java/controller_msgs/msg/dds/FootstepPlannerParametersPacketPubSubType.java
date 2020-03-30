@@ -88,6 +88,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -194,6 +198,12 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -404,6 +414,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getIdealFootstepLength());
 
+      cdr.write_type_6(data.getIdealSideStepWidth());
+
+      cdr.write_type_6(data.getIdealBackStepLength());
+
       cdr.write_type_6(data.getWiggleInsideDelta());
 
       cdr.write_type_6(data.getMaximumStepReach());
@@ -542,6 +556,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setIdealFootstepLength(cdr.read_type_6());
       	
+      data.setIdealSideStepWidth(cdr.read_type_6());
+      	
+      data.setIdealBackStepLength(cdr.read_type_6());
+      	
       data.setWiggleInsideDelta(cdr.read_type_6());
       	
       data.setMaximumStepReach(cdr.read_type_6());
@@ -677,6 +695,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_7("check_for_path_collisions", data.getCheckForPathCollisions());
       ser.write_type_6("ideal_footstep_width", data.getIdealFootstepWidth());
       ser.write_type_6("ideal_footstep_length", data.getIdealFootstepLength());
+      ser.write_type_6("ideal_side_step_width", data.getIdealSideStepWidth());
+      ser.write_type_6("ideal_back_step_length", data.getIdealBackStepLength());
       ser.write_type_6("wiggle_inside_delta", data.getWiggleInsideDelta());
       ser.write_type_6("maximum_step_reach", data.getMaximumStepReach());
       ser.write_type_6("maximum_step_yaw", data.getMaximumStepYaw());
@@ -749,6 +769,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setCheckForPathCollisions(ser.read_type_7("check_for_path_collisions"));
       data.setIdealFootstepWidth(ser.read_type_6("ideal_footstep_width"));
       data.setIdealFootstepLength(ser.read_type_6("ideal_footstep_length"));
+      data.setIdealSideStepWidth(ser.read_type_6("ideal_side_step_width"));
+      data.setIdealBackStepLength(ser.read_type_6("ideal_back_step_length"));
       data.setWiggleInsideDelta(ser.read_type_6("wiggle_inside_delta"));
       data.setMaximumStepReach(ser.read_type_6("maximum_step_reach"));
       data.setMaximumStepYaw(ser.read_type_6("maximum_step_yaw"));
