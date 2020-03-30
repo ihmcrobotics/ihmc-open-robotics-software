@@ -1,7 +1,6 @@
 package us.ihmc.robotics.functionApproximation;
 
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -10,7 +9,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class OnlineLine2DLinearRegression
 {
@@ -58,7 +56,10 @@ public class OnlineLine2DLinearRegression
          line.set(firstPointOnLine, secondPointOnLine);
 
          if (line.getDirection().containsNaN())
-            throw new RuntimeException("WHat?");
+         {
+            // The points are all at the same location causing the regression to fail.
+            return;
+         }
 
          Vector2DReadOnly direction = line.getDirection();
          deviationVector.set(Math.signum(direction.getX()) * onlineLeastSquaresRegression.getXStandardDeviation(), Math.signum(direction.getY()) * onlineLeastSquaresRegression.getYStandardDeviation());
