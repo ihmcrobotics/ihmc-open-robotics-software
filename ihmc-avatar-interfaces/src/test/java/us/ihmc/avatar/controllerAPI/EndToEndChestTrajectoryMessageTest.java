@@ -13,11 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -184,7 +180,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       chestTrajectoryMessage.setSequenceId(random.nextLong());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT));
 
       assertEquals(1, statusMessages.size());
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
