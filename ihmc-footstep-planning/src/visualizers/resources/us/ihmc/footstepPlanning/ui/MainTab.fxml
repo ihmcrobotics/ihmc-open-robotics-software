@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<SplitPane dividerPositions="0.4, 0.85" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
+<SplitPane dividerPositions="0.45, 0.85" xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
     <items>
         <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
             <children>
@@ -45,13 +45,13 @@
 
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <ComboBox fx:id="initialSupportSide" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Spinner fx:id="maxIterations" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="pathHeading" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Spinner fx:id="horizonLength" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                         <Label text="Initial Support" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                        <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                        <Label text="Max iterations" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label text="Path heading" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                         <Label text="Horizon Length" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
                         <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="0" />
@@ -127,22 +127,7 @@
 
                 <Region prefHeight="10"/>
 
-                <GridPane alignment="TOP_CENTER">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="10.0" minWidth="5.0" prefWidth="10.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="80.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="50.0" prefWidth="170.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="10.0" minWidth="5.0" prefWidth="5.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="80.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="50.0" prefWidth="170.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="10.0" minWidth="5.0" prefWidth="10.0"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="20.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                    </rowConstraints>
+                <GridPane alignment="TOP_CENTER" hgap="10" vgap="5">
                     <children>
                         <Label text="Sent ID" GridPane.halignment="RIGHT" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                         <Label text="Received ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
@@ -180,8 +165,8 @@
 
                     <Button prefWidth="120.0" text="Generate log" onAction="#generateLog" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="CENTER"/>
                     <Button prefWidth="120.0" text="Load log" onAction="#loadLog" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="CENTER"/>
-                    <TextField fx:id="logGenerationStatus" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="3"/>
-                    <TextField fx:id="logLoadStatus" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="3"/>
+                    <TextField fx:id="logGenerationStatus" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="4"/>
+                    <TextField fx:id="logLoadStatus" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="4"/>
                 </GridPane>
             </children>
         </VBox>

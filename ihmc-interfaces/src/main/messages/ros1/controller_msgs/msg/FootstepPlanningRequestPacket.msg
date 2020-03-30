@@ -4,6 +4,14 @@ int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
 
+int8 FOOTSTEP_PLAN_HEADING_FORWARD=0
+
+int8 FOOTSTEP_PLAN_HEADING_BACKWARD=1
+
+int8 FOOTSTEP_PLAN_HEADING_LEFT=2
+
+int8 FOOTSTEP_PLAN_HEADING_RIGHT=3
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -42,13 +50,17 @@ bool perform_a_star_search
 # Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
 geometry_msgs/Pose[] body_path_waypoints
 
-# Acceptable xy distance from the given goal for the planner to terminate
+# (In beta) acceptable xy distance from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_distance_proximity
 
-# Acceptable yaw offset from the given goal for the planner to terminate
+# (In beta) acceptable yaw offset from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_yaw_proximity
+
+# Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+# Field default value 255
+int8 requested_path_heading
 
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 # Field default value 5.0

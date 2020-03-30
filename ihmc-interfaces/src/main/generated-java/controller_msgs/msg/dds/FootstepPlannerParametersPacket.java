@@ -59,6 +59,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double ideal_footstep_length_ = -11.1;
    /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public double ideal_side_step_width_ = -11.1;
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public double ideal_back_step_length_ = -11.1;
+   /**
             * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
             * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
             * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
@@ -481,6 +489,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       ideal_footstep_length_ = other.ideal_footstep_length_;
 
+      ideal_side_step_width_ = other.ideal_side_step_width_;
+
+      ideal_back_step_length_ = other.ideal_back_step_length_;
+
       wiggle_inside_delta_ = other.wiggle_inside_delta_;
 
       maximum_step_reach_ = other.maximum_step_reach_;
@@ -684,6 +696,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getIdealFootstepLength()
    {
       return ideal_footstep_length_;
+   }
+
+   /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public void setIdealSideStepWidth(double ideal_side_step_width)
+   {
+      ideal_side_step_width_ = ideal_side_step_width;
+   }
+   /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public double getIdealSideStepWidth()
+   {
+      return ideal_side_step_width_;
+   }
+
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public void setIdealBackStepLength(double ideal_back_step_length)
+   {
+      ideal_back_step_length_ = ideal_back_step_length;
+   }
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public double getIdealBackStepLength()
+   {
+      return ideal_back_step_length_;
    }
 
    /**
@@ -1948,6 +1990,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_length_, other.ideal_footstep_length_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_side_step_width_, other.ideal_side_step_width_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_back_step_length_, other.ideal_back_step_length_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_, other.wiggle_inside_delta_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_, other.maximum_step_reach_, epsilon)) return false;
@@ -2095,6 +2141,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.ideal_footstep_length_ != otherMyClass.ideal_footstep_length_) return false;
 
+      if(this.ideal_side_step_width_ != otherMyClass.ideal_side_step_width_) return false;
+
+      if(this.ideal_back_step_length_ != otherMyClass.ideal_back_step_length_) return false;
+
       if(this.wiggle_inside_delta_ != otherMyClass.wiggle_inside_delta_) return false;
 
       if(this.maximum_step_reach_ != otherMyClass.maximum_step_reach_) return false;
@@ -2239,6 +2289,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.ideal_footstep_width_);      builder.append(", ");
       builder.append("ideal_footstep_length=");
       builder.append(this.ideal_footstep_length_);      builder.append(", ");
+      builder.append("ideal_side_step_width=");
+      builder.append(this.ideal_side_step_width_);      builder.append(", ");
+      builder.append("ideal_back_step_length=");
+      builder.append(this.ideal_back_step_length_);      builder.append(", ");
       builder.append("wiggle_inside_delta=");
       builder.append(this.wiggle_inside_delta_);      builder.append(", ");
       builder.append("maximum_step_reach=");

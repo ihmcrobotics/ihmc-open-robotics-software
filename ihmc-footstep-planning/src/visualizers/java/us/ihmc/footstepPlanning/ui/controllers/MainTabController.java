@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -67,8 +68,6 @@ public class MainTabController
    @FXML
    private Spinner<Double> timeout;
    @FXML
-   private Spinner<Integer> maxIterations;
-   @FXML
    private Spinner<Double> horizonLength;
 
    // status
@@ -119,6 +118,8 @@ public class MainTabController
    private Spinner<Double> goalZPosition;
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
+   @FXML
+   private ComboBox<us.ihmc.footstepPlanning.FootstepPlanHeading> pathHeading;
 
    @FXML
    private Spinner<Double> goalYaw;
@@ -277,11 +278,13 @@ public class MainTabController
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
       timeout.setValueFactory(createTimeoutValueFactory());
-      maxIterations.setValueFactory(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 1));
       horizonLength.setValueFactory(createHorizonValueFactory());
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
       initialSupportSide.setValue(RobotSide.LEFT);
+
+      pathHeading.setItems(FXCollections.observableArrayList(FootstepPlanHeading.values()));
+      pathHeading.setValue(FootstepPlanHeading.FORWARD);
 
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
@@ -335,6 +338,7 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide.valueProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.valueProperty(), false);
 
       goalPositionProperty.bindBidirectionalX(goalXPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());

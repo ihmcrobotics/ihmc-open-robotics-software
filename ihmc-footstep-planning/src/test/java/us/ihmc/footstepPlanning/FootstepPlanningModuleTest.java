@@ -2,12 +2,12 @@ package us.ihmc.footstepPlanning;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -188,6 +188,67 @@ public class FootstepPlanningModuleTest
          RobotSide robotSide = footstep.getRobotSide();
          boolean stepWasntAdjusted = footstep.getSoleFramePose().epsilonEquals(request.getGoalFootPoses().get(robotSide), 1e-10);
          Assertions.assertTrue(stepWasntAdjusted);
+      }
+   }
+
+   @Test
+   public void testPathHeading()
+   {
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(6.0, 6.0);
+
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      Pose3D initialMidFootPose = new Pose3D();
+      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
+      request.setPlanBodyPath(false);
+      request.setTimeout(2.0);
+
+      // test shuffling left
+      Pose3D goalMidFootPose = new Pose3D(0.0, 1.25, 0.0, 0.0, 0.0, 0.0);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
+      request.setDesiredHeading(FootstepPlanHeading.LEFT);
+      request.setRequestedInitialStanceSide(RobotSide.RIGHT);
+      FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
+      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      FootstepPlan plan = plannerOutput.getFootstepPlan();
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yawThreshold = Math.toRadians(25.0);
+         Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
+      }
+
+      // test shuffling right
+      goalMidFootPose.set(0.0, -1.25, 0.0, 0.0, 0.0, 0.0);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
+      request.setDesiredHeading(FootstepPlanHeading.RIGHT);
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      plannerOutput = planningModule.handleRequest(request);
+      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      plan = plannerOutput.getFootstepPlan();
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yawThreshold = Math.toRadians(25.0);
+         Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
+      }
+
+      // test walking backward
+      goalMidFootPose.set(-1.25, 0.0, 0.0, 0.0, 0.0, 0.0);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
+      request.setDesiredHeading(FootstepPlanHeading.BACKWARD);
+      plannerOutput = planningModule.handleRequest(request);
+      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      plan = plannerOutput.getFootstepPlan();
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yawThreshold = Math.toRadians(25.0);
+         Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
       }
    }
 }
