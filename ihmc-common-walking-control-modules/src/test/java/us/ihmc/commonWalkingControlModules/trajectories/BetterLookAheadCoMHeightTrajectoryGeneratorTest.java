@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 {
    private static final double minimumHeight = 0.75;
-   private static final double nominalHeight = 0.8;
+   private static double nominalHeight = 0.8;
    private static final double maximumHeight = 0.95;
    private static final double doubleSupportIn = 0.3;
 
@@ -36,13 +36,57 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    }
 
    @Test
-   public void testFlatMultiStep()
+   public void testFlatKindOfWeird()
+   {
+      nominalHeight = minimumHeight - 0.05;
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight);
+      FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
+      FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, -0.125, 0.0);
+
+      transferToAndNextFootstepsData.setTransferToPosition(end);
+
+      runTest(start, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
+   }
+
+   @Test
+   public void testFlatEasyMultiStep()
    {
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, -0.164, 0.0);
       FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.2, 0.0);
+
+      transferToAndNextFootstepsData.setTransferToPosition(transferTo);
+      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
+
+      runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
+   }
+
+   @Test
+   public void testFlatMultiStep()
+   {
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
+      FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
+      FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.4, -0.164, 0.0);
+      FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.8, 0.2, 0.0);
+
+      transferToAndNextFootstepsData.setTransferToPosition(transferTo);
+      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
+
+      runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
+   }
+
+   @Test
+   public void testTrickyCaseGoingUp()
+   {
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.57273, -0.02010, 0.80325);
+      FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.60080, -0.19949, -0.00120);
+      FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.2, 0.0);
+      FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, -0.2, 0.151);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
       transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);

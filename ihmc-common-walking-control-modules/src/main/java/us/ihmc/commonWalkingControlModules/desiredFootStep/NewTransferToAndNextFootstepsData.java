@@ -14,6 +14,11 @@ public class NewTransferToAndNextFootstepsData
 
    private final FramePoint3D nextFootstepPosition = new FramePoint3D();
 
+   public NewTransferToAndNextFootstepsData()
+   {
+      nextFootstepPosition.setToNaN();
+   }
+
    public FramePoint3DReadOnly getTransferToPosition()
    {
       return transferToPosition;

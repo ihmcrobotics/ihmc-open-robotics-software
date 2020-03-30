@@ -655,7 +655,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateManagers(WalkingState currentState)
    {
-      balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
+      desiredICPVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
+      balanceManager.getDesiredCoMVelocity(desiredICPVelocityAsFrameVector);
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
@@ -773,7 +774,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
          actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
       }
-      
+
       if (pelvisHeightStatus != null)
       {
          pelvisStatusMessage.setSequenceId(pelvisHeightStatus.getSequenceId());

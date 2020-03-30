@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
@@ -245,6 +247,17 @@ public interface ICPPlannerInterface
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
    void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack);
+
+   /**
+    * Gets the current CoM velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfMassVelocityToPack the current CoM position. Modified.
+    */
+   void getDesiredCenterOfMassVelocity(FixedFrameVector2DBasics desiredCenterOfMassVelocityToPack);
 
    /**
     * Gets the current ICP velocity.
