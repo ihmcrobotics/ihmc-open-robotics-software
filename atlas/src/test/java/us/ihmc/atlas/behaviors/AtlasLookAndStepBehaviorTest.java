@@ -19,6 +19,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -39,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AtlasLookAndStepBehaviorTest
 {
+   private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
+
    Supplier<PlanarRegionsList> environment = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
 
    @Test
@@ -72,6 +75,11 @@ public class AtlasLookAndStepBehaviorTest
                                                                         0.5,
                                                                         () -> monitorThread(currentState, robot, atTheTop, reachedOtherSide));
       monitorThread.start();
+
+      if (VISUALIZE)
+      {
+         new RobotAndMapViewer(createRobotModel(), ros2Node);
+      }
 
       atTheTop.blockingPoll();
       LogTools.info("REACHED THE TOP");
