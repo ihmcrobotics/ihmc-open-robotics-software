@@ -118,7 +118,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       }
 
       footPolygon.intersectionWithRay(rayThroughExitCMP, intersectionWithRay[0], intersectionWithRay[1]);
-      toeOffContactPoint2d.set(intersectionWithRay[0]);
+      toeOffContactPoint2d.setIncludingFrame(intersectionWithRay[0]);
 
       hasComputedToeOffContactPoint.set(true);
    }
