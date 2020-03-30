@@ -106,6 +106,7 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
+      controllerFactory.createControllerNetworkSubscriber(model.getSimpleRobotName(), realtimeRos2Node);
 
       HeightMap heightMapForFootstepZ = null;
       if (cheatWithGroundHeightAtForFootstep)
