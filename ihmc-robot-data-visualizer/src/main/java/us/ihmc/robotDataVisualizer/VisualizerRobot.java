@@ -15,6 +15,7 @@ public class VisualizerRobot extends FloatingRootJointRobot
       super(robotDescription, false, false);
       this.reducedRegistry = new YoVariableRegistry(robotDescription.getName());
 
+      reducedRegistry.registerVariable(t);
       reducedRegistry.registerVariable(getRootJoint().getQx());
       reducedRegistry.registerVariable(getRootJoint().getQy());
       reducedRegistry.registerVariable(getRootJoint().getQz());
