@@ -5,9 +5,12 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -15,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotics.geometry.RevisedStringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoConfigurablePolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,11 +50,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final YoFramePoint3D transferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D transferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D nextFootPosition = new YoFramePoint3D("nextFootPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoDouble desiredCoMPositionSlope = new YoDouble("desiredCoMPositionSlope", registry);
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
    private final YoFramePoint3D queryPosition = new YoFramePoint3D("queryPosition", ReferenceFrame.getWorldFrame(), registry);
 
@@ -154,9 +156,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          AppearanceDefinition startColor = YoAppearance.CadetBlue();
          AppearanceDefinition firstMidpointColor = YoAppearance.Chartreuse();
          AppearanceDefinition secondMidpointColor = YoAppearance.BlueViolet();
-         AppearanceDefinition middleColor = YoAppearance.Yellow();
-         AppearanceDefinition thirdMidpointColor = YoAppearance.Chartreuse();
-         AppearanceDefinition fourthMidpointColor = YoAppearance.BlueViolet();
          AppearanceDefinition endColor = YoAppearance.Azure();
 
          YoGraphicPosition position0 = new YoGraphicPosition(prefix + "contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
@@ -217,7 +216,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.changeFrame(worldFrame);
 
       desiredCoMPosition.set(tempFramePoint);
-      desiredCoMPositionSlope.set(0.0);
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
@@ -318,7 +316,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       spline.reshape(4);
       spline.addPositionConstraint(startWaypoint.getX(), startWaypoint.getZ());
-      //      spline.addVelocityConstraint(startWaypoint.getX(), desiredCoMPositionSlope.getDoubleValue());
       spline.addPositionConstraint(firstMidpoint.getX(), firstMidpoint.getZ());
       spline.addPositionConstraint(secondMidpoint.getX(), secondMidpoint.getZ());
       spline.addPositionConstraint(endWaypoint.getX(), endWaypoint.getZ());
@@ -494,7 +491,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       comHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
 
       desiredCoMHeight.set(z);
-      desiredCoMPositionSlope.set(dzds);
    }
 
    public void goHome(double trajectoryTime)
