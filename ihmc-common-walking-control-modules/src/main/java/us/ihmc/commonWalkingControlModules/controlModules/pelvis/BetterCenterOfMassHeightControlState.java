@@ -78,7 +78,7 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = new CenterOfMassJacobian(controllerToolbox.getFullRobotModel().getElevator(), worldFrame);
+      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       gravity = controllerToolbox.getGravityZ();
@@ -95,44 +95,6 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
       parentRegistry.addChild(registry);
    }
 
-
-   public BetterCenterOfMassHeightControlState(double minimumHeightAboveGround,
-                                               double nominalHeightAboveGround,
-                                               double maximumHeightAboveGround,
-                                               double defaultOffsetHeightAboveGround,
-                                               RigidBodyBasics elevator,
-                                               ReferenceFrame centerOfMassFrame,
-                                               MovingReferenceFrame pelvisFrame,
-                                               SideDependentList<MovingReferenceFrame> soleFrames,
-                                               double gravityZ,
-                                               DoubleProvider timeProvider,
-                                               double controlDT,
-                                               YoVariableRegistry parentRegistry,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this.centerOfMassFrame = centerOfMassFrame;
-      centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
-      this.pelvisFrame = pelvisFrame;
-
-      gravity = gravityZ;
-
-      centerOfMassTrajectoryGenerator = createTrajectoryGenerator(minimumHeightAboveGround,
-                                                                  nominalHeightAboveGround,
-                                                                  maximumHeightAboveGround,
-                                                                  defaultOffsetHeightAboveGround,
-                                                                  pelvisFrame,
-                                                                  soleFrames,
-                                                                  timeProvider,
-                                                                  yoGraphicsListRegistry);
-
-      // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
-      controlPelvisHeightInsteadOfCoMHeight.set(true);
-
-      comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
-      centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
-
-      parentRegistry.addChild(registry);
-   }
 
    public BetterLookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
                                                                           WalkingControllerParameters walkingControllerParameters,
@@ -292,7 +254,6 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.reset();
       comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
