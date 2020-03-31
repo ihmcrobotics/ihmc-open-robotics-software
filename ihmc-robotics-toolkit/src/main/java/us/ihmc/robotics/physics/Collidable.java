@@ -37,8 +37,9 @@ public class Collidable
     */
    private final Shape3DReadOnly shape;
    /**
-    * The frame the shape is expressed in. Usually the body-fixed frame of {@code rigidBody} or the
-    * frame after it parent joint.
+    * The frame the shape is expressed in. It has to be a frame that is rigidly attached to the
+    * rigid-body and preferably be the frame after it parent joint as the location of the
+    * {@link RigidBodyBasics#getBodyFixedFrame()} depends on the mass property of the body.
     */
    private final ReferenceFrame shapeFrame;
    /**
@@ -66,8 +67,10 @@ public class Collidable
     * @param shape          the shape of this collidable. It is strongly recommended to use only
     *                       {@link Sphere3D} and {@link Capsule3D} as collision evaluations are
     *                       extremely fast with these shapes.
-    * @param shapeFrame     the frame the shape is expressed in. Usually the body-fixed frame of
-    *                       {@code rigidBody} or the frame after it parent joint.
+    * @param shapeFrame     the frame the shape is expressed in. It has to be a frame that is rigidly
+    *                       attached to the rigid-body and preferably be the frame after it parent
+    *                       joint as the location of the {@link RigidBodyBasics#getBodyFixedFrame()}
+    *                       depends on the mass property of the body.
     */
    public Collidable(RigidBodyBasics rigidBody, long collisionMask, long collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
    {
