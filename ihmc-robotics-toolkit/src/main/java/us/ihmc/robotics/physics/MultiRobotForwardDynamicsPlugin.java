@@ -1,9 +1,9 @@
 package us.ihmc.robotics.physics;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -22,16 +22,10 @@ public class MultiRobotForwardDynamicsPlugin
       YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
       registry.addChild(multiContactCalculatorRegistry);
 
-      multiContactImpulseCalculators = new RecyclingArrayList<>(1, new Supplier<YoMultiContactImpulseCalculator>()
+      multiContactImpulseCalculators = new RecyclingArrayList<>(1, SupplierBuilder.indexedSupplier(identifier ->
       {
-         int identifier = 0;
-
-         @Override
-         public YoMultiContactImpulseCalculator get()
-         {
-            return new YoMultiContactImpulseCalculator(identifier++, rootFrame, multiContactCalculatorRegistry);
-         }
-      });
+         return new YoMultiContactImpulseCalculator(identifier++, rootFrame, multiContactCalculatorRegistry);
+      }));
       multiContactImpulseCalculators.clear();
    }
 

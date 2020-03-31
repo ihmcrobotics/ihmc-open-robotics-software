@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -54,27 +54,21 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
       robotRegistry.addChild(contactConstraintCalculatorRegistry);
 
-      environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, new Supplier<YoSingleContactImpulseCalculator>()
+      environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(identifier ->
       {
-         private int identifier = 0;
-
-         @Override
-         public YoSingleContactImpulseCalculator get()
-         {
-            YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
-                                                                                               identifier++,
-                                                                                               multiBodySystem.getInertialFrame(),
-                                                                                               rootBody,
-                                                                                               forwardDynamicsPlugin.getForwardDynamicsCalculator(),
-                                                                                               null,
-                                                                                               null,
-                                                                                               contactConstraintCalculatorRegistry);
-            if (yoGraphicsListRegistry != null)
-               calculator.setupGraphics(yoGraphicsListRegistry);
-            calculator.clear();
-            return calculator;
-         }
-      });
+         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
+                                                                                            identifier++,
+                                                                                            multiBodySystem.getInertialFrame(),
+                                                                                            rootBody,
+                                                                                            forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                                                            null,
+                                                                                            null,
+                                                                                            contactConstraintCalculatorRegistry);
+         if (yoGraphicsListRegistry != null)
+            calculator.setupGraphics(yoGraphicsListRegistry);
+         calculator.clear();
+         return calculator;
+      }));
       resetCalculators();
    }
 
@@ -141,23 +135,17 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
       if (calculators == null)
       {
-         calculators = new RecyclingArrayList<>(new Supplier<YoSingleContactImpulseCalculator>()
+         calculators = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(identifier ->
          {
-            private int identifier = 0;
-
-            @Override
-            public YoSingleContactImpulseCalculator get()
-            {
-               return new YoSingleContactImpulseCalculator("Dual",
-                                                           identifier++,
-                                                           multiBodySystem.getInertialFrame(),
-                                                           rootBody,
-                                                           forwardDynamicsPlugin.getForwardDynamicsCalculator(),
-                                                           otherRobot.getRootBody(),
-                                                           otherRobot.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
-                                                           contactConstraintCalculatorRegistry);
-            }
-         });
+            return new YoSingleContactImpulseCalculator("Dual",
+                                                        identifier++,
+                                                        multiBodySystem.getInertialFrame(),
+                                                        rootBody,
+                                                        forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                        otherRobot.getRootBody(),
+                                                        otherRobot.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
+                                                        contactConstraintCalculatorRegistry);
+         }));
       }
 
       return calculators.add();
