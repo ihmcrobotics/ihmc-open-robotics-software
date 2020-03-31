@@ -62,7 +62,7 @@ public class WholeBodyInverseDynamicsSolver
     * Whether to assemble the objective for minimizing the joint torques. May be computationally
     * intensive, needs benchmark.
     */
-   private static final boolean MINIMIZE_JOINT_TORQUES = false;
+   private static final boolean MINIMIZE_JOINT_TORQUES = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
