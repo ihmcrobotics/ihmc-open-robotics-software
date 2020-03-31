@@ -47,8 +47,8 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
       SideDependentList<String> legNames = new SideDependentList<>("LeftLeg", "RightLeg");
 
       { // Body
-         int collisionMask = helper.getCollisionMask(bodyName);
-         int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
+         long collisionMask = helper.getCollisionMask(bodyName);
+         long collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
          RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
          Capsule3D torsoShapeTop = new Capsule3D(0.08, 0.15);
@@ -80,8 +80,8 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 
       for (RobotSide robotSide : RobotSide.values)
       { // Arms
-         int collisionMask = helper.getCollisionMask(armNames.get(robotSide));
-         int collisionGroup = helper.createCollisionGroup(bodyName,
+         long collisionMask = helper.getCollisionMask(armNames.get(robotSide));
+         long collisionGroup = helper.createCollisionGroup(bodyName,
                                                           armNames.get(robotSide.getOppositeSide()),
                                                           legNames.get(RobotSide.LEFT),
                                                           legNames.get(RobotSide.RIGHT));
@@ -121,8 +121,8 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 
       for (RobotSide robotSide : RobotSide.values)
       { // Legs
-         int collisionMask = helper.getCollisionMask(legNames.get(robotSide));
-         int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
+         long collisionMask = helper.getCollisionMask(legNames.get(robotSide));
+         long collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
          RigidBodyBasics upperLeg = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), multiBodySystem).getSuccessor();
          Capsule3D upperLegShapeTop = new Capsule3D(0.25, 0.1);
@@ -152,8 +152,8 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
       String bodyName = "TorsoChin";
 
       { // Body
-         int collisionMask = helper.getCollisionMask(bodyName);
-         int collisionGroup = helper.createCollisionGroup(chinName);
+         long collisionMask = helper.getCollisionMask(bodyName);
+         long collisionGroup = helper.createCollisionGroup(chinName);
 
          RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
          Capsule3D torsoShapeTop = new Capsule3D(0.15, 0.15);
@@ -163,8 +163,8 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
       }
 
       { // Chin
-         int collisionMask = helper.getCollisionMask(chinName);
-         int collisionGroup = helper.createCollisionGroup(bodyName);
+         long collisionMask = helper.getCollisionMask(chinName);
+         long collisionGroup = helper.createCollisionGroup(bodyName);
 
          RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
          Capsule3D chinShape = new Capsule3D(0.05, 0.02);

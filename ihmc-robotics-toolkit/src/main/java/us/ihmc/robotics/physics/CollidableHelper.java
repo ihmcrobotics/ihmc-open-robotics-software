@@ -1,6 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 
 /**
  * Helper class that can be used to simplify the generation of collision masks and groups used with
@@ -10,9 +10,9 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  */
 public class CollidableHelper
 {
-   private static final int EMPTY_VALUE = -1;
-   private int nextCollisionMask = 0b1;
-   private final TObjectIntHashMap<String> namedCollisionMask = new TObjectIntHashMap<>(32, 1.0f, EMPTY_VALUE);
+   private static final long EMPTY_VALUE = -1;
+   private long nextCollisionMask = 0b1;
+   private final TObjectLongHashMap<String> namedCollisionMask = new TObjectLongHashMap<>(64, 1.0f, EMPTY_VALUE);
 
    /**
     * A single instance of this helper should be used when creating multiple collidables for a robot
@@ -35,21 +35,21 @@ public class CollidableHelper
     * @param name usually the name of the rigid-body the collision mask is for.
     * @return the value of the collision mask.
     */
-   public int getCollisionMask(String name)
+   public long getCollisionMask(String name)
    {
-      int collisionMask = namedCollisionMask.get(name);
+      long collisionMask = namedCollisionMask.get(name);
       if (collisionMask == EMPTY_VALUE)
          return nextCollisionMask(name);
       else
          return collisionMask;
    }
 
-   private int nextCollisionMask(String name)
+   private long nextCollisionMask(String name)
    {
       if (!canAddCollisionMask())
          throw new RuntimeException("Max capacity reached.");
 
-      int collisionMask = nextCollisionMask;
+      long collisionMask = nextCollisionMask;
       namedCollisionMask.put(name, collisionMask);
       nextCollisionMask = shiftBitLeft(nextCollisionMask);
       return collisionMask;
@@ -79,9 +79,9 @@ public class CollidableHelper
     * @param collidables the names of collidables the group should represent.
     * @return the value of the collision group.
     */
-   public int createCollisionGroup(String... collidables)
+   public long createCollisionGroup(String... collidables)
    {
-      int group = 0b0;
+      long group = 0b0;
 
       for (String collidable : collidables)
       {
@@ -90,7 +90,7 @@ public class CollidableHelper
       return group;
    }
 
-   private static int shiftBitLeft(int value)
+   private static long shiftBitLeft(long value)
    {
       return value << 1;
    }

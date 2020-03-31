@@ -265,12 +265,12 @@ public class ExperimentalSimulation extends Simulation
       return physicsEngine.getPhysicsEngineGraphicsRegistry();
    }
 
-   public static List<Collidable> toCollidables(int collisionMask, int collisionGroup, CommonAvatarEnvironmentInterface environment)
+   public static List<Collidable> toCollidables(long collisionMask, long collisionGroup, CommonAvatarEnvironmentInterface environment)
    {
       return toCollidables(collisionMask, collisionGroup, environment.getTerrainObject3D());
    }
 
-   public static List<Collidable> toCollidables(int collisionMask, int collisionGroup, TerrainObject3D terrainObject3D)
+   public static List<Collidable> toCollidables(long collisionMask, long collisionGroup, TerrainObject3D terrainObject3D)
    {
       List<Collidable> collidables = new ArrayList<>();
 
