@@ -329,7 +329,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
-      SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 0.9));
+      SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
       SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
             : new Vector3D());
    
