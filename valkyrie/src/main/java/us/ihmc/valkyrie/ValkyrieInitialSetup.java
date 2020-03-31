@@ -80,10 +80,12 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
    private void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
    {
+      robot.getRootJoint().setPosition(0.0, 0.0, 0.0);
+      robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(rotation, positionInWorld);
-      positionInWorld.addZ(groundZ - getLowestFootContactPointHeight(robot));
       positionInWorld.add(offset);
+      positionInWorld.addZ(groundZ - getLowestFootContactPointHeight(robot));
       robot.setPositionInWorld(positionInWorld);
 
       FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
