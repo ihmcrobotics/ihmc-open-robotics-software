@@ -5,12 +5,9 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,8 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
-import us.ihmc.robotics.geometry.RevisedStringStretcher2d;
+import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoConfigurablePolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,7 +24,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class BetterLookAheadCoMHeightTrajectoryGenerator
@@ -388,7 +383,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endWaypointMaximum.setToZero(referenceFrame);
    }
 
-   private final RevisedStringStretcher2d stringStretcher = new RevisedStringStretcher2d();
+   private final StringStretcher2d stringStretcher = new StringStretcher2d();
    private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>();
 
    private void computeHeightsToUseByStretchingString()
@@ -413,8 +408,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       }
 
       //      stringStretcher.addMinMaxPoints(0.0, minimumHeightAboveGround.getDoubleValue(), 0.0, maximumHeightAboveGround.getDoubleValue());
-      stringStretcher.addMinMaxPoints(firstMidpointMinimum.getX(), firstMidpointMinimum.getZ(), firstMidpointMaximum.getZ());
-      stringStretcher.addMinMaxPoints(secondMidpointMinimum.getX(), secondMidpointMinimum.getZ(), secondMidpointMaximum.getZ());
+      stringStretcher.addMinMaxPoints(firstMidpointMinimum.getX(), firstMidpointMinimum.getZ(), firstMidpointMaximum.getX(), firstMidpointMaximum.getZ());
+      stringStretcher.addMinMaxPoints(secondMidpointMinimum.getX(), secondMidpointMinimum.getZ(), secondMidpointMaximum.getX(), secondMidpointMaximum.getZ());
 
       stringStretcher.stretchString(stretchedStringWaypoints);
 
