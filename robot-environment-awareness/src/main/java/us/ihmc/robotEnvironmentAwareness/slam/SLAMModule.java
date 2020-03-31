@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,6 +58,7 @@ public class SLAMModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
+   private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
    private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -73,6 +75,7 @@ public class SLAMModule
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
 
    private final AtomicReference<Boolean> robotStatus;
+   private final AtomicReference<Boolean> velocityStatus;
    protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
@@ -108,6 +111,7 @@ public class SLAMModule
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
 
       robotStatus = reaMessager.createInput(REAModuleAPI.RobotStatus, false);
+      velocityStatus = reaMessager.createInput(REAModuleAPI.VelocityStatus, false);
    }
 
    public void start() throws IOException
@@ -168,6 +172,7 @@ public class SLAMModule
 
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
       boolean stationaryFlag = stationaryFlagQueue.getFirst();
+      boolean reasonableVelocityFlag = reasonableVelocityFlagQueue.getFirst();
 
       String stringToReport = "";
       boolean success;
@@ -178,18 +183,26 @@ public class SLAMModule
       }
       else
       {
-         if (stationaryFlag)
+         if(reasonableVelocityFlag)
          {
-            slam.addKeyFrame(pointCloudToCompute);
-            success = true;
+            if (stationaryFlag)
+            {
+               slam.addKeyFrame(pointCloudToCompute);
+               success = true;
+            }
+            else
+            {
+               success = slam.addFrame(pointCloudToCompute);
+            }   
          }
          else
          {
-            success = slam.addFrame(pointCloudToCompute);
+            success = false;
          }
       }
       pointCloudQueue.removeFirst();
       stationaryFlagQueue.removeFirst();
+      reasonableVelocityFlagQueue.removeFirst();
       reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
       stringToReport = stringToReport + success + " " + slam.getSensorPoses().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(REAModuleAPI.SLAMStatus, stringToReport);
@@ -282,6 +295,7 @@ public class SLAMModule
 
          pointCloudQueue.add(pointCloud);
          stationaryFlagQueue.add(robotStatus.get());
+         reasonableVelocityFlagQueue.add(velocityStatus.get());
       }
    }
 
@@ -295,6 +309,7 @@ public class SLAMModule
    {
       pointCloudQueue.clear();
       stationaryFlagQueue.clear();
+      reasonableVelocityFlagQueue.clear();
       slam.clear();
       newPointCloud.set(null);
    }
