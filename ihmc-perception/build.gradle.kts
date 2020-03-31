@@ -21,22 +21,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
-   }
+   api("org.bytedeco:javacv-platform:1.5.2")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("org.georegression:georegression:0.11")
