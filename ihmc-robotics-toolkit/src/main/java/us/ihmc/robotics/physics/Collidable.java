@@ -25,12 +25,12 @@ public class Collidable
     * Collision identifier for this collidable. Use {@link CollidableHelper} to compute collision masks
     * and groups.
     */
-   private final int collisionMask;
+   private final long collisionMask;
    /**
     * Collision identifiers of other collidables that this collidable is allowed to collide with. Use
     * {@link CollidableHelper} to compute collision masks and groups.
     */
-   private final int collisionGroup;
+   private final long collisionGroup;
    /**
     * The shape of this collidable. It is strongly recommended to use only {@link Sphere3D} and
     * {@link Capsule3D} as collision evaluations are extremely fast with these shapes.
@@ -69,7 +69,7 @@ public class Collidable
     * @param shapeFrame     the frame the shape is expressed in. Usually the body-fixed frame of
     *                       {@code rigidBody} or the frame after it parent joint.
     */
-   public Collidable(RigidBodyBasics rigidBody, int collisionMask, int collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
+   public Collidable(RigidBodyBasics rigidBody, long collisionMask, long collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
    {
       this.rigidBody = rigidBody;
       this.collisionMask = collisionMask;
@@ -157,7 +157,7 @@ public class Collidable
     *
     * @return the mask's value.
     */
-   public int getCollisionMask()
+   public long getCollisionMask()
    {
       return collisionMask;
    }
@@ -168,7 +168,7 @@ public class Collidable
     *
     * @return the group's value.
     */
-   public int getCollisionGroup()
+   public long getCollisionGroup()
    {
       return collisionGroup;
    }

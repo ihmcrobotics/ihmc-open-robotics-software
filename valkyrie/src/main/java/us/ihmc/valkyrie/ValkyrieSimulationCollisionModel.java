@@ -56,8 +56,8 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
    public List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem)
    {
       List<Collidable> collidables = new ArrayList<>();
-      int collisionMask = helper.getCollisionMask(robotCollisionMask);
-      int collisionGroup = helper.createCollisionGroup(otherCollisionMasks);
+      long collisionMask = helper.getCollisionMask(robotCollisionMask);
+      long collisionGroup = helper.createCollisionGroup(otherCollisionMasks);
 
       { // Head
          RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);

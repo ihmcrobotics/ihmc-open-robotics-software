@@ -45,8 +45,8 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
       SideDependentList<String> armNames = new SideDependentList<>("LeftArm", "RightArm");
 
       { // Body
-         int collisionMask = helper.getCollisionMask(bodyName);
-         int collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
+         long collisionMask = helper.getCollisionMask(bodyName);
+         long collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
          RigidBodyBasics head = RobotCollisionModel.findRigidBody(jointMap.getHeadName(), multiBodySystem);
          RigidBodyBasics torso = RobotCollisionModel.findRigidBody(jointMap.getChestName(), multiBodySystem);
@@ -136,8 +136,8 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         int collisionMask = helper.getCollisionMask(armNames.get(robotSide));
-         int collisionGroup = helper.createCollisionGroup(bodyName, armNames.get(robotSide.getOppositeSide()));
+         long collisionMask = helper.getCollisionMask(armNames.get(robotSide));
+         long collisionGroup = helper.createCollisionGroup(bodyName, armNames.get(robotSide.getOppositeSide()));
 
          RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
          ReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
