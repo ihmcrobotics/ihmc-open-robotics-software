@@ -95,10 +95,10 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          }
 
          // Pelvis ---------------------------------------------------------------------
-         MovingReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
+         MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
          Capsule3D pelvisShape = new Capsule3D(0.05, 0.22);
          pelvisShape.setAxis(Axis.Z);
-         pelvisShape.getPosition().set(0.0, 0.0, 0.01);
+         pelvisShape.getPosition().set(0.012, 0.0, 0.037);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame));
 
          // Legs ---------------------------------------------------------------------
