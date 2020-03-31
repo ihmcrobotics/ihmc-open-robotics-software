@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -14,8 +15,6 @@ public class StringStretcher2d
 {
    private final Point2D startPoint = new Point2D();
    private final Point2D endPoint = new Point2D();
-
-   private final Line2D tempLine = new Line2D(new Point2D(), new Vector2D(1.0, 0.0));
 
    private final RecyclingArrayList<MinMaxPointHolder> minMaxPool = new RecyclingArrayList<>(20, MinMaxPointHolder.class);
    private final RecyclingArrayList<Point2D> waypointPool = new RecyclingArrayList<>(20, Point2D.class);
@@ -193,16 +192,6 @@ public class StringStretcher2d
       }
    }
 
-   private void interpolate(Point2DReadOnly startPoint, Point2DReadOnly endPoint, double x, Point2DBasics midPointToPack)
-   {
-      double startX = startPoint.getX();
-      double endX = endPoint.getX();
-
-      double percentX = (x - startX) / (endX - startX);
-
-      midPointToPack.interpolate(startPoint, endPoint, percentX);
-   }
-
    public void addMinMaxPoints(Point2DReadOnly minPoint, Point2DReadOnly maxPoint)
    {
       addMinMaxPoints(minPoint.getX(), minPoint.getY(), maxPoint.getX(), maxPoint.getY());
@@ -244,31 +233,6 @@ public class StringStretcher2d
       return minMaxPoint.getMinPoint();
    }
 
-   private int findWorstMinViolatorIndex(Point2DReadOnly startPoint, Point2DReadOnly endPoint, int startIndex, int endIndex)
-   {
-      tempLine.set(startPoint, endPoint);
-
-      int returnIndex = -1;
-      double worstViolation = Double.NEGATIVE_INFINITY;
-
-      for (int i = startIndex; i <= endIndex; i++)
-      {
-         MinMaxPointHolder minMaxPoint = getMinMaxPoint(i);
-         Point2DReadOnly minPoint = minMaxPoint.getMinPoint();
-         if (tempLine.isPointOnLeftSideOfLine(minPoint))
-         {
-            double distance = tempLine.distance(minPoint);
-            if (distance > worstViolation)
-            {
-               worstViolation = distance;
-               returnIndex = i;
-            }
-         }
-      }
-
-      return returnIndex;
-   }
-
    public Point2DReadOnly findWorstMaxViolator(Point2D startPoint, Point2D endPoint)
    {
       int worstViolatorIndex = findWorstMaxViolatorIndex(startPoint, endPoint, 0, minMaxPoints.size() - 1);
@@ -280,26 +244,40 @@ public class StringStretcher2d
       return minMaxPoint.getMaxPoint();
    }
 
-   private int findWorstMaxViolatorIndex(Point2DReadOnly startPoint, Point2DReadOnly endPoint, int startIndex, int endIndex)
+   private int findWorstMinViolatorIndex(Point2DReadOnly startPoint, Point2DReadOnly endPoint, int startIndex, int endIndex)
    {
-      tempLine.set(startPoint, endPoint);
-
       int returnIndex = -1;
-      double worstViolation = Double.NEGATIVE_INFINITY;
+      double worstViolation = 0.0;
 
       for (int i = startIndex; i <= endIndex; i++)
       {
-         MinMaxPointHolder minMaxPoint = getMinMaxPoint(i);
-
-         Point2DReadOnly maxPoint = minMaxPoint.getMaxPoint();
-         if (tempLine.isPointOnRightSideOfLine(maxPoint))
+         Point2DReadOnly minPoint = minMaxPoints.get(i).getMinPoint();
+         double interpolatedHeightAtPoint = interpolate(startPoint, endPoint, minPoint.getX());
+         double minPointY = minPoint.getY();
+         if (interpolatedHeightAtPoint - minPointY < worstViolation)
          {
-            double distance = tempLine.distance(maxPoint);
-            if (distance > worstViolation)
-            {
-               worstViolation = distance;
-               returnIndex = i;
-            }
+            worstViolation = interpolatedHeightAtPoint - minPointY;
+            returnIndex = i;
+         }
+      }
+
+      return returnIndex;
+   }
+
+   private int findWorstMaxViolatorIndex(Point2DReadOnly startPoint, Point2DReadOnly endPoint, int startIndex, int endIndex)
+   {
+      int returnIndex = -1;
+      double worstViolation = 0.0;
+
+      for (int i = startIndex; i <= endIndex; i++)
+      {
+         Point2DReadOnly maxPoint = minMaxPoints.get(i).getMaxPoint();
+         double interpolatedHeightAtPoint = interpolate(startPoint, endPoint, maxPoint.getX());
+         double maxPointY = maxPoint.getY();
+         if (maxPointY - interpolatedHeightAtPoint < worstViolation)
+         {
+            worstViolation = maxPointY - interpolatedHeightAtPoint;
+            returnIndex = i;
          }
       }
 
@@ -322,5 +300,20 @@ public class StringStretcher2d
    {
       minMaxPoints.clear();
       minMaxPool.clear();
+   }
+
+   private static void interpolate(Point2DReadOnly startPoint, Point2DReadOnly endPoint, double x, Point2DBasics midPointToPack)
+   {
+      midPointToPack.set(x, interpolate(startPoint, endPoint, x));
+   }
+
+   private static double interpolate(Point2DReadOnly startPoint, Point2DReadOnly endPoint, double x)
+   {
+      double startX = startPoint.getX();
+      double endX = endPoint.getX();
+
+      double percentX = (x - startX) / (endX - startX);
+
+      return EuclidCoreTools.interpolate(startPoint.getY(), endPoint.getY(), percentX);
    }
 }
