@@ -69,6 +69,10 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
+opencvDependencies {
+   api("org.openpnp:opencv:3.4.2-2")
+}
+
 testDependencies {
 
    api("us.ihmc:ihmc-commons-testing:0.28.2")
