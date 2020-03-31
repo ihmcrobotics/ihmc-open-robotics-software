@@ -73,6 +73,14 @@ opencvDependencies {
    api("org.openpnp:opencv:3.4.2-2")
 }
 
+bytedecoDependencies {
+   api("org.bytedeco:opencv-platform:4.1.2-1.5.2")
+}
+
+javacvDependencies {
+   api("org.bytedeco:javacv-platform:1.5.2")
+}
+
 testDependencies {
 
    api("us.ihmc:ihmc-commons-testing:0.28.2")

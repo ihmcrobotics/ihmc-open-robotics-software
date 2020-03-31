@@ -4,7 +4,7 @@ import nu.pattern.OpenCV;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
-public class OpenCVDemo
+public class OpenPnPOpenCVDemo
 {
    public static void main(String[] args)
    {
