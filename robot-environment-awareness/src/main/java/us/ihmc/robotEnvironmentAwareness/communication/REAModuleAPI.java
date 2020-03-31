@@ -203,6 +203,7 @@ public class REAModuleAPI
    public static final Topic<String> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Status);
    public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
    public static final Topic<Boolean> RobotStatus = SLAMCategory.child(SLAMFrame).topic(Enable);
+   public static final Topic<Boolean> VelocityStatus = SLAMCategory.child(SLAMFrame).child(Custom).topic(Enable);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
