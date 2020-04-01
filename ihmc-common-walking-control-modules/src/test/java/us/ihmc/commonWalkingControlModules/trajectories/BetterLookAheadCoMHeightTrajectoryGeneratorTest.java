@@ -180,7 +180,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 
       lookAhead.reset();
       lookAhead.setSupportLeg(supportSide);
-      lookAhead.initialize(transferToAndNextFootstepsData, 0.0);
+      lookAhead.initialize(transferToAndNextFootstepsData, 0.0, true);
 
       scs.tickAndUpdate();
 

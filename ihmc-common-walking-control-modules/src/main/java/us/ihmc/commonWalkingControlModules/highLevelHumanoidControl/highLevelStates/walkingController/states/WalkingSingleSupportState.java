@@ -449,7 +449,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
-      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight, false);
 
       FixedFramePoint3DBasics stanceFootPosition = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide.getOppositeSide()).getFootstepPose().getPosition();
       FixedFramePoint3DBasics touchdownPosition = nextFootstep.getFootstepPose().getPosition();
