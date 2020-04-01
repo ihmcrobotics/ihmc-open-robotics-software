@@ -97,6 +97,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
    {
+      if (footstepDataListMessage == null)
+      {
+         return;
+      }
+
       meshBuilder.clear();
 
       FramePose3D footPose = new FramePose3D();

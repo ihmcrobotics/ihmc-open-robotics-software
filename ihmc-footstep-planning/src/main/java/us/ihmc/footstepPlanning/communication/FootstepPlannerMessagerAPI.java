@@ -71,6 +71,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowRobot = topic("ShowRobot");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
    public static final Topic<Boolean> ShowGoalSteps = topic("ShowGoalSteps");
+   public static final Topic<Boolean> ShowCoordinateSystem = topic("ShowCoordinateSystem");
 
    public static final Topic<Boolean> ShowBodyPath = topic("ShowBodyPath");
    public static final Topic<Boolean> ShowClusterRawPoints = topic("ShowClusterRawPoints");

@@ -12,6 +12,7 @@
                 <CheckBox fx:id="showRobotToggleButton" mnemonicParsing="false" selected="true" text="Show robot" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <CheckBox fx:id="showGoalSteps" mnemonicParsing="false" selected="true" text="Show goal steps" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="showCoordinateSystem" mnemonicParsing="false" selected="true" text="Show coordinate system" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                 <Label text="Body path" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                 <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.columnIndex="2" GridPane.rowIndex="1" />
