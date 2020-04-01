@@ -148,6 +148,10 @@
 
                 <Separator prefHeight="20" />
 
+                <ComboBox fx:id="dataSetSelector"/>
+
+                <Separator prefHeight="20" />
+
                 <Label alignment="CENTER" contentDisplay="CENTER" text="Logging" textAlignment="CENTER">
                     <font>
                         <Font size="16.0"/>

@@ -6,11 +6,12 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -27,9 +28,10 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
  */
 public class ValkyrieFootstepPlannerUI extends Application
 {
+   private static final Vector3D rootJointToMidFootOffset = new Vector3D(0.0359987, 0.0, -0.9900972);
+
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
-
    private FootstepPlannerUI ui;
 
    @Override
@@ -45,9 +47,17 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(),
-                                              new ValkyrieFootstepPostProcessorParameters(), model, previewModel, model.getContactPointParameters(),
-                                              model.getWalkingControllerParameters());
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage,
+                                              messager,
+                                              model.getFootstepPlannerParameters(),
+                                              model.getVisibilityGraphsParameters(),
+                                              new ValkyrieFootstepPostProcessorParameters(),
+                                              model,
+                                              previewModel,
+                                              model.getContactPointParameters(),
+                                              model.getWalkingControllerParameters(),
+                                              model.getHighLevelControllerParameters().getStandPrepParameters()::getSetpoint,
+                                              rootJointToMidFootOffset);
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())

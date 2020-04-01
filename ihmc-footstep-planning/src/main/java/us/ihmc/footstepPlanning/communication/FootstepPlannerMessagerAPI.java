@@ -21,6 +21,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -40,6 +41,7 @@ public class FootstepPlannerMessagerAPI
 
    // Robot state
    public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
+   public static final Topic<DataSetName> DataSetSelected = topic("DataSetSelected");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
