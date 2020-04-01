@@ -60,6 +60,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
+   private final FramePoint3D desiredCoM = new FramePoint3D();
+
    private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
    private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
 
@@ -443,9 +445,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
+      balanceManager.getDesiredCoMPosition(desiredCoM);
 
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
                                                                                                                                                    swingSide);
+      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();

@@ -30,11 +30,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -56,10 +52,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.*;
 
 public class BalanceManager
 {
@@ -82,6 +75,7 @@ public class BalanceManager
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector2D yoDesiredCoMVelocity = new YoFrameVector2D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
 
@@ -375,6 +369,7 @@ public class BalanceManager
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCenterOfPressurePosition(perfectCoP2d);
+      icpPlanner.getDesiredCenterOfMassPosition(yoDesiredCoMPosition);
       icpPlanner.getDesiredCenterOfMassVelocity(yoDesiredCoMVelocity);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
@@ -519,7 +514,12 @@ public class BalanceManager
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
-   public void getDesiredCoMVelocity(FrameVector2D desiredCoMVelocityToPack)
+   public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMVelocityToPack)
+   {
+      desiredCoMVelocityToPack.set(yoDesiredCoMPosition);
+   }
+
+   public void getDesiredCoMVelocity(FixedFrameVector2DBasics desiredCoMVelocityToPack)
    {
       desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
    }

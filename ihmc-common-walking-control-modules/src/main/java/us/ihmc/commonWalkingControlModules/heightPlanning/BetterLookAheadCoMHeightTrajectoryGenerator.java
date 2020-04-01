@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
@@ -56,6 +57,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
    private final YoDouble maximumHeightAboveGround = new YoDouble("maximumHeightAboveGround", registry);
 
+   private final YoDouble nominalDoubleSupportPercentageIn = new YoDouble("nominalDoubleSupportPercentageIn", registry);
    private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
@@ -119,7 +121,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       setSupportLeg(RobotSide.LEFT);
 
-      this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
+      this.nominalDoubleSupportPercentageIn.set(doubleSupportPercentageIn);
 
       parentRegistry.addChild(registry);
 
@@ -211,6 +213,10 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double middleAnkleZ = middleCoMPosition.getZ();
       middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
 
+      tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState());
+      tempFramePoint.changeFrame(frameOfLastFootstep);
+      doubleSupportPercentageIn.set(EuclidGeometryTools.percentageAlongLineSegment3D(startCoMPosition, middleCoMPosition, tempFramePoint));
+
       double midstanceWidth = 0.5 * middleCoMPosition.getY();
 
       startCoMPosition.setY(midstanceWidth);
@@ -250,10 +256,23 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double startX = startCoMPosition.getX();
       double endX = endCoMPosition.getX();
 
-      double percentIn = doubleSupportPercentageIn.getDoubleValue() > 0.5 ? 1.0 - doubleSupportPercentageIn.getDoubleValue() : doubleSupportPercentageIn.getDoubleValue();
-      double firstAlpha = isInTransfer ? percentIn : 0.5 * percentIn;
-      double secondAlpha = isInTransfer ? 0.5 : percentIn;
-      double thirdAlpha = isInTransfer ? 1.0 - percentIn : 0.5 + 0.5 * percentIn;
+      double percentIn = MathTools.clamp(doubleSupportPercentageIn.getDoubleValue(), 0.0, 1.0);
+      percentIn = percentIn > 0.5 ? 1.0 - percentIn : percentIn;
+      percentIn = Math.max(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue());
+
+      double firstAlpha, secondAlpha, thirdAlpha;
+      if (isInTransfer)
+      {
+         firstAlpha = 0.25;
+         secondAlpha = 0.5;
+         thirdAlpha = 0.75;
+      }
+      else
+      {
+         firstAlpha = 0.5 * percentIn;
+         secondAlpha = percentIn;
+         thirdAlpha = 0.5 * (1.0 + percentIn);
+      }
 
       double firstMidpointX = InterpolationTools.linearInterpolate(startX, endX, firstAlpha);
       double secondMidpointX = InterpolationTools.linearInterpolate(startX, endX, secondAlpha);
