@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.HumanoidExperimentalSimulationEndToEndTest;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -30,7 +29,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
 {
    @Override
-   public DRCRobotModel getRobotModel()
+   public ValkyrieRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
    }
@@ -54,7 +53,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
    {
       simulationTestingParameters.setUsePefectSensors(true);
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      ValkyrieRobotModel robotModel = getRobotModel();
       robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup());
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
