@@ -89,7 +89,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
       });
 
       messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlan, true);
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
