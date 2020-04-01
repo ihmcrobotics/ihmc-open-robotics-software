@@ -78,7 +78,7 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
       RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
       assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()));
-      assertOneDoFJointsAreWithingLimits(elevator, 1.0e-3);
+      assertOneDoFJointsAreWithingLimits(elevator, 2.0e-3);
    }
 
    public static void assertRigidBodiesAreAboveFlatGround(RigidBodyBasics rootBody, ToDoubleFunction<Point3DReadOnly> groundHeightFunction)
