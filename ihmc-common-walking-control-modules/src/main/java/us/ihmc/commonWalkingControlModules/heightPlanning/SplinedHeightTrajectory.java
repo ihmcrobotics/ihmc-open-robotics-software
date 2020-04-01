@@ -88,6 +88,7 @@ public class SplinedHeightTrajectory
 
    public void computeSpline()
    {
+      waypoints.sort(sorter);
       computeHeightsToUseByStretchingString(waypoints);
 
       int numberOfWaypoints = waypoints.size();

@@ -138,17 +138,17 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setMinimumHeightAboveGround(minimumHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setMinimumLegLengthToGround(minimumHeightAboveGround);
    }
 
    public void setNominalHeightAboveGround(double nominalHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setNominalHeightAboveGround(nominalHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setNominalLegLengthToGround(nominalHeightAboveGround);
    }
 
    public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setMaximumHeightAboveGround(maximumHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setMaximumLegLengthToGround(maximumHeightAboveGround);
    }
 
    @Override
