@@ -11,8 +11,8 @@ public class PlannerInput
 {
    private Point3D startPosition = new Point3D();
    private Point3D goalPosition = new Point3D();
-   private double startYaw = Double.NaN;
-   private double goalYaw = Double.NaN;
+   private double startYaw = 0.0;
+   private double goalYaw = 0.0;
    private HashMap<String, List<String>> additionalData = new HashMap<>();
 
    public Point3D getStartPosition()

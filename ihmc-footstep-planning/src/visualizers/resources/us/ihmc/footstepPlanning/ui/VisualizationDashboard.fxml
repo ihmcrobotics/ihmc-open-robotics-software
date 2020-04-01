@@ -11,7 +11,9 @@
                 <Label text="General" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                 <CheckBox fx:id="showRobotToggleButton" mnemonicParsing="false" selected="true" text="Show robot" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <CheckBox fx:id="showGoalSteps" mnemonicParsing="false" selected="true" text="Show goal steps" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="showStart" mnemonicParsing="false" selected="true" text="Show start" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="showGoal" mnemonicParsing="false" selected="true" text="Show goal" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="showCoordinateSystem" mnemonicParsing="false" selected="true" text="Show coordinate system" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                 <Label text="Body path" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                 <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.columnIndex="2" GridPane.rowIndex="1" />
