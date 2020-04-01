@@ -51,8 +51,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
  */
 public class FootstepPlannerUI
 {
-   private static final boolean VERBOSE = true;
-
    private final JavaFXMessager messager;
    private final Stage primaryStage;
    private final BorderPane mainPane;

@@ -24,11 +24,11 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
- * This class provides a visualizer for the remote footstep planner found in the footstep planner
- * toolbox. It allows users to view the resulting plans calculated by the toolbox. It also allows
- * the user to tune the planner parameters, and request a new plan from the planning toolboxs.
+ * This class provides a visualizer for the footstep planner module.
+ * It allows user to create plans, log and load plans from disk, tune parameters,
+ * and debug plans.
  */
-public class AtlasRemoteFootstepPlannerUI extends Application
+public class AtlasFootstepPlannerUI extends Application
 {
    private static final boolean launchPlannerToolbox = true;
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
