@@ -95,9 +95,9 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      stateMachine.getCurrentState().onExit();
+      stateMachine.getCurrentState().onExit(timeInState);
 
    }
 
