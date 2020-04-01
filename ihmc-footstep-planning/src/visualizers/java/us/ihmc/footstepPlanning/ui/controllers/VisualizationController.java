@@ -14,6 +14,8 @@ public class VisualizationController
    @FXML
    private CheckBox showRobotToggleButton;
    @FXML
+   private CheckBox showCoordinateSystem;
+   @FXML
    private CheckBox showInnerRegionMapsToggleButton;
    @FXML
    private CheckBox showInterRegionMapToggleButton;
@@ -59,6 +61,7 @@ public class VisualizationController
       messager.bindBidirectional(ShowRobot, showRobotToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalSteps, showGoalSteps.selectedProperty(), true);
+      messager.bindBidirectional(ShowCoordinateSystem, showCoordinateSystem.selectedProperty(), true);
 
       // Body path planner
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
