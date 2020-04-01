@@ -285,12 +285,12 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight, boolean isInTransfer)
    {
       if (useStateMachine)
       {
 //         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-         betterCenterOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+         betterCenterOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight, isInTransfer);
       }
    }
 

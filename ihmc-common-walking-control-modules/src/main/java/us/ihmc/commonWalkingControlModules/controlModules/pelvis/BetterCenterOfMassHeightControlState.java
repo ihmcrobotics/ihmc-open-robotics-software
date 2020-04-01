@@ -165,9 +165,9 @@ public class BetterCenterOfMassHeightControlState implements PelvisAndCenterOfMa
       comHeightTimeDerivativesSmoother.reset();
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight, boolean isInTransfer)
    {
-      centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight, isInTransfer);
    }
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)

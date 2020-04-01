@@ -4,6 +4,7 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -29,18 +30,10 @@ public class SplinedHeightTrajectory
 
    private final List<CoMHeightTrajectoryWaypoint> waypoints = new ArrayList<>();
    private final Comparator<CoMHeightTrajectoryWaypoint> sorter = Comparator.comparingDouble(CoMHeightTrajectoryWaypoint::getX);
-
-   private final CoMHeightTrajectoryWaypoint startWaypoint = new CoMHeightTrajectoryWaypoint();
-   private final CoMHeightTrajectoryWaypoint firstMidpoint = new CoMHeightTrajectoryWaypoint();
-   private final CoMHeightTrajectoryWaypoint secondMidpoint = new CoMHeightTrajectoryWaypoint();
-   private final CoMHeightTrajectoryWaypoint thirdMidpoint = new CoMHeightTrajectoryWaypoint();
-   private final CoMHeightTrajectoryWaypoint endWaypoint = new CoMHeightTrajectoryWaypoint();
-
    private final YoFramePoint3D contactFrameZeroPosition;
    private final YoFramePoint3D contactFrameOnePosition;
 
    private final BagOfBalls bagOfBalls;
-   private final DoubleProvider waypointInterpolation;
    private final YoConfigurablePolynomial spline;
 
    private ReferenceFrame referenceFrame;
@@ -54,38 +47,16 @@ public class SplinedHeightTrajectory
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
    private final Point2D pointToThrowAway = new Point2D();
 
-   public SplinedHeightTrajectory(DoubleProvider waypointInterpolation, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.waypointInterpolation = waypointInterpolation;
 
-      spline = new YoConfigurablePolynomial("height", 8, registry);
-
-      startWaypoint.createYoVariables("startWaypoint", registry);
-      firstMidpoint.createYoVariables("firstMidpoint", registry);
-      secondMidpoint.createYoVariables("secondMidpoint", registry);
-      thirdMidpoint.createYoVariables("thirdMidpoint", registry);
-      endWaypoint.createYoVariables("endWaypoint", registry);
+      spline = new YoConfigurablePolynomial("height", 9, registry);
 
       contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
       contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         String prefix = "better_";
-
-         AppearanceDefinition startColor = YoAppearance.CadetBlue();
-         AppearanceDefinition firstMidpointColor = YoAppearance.Chartreuse();
-         AppearanceDefinition secondMidpointColor = YoAppearance.BlueViolet();
-         AppearanceDefinition middleColor = YoAppearance.Azure();
-
-         String graphicListName = "BetterCoMHeightTrajectoryGenerator";
-
-         startWaypoint.setupViz(graphicListName, prefix + "StartWaypoint", startColor, yoGraphicsListRegistry);
-         firstMidpoint.setupViz(graphicListName, prefix + "FirstMidpoint", firstMidpointColor, yoGraphicsListRegistry);
-         secondMidpoint.setupViz(graphicListName, prefix + "SecondMidpoint", secondMidpointColor, yoGraphicsListRegistry);
-         thirdMidpoint.setupViz(graphicListName, prefix + "ThirdMidpoint", secondMidpointColor, yoGraphicsListRegistry);
-         endWaypoint.setupViz(graphicListName, prefix + "EndWaypoint", middleColor, yoGraphicsListRegistry);
-
          bagOfBalls = new BagOfBalls(15, 0.01, "height", registry, yoGraphicsListRegistry);
       }
       else
@@ -99,70 +70,44 @@ public class SplinedHeightTrajectory
       this.referenceFrame = referenceFrame;
    }
 
-   public void computeWaypoints(FramePoint3DReadOnly startCoMPosition,
-                                FramePoint3DReadOnly endCoMPosition,
-                                double startGroundHeight,
-                                double endGroundHeight,
-                                double minimumHeight,
-                                double maximumHeight)
+   public void clearWaypoints()
    {
-      double midstanceWidth = 0.5 * (startCoMPosition.getY() + endCoMPosition.getY());
-
-      double startX = startCoMPosition.getX();
-      double endX = endCoMPosition.getX();
-
-      double firstMidpointX = InterpolationTools.linearInterpolate(startX, endX, waypointInterpolation.getValue());
-      double secondMidpointX = InterpolationTools.linearInterpolate(startX, endX, 0.5);
-      double thirdMidpointX = InterpolationTools.linearInterpolate(endX, startX, waypointInterpolation.getValue());
-
-      setWaypointFrames(referenceFrame);
-
-      startWaypoint.setXY(startX, midstanceWidth);
-      firstMidpoint.setXY(firstMidpointX, midstanceWidth);
-      secondMidpoint.setXY(secondMidpointX, midstanceWidth);
-      thirdMidpoint.setXY(thirdMidpointX, midstanceWidth);
-      endWaypoint.setXY(endX, midstanceWidth);
-
-      startWaypoint.setHeight(startCoMPosition.getZ());
-      endWaypoint.setHeight(endCoMPosition.getZ());
-
-      double secondMinHeight = Math.max(findWaypointHeight(minimumHeight, startX, secondMidpointX, startGroundHeight),
-                                        findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight));
-      double secondMaxHeight = Math.min(findWaypointHeight(maximumHeight, startX, secondMidpointX, startGroundHeight),
-                                        findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight));
-      startWaypoint.setMinMax(minimumHeight, maximumHeight);
-      firstMidpoint.setMinMax(findWaypointHeight(minimumHeight, startX, firstMidpointX, startGroundHeight),
-                              findWaypointHeight(maximumHeight, startX, firstMidpointX, startGroundHeight));
-      secondMidpoint.setMinMax(secondMinHeight, secondMaxHeight);
-      thirdMidpoint.setMinMax(findWaypointHeight(minimumHeight, endX, thirdMidpointX, endGroundHeight),
-                              findWaypointHeight(maximumHeight, endX, thirdMidpointX, endGroundHeight));
-      endWaypoint.setMinMax(minimumHeight + endGroundHeight, maximumHeight + endGroundHeight);
-
       waypoints.clear();
-      waypoints.add(startWaypoint);
-      waypoints.add(firstMidpoint);
-      waypoints.add(thirdMidpoint);
-      waypoints.add(secondMidpoint);
-      waypoints.add(endWaypoint);
+   }
+
+   public void addWaypoints(List<CoMHeightTrajectoryWaypoint> waypoints)
+   {
+      for (int i = 0; i < waypoints.size(); i++)
+         addWaypoint(waypoints.get(i));
+   }
+
+   public void addWaypoint(CoMHeightTrajectoryWaypoint waypoint)
+   {
+      waypoints.add(waypoint);
+   }
+
+   public void computeSpline(double endingSlope)
+   {
+      boolean isSlopeValid = Double.isFinite(endingSlope);
+      boolean isReverse = waypoints.get(0).getX() > waypoints.get(waypoints.size() - 1).getX();
       waypoints.sort(sorter);
-   }
 
-   private void setWaypointFrames(ReferenceFrame referenceFrame)
-   {
-      startWaypoint.setToZero(referenceFrame);
-      firstMidpoint.setToZero(referenceFrame);
-      secondMidpoint.setToZero(referenceFrame);
-      thirdMidpoint.setToZero(referenceFrame);
-      endWaypoint.setToZero(referenceFrame);
-   }
-
-   public void computeSpline()
-   {
       computeHeightsToUseByStretchingString(waypoints);
 
-      spline.reshape(waypoints.size());
+      int numberOfWaypoints = waypoints.size();
+      if (isSlopeValid)
+         numberOfWaypoints++;
+
+      spline.reshape(numberOfWaypoints);
       for (int i = 0; i < waypoints.size(); i++)
          spline.addPositionConstraint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
+      if (isSlopeValid)
+      {
+         if (isReverse)
+            spline.addVelocityConstraint(waypoints.get(0).getX(), endingSlope);
+         else
+            spline.addVelocityConstraint(waypoints.get(waypoints.size() - 1).getX(), endingSlope);
+      }
       spline.solve();
 
       contactFrameZeroPosition.setMatchingFrame(waypoints.get(0).getWaypoint());
@@ -217,11 +162,6 @@ public class SplinedHeightTrajectory
       }
    }
 
-   private static double findWaypointHeight(double desiredDistanceFromFoot, double startAnkleX, double queryX, double extraToeOffHeight)
-   {
-      return Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - startAnkleX)) + extraToeOffHeight;
-   }
-
    public double solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
    {
       EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition, queryPoint);
@@ -238,13 +178,13 @@ public class SplinedHeightTrajectory
       double dzds = spline.getVelocity();
       double ddzdds = spline.getAcceleration();
 
-      double length = startWaypoint.getWaypoint().distance(endWaypoint.getWaypoint());
-      double dsdx = (endWaypoint.getX() - startWaypoint.getX()) / length;
-      double dsdy = (endWaypoint.getHeight() - startWaypoint.getHeight()) / length;
+      double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
+      double dsdx = (contactFrameOnePosition.getX() - contactFrameZeroPosition.getX()) / length;
+      double dsdy = (contactFrameOnePosition.getY() - contactFrameZeroPosition.getY()) / length;
 
-      double ddsddx = 0;
-      double ddsddy = 0;
-      double ddsdxdy = 0;
+      double ddsddx = 0.0;
+      double ddsddy = 0.0;
+      double ddsdxdy = 0.0;
 
       double dzdx = dsdx * dzds;
       double dzdy = dsdy * dzds;
@@ -254,6 +194,7 @@ public class SplinedHeightTrajectory
 
       tempFramePoint.setIncludingFrame(referenceFrame, 0.0, 0.0, z);
       tempFramePoint.changeFrame(worldFrame);
+
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, tempFramePoint.getZ());
       comHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
       comHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);

@@ -15,9 +15,16 @@ public class CoMHeightTrajectoryWaypoint
    private final FramePoint3D minWaypoint = new FramePoint3D();
    private final FramePoint3D maxWaypoint = new FramePoint3D();
 
-   private YoFramePoint3D yoWaypoint;
-   private YoFramePoint3D yoMinWaypoint;
-   private YoFramePoint3D yoMaxWaypoint;
+   private final YoFramePoint3D yoWaypoint;
+   private final YoFramePoint3D yoMinWaypoint;
+   private final YoFramePoint3D yoMaxWaypoint;
+
+   public CoMHeightTrajectoryWaypoint(String name, YoVariableRegistry registry)
+   {
+      yoWaypoint = new YoFramePoint3D(name + "InWorld", ReferenceFrame.getWorldFrame(), registry);
+      yoMinWaypoint = new YoFramePoint3D(name + "MinInWorld", ReferenceFrame.getWorldFrame(), registry);
+      yoMaxWaypoint = new YoFramePoint3D(name + "MaxInWorld", ReferenceFrame.getWorldFrame(), registry);
+   }
 
    public void setToZero(ReferenceFrame referenceFrame)
    {
@@ -92,41 +99,23 @@ public class CoMHeightTrajectoryWaypoint
       return maxWaypoint;
    }
 
-   public void createYoVariables(String name, YoVariableRegistry registry)
-   {
-      yoWaypoint = new YoFramePoint3D(name + "InWorld", ReferenceFrame.getWorldFrame(), registry);
-      yoMinWaypoint = new YoFramePoint3D(name + "MinInWorld", ReferenceFrame.getWorldFrame(), registry);
-      yoMaxWaypoint = new YoFramePoint3D(name + "MaxInWorld", ReferenceFrame.getWorldFrame(), registry);
-   }
-
    public void update()
    {
-      if (yoWaypoint != null)
-         yoWaypoint.setMatchingFrame(waypoint);
-      if (yoMinWaypoint != null)
-         yoMinWaypoint.setMatchingFrame(minWaypoint);
-      if (yoMaxWaypoint != null)
-         yoMaxWaypoint.setMatchingFrame(maxWaypoint);
+      yoWaypoint.setMatchingFrame(waypoint);
+      yoMinWaypoint.setMatchingFrame(minWaypoint);
+      yoMaxWaypoint.setMatchingFrame(maxWaypoint);
    }
 
    public void setupViz(String graphicListName, String name, AppearanceDefinition color, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double pointSize = 0.03;
 
-      if (yoWaypoint != null)
-      {
-         YoGraphicPosition pointD0Viz = new YoGraphicPosition(name, yoWaypoint, pointSize, color);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
-      }
-      if (yoMinWaypoint != null)
-      {
-         YoGraphicPosition pointD0MinViz = new YoGraphicPosition(name + "Min", yoMinWaypoint, 0.8 * pointSize, color);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
-      }
-      if (yoMaxWaypoint != null)
-      {
-         YoGraphicPosition pointD0MaxViz = new YoGraphicPosition(name + "Max", yoMaxWaypoint, 0.9 * pointSize, color);
-         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
-      }
+      YoGraphicPosition pointD0Viz = new YoGraphicPosition(name, yoWaypoint, pointSize, color);
+      YoGraphicPosition pointD0MinViz = new YoGraphicPosition(name + "Min", yoMinWaypoint, 0.8 * pointSize, color);
+      YoGraphicPosition pointD0MaxViz = new YoGraphicPosition(name + "Max", yoMaxWaypoint, 0.9 * pointSize, color);
+
+      yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
+      yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
+      yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
    }
 }
