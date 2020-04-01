@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import com.jme3.animation.Pose;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.BetterLookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
