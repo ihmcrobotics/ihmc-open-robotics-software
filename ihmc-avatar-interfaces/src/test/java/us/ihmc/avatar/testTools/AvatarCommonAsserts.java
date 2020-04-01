@@ -1,7 +1,7 @@
 package us.ihmc.avatar.testTools;
 
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
