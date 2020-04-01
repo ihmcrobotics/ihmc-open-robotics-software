@@ -21,11 +21,11 @@ import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 /**
- * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
- * It allows users to view the resulting plans calculated by the toolbox. It also allows the user to tune
- * the planner parameters, and request a new plan from the planning toolbox.
+ * This class provides a visualizer for the footstep planner module.
+ * It allows user to create plans, log and load plans from disk, tune parameters,
+ * and debug plans.
  */
-public class ValkyrieRemoteFootstepPlannerUI extends Application
+public class ValkyrieFootstepPlannerUI extends Application
 {
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;

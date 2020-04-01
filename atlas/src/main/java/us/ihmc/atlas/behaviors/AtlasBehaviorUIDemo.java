@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
+import us.ihmc.atlas.jfxvisualizer.AtlasFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
@@ -125,8 +125,8 @@ public class AtlasBehaviorUIDemo
    private void footstepPlannerUI()
    {
       LogTools.info("Launching remote footstep planner UI");
-      AtlasRemoteFootstepPlannerUI atlasRemoteFootstepPlannerUI = new AtlasRemoteFootstepPlannerUI();
-      JavaFXMissingTools.runApplication(atlasRemoteFootstepPlannerUI);
+      AtlasFootstepPlannerUI atlasFootstepPlannerUI = new AtlasFootstepPlannerUI();
+      JavaFXMissingTools.runApplication(atlasFootstepPlannerUI);
    }
 
    private AtlasRobotModel createRobotModel()
