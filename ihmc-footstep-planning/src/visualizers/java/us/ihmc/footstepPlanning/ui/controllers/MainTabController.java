@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -290,6 +291,9 @@ public class MainTabController
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
       messager.bindBidirectional(SnapGoalSteps, snapGoalSteps.selectedProperty(), true);
       messager.bindBidirectional(AbortIfGoalStepSnapFails, abortIfGoalStepSnapFails.selectedProperty(), true);
+
+      dataSetSelector.setItems(FXCollections.observableArrayList(DataSetName.values()));
+      dataSetSelector.valueProperty().addListener(((observable, oldValue, newValue) -> messager.submitMessage(DataSetSelected, dataSetSelector.getValue())));
    }
 
    public void bindControls()
