@@ -209,16 +209,12 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                        minimumHeightAboveGround.getDoubleValue(),
                        maximumHeightAboveGround.getDoubleValue(), isInTransfer);
 
-      double straightSlopeForFirst = (middleCoMPosition.getZ() - startCoMPosition.getZ()) / (middleCoMPosition.getX() - startCoMPosition.getX());
-      double straightSlopeForNext = (endCoMPosition.getZ() - middleCoMPosition.getZ()) / (endCoMPosition.getX() - middleCoMPosition.getX());
-      double nominalSlopeAtEnd = 0.5 * (straightSlopeForFirst + straightSlopeForNext);
-
       for (int i = 0; i < heightWaypoints.size(); i++)
          heightWaypoints.get(i).update();
 
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
-      splinedHeightTrajectory.computeSpline(Double.NaN);
+      splinedHeightTrajectory.computeSpline();
    }
 
    private void computeWaypoints(FramePoint3DReadOnly startCoMPosition,
