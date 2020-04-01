@@ -173,6 +173,8 @@ public class FootstepPlannerUI
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(contactPointParameters, messager);
 
+      startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
+
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(goalOrientationViewer.getRoot());
@@ -267,8 +269,8 @@ public class FootstepPlannerUI
          if (dataSet.hasPlannerInput())
          {
             robotRootJoint.getTranslation().set(dataSet.getPlannerInput().getStartPosition());
-            robotRootJoint.getTranslation().sub(rootJointToMidFootOffset);
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
+            robotRootJoint.getTranslation().sub(rootJointToMidFootOffset);
             robotVisualizer.submitNewConfiguration(robotRootJoint, defaultJointSetpoints);
 
             messager.submitMessage(GoalMidFootPosition, dataSet.getPlannerInput().getGoalPosition());

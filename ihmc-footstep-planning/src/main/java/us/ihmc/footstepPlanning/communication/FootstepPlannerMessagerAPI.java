@@ -72,7 +72,8 @@ public class FootstepPlannerMessagerAPI
    // Graphics control
    public static final Topic<Boolean> ShowRobot = topic("ShowRobot");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
-   public static final Topic<Boolean> ShowGoalSteps = topic("ShowGoalSteps");
+   public static final Topic<Boolean> ShowStart = topic("ShowStart");
+   public static final Topic<Boolean> ShowGoal = topic("ShowGoal");
    public static final Topic<Boolean> ShowCoordinateSystem = topic("ShowCoordinateSystem");
 
    public static final Topic<Boolean> ShowBodyPath = topic("ShowBodyPath");
@@ -112,7 +113,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pose3DReadOnly> RightFootGoalPose = topic("RightFootGoalPose");
    public static final Topic<Point3D> GoalMidFootPosition = topic("GoalMidFootPosition");
    public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
-   public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
    public static final Topic<FootstepPlanHeading> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
@@ -131,6 +131,7 @@ public class FootstepPlannerMessagerAPI
    // Footstep planner output
    public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
+   public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
    public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
    public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
