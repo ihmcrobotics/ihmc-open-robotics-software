@@ -8,41 +8,28 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class NewTransferToAndNextFootstepsData
 {
-   private final FramePoint3D transferFromPosition = new FramePoint3D();
    private final FramePoint3D transferToPosition = new FramePoint3D();
+   private final FramePoint3D comAtEndOfState = new FramePoint3D();
    private RobotSide transferToSide;
-
-   private final FramePoint3D nextFootstepPosition = new FramePoint3D();
-
-   public NewTransferToAndNextFootstepsData()
-   {
-      nextFootstepPosition.setToNaN();
-   }
 
    public FramePoint3DReadOnly getTransferToPosition()
    {
       return transferToPosition;
    }
 
-   public FramePoint3DReadOnly getTransferFromPosition()
+   public void setComAtEndOfState(FramePoint3DReadOnly comAtEndOfState)
    {
-      return transferFromPosition;
+      this.comAtEndOfState.set(comAtEndOfState);
    }
 
-   public void setTransferFromPosition(FramePoint3DReadOnly transferFromPosition)
+   public FramePoint3DReadOnly getCoMAtEndOfState()
    {
-      this.transferFromPosition.set(transferFromPosition);
+      return comAtEndOfState;
    }
 
    public void setTransferToPosition(FramePoint3DReadOnly transferToPosition)
    {
       this.transferToPosition.set(transferToPosition);
-   }
-
-   public void setTransferFromPosition(ReferenceFrame referenceFrame)
-   {
-      transferFromPosition.setToZero(referenceFrame);
-      transferFromPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void setTransferToPosition(ReferenceFrame referenceFrame)
@@ -60,20 +47,6 @@ public class NewTransferToAndNextFootstepsData
    {
       this.transferToSide = transferToSide;
    }
-
-   public FramePoint3DReadOnly getNextFootstepPosition()
-   {
-      return nextFootstepPosition;
-   }
-
-   public void setNextFootstepPosition(FramePoint3DReadOnly nextFootstepPosition)
-   {
-      if (nextFootstepPosition == null)
-      {
-         this.nextFootstepPosition.setToNaN();
-         return;
-      }
-
-      this.nextFootstepPosition.set(nextFootstepPosition);
-   }
 }
+
+

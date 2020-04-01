@@ -880,37 +880,16 @@ public class WalkingMessageHandler
 
    public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
-      transferToAndNextFootstepsData.setTransferFromPosition(soleFrames.get(transferToSide.getOppositeSide()));
       transferToAndNextFootstepsData.setTransferToPosition(soleFrames.get(transferToSide));
-
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
-
-      if (getCurrentNumberOfFootsteps() > 0)
-      {
-         transferToAndNextFootstepsData.setNextFootstepPosition(upcomingFootsteps.get(0).getFootstepPose().getPosition());
-      }
-      else
-      {
-         transferToAndNextFootstepsData.setNextFootstepPosition(null);
-      }
 
       return transferToAndNextFootstepsData;
    }
 
    public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
-      transferToAndNextFootstepsData.setTransferFromPosition(soleFrames.get(swingSide.getOppositeSide()));
       transferToAndNextFootstepsData.setTransferToPosition(transferToFootstep.getFootstepPose().getPosition());
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
-
-      if (getCurrentNumberOfFootsteps() > 0)
-      {
-         transferToAndNextFootstepsData.setNextFootstepPosition(upcomingFootsteps.get(0).getFootstepPose().getPosition());
-      }
-      else
-      {
-         transferToAndNextFootstepsData.setNextFootstepPosition(null);
-      }
 
       return transferToAndNextFootstepsData;
    }

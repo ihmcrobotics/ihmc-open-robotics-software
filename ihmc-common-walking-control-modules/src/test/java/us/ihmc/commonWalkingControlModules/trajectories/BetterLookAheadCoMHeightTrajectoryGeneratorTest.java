@@ -59,7 +59,6 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.2, 0.0);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
-      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
 
       runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
    }
@@ -74,7 +73,6 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.8, 0.2, 0.0);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
-      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
 
       runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
    }
@@ -89,7 +87,6 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D nextFootstep= new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, -0.2, 0.151);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
-      transferToAndNextFootstepsData.setNextFootstepPosition(nextFootstep);
 
       runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
    }
