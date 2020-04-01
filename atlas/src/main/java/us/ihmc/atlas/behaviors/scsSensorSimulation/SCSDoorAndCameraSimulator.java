@@ -125,6 +125,7 @@ public class SCSDoorAndCameraSimulator
       IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
+      cameraConfiguration.setCameraFieldOfView(80.0);
       scs.setupCamera(cameraConfiguration);
       int width = 1024;
       int height = 544;
