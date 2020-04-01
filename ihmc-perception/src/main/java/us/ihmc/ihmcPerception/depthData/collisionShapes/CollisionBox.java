@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.depthData.collisionShapes;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class CollisionBox extends CollisionShape
 {
@@ -48,7 +48,7 @@ public class CollisionBox extends CollisionShape
     * @return whether or not the point is in the box
     */
    @Override
-   public boolean contains(Point3D point)
+   public boolean contains(Point3DReadOnly point)
    {
       return (point.getX() >= -xExtent && point.getX() <= xExtent) && (point.getY() >= -yExtent && point.getY() <= yExtent) && (point.getZ() >= -zExtent && point.getZ() <= zExtent);
    }

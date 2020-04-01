@@ -191,13 +191,25 @@ public class ValkyriePlannerDashboardController
 
    private class TimeElapsedManager extends AnimationTimer
    {
+      private boolean active = false;
       private final Stopwatch stopwatch = new Stopwatch();
 
       @Override
       public void start()
       {
-         stopwatch.start();
-         super.start();
+         if(!active)
+         {
+            active = true;
+            stopwatch.start();
+            super.start();
+         }
+      }
+
+      @Override
+      public void stop()
+      {
+         active = false;
+         super.stop();
       }
 
       @Override

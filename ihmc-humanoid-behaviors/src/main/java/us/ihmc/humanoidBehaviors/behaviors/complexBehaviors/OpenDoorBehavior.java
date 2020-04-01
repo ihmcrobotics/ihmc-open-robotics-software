@@ -185,7 +185,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
             
       //      RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.096,  0.932 ) orientation 1.5511648101378044, 0.08462087065219358, 0.03818089607481523
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.769, -0.096,  0.9652 , 1.5511648101378044, 0.08462087065219358, 0.03818089607481523, RobotSide.RIGHT, "Moving Hand To Door Knob", 4));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.769, -0.096,  0.932 , 1.5511648101378044, 0.08462087065219358, 0.03818089607481523, RobotSide.RIGHT, "Moving Hand To Door Knob", 4));
             
          }
       };
@@ -207,8 +207,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             //otherwise the robot stops the arm motion because it is to fast
             setAutomaticArmAbort(false);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455, 0.218, 1.154, 1.7318790859631, 0.9163508562370669, -0.2253954188985998,
-                                                                               RobotSide.LEFT, "Pushing Door", 1));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455, 0.15, 1.154, 1.7318790859631, 0.9163508562370669, -0.2253954188985998,
+                                                                               RobotSide.LEFT, "Pushing Door", 2));
          }
 
       };
@@ -248,7 +248,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       };
 
       factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION, moveLeftHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION, moveLeftHandToDoor, OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 

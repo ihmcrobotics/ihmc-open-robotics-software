@@ -22,10 +22,10 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
@@ -54,6 +54,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LogVisualizer
 {
+   private static final int DEFAULT_BUFFER_SIZE = 8000;
+
    private static final boolean PRINT_OUT_YOVARIABLE_NAMES = false;
 
    private final SimulationConstructionSet scs;
@@ -62,7 +64,12 @@ public class LogVisualizer
 
    public LogVisualizer() throws IOException
    {
-      this(8000, false, null);
+      this(DEFAULT_BUFFER_SIZE);
+   }
+
+   public LogVisualizer(int bufferSize) throws IOException
+   {
+      this(bufferSize, false, null);
    }
 
    public LogVisualizer(int bufferSize, boolean showOverheadView, File logFile) throws IOException
@@ -155,7 +162,7 @@ public class LogVisualizer
          }
          catch (Exception e)
          {
-            PrintTools.warn("Robot model not available.");
+            LogTools.warn("Robot model not available.");
          }
       }
       else if (jointStates.size() != 0)
@@ -343,6 +350,7 @@ public class LogVisualizer
     * Valid arguments are:
     * <ul>
     * <li>SCS Var group file path, example: <tt>--varGroupFile="/home/user/varGroupExample.xml"</tt>
+    * <li>Setting custom buffer size: example: <tt>-b16000</tt> or <tt>--bufferSize=16000</tt>
     * </ul>
     * 
     * @param args
@@ -353,21 +361,39 @@ public class LogVisualizer
       JSAP jsap = new JSAP();
 
       FlaggedOption varGroupFileFlag = new FlaggedOption("varGroupFile").setLongFlag("varGroupFile").setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption bufferSizeFlag = new FlaggedOption("buffserSize").setLongFlag("bufferSize").setShortFlag('b').setRequired(false)
+                                                                     .setStringParser(JSAP.STRING_PARSER);
       jsap.registerParameter(varGroupFileFlag);
+      jsap.registerParameter(bufferSizeFlag);
 
       JSAPResult config = jsap.parse(args);
 
-      LogVisualizer visualizer = new LogVisualizer();
+      int bufferSize = DEFAULT_BUFFER_SIZE;
+      List<VarGroup> varGroups = null;
 
       if (config.success())
       {
-         File varGroupFile = new File(config.getString("varGroupFile"));
-         List<VarGroup> varGroups = loadVarGroups(varGroupFile);
-         if (varGroups != null && !varGroups.isEmpty())
+         String bufferSizeString = config.getString(bufferSizeFlag.getID());
+         if (bufferSizeString != null)
          {
-            varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
+            bufferSize = Integer.parseInt(bufferSizeString);
+            LogTools.info("Setting custom buffer size: " + bufferSize);
+         }
+
+         String varGroupFilePath = config.getString("varGroupFile");
+         if (varGroupFilePath != null)
+         {
+            File varGroupFile = new File(varGroupFilePath);
+            varGroups = loadVarGroups(varGroupFile);
+            LogTools.info("Loaded VarGroup file: " + varGroupFile);
          }
       }
+
+      LogVisualizer visualizer = new LogVisualizer(bufferSize);
+      if (visualizer.scs == null)
+         return;
+      if (varGroups != null && !varGroups.isEmpty())
+         varGroups.forEach(visualizer.scs.getVarGroupList()::addVarGroup);
 
       visualizer.run();
    }

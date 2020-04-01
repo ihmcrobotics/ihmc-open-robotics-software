@@ -15,7 +15,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 public class ValkyrieJoystickBasedSteppingApplication extends Application
 {
@@ -31,7 +31,7 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
       LogTools.info("-------------------------------------------------------------------");
       LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
       LogTools.info("-------------------------------------------------------------------");
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, ValkyrieRobotVersion.DEFAULT);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, ValkyrieRosControlController.VERSION);
       String robotName = robotModel.getSimpleRobotName();
       ValkyriePunchMessenger kickAndPunchMessenger = new ValkyriePunchMessenger(robotName, ros2Node);
 

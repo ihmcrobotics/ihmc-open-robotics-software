@@ -8,8 +8,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,13 +20,18 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.lang.ref.Reference;
+
 public class TransferToStandingState extends WalkingState
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
 
    private final YoBoolean doFootExplorationInTransferToStanding = new YoBoolean("doFootExplorationInTransferToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
+   private final TouchdownErrorCompensator touchdownErrorCompensator;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -33,15 +41,19 @@ public class TransferToStandingState extends WalkingState
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
 
+   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
+
    private final Point3D midFootPosition = new Point3D();
 
-   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
+                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                  WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(WalkingStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
+      this.touchdownErrorCompensator = touchdownErrorCompensator;
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
@@ -77,6 +89,7 @@ public class TransferToStandingState extends WalkingState
       balanceManager.resetPushRecovery();
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+
 
       // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
       // restore the full foot contact.
@@ -124,9 +137,12 @@ public class TransferToStandingState extends WalkingState
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
 
+      touchdownErrorCompensator.clear();
+
       if (previousSupportSide != null)
       {
          RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
+
          legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
          legConfigurationManager.beginStraightening(previousSwingSide);
       }

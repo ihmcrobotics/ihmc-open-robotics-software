@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.cell.PropertyValueFactory;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -59,6 +60,7 @@ public class MainTabController
    private static final double safetyRadiusToDiscardSteps = 0.8;
    private final ObservableList<RejectionPercentageProperty> rejectionTableItems = FXCollections.observableArrayList();
    private static final DecimalFormat percentageFormat = new DecimalFormat("#0.00");
+   private final TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
 
    // control
    @FXML
@@ -313,7 +315,6 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerType, plannerType.valueProperty(), true);
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerTimeTaken, new TextViewerListener<>(timeTaken));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
 
@@ -324,6 +325,14 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
+
+      messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
+      messager.registerTopicListener(PlanningResult, result ->
+      {
+         System.out.println(result);
+         if (result.terminalResult())
+            timeElapsedManager.stop();
+      });
 
       // set goal
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, placeStart.disableProperty());
@@ -537,7 +546,7 @@ public class MainTabController
    private SpinnerValueFactory.DoubleSpinnerValueFactory createTimeoutValueFactory()
    {
       double min = 0.0;
-      double max = 500.0;
+      double max = Double.MAX_VALUE;
       double amountToStepBy = 5;
       return new DoubleSpinnerValueFactory(min, max, 15.0, amountToStepBy);
    }
@@ -608,6 +617,9 @@ public class MainTabController
 
       messager.registerTopicListener(PlannerStatistics, statisticsMessage ->
       {
+         if(statisticsMessage.getRejectionFractions().isEmpty())
+            return;
+
          String percentageRejectionSteps = percentageFormat.format(100 * statisticsMessage.getFractionOfRejectedSteps());
          rejectionPercentage.setText(percentageRejectionSteps);
 
@@ -756,6 +768,36 @@ public class MainTabController
 
          previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
          previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      }
+   }
+
+   private class TimeElapsedManager extends AnimationTimer
+   {
+      private boolean active = false;
+      private final Stopwatch stopwatch = new Stopwatch();
+
+      @Override
+      public void start()
+      {
+         if(!active)
+         {
+            active = true;
+            stopwatch.start();
+            super.start();
+         }
+      }
+
+      @Override
+      public void stop()
+      {
+         active = false;
+         super.stop();
+      }
+
+      @Override
+      public void handle(long now)
+      {
+         timeTaken.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
    }
 

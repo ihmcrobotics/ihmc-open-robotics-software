@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
@@ -40,9 +40,9 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
       DRCRobotModel robotModel = getRobotModel();
       HumanoidRobotSensorInformation robotSensorInfo = robotModel.getSensorInformation();
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
-      networkModuleParameters.enableBehaviorModule(true);
-      networkModuleParameters.enableSensorModule(true);
+      HumanoidNetworkProcessorParameters networkModuleParameters = new HumanoidNetworkProcessorParameters();
+      networkModuleParameters.setUseBehaviorModule(true);
+      networkModuleParameters.setUseSensorModule(true);
 
       System.out.println(networkModuleParameters.toString());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;

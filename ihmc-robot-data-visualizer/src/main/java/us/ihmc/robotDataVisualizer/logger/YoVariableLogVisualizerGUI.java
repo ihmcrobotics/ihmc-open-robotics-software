@@ -1,23 +1,12 @@
 package us.ihmc.robotDataVisualizer.logger;
 
-import java.awt.BorderLayout;
-import java.awt.FileDialog;
-import java.awt.Frame;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -28,6 +17,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
+import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
+import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.videos.VideoFileFilter;
 
 public class YoVariableLogVisualizerGUI extends JPanel
@@ -45,9 +38,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private boolean isSeeking = false;
 
    private final YoVariableExporter exporter;
-   
-   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableHandshakeParser parser, YoVariableLogPlaybackRobot robot,
-         SimulationConstructionSet scs)
+
+   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableHandshakeParser parser,
+                                     YoVariableLogPlaybackRobot robot, SimulationConstructionSet scs)
    {
       super();
 
@@ -56,10 +49,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.scs = scs;
       this.directory = directory;
 
-      
-      if(properties.getVariables().getCompressed())
+      if (properties.getVariables().getCompressed())
       {
-         yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);         
+         yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);
          exporter = new YoVariableExporter(scs, directory, properties, parser.getYoVariablesList());
       }
       else
@@ -67,7 +59,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          yoVariableLogCropper = null;
          exporter = null;
       }
-      
+
       setLayout(new GridLayout(1, 2));
 
       addGUIElements(directory, properties);
@@ -88,7 +80,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          if (!isSeeking && !scs.isSimulating())
          {
-            if(newValue > 0)
+            if (newValue > 0)
             {
                newValue -= 1;
             }
@@ -153,40 +145,114 @@ public class YoVariableLogVisualizerGUI extends JPanel
          }
       }
    }
-   
 
-   private void exportGraphs(int start, int end)
+   private void exportMatlabDataDialog(int start, int end)
+   {
+      if (start == -1 || end == -1)
+         return;
+
+      JFrame jFrame = scs.getJFrame();
+      JDialog jDialog = new JDialog(jFrame, "Export Matlab Data");
+
+      Container contentPane = jDialog.getContentPane();
+
+      JLabel varGroupJLabel = new JLabel("VarGroup:   ");
+
+      JComboBox<String> varGroupComboBox = new JComboBox<String>();
+      varGroupComboBox.setMaximumSize(new Dimension(125, 21));
+      varGroupComboBox.setMinimumSize(new Dimension(125, 21));
+
+      for (String varGroupName : scs.getVarGroupList().getVarGroupNames())
+         varGroupComboBox.addItem(varGroupName);
+      varGroupComboBox.addItem("PlottedVariables");
+
+      JPanel optionsPanel = new JPanel();
+      optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.LINE_AXIS));
+      optionsPanel.add(varGroupJLabel);
+      optionsPanel.add(varGroupComboBox);
+      optionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+      contentPane.add(optionsPanel, BorderLayout.CENTER);
+
+      JButton exportButton = new JButton("Export");
+      exportButton.addActionListener(e ->
+      {
+         jDialog.setVisible(false);
+         VarGroup varGroup = null;
+         if (varGroupComboBox.getSelectedItem().equals("all"))
+            varGroup = null;
+         else if (varGroupComboBox.getSelectedItem().equals("PlottedVariables"))
+            varGroup = createVarGroupFromGraphs();
+         else
+            varGroup = scs.getVarGroupList().getVarGroup((String) varGroupComboBox.getSelectedItem());
+         exportMatlabData(start, end, varGroup);
+      });
+      JButton cancelButton = new JButton("Cancel");
+      cancelButton.addActionListener(e -> jDialog.setVisible(false));
+
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.add(exportButton);
+      buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+      buttonPanel.add(cancelButton);
+      buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+      contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+      Point point = jFrame.getLocation();
+      Dimension frameSize = jFrame.getSize();
+
+      point.translate(frameSize.width / 2, frameSize.height / 4);
+      jDialog.setLocation(point);
+
+      jDialog.pack();
+      jDialog.setVisible(true);
+   }
+
+   private VarGroup createVarGroupFromGraphs()
+   {
+      VarGroup varGroup = new VarGroup("PlottedVariables");
+
+      StandardSimulationGUI gui = scs.getGUI();
+
+      for (YoGraph graph : gui.getGraphArrayPanel().getGraphsOnThisPanel())
+      {
+         graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+      }
+
+      for (GraphArrayWindow graphArrayWindow : gui.getGraphArrayWindows())
+      {
+         for (YoGraph graph : graphArrayWindow.getGraphArrayPanel().getGraphsOnThisPanel())
+         {
+            graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+         }
+      }
+
+      return varGroup;
+   }
+
+   private void exportMatlabData(int start, int end, VarGroup varGroup)
    {
       if (start == -1 || end == -1)
       {
          return;
       }
-      if(exporter != null)
+      if (exporter != null)
       {
          final long startTimestamp = robot.getTimestamp(start);
          final long endTimestamp = robot.getTimestamp(end);
+
          new Thread("IHMC-LogVisualizerGUI")
          {
             @Override
             public void run()
             {
-               if(exporter != null)
+               if (exporter != null)
                {
                   FileDialog fd = new FileDialog((Frame) null, "Select .mat file to save to", FileDialog.SAVE);
-                  fd.setFilenameFilter(new FilenameFilter()
-                  {
-                     
-                     @Override
-                     public boolean accept(File dir, String name)
-                     {
-                        String lower = name.toLowerCase();
-                        return lower.endsWith(".mat");
-                     }
-                  });
+                  fd.setFilenameFilter((dir, name) -> name.toLowerCase().endsWith(".mat"));
                   fd.setFile("*.mat");
                   fd.setVisible(true);
                   String filename = fd.getFile();
-                  if(filename == null)
+
+                  if (filename == null)
                   {
                      System.out.println("No file selected, not exporting data.");
                   }
@@ -195,9 +261,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
                      File file = new File(fd.getDirectory(), filename);
                      try
                      {
-                        if(file.canWrite() || file.createNewFile())
+                        if (file.canWrite() || file.createNewFile())
                         {
-                           exporter.exportGraphs(file, startTimestamp,endTimestamp);
+                           exporter.exportMatlabData(file, startTimestamp, endTimestamp, varGroup);
                            return;
                         }
                      }
@@ -245,8 +311,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
       else
       {
          JOptionPane.showMessageDialog(null,
-               "Cannot crop this data file. Only compressed log files are supported. Use LogCompressor to compress this log file.", "Cannot crop",
-               JOptionPane.ERROR_MESSAGE);
+                                       "Cannot crop this data file. Only compressed log files are supported. Use LogCompressor to compress this log file.",
+                                       "Cannot crop",
+                                       JOptionPane.ERROR_MESSAGE);
       }
    }
 
@@ -299,7 +366,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
          public void stateChanged(ChangeEvent e)
          {
             int sliderValue = slider.getValue();
-            
+
             final String val = String.valueOf(sliderValue);
             SwingUtilities.invokeLater(new Runnable()
             {
@@ -385,20 +452,10 @@ public class YoVariableLogVisualizerGUI extends JPanel
             crop(slider.getStart(), slider.getEnd());
          }
       });
-      
-      final JButton exportData = new JButton("Export graphed variables");
-      exportData.setToolTipText("Export variables that are graphed in the main window from the in point till the out point");
-      exportData.addActionListener(new ActionListener()
-      {
-         
-         @Override
-         public void actionPerformed(ActionEvent arg0)
-         {
-            exportGraphs(slider.getStart(), slider.getEnd());
-            
-         }
 
-      });
+      final JButton exportData = new JButton("Export Matlab data");
+      exportData.setToolTipText("Export variables that are graphed in the main window from the in point till the out point");
+      exportData.addActionListener(event -> exportMatlabDataDialog(slider.getStart(), slider.getEnd()));
 
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);

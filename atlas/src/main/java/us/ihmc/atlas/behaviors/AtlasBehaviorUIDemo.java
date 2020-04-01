@@ -10,7 +10,7 @@ import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
-import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
@@ -22,7 +22,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.parameterTuner.remote.ParameterTuner;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -95,7 +94,7 @@ public class AtlasBehaviorUIDemo
 
       new Thread(() -> {
          LogTools.info("Creating footstep toolbox");
-         new FootstepPlanningToolboxModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModuleLauncher.createModule(createRobotModel(), PubSubImplementation.FAST_RTPS);
       }).start();
 
       new Thread(() -> {

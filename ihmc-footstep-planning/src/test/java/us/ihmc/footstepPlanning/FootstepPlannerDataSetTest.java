@@ -10,33 +10,33 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
+import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.ui.ApplicationRunner;
-import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
-import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.messager.SharedMemoryMessager;
 
 public abstract class FootstepPlannerDataSetTest
 {
@@ -252,10 +252,10 @@ public abstract class FootstepPlannerDataSetTest
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
 
-      if (plannerInput.hasGoalOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
-      if (plannerInput.hasStartOrientation())
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      double startYaw = plannerInput.hasStartOrientation() ? plannerInput.getStartYaw() : 0.0;
+      double goalYaw = plannerInput.hasGoalOrientation() ? plannerInput.getGoalYaw() : 0.0;
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientation, new Quaternion(startYaw, 0.0, 0.0));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientation, new Quaternion(goalYaw, 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 

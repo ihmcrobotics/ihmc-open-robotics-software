@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +18,6 @@ import javax.xml.bind.JAXBException;
 
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.modelLoaders.LogModelLoader;
-import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFModelLoader implements LogModelLoader
 {
@@ -63,7 +64,9 @@ public class SDFModelLoader implements LogModelLoader
 
    public JaxbSDFLoader createJaxbSDFLoader()
    {
-      if(resourceZip != null)
+      URLClassLoader resourceClassLoader = null;
+
+      if (resourceZip != null)
       {
          Path resourceDirectory = Paths.get(resourceDirectoryLocation, modelName);
          try
@@ -80,7 +83,7 @@ public class SDFModelLoader implements LogModelLoader
          ZipEntry ze = null;
          try
          {
-            while((ze = zip.getNextEntry()) != null)
+            while ((ze = zip.getNextEntry()) != null)
             {
                Path target = resourceDirectory.resolve(ze.getName());
                Files.createDirectories(target.getParent());
@@ -96,7 +99,7 @@ public class SDFModelLoader implements LogModelLoader
 
          try
          {
-            ClassLoaderTools.addURLToSystemClassLoader(resourceDirectory.toUri().toURL());
+            resourceClassLoader = new URLClassLoader(new URL[] {resourceDirectory.toUri().toURL()});
          }
          catch (IOException e)
          {
@@ -107,7 +110,7 @@ public class SDFModelLoader implements LogModelLoader
       ByteArrayInputStream is = new ByteArrayInputStream(model);
       try
       {
-         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories), descriptionMutator);
+         return new JaxbSDFLoader(is, Arrays.asList(resourceDirectories), resourceClassLoader, descriptionMutator);
       }
       catch (FileNotFoundException | JAXBException e)
       {

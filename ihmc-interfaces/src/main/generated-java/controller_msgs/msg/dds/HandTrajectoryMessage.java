@@ -28,15 +28,10 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
             * The position/orientation trajectory information.
             */
    public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
-   /**
-            * The trajectory information for the force/moment to be achieved by the end-effector.
-            */
-   public controller_msgs.msg.dds.WrenchTrajectoryMessage wrench_trajectory_;
 
    public HandTrajectoryMessage()
    {
       se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
-      wrench_trajectory_ = new controller_msgs.msg.dds.WrenchTrajectoryMessage();
    }
 
    public HandTrajectoryMessage(HandTrajectoryMessage other)
@@ -52,7 +47,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       robot_side_ = other.robot_side_;
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
-      controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.staticCopy(other.wrench_trajectory_, wrench_trajectory_);
    }
 
    /**
@@ -95,15 +89,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    }
 
 
-   /**
-            * The trajectory information for the force/moment to be achieved by the end-effector.
-            */
-   public controller_msgs.msg.dds.WrenchTrajectoryMessage getWrenchTrajectory()
-   {
-      return wrench_trajectory_;
-   }
-
-
    public static Supplier<HandTrajectoryMessagePubSubType> getPubSubType()
    {
       return HandTrajectoryMessagePubSubType::new;
@@ -126,7 +111,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!this.se3_trajectory_.epsilonEquals(other.se3_trajectory_, epsilon)) return false;
-      if (!this.wrench_trajectory_.epsilonEquals(other.wrench_trajectory_, epsilon)) return false;
 
       return true;
    }
@@ -145,7 +129,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.se3_trajectory_.equals(otherMyClass.se3_trajectory_)) return false;
-      if (!this.wrench_trajectory_.equals(otherMyClass.wrench_trajectory_)) return false;
 
       return true;
    }
@@ -161,9 +144,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("se3_trajectory=");
-      builder.append(this.se3_trajectory_);      builder.append(", ");
-      builder.append("wrench_trajectory=");
-      builder.append(this.wrench_trajectory_);
+      builder.append(this.se3_trajectory_);
       builder.append("}");
       return builder.toString();
    }
