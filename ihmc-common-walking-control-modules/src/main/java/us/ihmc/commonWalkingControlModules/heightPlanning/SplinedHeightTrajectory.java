@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
@@ -115,6 +115,8 @@ public class SplinedHeightTrajectory
       double secondMidpointX = InterpolationTools.linearInterpolate(startX, endX, 0.5);
       double thirdMidpointX = InterpolationTools.linearInterpolate(endX, startX, waypointInterpolation.getValue());
 
+      setWaypointFrames(referenceFrame);
+
       startWaypoint.setXY(startX, midstanceWidth);
       firstMidpoint.setXY(firstMidpointX, midstanceWidth);
       secondMidpoint.setXY(secondMidpointX, midstanceWidth);
@@ -143,6 +145,15 @@ public class SplinedHeightTrajectory
       waypoints.add(secondMidpoint);
       waypoints.add(endWaypoint);
       waypoints.sort(sorter);
+   }
+
+   private void setWaypointFrames(ReferenceFrame referenceFrame)
+   {
+      startWaypoint.setToZero(referenceFrame);
+      firstMidpoint.setToZero(referenceFrame);
+      secondMidpoint.setToZero(referenceFrame);
+      thirdMidpoint.setToZero(referenceFrame);
+      endWaypoint.setToZero(referenceFrame);
    }
 
    public void computeSpline()
@@ -211,7 +222,7 @@ public class SplinedHeightTrajectory
       return Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - startAnkleX)) + extraToeOffHeight;
    }
 
-   private void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
+   public double solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
    {
       EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition, queryPoint);
       double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition);
@@ -251,5 +262,7 @@ public class SplinedHeightTrajectory
       comHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
 
       pointOnSplineToPack.set(splineQuery, z);
+
+      return percentAlongSegment;
    }
 }

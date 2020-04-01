@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import java.util.ArrayList;
 
