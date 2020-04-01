@@ -86,28 +86,15 @@ public class SplinedHeightTrajectory
       waypoints.add(waypoint);
    }
 
-   public void computeSpline(double endingSlope)
+   public void computeSpline()
    {
-      boolean isSlopeValid = Double.isFinite(endingSlope);
-      boolean isReverse = waypoints.get(0).getX() > waypoints.get(waypoints.size() - 1).getX();
-      waypoints.sort(sorter);
-
       computeHeightsToUseByStretchingString(waypoints);
 
       int numberOfWaypoints = waypoints.size();
-      if (isSlopeValid)
-         numberOfWaypoints++;
 
       spline.reshape(numberOfWaypoints);
       for (int i = 0; i < waypoints.size(); i++)
          spline.addPositionConstraint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
-      if (isSlopeValid)
-      {
-         if (isReverse)
-            spline.addVelocityConstraint(waypoints.get(0).getX(), endingSlope);
-         else
-            spline.addVelocityConstraint(waypoints.get(waypoints.size() - 1).getX(), endingSlope);
-      }
       spline.solve();
 
       contactFrameZeroPosition.setMatchingFrame(waypoints.get(0).getWaypoint());
