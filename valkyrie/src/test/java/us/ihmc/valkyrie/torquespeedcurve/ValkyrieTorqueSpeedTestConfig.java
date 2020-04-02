@@ -38,6 +38,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	public HashMap<String, Double> velocityLimits; // Map of joint name to overridden velocity limit.
 	public HashMap<String, ArrayList<Double>> positionLimits; // Map of joint name to array containing lower and upper limit
 	public boolean showGui;             // whether to pop up a GUI (required if a video is wanted)
+	public boolean minimizeJointTorques; // Whether to minimize joint torques as part of the QP calculation
 	public TestType testType;           // type of test to run (see TestType enum)
 	public String footstepsFile;        // path to a file of footstep messages
 	public boolean disableAnkleLimits;  // ignore ankle limits -- falls are sometimes due to hitting ankle limits rather than insufficient torque 
@@ -84,6 +85,11 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		return disableAnkleLimits;
 	}
 	
+	@Override
+	public boolean getMinimizeJointTorques() {
+		return minimizeJointTorques;
+	}
+	
 	@Expose (serialize=false, deserialize=false)
 	private final JSONSerializer<FootstepDataListMessage> FootstepDataListMessageSerializer = new JSONSerializer<>(new FootstepDataListMessagePubSubType());
 	
@@ -100,6 +106,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		velocityLimits = new HashMap<String, Double>();
 		positionLimits = new HashMap<String, ArrayList<Double> >();
 		showGui = true;
+		minimizeJointTorques = false;
 		testType = TestType.STAIRS;
 		footstepsFile = null;
 		disableAnkleLimits = false;

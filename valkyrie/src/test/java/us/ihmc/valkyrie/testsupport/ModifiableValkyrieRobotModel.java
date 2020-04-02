@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.testsupport;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -25,6 +26,8 @@ public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 		setModelMassScale(config.getGlobalMassScale());
 		setModelSizeScale(config.getGlobalSizeScale());
 		
+		// Configure whether to minimize joint torques
+		WholeBodyInverseDynamicsSolver.MinimizeJointTorques(config.getMinimizeJointTorques());
 		
 		// Apply SDF modifications
 		SDFDescriptionMutatorList mutators = getSdfMutators(config);

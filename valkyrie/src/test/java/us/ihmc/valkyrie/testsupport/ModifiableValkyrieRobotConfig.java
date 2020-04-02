@@ -16,4 +16,5 @@ public interface ModifiableValkyrieRobotConfig {
 	public double getGlobalMassScale();
 	public double getGlobalSizeScale();
 	public boolean getAnkleLimitsDisabled();
+	public boolean getMinimizeJointTorques();
 }

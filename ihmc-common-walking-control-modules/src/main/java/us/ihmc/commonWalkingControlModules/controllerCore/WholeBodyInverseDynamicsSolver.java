@@ -62,7 +62,7 @@ public class WholeBodyInverseDynamicsSolver
     * Whether to assemble the objective for minimizing the joint torques. May be computationally
     * intensive, needs benchmark.
     */
-   private static final boolean MINIMIZE_JOINT_TORQUES = true;
+   private static boolean MINIMIZE_JOINT_TORQUES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -101,6 +101,10 @@ public class WholeBodyInverseDynamicsSolver
    private final YoBoolean enforceJointTorqueLimit = new YoBoolean("enforceJointTorqueLimit", registry);
 
    private final double controlDT;
+   
+   public static void MinimizeJointTorques(boolean state) {
+	   MINIMIZE_JOINT_TORQUES = state;
+   }
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -163,6 +167,8 @@ public class WholeBodyInverseDynamicsSolver
       // where the feet are all jacked up. For example, after falling and getting back up.
       optimizationControlModule.initialize();
       planeContactWrenchProcessor.initialize();
+      
+      System.out.printf("* * * Initialize Dynamics Solver. MINIMIZE_JOINT_TORQUES is %B\n", MINIMIZE_JOINT_TORQUES);
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
