@@ -103,7 +103,7 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
             Capsule3D forearmShape = new Capsule3D(0.15, 0.075);
             forearmShape.getPosition().set(-0.03, robotSide.negateIfRightSide(0.14), 0.0);
             forearmShape.getAxis().set(Axis.Y);
-            collidables.add(new Collidable(elbow.getPredecessor(), collisionMask, collisionGroup, forearmShape, elbowFrame));
+            collidables.add(new Collidable(elbow.getSuccessor(), collisionMask, collisionGroup, forearmShape, elbowFrame));
          }
 
          { // Hand
