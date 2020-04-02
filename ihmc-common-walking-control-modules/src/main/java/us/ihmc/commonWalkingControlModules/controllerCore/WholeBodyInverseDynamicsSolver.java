@@ -46,6 +46,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -56,11 +57,6 @@ public class WholeBodyInverseDynamicsSolver
     * {@link InverseDynamicsCalculator} for computing the joint efforts.
     */
    private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = false;
-   /**
-    * Whether to assemble the objective for minimizing the joint torques. May be computationally
-    * intensive, needs benchmark.
-    */
-   private static final boolean MINIMIZE_JOINT_TORQUES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -95,6 +91,12 @@ public class WholeBodyInverseDynamicsSolver
 
    private final YoFrameVector3D yoResidualRootJointForce;
    private final YoFrameVector3D yoResidualRootJointTorque;
+
+   /**
+    * Whether to assemble the objective for minimizing the joint torques. May be computationally
+    * intensive, needs benchmark.
+    */
+   private final YoBoolean minimizeJointTorques;
 
    private final double controlDT;
 
@@ -132,6 +134,9 @@ public class WholeBodyInverseDynamicsSolver
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
 
+      minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
+      minimizeJointTorques.set(false);
+
       parentRegistry.addChild(registry);
    }
 
@@ -146,7 +151,7 @@ public class WholeBodyInverseDynamicsSolver
       else
       {
          inverseDynamicsCalculator.setExternalWrenchesToZero();
-         if (MINIMIZE_JOINT_TORQUES)
+         if (minimizeJointTorques.getValue())
             dynamicsMatrixCalculator.reset();
       }
    }
@@ -165,7 +170,7 @@ public class WholeBodyInverseDynamicsSolver
       else
       {
          inverseDynamicsCalculator.compute();
-         if (MINIMIZE_JOINT_TORQUES)
+         if (minimizeJointTorques.getValue())
             dynamicsMatrixCalculator.reset();
       }
 
@@ -179,10 +184,10 @@ public class WholeBodyInverseDynamicsSolver
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
          dynamicsMatrixCalculator.compute();
-         if (MINIMIZE_JOINT_TORQUES)
+         if (minimizeJointTorques.getValue())
             optimizationControlModule.setupTorqueMinimizationCommand();
       }
-      else if (MINIMIZE_JOINT_TORQUES)
+      else if (minimizeJointTorques.getValue())
       {
          dynamicsMatrixCalculator.compute();
          optimizationControlModule.setupTorqueMinimizationCommand();
@@ -285,9 +290,10 @@ public class WholeBodyInverseDynamicsSolver
 
    public void submitInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
    {
-      while (inverseDynamicsCommandList.getNumberOfCommands() > 0)
+      for (int i = 0; i < inverseDynamicsCommandList.getNumberOfCommands(); i++)
       {
-         InverseDynamicsCommand<?> command = inverseDynamicsCommandList.pollCommand();
+         InverseDynamicsCommand<?> command = inverseDynamicsCommandList.getCommand(i);
+
          switch (command.getCommandType())
          {
             case TASKSPACE:
@@ -334,12 +340,22 @@ public class WholeBodyInverseDynamicsSolver
                submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
                break;
             case OPTIMIZATION_SETTINGS:
-               optimizationControlModule.submitOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) command);
+               submitOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) command);
                break;
             default:
                throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
+
+      inverseDynamicsCommandList.clear();
+   }
+
+   private void submitOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand command)
+   {
+      if (Double.isFinite(command.getJointTorqueWeight()) && !minimizeJointTorques.getValue())
+         minimizeJointTorques.set(true);
+
+      optimizationControlModule.submitOptimizationSettingsCommand(command);
    }
 
    // FIXME this assumes there is only one momentum rate command
