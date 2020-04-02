@@ -12,6 +12,10 @@ public class NewTransferToAndNextFootstepsData
    private final FramePoint3D comAtEndOfState = new FramePoint3D();
    private RobotSide transferToSide;
 
+   public NewTransferToAndNextFootstepsData()
+   {
+      comAtEndOfState.setToNaN();
+   }
    public FramePoint3DReadOnly getTransferToPosition()
    {
       return transferToPosition;

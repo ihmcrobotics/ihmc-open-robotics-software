@@ -190,6 +190,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
 
+   public double getDoubleSupportPercentageIn()
+   {
+      return doubleSupportPercentageIn.getDoubleValue();
+   }
+
    public void setSupportLeg(RobotSide supportLeg)
    {
       frameOfLastFootstep = soleFrames.get(supportLeg);
@@ -213,9 +218,16 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double middleAnkleZ = middleCoMPosition.getZ();
       middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
 
-      tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState());
-      tempFramePoint.changeFrame(frameOfLastFootstep);
-      doubleSupportPercentageIn.set(EuclidGeometryTools.percentageAlongLineSegment3D(startCoMPosition, middleCoMPosition, tempFramePoint));
+      if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
+      {
+         tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState());
+         tempFramePoint.changeFrame(frameOfLastFootstep);
+         doubleSupportPercentageIn.set(EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, middleCoMPosition));
+      }
+      else
+      {
+         doubleSupportPercentageIn.set(nominalDoubleSupportPercentageIn.getDoubleValue());
+      }
 
       double midstanceWidth = 0.5 * middleCoMPosition.getY();
 
@@ -257,7 +269,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double endX = endCoMPosition.getX();
 
       double percentIn = MathTools.clamp(doubleSupportPercentageIn.getDoubleValue(), 0.0, 1.0);
-      percentIn = percentIn > 0.5 ? 1.0 - percentIn : percentIn;
       percentIn = Math.max(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue());
 
       double firstAlpha, secondAlpha, thirdAlpha;
@@ -295,10 +306,14 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double startMaxHeight = findWaypointHeight(maximumHeight, 0.0, startX, startGroundHeight);
       double firstMinHeight = findWaypointHeight(minimumHeight, 0.0, firstMidpointX, startGroundHeight);
       double firstMaxHeight = findWaypointHeight(maximumHeight, 0.0, firstMidpointX, startGroundHeight);
-      double secondMinHeight = Math.max(findWaypointHeight(minimumHeight, 0.0, secondMidpointX, startGroundHeight),
-                                        findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight));
-      double secondMaxHeight = Math.min(findWaypointHeight(maximumHeight, 0.0, secondMidpointX, startGroundHeight),
-                                        findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight));
+
+      double exchangeFromMinHeight = findWaypointHeight(minimumHeight, 0.0, secondMidpointX, startGroundHeight);
+      double exchangeToMinHeight = findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight);
+      double exchangeFromMaxHeight = findWaypointHeight(maximumHeight, 0.0, secondMidpointX, startGroundHeight);
+      double exchangeToMaxHeight = findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight);
+      // FIXME this second waypoint needs to be rethought
+      double secondMinHeight = Math.max(exchangeFromMinHeight, exchangeToMinHeight);
+      double secondMaxHeight = Math.min(exchangeFromMaxHeight, exchangeToMaxHeight);
       double thirdMinHeight = findWaypointHeight(minimumHeight, endX, thirdMidpointX, endGroundHeight);
       double thirdMaxHeight = findWaypointHeight(maximumHeight, endX, thirdMidpointX, endGroundHeight);
       double endMinHeight = minimumHeight + endGroundHeight;
@@ -339,7 +354,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final Point2D point = new Point2D();
 
-   private void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
+   void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
    {
       this.queryPosition.set(queryPoint);
 
