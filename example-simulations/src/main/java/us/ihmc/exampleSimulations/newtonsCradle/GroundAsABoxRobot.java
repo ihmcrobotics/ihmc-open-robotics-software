@@ -157,10 +157,10 @@ public class GroundAsABoxRobot
       baseLinkGraphics.identity();
       baseLinkGraphics.translate(new Vector3D(offsetX, offsetY, -floorThickness));
       RotationMatrix rotationMatrixX = new RotationMatrix();
-      rotationMatrixX.setToRollMatrix(xRotation);
+      rotationMatrixX.setToRollOrientation(xRotation);
       baseLinkGraphics.rotate(rotationMatrixX);
       RotationMatrix rotationMatrixY = new RotationMatrix();
-      rotationMatrixY.setToPitchMatrix(yRotation);
+      rotationMatrixY.setToPitchOrientation(yRotation);
       baseLinkGraphics.rotate(rotationMatrixY);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 

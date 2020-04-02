@@ -952,7 +952,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                RotationMatrix cinderBlockOrientation = new RotationMatrix();
 
                pitchRollMatrix.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(cinderBlockNormal));
-               cinderBlockOrientation.setToYawMatrix(Math.toRadians(courseAngle));
+               cinderBlockOrientation.setToYawOrientation(Math.toRadians(courseAngle));
                cinderBlockOrientation.multiply(pitchRollMatrix);
 
                FramePose3D cinderBlockPose = new FramePose3D(ReferenceFrame.getWorldFrame());

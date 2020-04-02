@@ -9,23 +9,18 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.geometry.*;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -34,7 +29,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionTest
@@ -250,14 +247,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -289,14 +280,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -326,14 +311,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test

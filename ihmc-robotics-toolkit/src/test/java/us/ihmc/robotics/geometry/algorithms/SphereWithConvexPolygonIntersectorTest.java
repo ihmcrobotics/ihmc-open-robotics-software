@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry.algorithms;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +10,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Epsilons;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class SphereWithConvexPolygonIntersectorTest
@@ -36,14 +35,14 @@ public class SphereWithConvexPolygonIntersectorTest
    public void testSimpleIntersections()
    {
       SphereWithConvexPolygonIntersector sphereWithConvexPolygonIntersector = new SphereWithConvexPolygonIntersector();
-      FrameSphere3d sphere;
+      FrameSphere3D sphere;
       List<Point2D> vertices;
       FrameConvexPolygon2D polygon;
       PoseReferenceFrame frame;
       PoseReferenceFrame frame2;
       FramePoint3D closestPointOnPolygon;
 
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 2.0);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-10.0, -10.0));
       vertices.add(new Point2D(-10.0, 10.0));
@@ -54,7 +53,7 @@ public class SphereWithConvexPolygonIntersectorTest
       EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
 
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 0.5);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-10.0, -10.0));
       vertices.add(new Point2D(-10.0, 10.0));
@@ -65,7 +64,7 @@ public class SphereWithConvexPolygonIntersectorTest
       EuclidCoreTestTools.assertTuple3DEquals("intersection not right", new Point3D(5.0, 3.0, 0.0),
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
       
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 0.5);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
       vertices.add(new Point2D(-1.0, 1.0));
@@ -78,7 +77,7 @@ public class SphereWithConvexPolygonIntersectorTest
       
       frame = new PoseReferenceFrame("testFrame1", WORLD);
       frame.setPositionWithoutChecksAndUpdate(5.0, 3.0, 0.0);
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 0.5);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
       vertices.add(new Point2D(-1.0, 1.0));
@@ -95,7 +94,7 @@ public class SphereWithConvexPolygonIntersectorTest
       
       frame = new PoseReferenceFrame("testFrame2", WORLD);
       frame.setPositionWithoutChecksAndUpdate(5.0, 3.0, 0.0);
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 1.0);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 1.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
       vertices.add(new Point2D(-1.0, 1.0));
@@ -112,7 +111,7 @@ public class SphereWithConvexPolygonIntersectorTest
       
       frame = new PoseReferenceFrame("testFrame3", WORLD);
       frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
-      sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 2.0);
+      sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
       vertices.add(new Point2D(-1.0, 1.0));
@@ -129,7 +128,7 @@ public class SphereWithConvexPolygonIntersectorTest
       
       frame = new PoseReferenceFrame("testFrame4", WORLD);
       frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
-      sphere = new FrameSphere3d(frame, 5.0, 3.0, 1.0, 2.0);
+      sphere = new FrameSphere3D(frame, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
       vertices.add(new Point2D(-1.0, 1.0));
