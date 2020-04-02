@@ -345,7 +345,7 @@ public class RemoteUIMessageConverter
                                 "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + result);
       }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerStatistics, packet.getFootstepPlanningStatistics());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, packet.getPlannerTimings());
 
       if (verbose)
          LogTools.info("Received a footstep planning result from the toolbox.");

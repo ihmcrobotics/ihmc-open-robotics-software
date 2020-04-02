@@ -32,7 +32,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
-   public controller_msgs.msg.dds.FootstepPlanningStatistics footstep_planning_statistics_;
+   public controller_msgs.msg.dds.FootstepPlanningTimingsMessage planner_timings_;
    /**
             * Contains planner stack trace if failure is due to an exception
             */
@@ -45,7 +45,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
-      footstep_planning_statistics_ = new controller_msgs.msg.dds.FootstepPlanningStatistics();
+      planner_timings_ = new controller_msgs.msg.dds.FootstepPlanningTimingsMessage();
       exception_message_ = new java.lang.StringBuilder(255);
       stacktrace_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (20, "type_d");
 
@@ -69,7 +69,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
       body_path_.set(other.body_path_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
-      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.staticCopy(other.footstep_planning_statistics_, footstep_planning_statistics_);
+      controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.staticCopy(other.planner_timings_, planner_timings_);
       exception_message_.setLength(0);
       exception_message_.append(other.exception_message_);
 
@@ -134,9 +134,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-   public controller_msgs.msg.dds.FootstepPlanningStatistics getFootstepPlanningStatistics()
+   public controller_msgs.msg.dds.FootstepPlanningTimingsMessage getPlannerTimings()
    {
-      return footstep_planning_statistics_;
+      return planner_timings_;
    }
 
    /**
@@ -203,7 +203,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       }
 
       if (!this.low_level_planner_goal_.epsilonEquals(other.low_level_planner_goal_, epsilon)) return false;
-      if (!this.footstep_planning_statistics_.epsilonEquals(other.footstep_planning_statistics_, epsilon)) return false;
+      if (!this.planner_timings_.epsilonEquals(other.planner_timings_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.exception_message_, other.exception_message_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.stacktrace_, other.stacktrace_, epsilon)) return false;
@@ -231,7 +231,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
       if (!this.low_level_planner_goal_.equals(otherMyClass.low_level_planner_goal_)) return false;
-      if (!this.footstep_planning_statistics_.equals(otherMyClass.footstep_planning_statistics_)) return false;
+      if (!this.planner_timings_.equals(otherMyClass.planner_timings_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.exception_message_, otherMyClass.exception_message_)) return false;
 
       if (!this.stacktrace_.equals(otherMyClass.stacktrace_)) return false;
@@ -259,8 +259,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append(this.body_path_);      builder.append(", ");
       builder.append("low_level_planner_goal=");
       builder.append(this.low_level_planner_goal_);      builder.append(", ");
-      builder.append("footstep_planning_statistics=");
-      builder.append(this.footstep_planning_statistics_);      builder.append(", ");
+      builder.append("planner_timings=");
+      builder.append(this.planner_timings_);      builder.append(", ");
       builder.append("exception_message=");
       builder.append(this.exception_message_);      builder.append(", ");
       builder.append("stacktrace=");

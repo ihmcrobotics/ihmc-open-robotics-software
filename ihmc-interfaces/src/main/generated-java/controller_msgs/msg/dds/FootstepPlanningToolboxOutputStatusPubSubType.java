@@ -55,7 +55,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
@@ -95,7 +95,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getCdrSerializedSize(data.getFootstepPlanningStatistics(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getCdrSerializedSize(data.getPlannerTimings(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExceptionMessage().length() + 1;
 
@@ -123,7 +123,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
           throw new RuntimeException("body_path field exceeds the maximum length");
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getLowLevelPlannerGoal(), cdr);
-      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.write(data.getFootstepPlanningStatistics(), cdr);
+      controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.write(data.getPlannerTimings(), cdr);
       if(data.getExceptionMessage().length() <= 255)
       cdr.write_type_d(data.getExceptionMessage());else
           throw new RuntimeException("exception_message field exceeds the maximum length");
@@ -146,7 +146,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
-      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.read(data.getFootstepPlanningStatistics(), cdr);	
+      controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.read(data.getPlannerTimings(), cdr);	
       cdr.read_type_d(data.getExceptionMessage());	
       cdr.read_type_e(data.getStacktrace());	
 
@@ -165,7 +165,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.write_type_e("body_path", data.getBodyPath());
       ser.write_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
 
-      ser.write_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
+      ser.write_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());
 
       ser.write_type_d("exception_message", data.getExceptionMessage());
       ser.write_type_e("stacktrace", data.getStacktrace());
@@ -184,7 +184,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.read_type_e("body_path", data.getBodyPath());
       ser.read_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
 
-      ser.read_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
+      ser.read_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());
 
       ser.read_type_d("exception_message", data.getExceptionMessage());
       ser.read_type_e("stacktrace", data.getStacktrace());
