@@ -1219,7 +1219,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
@@ -1230,8 +1230,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          tempFinalCoM.set(singleSupportFinalCoM);
       }
 
-      tempFinalCoM.changeFrame(worldFrame);
-      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(tempFinalCoM);
+      finalDesiredCenterOfMassPositionToPack.setMatchingFrame(tempFinalCoM);
 
    }
 
