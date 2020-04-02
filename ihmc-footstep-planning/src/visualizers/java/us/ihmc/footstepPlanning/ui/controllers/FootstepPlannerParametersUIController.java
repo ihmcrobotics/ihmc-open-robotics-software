@@ -77,7 +77,7 @@ public class FootstepPlannerParametersUIController
       int numRows = keys.keys().size() / numTableColumns + 1;
 
       List<StoredPropertyKey<?>> orderedKeys = new ArrayList<>(keys.keys());
-      Comparator<StoredPropertyKey<?>> nameSorter = Comparator.comparing(StoredPropertyKey::getTitleCasedName, String::compareTo);
+      Comparator<StoredPropertyKey<?>> nameSorter = Comparator.comparing(StoredPropertyKey::getTitleCasedName, String.CASE_INSENSITIVE_ORDER);
       orderedKeys.sort(nameSorter);
       parameterTableRows.clear();
 
