@@ -51,7 +51,6 @@ public class MainTabController
 {
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
-   private final TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
 
    // control
    @FXML
@@ -82,6 +81,8 @@ public class MainTabController
    @FXML
    private TextField timeTaken;
    @FXML
+   private TextField iterationsTaken;
+   @FXML
    private TextField planningResult;
    @FXML
    private TextField plannerStatus;
@@ -91,8 +92,6 @@ public class MainTabController
    private TextField logGenerationStatus;
    @FXML
    private TextField logLoadStatus;
-   @FXML
-   private Button loadLogButton;
 
    // goal placement
    @FXML
@@ -327,12 +326,10 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
 
-      messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
-      messager.registerTopicListener(AbortPlanning, b -> timeElapsedManager.stop());
-      messager.registerTopicListener(PlanningResult, result ->
+      messager.registerTopicListener(PlannerTimings, timings ->
       {
-         if (result.terminalResult())
-            timeElapsedManager.stop();
+         timeTaken.setText(String.format("%.2f", timings.getTotalElapsedSeconds()));
+         iterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
       });
 
       // set goal
@@ -668,36 +665,6 @@ public class MainTabController
 
          previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
          previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
-      }
-   }
-
-   private class TimeElapsedManager extends AnimationTimer
-   {
-      private boolean active = false;
-      private final Stopwatch stopwatch = new Stopwatch();
-
-      @Override
-      public void start()
-      {
-         if(!active)
-         {
-            active = true;
-            stopwatch.start();
-            super.start();
-         }
-      }
-
-      @Override
-      public void stop()
-      {
-         active = false;
-         super.stop();
-      }
-
-      @Override
-      public void handle(long now)
-      {
-         timeTaken.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
    }
 }
