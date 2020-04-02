@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.BodyPathPlanMessage;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -55,6 +56,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepPlannerOutput output = new FootstepPlannerOutput();
+   private final Stopwatch stopwatch = new Stopwatch();
 
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
@@ -85,6 +87,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
+
+      addBodyPathPlanCallback(bodyPathMessage -> output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap()));
+      addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap()));
+      aStarFootstepPlanner.addIterationCallback(iterationData -> output.getPlannerTimings().setStepPlanningIterations(aStarFootstepPlanner.getIterations()));
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -95,9 +101,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return null;
       }
 
+      stopwatch.start();
+      output.clear();
+
       try
       {
-         return handleRequestInternal(request);
+         handleRequestInternal(request);
+         output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
+         return output;
       }
       catch (Exception exception)
       {
@@ -107,14 +118,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setPlanId(request.getRequestId());
          output.setResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
+         output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
          statusCallback.accept(output);
          return output;
       }
    }
 
-   private FootstepPlannerOutput handleRequestInternal(FootstepPlannerRequest request)
+   private void handleRequestInternal(FootstepPlannerRequest request)
    {
       this.request.set(request);
+      requestCallback.accept(request);
       output.setPlanId(request.getRequestId());
       isPlanning.set(true);
       bodyPathPlanMessage = new BodyPathPlanMessage();
@@ -122,12 +135,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
-      requestCallback.accept(request);
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
+
+      // record time
+      output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
 
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
@@ -143,7 +158,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             output.setResult(bodyPathPlannerResult);
             statusCallback.accept(output);
             isPlanning.set(false);
-            return output;
+            return;
          }
          else if (waypoints.size() < 2 && footstepPlannerParameters.getReturnBestEffortPlan())
          {
@@ -198,11 +213,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             output.getFootstepPlan().addFootstep(plan.getFootstep(i));
          }
 
+         output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
          statusCallback.accept(output);
       }
 
       isPlanning.set(false);
-      return output;
    }
 
    private void reportBodyPathPlan(FootstepPlanningResult result)
