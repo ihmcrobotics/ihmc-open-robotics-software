@@ -382,4 +382,9 @@ public class AStarFootstepPlanner
    {
       return iterationData;
    }
+
+   public int getIterations()
+   {
+      return iterations;
+   }
 }
