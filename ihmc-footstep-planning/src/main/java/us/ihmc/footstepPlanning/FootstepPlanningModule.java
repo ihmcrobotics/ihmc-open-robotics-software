@@ -89,7 +89,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
 
       addBodyPathPlanCallback(bodyPathMessage -> output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap()));
-      addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap()));
+      addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
+      addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
       aStarFootstepPlanner.addIterationCallback(iterationData -> output.getPlannerTimings().setStepPlanningIterations(aStarFootstepPlanner.getIterations()));
    }
 
@@ -107,7 +108,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          handleRequestInternal(request);
-         output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
          return output;
       }
       catch (Exception exception)
@@ -118,7 +118,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setPlanId(request.getRequestId());
          output.setResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
-         output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
          statusCallback.accept(output);
          return output;
       }

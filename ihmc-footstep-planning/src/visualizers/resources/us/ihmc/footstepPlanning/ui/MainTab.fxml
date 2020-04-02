@@ -129,20 +129,24 @@
 
                 <GridPane alignment="TOP_CENTER" hgap="10" vgap="5">
                     <children>
-                        <Label text="Sent ID" GridPane.halignment="RIGHT" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Label text="Received ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="Sent ID" GridPane.halignment="RIGHT" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <Label text="Received ID" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
 
-                        <Label text="Time Taken" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="0"/>
-                        <Label text="Result" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1"/>
-                        <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                        <Label text="Planner Status" GridPane.halignment="RIGHT" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                        <Label text="Result" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
 
-                        <TextField fx:id="sentRequestId" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                        <TextField fx:id="receivedRequestId" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                        <TextField fx:id="plannerStatus" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                        <Label text="Time Taken" GridPane.halignment="RIGHT" GridPane.rowIndex="0" GridPane.columnIndex="4" />
+                        <Label text="Iterations" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.columnIndex="4" />
 
-                        <TextField fx:id="timeTaken" GridPane.columnIndex="5" GridPane.rowIndex="0"/>
-                        <TextField fx:id="planningResult" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+                        <TextField fx:id="sentRequestId" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="60"/>
+                        <TextField fx:id="receivedRequestId" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="60"/>
+
+                        <TextField fx:id="plannerStatus" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                        <TextField fx:id="planningResult" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                        <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+                        <TextField fx:id="timeTaken" GridPane.columnIndex="5" GridPane.rowIndex="0" prefWidth="80"/>
+                        <TextField fx:id="iterationsTaken" GridPane.columnIndex="5" GridPane.rowIndex="1" prefWidth="80"/>
                     </children>
                 </GridPane>
 
