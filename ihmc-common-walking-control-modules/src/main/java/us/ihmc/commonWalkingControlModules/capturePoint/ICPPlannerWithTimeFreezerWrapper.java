@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -459,7 +460,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
       icpPlanner.getFinalDesiredCenterOfMassPosition(finalDesiredCenterOfMassPositionToPack);
    }

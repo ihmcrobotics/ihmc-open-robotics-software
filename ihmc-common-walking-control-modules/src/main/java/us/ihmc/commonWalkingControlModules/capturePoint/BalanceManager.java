@@ -78,6 +78,7 @@ public class BalanceManager
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector2D yoDesiredCoMVelocity = new YoFrameVector2D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
+   private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
 
    /** CoP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
@@ -514,6 +515,11 @@ public class BalanceManager
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
+   public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMVelocityToPack)
+   {
+      desiredCoMVelocityToPack.set(yoFinalDesiredCoM);
+   }
+
    public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMVelocityToPack)
    {
       desiredCoMVelocityToPack.set(yoDesiredCoMPosition);
@@ -804,6 +810,7 @@ public class BalanceManager
    {
       computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()

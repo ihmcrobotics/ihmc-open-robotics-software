@@ -1,12 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -514,7 +509,13 @@ public interface ICPPlannerInterface
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
+   default void getFinalDesiredCenterOfMassPosition(FramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
+   {
+      finalDesiredCenterOfMassPositionToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      getFinalDesiredCenterOfMassPosition((FixedFramePoint3DBasics) finalDesiredCenterOfMassPositionToPack);
+   }
+
+   void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack);
 
    /**
     * Retrieves the position of the next exit CMP.
