@@ -162,7 +162,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
    }
 
-   private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
+   RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
    {
       updateWiggleParameters();
 
