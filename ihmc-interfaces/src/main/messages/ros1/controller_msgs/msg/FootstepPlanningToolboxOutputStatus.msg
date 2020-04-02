@@ -39,7 +39,7 @@ geometry_msgs/Pose[] body_path
 
 geometry_msgs/Pose low_level_planner_goal
 
-controller_msgs/FootstepPlanningStatistics footstep_planning_statistics
+controller_msgs/FootstepPlanningTimingsMessage planner_timings
 
 # Contains planner stack trace if failure is due to an exception
 string exception_message

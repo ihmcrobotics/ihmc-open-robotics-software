@@ -134,7 +134,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
    public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
-   public static final Topic<FootstepPlanningStatistics> PlannerStatistics = topic("PlannerStatistics");
+   public static final Topic<FootstepPlanningTimingsMessage> PlannerTimings = topic("PlannerTimings");
    public static final Topic<FootstepPlanningResult> PlanningResult = topic("PlanningResult");
    public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");

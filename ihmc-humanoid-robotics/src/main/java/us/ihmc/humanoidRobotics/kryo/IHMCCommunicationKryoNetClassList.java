@@ -257,7 +257,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkingControllerFailureStatusMessagePubSubType.class);
       registerPacketField(ParameterValuePubSubType.class);
       registerPacketField(FootstepDataMessagePubSubType.class);
-      registerPacketField(FootstepPlanningStatistics.class);
+      registerPacketField(FootstepPlanningTimingsMessage.class);
       registerPacketField(FootstepPlanningToolboxOutputStatusPubSubType.class);
       registerPacketField(ColorRGBAPubSubType.class);
       registerPacketField(PelvisPoseErrorPacketPubSubType.class);
