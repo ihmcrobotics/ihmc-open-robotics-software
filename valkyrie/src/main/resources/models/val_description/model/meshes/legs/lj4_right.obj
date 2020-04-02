@@ -4650,7 +4650,7 @@ vt 0.5073 0.2321 0.0000
 vt 0.5072 0.2411 0.0000
 # 783 texture coords
 
-o Cylinder_001
+#o Cylinder_001
 g Cylinder_001
 usemtl Material
 s off

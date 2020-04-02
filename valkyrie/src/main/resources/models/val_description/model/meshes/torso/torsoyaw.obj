@@ -168,7 +168,7 @@ vt 1.0000 0.0000 0.0000
 vt 1.0000 1.0000 0.0000
 # 3 texture coords
 
-o Cylinder
+#o Cylinder
 g Cylinder
 usemtl Material
 s off
