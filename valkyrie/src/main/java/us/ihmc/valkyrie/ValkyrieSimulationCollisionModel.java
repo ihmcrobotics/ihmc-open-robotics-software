@@ -44,6 +44,8 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
    public ValkyrieSimulationCollisionModel(DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
+      // Setting default info.
+      setCollidableHelper(new CollidableHelper(), jointMap.getModelName(), "other");
    }
 
    public void setCollidableHelper(CollidableHelper helper, String robotCollisionMask, String... otherCollisionMasks)
