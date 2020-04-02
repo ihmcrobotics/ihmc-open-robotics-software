@@ -312,7 +312,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double exchangeFromMaxHeight = findWaypointHeight(maximumHeight, 0.0, secondMidpointX, startGroundHeight);
       double exchangeToMaxHeight = findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight);
       // FIXME this second waypoint needs to be rethought
-      double secondMinHeight = Math.max(exchangeFromMinHeight, exchangeToMinHeight);
+      double secondMinHeight = Math.min(Math.max(exchangeFromMinHeight, exchangeToMinHeight), Math.min(exchangeFromMaxHeight, exchangeToMaxHeight));
       double secondMaxHeight = Math.min(exchangeFromMaxHeight, exchangeToMaxHeight);
       double thirdMinHeight = findWaypointHeight(minimumHeight, endX, thirdMidpointX, endGroundHeight);
       double thirdMaxHeight = findWaypointHeight(maximumHeight, endX, thirdMidpointX, endGroundHeight);

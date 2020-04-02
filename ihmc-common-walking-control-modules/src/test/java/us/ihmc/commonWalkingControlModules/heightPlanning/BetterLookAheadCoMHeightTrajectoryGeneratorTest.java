@@ -25,7 +25,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 {
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
    private static final double minimumHeight = 0.75;
    private static double nominalHeight = 0.8;
    private static final double maximumHeight = 0.95;
@@ -217,19 +217,19 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       AppearanceDefinition startMinBallAppearance = YoAppearance.Red();
       AppearanceDefinition endMaxBallAPpearan = YoAppearance.Blue();
       AppearanceDefinition endMinBallAPpearan = YoAppearance.Blue();
-      startMaxBallAppearance.setTransparency(0.3);
-      startMinBallAppearance.setTransparency(0.3);
-      endMaxBallAPpearan.setTransparency(0.3);
-      endMinBallAPpearan.setTransparency(0.3);
+      startMaxBallAppearance.setTransparency(0.9);
+      startMinBallAppearance.setTransparency(0.95);
+      endMaxBallAPpearan.setTransparency(0.9);
+      endMinBallAPpearan.setTransparency(0.95);
       YoGraphicPosition startMinBall = new YoGraphicPosition("startFootMin", yoStartFoot, minimumHeight, startMinBallAppearance);
       YoGraphicPosition startMaxBall = new YoGraphicPosition("startFootMax", yoStartFoot, maximumHeight, startMaxBallAppearance);
       YoGraphicPosition endMaxBall = new YoGraphicPosition("endFootMax", yoEndFoot, maximumHeight, endMaxBallAPpearan);
       YoGraphicPosition endMinBall = new YoGraphicPosition("endFootMin", yoEndFoot, minimumHeight, endMinBallAPpearan);
 
-      graphicsListRegistry.registerYoGraphic("test", startMinBall);
-      graphicsListRegistry.registerYoGraphic("test", startMaxBall);
-      graphicsListRegistry.registerYoGraphic("test", endMinBall);
-      graphicsListRegistry.registerYoGraphic("test", endMaxBall);
+      graphicsListRegistry.registerYoGraphic("testStartMin", startMinBall);
+      graphicsListRegistry.registerYoGraphic("testStartMax", startMaxBall);
+      graphicsListRegistry.registerYoGraphic("testEndMin", endMinBall);
+      graphicsListRegistry.registerYoGraphic("testEndMax", endMaxBall);
 
       if (visualize)
       {
