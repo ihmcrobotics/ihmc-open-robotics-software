@@ -161,8 +161,8 @@ public class MovingWalkingReferenceFrameTest
 
             RotationMatrix yaw = new RotationMatrix();
             RotationMatrix pitch = new RotationMatrix();
-            yaw.setToYawMatrix(yawPitchRoll[0]);
-            pitch.setToPitchMatrix(yawPitchRoll[1]);
+            yaw.setToYawOrientation(yawPitchRoll[0]);
+            pitch.setToPitchOrientation(yawPitchRoll[1]);
 
             angularVelocity.setToZero(parentFrame);
             angularVelocity.add(yawPitchRollDot[2], 0.0, 0.0);

@@ -5,17 +5,13 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Calculates suggested swing time, swing height and waypoint proportions
@@ -99,7 +95,7 @@ public class AdaptiveSwingTrajectoryCalculator
    {
       Box3D footStubBox = new Box3D();
       double stubClearance = adaptiveSwingParameters.getFootStubClearance();
-      footStubBox.setSize(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
+      footStubBox.getSize().set(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
 
       Pose3D boxCenter = new Pose3D(stepAtRiskOfToeStubbing);
 

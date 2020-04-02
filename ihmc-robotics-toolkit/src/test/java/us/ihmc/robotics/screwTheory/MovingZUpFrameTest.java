@@ -52,7 +52,7 @@ public class MovingZUpFrameTest
          RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(random);
 
          RotationMatrix expectedZUp = new RotationMatrix();
-         expectedZUp.setToYawMatrix(rotationMatrix.getYaw());
+         expectedZUp.setToYawOrientation(rotationMatrix.getYaw());
 
          RotationMatrix actualZUp = new RotationMatrix();
          double sinPitch = -rotationMatrix.getM20();

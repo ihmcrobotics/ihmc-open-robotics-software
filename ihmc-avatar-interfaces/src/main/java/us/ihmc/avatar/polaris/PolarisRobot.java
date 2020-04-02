@@ -128,7 +128,7 @@ public class PolarisRobot extends Robot
    {
       wheelToCarTransform.setTranslation(wheelToCarX, wheelToCarY, wheelToCarZ);
       RotationMatrix rotation = new RotationMatrix();
-      rotation.setToPitchMatrix(Math.toRadians(steeringWheelPitchInDegrees));
+      rotation.setToPitchOrientation(Math.toRadians(steeringWheelPitchInDegrees));
       wheelToCarTransform.setRotation(rotation);
       
       carToWheelTransform.set(wheelToCarTransform);

@@ -32,6 +32,7 @@ mainDependencies {
    api("us.ihmc:log-tools:0.4.1")
    api("us.ihmc:euclid:0.12.2")
    api("us.ihmc:euclid-frame:0.12.2")
+   api("us.ihmc:euclid-frame-shape:0.12.2")
    api("us.ihmc:euclid-shape:0.12.2")
    api("us.ihmc:mecano:0.2.1")
    api("us.ihmc:mecano-yovariables:0.2.1")

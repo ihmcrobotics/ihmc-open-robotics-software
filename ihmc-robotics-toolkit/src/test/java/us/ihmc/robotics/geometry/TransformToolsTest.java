@@ -228,19 +228,19 @@ public class TransformToolsTest
    private void createRandomRotationMatrixX(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToRollMatrix(theta);
+      matrix.setToRollOrientation(theta);
    }
 
    private void createRandomRotationMatrixY(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToPitchMatrix(theta);
+      matrix.setToPitchOrientation(theta);
    }
 
    private void createRandomRotationMatrixZ(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToYawMatrix(theta);
+      matrix.setToYawOrientation(theta);
    }
 
    private void randomizeVector(Random random, Vector3D vector)

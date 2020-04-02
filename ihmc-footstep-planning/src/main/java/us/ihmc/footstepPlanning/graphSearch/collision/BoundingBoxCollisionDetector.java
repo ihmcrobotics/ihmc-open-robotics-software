@@ -133,14 +133,14 @@ public class BoundingBoxCollisionDetector
 
    private void setDimensionsToLowerBound()
    {
-      bodyBox.setSize(boxDepth, boxWidth, boxHeight);
+      bodyBox.getSize().set(boxDepth, boxWidth, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
    }
 
    private void setDimensionsToUpperBound()
    {
       double planarDimensionIncrease = 2.0 * xyProximityCheck;
-      bodyBox.setSize(boxDepth + planarDimensionIncrease, boxWidth + planarDimensionIncrease, boxHeight);
+      bodyBox.getSize().set(boxDepth + planarDimensionIncrease, boxWidth + planarDimensionIncrease, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
    }
 

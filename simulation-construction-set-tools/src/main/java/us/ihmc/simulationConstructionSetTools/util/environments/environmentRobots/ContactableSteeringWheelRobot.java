@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,7 +15,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
@@ -51,7 +47,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    private Matrix3D inertiaMatrix;
 
    private FrameTorus3d steeringWheelTorus;
-   protected ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
+   protected ArrayList<FrameCylinder3D> spokesCylinders = new ArrayList<FrameCylinder3D>();
 
    protected Link steeringWheelLink;
    private PinJoint steeringWheelPinJoint;
@@ -73,11 +69,18 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double spokeThickness = 0.03;
       double totalNumberOfPossibleTurns = 3.25;
       double mass = 5.0;
-      return new ContactableSteeringWheelRobot("PolarisSteeringWheel", steeringWheelRadius, steerigColunmLength, steeringWheelThickness, spokeThickness, steeringWheelPoseInWorld, totalNumberOfPossibleTurns, mass);
+      return new ContactableSteeringWheelRobot("PolarisSteeringWheel",
+                                               steeringWheelRadius,
+                                               steerigColunmLength,
+                                               steeringWheelThickness,
+                                               spokeThickness,
+                                               steeringWheelPoseInWorld,
+                                               totalNumberOfPossibleTurns,
+                                               mass);
    }
 
-   public ContactableSteeringWheelRobot(String name, double steeringWheelRadius, double steerigColunmLength, double steeringWheelThickness, double spokesThickness,
-         FramePose3D steeringWheelPoseInWorld, double totalNumberOfPossibleTurns, double mass)
+   public ContactableSteeringWheelRobot(String name, double steeringWheelRadius, double steerigColunmLength, double steeringWheelThickness,
+                                        double spokesThickness, FramePose3D steeringWheelPoseInWorld, double totalNumberOfPossibleTurns, double mass)
    {
       super(name);
       this.name = name;
@@ -91,7 +94,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    }
 
    public void setProperties(double steeringWheelRadius, double steerinWheelColunmLength, double steeringWheelThickness, double spokesThickness,
-         double totalNumberOfPossibleTurns, double mass)
+                             double totalNumberOfPossibleTurns, double mass)
    {
       this.steeringWheelRadius = steeringWheelRadius;
       this.steeringColunmLength = steerinWheelColunmLength;
@@ -112,7 +115,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    }
 
    public void addSpinnerHandle(double angleOnSteeringWheelingInDegrees, double percentOfSteeringWheelRadius, double handleLength, double handleRadius,
-         double distanceFromWheel)
+                                double distanceFromWheel)
    {
 
       double angleOnSteeringWheel = Math.toRadians(angleOnSteeringWheelingInDegrees);
@@ -121,8 +124,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double yHandle = distanceFromCenter * Math.sin(angleOnSteeringWheel);
 
       Point3D translation = new Point3D(xHandle, yHandle, distanceFromWheel);
-      
-      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, translation, Axis.Z, handleLength, handleRadius);
+
+      FrameCylinder3D spinnerHandleCylinder = new FrameCylinder3D(steeringWheelFrame, translation, Axis.Z, handleLength, handleRadius);
       spokesCylinders.add(spinnerHandleCylinder);
 
       steeringWheelLinkGraphics.translate(translation);
@@ -134,25 +137,25 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       spinnerHandleCenter = new FramePoint3D(steeringWheelFrame, xHandle, yHandle, handleLength / 2.0);
    }
-   
+
    public void addCrossBar()
    {
       double height = 2.0 * steeringWheelRadius;
       double radius = 0.015;
       double heightAboveWheel = 0.1;
-      
+
       FramePose3D crossBar = new FramePose3D(steeringWheelFrame);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0, crossBar);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0, crossBar);
-      crossBar.setPosition(new Vector3D(-height/2.0, 0.0, heightAboveWheel));
-      
+      crossBar.setPosition(new Vector3D(-height / 2.0, 0.0, heightAboveWheel));
+
       RigidBodyTransform transform = new RigidBodyTransform();
       crossBar.get(transform);
-      
-      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, height, radius);
-      spinnerHandleCylinder.getCylinder3d().applyTransform(transform);
+
+      FrameCylinder3D spinnerHandleCylinder = new FrameCylinder3D(steeringWheelFrame, height, radius);
+      spinnerHandleCylinder.applyTransform(transform);
       spokesCylinders.add(spinnerHandleCylinder);
-      
+
       steeringWheelLinkGraphics.transform(transform);
       steeringWheelLinkGraphics.addCylinder(height, radius, YoAppearance.IndianRed());
       transform.invert();
@@ -222,7 +225,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
          RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
          yoGraphicTransform.multiply(transform);
 
-         FrameCylinder3d spokeCylinder = new FrameCylinder3d(steeringWheelFrame, steeringWheelRadius, spokesThickness / 2.0);
+         FrameCylinder3D spokeCylinder = new FrameCylinder3D(steeringWheelFrame, steeringWheelRadius, spokesThickness / 2.0);
          spokeCylinder.applyTransform(transform);
          spokesCylinders.add(spokeCylinder);
 
@@ -243,7 +246,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
          public void notifyOfVariableChange(YoVariable<?> v)
          {
             double rangeOfMotion = 2 * Math.PI * totalNumberOfPossibleTurns;
-            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);
+            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue())
+                  / (0.5 * rangeOfMotion)) * 100);
          }
       });
    }
@@ -273,7 +277,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
          return true;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).isInsideOrOnSurface(pointToCheck))
+         if (spokesCylinders.get(i).isPointInside(pointToCheck))
             return true;
       }
       return false;
@@ -295,7 +299,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+         if (spokesCylinders.get(i).evaluatePoint3DCollision(pointToCheck, intersectionToPack, normalToPack))
             return;
       }
    }

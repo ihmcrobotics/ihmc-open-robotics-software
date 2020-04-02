@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SliderJoint;
@@ -55,7 +55,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private Link buttonLink, caseLink;
    private Graphics3DObject buttonLinkGraphics, caseLinkGraphics;
 
-   private FrameCylinder3d cylinderFrame;
+   private FrameCylinder3D cylinderFrame;
    private PoseReferenceFrame buttonFrame;
 
    private RigidBodyTransform originalButtonTransform;
@@ -127,8 +127,8 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonSliderJoint.setLink(buttonLink);
 
       this.addRootJoint(buttonSliderJoint);
-      cylinderFrame = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), buttonThickness, buttonRadius);
-      cylinderFrame.getCylinder3d().applyTransform(rootJointTransform);
+      cylinderFrame = new FrameCylinder3D(ReferenceFrame.getWorldFrame(), buttonThickness, buttonRadius);
+      cylinderFrame.applyTransform(rootJointTransform);
 
       // Create the Graphics
       buttonLinkGraphics = new Graphics3DObject();
@@ -222,7 +222,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    {
       FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
 
-      if (cylinderFrame.isInsideOrOnSurface(pointToCheck))
+      if (cylinderFrame.isPointInside(pointToCheck))
       {
          return true;
       }
@@ -232,7 +232,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      cylinderFrame.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      cylinderFrame.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override
