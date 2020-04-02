@@ -17,6 +17,12 @@ public class FootstepPlannerOutput
    private final ArrayList<Pose3D> bodyPath = new ArrayList<>();
    private final Pose3D lowLevelGoal = new Pose3D();
    private Exception exception;
+   private final FootstepPlannerTimings plannerTimings = new FootstepPlannerTimings();
+
+   public FootstepPlannerOutput()
+   {
+      clear();
+   }
 
    public void clear()
    {
@@ -27,6 +33,7 @@ public class FootstepPlannerOutput
       bodyPath.clear();
       lowLevelGoal.setToNaN();
       exception = null;
+      plannerTimings.clear();
    }
 
    public int getPlanId()
@@ -64,6 +71,11 @@ public class FootstepPlannerOutput
       return exception;
    }
 
+   public FootstepPlannerTimings getPlannerTimings()
+   {
+      return plannerTimings;
+   }
+
    public void setPlanId(int planId)
    {
       this.planId = planId;
@@ -96,6 +108,7 @@ public class FootstepPlannerOutput
       outputStatus.setFootstepPlanningResult(getResult().toByte());
       outputStatus.getBodyPath().clear();
       outputStatus.getLowLevelPlannerGoal().set(getLowLevelGoal());
+      getPlannerTimings().setPacket(outputStatus.getPlannerTimings());
 
       if(getException() != null)
       {
