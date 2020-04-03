@@ -28,6 +28,7 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
    public int planner_request_id_ = -1;
    public double timeout_;
    public double best_effort_timeout_;
+   public int max_iterations_ = -1;
    public double horizon_length_;
 
    public BipedContinuousPlanningRequestPacket()
@@ -63,6 +64,8 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
       timeout_ = other.timeout_;
 
       best_effort_timeout_ = other.best_effort_timeout_;
+
+      max_iterations_ = other.max_iterations_;
 
       horizon_length_ = other.horizon_length_;
 
@@ -155,6 +158,15 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
       return best_effort_timeout_;
    }
 
+   public void setMaxIterations(int max_iterations)
+   {
+      max_iterations_ = max_iterations;
+   }
+   public int getMaxIterations()
+   {
+      return max_iterations_;
+   }
+
    public void setHorizonLength(double horizon_length)
    {
       horizon_length_ = horizon_length;
@@ -198,6 +210,8 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.best_effort_timeout_, other.best_effort_timeout_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_iterations_, other.max_iterations_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.horizon_length_, other.horizon_length_, epsilon)) return false;
 
 
@@ -228,6 +242,8 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
       if(this.best_effort_timeout_ != otherMyClass.best_effort_timeout_) return false;
+
+      if(this.max_iterations_ != otherMyClass.max_iterations_) return false;
 
       if(this.horizon_length_ != otherMyClass.horizon_length_) return false;
 
@@ -263,6 +279,8 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("best_effort_timeout=");
       builder.append(this.best_effort_timeout_);      builder.append(", ");
+      builder.append("max_iterations=");
+      builder.append(this.max_iterations_);      builder.append(", ");
       builder.append("horizon_length=");
       builder.append(this.horizon_length_);
       builder.append("}");
