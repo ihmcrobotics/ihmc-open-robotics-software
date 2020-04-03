@@ -173,7 +173,12 @@ public class KSTStreamingState implements State
 
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
-      preferredArmConfigWeight.set(0.1);
+      /*
+       * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
+       * impacting too much the task-space objectives and preventing the privileged configuration to kick
+       * in when there's a singularity.
+       */
+      preferredArmConfigWeight.set(0.075);
 
       for (RobotSide robotSide : RobotSide.values)
       {
