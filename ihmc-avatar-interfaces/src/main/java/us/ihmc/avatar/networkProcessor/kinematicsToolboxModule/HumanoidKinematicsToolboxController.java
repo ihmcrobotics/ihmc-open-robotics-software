@@ -17,7 +17,6 @@ import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -53,6 +52,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -280,10 +280,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       setInitialRobotConfiguration(privilegedConfiguration);
    }
 
-   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       if (collisionModel != null)
-         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel()));
+         registerCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel().getElevator()));
    }
 
    @Override

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision;
+package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.GeometricallyComparable;
@@ -6,7 +6,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.shape.collision.interfaces.EuclidShape3DCollisionResultBasics;
 import us.ihmc.euclid.shape.collision.interfaces.EuclidShape3DCollisionResultReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
@@ -14,11 +13,11 @@ import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
 /**
  * Class for holding the result of a collision query between two shapes and their respective
  * reference frame information.
- * 
+ *
  * @author Sylvain Bertrand
  */
-public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollisionResultBasics, EpsilonComparable<EuclidShape3DCollisionFrameResult>,
-      GeometricallyComparable<EuclidShape3DCollisionFrameResult>
+public class EuclidFrameShape3DCollisionResult implements EuclidFrameShape3DCollisionResultBasics, EpsilonComparable<EuclidFrameShape3DCollisionResult>,
+      GeometricallyComparable<EuclidFrameShape3DCollisionResult>
 {
    /** Whether the shapes are colliding. */
    private boolean shapesAreColliding;
@@ -48,7 +47,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    /**
     * Creates a new empty collision result.
     */
-   public EuclidShape3DCollisionFrameResult()
+   public EuclidFrameShape3DCollisionResult()
    {
    }
 
@@ -63,7 +62,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    @Override
    public void setSignedDistance(double distance)
    {
-      this.signedDistance = distance;
+      signedDistance = distance;
    }
 
    /** {@inheritDoc} */
@@ -85,7 +84,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     * <p>
     * This does <b>not</b> change the reference frame of {@code pointOnA} nor {@code normalOnA}.
     * </p>
-    * 
+    *
     * @param frameA the reference frame for {@code shapeA}.
     */
    public void setFrameA(ReferenceFrame frameA)
@@ -98,7 +97,7 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     * <p>
     * This does <b>not</b> change the reference frame of {@code pointOnB} nor {@code normalOnB}.
     * </p>
-    * 
+    *
     * @param frameB the reference frame for {@code shapeB}.
     */
    public void setFrameB(ReferenceFrame frameB)
@@ -136,17 +135,17 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
 
    /**
     * Gets the reference frame in which {@code shapeA} is expressed.
-    * 
+    *
     * @return the reference frame for {@code shapeA}.
     */
    public ReferenceFrame getFrameA()
    {
       return frameA;
    }
-   
+
    /**
     * Gets the reference frame in which {@code shapeB} is expressed.
-    * 
+    *
     * @return the reference frame for {@code shapeB}.
     */
    public ReferenceFrame getFrameB()
@@ -188,25 +187,21 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     * Two instances of collision frame results are not considered equal when their respective frames
     * are different.
     * </p>
-    * 
+    *
     * @param other   the other collision result to compare against this. Not modified.
     * @param epsilon tolerance to use when comparing each component.
     * @return {@code true} if the two collision results are equal component-wise, {@code false}
     *         otherwise.
     */
    @Override
-   public boolean epsilonEquals(EuclidShape3DCollisionFrameResult other, double epsilon)
+   public boolean epsilonEquals(EuclidFrameShape3DCollisionResult other, double epsilon)
    {
-      if (frameA == null ? other.frameA != null : frameA != other.frameA)
-         return false;
-      if (frameB == null ? other.frameB != null : frameB != other.frameB)
-         return false;
-      return EuclidShape3DCollisionResultBasics.super.epsilonEquals(other, epsilon);
+      return EuclidFrameShape3DCollisionResultBasics.super.epsilonEquals(other, epsilon);
    }
 
    /**
     * Tests each feature of {@code this} against {@code other} for geometric similarity.
-    * 
+    *
     * @param other   the other collision result to compare against this. Not modified.
     * @param epsilon tolerance to use when comparing each feature.
     * @return {@code true} if the two collision results are considered geometrically similar,
@@ -215,17 +210,9 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
     *                                         as {@code this}.
     */
    @Override
-   public boolean geometricallyEquals(EuclidShape3DCollisionFrameResult other, double epsilon)
+   public boolean geometricallyEquals(EuclidFrameShape3DCollisionResult other, double epsilon)
    {
-      if (frameA != null)
-         frameA.checkReferenceFrameMatch(other.frameA);
-      else if (other.frameA != null)
-         return false;
-      if (frameB != null)
-         frameB.checkReferenceFrameMatch(other.frameB);
-      else if (other.frameB != null)
-         return false;
-      return EuclidShape3DCollisionResultBasics.super.geometricallyEquals(other, epsilon);
+      return EuclidFrameShape3DCollisionResultBasics.super.geometricallyEquals(other, epsilon);
    }
 
    /**
@@ -238,58 +225,30 @@ public class EuclidShape3DCollisionFrameResult implements EuclidShape3DCollision
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof EuclidShape3DCollisionFrameResult)
-         return equals((EuclidShape3DCollisionFrameResult) object);
       if (object instanceof EuclidShape3DCollisionResultReadOnly)
-         return EuclidShape3DCollisionResultBasics.super.equals((EuclidShape3DCollisionResultReadOnly) object);
+         return EuclidFrameShape3DCollisionResultBasics.super.equals((EuclidFrameShape3DCollisionResultBasics) object);
       else
          return false;
    }
 
    /**
-    * Tests on a per component basis, if this collision result is exactly equal to {@code other}.
-    * <p>
-    * Two instances of collision frame results are not considered equal when their respective frames
-    * are different.
-    * </p>
-    *
-    * @param other the other collision result to compare against this. Not modified.
-    * @return {@code true} if the two collision results are exactly equal component-wise, {@code false}
-    *         otherwise.
-    */
-   public boolean equals(EuclidShape3DCollisionFrameResult other)
-   {
-      if (other == this)
-         return true;
-      if (other == null)
-         return false;
-
-      if (frameA == null ? other.frameA != null : frameA != other.frameA)
-         return false;
-      if (frameB == null ? other.frameB != null : frameB != other.frameB)
-         return false;
-
-      return EuclidShape3DCollisionResultBasics.super.equals(other);
-   }
-
-   /**
     * Provides a {@code String} representation of this collision result as follows:<br>
     * When shapes are colliding:
-    * 
+    *
     * <pre>
     * Collision test result: colliding, depth: 0.539
     * Shape A: Box3D, location: ( 0.540,  0.110,  0.319 ), normal: ( 0.540,  0.110,  0.319 )
     * Shape B: Capsule3D, location: ( 0.540,  0.110,  0.319 ), normal: ( 0.540,  0.110,  0.319 )
     * </pre>
-    * 
+    *
     * When shapes are not colliding:
-    * 
+    *
     * <pre>
     * Collision test result: non-colliding, separating distance: 0.539
     * Shape A: Box3D, location: ( 0.540,  0.110,  0.319 ), normal: ( 0.540,  0.110,  0.319 )
     * Shape B: Capsule3D, location: ( 0.540,  0.110,  0.319 ), normal: ( 0.540,  0.110,  0.319 )
     * </pre>
-    * 
+    *
     * @return the {@code String} representing this collision result.
     */
    @Override
