@@ -217,9 +217,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      poseController.onExit();
+      poseController.onExit(timeInState);
    }
 
    @Override
